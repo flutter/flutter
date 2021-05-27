@@ -27,19 +27,19 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-/// const List<String> _tabs = ["Months", "Days"];
-/// const List<String> _months = [ "January","February","March", ];
-/// const List<String> _days = [ "Sunday", "Monday","Tuesday", ];
+/// const List<String> _tabs = <String>['Months', 'Days'];
+/// const List<String> _months = <String>[ 'January','February','March', ];
+/// const List<String> _days = <String>[ 'Sunday', 'Monday','Tuesday', ];
 ///   return DefaultTabController(
 ///     length: _tabs.length,
 ///     child: Scaffold(
 ///       // Listens to the scroll events and returns the current position.
 ///       body: NotificationListener<ScrollNotification>(
-///         onNotification: (scrollNotification) {
+///         onNotification: (ScrollNotification scrollNotification) {
 ///           if (scrollNotification is ScrollStartNotification) {
 ///             print('Scrolling has started');
 ///           } else if (scrollNotification is ScrollEndNotification) {
-///             print("Scrolling has ended");
+///             print('Scrolling has ended');
 ///           }
 ///           // Return true to cancel the notification bubbling.
 ///           return true;
@@ -49,26 +49,26 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 ///               (BuildContext context, bool innerBoxIsScrolled) {
 ///             return <Widget>[
 ///               SliverAppBar(
-///                 title: const Text("Flutter Code Sample"),
+///                 title: const Text('Flutter Code Sample'),
 ///                 pinned: true,
 ///                 floating: true,
 ///                 bottom: TabBar(
-///                   tabs: _tabs.map((name) => Tab(text: name)).toList(),
+///                   tabs: _tabs.map((String name) => Tab(text: name)).toList(),
 ///                 ),
 ///               ),
 ///             ];
 ///           },
 ///           body: TabBarView(
-///             children: [
+///             children: <Widget>[
 ///               ListView.builder(
 ///                 itemCount: _months.length,
-///                 itemBuilder: (context, index) {
+///                 itemBuilder: (BuildContext context, int index) {
 ///                   return ListTile(title: Text(_months[index]));
 ///                 },
 ///               ),
 ///               ListView.builder(
 ///                 itemCount: _days.length,
-///                 itemBuilder: (context, index) {
+///                 itemBuilder: (BuildContext context, int index) {
 ///                   return ListTile(title: Text(_days[index]));
 ///                 },
 ///               ),
@@ -152,8 +152,8 @@ abstract class Notification {
   /// the [Notification] base class calls [debugFillDescription] to collect
   /// useful information from subclasses to incorporate into its return value.
   ///
-  /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillDescription(description)`.
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.debugFillDescription(description)`.
   @protected
   @mustCallSuper
   void debugFillDescription(List<String> description) { }

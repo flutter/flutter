@@ -89,15 +89,15 @@ class _TableElementRow {
 /// Widget build(BuildContext context) {
 ///   return Table(
 ///     border: TableBorder.all(),
-///     columnWidths: {
+///     columnWidths: const <int, TableColumnWidth>{
 ///       0: IntrinsicColumnWidth(),
 ///       1: FlexColumnWidth(),
 ///       2: FixedColumnWidth(64),
 ///     },
 ///     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-///     children: [
+///     children: <TableRow>[
 ///       TableRow(
-///         children: [
+///         children: <Widget>[
 ///           Container(
 ///             height: 32,
 ///             color: Colors.green,
@@ -117,10 +117,10 @@ class _TableElementRow {
 ///         ],
 ///       ),
 ///       TableRow(
-///         decoration: BoxDecoration(
+///         decoration: const BoxDecoration(
 ///           color: Colors.grey,
 ///         ),
-///         children: [
+///         children: <Widget>[
 ///           Container(
 ///             height: 64,
 ///             width: 128,
@@ -189,7 +189,7 @@ class Table extends RenderObjectWidget {
          if (children.any((TableRow row) => row.children == null)) {
            throw FlutterError(
              'One of the rows of the table had null children.\n'
-             'The children property of TableRow must not be null.'
+             'The children property of TableRow must not be null.',
            );
          }
          return true;
@@ -198,7 +198,7 @@ class Table extends RenderObjectWidget {
          if (children.any((TableRow row) => row.children!.any((Widget cell) => cell == null))) {
            throw FlutterError(
              'One of the children of one of the rows of the table was null.\n'
-             'The children of a TableRow must not be null.'
+             'The children of a TableRow must not be null.',
            );
          }
          return true;
@@ -207,7 +207,7 @@ class Table extends RenderObjectWidget {
          if (children.any((TableRow row1) => row1.key != null && children.any((TableRow row2) => row1 != row2 && row1.key == row2.key))) {
            throw FlutterError(
              'Two or more TableRow children of this Table had the same key.\n'
-             'All the keyed TableRow children of a Table must have different Keys.'
+             'All the keyed TableRow children of a Table must have different Keys.',
            );
          }
          return true;
@@ -219,7 +219,7 @@ class Table extends RenderObjectWidget {
              throw FlutterError(
                'Table contains irregular row lengths.\n'
                'Every TableRow in a Table must have the same number of children, so that every cell is filled. '
-               'Otherwise, the table will contain holes.'
+               'Otherwise, the table will contain holes.',
              );
            }
          }
@@ -236,7 +236,7 @@ class Table extends RenderObjectWidget {
           'Two or more cells in this Table contain widgets with the same key.\n'
           'Every widget child of every TableRow in a Table must have different keys. The cells of a Table are '
           'flattened out for processing, so separate cells cannot have duplicate keys even if they are in '
-          'different rows.'
+          'different rows.',
         );
       }
       return true;
@@ -303,7 +303,7 @@ class Table extends RenderObjectWidget {
   final List<Decoration?>? _rowDecorations;
 
   @override
-  _TableElement createElement() => _TableElement(this);
+  RenderObjectElement createElement() => _TableElement(this);
 
   @override
   RenderTable createRenderObject(BuildContext context) {
@@ -348,45 +348,59 @@ class _TableElement extends RenderObjectElement {
   @override
   RenderTable get renderObject => super.renderObject as RenderTable;
 
-  // This class ignores the child's slot entirely.
-  // Instead of doing incremental updates to the child list, it replaces the entire list each frame.
-
   List<_TableElementRow> _children = const<_TableElementRow>[];
 
+  bool _doingMountOrUpdate = false;
+
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
+    assert(!_doingMountOrUpdate);
+    _doingMountOrUpdate = true;
     super.mount(parent, newSlot);
+    int rowIndex = -1;
     _children = widget.children.map<_TableElementRow>((TableRow row) {
+      int columnIndex = 0;
+      rowIndex += 1;
       return _TableElementRow(
         key: row.key,
         children: row.children!.map<Element>((Widget child) {
           assert(child != null);
-          return inflateWidget(child, null);
+          return inflateWidget(child, _TableSlot(columnIndex++, rowIndex));
         }).toList(growable: false),
       );
     }).toList(growable: false);
     _updateRenderObjectChildren();
+    assert(_doingMountOrUpdate);
+    _doingMountOrUpdate = false;
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderBox child, _TableSlot slot) {
     renderObject.setupParentData(child);
+    // Once [mount]/[update] are done, the children are getting set all at once
+    // in [_updateRenderObjectChildren].
+    if (!_doingMountOrUpdate) {
+      renderObject.setChild(slot.column, slot.row, child);
+    }
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderBox child, _TableSlot oldSlot, _TableSlot newSlot) {
+    assert(_doingMountOrUpdate);
+    // Child gets moved at the end of [update] in [_updateRenderObjectChildren].
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, dynamic slot) {
-    final TableCellParentData childParentData = child.parentData! as TableCellParentData;
-    renderObject.setChild(childParentData.x!, childParentData.y!, null);
+  void removeRenderObjectChild(RenderBox child, _TableSlot slot) {
+    renderObject.setChild(slot.column, slot.row, null);
   }
 
   final Set<Element> _forgottenChildren = HashSet<Element>();
 
   @override
   void update(Table newWidget) {
+    assert(!_doingMountOrUpdate);
+    _doingMountOrUpdate = true;
     final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
     for (final _TableElementRow row in _children) {
       if (row.key != null) {
@@ -396,7 +410,8 @@ class _TableElement extends RenderObjectElement {
     final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     final Set<List<Element>> taken = <List<Element>>{};
-    for (final TableRow row in newWidget.children) {
+    for (int rowIndex = 0; rowIndex < newWidget.children.length; rowIndex++) {
+      final TableRow row = newWidget.children[rowIndex];
       List<Element> oldChildren;
       if (row.key != null && oldKeyedRows.containsKey(row.key)) {
         oldChildren = oldKeyedRows[row.key]!;
@@ -406,9 +421,13 @@ class _TableElement extends RenderObjectElement {
       } else {
         oldChildren = const <Element>[];
       }
+      final List<_TableSlot> slots = List<_TableSlot>.generate(
+        row.children!.length,
+        (int columnIndex) => _TableSlot(columnIndex, rowIndex),
+      );
       newChildren.add(_TableElementRow(
         key: row.key,
-        children: updateChildren(oldChildren, row.children!, forgottenChildren: _forgottenChildren),
+        children: updateChildren(oldChildren, row.children!, forgottenChildren: _forgottenChildren, slots: slots),
       ));
     }
     while (oldUnkeyedRows.moveNext())
@@ -421,6 +440,8 @@ class _TableElement extends RenderObjectElement {
     _forgottenChildren.clear();
     super.update(newWidget);
     assert(widget == newWidget);
+    assert(_doingMountOrUpdate);
+    _doingMountOrUpdate = false;
   }
 
   void _updateRenderObjectChildren() {
@@ -487,5 +508,32 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment));
+  }
+}
+
+@immutable
+class _TableSlot with Diagnosticable {
+  const _TableSlot(this.column, this.row);
+
+  final int column;
+  final int row;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _TableSlot
+        && column == other.column
+        && row == other.row;
+  }
+
+  @override
+  int get hashCode => hashValues(column, row);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('x', column));
+    properties.add(IntProperty('y', row));
   }
 }

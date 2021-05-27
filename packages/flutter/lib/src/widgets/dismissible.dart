@@ -72,8 +72,9 @@ enum DismissDirection {
 /// tiles to the left or right to dismiss them from the [ListView].
 ///
 /// ```dart
-/// List<int> items = List<int>.generate(100, (index) => index);
+/// List<int> items = List<int>.generate(100, (int index) => index);
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return ListView.builder(
 ///     itemCount: items.length,
@@ -88,10 +89,10 @@ enum DismissDirection {
 ///         background: Container(
 ///           color: Colors.green,
 ///         ),
-///         key: ValueKey(items[index]),
+///         key: ValueKey<int>(items[index]),
 ///         onDismissed: (DismissDirection direction) {
 ///           setState(() {
-///             items.remove(index);
+///             items.removeAt(index);
 ///           });
 ///         },
 ///       );
@@ -211,8 +212,9 @@ class Dismissible extends StatefulWidget {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag gesture used to dismiss a
-  /// dismissible will begin upon the detection of a drag gesture. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// dismissible will begin at the position where the drag gesture won the arena.
+  /// If set to [DragStartBehavior.down] it will begin at the position where
+  /// a down event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -231,7 +233,7 @@ class Dismissible extends StatefulWidget {
   final HitTestBehavior behavior;
 
   @override
-  _DismissibleState createState() => _DismissibleState();
+  State<Dismissible> createState() => _DismissibleState();
 }
 
 class _DismissibleClipper extends CustomClipper<Rect> {
@@ -528,7 +530,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         _sizePriorToCollapse = context.size;
         _resizeAnimation = _resizeController!.drive(
           CurveTween(
-            curve: _kResizeTimeCurve
+            curve: _kResizeTimeCurve,
           ),
         ).drive(
           Tween<double>(
@@ -542,13 +544,9 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   void _handleResizeProgressChanged() {
     if (_resizeController!.isCompleted) {
-      if (widget.onDismissed != null) {
-        final DismissDirection direction = _dismissDirection;
-        widget.onDismissed!(direction);
-      }
+      widget.onDismissed?.call(_dismissDirection);
     } else {
-      if (widget.onResize != null)
-        widget.onResize!();
+      widget.onResize?.call();
     }
   }
 
@@ -574,8 +572,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             ErrorSummary('A dismissed Dismissible widget is still part of the tree.'),
             ErrorHint(
               'Make sure to implement the onDismissed handler and to immediately remove the Dismissible '
-              'widget from the application once that handler has fired.'
-            )
+              'widget from the application once that handler has fired.',
+            ),
           ]);
         }
         return true;
@@ -621,8 +619,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
       behavior: widget.behavior,
-      child: content,
       dragStartBehavior: widget.dragStartBehavior,
+      child: content,
     );
   }
 }

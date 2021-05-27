@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding =
@@ -104,10 +103,7 @@ void main() {
       Rect decoyChildRect = tester.getRect(_findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      // TODO(justinmc): When ShaderMask is supported on web, remove this
-      // conditional and just check for ShaderMask.
-      // https://github.com/flutter/flutter/issues/52967.
-      expect(find.byType(ShaderMask), kIsWeb ? findsNothing : findsOneWidget);
+      expect(find.byType(ShaderMask), findsOneWidget);
 
       // After a small delay, the _DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 100));
@@ -125,7 +121,7 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(_findStatic(), findsOneWidget);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
+    });
   });
 
   group('CupertinoContextMenu when open', () {
@@ -145,7 +141,7 @@ void main() {
       await tester.tapAt(const Offset(1.0, 1.0));
       await tester.pumpAndSettle();
       expect(_findStatic(), findsNothing);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
+    });
 
     testWidgets('Can close CupertinoContextMenu by dragging down', (WidgetTester tester) async {
       final Widget child = _getChild();
@@ -187,7 +183,7 @@ void main() {
       await swipeGesture.up();
       await tester.pumpAndSettle();
       expect(_findStatic(), findsNothing);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
+    });
 
     testWidgets('Can close CupertinoContextMenu by flinging down', (WidgetTester tester) async {
       final Widget child = _getChild();
@@ -212,7 +208,7 @@ void main() {
       await tester.fling(_findStaticChild(child), const Offset(0.0, 100.0), 1000.0);
       await tester.pumpAndSettle();
       expect(_findStatic(), findsNothing);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
+    });
 
     testWidgets("Backdrop is added using ModalRoute's filter parameter", (WidgetTester tester) async {
       final Widget child = _getChild();
@@ -227,7 +223,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(_findStatic(), findsOneWidget);
       expect(find.byType(BackdropFilter), findsOneWidget);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
+    });
   });
 
   group("Open layout differs depending on child's position on screen", () {
@@ -302,7 +298,7 @@ void main() {
 
       // Set the screen back to its normal size.
       await binding.setSurfaceSize(const Size(800.0, 600.0));
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
+    });
 
     testWidgets('Landscape', (WidgetTester tester) async {
       // Pump a CupertinoContextMenu in the center of the screen and open it.
@@ -367,6 +363,6 @@ void main() {
       expect(find.byType(CupertinoContextMenuAction), findsOneWidget);
       final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
       expect(right.dx, lessThan(left.dx));
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
+    });
   });
 }

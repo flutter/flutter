@@ -10,6 +10,8 @@ export 'popup_constants.dart';
 
 /// A page with a popup menu, a dropdown menu, and a modal alert.
 class PopupControlsPage extends StatefulWidget {
+  const PopupControlsPage({Key key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _PopupControlsPageState();
 }

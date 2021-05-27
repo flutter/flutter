@@ -20,11 +20,13 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.internal.os.OperatingSystem
+import org.gradle.util.VersionNumber
 
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.0'
@@ -100,6 +102,32 @@ class FlutterPlugin implements Plugin<Project> {
     void apply(Project project) {
         this.project = project
 
+        def rootProject = project.rootProject
+        rootProject.tasks.register('generateLockfiles') {
+            rootProject.subprojects.each { subproject ->
+                def gradlew = (OperatingSystem.current().isWindows()) ?
+                    "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
+                rootProject.exec {
+                    workingDir rootProject.projectDir
+                    executable gradlew
+                    args ":${subproject.name}:dependencies", "--write-locks"
+                }
+            }
+        }
+
+        // Configure the Maven repository.
+        String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
+        String repository = useLocalEngine()
+            ? project.property('local-engine-repo')
+            : "$hostedRepository/download.flutter.io"
+        rootProject.allprojects {
+            repositories {
+                maven {
+                    url repository
+                }
+            }
+        }
+
         project.extensions.create("flutter", FlutterExtension)
         this.addFlutterTasks(project)
 
@@ -120,6 +148,14 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
+
+        if (project.hasProperty('deferred-component-names')) {
+            String[] componentNames = project.property('deferred-component-names').split(',').collect {":${it}"}
+            project.android {
+                dynamicFeatures = componentNames
+            }
+        }
+
         getTargetPlatforms().each { targetArch ->
             String abiValue = PLATFORM_ARCH_MAP[targetArch]
             project.android {
@@ -159,17 +195,23 @@ class FlutterPlugin implements Plugin<Project> {
                     matchingFallbacks = ["debug", "release"]
                 }
             }
-            release {
-                // Enables code shrinking, obfuscation, and optimization for only
-                // your project's release build type.
-                minifyEnabled true
-                // Enables resource shrinking, which is performed by the
-                // Android Gradle plugin.
-                // NOTE: The resource shrinker can't be used for libraries.
-                shrinkResources isBuiltAsApp(project)
-                // Fallback to `android/app/proguard-rules.pro`.
-                // This way, custom Proguard rules can be configured as needed.
-                proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
+            // TODO(garyq): Shrinking is only false for multi apk split aot builds, where shrinking is not allowed yet.
+            // This limitation has been removed experimentally in gradle plugin version 4.2, so we can remove
+            // this check when we upgrade to 4.2+ gradle. Currently, deferred components apps may see
+            // increased app size due to this.
+            if (shouldShrinkResources(project)) {
+                release {
+                    // Enables code shrinking, obfuscation, and optimization for only
+                    // your project's release build type.
+                    minifyEnabled true
+                    // Enables resource shrinking, which is performed by the
+                    // Android Gradle plugin.
+                    // NOTE: The resource shrinker can't be used for libraries.
+                    shrinkResources isBuiltAsApp(project)
+                    // Fallback to `android/app/proguard-rules.pro`.
+                    // This way, custom Proguard rules can be configured as needed.
+                    proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
+                }
             }
         }
 
@@ -183,8 +225,14 @@ class FlutterPlugin implements Plugin<Project> {
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
         }
-        project.android.buildTypes.each this.&addFlutterDependencies
-        project.android.buildTypes.whenObjectAdded this.&addFlutterDependencies
+        project.android.buildTypes.all this.&addFlutterDependencies
+    }
+
+    private static Boolean shouldShrinkResources(Project project) {
+        if (project.hasProperty("shrink")) {
+            return project.property("shrink").toBoolean()
+        }
+        return true
     }
 
     /**
@@ -198,21 +246,16 @@ class FlutterPlugin implements Plugin<Project> {
         if (!supportsBuildMode(flutterBuildMode)) {
             return
         }
-        String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
-        String repository = useLocalEngine()
-            ? project.property('local-engine-repo')
-            : "$hostedRepository/download.flutter.io"
-        project.rootProject.allprojects {
-            repositories {
-                maven {
-                    url repository
-                }
-            }
+        // The embedding is set as an API dependency in a Flutter plugin.
+        // Therefore, don't make the app project depend on the embedding if there are Flutter
+        // plugins.
+        // This prevents duplicated classes when using custom build types. That is, a custom build
+        // type like profile is used, and the plugin and app projects have API dependencies on the
+        // embedding.
+        if (!isFlutterAppProject() || getPluginList().size() == 0) {
+            addApiDependencies(project, buildType.name,
+                    "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
-        // Add the embedding dependency.
-        addApiDependencies(project, buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
-
         List<String> platforms = getTargetPlatforms().collect()
         // Debug mode includes x86 and x64, which are commonly used in emulators.
         if (flutterBuildMode == "debug" && !useLocalEngine()) {
@@ -302,9 +345,9 @@ class FlutterPlugin implements Plugin<Project> {
         }
         // Add plugin dependency to the app project.
         project.dependencies {
-            implementation pluginProject
+            api pluginProject
         }
-        Closure addEmbeddingCompileOnlyDependency = { buildType ->
+        Closure addEmbeddingDependencyToPlugin = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             // In AGP 3.5, the embedding must be added as an API implementation,
             // so java8 features are desugared against the runtime classpath.
@@ -312,19 +355,28 @@ class FlutterPlugin implements Plugin<Project> {
             if (!supportsBuildMode(flutterBuildMode)) {
                 return
             }
+            if (!pluginProject.hasProperty('android')) {
+                return
+            }
             // Copy build types from the app to the plugin.
             // This allows to build apps with plugins and custom build types or flavors.
             pluginProject.android.buildTypes {
                 "${buildType.name}" {}
             }
-            pluginProject.dependencies.add(
-                "${buildType.name}CompileOnly",
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
+            // The embedding is API dependency of the plugin, so the AGP is able to desugar
+            // default method implementations when the interface is implemented by a plugin.
+            //
+            // See https://issuetracker.google.com/139821726, and
+            // https://github.com/flutter/flutter/issues/72185 for more details.
+            addApiDependencies(
+              pluginProject,
+              buildType.name,
+              "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
+            )
         }
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
-            project.android.buildTypes.each addEmbeddingCompileOnlyDependency
-            project.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
+            project.android.buildTypes.all addEmbeddingDependencyToPlugin
         }
     }
 
@@ -560,7 +612,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     /**
      * Gets the directory that contains the Flutter source code.
-     * This is the the directory containing the `android/` directory.
+     * This is the directory containing the `android/` directory.
      */
     private File getFlutterSourceDirectory() {
         if (project.flutter.source == null) {
@@ -636,6 +688,10 @@ class FlutterPlugin implements Plugin<Project> {
         return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
     }
 
+    private boolean isFlutterAppProject() {
+        return project.android.hasProperty("applicationVariants")
+    }
+
     private void addFlutterTasks(Project project) {
         if (project.state.failure) {
             return
@@ -688,6 +744,14 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('code-size-directory')) {
             codeSizeDirectoryValue = project.property('code-size-directory')
         }
+        Boolean deferredComponentsValue = false
+        if (project.hasProperty('deferred-components')) {
+            deferredComponentsValue = project.property('deferred-components').toBoolean()
+        }
+        Boolean validateDeferredComponentsValue = true
+        if (project.hasProperty('validate-deferred-components')) {
+            validateDeferredComponentsValue = project.property('validate-deferred-components').toBoolean()
+        }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
@@ -729,6 +793,8 @@ class FlutterPlugin implements Plugin<Project> {
                 bundleSkSLPath bundleSkSLPathValue
                 performanceMeasurementFile performanceMeasurementFileValue
                 codeSizeDirectory codeSizeDirectoryValue
+                deferredComponents deferredComponentsValue
+                validateDeferredComponents validateDeferredComponentsValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -792,9 +858,9 @@ class FlutterPlugin implements Plugin<Project> {
                 processResources.dependsOn(copyFlutterAssetsTask)
             }
             return copyFlutterAssetsTask
-        }
-        boolean isFlutterAppProject = project.android.hasProperty("applicationVariants")
-        if (isFlutterAppProject) {
+        } // end def addFlutterDeps
+
+        if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
                 if (!shouldConfigureFlutterTask(assembleTask)) {
@@ -866,7 +932,7 @@ class FlutterPlugin implements Plugin<Project> {
                     // | ----------------- | ----------------------------- |
                     // |   Build Variant   |   Flutter Equivalent Variant  |
                     // | ----------------- | ----------------------------- |
-                    // |   freeRelease     |   relese                      |
+                    // |   freeRelease     |   release                      |
                     // |   freeDebug       |   debug                       |
                     // |   freeDevelop     |   debug                       |
                     // |   profile         |   profile                     |
@@ -904,18 +970,21 @@ class FlutterExtension {
 }
 
 abstract class BaseFlutterTask extends DefaultTask {
+    @Internal
     File flutterRoot
+    @Internal
     File flutterExecutable
+    @Input
     String buildMode
     @Optional @Input
     String localEngine
     @Optional @Input
     String localEngineSrcPath
-    @Input
+    @Optional @Input
     Boolean fastStart
     @Input
     String targetPath
-    @Optional
+    @Optional @Internal
     Boolean verbose
     @Optional @Input
     String[] fileSystemRoots
@@ -925,7 +994,9 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean trackWidgetCreation
     @Optional @Input
     List<String> targetPlatformValues
+    @Internal
     File sourceDir
+    @Internal
     File intermediateDir
     @Optional @Input
     String extraFrontEndOptions
@@ -943,7 +1014,12 @@ abstract class BaseFlutterTask extends DefaultTask {
     String bundleSkSLPath
     @Optional @Input
     String codeSizeDirectory;
+    @Optional @Input
     String performanceMeasurementFile;
+    @Optional @Input
+    Boolean deferredComponents
+    @Optional @Input
+    Boolean validateDeferredComponents
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -968,6 +1044,8 @@ abstract class BaseFlutterTask extends DefaultTask {
         String[] ruleNames;
         if (buildMode == "debug") {
             ruleNames = ["debug_android_application"]
+        } else if (deferredComponents) {
+            ruleNames = targetPlatformValues.collect { "android_aot_deferred_components_bundle_${buildMode}_$it" }
         } else {
             ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
         }
@@ -985,6 +1063,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--quiet"
             }
             args "assemble"
+            args "--no-version-check"
             args "--depfile", "${intermediateDir}/flutter_build.d"
             args "--output", "${intermediateDir}"
             if (performanceMeasurementFile != null) {
@@ -1013,7 +1092,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--DartDefines=${dartDefines}"
             }
             if (bundleSkSLPath != null) {
-                args "-iBundleSkSLPath=${bundleSkSLPath}"
+                args "-dBundleSkSLPath=${bundleSkSLPath}"
             }
             if (codeSizeDirectory != null) {
                 args "-dCodeSizeDirectory=${codeSizeDirectory}"
@@ -1035,10 +1114,12 @@ class FlutterTask extends BaseFlutterTask {
         return intermediateDir
     }
 
+    @Internal
     String getAssetsDirectory() {
         return "${outputDirectory}/flutter_assets"
     }
 
+    @Internal
     CopySpec getAssets() {
         return project.copySpec {
             from "${intermediateDir}"
@@ -1046,6 +1127,7 @@ class FlutterTask extends BaseFlutterTask {
         }
     }
 
+    @Internal
     CopySpec getSnapshots() {
         return project.copySpec {
             from "${intermediateDir}"

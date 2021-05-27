@@ -4,10 +4,9 @@
 
 import 'dart:html' as html;
 
-import 'package:meta/dart2js.dart';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/dart2js.dart';
 
 // Tests that the framework prints stack traces in all build modes.
 //
@@ -15,13 +14,13 @@ import 'package:flutter/widgets.dart';
 //
 // See also `dev/integration_tests/web/lib/stack_trace.dart` that tests the
 // framework's ability to parse stack traces in all build modes.
-void main() async {
+Future<void> main() async {
   final StringBuffer errorMessage = StringBuffer();
-  debugPrint = (String message, { int wrapWidth }) {
+  debugPrint = (String? message, { int? wrapWidth }) {
     errorMessage.writeln(message);
   };
 
-  runApp(ThrowingWidget());
+  runApp(const ThrowingWidget());
 
   // Let the framework flush error messages.
   await Future<void>.delayed(Duration.zero);
@@ -63,8 +62,10 @@ bool _errorMessageFormattedCorrectly(String errorMessage) {
 }
 
 class ThrowingWidget extends StatefulWidget {
+  const ThrowingWidget({Key? key}) : super(key: key);
+
   @override
-  _ThrowingWidgetState createState() => _ThrowingWidgetState();
+  State<ThrowingWidget> createState() => _ThrowingWidgetState();
 }
 
 class _ThrowingWidgetState extends State<ThrowingWidget> {

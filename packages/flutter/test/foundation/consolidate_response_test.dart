@@ -3,16 +3,17 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 final Uint8List chunkOne = Uint8List.fromList(<int>[0, 1, 2, 3, 4, 5]);
 final Uint8List chunkTwo = Uint8List.fromList(<int>[6, 7, 8, 9, 10]);
+
 void main() {
   group(consolidateHttpClientResponseBytes, () {
     late MockHttpClientResponse response;
@@ -165,16 +166,14 @@ class MockHttpClientResponse extends Fake implements HttpClientResponse {
   @override
   StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     if (error != null) {
-      return Stream<List<int>>.fromFuture(
-        Future<List<int>>.error(error as Object)).listen(
+      return Stream<List<int>>.fromFuture(Future<List<int>>.error(error as Object)).listen(
           onData,
           onDone: onDone,
           onError: onError,
           cancelOnError: cancelOnError,
         );
     }
-    return Stream<List<int>>.fromIterable(
-        <List<int>>[chunkOne, chunkTwo]).listen(
+    return Stream<List<int>>.fromIterable(<List<int>>[chunkOne, chunkTwo]).listen(
       onData,
       onDone: onDone,
       onError: onError,

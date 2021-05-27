@@ -695,7 +695,7 @@ class BoxHitTestResult extends HitTestResult {
   ///
   /// The `position` argument may be null, which will be forwarded to the
   /// `hitTest` callback as-is. Using null as the position can be useful if
-  /// the child speaks a different hit test protocol then the parent and the
+  /// the child speaks a different hit test protocol than the parent and the
   /// position is not required to do the actual hit testing in that protocol.
   ///
   /// The function returns the return value of the `hitTest` callback.
@@ -706,7 +706,6 @@ class BoxHitTestResult extends HitTestResult {
   ///
   /// ```dart
   /// abstract class RenderFoo extends RenderBox {
-  ///
   ///   final Matrix4 _effectiveTransform = Matrix4.rotationZ(50);
   ///
   ///   @override
@@ -715,7 +714,7 @@ class BoxHitTestResult extends HitTestResult {
   ///   }
   ///
   ///   @override
-  ///   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  ///   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
   ///     return result.addWithPaintTransform(
   ///       transform: _effectiveTransform,
   ///       position: position,
@@ -865,10 +864,12 @@ class BoxHitTestResult extends HitTestResult {
     required BoxHitTestWithOutOfBandPosition hitTest,
   }) {
     assert(hitTest != null);
-    assert((paintOffset == null && paintTransform == null && rawTransform != null) ||
-           (paintOffset == null && paintTransform != null && rawTransform == null) ||
-           (paintOffset != null && paintTransform == null && rawTransform == null),
-           'Exactly one transform or offset argument must be provided.');
+    assert(
+      (paintOffset == null && paintTransform == null && rawTransform != null) ||
+      (paintOffset == null && paintTransform != null && rawTransform == null) ||
+      (paintOffset != null && paintTransform == null && rawTransform == null),
+      'Exactly one transform or offset argument must be provided.',
+    );
     if (paintOffset != null) {
       pushOffset(-paintOffset);
     } else if (rawTransform != null) {
@@ -1341,6 +1342,10 @@ class _IntrinsicDimensionsCacheEntry {
 /// [computeMinIntrinsicWidth], [computeMaxIntrinsicWidth],
 /// [computeMinIntrinsicHeight], [computeMaxIntrinsicHeight].
 ///
+/// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if you
+/// do override any of these methods, which will add additional checks to
+/// help validate your implementation.
+///
 /// In addition, if the box has any children, it must implement
 /// [computeDistanceToActualBaseline]. [RenderProxyBox] provides a simple
 /// implementation that forwards to the child; [RenderShiftedBox] provides an
@@ -1356,7 +1361,7 @@ abstract class RenderBox extends RenderObject {
 
   Map<_IntrinsicDimensionsCacheEntry, double>? _cachedIntrinsicDimensions;
 
-  double _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double computer(double argument)) {
+  double _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double Function(double argument) computer) {
     assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
     bool shouldCache = true;
     assert(() {
@@ -1394,10 +1399,7 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMinIntrinsicWidth(double height) {
     assert(() {
-      // `height` has a non-nullable return type, but might be null when
-      // running with weak checking, so we need to null check it anyway (and
-      // ignore the warning that the null-handling logic is dead code).
-      if (height == null) { // ignore: dead_code
+      if (height == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMinIntrinsicWidth was null.'),
           ErrorDescription('The argument to getMinIntrinsicWidth must not be negative or null.'),
@@ -1411,7 +1413,7 @@ abstract class RenderBox extends RenderObject {
           ErrorHint(
             'If you perform computations on another height before passing it to '
             'getMinIntrinsicWidth, consider using math.max() or double.clamp() '
-            'to force the value into the valid range.'
+            'to force the value into the valid range.',
           ),
         ]);
       }
@@ -1444,6 +1446,10 @@ abstract class RenderBox extends RenderObject {
   /// whose names start with `get`, not `compute`.
   ///
   /// This function should never return a negative or infinite value.
+  ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
   ///
   /// ## Examples
   ///
@@ -1542,10 +1548,7 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMaxIntrinsicWidth(double height) {
     assert(() {
-      // `height` has a non-nullable return type, but might be null when
-      // running with weak checking, so we need to null check it anyway (and
-      // ignore the warning that the null-handling logic is dead code).
-      if (height == null) { // ignore: dead_code
+      if (height == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMaxIntrinsicWidth was null.'),
           ErrorDescription('The argument to getMaxIntrinsicWidth must not be negative or null.'),
@@ -1559,7 +1562,7 @@ abstract class RenderBox extends RenderObject {
           ErrorHint(
             'If you perform computations on another height before passing it to '
             'getMaxIntrinsicWidth, consider using math.max() or double.clamp() '
-            'to force the value into the valid range.'
+            'to force the value into the valid range.',
           ),
         ]);
       }
@@ -1597,6 +1600,10 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
+  ///
   /// See also:
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
@@ -1624,10 +1631,7 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMinIntrinsicHeight(double width) {
     assert(() {
-      // `width` has a non-nullable return type, but might be null when
-      // running with weak checking, so we need to null check it anyway (and
-      // ignore the warning that the null-handling logic is dead code).
-      if (width == null) { // ignore: dead_code
+      if (width == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMinIntrinsicHeight was null.'),
           ErrorDescription('The argument to getMinIntrinsicHeight must not be negative or null.'),
@@ -1641,7 +1645,7 @@ abstract class RenderBox extends RenderObject {
           ErrorHint(
             'If you perform computations on another width before passing it to '
             'getMinIntrinsicHeight, consider using math.max() or double.clamp() '
-            'to force the value into the valid range.'
+            'to force the value into the valid range.',
           ),
         ]);
       }
@@ -1675,6 +1679,10 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
+  ///
   /// See also:
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
@@ -1705,10 +1713,7 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMaxIntrinsicHeight(double width) {
     assert(() {
-      // `width` has a non-nullable return type, but might be null when
-      // running with weak checking, so we need to null check it anyway (and
-      // ignore the warning that the null-handling logic is dead code).
-      if (width == null) { // ignore: dead_code
+      if (width == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMaxIntrinsicHeight was null.'),
           ErrorDescription('The argument to getMaxIntrinsicHeight must not be negative or null.'),
@@ -1722,7 +1727,7 @@ abstract class RenderBox extends RenderObject {
           ErrorHint(
             'If you perform computations on another width before passing it to '
             'getMaxIntrinsicHeight, consider using math.max() or double.clamp() '
-            'to force the value into the valid range.'
+            'to force the value into the valid range.',
           ),
         ]);
       }
@@ -1759,6 +1764,10 @@ abstract class RenderBox extends RenderObject {
   /// whose names start with `get`, not `compute`.
   ///
   /// This function should never return a negative or infinite value.
+  ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
   ///
   /// See also:
   ///
@@ -1812,7 +1821,7 @@ abstract class RenderBox extends RenderObject {
       _computingThisDryLayout = true;
       return true;
     }());
-    final Size result =  computeDryLayout(constraints);
+    final Size result = computeDryLayout(constraints);
     assert(() {
       assert(_computingThisDryLayout);
       _computingThisDryLayout = false;
@@ -1851,7 +1860,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// In such cases, it may be impossible (or at least impractical) to actually
   /// return a valid answer. In such cases, the function should call
-  /// [debugCannotComputeDryLayout] from within an assert and and return a dummy
+  /// [debugCannotComputeDryLayout] from within an assert and return a dummy
   /// value of `const Size(0, 0)`.
   @protected
   Size computeDryLayout(BoxConstraints constraints) {
@@ -1860,11 +1869,11 @@ abstract class RenderBox extends RenderObject {
         ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryLayout".'),
         ErrorHint(
           'If you are not writing your own RenderBox subclass, then this is not\n'
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
         ),
       ]),
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   static bool _dryLayoutCalculationValid = true;
@@ -1922,7 +1931,8 @@ abstract class RenderBox extends RenderObject {
       final Size? _size = this._size;
       if (_size is _DebugSize) {
         assert(_size._owner == this);
-        if (RenderObject.debugActiveLayout != null) {
+        if (RenderObject.debugActiveLayout != null &&
+            !RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback) {
           assert(
             debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
               (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
@@ -1931,7 +1941,7 @@ abstract class RenderBox extends RenderObject {
             'otherwise, the only object that is allowed to read RenderBox.size '
             'is its parent, if they have said they will. It you hit this assert '
             'trying to access a child\'s size, pass "parentUsesSize: true" to '
-            'that child\'s layout().'
+            "that child's layout().",
           );
         }
         assert(_size == this._size);
@@ -1961,7 +1971,7 @@ abstract class RenderBox extends RenderObject {
         information.add(ErrorDescription('It appears that the size setter was called from performLayout().'));
       } else {
         information.add(ErrorDescription(
-          'The size setter was called from outside layout (neither performResize() nor performLayout() were being run for this object).'
+          'The size setter was called from outside layout (neither performResize() nor performLayout() were being run for this object).',
         ));
         if (owner != null && owner!.debugDoingLayout)
           information.add(ErrorDescription('Only the object itself can set its size. It is a contract violation for other objects to set it.'));
@@ -2010,20 +2020,20 @@ abstract class RenderBox extends RenderObject {
                 'However, this second render object is not, or is no longer, a '
                 'child of the first, and it is therefore a violation of the '
                 'RenderBox layout protocol to use that size in the layout of the '
-                'first render object.'
+                'first render object.',
               ),
               ErrorHint(
                 'If the size was obtained at a time where it was valid to read '
                 'the size (because the second render object above was a child '
                 'of the first at the time), then it should be adopted using '
-                'debugAdoptSize at that time.'
+                'debugAdoptSize at that time.',
               ),
               ErrorHint(
                 'If the size comes from a grandchild or a render object from an '
                 'entirely different part of the render tree, then there is no '
                 'way to be notified when the size changes and therefore attempts '
                 'to read that size are almost certainly a source of bugs. A different '
-                'approach should be used.'
+                'approach should be used.',
               ),
             ]);
           }
@@ -2038,7 +2048,7 @@ abstract class RenderBox extends RenderObject {
                 'inaccurate: the size was nonetheless used by the parent.\n'
                 'It is important to tell the framework if the size will be used or not '
                 'as several important performance optimizations can be made if the '
-                'size will not be used by the parent.'
+                'size will not be used by the parent.',
               ),
             ]);
           }
@@ -2175,7 +2185,7 @@ abstract class RenderBox extends RenderObject {
           ErrorDescription(
             'This probably means that it is a render object that tries to be '
             'as big as possible, but it was put inside another render object '
-            'that allows its children to pick their own size.'
+            'that allows its children to pick their own size.',
           ),
         ];
         if (!constraints.hasBoundedWidth) {
@@ -2207,7 +2217,7 @@ abstract class RenderBox extends RenderObject {
           DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not '
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
           ),
         ]);
       }
@@ -2217,7 +2227,7 @@ abstract class RenderBox extends RenderObject {
         RenderObject.debugCheckingIntrinsics = true;
         final List<DiagnosticsNode> failures = <DiagnosticsNode>[];
 
-        double testIntrinsic(double function(double extent), String name, double constraint) {
+        double testIntrinsic(double Function(double extent) function, String name, double constraint) {
           final double result = function(constraint);
           if (result < 0) {
             failures.add(ErrorDescription(' * $name($constraint) returned a negative value: $result'));
@@ -2228,7 +2238,7 @@ abstract class RenderBox extends RenderObject {
           return result;
         }
 
-        void testIntrinsicsForValues(double getMin(double extent), double getMax(double extent), String name, double constraint) {
+        void testIntrinsicsForValues(double Function(double extent) getMin, double Function(double extent) getMax, String name, double constraint) {
           final double min = testIntrinsic(getMin, 'getMinIntrinsic$name', constraint);
           final double max = testIntrinsic(getMax, 'getMaxIntrinsic$name', constraint);
           if (min > max) {
@@ -2254,7 +2264,7 @@ abstract class RenderBox extends RenderObject {
             ...failures,
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
             ),
           ]);
         }
@@ -2262,7 +2272,7 @@ abstract class RenderBox extends RenderObject {
         // Checking that getDryLayout computes the same size.
         _dryLayoutCalculationValid = true;
         RenderObject.debugCheckingIntrinsics = true;
-        late Size dryLayoutSize;
+        final Size dryLayoutSize;
         try {
           dryLayoutSize = getDryLayout(constraints);
         } finally {
@@ -2273,14 +2283,14 @@ abstract class RenderBox extends RenderObject {
             ErrorSummary('The size given to the ${objectRuntimeType(this, 'RenderBox')} class differs from the size computed by computeDryLayout.'),
             ErrorDescription(
               'The size computed in ${sizedByParent ? 'performResize' : 'performLayout'} '
-              'is $size, which is different from $dryLayoutSize, which was computed by computeDryLayout.'
+              'is $size, which is different from $dryLayoutSize, which was computed by computeDryLayout.',
             ),
             ErrorDescription(
               'The constraints used were $constraints.',
             ),
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
             ),
           ]);
         }
@@ -2312,9 +2322,9 @@ abstract class RenderBox extends RenderObject {
 
   /// {@macro flutter.rendering.RenderObject.performResize}
   ///
-  /// By default this method calls [getDryLayout] with the current
-  /// [constraints]. Instead of overriding this method, consider overriding
-  /// [computeDryLayout] (the backend implementation of [getDryLayout]).
+  /// By default this method sets [size] to the result of [computeDryLayout]
+  /// called with the current [constraints]. Instead of overriding this method,
+  /// consider overriding [computeDryLayout].
   @override
   void performResize() {
     // default behavior for subclasses that have sizedByParent = true
@@ -2331,7 +2341,7 @@ abstract class RenderBox extends RenderObject {
           ErrorHint(
             'RenderBox subclasses need to either override performLayout() to '
             'set a size and lay out any children, or, set sizedByParent to true '
-            'so that performResize() sizes the render object.'
+            'so that performResize() sizes the render object.',
           ),
         ]);
       }
@@ -2373,13 +2383,13 @@ abstract class RenderBox extends RenderObject {
             ErrorDescription(
               "Unfortunately, this object's geometry is not known at this time, "
               'probably because it has never been laid out. '
-              'This means it cannot be accurately hit-tested.'
+              'This means it cannot be accurately hit-tested.',
             ),
             ErrorHint(
               'If you are trying '
               'to perform a hit test during the layout phase itself, make sure '
               "you only hit test nodes that have completed layout (e.g. the node's "
-              'children, after their layout() method has been called).'
+              'children, after their layout() method has been called).',
             ),
           ]);
         }
@@ -2388,12 +2398,12 @@ abstract class RenderBox extends RenderObject {
           describeForError('The hitTest() method was called on this RenderBox'),
           ErrorDescription(
             'Although this node is not marked as needing layout, '
-            'its size is not set.'
+            'its size is not set.',
           ),
           ErrorHint(
             'A RenderBox object must have an '
             'explicit size before it can be hit-tested. Make sure '
-            'that the RenderBox in question sets its size during layout.'
+            'that the RenderBox in question sets its size during layout.',
           ),
         ]);
       }
@@ -2476,7 +2486,7 @@ abstract class RenderBox extends RenderObject {
             'children all use BoxParentData objects for their parentData field. '
             'Since $runtimeType does not in fact use that ParentData class for its children, it must '
             'provide an implementation of applyPaintTransform that supports the specific ParentData '
-            'subclass used by its children (which apparently is ${child.parentData.runtimeType}).'
+            'subclass used by its children (which apparently is ${child.parentData.runtimeType}).',
           ),
         ]);
       }
@@ -2562,8 +2572,8 @@ abstract class RenderBox extends RenderObject {
   /// object you can determine the [PointerDownEvent]'s position in local coordinates.
   /// (This is useful because [PointerEvent.position] is in global coordinates.)
   ///
-  /// If you override this, consider calling [debugHandleEvent] as follows, so
-  /// that you can support [debugPaintPointersEnabled]:
+  /// Implementations of this method should call [debugHandleEvent] as follows,
+  /// so that they support [debugPaintPointersEnabled]:
   ///
   /// ```dart
   /// @override

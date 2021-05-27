@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../../gallery/demo.dart';
 
@@ -79,7 +78,7 @@ class DessertDataSource extends DataTableSource {
     Dessert('Coconut slice and KitKat',             677, 41.0,  72,  8.5,  63, 12, 12),
   ];
 
-  void _sort<T>(Comparable<T> getField(Dessert d), bool ascending) {
+  void _sort<T>(Comparable<T> Function(Dessert d) getField, bool ascending) {
     _desserts.sort((Dessert a, Dessert b) {
       if (!ascending) {
         final Dessert c = a;
@@ -143,10 +142,12 @@ class DessertDataSource extends DataTableSource {
 }
 
 class DataTableDemo extends StatefulWidget {
+  const DataTableDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/data-table';
 
   @override
-  _DataTableDemoState createState() => _DataTableDemoState();
+  State<DataTableDemo> createState() => _DataTableDemoState();
 }
 
 class _DataTableDemoState extends State<DataTableDemo> {
@@ -155,7 +156,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
   bool _sortAscending = true;
   final DessertDataSource _dessertsDataSource = DessertDataSource();
 
-  void _sort<T>(Comparable<T> getField(Dessert d), int columnIndex, bool ascending) {
+  void _sort<T>(Comparable<T> Function(Dessert d) getField, int columnIndex, bool ascending) {
     _dessertsDataSource._sort<T>(getField, ascending);
     setState(() {
       _sortColumnIndex = columnIndex;

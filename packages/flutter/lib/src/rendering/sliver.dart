@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
@@ -466,9 +465,8 @@ class SliverConstraints extends Constraints {
       return true;
     if (other is! SliverConstraints)
       return false;
-    assert(other is SliverConstraints && other.debugAssertIsValid());
-    return other is SliverConstraints
-        && other.axisDirection == axisDirection
+    assert(other.debugAssertIsValid());
+    return other.axisDirection == axisDirection
         && other.growthDirection == growthDirection
         && other.scrollOffset == scrollOffset
         && other.overlap == overlap
@@ -921,7 +919,7 @@ class SliverHitTestEntry extends HitTestEntry {
 class SliverLogicalParentData extends ParentData {
   /// The position of the child relative to the zero scroll offset.
   ///
-  /// The number of pixels from from the zero scroll offset of the parent sliver
+  /// The number of pixels from the zero scroll offset of the parent sliver
   /// (the line at which its [SliverConstraints.scrollOffset] is zero) to the
   /// side of the child closest to that offset. A [layoutOffset] can be null
   /// when it cannot be determined. The value will be set after layout.
@@ -977,13 +975,13 @@ List<DiagnosticsNode> _debugCompareFloats(String labelA, double valueA, String l
     if (valueA.toStringAsFixed(1) != valueB.toStringAsFixed(1))
       ErrorDescription(
         'The $labelA is ${valueA.toStringAsFixed(1)}, but '
-        'the $labelB is ${valueB.toStringAsFixed(1)}.'
+        'the $labelB is ${valueB.toStringAsFixed(1)}.',
       )
     else ...<DiagnosticsNode>[
       ErrorDescription('The $labelA is $valueA, but the $labelB is $valueB.'),
       ErrorHint(
         'Maybe you have fallen prey to floating point rounding errors, and should explicitly '
-        'apply the min() or max() functions, or the clamp() method, to the $labelB?'
+        'apply the min() or max() functions, or the clamp() method, to the $labelB?',
       ),
     ],
   ];
@@ -1207,7 +1205,7 @@ abstract class RenderSliver extends RenderObject {
     assert(geometry!.debugAssertIsValid(
       informationCollector: () sync* {
         yield describeForError('The RenderSliver that returned the offending geometry was');
-      }
+      },
     ));
     assert(() {
       if (geometry!.paintOrigin + geometry!.paintExtent > constraints.remainingPaintExtent) {
@@ -1598,8 +1596,7 @@ abstract class RenderSliver extends RenderObject {
 }
 
 /// Mixin for [RenderSliver] subclasses that provides some utility functions.
-abstract class RenderSliverHelpers implements RenderSliver {
-
+mixin RenderSliverHelpers implements RenderSliver {
   bool _getRightWayUp(SliverConstraints constraints) {
     assert(constraints != null);
     assert(constraints.axisDirection != null);

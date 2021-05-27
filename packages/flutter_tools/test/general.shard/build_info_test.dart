@@ -2,21 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
 import '../src/common.dart';
 
 void main() {
-  BufferLogger logger;
+  late BufferLogger logger;
   setUp(() {
     logger = BufferLogger.test();
   });
 
   group('Validate build number', () {
     testWithoutContext('CFBundleVersion for iOS', () async {
-      String buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz', logger);
+      String? buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
       buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
@@ -27,7 +26,7 @@ void main() {
     });
 
     testWithoutContext('versionCode for Android', () async {
-      String buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
+      String? buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
       expect(buildName, '123');
       buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, 'abc', logger);
       expect(buildName, '1');
@@ -36,7 +35,7 @@ void main() {
 
   group('Validate build name', () {
     testWithoutContext('CFBundleShortVersionString for iOS', () async {
-      String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz', logger);
+      String? buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
       buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
@@ -50,7 +49,7 @@ void main() {
     });
 
     testWithoutContext('versionName for Android', () async {
-      String buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
+      String? buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
       expect(buildName, '123.abc+-');
       buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-', logger);
       expect(buildName, 'abc+-');
@@ -96,6 +95,38 @@ void main() {
     expect(() => getIOSArchForName('bogus'), throwsException);
   });
 
+  testWithoutContext('toBuildSystemEnvironment encoding of standard values', () {
+    const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
+      treeShakeIcons: true,
+      trackWidgetCreation: true,
+      dartDefines: <String>['foo=2', 'bar=2'],
+      dartObfuscation: true,
+      splitDebugInfoPath: 'foo/',
+      extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
+      extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
+      bundleSkSLPath: 'foo/bar/baz.sksl.json',
+      packagesPath: 'foo/.packages',
+      codeSizeDirectory: 'foo/code-size',
+      fileSystemRoots: <String>['test5', 'test6'],
+      fileSystemScheme: 'scheme',
+    );
+
+    expect(buildInfo.toBuildSystemEnvironment(), <String, String>{
+      'BuildMode': 'debug',
+      'DartDefines': 'Zm9vPTI=,YmFyPTI=',
+      'DartObfuscation': 'true',
+      'ExtraFrontEndOptions': '--enable-experiment=non-nullable,bar',
+      'ExtraGenSnapshotOptions': '--enable-experiment=non-nullable,fizz',
+      'SplitDebugInfo': 'foo/',
+      'TrackWidgetCreation': 'true',
+      'TreeShakeIcons': 'true',
+      'BundleSkSLPath': 'foo/bar/baz.sksl.json',
+      'CodeSizeDirectory': 'foo/code-size',
+      'FileSystemRoots': 'test5,test6',
+      'FileSystemScheme': 'scheme',
+    });
+  });
+
   testWithoutContext('toEnvironmentConfig encoding of standard values', () {
     const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
       treeShakeIcons: true,
@@ -108,45 +139,77 @@ void main() {
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
       packagesPath: 'foo/.packages',
       codeSizeDirectory: 'foo/code-size',
+      // These values are ignored by toEnvironmentConfig
+      androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
     );
 
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
       'TREE_SHAKE_ICONS': 'true',
       'TRACK_WIDGET_CREATION': 'true',
-      'DART_DEFINES': 'foo%3D2,bar%3D2',
+      'DART_DEFINES': 'Zm9vPTI=,YmFyPTI=',
       'DART_OBFUSCATION': 'true',
       'SPLIT_DEBUG_INFO': 'foo/',
-      'EXTRA_FRONT_END_OPTIONS': '--enable-experiment%3Dnon-nullable,bar',
-      'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment%3Dnon-nullable,fizz',
+      'EXTRA_FRONT_END_OPTIONS': '--enable-experiment=non-nullable,bar',
+      'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment=non-nullable,fizz',
       'BUNDLE_SKSL_PATH': 'foo/bar/baz.sksl.json',
       'PACKAGE_CONFIG': 'foo/.packages',
       'CODE_SIZE_DIRECTORY': 'foo/code-size',
     });
   });
 
-  testWithoutContext('encodeDartDefines encodes define values with URI encode compnents', () {
-    expect(encodeDartDefines(<String>['"hello"']), '%22hello%22');
-    expect(encodeDartDefines(<String>['https://www.google.com']), 'https%3A%2F%2Fwww.google.com');
-    expect(encodeDartDefines(<String>['2,3,4', '5']), '2%2C3%2C4,5');
-    expect(encodeDartDefines(<String>['true', 'false', 'flase']), 'true,false,flase');
-    expect(encodeDartDefines(<String>['1232,456', '2']), '1232%2C456,2');
+  testWithoutContext('toGradleConfig encoding of standard values', () {
+    const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
+      treeShakeIcons: true,
+      trackWidgetCreation: true,
+      dartDefines: <String>['foo=2', 'bar=2'],
+      dartObfuscation: true,
+      splitDebugInfoPath: 'foo/',
+      extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
+      extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
+      bundleSkSLPath: 'foo/bar/baz.sksl.json',
+      packagesPath: 'foo/.packages',
+      codeSizeDirectory: 'foo/code-size',
+      androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
+    );
+
+    expect(buildInfo.toGradleConfig(), <String>[
+      '-Pdart-defines=Zm9vPTI=,YmFyPTI=',
+      '-Pdart-obfuscation=true',
+      '-Pextra-front-end-options=--enable-experiment=non-nullable,bar',
+      '-Pextra-gen-snapshot-options=--enable-experiment=non-nullable,fizz',
+      '-Psplit-debug-info=foo/',
+      '-Ptrack-widget-creation=true',
+      '-Ptree-shake-icons=true',
+      '-Pbundle-sksl-path=foo/bar/baz.sksl.json',
+      '-Pcode-size-directory=foo/code-size',
+      '-Pfoo=bar',
+      '-Pfizz=bazz'
+    ]);
   });
 
-  testWithoutContext('decodeDartDefines decodes URI encoded dart defines', () {
+  testWithoutContext('encodeDartDefines encodes define values with base64 encoded compnents', () {
+    expect(encodeDartDefines(<String>['"hello"']), 'ImhlbGxvIg==');
+    expect(encodeDartDefines(<String>['https://www.google.com']), 'aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ==');
+    expect(encodeDartDefines(<String>['2,3,4', '5']), 'MiwzLDQ=,NQ==');
+    expect(encodeDartDefines(<String>['true', 'false', 'flase']), 'dHJ1ZQ==,ZmFsc2U=,Zmxhc2U=');
+    expect(encodeDartDefines(<String>['1232,456', '2']), 'MTIzMiw0NTY=,Mg==');
+  });
+
+  testWithoutContext('decodeDartDefines decodes base64 encoded dart defines', () {
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: '%22hello%22'
+      kDartDefines: 'ImhlbGxvIg=='
     }, kDartDefines), <String>['"hello"']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'https%3A%2F%2Fwww.google.com'
+      kDartDefines: 'aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ=='
     }, kDartDefines), <String>['https://www.google.com']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: '2%2C3%2C4,5'
+      kDartDefines: 'MiwzLDQ=,NQ=='
     }, kDartDefines), <String>['2,3,4', '5']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'true,false,flase'
+      kDartDefines: 'dHJ1ZQ==,ZmFsc2U=,Zmxhc2U='
     }, kDartDefines), <String>['true', 'false', 'flase']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: '1232%2C456,2'
+      kDartDefines: 'MTIzMiw0NTY=,Mg=='
     }, kDartDefines), <String>['1232,456', '2']);
   });
 }

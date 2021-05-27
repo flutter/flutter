@@ -9,10 +9,12 @@ import 'package:flutter/cupertino.dart';
 import '../../gallery/demo.dart';
 
 class CupertinoRefreshControlDemo extends StatefulWidget {
+  const CupertinoRefreshControlDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/cupertino/refresh';
 
   @override
-  _CupertinoRefreshControlDemoState createState() => _CupertinoRefreshControlDemoState();
+  State<CupertinoRefreshControlDemo> createState() => _CupertinoRefreshControlDemoState();
 }
 
 class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDemo> {
@@ -162,7 +164,7 @@ class _ListItem extends StatelessWidget {
       padding: const EdgeInsets.only(top: 9.0),
       child: Row(
         children: <Widget>[
-          Container(
+          SizedBox(
             width: 38.0,
             child: called!
                 ? Align(

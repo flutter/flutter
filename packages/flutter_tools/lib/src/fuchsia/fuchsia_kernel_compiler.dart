@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 
 /// This is a simple wrapper around the custom kernel compiler from the Fuchsia
@@ -63,7 +65,7 @@ class FuchsiaKernelCompiler {
     ];
 
     final List<String> command = <String>[
-      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
       kernelCompiler,
       ...flags,

@@ -4,11 +4,9 @@
 
 import 'dart:ui';
 
-import 'package:flutter/painting.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'semantics_tester.dart';
 
@@ -40,11 +38,11 @@ void main() {
             children: <Widget>[
               Focus(
                 key: key2,
-                child: Container(key: key3, width: 100, height: 100),
+                child: SizedBox(key: key3, width: 100, height: 100),
               ),
               Focus(
                 key: key4,
-                child: Container(key: key5, width: 100, height: 100),
+                child: SizedBox(key: key5, width: 100, height: 100),
               ),
             ],
           ),
@@ -79,11 +77,11 @@ void main() {
             children: <Widget>[
               Focus(
                 key: key2,
-                child: Container(key: key3, width: 100, height: 100),
+                child: SizedBox(key: key3, width: 100, height: 100),
               ),
               Focus(
                 key: key4,
-                child: Container(key: key5, width: 100, height: 100),
+                child: SizedBox(key: key5, width: 100, height: 100),
               ),
             ],
           ),
@@ -415,11 +413,11 @@ void main() {
             children: <Widget>[
               Focus(
                 key: key2,
-                child: Container(key: key3, width: 100, height: 100),
+                child: SizedBox(key: key3, width: 100, height: 100),
               ),
               Focus(
                 key: key4,
-                child: Container(key: key5, width: 100, height: 100),
+                child: SizedBox(key: key5, width: 100, height: 100),
               ),
             ],
           ),
@@ -753,7 +751,7 @@ void main() {
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: Stack(
-              alignment: const Alignment(-1, -1),
+              alignment: Alignment.topLeft,
               children: List<Widget>.generate(nodeCount, (int index) {
                 // Boxes that all have the same upper left origin corner.
                 return Focus(
@@ -781,7 +779,7 @@ void main() {
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: Stack(
-              alignment: const Alignment(0, 0),
+              alignment: Alignment.center,
               children: List<Widget>.generate(nodeCount, (int index) {
                 return Focus(
                   focusNode: nodes[index],
@@ -809,7 +807,7 @@ void main() {
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: Stack(
-              alignment: const Alignment(0, 0),
+              alignment: Alignment.center,
               children: List<Widget>.generate(nodeCount, (int index) {
                 return Positioned(
                   top: 5.0 * index * (index + 1),
@@ -851,13 +849,13 @@ void main() {
               FocusTraversalOrder(
                 order: const NumericFocusOrder(2),
                 child: Focus(
-                  child: Container(key: key1, width: 100, height: 100),
+                  child: SizedBox(key: key1, width: 100, height: 100),
                 ),
               ),
               FocusTraversalOrder(
                 order: const NumericFocusOrder(1),
                 child: Focus(
-                  child: Container(key: key2, width: 100, height: 100),
+                  child: SizedBox(key: key2, width: 100, height: 100),
                 ),
               ),
             ],
@@ -1227,12 +1225,12 @@ void main() {
                       Focus(
                         debugLabel: 'upperLeft',
                         onFocusChange: (bool focus) => focusUpperLeft = focus,
-                        child: Container(width: 100, height: 100, key: upperLeftKey),
+                        child: SizedBox(width: 100, height: 100, key: upperLeftKey),
                       ),
                       Focus(
                         debugLabel: 'upperRight',
                         onFocusChange: (bool focus) => focusUpperRight = focus,
-                        child: Container(width: 100, height: 100, key: upperRightKey),
+                        child: SizedBox(width: 100, height: 100, key: upperRightKey),
                       ),
                     ],
                   ),
@@ -1241,12 +1239,12 @@ void main() {
                       Focus(
                         debugLabel: 'lowerLeft',
                         onFocusChange: (bool focus) => focusLowerLeft = focus,
-                        child: Container(width: 100, height: 100, key: lowerLeftKey),
+                        child: SizedBox(width: 100, height: 100, key: lowerLeftKey),
                       ),
                       Focus(
                         debugLabel: 'lowerRight',
                         onFocusChange: (bool focus) => focusLowerRight = focus,
-                        child: Container(width: 100, height: 100, key: lowerRightKey),
+                        child: SizedBox(width: 100, height: 100, key: lowerRightKey),
                       ),
                     ],
                   ),
@@ -1358,7 +1356,7 @@ void main() {
         return Focus(
           debugLabel: keys[index].toString(),
           onFocusChange: (bool isFocused) => focus[index] = isFocused,
-          child: Container(width: 100, height: 100, key: keys[index]),
+          child: SizedBox(width: 100, height: 100, key: keys[index]),
         );
       }
 
@@ -1500,11 +1498,11 @@ void main() {
                     children: <Widget>[
                       Focus(
                         debugLabel: 'upperLeft',
-                        child: Container(width: 100, height: 100, key: upperLeftKey),
+                        child: SizedBox(width: 100, height: 100, key: upperLeftKey),
                       ),
                       Focus(
                         debugLabel: 'upperRight',
-                        child: Container(width: 100, height: 100, key: upperRightKey),
+                        child: SizedBox(width: 100, height: 100, key: upperRightKey),
                       ),
                     ],
                   ),
@@ -1512,7 +1510,7 @@ void main() {
                     children: <Widget>[
                       Focus(
                         debugLabel: 'lowerLeft',
-                        child: Container(width: 100, height: 100, key: lowerLeftKey),
+                        child: SizedBox(width: 100, height: 100, key: lowerLeftKey),
                       ),
                       const Focus(
                         debugLabel: 'lowerRight',
@@ -1615,11 +1613,11 @@ void main() {
                           Focus(
                             autofocus: true,
                             debugLabel: 'upperLeft',
-                            child: Container(width: 100, height: 100, key: upperLeftKey),
+                            child: SizedBox(width: 100, height: 100, key: upperLeftKey),
                           ),
                           Focus(
                             debugLabel: 'upperRight',
-                            child: Container(width: 100, height: 100, key: upperRightKey),
+                            child: SizedBox(width: 100, height: 100, key: upperRightKey),
                           ),
                         ],
                       ),
@@ -1627,11 +1625,11 @@ void main() {
                         children: <Widget>[
                           Focus(
                             debugLabel: 'lowerLeft',
-                            child: Container(width: 100, height: 100, key: lowerLeftKey),
+                            child: SizedBox(width: 100, height: 100, key: lowerLeftKey),
                           ),
                           Focus(
                             debugLabel: 'lowerRight',
-                            child: Container(width: 100, height: 100, key: lowerRightKey),
+                            child: SizedBox(width: 100, height: 100, key: lowerRightKey),
                           ),
                         ],
                       ),
@@ -1895,11 +1893,11 @@ void main() {
       final FocusNode focusNodeLowerRight = FocusNode(debugLabel: 'lowerRight');
 
       Widget generateTestWidgets(bool ignoreTextFields) {
-        final Map<LogicalKeySet, Intent> shortcuts = <LogicalKeySet, Intent>{
-          LogicalKeySet(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left, ignoreTextFields: ignoreTextFields),
-          LogicalKeySet(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right, ignoreTextFields: ignoreTextFields),
-          LogicalKeySet(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down, ignoreTextFields: ignoreTextFields),
-          LogicalKeySet(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up, ignoreTextFields: ignoreTextFields),
+        final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
+          const SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left, ignoreTextFields: ignoreTextFields),
+          const SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right, ignoreTextFields: ignoreTextFields),
+          const SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down, ignoreTextFields: ignoreTextFields),
+          const SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up, ignoreTextFields: ignoreTextFields),
         };
 
         return MaterialApp(
@@ -1911,7 +1909,7 @@ void main() {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      Container(
+                      SizedBox(
                         width: 100,
                         height: 100,
                         child: EditableText(
@@ -1924,7 +1922,7 @@ void main() {
                           style: const TextStyle(),
                         ),
                       ),
-                      Container(
+                      SizedBox(
                         width: 100,
                         height: 100,
                         child: EditableText(
@@ -1940,7 +1938,7 @@ void main() {
                   ),
                   Row(
                     children: <Widget>[
-                      Container(
+                      SizedBox(
                         width: 100,
                         height: 100,
                         child: EditableText(
@@ -1952,7 +1950,7 @@ void main() {
                           style: const TextStyle(),
                         ),
                       ),
-                      Container(
+                      SizedBox(
                         width: 100,
                         height: 100,
                         child: EditableText(
@@ -2087,6 +2085,82 @@ void main() {
       expect(gotFocus, isNull);
       expect(containerNode.hasFocus, isFalse);
       expect(unfocusableNode.hasFocus, isFalse);
+    });
+    testWidgets("Nested FocusTraversalGroup with unfocusable children doesn't assert.", (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final FocusNode focusNode = FocusNode();
+      bool? gotFocus;
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          child: Column(
+            children: <Widget>[
+              Focus(
+                autofocus: true,
+                child: Container(),
+              ),
+              FocusTraversalGroup(
+                descendantsAreFocusable: false,
+                child: Focus(
+                  onFocusChange: (bool focused) => gotFocus = focused,
+                  child: Focus(
+                    key: key1,
+                    focusNode: focusNode,
+                    child: Container(key: key2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final Element childWidget = tester.element(find.byKey(key1));
+      final FocusNode unfocusableNode = Focus.of(childWidget);
+      final Element containerWidget = tester.element(find.byKey(key2));
+      final FocusNode containerNode = Focus.of(containerWidget);
+
+      await tester.pump();
+      primaryFocus!.nextFocus();
+
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
+
+      containerNode.requestFocus();
+      await tester.pump();
+
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
+    });
+    testWidgets("Empty FocusTraversalGroup doesn't cause an exception.", (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey(debugLabel: 'Test Key');
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Column(
+              children: <Widget>[
+                FocusTraversalGroup(
+                  child: Container(key: key),
+                ),
+                Focus(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  child: Container(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      primaryFocus!.nextFocus();
+      await tester.pump();
+      expect(primaryFocus, equals(focusNode));
     });
   });
   group(RawKeyboardListener, () {

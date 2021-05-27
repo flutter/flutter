@@ -39,6 +39,8 @@ class TextStyleItem extends StatelessWidget {
 }
 
 class TypographyDemo extends StatelessWidget {
+  const TypographyDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/typography';
 
   @override

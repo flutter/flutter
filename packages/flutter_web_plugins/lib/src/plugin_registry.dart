@@ -61,7 +61,7 @@ class Registrar extends BinaryMessenger {
   /// the [dart:ui] library. That function is only available when
   /// compiling for the web.
   void registerMessageHandler() {
-    // The function below is only defined in the Web dart:ui.
+    // The `ui.webOnlySetPluginHandler` function below is only defined in the Web dart:ui.
     // ignore: undefined_function
     ui.webOnlySetPluginHandler(handleFrameworkMessage);
   }
@@ -141,7 +141,7 @@ class Registrar extends BinaryMessenger {
   @override
   Future<ByteData?> send(String channel, ByteData? message) {
     final Completer<ByteData?> completer = Completer<ByteData?>();
-    ui.window.onPlatformMessage!(channel, message, (ByteData? reply) {
+    ui.channelBuffers.push(channel, message, (ByteData? reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
@@ -163,50 +163,34 @@ class Registrar extends BinaryMessenger {
     else
       _handlers[channel] = handler;
   }
-
-  @override
-  bool checkMessageHandler(String channel, MessageHandler? handler) => _handlers[channel] == handler;
-
-  @override
-  void setMockMessageHandler(
-    String channel,
-    MessageHandler? handler,
-  ) {
-    throw FlutterError(
-      'Setting mock handlers is not supported on the platform side.',
-    );
-  }
-
-  @override
-  bool checkMockMessageHandler(String channel, MessageHandler? handler) {
-    throw FlutterError(
-      'Setting mock handlers is not supported on the platform side.',
-    );
-  }
 }
 
 /// This class was previously separate from [Registrar] but was merged into it
 /// as part of a simplification of the web plugins API.
 @Deprecated(
   'Use Registrar instead. '
-  'This feature was deprecated after v1.24.0-7.0.pre.'
+  'This feature was deprecated after v1.26.0-18.0.pre.'
 )
 class PluginRegistry extends Registrar {
   /// Creates a [Registrar].
   ///
   /// The argument is ignored.
+  @Deprecated(
+    'Use Registrar instead. '
+    'This feature was deprecated after v1.26.0-18.0.pre.'
+  )
   PluginRegistry([
     @Deprecated(
       'This argument is ignored. '
-      'This feature was deprecated after v1.24.0-7.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     BinaryMessenger? binaryMessenger,
-  ]) : super(); // ignore: avoid_unused_constructor_parameters
+  ]) : super();
 
   /// Returns `this`. The argument is ignored.
   @Deprecated(
     'This method is redundant. It returns the object on which it is called. '
-    'This feature was deprecated after v1.24.0-7.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.'
   )
   Registrar registrarFor(Type key) => this;
 }

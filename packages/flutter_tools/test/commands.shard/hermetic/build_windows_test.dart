@@ -2,24 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
+import 'package:flutter_tools/src/commands/build_winuwp.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 const String flutterRoot = r'C:\flutter';
 const String buildFilePath = r'C:\windows\CMakeLists.txt';
+const String buildUwpFilePath = r'C:\winuwp\CMakeLists.txt';
 const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
 const String cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
 
@@ -42,18 +46,19 @@ void main() {
   FileSystem fileSystem;
 
   ProcessManager processManager;
-  MockVisualStudio mockVisualStudio;
-  Usage usage;
+  FakeVisualStudio fakeVisualStudio;
+  TestUsage usage;
 
   setUpAll(() {
     Cache.disableLocking();
+    Cache.flutterRoot = '';
   });
 
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
-    mockVisualStudio = MockVisualStudio();
-    usage = Usage.test();
+    fakeVisualStudio = FakeVisualStudio();
+    usage = TestUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -64,21 +69,32 @@ void main() {
   }
 
   // Creates the mock files necessary to run a build.
-  void setUpMockProjectFilesForBuild({int templateVersion}) {
+  void setUpMockProjectFilesForBuild() {
     fileSystem.file(buildFilePath).createSync(recursive: true);
+    setUpMockCoreProjectFiles();
+  }
+
+  void setUpMockUwpFilesForBuild(int version) {
+    final Directory projectDirectory = (fileSystem.file(buildUwpFilePath)
+      ..createSync(recursive: true))
+      .parent;
+    projectDirectory.childFile('project_version').writeAsString(version.toString());
     setUpMockCoreProjectFiles();
   }
 
   // Returns the command matching the build_windows call to generate CMake
   // files.
-  FakeCommand cmakeGenerationCommand({void Function() onRun}) {
+  FakeCommand cmakeGenerationCommand({void Function() onRun, bool winuwp = false}) {
     return FakeCommand(
       command: <String>[
         cmakePath,
         '-S',
-        fileSystem.path.dirname(buildFilePath),
+        fileSystem.path.dirname(winuwp ? buildUwpFilePath : buildFilePath),
         '-B',
-        r'build\windows',
+        if (winuwp)
+          r'build\winuwp'
+        else
+          r'build\windows',
         '-G',
         'Visual Studio 16 2019',
       ],
@@ -91,16 +107,20 @@ void main() {
     bool verbose = false,
     void Function() onRun,
     String stdout = '',
+    bool winuwp = false,
   }) {
     return FakeCommand(
       command: <String>[
         cmakePath,
         '--build',
-        r'build\windows',
+        if (winuwp)
+          r'build\winuwp'
+        else
+          r'build\windows',
         '--config',
         buildMode,
-        '--target',
-        'INSTALL',
+        if (!winuwp)
+          ...<String>['--target', 'INSTALL'],
         if (verbose)
           '--verbose'
       ],
@@ -115,7 +135,7 @@ void main() {
 
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
     expect(createTestCommandRunner(command).run(
@@ -129,14 +149,16 @@ void main() {
   });
 
   testUsingContext('Windows build fails when there is no windows project', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockCoreProjectFiles();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
-    ), throwsToolExit(message: 'No Windows desktop project configured'));
+    ), throwsToolExit(message: 'No Windows desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding Windows support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
@@ -145,14 +167,14 @@ void main() {
   });
 
   testUsingContext('Windows build fails on non windows platform', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
-    ), throwsToolExit());
+    ), throwsToolExit(message: '"build windows" only supported on Windows hosts.'));
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
     FileSystem: () => fileSystem,
@@ -160,11 +182,27 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
-  testUsingContext('Windows build does not spew stdout to status logger', () async {
+  testUsingContext('Windows build fails when feature is disabled', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
+
+    expect(createTestCommandRunner(command).run(
+        const <String>['windows', '--no-pub']
+    ), throwsToolExit(message: '"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".'));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
+  });
+
+  testUsingContext('Windows build does not spew stdout to status logger', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -186,10 +224,10 @@ void main() {
   });
 
   testUsingContext('Windows build extracts errors from stdout', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     // This contains a mix of routine build output and various types of errors
     // (compile error, link error, warning treated as an error) from MSBuild,
@@ -244,10 +282,10 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -270,10 +308,10 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows build invokes build and writes generated files', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -315,17 +353,17 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     expect(configLines, containsAll(<String>[
       r'file(TO_CMAKE_PATH "C:\\flutter" FLUTTER_ROOT)',
       r'file(TO_CMAKE_PATH "C:\\" PROJECT_DIR)',
-      r'  "DART_DEFINES=\"foo%3Da,bar%3Db\""',
-      r'  "DART_OBFUSCATION=\"true\""',
-      r'  "EXTRA_FRONT_END_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
-      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
-      r'  "SPLIT_DEBUG_INFO=\"C:\\foo\\\""',
-      r'  "TRACK_WIDGET_CREATION=\"true\""',
-      r'  "TREE_SHAKE_ICONS=\"true\""',
-      r'  "FLUTTER_ROOT=\"C:\\flutter\""',
-      r'  "PROJECT_DIR=\"C:\\\""',
-      r'  "FLUTTER_TARGET=\"lib\\other.dart\""',
-      r'  "BUNDLE_SKSL_PATH=\"foo\\bar.sksl.json\""',
+      r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI="',
+      r'  "DART_OBFUSCATION=true"',
+      r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
+      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
+      r'  "SPLIT_DEBUG_INFO=C:\\foo\\"',
+      r'  "TRACK_WIDGET_CREATION=true"',
+      r'  "TREE_SHAKE_ICONS=true"',
+      r'  "FLUTTER_ROOT=C:\\flutter"',
+      r'  "PROJECT_DIR=C:\\"',
+      r'  "FLUTTER_TARGET=lib\\other.dart"',
+      r'  "BUNDLE_SKSL_PATH=foo\\bar.sksl.json"',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -335,10 +373,10 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows profile build passes Profile configuration', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -370,10 +408,10 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     fileSystem.file(r'build\windows\runner\Release\app.so')
       ..createSync(recursive: true)
@@ -399,15 +437,15 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
       }),
     ]);
 
-    // Capture Usage.test() events.
-    final StringBuffer buffer = await capturedConsolePrint(() =>
-      createTestCommandRunner(command).run(
-        const <String>['windows', '--no-pub', '--analyze-size']
-      )
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub', '--analyze-size']
     );
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
-    expect(buffer.toString(), contains('event {category: code-size-analysis, action: windows, label: null, value: null, cd33:'));
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(usage.events, contains(
+       const TestUsageEvent('code-size-analysis', 'windows'),
+    ));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     FileSystem: () => fileSystem,
@@ -416,6 +454,130 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
     Usage: () => usage,
   });
+
+  testUsingContext('Windows build fails when there is no windows project', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockCoreProjectFiles();
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['winuwp', '--no-pub']
+    ), throwsToolExit(message: 'No Windows UWP desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding Windows support to a project.'));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+  });
+
+  testUsingContext('Windows build fails on non windows platform', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockUwpFilesForBuild(0);
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['winuwp', '--no-pub']
+    ), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    Platform: () => notWindowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+  });
+
+  testUsingContext('Windows UWP uild fails on non windows platform', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    expect(createTestCommandRunner(command).run(
+        const <String>['winuwp', '--no-pub']
+    ), throwsToolExit(message: '"build winuwp" only supported on Windows hosts.'));
+  }, overrides: <Type, Generator>{
+    Platform: () => notWindowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+  });
+
+  testUsingContext('Windows UWP build fails when the project version is out of date', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockUwpFilesForBuild(-1);
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['winuwp', '--no-pub']
+    ), throwsToolExit(message: 'The Windows UWP project template and build process has changed. '
+        'In order to build you must delete the winuwp directory and re-create the project'));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+  });
+
+  testUsingContext('Windows UWP build fails when feature is disabled', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    // This message should include 'To enable, run "flutter config --enable-windows-uwp-desktop"."
+    // once the `windowsUwpEmbedding` feature is available on all channels.
+    expect(createTestCommandRunner(command).run(
+        const <String>['winuwp', '--no-pub']
+    ), throwsToolExit(message: RegExp(r'"build winuwp" is not currently supported\.$')));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: false),
+  });
+
+  testUsingContext('Windows UWP build completes successfully', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockUwpFilesForBuild(0);
+
+    await createTestCommandRunner(command).run(
+      const <String>['winuwp', '--no-pub']
+    );
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          r'C:\flutter\bin\flutter',
+          'assemble',
+          '--no-version-check',
+          '--output=build',
+          '-dTargetPlatform=windows-uwp-x64',
+          '-dTrackWidgetCreation=true',
+          '-dBuildMode=release',
+          r'-dTargetFile=lib\main.dart',
+          '-dTreeShakeIcons="true"',
+          '-dDartObfuscation=false',
+          'release_bundle_windows_assets_uwp'
+        ],
+      ),
+      cmakeGenerationCommand(winuwp: true),
+      buildCommand('Release',  stdout: 'STDOUT STUFF', winuwp: true),
+    ]),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+  });
 }
 
-class MockVisualStudio extends Mock implements VisualStudio {}
+class FakeVisualStudio extends Fake implements VisualStudio {
+  FakeVisualStudio([this.cmakePath]);
+
+  @override
+  final String cmakePath;
+}

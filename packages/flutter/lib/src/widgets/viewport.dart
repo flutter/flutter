@@ -144,8 +144,8 @@ class Viewport extends MultiChildRenderObjectWidget {
       case AxisDirection.up:
         assert(debugCheckHasDirectionality(
           context,
-          why: 'to determine the cross-axis direction when the viewport has an \'up\' axisDirection',
-          alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
+          why: "to determine the cross-axis direction when the viewport has an 'up' axisDirection",
+          alternative: "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
         ));
         return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.right:
@@ -153,8 +153,8 @@ class Viewport extends MultiChildRenderObjectWidget {
       case AxisDirection.down:
         assert(debugCheckHasDirectionality(
           context,
-          why: 'to determine the cross-axis direction when the viewport has a \'down\' axisDirection',
-          alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
+          why: "to determine the cross-axis direction when the viewport has a 'down' axisDirection",
+          alternative: "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
         ));
         return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.left:
@@ -188,7 +188,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 
   @override
-  _ViewportElement createElement() => _ViewportElement(this);
+  MultiChildRenderObjectElement createElement() => _ViewportElement(this);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -218,7 +218,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   RenderViewport get renderObject => super.renderObject as RenderViewport;
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _updateCenter();
   }
@@ -233,7 +233,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
     // TODO(ianh): cache the keys to make this faster
     if (widget.center != null) {
       renderObject.center = children.singleWhere(
-        (Element element) => element.widget.key == widget.center
+        (Element element) => element.widget.key == widget.center,
       ).renderObject as RenderSliver?;
     } else if (children.isNotEmpty) {
       renderObject.center = children.first.renderObject as RenderSliver?;

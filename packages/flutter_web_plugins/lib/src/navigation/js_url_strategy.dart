@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(goderbauer): Remove this ignore when the documentation for the
+//   now private, then public typedefs is clear.
+// ignore_for_file: library_private_types_in_public_api
+
 @JS()
 library js_location_strategy;
 
@@ -90,12 +94,12 @@ abstract class JsUrlStrategy {
   /// Push a new history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-  external void pushState(Object state, String title, String url);
+  external void pushState(Object? state, String title, String url);
 
   /// Replace the currently active history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-  external void replaceState(Object state, String title, String url);
+  external void replaceState(Object? state, String title, String url);
 
   /// Moves forwards or backwards through the history stack.
   ///

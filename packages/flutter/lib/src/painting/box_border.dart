@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -11,7 +10,7 @@ import 'borders.dart';
 import 'edge_insets.dart';
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 
 /// The shape to use when rendering a [Border] or [BoxDecoration].
 ///
@@ -159,7 +158,7 @@ abstract class BoxBorder extends ShapeBorder {
         'BoxBorder.lerp() was called with two objects of type ${a.runtimeType} and ${b.runtimeType}:\n'
         '  $a\n'
         '  $b\n'
-        'However, only Border and BorderDirectional classes are supported by this method.'
+        'However, only Border and BorderDirectional classes are supported by this method.',
       ),
       ErrorHint('For a more general interpolation method, consider using ShapeBorder.lerp instead.'),
     ]);
@@ -268,20 +267,20 @@ abstract class BoxBorder extends ShapeBorder {
 /// Container(
 ///   decoration: const BoxDecoration(
 ///     border: Border(
-///       top: BorderSide(width: 1.0, color: Color(0xFFFFFFFFFF)),
-///       left: BorderSide(width: 1.0, color: Color(0xFFFFFFFFFF)),
-///       right: BorderSide(width: 1.0, color: Color(0xFFFF000000)),
-///       bottom: BorderSide(width: 1.0, color: Color(0xFFFF000000)),
+///       top: BorderSide(width: 1.0, color: Color(0xFFFFFFFF)),
+///       left: BorderSide(width: 1.0, color: Color(0xFFFFFFFF)),
+///       right: BorderSide(width: 1.0, color: Color(0xFF000000)),
+///       bottom: BorderSide(width: 1.0, color: Color(0xFF000000)),
 ///     ),
 ///   ),
 ///   child: Container(
 ///     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
 ///     decoration: const BoxDecoration(
 ///       border: Border(
-///         top: BorderSide(width: 1.0, color: Color(0xFFFFDFDFDF)),
-///         left: BorderSide(width: 1.0, color: Color(0xFFFFDFDFDF)),
-///         right: BorderSide(width: 1.0, color: Color(0xFFFF7F7F7F)),
-///         bottom: BorderSide(width: 1.0, color: Color(0xFFFF7F7F7F)),
+///         top: BorderSide(width: 1.0, color: Color(0xFFDFDFDF)),
+///         left: BorderSide(width: 1.0, color: Color(0xFFDFDFDF)),
+///         right: BorderSide(width: 1.0, color: Color(0xFF7F7F7F)),
+///         bottom: BorderSide(width: 1.0, color: Color(0xFF7F7F7F)),
 ///       ),
 ///       color: Color(0xFFBFBFBF),
 ///     ),

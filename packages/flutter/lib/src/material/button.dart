@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -30,7 +29,7 @@ import 'theme_data.dart';
 /// TextButton, ElevatedButton, and OutlinedButton respectively.
 /// ButtonTheme has been replaced by TextButtonTheme,
 /// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
-/// will be deprecated soon, please migrate code that uses them.
+/// have been deprecated, please migrate code that uses them.
 /// There's a detailed migration guide for the new button and button
 /// theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
@@ -66,7 +65,7 @@ class RawMaterialButton extends StatefulWidget {
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
     this.padding = EdgeInsets.zero,
-    this.visualDensity = const VisualDensity(),
+    this.visualDensity = VisualDensity.standard,
     this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape = const RoundedRectangleBorder(),
     this.animationDuration = kThemeChangeDuration,
@@ -312,7 +311,7 @@ class RawMaterialButton extends StatefulWidget {
   final bool enableFeedback;
 
   @override
-  _RawMaterialButtonState createState() => _RawMaterialButtonState();
+  State<RawMaterialButton> createState() => _RawMaterialButtonState();
 }
 
 class _RawMaterialButtonState extends State<RawMaterialButton> {
@@ -331,9 +330,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     if (_pressed != value) {
       setState(() {
         _updateState(MaterialState.pressed, value);
-        if (widget.onHighlightChanged != null) {
-          widget.onHighlightChanged!(value);
-        }
+        widget.onHighlightChanged?.call(value);
       });
     }
   }

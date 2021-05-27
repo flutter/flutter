@@ -75,7 +75,6 @@ class PointerRouter {
   ///
   /// This is valid in debug builds only. In release builds, this will throw an
   /// [UnsupportedError].
-  @visibleForTesting
   int get debugGlobalRouteCount {
     int? count;
     assert(() {
@@ -88,6 +87,7 @@ class PointerRouter {
     throw UnsupportedError('debugGlobalRouteCount is not supported in release builds');
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _dispatch(PointerEvent event, PointerRoute route, Matrix4? transform) {
     try {
       event = event.transformed(transform);
@@ -107,7 +107,7 @@ class PointerRouter {
         stack: stack,
         library: 'gesture library',
         context: ErrorDescription('while routing a pointer event'),
-        informationCollector: collector
+        informationCollector: collector,
       ));
     }
   }

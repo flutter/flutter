@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   testUsingContext('obfuscate requires split-debug-info', () {
@@ -17,7 +19,7 @@ void main() {
     expect(() => commandRunner.run(<String>[
       'build',
       '--obfuscate',
-    ]), throwsA(isA<ToolExit>()));
+    ]), throwsToolExit());
   });
 }
 

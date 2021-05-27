@@ -13,6 +13,12 @@ import 'package:flutter/foundation.dart';
 /// This is useful when writing golden file tests (see [matchesGoldenFile]) since
 /// the rendering of shadows is not guaranteed to be pixel-for-pixel identical from
 /// version to version (or even from run to run).
+///
+/// In those tests, this is usually set to false at the beginning of a test and back
+/// to true before the end of the test case.
+///
+/// If it remains true when the test ends, an exception is thrown to avoid state
+/// leaking from one test case to another.
 bool debugDisableShadows = false;
 
 /// Signature for a method that returns an [HttpClient].
@@ -157,11 +163,13 @@ PaintImageCallback? debugOnPaintImage;
 /// This has no effect unless asserts are enabled.
 bool debugInvertOversizedImages = false;
 
+const int _imageOverheadAllowanceDefault = 128 * 1024;
+
 /// The number of bytes an image must use before it triggers inversion when
 /// [debugInvertOversizedImages] is true.
 ///
-/// Default is 1024 (1kb).
-int debugImageOverheadAllowance = 1024;
+/// Default is 128kb.
+int debugImageOverheadAllowance = _imageOverheadAllowanceDefault;
 
 /// Returns true if none of the painting library debug variables have been changed.
 ///
@@ -180,7 +188,7 @@ bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOv
         debugNetworkImageHttpClientProvider != null ||
         debugOnPaintImage != null ||
         debugInvertOversizedImages == true ||
-        debugImageOverheadAllowance != 1024) {
+        debugImageOverheadAllowance != _imageOverheadAllowanceDefault) {
       throw FlutterError(reason);
     }
     return true;

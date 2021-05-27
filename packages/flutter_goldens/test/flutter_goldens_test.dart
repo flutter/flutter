@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
+import 'dart:convert';
 import 'dart:core';
-import 'dart:io';
+import 'dart:io' hide Directory;
 import 'dart:typed_data';
+import 'dart:ui' show hashValues, hashList;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -35,7 +35,7 @@ const List<int> _kFailPngBytes =
   120, 1, 99, 249, 207, 240, 255, 63, 0, 7, 18, 3, 2, 164, 147, 160, 197, 0,
   0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
 
-Future<void> testWithOutput(String name, Future<void> body(), String expectedOutput) async {
+Future<void> testWithOutput(String name, Future<void> Function() body, String expectedOutput) async {
   test(name, () async {
     final StringBuffer output = StringBuffer();
     void _recordPrint(Zone self, ZoneDelegate parent, Zone zone, String line) {
@@ -47,10 +47,10 @@ Future<void> testWithOutput(String name, Future<void> body(), String expectedOut
 }
 
 void main() {
-  MemoryFileSystem fs;
-  FakePlatform platform;
-  MockProcessManager process;
-  MockHttpClient mockHttpClient;
+  late MemoryFileSystem fs;
+  late FakePlatform platform;
+  late FakeProcessManager process;
+  late FakeHttpClient fakeHttpClient;
 
   setUp(() {
     fs = MemoryFileSystem();
@@ -58,14 +58,14 @@ void main() {
       environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
       operatingSystem: 'macos'
     );
-    process = MockProcessManager();
-    mockHttpClient = MockHttpClient();
+    process = FakeProcessManager();
+    fakeHttpClient = FakeHttpClient();
     fs.directory(_kFlutterRoot).createSync(recursive: true);
   });
 
   group('SkiaGoldClient', () {
-    SkiaGoldClient skiaClient;
-    Directory workDirectory;
+    late SkiaGoldClient skiaClient;
+    late Directory workDirectory;
 
     setUp(() {
       workDirectory = fs.directory('/workDirectory')
@@ -75,7 +75,7 @@ void main() {
         fs: fs,
         process: process,
         platform: platform,
-        httpClient: mockHttpClient,
+        httpClient: fakeHttpClient,
       );
     });
 
@@ -83,15 +83,10 @@ void main() {
       final File authFile = fs.file('/workDirectory/temp/auth_opt.json')
         ..createSync(recursive: true);
       authFile.writeAsStringSync(authTemplate());
-      when(process.run(any))
-        .thenAnswer((_) => Future<ProcessResult>
-        .value(ProcessResult(123, 0, '', '')));
+      process.fallbackProcessResult = ProcessResult(123, 0, '', '');
       await skiaClient.auth();
 
-      verifyNever(process.run(
-        captureAny,
-        workingDirectory: captureAnyNamed('workingDirectory'),
-      ));
+      expect(process.workingDirectories, isEmpty);
     });
 
     test('gsutil is checked when authorization file is present', () async {
@@ -119,16 +114,13 @@ void main() {
         fs: fs,
         process: process,
         platform: platform,
-        httpClient: mockHttpClient,
+        httpClient: fakeHttpClient,
       );
 
-      when(process.run(any))
-        .thenAnswer((_) => Future<ProcessResult>
-        .value(ProcessResult(123, 1, 'fail', 'fail')));
-      final Future<void> test = skiaClient.auth();
+      process.fallbackProcessResult = ProcessResult(123, 1, 'fail', 'fail');
 
       expect(
-        test,
+        skiaClient.auth(),
         throwsException,
       );
     });
@@ -147,16 +139,16 @@ void main() {
         fs: fs,
         process: process,
         platform: platform,
-        httpClient: mockHttpClient,
+        httpClient: fakeHttpClient,
       );
 
-      when(process.run(
-        <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: '/flutter',
-      )).thenAnswer((_) => Future<ProcessResult>
-        .value(ProcessResult(12345678, 0, '12345678', '')));
+      process.fallbackProcessResult = ProcessResult(123, 1, 'fail', 'fail');
 
-      when(process.run(
+      const RunInvocation gitInvocation = RunInvocation(
+        <String>['git', 'rev-parse', 'HEAD'],
+        '/flutter',
+      );
+      const RunInvocation goldctlInvocation = RunInvocation(
         <String>[
           'goldctl',
           'imgtest', 'init',
@@ -167,12 +159,13 @@ void main() {
           '--failure-file', '/workDirectory/failures.json',
           '--passfail',
         ],
-      )).thenAnswer((_) => Future<ProcessResult>
-        .value(ProcessResult(123, 1, 'fail', 'fail')));
-      final Future<void> test =  skiaClient.imgtestInit();
+        null,
+      );
+      process.processResults[gitInvocation] = ProcessResult(12345678, 0, '12345678', '');
+      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'fail', 'fail');
 
       expect(
-        test,
+        skiaClient.imgtestInit(),
         throwsException,
       );
     });
@@ -194,7 +187,7 @@ void main() {
         fs: fs,
         process: process,
         platform: platform,
-        httpClient: mockHttpClient,
+        httpClient: fakeHttpClient,
       );
 
       final List<String> ciArguments = skiaClient.getCIArguments();
@@ -229,7 +222,7 @@ void main() {
         fs: fs,
         process: process,
         platform: platform,
-        httpClient: mockHttpClient,
+        httpClient: fakeHttpClient,
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
@@ -257,7 +250,7 @@ void main() {
         fs: fs,
         process: process,
         platform: platform,
-        httpClient: mockHttpClient,
+        httpClient: fakeHttpClient,
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
@@ -280,7 +273,7 @@ void main() {
         fs: fs,
         process: process,
         platform: platform,
-        httpClient: mockHttpClient,
+        httpClient: fakeHttpClient,
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
@@ -292,56 +285,51 @@ void main() {
     });
 
     group('Request Handling', () {
-      String expectation;
-
-      setUp(() {
-        expectation = '55109a4bed52acc780530f7a9aeff6c0';
-      });
+      const String expectation = '55109a4bed52acc780530f7a9aeff6c0';
 
       test('image bytes are processed properly', () async {
         final Uri imageUrl = Uri.parse(
           'https://flutter-gold.skia.org/img/images/$expectation.png'
         );
-        final MockHttpClientRequest mockImageRequest = MockHttpClientRequest();
-        final MockHttpImageResponse mockImageResponse = MockHttpImageResponse(
+        final FakeHttpClientRequest fakeImageRequest = FakeHttpClientRequest();
+        final FakeHttpImageResponse fakeImageResponse = FakeHttpImageResponse(
           imageResponseTemplate()
         );
-        when(mockHttpClient.getUrl(imageUrl))
-          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockImageRequest));
-        when(mockImageRequest.close())
-          .thenAnswer((_) => Future<MockHttpImageResponse>.value(mockImageResponse));
+
+        fakeHttpClient.request = fakeImageRequest;
+        fakeImageRequest.response = fakeImageResponse;
 
         final List<int> masterBytes = await skiaClient.getImageBytes(expectation);
 
+        expect(fakeHttpClient.lastUri, imageUrl);
         expect(masterBytes, equals(_kTestPngBytes));
       });
     });
   });
 
   group('FlutterGoldenFileComparator', () {
-    FlutterPostSubmitFileComparator comparator;
+    late FlutterPostSubmitFileComparator comparator;
 
     setUp(() {
       final Directory basedir = fs.directory('flutter/test/library/')
         ..createSync(recursive: true);
       comparator = FlutterPostSubmitFileComparator(
         basedir.uri,
-        MockSkiaGoldClient(),
+        FakeSkiaGoldClient(),
         fs: fs,
         platform: platform,
       );
     });
 
     test('calculates the basedir correctly from defaultComparator for local testing', () async {
-      final MockLocalFileComparator defaultComparator = MockLocalFileComparator();
+      final FakeLocalFileComparator defaultComparator = FakeLocalFileComparator();
       final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT'])
         ..createSync(recursive: true);
-      when(defaultComparator.basedir).thenReturn(flutterRoot.childDirectory('baz').uri);
+      defaultComparator.basedir = flutterRoot.childDirectory('baz').uri;
 
       final Directory basedir = FlutterGoldenFileComparator.getBaseDirectory(
         defaultComparator,
         platform,
-        local: true,
       );
       expect(
         basedir.uri,
@@ -355,14 +343,14 @@ void main() {
     });
 
     group('Post-Submit', () {
-      final MockSkiaGoldClient mockSkiaClient = MockSkiaGoldClient();
+      final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
 
       setUp(() {
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
         comparator = FlutterPostSubmitFileComparator(
           basedir.uri,
-          mockSkiaClient,
+          fakeSkiaClient,
           fs: fs,
           platform: platform,
         );
@@ -560,15 +548,15 @@ void main() {
     });
 
     group('Local', () {
-      FlutterLocalFileComparator comparator;
-      final MockSkiaGoldClient mockSkiaClient = MockSkiaGoldClient();
+      late FlutterLocalFileComparator comparator;
+      final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
 
       setUp(() async {
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
         comparator = FlutterLocalFileComparator(
           basedir.uri,
-          mockSkiaClient,
+          fakeSkiaClient,
           fs: fs,
           platform: FakePlatform(
             environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
@@ -576,14 +564,11 @@ void main() {
           ),
         );
 
-        when(mockSkiaClient.getExpectationForTest('flutter.golden_test.1'))
-          .thenAnswer((_) => Future<String>.value('55109a4bed52acc780530f7a9aeff6c0'));
-        when(mockSkiaClient.getExpectationForTest('flutter.new_golden_test.2'))
-          .thenAnswer((_) => Future<String>.value(''));
-        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
-          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
-          .thenReturn('flutter.golden_test.1');
+        const String hash = '55109a4bed52acc780530f7a9aeff6c0';
+        fakeSkiaClient.expectationForTestValues['flutter.golden_test.1'] = hash;
+        fakeSkiaClient.expectationForTestValues['flutter.new_golden_test.1'] = '';
+        fakeSkiaClient.imageBytesValues[hash] =_kTestPngBytes;
+        fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] = 'flutter.golden_test.1';
       });
 
       test('passes when bytes match', () async {
@@ -639,25 +624,25 @@ void main() {
       });
 
       test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
-        final MockDirectory mockDirectory = MockDirectory();
-        when(mockDirectory.existsSync()).thenReturn(true);
-        when(mockDirectory.uri).thenReturn(Uri.parse('/flutter'));
+        final FakeDirectory fakeDirectory = FakeDirectory();
+        fakeDirectory.existsSyncValue = true;
+        fakeDirectory.uri = Uri.parse('/flutter');
 
-        when(mockSkiaClient.getExpectationForTest(any))
-          .thenAnswer((_) => throw const OSError("Can't reach Gold"));
+        fakeSkiaClient.getExpectationForTestThrowable = const OSError("Can't reach Gold");
+
         FlutterGoldenFileComparator comparator = await FlutterLocalFileComparator.fromDefaultComparator(
           platform,
-          goldens: mockSkiaClient,
-          baseDirectory: mockDirectory,
+          goldens: fakeSkiaClient,
+          baseDirectory: fakeDirectory,
         );
         expect(comparator.runtimeType, FlutterSkippingFileComparator);
 
-        when(mockSkiaClient.getExpectationForTest(any))
-          .thenAnswer((_) => throw const SocketException("Can't reach Gold"));
+        fakeSkiaClient.getExpectationForTestThrowable =  const SocketException("Can't reach Gold");
+
         comparator = await FlutterLocalFileComparator.fromDefaultComparator(
           platform,
-          goldens: mockSkiaClient,
-          baseDirectory: mockDirectory,
+          goldens: fakeSkiaClient,
+          baseDirectory: fakeDirectory,
         );
         expect(comparator.runtimeType, FlutterSkippingFileComparator);
       });
@@ -665,42 +650,152 @@ void main() {
   });
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
+@immutable
+class RunInvocation {
+  const RunInvocation(this.command, this.workingDirectory);
 
-class MockSkiaGoldClient extends Mock implements SkiaGoldClient {}
+  final List<String> command;
+  final String? workingDirectory;
 
-class MockLocalFileComparator extends Mock implements LocalFileComparator {}
+  @override
+  int get hashCode => hashValues(hashList(command), workingDirectory);
 
-class MockDirectory extends Mock implements Directory {}
+  bool _commandEquals(List<String> other) {
+    if (other == command) {
+      return true;
+    }
+    if (other.length != command.length) {
+      return false;
+    }
+    for (int index = 0; index < other.length; index += 1) {
+      if (other[index] != command[index]) {
+        return false;
+      }
+    }
+    return true;
+  }
 
-class MockHttpClient extends Mock implements HttpClient {}
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is RunInvocation
+        && _commandEquals(other.command)
+        && other.workingDirectory == workingDirectory;
+  }
 
-class MockHttpClientRequest extends Mock implements HttpClientRequest {}
+  @override
+  String toString() => '$command ($workingDirectory)';
+}
 
-class MockHttpClientResponse extends Mock implements HttpClientResponse {
-  MockHttpClientResponse(this.response);
+class FakeProcessManager extends Fake implements ProcessManager {
+  Map<RunInvocation, ProcessResult> processResults = <RunInvocation, ProcessResult>{};
+
+  /// Used if [processResults] does not contain a matching invocation.
+  ProcessResult? fallbackProcessResult;
+
+  final List<String?> workingDirectories = <String?>[];
+
+  @override
+  Future<ProcessResult> run(
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
+  }) async {
+    workingDirectories.add(workingDirectory);
+    final ProcessResult? result = processResults[RunInvocation(command.cast<String>(), workingDirectory)];
+    if (result == null && fallbackProcessResult == null) {
+      // Throwing here might gobble up the exception message if a test fails.
+      print('ProcessManager.run was called with $command ($workingDirectory) unexpectedly - $processResults.');
+      fail('See above.');
+    }
+    return result ?? fallbackProcessResult!;
+  }
+}
+
+class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
+  Map<String, String> expectationForTestValues = <String, String>{};
+  Object? getExpectationForTestThrowable;
+  @override
+  Future<String> getExpectationForTest(String testName) async {
+    if (getExpectationForTestThrowable != null) {
+      throw getExpectationForTestThrowable!;
+    }
+    return expectationForTestValues[testName] ?? '';
+  }
+
+  Map<String, List<int>> imageBytesValues = <String, List<int>>{};
+  @override
+  Future<List<int>> getImageBytes(String imageHash) async => imageBytesValues[imageHash]!;
+
+  Map<String, String> cleanTestNameValues = <String, String>{};
+  @override
+  String cleanTestName(String fileName) => cleanTestNameValues[fileName] ?? '';
+}
+
+class FakeLocalFileComparator extends Fake implements LocalFileComparator {
+  @override
+  late Uri basedir;
+}
+
+class FakeDirectory extends Fake implements Directory {
+  late bool existsSyncValue;
+  @override
+  bool existsSync() => existsSyncValue;
+
+  @override
+  late Uri uri;
+}
+
+class FakeHttpClient extends Fake implements HttpClient {
+  late Uri lastUri;
+  late FakeHttpClientRequest request;
+
+  @override
+  Future<HttpClientRequest> getUrl(Uri url) async {
+    lastUri = url;
+    return request;
+  }
+}
+
+class FakeHttpClientRequest extends Fake implements HttpClientRequest {
+  late FakeHttpImageResponse response;
+
+  @override
+  Future<HttpClientResponse> close() async {
+    return response;
+  }
+}
+
+class FakeHttpClientResponse extends Fake implements HttpClientResponse {
+  FakeHttpClientResponse(this.response);
 
   final List<int> response;
 
   @override
   StreamSubscription<List<int>> listen(
-    void onData(List<int> event), {
-      Function onError,
-      void onDone(),
-      bool cancelOnError,
+    void Function(List<int> event)? onData, {
+      Function? onError,
+      void Function()? onDone,
+      bool? cancelOnError,
     }) {
     return Stream<List<int>>.fromFuture(Future<List<int>>.value(response))
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 }
 
-class MockHttpImageResponse extends Mock implements HttpClientResponse {
-  MockHttpImageResponse(this.response);
+class FakeHttpImageResponse extends Fake implements HttpClientResponse {
+  FakeHttpImageResponse(this.response);
 
   final List<List<int>> response;
 
   @override
-  Future<void> forEach(void action(List<int> element)) async {
+  Future<void> forEach(void Function(List<int> element) action) async {
     response.forEach(action);
   }
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -48,18 +50,16 @@ class MacOSDevice extends DesktopDevice {
   @override
   String get name => 'macOS';
 
-  /// Returns [TargetPlatform.darwin_x64] even on macOS ARM devices.
-  ///
-  /// Build system, artifacts rely on Rosetta to translate to x86_64 on ARM.
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_x64;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
   Future<String> get targetPlatformDisplayName async {
     if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
       return 'darwin-arm64';
+    } else {
+      return 'darwin-x64';
     }
-    return super.targetPlatformDisplayName;
   }
 
   @override

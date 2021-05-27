@@ -148,31 +148,35 @@ class PageStorageBucket {
 /// ```
 ///
 /// ```dart main
-/// void main() => runApp(MyApp());
+/// void main() => runApp(const MyApp());
 /// ```
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return MaterialApp(
+///     return const MaterialApp(
 ///       home: MyHomePage(),
 ///     );
 ///   }
 /// }
 ///
 /// class MyHomePage extends StatefulWidget {
+///   const MyHomePage({Key? key}) : super(key: key);
+///
 ///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
+///   State<MyHomePage> createState() => _MyHomePageState();
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {
-///   final List<Widget> pages = <Widget>[
+///   final List<Widget> pages = const <Widget>[
 ///     ColorBoxPage(
-///       key: PageStorageKey('pageOne'),
+///       key: PageStorageKey<String>('pageOne'),
 ///     ),
 ///     ColorBoxPage(
-///       key: PageStorageKey('pageTwo'),
+///       key: PageStorageKey<String>('pageTwo'),
 ///     )
 ///   ];
 ///   int currentTab = 0;
@@ -182,7 +186,7 @@ class PageStorageBucket {
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       appBar: AppBar(
-///         title: Text("Persistence Example"),
+///         title: const Text('Persistence Example'),
 ///       ),
 ///       body: PageStorage(
 ///         child: pages[currentTab],
@@ -195,7 +199,7 @@ class PageStorageBucket {
 ///             currentTab = index;
 ///           });
 ///         },
-///         items: <BottomNavigationBarItem>[
+///         items: const <BottomNavigationBarItem>[
 ///           BottomNavigationBarItem(
 ///             icon: Icon(Icons.home),
 ///             label: 'page 1',
@@ -211,18 +215,16 @@ class PageStorageBucket {
 /// }
 ///
 /// class ColorBoxPage extends StatelessWidget {
-///   ColorBoxPage({
-///     Key key,
-///   }) : super(key: key);
+///   const ColorBoxPage({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return ListView.builder(
 ///       itemExtent: 250.0,
-///       itemBuilder: (context, index) => Container(
-///         padding: EdgeInsets.all(10.0),
+///       itemBuilder: (BuildContext context, int index) => Container(
+///         padding: const EdgeInsets.all(10.0),
 ///         child: Material(
-///           color: index % 2 == 0 ? Colors.cyan : Colors.deepOrange,
+///           color: index.isEven ? Colors.cyan : Colors.deepOrange,
 ///           child: Center(
 ///             child: Text(index.toString()),
 ///           ),
@@ -265,6 +267,8 @@ class PageStorage extends StatelessWidget {
   /// ```dart
   /// PageStorageBucket bucket = PageStorage.of(context);
   /// ```
+  ///
+  /// This method can be expensive (it walks the element tree).
   static PageStorageBucket? of(BuildContext context) {
     final PageStorage? widget = context.findAncestorWidgetOfExactType<PageStorage>();
     return widget?.bucket;

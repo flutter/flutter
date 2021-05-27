@@ -5,8 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -88,7 +86,7 @@ enum _ContextMenuLocation {
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(
-///       child: Container(
+///       child: SizedBox(
 ///         width: 100,
 ///         height: 100,
 ///         child: CupertinoContextMenu(
@@ -221,7 +219,7 @@ class CupertinoContextMenu extends StatefulWidget {
   final ContextMenuPreviewBuilder? previewBuilder;
 
   @override
-  _CupertinoContextMenuState createState() => _CupertinoContextMenuState();
+  State<CupertinoContextMenu> createState() => _CupertinoContextMenuState();
 }
 
 class _CupertinoContextMenuState extends State<CupertinoContextMenu> with TickerProviderStateMixin {
@@ -385,9 +383,9 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       builder: (BuildContext context) {
         return _DecoyChild(
           beginRect: childRect,
-          child: widget.child,
           controller: _openController,
           endRect: _decoyChildEndRect,
+          child: widget.child,
         );
       },
     );
@@ -512,22 +510,17 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       : _mask.value;
     return Positioned.fromRect(
       rect: _rect.value!,
-      // TODO(justinmc): When ShaderMask is supported on web, remove this
-      // conditional and use ShaderMask everywhere.
-      // https://github.com/flutter/flutter/issues/52967.
-      child: kIsWeb
-          ? Container(key: _childGlobalKey, child: widget.child)
-          : ShaderMask(
-            key: _childGlobalKey,
-            shaderCallback: (Rect bounds) {
-              return LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: <Color>[color, color],
-              ).createShader(bounds);
-            },
-            child: widget.child,
-          ),
+      child: ShaderMask(
+        key: _childGlobalKey,
+        shaderCallback: (Rect bounds) {
+          return LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[color, color],
+          ).createShader(bounds);
+        },
+        child: widget.child,
+      ),
     );
   }
 
@@ -827,12 +820,12 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
         // in the final position.
         return _ContextMenuRouteStatic(
           actions: _actions,
-          child: _builder!(context, animation),
           childGlobalKey: _childGlobalKey,
           contextMenuLocation: _contextMenuLocation,
           onDismiss: _onDismiss,
           orientation: orientation,
           sheetGlobalKey: _sheetGlobalKey,
+          child: _builder!(context, animation),
         );
       },
     );

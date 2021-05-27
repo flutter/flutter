@@ -7,7 +7,6 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/services.dart';
 
 /// An example that sets up local http server for serving single
@@ -82,9 +81,9 @@ mhBKvYQc85gja0s1c+1VXA==
 
 class MyHttpOverrides extends HttpOverrides {
   @override
-  HttpClient createHttpClient(SecurityContext context) {
+  HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(
-        (context ?? SecurityContext())..setTrustedCertificatesBytes(certificate.codeUnits)
+        (context ?? SecurityContext())..setTrustedCertificatesBytes(certificate.codeUnits),
     );
   }
 }
@@ -113,7 +112,7 @@ Future<void> main() async {
       offset += length;
       request.response.add(bytes);
       // Let other isolates and microtasks to run.
-      await Future<void>.delayed(const Duration());
+      await Future<void>.delayed(Duration.zero);
     }
     request.response.close();
   });
@@ -125,7 +124,7 @@ const int IMAGES = 50;
 
 @immutable
 class MyApp extends StatelessWidget {
-  const MyApp(this.port);
+  const MyApp(this.port, {Key? key}) : super(key: key);
 
   final int port;
 
@@ -142,12 +141,12 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title, this.port}) : super(key: key);
+  const MyHomePage({Key? key, required this.title, required this.port}) : super(key: key);
   final String title;
   final int port;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
@@ -165,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         frameBuilder: (
           BuildContext context,
           Widget child,
-          int frame,
+          int? frame,
           bool wasSynchronouslyLoaded,
         ) {
           if (frame == 0 && !completer.isCompleted) {
@@ -178,23 +177,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final List<AnimationController> controllers = List<AnimationController>.filled(IMAGES, null);
-    for (int i = 0; i < IMAGES; i++) {
-      controllers[i] = AnimationController(
-        duration: const Duration(milliseconds: 3600),
-        vsync: this,
-      )..repeat();
-    }
-    final List<Completer<bool>> completers = List<Completer<bool>>.filled(IMAGES, null);
-    for (int i = 0; i < IMAGES; i++) {
-      completers[i] = Completer<bool>();
-    }
+    final List<AnimationController> controllers = <AnimationController>[
+      for (int i = 0; i < IMAGES; i++)
+        AnimationController(
+          duration: const Duration(milliseconds: 3600),
+          vsync: this,
+        )..repeat(),
+    ];
+    final List<Completer<bool>> completers = <Completer<bool>>[
+      for (int i = 0; i < IMAGES; i++)
+        Completer<bool>(),
+    ];
     final List<Future<bool>> futures = completers.map(
-        (Completer<bool> completer) => completer.future).toList();
+      (Completer<bool> completer) => completer.future,
+    ).toList();
     final DateTime started = DateTime.now();
     Future.wait(futures).then((_) {
       print(
-          '===image_list=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.');
+        '===image_list=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.',
+      );
     });
     return Scaffold(
       appBar: AppBar(
@@ -223,16 +224,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 
-  List<Widget> createImageList(int count, List<Completer<bool>> completers,
-      List<AnimationController> controllers) {
+  List<Widget> createImageList(
+    int count,
+    List<Completer<bool>> completers,
+    List<AnimationController> controllers,
+  ) {
     final List<Widget> list = <Widget>[];
     for (int i = 0; i < count; i++) {
       list.add(Flexible(
-          fit: FlexFit.tight,
-          flex: i + 1,
-          child: RotationTransition(
-              turns: controllers[i],
-              child: createImage(i + 1, completers[i]))));
+        fit: FlexFit.tight,
+        flex: i + 1,
+        child: RotationTransition(
+          turns: controllers[i],
+          child: createImage(i + 1, completers[i]),
+        ),
+      ));
     }
     return list;
   }

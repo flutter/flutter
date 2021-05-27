@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/services/keyboard_key.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -75,6 +76,38 @@ void main() {
     expect(log, equals(<String>['tap-down', 'tap-cancel']));
   });
 
+  testWidgets('InkWell invokes activation actions when expected', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Shortcuts(
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.enter): ButtonActivateIntent(),
+        },
+        child: Material(
+          child: Center(
+            child: InkWell(
+              autofocus: true,
+              onTap: () {
+                log.add('tap');
+              },
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+    expect(log, equals(<String>['tap']));
+    log.clear();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(log, equals(<String>['tap']));
+  });
+
   testWidgets('long-press and tap on disabled should not throw', (WidgetTester tester) async {
     await tester.pumpWidget(const Material(
       child: Directionality(
@@ -95,7 +128,7 @@ void main() {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100,
             height: 100,
             child: InkWell(
@@ -114,7 +147,7 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(find.byType(Container)));
+    await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
@@ -127,7 +160,7 @@ void main() {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100,
             height: 100,
             child: InkWell(
@@ -151,7 +184,7 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(find.byType(Container)));
+    await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
@@ -165,7 +198,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: InkWell(
@@ -185,11 +218,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints
-      ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+    expect(
+      inkFeatures,
+      paints ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
+    );
   });
 
   testWidgets('ink response changes color on focus with overlayColor', (WidgetTester tester) async {
@@ -202,7 +237,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: InkWell(
@@ -228,11 +263,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints
-           ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+    expect(
+      inkFeatures,
+      paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
+    );
   });
 
   testWidgets('ink response splashColor matches splashColor parameter', (WidgetTester tester) async {
@@ -245,7 +282,7 @@ void main() {
         child: Center(
           child: Focus(
             focusNode: focusNode,
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: InkWell(
@@ -283,7 +320,7 @@ void main() {
         child: Center(
           child: Focus(
             focusNode: focusNode,
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: InkWell(
@@ -321,7 +358,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: InkResponse(
@@ -350,20 +387,18 @@ void main() {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Focus(
-            focusNode: focusNode,
-            child: Container(
-              width: 100,
-              height: 100,
-              child: InkWell(
-                  hoverColor: const Color(0xff00ff00),
-                  splashColor: const Color(0xffff0000),
-                  focusColor: const Color(0xff0000ff),
-                  highlightColor: const Color(0xf00fffff),
-                  onTap: () { },
-                  onLongPress: () { },
-                  onHover: (bool hover) { },
-              ),
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              focusNode: focusNode,
+              hoverColor: const Color(0xff00ff00),
+              splashColor: const Color(0xffff0000),
+              focusColor: const Color(0xff0000ff),
+              highlightColor: const Color(0xf00fffff),
+              onTap: () { },
+              onLongPress: () { },
+              onHover: (bool hover) { },
             ),
           ),
         ),
@@ -371,10 +406,10 @@ void main() {
     ));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
   });
 
   testWidgets('InkWell.mouseCursor changes cursor on hover', (WidgetTester tester) async {
@@ -542,9 +577,9 @@ void main() {
                 addAutomaticKeepAlives: keepAlive,
                 dragStartBehavior: DragStartBehavior.down,
                 children: <Widget>[
-                  Container(height: 500.0, child: InkWell(onTap: () {}, child: const Placeholder())),
-                  Container(height: 500.0),
-                  Container(height: 500.0),
+                  SizedBox(height: 500.0, child: InkWell(onTap: () {}, child: const Placeholder())),
+                  const SizedBox(height: 500.0),
+                  const SizedBox(height: 500.0),
                 ],
               ),
             ),
@@ -589,8 +624,8 @@ void main() {
       child: Material(
         child: InkWell(
           onTap: () { },
-          child: const Text('Button'),
           excludeFromSemantics: true,
+          child: const Text('Button'),
         ),
       ),
     ));
@@ -690,7 +725,7 @@ void main() {
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Container(
+          child: SizedBox(
             width: 100,
             height: 100,
             child: InkWell(
@@ -699,7 +734,7 @@ void main() {
               onLongPress: () {},
               onHover: (bool value) { hovering = value; },
               focusNode: focusNode,
-              child: Container(key: childKey),
+              child: SizedBox(key: childKey),
             ),
           ),
         ),
@@ -718,13 +753,13 @@ void main() {
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Container(
+          child: SizedBox(
             width: 100,
             height: 100,
             child: InkWell(
               focusNode: focusNode,
               onHover: (bool value) { hovering = value; },
-              child: Container(key: childKey),
+              child: SizedBox(key: childKey),
             ),
           ),
         ),
@@ -759,7 +794,7 @@ void main() {
                 key: middleKey,
                 child: paddedInkWell(
                   key: innerKey,
-                  child: Container(width: 50, height: 50),
+                  child: const SizedBox(width: 50, height: 50),
                 ),
               ),
             ),
@@ -821,7 +856,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Align(
             alignment: Alignment.topLeft,
-            child: Container(
+            child: SizedBox(
               width: 200,
               height: 100,
               child: Row(
@@ -832,7 +867,7 @@ void main() {
                       key: innerKey,
                     ),
                   ),
-                  Container(),
+                  const SizedBox(),
                 ],
               ),
             ),
@@ -854,7 +889,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Align(
             alignment: Alignment.topLeft,
-            child: Container(
+            child: SizedBox(
               width: 200,
               height: 100,
               child: Row(
@@ -913,7 +948,7 @@ void main() {
                 key: middleKey,
                 child: paddedInkWell(
                   key: innerKey,
-                  child: Container(width: 50, height: 50),
+                  child: const SizedBox(width: 50, height: 50),
                 ),
               ),
             ),
@@ -943,19 +978,19 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: InkWell(
                 key: parentKey,
                 onTap: () {},
                 child: Center(
-                  child: Container(
+                  child: SizedBox(
                     width: 100,
                     height: 50,
                     child: Row(
                       children: <Widget>[
-                        Container(
+                        SizedBox(
                           width: 50,
                           height: 50,
                           child: InkWell(
@@ -963,7 +998,7 @@ void main() {
                             onTap: () {},
                           ),
                         ),
-                        Container(
+                        SizedBox(
                           width: 50,
                           height: 50,
                           child: InkWell(
@@ -1040,19 +1075,19 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Align(
             alignment: Alignment.topLeft,
-            child: Container(
+            child: SizedBox(
               width: leftWidth+rightWidth,
               height: 100,
               child: Row(
                 children: <Widget>[
-                  Container(
+                  SizedBox(
                     width: leftWidth,
                     height: 100,
                     child: InkWell(
                       key: leftKey,
                       onTap: () {},
                       child: Center(
-                        child: Container(
+                        child: SizedBox(
                           width: leftWidth,
                           height: 50,
                           child: leftChild,
@@ -1060,20 +1095,20 @@ void main() {
                       ),
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     width: rightWidth,
                     height: 100,
                     child: InkWell(
                       key: rightKey,
                       onTap: () {},
                       child: Center(
-                        child: Container(
+                        child: SizedBox(
                           width: leftWidth,
                           height: 50,
                           child: rightChild,
                         ),
                       ),
-                    )
+                    ),
                   ),
                 ],
               ),
@@ -1145,13 +1180,13 @@ void main() {
           child: GestureDetector(
             onHorizontalDragStart: (_) {},
             child: Center(
-              child: Container(
+              child: SizedBox(
                 width: 100,
                 height: 100,
                 child: InkWell(
                   onTap: () {},
                   child: Center(
-                    child: Container(
+                    child: SizedBox(
                       width: 50,
                       height: 50,
                       child: InkWell(

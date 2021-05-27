@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -98,12 +99,12 @@ void main() {
     final MemoryImage memoryImage = MemoryImage(bytes);
     final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
 
-    final DecoderCallback decode = (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
+    Future<ui.Codec> decode(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
       expect(cacheWidth, 123);
       expect(cacheHeight, 321);
       expect(allowUpscaling, false);
       return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
-    };
+    }
 
     resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
   });
@@ -135,8 +136,10 @@ void main() {
   });
 }
 
-Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
-    {ImageConfiguration configuration = ImageConfiguration.empty}) async {
+Future<Size> _resolveAndGetSize(
+  ImageProvider imageProvider, {
+  ImageConfiguration configuration = ImageConfiguration.empty,
+}) async {
   final ImageStream stream = imageProvider.resolve(configuration);
   final Completer<Size> completer = Completer<Size>();
   final ImageStreamListener listener =
@@ -147,7 +150,7 @@ Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
     }
   );
   stream.addListener(listener);
-  return await completer.future;
+  return completer.future;
 }
 
 // This version of MemoryImage guarantees obtainKey returns a future that has not been

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/file_system.dart';
@@ -14,9 +13,9 @@ import '../convert.dart';
 
 class PlistParser {
   PlistParser({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required ProcessManager processManager,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
@@ -56,7 +55,7 @@ class PlistParser {
         args,
         throwOnError: true,
       ).stdout.trim();
-      return castStringKeyedMap(json.decode(jsonContent));
+      return castStringKeyedMap(json.decode(jsonContent)) ?? const <String, dynamic>{};
     } on ProcessException catch (error) {
       _logger.printTrace('$error');
       return const <String, dynamic>{};
@@ -72,7 +71,7 @@ class PlistParser {
   /// If [key] is not found in the property list, this will return null.
   ///
   /// The [plistFilePath] and [key] arguments must not be null.
-  String getValueFromFile(String plistFilePath, String key) {
+  String? getValueFromFile(String plistFilePath, String key) {
     assert(key != null);
     final Map<String, dynamic> parsed = parseFile(plistFilePath);
     return parsed[key] as String;

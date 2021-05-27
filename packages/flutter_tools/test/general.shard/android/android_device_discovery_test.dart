@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device_discovery.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -10,11 +12,11 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
-import '../../src/testbed.dart';
+import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   AndroidWorkflow androidWorkflow;
@@ -23,6 +25,7 @@ void main() {
     androidWorkflow = AndroidWorkflow(
       androidSdk: FakeAndroidSdk(),
       featureFlags: TestFeatureFlags(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
   });
 
@@ -33,8 +36,9 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
       fileSystem: MemoryFileSystem.test(),
       platform: FakePlatform(),
       userMessages: UserMessages(),
@@ -44,6 +48,28 @@ void main() {
     expect(await androidDevices.getDiagnostics(), isEmpty);
   });
 
+  testWithoutContext('AndroidDevices returns empty device list and diagnostics when adb cannot be run', () async {
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
+    fakeProcessManager.excludedExecutables.add('adb');
+    final AndroidDevices androidDevices = AndroidDevices(
+      androidSdk: FakeAndroidSdk(),
+      logger: BufferLogger.test(),
+      androidWorkflow: AndroidWorkflow(
+        androidSdk: FakeAndroidSdk('adb'),
+        featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      ),
+      processManager: fakeProcessManager,
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
+      userMessages: UserMessages(),
+    );
+
+    expect(await androidDevices.pollingGetDevices(), isEmpty);
+    expect(await androidDevices.getDiagnostics(), isEmpty);
+    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+  });
+
   testWithoutContext('AndroidDevices returns empty device list and diagnostics on null Android SDK', () async {
     final AndroidDevices androidDevices = AndroidDevices(
       androidSdk: null,
@@ -51,8 +77,9 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
       fileSystem: MemoryFileSystem.test(),
       platform: FakePlatform(),
       userMessages: UserMessages(),
@@ -92,6 +119,7 @@ void main() {
         featureFlags: TestFeatureFlags(
           isAndroidEnabled: false,
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' show Color, Size, Rect;
 
 import 'package:flutter/foundation.dart';
@@ -12,8 +11,8 @@ import 'animations.dart';
 import 'curves.dart';
 
 // Examples can assume:
-// Animation<Offset> _animation;
-// AnimationController _controller;
+// late Animation<Offset> _animation;
+// late AnimationController _controller;
 
 /// An object that can produce a value of type `T` given an [Animation<double>]
 /// as input.
@@ -257,6 +256,51 @@ class Tween<T extends dynamic> extends Animatable<T> {
   T lerp(double t) {
     assert(begin != null);
     assert(end != null);
+    assert(() {
+      // Assertions that attempt to catch common cases of tweening types
+      // that do not conform to the Tween requirements.
+      dynamic result;
+      try {
+        result = begin + (end - begin) * t;
+        result as T;
+        return true;
+      } on NoSuchMethodError {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot lerp between "$begin" and "$end".'),
+          ErrorDescription(
+            'The type ${begin.runtimeType} might not fully implement `+`, `-`, and/or `*`. '
+            'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html '
+            'for more information.',
+          ),
+          if (begin is Color || end is Color)
+            ErrorHint('To lerp colors, consider ColorTween instead.')
+          else if (begin is Rect || end is Rect)
+            ErrorHint('To lerp rects, consider RectTween instead.')
+          else
+            ErrorHint(
+              'There may be a dedicated "${begin.runtimeType}Tween" for this type, '
+              'or you may need to create one.',
+            ),
+        ]);
+      } on TypeError {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot lerp between "$begin" and "$end".'),
+          ErrorDescription(
+            'The type ${begin.runtimeType} returned a ${result.runtimeType} after '
+            'multiplication with a double value. '
+            'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html '
+            'for more information.',
+          ),
+          if (begin is int || end is int)
+            ErrorHint('To lerp int values, consider IntTween or StepTween instead.')
+          else
+            ErrorHint(
+              'There may be a dedicated "${begin.runtimeType}Tween" for this type, '
+              'or you may need to create one.',
+            ),
+        ]);
+      }
+    }());
     return begin + (end - begin) * t as T;
   }
 
@@ -436,7 +480,7 @@ class ConstantTween<T> extends Tween<T> {
   T lerp(double t) => begin as T;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'ReverseTween')}(value: $begin)';
+  String toString() => '${objectRuntimeType(this, 'ConstantTween')}(value: $begin)';
 }
 
 /// Transforms the value of the given animation by the given curve.

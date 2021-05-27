@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -9,15 +11,11 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
-import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
-import '../../../src/mocks.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/testbed.dart';
 
 const List<String> kDart2jsLinuxArgs = <String>[
@@ -47,7 +45,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('foo:foo/lib/\n');
       globals.fs.currentDirectory.childDirectory('bar').createSync();
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
 
       environment = Environment.test(
         globals.fs.currentDirectory,
@@ -103,6 +101,33 @@ void main() {
     expect(environment.outputDir.childFile('version.json'), exists);
   }));
 
+  test('Base href is created in index.html with given base-href after release build', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kBaseHref] = '/basehreftest/';
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('index.html').createSync(recursive: true);
+    webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><base href="$kBaseHrefPlaceholder"><head></head></html>
+    ''');
+    environment.buildDir.childFile('main.dart.js').createSync();
+    await const WebReleaseBundle().build(environment);
+
+    expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
+  }));
+
+  test('null base href does not override existing base href in index.html', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('index.html').createSync(recursive: true);
+    webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><head><base href='/basehreftest/'></head></html>
+    ''');
+    environment.buildDir.childFile('main.dart.js').createSync();
+    await const WebReleaseBundle().build(environment);
+
+    expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
+  }));
+
   test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     final Directory webResources = environment.projectDir.childDirectory('web');
@@ -129,7 +154,7 @@ void main() {
     expect(environment.outputDir.childDirectory('assets')
       .childFile('AssetManifest.json').existsSync(), true);
 
-    // Update to arbitary resource file triggers rebuild.
+    // Update to arbitrary resource file triggers rebuild.
     webResources.childFile('foo.txt').writeAsStringSync('B');
 
     await const WebReleaseBundle().build(environment);
@@ -460,11 +485,21 @@ void main() {
 
   test('Dart2JSTarget produces expected depfile', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
-      environment.buildDir.childFile('app.dill.deps')
-        .writeAsStringSync('file:///a.dart');
-      return FakeProcessResult(exitCode: 0);
-    });
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        '--no-source-maps',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=.packages',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ], onRun: () {
+        environment.buildDir.childFile('app.dill.deps')
+          .writeAsStringSync('file:///a.dart');
+      },
+    ));
     await const Dart2JSTarget().build(environment);
 
     expect(environment.buildDir.childFile('dart2js.d'), exists);
@@ -474,12 +509,12 @@ void main() {
     expect(depfile.outputs.single.path,
       environment.buildDir.childFile('main.dart.js').absolute.path);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
+    ProcessManager: () => processManager,
   }));
 
   test('Dart2JSTarget calls dart2js with Dart defines in release mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
+    environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
@@ -546,7 +581,7 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with Dart defines in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
+    environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
@@ -650,5 +685,3 @@ void main() {
       contains('"main.dart.js"'));
   }));
 }
-
-class MockProcessManager extends Mock implements ProcessManager {}

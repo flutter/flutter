@@ -12,15 +12,14 @@ import 'interface_level.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// Widget child;
-// BuildContext context;
+// late Widget child;
+// late BuildContext context;
 
 /// A palette of [Color] constants that describe colors commonly used when
 /// matching the iOS platform aesthetics.
 class CupertinoColors {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   CupertinoColors._();
 
   /// iOS 13's default blue color. Used to indicate active elements such as
@@ -601,7 +600,7 @@ class CupertinoColors {
 /// CupertinoButton(
 ///   child: child,
 ///   // CupertinoDynamicColor works out of box in a CupertinoButton.
-///   color: CupertinoDynamicColor.withBrightness(
+///   color: const CupertinoDynamicColor.withBrightness(
 ///     color: CupertinoColors.white,
 ///     darkColor: CupertinoColors.black,
 ///   ),

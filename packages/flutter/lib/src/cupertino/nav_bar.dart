@@ -130,21 +130,6 @@ Widget _wrapWithBackground({
   );
 }
 
-// This exists to support backward compatibility with arguments like
-// `actionsForegroundColor`. CupertinoThemes can be used to support these
-// scenarios now. To support `actionsForegroundColor`, the nav bar rewraps
-// its children with a CupertinoTheme.
-Widget _wrapActiveColor(Color? color, BuildContext context, Widget child) {
-  if (color == null) {
-    return child;
-  }
-
-  return CupertinoTheme(
-    data: CupertinoTheme.of(context).copyWith(primaryColor: color),
-    child: child,
-  );
-}
-
 // Whether the current route supports nav bar hero transitions from or to.
 bool _isTransitionable(BuildContext context) {
   final ModalRoute<dynamic>? route = ModalRoute.of(context);
@@ -197,6 +182,34 @@ bool _isTransitionable(BuildContext context) {
 /// value from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
 ///
+/// {@tool dartpad --template=stateful_widget_cupertino}
+/// This example shows a [CupertinoNavigationBar] placed in a [CupertinoPageScaffold].
+/// Since [backgroundColor]'s opacity is not 1.0, there is a blur effect and
+/// content slides underneath.
+///
+///
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   return CupertinoPageScaffold(
+///     navigationBar: CupertinoNavigationBar(
+///       // Try removing opacity to observe the lack of a blur effect and of sliding content.
+///       backgroundColor: CupertinoColors.systemGrey.withOpacity(0.5),
+///       middle: const Text('Sample Code'),
+///     ),
+///     child: Column(
+///       children: <Widget>[
+///         Container(height: 50, color: CupertinoColors.systemRed),
+///         Container(height: 50, color: CupertinoColors.systemGreen),
+///         Container(height: 50, color: CupertinoColors.systemBlue),
+///         Container(height: 50, color: CupertinoColors.systemYellow),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoPageScaffold], a page layout helper typically hosting the
@@ -217,7 +230,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.backgroundColor,
     this.brightness,
     this.padding,
-    this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
   }) : assert(automaticallyImplyLeading != null),
@@ -226,12 +238,12 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
        assert(
          heroTag != null,
          'heroTag cannot be null. Use transitionBetweenRoutes = false to '
-         'disable Hero transition on this navigation bar.'
+         'disable Hero transition on this navigation bar.',
        ),
        assert(
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
-         'transition due to transitionBetweenRoutes = false.'
+         'transition due to transitionBetweenRoutes = false.',
        ),
        super(key: key);
 
@@ -345,21 +357,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Border? border;
 
-  /// {@template flutter.cupertino.CupertinoNavigationBar.actionsForegroundColor}
-  /// Default color used for text and icons of the [leading] and [trailing]
-  /// widgets in the navigation bar.
-  ///
-  /// Defaults to the `primaryColor` of the [CupertinoTheme] when null.
-  /// {@endtemplate}
-  ///
-  /// The default color for text in the [middle] slot is always black, as per
-  /// iOS standard design.
-  @Deprecated(
-    'Use CupertinoTheme and primaryColor to propagate color. '
-    'This feature was deprecated after v1.1.2.'
-  )
-  final Color? actionsForegroundColor;
-
   /// {@template flutter.cupertino.CupertinoNavigationBar.transitionBetweenRoutes}
   /// Whether to transition between navigation bars.
   ///
@@ -410,9 +407,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   }
 
   @override
-  _CupertinoNavigationBarState createState() {
-    return _CupertinoNavigationBarState();
-  }
+  State<CupertinoNavigationBar> createState() => _CupertinoNavigationBarState();
 }
 
 // A state class exists for the nav bar so that the keys of its sub-components
@@ -459,44 +454,35 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       ),
     );
 
-    final Color? actionsForegroundColor = CupertinoDynamicColor.maybeResolve(
-      widget.actionsForegroundColor,
-      context,
-    );
     if (!widget.transitionBetweenRoutes || !_isTransitionable(context)) {
       // Lint ignore to maintain backward compatibility.
-      return _wrapActiveColor(actionsForegroundColor, context, navBar);
+      return navBar;
     }
 
-    return _wrapActiveColor(
-      // Lint ignore to maintain backward compatibility.
-      actionsForegroundColor,
-      context,
-      Builder(
-        // Get the context that might have a possibly changed CupertinoTheme.
-        builder: (BuildContext context) {
-          return Hero(
-            tag: widget.heroTag == _defaultHeroTag
-                ? _HeroTag(Navigator.of(context))
-                : widget.heroTag,
-            createRectTween: _linearTranslateWithLargestRectSizeTween,
-            placeholderBuilder: _navBarHeroLaunchPadBuilder,
-            flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
-            transitionOnUserGestures: true,
-            child: _TransitionableNavigationBar(
-              componentsKeys: keys,
-              backgroundColor: backgroundColor,
-              backButtonTextStyle: CupertinoTheme.of(context).textTheme.navActionTextStyle,
-              titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-              largeTitleTextStyle: null,
-              border: widget.border,
-              hasUserMiddle: widget.middle != null,
-              largeExpanded: false,
-              child: navBar,
-            ),
-          );
-        },
-      ),
+    return Builder(
+      // Get the context that might have a possibly changed CupertinoTheme.
+      builder: (BuildContext context) {
+        return Hero(
+          tag: widget.heroTag == _defaultHeroTag
+              ? _HeroTag(Navigator.of(context))
+              : widget.heroTag,
+          createRectTween: _linearTranslateWithLargestRectSizeTween,
+          placeholderBuilder: _navBarHeroLaunchPadBuilder,
+          flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
+          transitionOnUserGestures: true,
+          child: _TransitionableNavigationBar(
+            componentsKeys: keys,
+            backgroundColor: backgroundColor,
+            backButtonTextStyle: CupertinoTheme.of(context).textTheme.navActionTextStyle,
+            titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
+            largeTitleTextStyle: null,
+            border: widget.border,
+            hasUserMiddle: widget.middle != null,
+            largeExpanded: false,
+            child: navBar,
+          ),
+        );
+      },
     );
   }
 }
@@ -554,7 +540,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// The [stretch] parameter determines whether the nav bar should stretch to
 /// fill the over-scroll area. The nav bar can still expand and contract as the
 /// user scrolls, but it will also stretch when the user over-scrolls if the
-/// [stretch] value is `true`. Defaults to `true`.
+/// [stretch] value is `true`. Defaults to `false`.
 ///
 /// See also:
 ///
@@ -577,17 +563,16 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.backgroundColor,
     this.brightness,
     this.padding,
-    this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
-    this.stretch = true,
+    this.stretch = false,
   }) : assert(automaticallyImplyLeading != null),
        assert(automaticallyImplyTitle != null),
        assert(
          automaticallyImplyTitle == true || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
-         'true.'
+         'true.',
        ),
        super(key: key);
 
@@ -659,16 +644,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoNavigationBar.border}
   final Border? border;
 
-  /// {@macro flutter.cupertino.CupertinoNavigationBar.actionsForegroundColor}
-  ///
-  /// The default color for text in the [largeTitle] slot is always black, as per
-  /// iOS standard design.
-  @Deprecated(
-    'Use CupertinoTheme and primaryColor to propagate color. '
-    'This feature was deprecated after v1.1.2.'
-  )
-  final Color? actionsForegroundColor;
-
   /// {@macro flutter.cupertino.CupertinoNavigationBar.transitionBetweenRoutes}
   final bool transitionBetweenRoutes;
 
@@ -682,11 +657,16 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///
   /// The nav bar can still expand and contract as the user scrolls, but it will
   /// also stretch when the user over-scrolls if the [stretch] value is `true`.
-  /// Defaults to `true`.
+  ///
+  /// When set to `true`, the nav bar will prevent subsequent slivers from
+  /// accessing overscrolls. This may be undesirable for using overscroll-based
+  /// widgets like the [CupertinoSliverRefreshControl].
+  ///
+  /// Defaults to `false`.
   final bool stretch;
 
   @override
-  _CupertinoSliverNavigationBarState createState() => _CupertinoSliverNavigationBarState();
+  State<CupertinoSliverNavigationBar> createState() => _CupertinoSliverNavigationBarState();
 }
 
 // A state class exists for the nav bar so that the keys of its sub-components
@@ -703,10 +683,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   @override
   Widget build(BuildContext context) {
-    // Lint ignore to maintain backward compatibility.
-    final Color actionsForegroundColor = CupertinoDynamicColor.maybeResolve(widget.actionsForegroundColor, context)
-                                      ?? CupertinoTheme.of(context).primaryColor;
-
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
       route: ModalRoute.of(context),
@@ -721,29 +697,24 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       large: true,
     );
 
-    return _wrapActiveColor(
-      // Lint ignore to maintain backward compatibility.
-      actionsForegroundColor,
-      context,
-      MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
-        child: SliverPersistentHeader(
-          pinned: true, // iOS navigation bars are always pinned.
-          delegate: _LargeTitleNavigationBarSliverDelegate(
-            keys: keys,
-            components: components,
-            userMiddle: widget.middle,
-            backgroundColor: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
-            brightness: widget.brightness,
-            border: widget.border,
-            padding: widget.padding,
-            actionsForegroundColor: actionsForegroundColor,
-            transitionBetweenRoutes: widget.transitionBetweenRoutes,
-            heroTag: widget.heroTag,
-            persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-            alwaysShowMiddle: widget.middle != null,
-            stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
-          ),
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+      child: SliverPersistentHeader(
+        pinned: true, // iOS navigation bars are always pinned.
+        delegate: _LargeTitleNavigationBarSliverDelegate(
+          keys: keys,
+          components: components,
+          userMiddle: widget.middle,
+          backgroundColor: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
+          brightness: widget.brightness,
+          border: widget.border,
+          padding: widget.padding,
+          actionsForegroundColor: CupertinoTheme.of(context).primaryColor,
+          transitionBetweenRoutes: widget.transitionBetweenRoutes,
+          heroTag: widget.heroTag,
+          persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+          alwaysShowMiddle: widget.middle != null,
+          stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
         ),
       ),
     );
@@ -1105,9 +1076,9 @@ class _NavigationBarStaticComponents {
       route.fullscreenDialog
     ) {
       leadingContent = CupertinoButton(
-        child: const Text('Close'),
         padding: EdgeInsets.zero,
         onPressed: () { route.navigator!.maybePop(); },
+        child: const Text('Close'),
       );
     }
 
@@ -1347,6 +1318,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
     }
 
     return CupertinoButton(
+      padding: EdgeInsets.zero,
       child: Semantics(
         container: true,
         excludeSemantics: true,
@@ -1374,7 +1346,6 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
           ),
         ),
       ),
-      padding: EdgeInsets.zero,
       onPressed: () {
         if (onPressed != null) {
           onPressed!();
@@ -2251,7 +2222,7 @@ class _NavigationBarComponentsTransition {
 
 /// Navigation bars' hero rect tween that will move between the static bars
 /// but keep a constant size that's the bigger of both navigation bars.
-CreateRectTween _linearTranslateWithLargestRectSizeTween = (Rect? begin, Rect? end) {
+RectTween _linearTranslateWithLargestRectSizeTween(Rect? begin, Rect? end) {
   final Size largestSize = Size(
     math.max(begin!.size.width, end!.size.width),
     math.max(begin.size.height, end.size.height),
@@ -2260,9 +2231,9 @@ CreateRectTween _linearTranslateWithLargestRectSizeTween = (Rect? begin, Rect? e
     begin: begin.topLeft & largestSize,
     end: end.topLeft & largestSize,
   );
-};
+}
 
-final HeroPlaceholderBuilder _navBarHeroLaunchPadBuilder = (
+Widget _navBarHeroLaunchPadBuilder(
   BuildContext context,
   Size heroSize,
   Widget child,
@@ -2286,10 +2257,10 @@ final HeroPlaceholderBuilder _navBarHeroLaunchPadBuilder = (
     visible: false,
     child: child,
   );
-};
+}
 
 /// Navigation bars' hero flight shuttle builder.
-final HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
+Widget _navBarHeroFlightShuttleBuilder(
   BuildContext flightContext,
   Animation<double> animation,
   HeroFlightDirection flightDirection,
@@ -2338,4 +2309,4 @@ final HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
         topNavBar: fromNavBar,
       );
   }
-};
+}

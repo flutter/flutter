@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Offset;
-
-import 'package:flutter/foundation.dart';
-
 import 'arena.dart';
 import 'events.dart';
 import 'recognizer.dart';
@@ -120,18 +116,27 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// to 1.0 for values of `pressure` that are between `pressureMin` and
   /// `pressureMax`.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   ForcePressGestureRecognizer({
     this.startPressure = 0.4,
     this.peakPressure = 0.85,
     this.interpolation = _inverseLerp,
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
   }) : assert(startPressure != null),
        assert(peakPressure != null),
        assert(interpolation != null),
        assert(peakPressure > startPressure),
-       super(debugOwner: debugOwner, kind: kind);
+       super(
+         debugOwner: debugOwner,
+         kind: kind,
+         supportedDevices: supportedDevices,
+       );
 
   /// A pointer is in contact with the screen and has just pressed with a force
   /// exceeding the [startPressure]. Consequently, if there were other gesture
@@ -211,14 +216,14 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   _ForceState _state = _ForceState.ready;
 
   @override
-  void addAllowedPointer(PointerEvent event) {
+  void addAllowedPointer(PointerDownEvent event) {
     // If the device has a maximum pressure of less than or equal to 1, it
     // doesn't have touch pressure sensing capabilities. Do not participate
     // in the gesture arena.
-    if (event is! PointerUpEvent && event.pressureMax <= 1.0) {
+    if (event.pressureMax <= 1.0) {
       resolve(GestureDisposition.rejected);
     } else {
-      startTrackingPointer(event.pointer, event.transform);
+      super.addAllowedPointer(event);
       if (_state == _ForceState.ready) {
         _state = _ForceState.possible;
         _lastPosition = OffsetPair.fromEventPosition(event);
@@ -231,18 +236,10 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(_state != _ForceState.ready);
     // A static pointer with changes in pressure creates PointerMoveEvent events.
     if (event is PointerMoveEvent || event is PointerDownEvent) {
-      if (event.pressure > event.pressureMax || event.pressure < event.pressureMin) {
-        debugPrint(
-          'The reported device pressure ' + event.pressure.toString() +
-          ' is outside of the device pressure range where: ' +
-          event.pressureMin.toString() + ' <= pressure <= ' + event.pressureMax.toString(),
-        );
-      }
-
       final double pressure = interpolation(event.pressureMin, event.pressureMax, event.pressure);
       assert(
         (pressure >= 0.0 && pressure <= 1.0) || // Interpolated pressure must be between 1.0 and 0.0...
-        pressure.isNaN // and interpolation may return NaN for values it doesn't want to support...
+        pressure.isNaN, // and interpolation may return NaN for values it doesn't want to support...
       );
 
       _lastPosition = OffsetPair.fromEventPosition(event);

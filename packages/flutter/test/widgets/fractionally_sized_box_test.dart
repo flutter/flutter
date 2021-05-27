@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('FractionallySizedBox', (WidgetTester tester) async {
@@ -14,13 +13,13 @@ void main() {
       maxWidth: 100.0,
       minHeight: 0.0,
       maxHeight: 100.0,
-      alignment: const Alignment(-1.0, -1.0),
+      alignment: Alignment.topLeft,
       child: Center(
         child: FractionallySizedBox(
           widthFactor: 0.5,
           heightFactor: 0.25,
           child: Container(
-            key: inner
+            key: inner,
           ),
         ),
       ),
@@ -71,13 +70,13 @@ void main() {
         maxWidth: 100.0,
         minHeight: 0.0,
         maxHeight: 100.0,
-        alignment: const AlignmentDirectional(1.0, -1.0),
+        alignment: AlignmentDirectional.topEnd,
         child: Center(
           child: FractionallySizedBox(
             widthFactor: 0.5,
             heightFactor: 0.25,
             child: Container(
-              key: inner
+              key: inner,
             ),
           ),
         ),

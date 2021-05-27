@@ -44,7 +44,6 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeSummaryToFile('home_scroll_perf', pretty: true);
       await summary.writeTimelineToFile('home_scroll_perf', pretty: true);
     });
   });

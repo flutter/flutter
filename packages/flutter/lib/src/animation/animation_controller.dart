@@ -17,8 +17,8 @@ import 'listener_helpers.dart';
 export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 
 // Examples can assume:
-// AnimationController _controller, fadeAnimationController, sizeAnimationController;
-// bool dismissed;
+// late AnimationController _controller, fadeAnimationController, sizeAnimationController;
+// late bool dismissed;
 // void setState(VoidCallback fn) { }
 
 /// The direction in which an animation is running.
@@ -136,16 +136,16 @@ enum AnimationBehavior {
 ///
 /// ```dart
 /// class Foo extends StatefulWidget {
-///   Foo({ Key key, this.duration }) : super(key: key);
+///   const Foo({ Key? key, required this.duration }) : super(key: key);
 ///
 ///   final Duration duration;
 ///
 ///   @override
-///   _FooState createState() => _FooState();
+///   State<Foo> createState() => _FooState();
 /// }
 ///
 /// class _FooState extends State<Foo> with SingleTickerProviderStateMixin {
-///   AnimationController _controller;
+///   late AnimationController _controller;
 ///
 ///   @override
 ///   void initState() {
@@ -312,7 +312,7 @@ class AnimationController extends Animation<double>
 
   /// The length of time this animation should last when going in [reverse].
   ///
-  /// The value of [duration] us used if [reverseDuration] is not specified or
+  /// The value of [duration] is used if [reverseDuration] is not specified or
   /// set to null.
   Duration? reverseDuration;
 
@@ -446,7 +446,7 @@ class AnimationController extends Animation<double>
         throw FlutterError(
           'AnimationController.forward() called with no default duration.\n'
           'The "duration" property should be set, either in the constructor or later, before '
-          'calling the forward() function.'
+          'calling the forward() function.',
         );
       }
       return true;
@@ -454,7 +454,7 @@ class AnimationController extends Animation<double>
     assert(
       _ticker != null,
       'AnimationController.forward() called after AnimationController.dispose()\n'
-      'AnimationController methods should not be used after calling dispose.'
+      'AnimationController methods should not be used after calling dispose.',
     );
     _direction = _AnimationDirection.forward;
     if (from != null)
@@ -479,7 +479,7 @@ class AnimationController extends Animation<double>
         throw FlutterError(
           'AnimationController.reverse() called with no default duration or reverseDuration.\n'
           'The "duration" or "reverseDuration" property should be set, either in the constructor or later, before '
-          'calling the reverse() function.'
+          'calling the reverse() function.',
         );
       }
       return true;
@@ -487,7 +487,7 @@ class AnimationController extends Animation<double>
     assert(
       _ticker != null,
       'AnimationController.reverse() called after AnimationController.dispose()\n'
-      'AnimationController methods should not be used after calling dispose.'
+      'AnimationController methods should not be used after calling dispose.',
     );
     _direction = _AnimationDirection.reverse;
     if (from != null)
@@ -507,6 +507,10 @@ class AnimationController extends Animation<double>
   /// regardless of whether `target` > [value] or not. At the end of the
   /// animation, when `target` is reached, [status] is reported as
   /// [AnimationStatus.completed].
+  ///
+  /// If the `target` argument is the same as the current [value] of the
+  /// animation, then this won't animate, and the returned [TickerFuture] will
+  /// be already complete.
   TickerFuture animateTo(double target, { Duration? duration, Curve curve = Curves.linear }) {
     assert(() {
       if (this.duration == null && duration == null) {
@@ -514,7 +518,7 @@ class AnimationController extends Animation<double>
           'AnimationController.animateTo() called with no explicit duration and no default duration.\n'
           'Either the "duration" argument to the animateTo() method should be provided, or the '
           '"duration" property should be set, either in the constructor or later, before '
-          'calling the animateTo() function.'
+          'calling the animateTo() function.',
         );
       }
       return true;
@@ -522,7 +526,7 @@ class AnimationController extends Animation<double>
     assert(
       _ticker != null,
       'AnimationController.animateTo() called after AnimationController.dispose()\n'
-      'AnimationController methods should not be used after calling dispose.'
+      'AnimationController methods should not be used after calling dispose.',
     );
     _direction = _AnimationDirection.forward;
     return _animateToInternal(target, duration: duration, curve: curve);
@@ -547,7 +551,7 @@ class AnimationController extends Animation<double>
           'AnimationController.animateBack() called with no explicit duration and no default duration or reverseDuration.\n'
           'Either the "duration" argument to the animateBack() method should be provided, or the '
           '"duration" or "reverseDuration" property should be set, either in the constructor or later, before '
-          'calling the animateBack() function.'
+          'calling the animateBack() function.',
         );
       }
       return true;
@@ -555,7 +559,7 @@ class AnimationController extends Animation<double>
     assert(
       _ticker != null,
       'AnimationController.animateBack() called after AnimationController.dispose()\n'
-      'AnimationController methods should not be used after calling dispose.'
+      'AnimationController methods should not be used after calling dispose.',
     );
     _direction = _AnimationDirection.reverse;
     return _animateToInternal(target, duration: duration, curve: curve);
@@ -638,7 +642,7 @@ class AnimationController extends Animation<double>
           'AnimationController.repeat() called without an explicit period and with no default Duration.\n'
           'Either the "period" argument to the repeat() method should be provided, or the '
           '"duration" property should be set, either in the constructor or later, before '
-          'calling the repeat() function.'
+          'calling the repeat() function.',
         );
       }
       return true;
@@ -700,7 +704,7 @@ class AnimationController extends Animation<double>
     assert(
       simulation.type != SpringType.underDamped,
       'The resulting spring simulation is of type SpringType.underDamped.\n'
-      'This can lead to unexpected look of the animation, please adjust the springDescription parameter'
+      'This can lead to unexpected look of the animation, please adjust the springDescription parameter',
     );
     stop();
     return _startSimulation(simulation);
@@ -724,7 +728,7 @@ class AnimationController extends Animation<double>
     assert(
       _ticker != null,
       'AnimationController.animateWith() called after AnimationController.dispose()\n'
-      'AnimationController methods should not be used after calling dispose.'
+      'AnimationController methods should not be used after calling dispose.',
     );
     stop();
     _direction = _AnimationDirection.forward;
@@ -766,7 +770,7 @@ class AnimationController extends Animation<double>
     assert(
       _ticker != null,
       'AnimationController.stop() called after AnimationController.dispose()\n'
-      'AnimationController methods should not be used after calling dispose.'
+      'AnimationController methods should not be used after calling dispose.',
     );
     _simulation = null;
     _lastElapsedDuration = null;
@@ -797,6 +801,8 @@ class AnimationController extends Animation<double>
     }());
     _ticker!.dispose();
     _ticker = null;
+    clearStatusListeners();
+    clearListeners();
     super.dispose();
   }
 

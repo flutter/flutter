@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -19,7 +19,7 @@ void main() {
       (Canvas canvas) {
         painter.paint(
           canvas,
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const ImageConfiguration(size: size, textDirection: TextDirection.rtl),
         );
       },
@@ -32,7 +32,7 @@ void main() {
       (Canvas canvas) {
         painter.paint(
           canvas,
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const ImageConfiguration(size: size, textDirection: TextDirection.ltr),
         );
       },
@@ -61,7 +61,7 @@ void main() {
       (Canvas canvas) {
         painter.paint(
           canvas,
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const ImageConfiguration(size: size, textDirection: TextDirection.rtl),
         );
       },

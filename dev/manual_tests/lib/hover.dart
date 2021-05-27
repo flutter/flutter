@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,7 +12,7 @@ void main() {
 }
 
 class DemoButton extends StatelessWidget {
-  const DemoButton({this.name});
+  const DemoButton({Key key, this.name}) : super(key: key);
 
   final String name;
 
@@ -34,7 +33,7 @@ class HoverDemo extends StatefulWidget {
   const HoverDemo({Key key}) : super(key: key);
 
   @override
-  _HoverDemoState createState() => _HoverDemoState();
+  State<HoverDemo> createState() => _HoverDemoState();
 }
 
 class _HoverDemoState extends State<HoverDemo> {
@@ -66,13 +65,13 @@ class _HoverDemoState extends State<HoverDemo> {
                   children: <Widget>[
                     ElevatedButton(
                       onPressed: () => print('Button pressed.'),
-                      child: const Text('Button'),
                       style: overrideFocusColor,
+                      child: const Text('Button'),
                     ),
                     TextButton(
                       onPressed: () => print('Button pressed.'),
-                      child: const Text('Button'),
                       style: overrideFocusColor,
+                      child: const Text('Button'),
                     ),
                     IconButton(
                       onPressed: () => print('Button pressed'),

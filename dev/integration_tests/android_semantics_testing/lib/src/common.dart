@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
+
 import 'constants.dart';
 
 /// A semantics node created from Android accessibility information.

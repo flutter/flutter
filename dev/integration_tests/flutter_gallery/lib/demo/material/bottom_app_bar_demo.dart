@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class BottomAppBarDemo extends StatefulWidget {
+  const BottomAppBarDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/bottom_app_bar';
 
   @override
@@ -33,8 +35,8 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     label: 'circular floating action button',
     value: FloatingActionButton(
       onPressed: _showSnackbar,
-      child: Icon(Icons.add, semanticLabel: 'Action'),
       backgroundColor: Colors.orange,
+      child: Icon(Icons.add, semanticLabel: 'Action'),
     ),
   );
 
@@ -429,18 +431,18 @@ class _DiamondFab extends StatelessWidget {
     return Material(
       shape: const _DiamondBorder(),
       color: Colors.orange,
+      elevation: 6.0,
       child: InkWell(
         onTap: onPressed,
-        child: Container(
+        child: SizedBox(
           width: 56.0,
           height: 56.0,
           child: IconTheme.merge(
-            data: IconThemeData(color: Theme.of(context).accentIconTheme.color),
+            data: IconThemeData(color: Theme.of(context).colorScheme.secondary),
             child: child!,
           ),
         ),
       ),
-      elevation: 6.0,
     );
   }
 }
@@ -488,7 +490,7 @@ class _DiamondBorder extends ShapeBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return const EdgeInsets.only();
+    return EdgeInsets.zero;
   }
 
   @override

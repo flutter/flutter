@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 class Leaf extends StatefulWidget {
   const Leaf({ required Key key, required this.child }) : super(key: key);
   final Widget child;
   @override
-  _LeafState createState() => _LeafState();
+  State<Leaf> createState() => _LeafState();
 }
 
 class _LeafState extends State<Leaf> {
@@ -123,7 +123,7 @@ void tests({ required bool impliedMode }) {
           addSemanticIndexes: false,
           cacheExtent: 0.0,
           children: generateList(
-            Container(height: 12.3, child: const Placeholder()), // about 50 widgets visible
+            const SizedBox(height: 12.3, child: Placeholder()), // about 50 widgets visible
             impliedMode: impliedMode,
           ),
         ),
@@ -175,7 +175,7 @@ void tests({ required bool impliedMode }) {
           childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
           cacheExtent: 0.0,
           children: generateList(
-            Container(child: const Placeholder()),
+            const Placeholder(),
             impliedMode: impliedMode,
           ),
         ),
@@ -231,7 +231,7 @@ void main() {
           cacheExtent: 0.0,
           children: <Widget>[
             AutomaticKeepAlive(
-              child: Container(
+              child: SizedBox(
                 height: 400.0,
                 child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
@@ -239,15 +239,15 @@ void main() {
                 ]),
               ),
             ),
-            AutomaticKeepAlive(
-              child: Container(
-                key: const GlobalObjectKey<_LeafState>(2),
+            const AutomaticKeepAlive(
+              child: SizedBox(
+                key: GlobalObjectKey<_LeafState>(2),
                 height: 400.0,
               ),
             ),
-            AutomaticKeepAlive(
-              child: Container(
-                key: const GlobalObjectKey<_LeafState>(3),
+            const AutomaticKeepAlive(
+              child: SizedBox(
+                key: GlobalObjectKey<_LeafState>(3),
                 height: 400.0,
               ),
             ),
@@ -315,7 +315,7 @@ void main() {
           cacheExtent: 0.0,
           children: <Widget>[
             AutomaticKeepAlive(
-              child: Container(
+              child: SizedBox(
                 height: 400.0,
                 child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
@@ -324,7 +324,7 @@ void main() {
               ),
             ),
             AutomaticKeepAlive(
-              child: Container(
+              child: SizedBox(
                 height: 400.0,
                 child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
@@ -333,7 +333,7 @@ void main() {
               ),
             ),
             AutomaticKeepAlive(
-              child: Container(
+              child: SizedBox(
                 height: 400.0,
                 child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
@@ -371,7 +371,7 @@ void main() {
         cacheExtent: 0.0,
         children: <Widget>[
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
               child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
@@ -379,7 +379,7 @@ void main() {
             ),
           ),
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
               child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
@@ -388,7 +388,7 @@ void main() {
             ),
           ),
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
               child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
@@ -435,7 +435,7 @@ void main() {
         cacheExtent: 0.0,
         children: <Widget>[
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
               child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
@@ -444,14 +444,13 @@ void main() {
             ),
           ),
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
-              ]),
+              child: Stack(children: const <Widget>[]),
             ),
           ),
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
               child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
@@ -486,7 +485,7 @@ void main() {
               key: GlobalObjectKey<_AlwaysKeepAliveState>(0),
             );
           }
-          return Container(
+          return SizedBox(
             height: 44.0,
             child: Text('FooBar $index'),
           );
@@ -520,7 +519,7 @@ void main() {
               key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
             );
           }
-          return Container(
+          return SizedBox(
             height: 44.0,
             child: Text('FooBar $index'),
           );
@@ -573,9 +572,9 @@ class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAl
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Container(
+    return const SizedBox(
       height: 48.0,
-      child: const Text('keep me alive'),
+      child: Text('keep me alive'),
     );
   }
 }
@@ -591,14 +590,14 @@ class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive> with Automat
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Container(
+    return const SizedBox(
       height: 48.0,
-      child: const Text('keep me alive'),
+      child: Text('keep me alive'),
     );
   }
 }
 
-abstract class KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
+mixin KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
   @override
   bool keptAlive = false;
 

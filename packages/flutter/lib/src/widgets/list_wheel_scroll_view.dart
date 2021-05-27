@@ -5,7 +5,6 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -13,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
+import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
@@ -93,7 +93,7 @@ class ListWheelChildListDelegate extends ListWheelChildDelegate {
   Widget? build(BuildContext context, int index) {
     if (index < 0 || index >= children.length)
       return null;
-    return IndexedSemantics(child: children[index], index: index);
+    return IndexedSemantics(index: index, child: children[index]);
   }
 
   @override
@@ -139,7 +139,7 @@ class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
   Widget? build(BuildContext context, int index) {
     if (children.isEmpty)
       return null;
-    return IndexedSemantics(child: children[index % children.length], index: index);
+    return IndexedSemantics(index: index, child: children[index % children.length]);
   }
 
   @override
@@ -182,11 +182,11 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   Widget? build(BuildContext context, int index) {
     if (childCount == null) {
       final Widget? child = builder(context, index);
-      return child == null ? null : IndexedSemantics(child: child, index: index);
+      return child == null ? null : IndexedSemantics(index: index, child: child);
     }
     if (index < 0 || index >= childCount!)
       return null;
-    return IndexedSemantics(child: builder(context, index), index: index);
+    return IndexedSemantics(index: index, child: builder(context, index));
   }
 
   @override
@@ -373,7 +373,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext impleme
     String? debugLabel,
   }) : assert(
          context is _FixedExtentScrollableState,
-         'FixedExtentScrollController can only be used with ListWheelScrollViews'
+         'FixedExtentScrollController can only be used with ListWheelScrollViews',
        ),
        super(
          physics: physics,
@@ -432,6 +432,7 @@ class _FixedExtentScrollable extends Scrollable {
     required this.itemExtent,
     required ViewportBuilder viewportBuilder,
     String? restorationId,
+    ScrollBehavior? scrollBehavior,
   }) : super (
     key: key,
     axisDirection: axisDirection,
@@ -439,6 +440,7 @@ class _FixedExtentScrollable extends Scrollable {
     physics: physics,
     viewportBuilder: viewportBuilder,
     restorationId: restorationId,
+    scrollBehavior: scrollBehavior,
   );
 
   final double itemExtent;
@@ -481,7 +483,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
     assert(
       position is _FixedExtentScrollPosition,
       'FixedExtentScrollPhysics can only be used with Scrollables that uses '
-      'the FixedExtentScrollController'
+      'the FixedExtentScrollController',
     );
 
     final _FixedExtentScrollPosition metrics = position as _FixedExtentScrollPosition;
@@ -585,6 +587,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.scrollBehavior,
     required List<Widget> children,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -626,6 +629,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.scrollBehavior,
     required this.childDelegate,
   }) : assert(childDelegate != null),
        assert(diameterRatio != null),
@@ -669,6 +673,10 @@ class ListWheelScrollView extends StatefulWidget {
   ///
   /// For example, determines how the scroll view continues to animate after the
   /// user stops dragging the scroll view.
+  ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
   ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
@@ -717,8 +725,19 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
+  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  ///
+  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
+  /// [ScrollPhysics] is provided in [physics], it will take precedence,
+  /// followed by [scrollBehavior], and then the inherited ancestor
+  /// [ScrollBehavior].
+  ///
+  /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
+  /// modified by default to not apply a [Scrollbar].
+  final ScrollBehavior? scrollBehavior;
+
   @override
-  _ListWheelScrollViewState createState() => _ListWheelScrollViewState();
+  State<ListWheelScrollView> createState() => _ListWheelScrollViewState();
 }
 
 class _ListWheelScrollViewState extends State<ListWheelScrollView> {
@@ -770,6 +789,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
         physics: widget.physics,
         itemExtent: widget.itemExtent,
         restorationId: widget.restorationId,
+        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return ListWheelViewport(
             diameterRatio: widget.diameterRatio,
@@ -890,12 +910,12 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  Element? updateChild(Element? child, Widget? newWidget, dynamic newSlot) {
+  Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
     final ListWheelParentData? oldParentData = child?.renderObject?.parentData as ListWheelParentData?;
     final Element? newChild = super.updateChild(child, newWidget, newSlot);
     final ListWheelParentData? newParentData = newChild?.renderObject?.parentData as ListWheelParentData?;
     if (newParentData != null) {
-      newParentData.index = newSlot as int;
+      newParentData.index = newSlot! as int;
       if (oldParentData != null)
         newParentData.offset = oldParentData.offset;
     }

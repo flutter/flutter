@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../build_info.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../macos/xcode.dart';
 
 const bool kBitcodeEnabledDefault = false;

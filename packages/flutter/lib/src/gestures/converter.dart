@@ -35,7 +35,6 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
 class PointerEventConverter {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   PointerEventConverter._();
 
   /// Expand the given packet of pointer data into a sequence of framework

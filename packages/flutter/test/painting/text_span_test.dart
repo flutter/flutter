@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -26,6 +27,21 @@ void main() {
     expect(a1 == c2, isFalse);
     expect(b1 == a2, isFalse);
     expect(c1 == b2, isFalse);
+
+    void callback1(PointerEnterEvent _) {}
+    void callback2(PointerEnterEvent _) {}
+
+    final TextSpan d1 = TextSpan(text: 'a', onEnter: callback1);
+    final TextSpan d2 = TextSpan(text: 'a', onEnter: callback1);
+    final TextSpan d3 = TextSpan(text: 'a', onEnter: callback2);
+    final TextSpan e1 = TextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
+    final TextSpan e2 = TextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
+
+    expect(a1 == d1, isFalse);
+    expect(d1 == d2, isTrue);
+    expect(d2 == d3, isFalse);
+    expect(d3 == e1, isFalse);
+    expect(e1 == e2, isTrue);
   });
 
   test('TextSpan toStringDeep', () {
@@ -56,9 +72,33 @@ void main() {
       '    TextSpan:\n'
       '      (empty)\n'
       '  TextSpan:\n'
-      '    "c"\n'
+      '    "c"\n',
     ));
   });
+
+  test('TextSpan toStringDeep for mouse', () {
+    const TextSpan test1 = TextSpan(
+      text: 'a',
+    );
+    expect(test1.toStringDeep(), equals(
+      'TextSpan:\n'
+      '  "a"\n',
+    ));
+
+    final TextSpan test2 = TextSpan(
+      text: 'a',
+      onEnter: (_) {},
+      onExit: (_) {},
+      mouseCursor: SystemMouseCursors.forbidden,
+    );
+    expect(test2.toStringDeep(), equals(
+      'TextSpan:\n'
+      '  "a"\n'
+      '  callbacks: enter, exit\n'
+      '  mouseCursor: SystemMouseCursor(forbidden)\n',
+    ));
+  });
+
 
   test('TextSpan toPlainText', () {
     const TextSpan textSpan = TextSpan(
@@ -232,4 +272,96 @@ void main() {
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 2)).runtimeType, WidgetSpan);
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 3)).runtimeType, TextSpan);
   });
+
+  test('TextSpan computeSemanticsInformation', () {
+    final List<InlineSpanSemanticsInformation> collector = <InlineSpanSemanticsInformation>[];
+    const TextSpan(text: 'aaa', semanticsLabel: 'bbb').computeSemanticsInformation(collector);
+    expect(collector[0].text, 'aaa');
+    expect(collector[0].semanticsLabel, 'bbb');
+  });
+
+  testWidgets('handles mouse cursor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Text.rich(
+            TextSpan(
+              text: 'xxxxx',
+              children: <InlineSpan>[
+                TextSpan(
+                  text: 'yyyyy',
+                  mouseCursor: SystemMouseCursors.forbidden,
+                ),
+                TextSpan(
+                  text: 'xxxxx',
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+
+    await gesture.moveTo(tester.getCenter(find.byType(RichText)) - const Offset(40, 0));
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    await gesture.moveTo(tester.getCenter(find.byType(RichText)));
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+
+    await gesture.moveTo(tester.getCenter(find.byType(RichText)) + const Offset(40, 0));
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('handles onEnter and onExit', (WidgetTester tester) async {
+    final List<PointerEvent> logEvents = <PointerEvent>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Text.rich(
+            TextSpan(
+              text: 'xxxxx',
+              children: <InlineSpan>[
+                TextSpan(
+                  text: 'yyyyy',
+                  onEnter: (PointerEnterEvent event) {
+                    logEvents.add(event);
+                  },
+                  onExit: (PointerExitEvent event) {
+                    logEvents.add(event);
+                  },
+                ),
+                const TextSpan(
+                  text: 'xxxxx',
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+
+    await gesture.moveTo(tester.getCenter(find.byType(RichText)) - const Offset(40, 0));
+    expect(logEvents, isEmpty);
+
+    await gesture.moveTo(tester.getCenter(find.byType(RichText)));
+    expect(logEvents.length, 1);
+    expect(logEvents[0], isA<PointerEnterEvent>());
+
+    await gesture.moveTo(tester.getCenter(find.byType(RichText)) + const Offset(40, 0));
+    expect(logEvents.length, 2);
+    expect(logEvents[1], isA<PointerExitEvent>());
+  });
+
 }

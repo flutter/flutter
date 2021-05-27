@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('widget moves scopes during restore', (WidgetTester tester) async {
-    await tester.pumpWidget(RootRestorationScope(
+    await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root',
       child: Directionality(
         textDirection: TextDirection.ltr,
@@ -111,6 +111,8 @@ void main() {
 }
 
 class TestWidgetWithCounterChild extends StatefulWidget {
+  const TestWidgetWithCounterChild({Key? key}) : super(key: key);
+
   @override
   State<TestWidgetWithCounterChild> createState() => TestWidgetWithCounterChildState();
 }
@@ -159,7 +161,7 @@ class TestWidgetWithCounterChildState extends State<TestWidgetWithCounterChild> 
 }
 
 class Counter extends StatefulWidget {
-  const Counter({this.restorationId});
+  const Counter({Key? key, this.restorationId}) : super(key: key);
 
   final String? restorationId;
 
@@ -200,7 +202,7 @@ class CounterState extends State<Counter> with RestorationMixin {
 }
 
 class TestWidget extends StatefulWidget {
-  const TestWidget({required this.restorationId});
+  const TestWidget({Key? key, required this.restorationId}) : super(key: key);
 
   final String? restorationId;
 

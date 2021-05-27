@@ -56,10 +56,11 @@ mixin DeserializeCommandFactory {
       case 'tap': return Tap.deserialize(params, finderFactory);
       case 'waitFor': return WaitFor.deserialize(params, finderFactory);
       case 'waitForAbsent': return WaitForAbsent.deserialize(params, finderFactory);
+      case 'waitForTappable': return WaitForTappable.deserialize(params, finderFactory);
       case 'waitForCondition': return WaitForCondition.deserialize(params);
-      case 'waitUntilNoTransientCallbacks': return WaitUntilNoTransientCallbacks.deserialize(params);
-      case 'waitUntilNoPendingFrame': return WaitUntilNoPendingFrame.deserialize(params);
-      case 'waitUntilFirstFrameRasterized': return WaitUntilFirstFrameRasterized.deserialize(params);
+      case 'waitUntilNoTransientCallbacks': return WaitForCondition.deserialize(params);
+      case 'waitUntilNoPendingFrame': return WaitForCondition.deserialize(params);
+      case 'waitUntilFirstFrameRasterized': return WaitForCondition.deserialize(params);
       case 'get_semantics_id': return GetSemanticsId.deserialize(params, finderFactory);
       case 'get_offset': return GetOffset.deserialize(params, finderFactory);
       case 'get_diagnostics_tree': return GetDiagnosticsTree.deserialize(params, finderFactory);
