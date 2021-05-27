@@ -26,8 +26,10 @@ class Pipeline {
 
   Type type_ = Type::kUnknown;
   id<MTLRenderPipelineState> state_;
+  id<MTLDepthStencilState> depth_stencil_state_;
 
-  Pipeline(id<MTLRenderPipelineState> state);
+  Pipeline(id<MTLRenderPipelineState> state,
+           id<MTLDepthStencilState> depth_stencil_state);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Pipeline);
 };

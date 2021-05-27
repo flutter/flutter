@@ -6,7 +6,9 @@
 
 namespace impeller {
 
-Pipeline::Pipeline(id<MTLRenderPipelineState> state) : state_(state) {
+Pipeline::Pipeline(id<MTLRenderPipelineState> state,
+                   id<MTLDepthStencilState> depth_stencil_state)
+    : state_(state), depth_stencil_state_(depth_stencil_state) {
   if (state_ != nil) {
     type_ = Type::kRender;
   }

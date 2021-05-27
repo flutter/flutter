@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <Metal/Metal.h>
 
 #include "flutter/fml/macros.h"
@@ -96,8 +98,57 @@ constexpr MTLColorWriteMask ToMTLColorWriteMask(
   return mask;
 };
 
+constexpr MTLCompareFunction ToMTLCompareFunction(CompareFunction func) {
+  switch (func) {
+    case CompareFunction::kNever:
+      return MTLCompareFunctionNever;
+    case CompareFunction::kLess:
+      return MTLCompareFunctionLess;
+    case CompareFunction::kEqual:
+      return MTLCompareFunctionEqual;
+    case CompareFunction::kLessEqual:
+      return MTLCompareFunctionLessEqual;
+    case CompareFunction::kGreater:
+      return MTLCompareFunctionGreater;
+    case CompareFunction::kNotEqual:
+      return MTLCompareFunctionNotEqual;
+    case CompareFunction::kGreaterEqual:
+      return MTLCompareFunctionGreaterEqual;
+    case CompareFunction::kAlways:
+      return MTLCompareFunctionAlways;
+  }
+  return MTLCompareFunctionAlways;
+};
+
+constexpr MTLStencilOperation ToMTLStencilOperation(StencilOperation op) {
+  switch (op) {
+    case StencilOperation::kKeep:
+      return MTLStencilOperationKeep;
+    case StencilOperation::kZero:
+      return MTLStencilOperationZero;
+    case StencilOperation::kReplace:
+      return MTLStencilOperationReplace;
+    case StencilOperation::kIncrementClamp:
+      return MTLStencilOperationIncrementClamp;
+    case StencilOperation::kDecrementClamp:
+      return MTLStencilOperationDecrementClamp;
+    case StencilOperation::kInvert:
+      return MTLStencilOperationInvert;
+    case StencilOperation::kIncrementWrap:
+      return MTLStencilOperationIncrementWrap;
+    case StencilOperation::kDecrementWrap:
+      return MTLStencilOperationDecrementWrap;
+  }
+  return MTLStencilOperationKeep;
+};
+
 MTLRenderPipelineColorAttachmentDescriptor*
 ToMTLRenderPipelineColorAttachmentDescriptor(
     ColorAttachmentDescriptor descriptor);
+
+MTLDepthStencilDescriptor* ToMTLDepthStencilDescriptor(
+    std::optional<DepthAttachmentDescriptor> depth,
+    std::optional<StencilAttachmentDescriptor> front,
+    std::optional<StencilAttachmentDescriptor> back);
 
 }  // namespace impeller

@@ -30,4 +30,47 @@ ToMTLRenderPipelineColorAttachmentDescriptor(
   return des;
 }
 
+MTLStencilDescriptor* ToMTLStencilDescriptor(
+    const StencilAttachmentDescriptor& descriptor) {
+  auto des = [[MTLStencilDescriptor alloc] init];
+  des.stencilCompareFunction = ToMTLCompareFunction(descriptor.stencil_compare);
+  des.stencilFailureOperation =
+      ToMTLStencilOperation(descriptor.stencil_failure);
+  des.depthFailureOperation = ToMTLStencilOperation(descriptor.depth_failure);
+  des.depthStencilPassOperation =
+      ToMTLStencilOperation(descriptor.depth_stencil_pass);
+
+  des.readMask = descriptor.read_mask;
+  des.writeMask = descriptor.write_mask;
+
+  return des;
+}
+
+MTLDepthStencilDescriptor* ToMTLDepthStencilDescriptor(
+    std::optional<DepthAttachmentDescriptor> depth,
+    std::optional<StencilAttachmentDescriptor> front,
+    std::optional<StencilAttachmentDescriptor> back) {
+  if (!depth) {
+    depth = DepthAttachmentDescriptor{
+        // Always pass the depth test.
+        .depth_compare = CompareFunction::kAlways,
+        .depth_write_enabled = false,
+    };
+  }
+
+  auto des = [[MTLDepthStencilDescriptor alloc] init];
+
+  des.depthCompareFunction = ToMTLCompareFunction(depth->depth_compare);
+  des.depthWriteEnabled = depth->depth_write_enabled;
+
+  if (front.has_value()) {
+    des.frontFaceStencil = ToMTLStencilDescriptor(front.value());
+  }
+  if (back.has_value()) {
+    des.backFaceStencil = ToMTLStencilDescriptor(back.value());
+  }
+
+  return des;
+}
+
 }  // namespace impeller
