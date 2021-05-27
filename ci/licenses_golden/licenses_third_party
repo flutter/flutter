@@ -1,4 +1,4 @@
-Signature: b3d5053dffccc172df187cc54dc09f5c
+Signature: 99bd00906270371c02d37cd9190c9012
 
 UNUSED LICENSES:
 
@@ -9400,6 +9400,20 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/x64_i
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/x64_macos.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/x64_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/arm64_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/arm64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/arm64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/arm64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/arm_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/arm_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/arm_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/ia32_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/ia32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/x64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/x64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/x64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/x64_win.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/arm64_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/arm64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/arm64_linux.expect
@@ -9880,6 +9894,11 @@ ORIGIN: ../../../third_party/dart/benchmarks/DartCLIStartup/dart/DartCLIStartup.
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/DartCLIStartup/dart/DartCLIStartup.dart
 FILE: ../../../third_party/dart/benchmarks/DartCLIStartup/dart2/DartCLIStartup.dart
+FILE: ../../../third_party/dart/benchmarks/MapLookup/dart/MapLookup.dart
+FILE: ../../../third_party/dart/benchmarks/MapLookup/dart/maps.dart
+FILE: ../../../third_party/dart/benchmarks/MapLookup/dart2/MapLookup.dart
+FILE: ../../../third_party/dart/benchmarks/MapLookup/dart2/maps.dart
+FILE: ../../../third_party/dart/benchmarks/MapLookup/generate_maps.dart
 FILE: ../../../third_party/dart/benchmarks/SDKArtifactSizes/dart/SDKArtifactSizes.dart
 FILE: ../../../third_party/dart/benchmarks/SDKArtifactSizes/dart2/SDKArtifactSizes.dart
 FILE: ../../../third_party/dart/runtime/bin/utils.cc
