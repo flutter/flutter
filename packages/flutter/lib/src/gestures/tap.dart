@@ -346,8 +346,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 ///  * [MultiTapGestureRecognizer]
 class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// Creates a tap gesture recognizer.
-  TapGestureRecognizer({ Object? debugOwner })
-    : super(debugOwner: debugOwner);
+  TapGestureRecognizer({ Object? debugOwner }) : super(debugOwner: debugOwner);
 
   /// A pointer has contacted the screen at a particular location with a primary
   /// button, which might be the start of a tap.
