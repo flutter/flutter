@@ -1991,10 +1991,6 @@ typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animatio
 /// contacted an existing focused widget. If not, this asks the [FocusScopeNode] to reset the
 /// focus state. This allows [TextField]s and other focusable widgets to give up their focus
 /// state, without creating a gesture detector that competes with others on screen.
-///
-/// See also:
-///   * [RenderFocusArea], which allows a focus node to own a larger render object
-///     subtree.
 class _FocusTrap extends SingleChildRenderObjectWidget {
   const _FocusTrap({
     required this.focusScopeNode,
