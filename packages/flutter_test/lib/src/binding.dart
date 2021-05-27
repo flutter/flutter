@@ -466,12 +466,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   TestBindingEventSource _pointerEventSource = TestBindingEventSource.device;
 
   /// Dispatch an event to the targets found by a hit test on its position,
-  /// and mark its source.
+  /// and remember its source as [pointerEventSource].
   ///
-  /// This method calls [handlePointerEvent] by default, but allows subclasses
-  /// to override this method to behave differently based on the event source.
-  /// The `source` argument is stored as [pointerEventSource] during the
-  /// enclosing [handlePointerEvent].
+  /// This method sets [pointerEventSource] to `source`, runs
+  /// [handlePointerEvent], then resets [pointerEventSource] to the previous
+  /// value.
   void handlePointerEventForSource(
     PointerEvent event, {
     TestBindingEventSource source = TestBindingEventSource.device,
@@ -479,6 +478,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     withPointerEventSource(source, () => handlePointerEvent(event));
   }
 
+  /// Sets [pointerEventSource] to `source`, runs `task`, then resets `source`
+  /// to the previous value.
   @protected
   void withPointerEventSource(TestBindingEventSource source, VoidCallback task) {
     final TestBindingEventSource previousSource = source;

@@ -79,7 +79,7 @@ void main() {
     await tester.pumpFrames(target, const Duration(milliseconds: 50));
 
     await expectLater(
-      await animationSheet.composite(1200),
+      animationSheet.collate(6),
       matchesGoldenFile('LiveBinding.press.animation.png'),
     );
   });

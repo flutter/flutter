@@ -6,6 +6,7 @@ import 'dart:math' as math;
 // import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -23,10 +24,8 @@ import 'package:flutter/widgets.dart';
 ///  * Create an instance of this class.
 ///  * Pump frames that render the target widget wrapped in [record]. Every frame
 ///    that has `recording` being true will be recorded.
-///  * Adjust the size of the test viewport to the [sheetSize] (see the
-///    documentation of [sheetSize] for more information).
-///  * Pump a frame that renders [display], which shows all recorded frames in an
-///    animation sheet, and can be matched against the golden test.
+///  * Acquire the output image with [collate] and compare against the golden
+///    file.
 ///
 /// {@tool snippet}
 /// The following example shows how to record an animation sheet of an [InkWell]
@@ -68,16 +67,9 @@ import 'package:flutter/widgets.dart';
 ///     recording: true,
 ///   ), const Duration(seconds: 1));
 ///
-///   // Adjust view port size
-///   tester.binding.setSurfaceSize(animationSheet.sheetSize());
-///
-///   // Display
-///   final Widget display = await animationSheet.display();
-///   await tester.pumpWidget(display);
-///
 ///   // Compare against golden file
 ///   await expectLater(
-///     find.byWidget(display),
+///     animationSheet.collate(800),
 ///     matchesGoldenFile('inkwell.press.animation.png'),
 ///   );
 /// }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
@@ -92,10 +84,14 @@ class AnimationSheetBuilder {
   ///
   /// The [frameSize] is a tight constraint for the child to be recorded, and must not
   /// be null.
+  ///
+  /// The [allLayers] controls whether to record elements drawn out of the subtree,
+  /// and defaults to false.
   AnimationSheetBuilder({
     required this.frameSize,
     this.allLayers = false,
-  }) : assert(frameSize != null);
+  }) : assert(!kIsWeb), // Does not support Web. See [AnimationSheetBuilder].
+       assert(frameSize != null);
 
   /// The size of the child to be recorded.
   ///
@@ -103,6 +99,20 @@ class AnimationSheetBuilder {
   /// fixed throughout the building session.
   final Size frameSize;
 
+  /// Whether the captured image comes from the entire tree, or only the
+  /// subtree of [record].
+  ///
+  /// If [allLayers] is false, then the [record] widget will capture the image
+  /// composited by its subtree.  If [allLayers] is true, then the [record] will
+  /// capture the entire tree composited and clipped by [record]'s region.
+  ///
+  /// The two modes are identical if there is nothing in front of [record].
+  /// But in rare cases, what needs to be captured has to be rendered out of
+  /// [record]'s subtree in its front. By setting [allLayers] to true, [record]
+  /// captures everything within its region even if drawn outside of its
+  /// subtree.
+  ///
+  /// Defaults to false.
   final bool allLayers;
 
   final List<Future<ui.Image>> _recordedFrames = <Future<ui.Image>>[];
@@ -139,7 +149,6 @@ class AnimationSheetBuilder {
   ///    with a fixed time interval.
   Widget record(Widget child, {
     Key? key,
-    bool fullscreen = false,
     bool recording = true,
   }) {
     assert(child != null);
@@ -167,6 +176,73 @@ class AnimationSheetBuilder {
   /// The `key` is applied to the root widget.
   ///
   /// This method can only be called if at least one frame has been recorded.
+  ///
+  /// The [display] is the legacy way of acquiring the output for comparison.
+  /// Using this way includes the following steps:
+  ///
+  ///  * Create an instance of this class.
+  ///  * Pump frames that render the target widget wrapped in [record]. Every frame
+  ///    that has `recording` being true will be recorded.
+  ///  * Adjust the size of the test viewport to the [sheetSize] (see the
+  ///    documentation of [sheetSize] for more information).
+  ///  * Pump a frame that renders [display], which shows all recorded frames in an
+  ///    animation sheet, and can be matched against the golden test.
+  ///
+  /// {@tool snippet}
+  /// The following example shows how to record an animation sheet of an [InkWell]
+  /// being pressed then released.
+  ///
+  /// ```dart
+  /// testWidgets('Inkwell animation sheet', (WidgetTester tester) async {
+  ///   // Create instance
+  ///   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(48, 24));
+  ///
+  ///   final Widget target = Material(
+  ///     child: Directionality(
+  ///       textDirection: TextDirection.ltr,
+  ///       child: InkWell(
+  ///         splashColor: Colors.blue,
+  ///         onTap: () {},
+  ///       ),
+  ///     ),
+  ///   );
+  ///
+  ///   // Optional: setup before recording (`recording` is false)
+  ///   await tester.pumpWidget(animationSheet.record(
+  ///     target,
+  ///     recording: false,
+  ///   ));
+  ///
+  ///   final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
+  ///
+  ///   // Start recording (`recording` is true)
+  ///   await tester.pumpFrames(animationSheet.record(
+  ///     target,
+  ///     recording: true,
+  ///   ), const Duration(seconds: 1));
+  ///
+  ///   await gesture.up();
+  ///
+  ///   await tester.pumpFrames(animationSheet.record(
+  ///     target,
+  ///     recording: true,
+  ///   ), const Duration(seconds: 1));
+  ///
+  ///   // Adjust view port size
+  ///   tester.binding.setSurfaceSize(animationSheet.sheetSize());
+  ///
+  ///   // Display
+  ///   final Widget display = await animationSheet.display();
+  ///   await tester.pumpWidget(display);
+  ///
+  ///   // Compare against golden file
+  ///   await expectLater(
+  ///     find.byWidget(display),
+  ///     matchesGoldenFile('inkwell.press.animation.png'),
+  ///   );
+  /// }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
+  /// ```
+  /// {@end-tool}
   Future<Widget> display({Key? key}) async {
     assert(_recordedFrames.isNotEmpty);
     final List<ui.Image> frames = await _frames;
@@ -184,8 +260,14 @@ class AnimationSheetBuilder {
     );
   }
 
-  Future<ui.Image> composite(double canvasWidth) async {
-    return _collateFrames(await _frames, frameSize, canvasWidth);
+  /// Returns an result image by putting all frames together in a table.
+  ///
+  /// This method returns a table of captured frames, `cellsPerRow` images
+  /// per row, from left to right, top to bottom.
+  ///
+  /// An example of using this method can be found at [AnimationSheetBuilder].
+  Future<ui.Image> collate(int cellsPerRow) async {
+    return _collateFrames(await _frames, frameSize, cellsPerRow);
   }
 
   /// Returns the smallest size that can contain all recorded frames.
@@ -329,8 +411,7 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   }
 }
 
-Future<ui.Image> _collateFrames(List<ui.Image> frames, Size frameSize, double canvasWidth) async {
-  final int cellsPerRow = (canvasWidth / frameSize.width).floor();
+Future<ui.Image> _collateFrames(List<ui.Image> frames, Size frameSize, int cellsPerRow) async {
   final int rowNum = (frames.length / cellsPerRow).ceil();
 
   final ui.PictureRecorder recorder = ui.PictureRecorder();
