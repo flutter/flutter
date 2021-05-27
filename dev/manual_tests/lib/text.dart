@@ -820,11 +820,12 @@ class Zalgo extends StatefulWidget {
 class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
   String? _text;
   late final Ticker _ticker = createTicker(_update)..start();
-  late math.Random _random = math.Random(widget.seed); // providing a seed is important for reproducibility;
+  math.Random _random = math.Random();
 
   @override
   void initState() {
     super.initState();
+    _random = math.Random(widget.seed); // providing a seed is important for reproducibility;
     _update(null);
   }
 
@@ -925,11 +926,12 @@ class Painting extends StatefulWidget {
 class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin {
   String? _text;
   late final Ticker _ticker = createTicker(_update)..start();
-  late math.Random _random = math.Random(widget.seed); // providing a seed is important for reproducibility;
+  math.Random _random = math.Random();
 
   @override
   void initState() {
     super.initState();
+    _random = math.Random(widget.seed); // providing a seed is important for reproducibility;
     _update(null);
   }
 
@@ -1052,7 +1054,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                     setState(() {
                       _ellipsize = value;
                       _random = math.Random(widget.seed); // reset for reproducibility
-                      if (_ticker.isActive == false)
+                      if (!_ticker.isActive)
                         _update(null);
                     });
                   },

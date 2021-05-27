@@ -90,7 +90,7 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   void dismissCard(CardModel card) {
-    if (_cardModels.contains(card) == true) {
+    if (_cardModels.contains(card)) {
       setState(() {
         _cardModels.remove(card);
       });
