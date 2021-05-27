@@ -16,6 +16,13 @@ import 'matchers.dart';
 
 const MethodCodec codec = JSONMethodCodec();
 
+Map<String, dynamic> _tagStateWithSerialCount(dynamic state, int serialCount) {
+  return <String, dynamic> {
+    'serialCount': serialCount,
+    'state': state,
+  };
+}
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -173,6 +180,67 @@ void testMain() {
     );
     expect(window.browserHistory, isA<SingleEntryBrowserHistory>());
     expect(window.browserHistory.urlStrategy!.getPath(), '/foo');
+  });
+
+  test('can replace in MultiEntriesBrowserHistory',
+      () async {
+    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+      TestHistoryEntry('initial state', null, '/initial'),
+    ), useSingle: false);
+    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+
+    Completer<void> callback = Completer<void>();
+    window.sendPlatformMessage(
+      'flutter/navigation',
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'routeInformationUpdated',
+        <String, dynamic>{
+          'location': '/baz',
+          'state': '/state',
+        },
+      )),
+      (_) { callback.complete(); },
+    );
+    await callback.future;
+    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
+    expect(window.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/state', 1));
+
+    callback = Completer<void>();
+    window.sendPlatformMessage(
+      'flutter/navigation',
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'routeInformationUpdated',
+        <String, dynamic>{
+          'location': '/baz',
+          'state': '/state1',
+          'replace': true
+        },
+      )),
+      (_) { callback.complete(); },
+    );
+    await callback.future;
+    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
+    expect(window.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/state1', 1));
+
+    callback = Completer<void>();
+    window.sendPlatformMessage(
+      'flutter/navigation',
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'routeInformationUpdated',
+        <String, dynamic>{
+          'location': '/foo',
+          'state': '/foostate1',
+        },
+      )),
+      (_) { callback.complete(); },
+    );
+    await callback.future;
+    expect(window.browserHistory.urlStrategy!.getPath(), '/foo');
+    expect(window.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/foostate1', 2));
+
+    await window.browserHistory.back();
+    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
+    expect(window.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/state1', 1));
   });
 
   test('initialize browser history with default url strategy (single)', () async {
