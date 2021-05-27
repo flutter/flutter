@@ -55,6 +55,7 @@ void main() {
       expect(pair.first.koid, duplicate.koid);
     });
 
+    // TODO(fxbug.dev/77599): Simplify once zx_object_get_info is available.
     test('reduced rights', () {
       // Set up handle.
       final HandleResult vmo = System.vmoCreate(2);
@@ -123,6 +124,7 @@ void main() {
       expect(koid, replaced.koid);
     });
 
+    // TODO(fxbug.dev/77599): Simplify once zx_object_get_info is available.
     test('reduced rights', () {
       // Set up handle.
       final HandleResult vmo = System.vmoCreate(2);
