@@ -92,13 +92,18 @@ class AnimationSheetBuilder {
   ///
   /// The [frameSize] is a tight constraint for the child to be recorded, and must not
   /// be null.
-  AnimationSheetBuilder({required this.frameSize}) : assert(frameSize != null);
+  AnimationSheetBuilder({
+    required this.frameSize,
+    this.allLayers = false,
+  }) : assert(frameSize != null);
 
   /// The size of the child to be recorded.
   ///
   /// This size is applied as a tight layout constraint for the child, and is
   /// fixed throughout the building session.
   final Size frameSize;
+
+  final bool allLayers;
 
   final List<Future<ui.Image>> _recordedFrames = <Future<ui.Image>>[];
   Future<List<ui.Image>> get _frames async {
@@ -141,7 +146,7 @@ class AnimationSheetBuilder {
     return _AnimationSheetRecorder(
       key: key,
       size: frameSize,
-      fullscreen: fullscreen,
+      allLayers: allLayers,
       handleRecorded: recording ? _recordedFrames.add : null,
       child: child,
     );
@@ -220,14 +225,14 @@ class _AnimationSheetRecorder extends StatefulWidget {
     this.handleRecorded,
     required this.child,
     required this.size,
-    required this.fullscreen,
+    required this.allLayers,
     Key? key,
   }) : super(key: key);
 
   final _RecordedHandler? handleRecorded;
   final Widget child;
   final Size size;
-  final bool fullscreen;
+  final bool allLayers;
 
   @override
   State<StatefulWidget> createState() => _AnimationSheetRecorderState();
@@ -239,8 +244,8 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
   void _record(Duration duration) {
     assert(widget.handleRecorded != null);
     final _RenderRootableRepaintBoundary boundary = boundaryKey.currentContext!.findRenderObject()! as _RenderRootableRepaintBoundary;
-    if (widget.fullscreen) {
-      widget.handleRecorded!(boundary.rootToImage());
+    if (widget.allLayers) {
+      widget.handleRecorded!(boundary.allLayersToImage());
     } else {
       widget.handleRecorded!(boundary.toImage());
     }
@@ -388,13 +393,15 @@ class _CellSheet extends StatelessWidget {
 }
 
 class _RenderRootableRepaintBoundary extends RenderRepaintBoundary {
-  Future<ui.Image> rootToImage({double pixelRatio = 1.0}) {
+  // Capture an image of the current state of the root (RenderView) and its
+  // children.
+  Future<ui.Image> allLayersToImage() {
     final TransformLayer rootLayer = _rootLayer();
-    final Matrix4 transform = (rootLayer.transform ?? Matrix4.identity()).clone();
-    // transform.scale(1 / transform[0]);
-    final RenderView renderView = RendererBinding.instance!.renderView;
-    final Rect rect = MatrixUtils.transformRect(transform, Offset.zero & renderView.size);
-    // print(transform);
+    final Matrix4 rootTransform = (rootLayer.transform ?? Matrix4.identity()).clone();
+    final Matrix4 transform = rootTransform.multiplied(getTransformTo(null));
+    final Rect rect = MatrixUtils.transformRect(transform, Offset.zero & size);
+    // The scale was used to fit the actual device. Revert it since the target
+    // is the logical display. Take transform[0] as the scale.
     return rootLayer.toImage(rect, pixelRatio: 1 / transform[0]);
   }
 
@@ -406,6 +413,8 @@ class _RenderRootableRepaintBoundary extends RenderRepaintBoundary {
   }
 }
 
+// A [RepaintBoundary], except that its render object has a `fullscreenToImage` method,
+// which can convert the root
 class _RootableRepaintBoundary extends SingleChildRenderObjectWidget {
   /// Creates a widget that isolates repaints.
   const _RootableRepaintBoundary({ Key? key, Widget? child }) : super(key: key, child: child);

@@ -39,18 +39,22 @@ void main() {
   });
 
   testWidgets('Should render on pointer events', (WidgetTester tester) async {
-    await binding.setSurfaceSize(const Size(200, 200));
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200));
-    final Widget target = MaterialApp(
-      home: Container(
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 128, 128, 128),
-          border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
-        ),
-        child: Center(
-          child: GestureDetector(
-            onTap: () {},
-            child: const Text('Test'),
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
+    final Widget target = Container(
+      padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
+      child: animationSheet.record(
+        MaterialApp(
+          home: Container(
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 128, 128, 128),
+              border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
+            ),
+            child: Center(
+              child: GestureDetector(
+                onTap: () {},
+                child: const Text('Test'),
+              ),
+            ),
           ),
         ),
       ),
@@ -58,21 +62,21 @@ void main() {
 
     await tester.pumpWidget(target);
 
-    await tester.pumpFrames(animationSheet.record(target, fullscreen: true), const Duration(milliseconds: 50));
+    await tester.pumpFrames(target, const Duration(milliseconds: 50));
 
     final TestGesture gesture1 = await tester.createGesture();
     await gesture1.down(tester.getCenter(find.byType(Text)) + const Offset(10, 10));
 
-    await tester.pumpFrames(animationSheet.record(target, fullscreen: true), const Duration(milliseconds: 100));
+    await tester.pumpFrames(target, const Duration(milliseconds: 100));
 
     final TestGesture gesture2 = await tester.createGesture();
     await gesture2.down(tester.getTopLeft(find.byType(Text)) + const Offset(30, -10));
     await gesture1.moveBy(const Offset(50, 50));
 
-    await tester.pumpFrames(animationSheet.record(target, fullscreen: true), const Duration(milliseconds: 100));
+    await tester.pumpFrames(target, const Duration(milliseconds: 100));
     await gesture1.up();
     await gesture2.up();
-    await tester.pumpFrames(animationSheet.record(target, fullscreen: true), const Duration(milliseconds: 50));
+    await tester.pumpFrames(target, const Duration(milliseconds: 50));
 
     await expectLater(
       await animationSheet.composite(1200),
