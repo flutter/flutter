@@ -281,7 +281,7 @@ class Stepper extends StatefulWidget {
   /// {@end-tool}
   final ControlsWidgetBuilder? controlsBuilder;
 
-  /// The z-coordinate at which to place this drawer relative to its parent.
+  /// The z-coordinate at which to place this stepper relative to its parent.
   ///
   /// This determines the elevation of the stepper widget when built horizontally.
   ///
