@@ -26,6 +26,10 @@ public interface MessageCodec<T> {
   /**
    * Decodes the specified message from binary.
    *
+   * <p><b>Warning:</b> The ByteBuffer is "direct" and it won't be valid beyond this call. Storing
+   * the ByteBuffer and using it later and will lead to a {@code java.nio.BufferUnderflowException}.
+   * If you want to retain the data you'll need to copy it.
+   *
    * @param message the {@link ByteBuffer} message, possibly null.
    * @return a T value representation of the bytes between the given buffer's current position and
    *     its limit, or null, if message is null.
