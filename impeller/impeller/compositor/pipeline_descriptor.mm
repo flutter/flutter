@@ -33,6 +33,9 @@ std::size_t PipelineDescriptor::GetHash() const {
     fml::HashCombineSeed(seed, vertex_descriptor_->GetHash());
   }
   fml::HashCombineSeed(seed, depth_stencil_pixel_format_);
+  fml::HashCombineSeed(seed, depth_attachment_descriptor_);
+  fml::HashCombineSeed(seed, front_stencil_attachment_descriptor_);
+  fml::HashCombineSeed(seed, back_stencil_attachment_descriptor_);
   return seed;
 }
 
@@ -42,7 +45,12 @@ bool PipelineDescriptor::IsEqual(const PipelineDescriptor& other) const {
          DeepCompareMap(entrypoints_, other.entrypoints_) &&
          color_attachment_descriptors_ == other.color_attachment_descriptors_ &&
          DeepComparePointer(vertex_descriptor_, other.vertex_descriptor_) &&
-         depth_stencil_pixel_format_ == other.depth_stencil_pixel_format_;
+         depth_stencil_pixel_format_ == other.depth_stencil_pixel_format_ &&
+         depth_attachment_descriptor_ == other.depth_attachment_descriptor_ &&
+         front_stencil_attachment_descriptor_ ==
+             other.front_stencil_attachment_descriptor_ &&
+         back_stencil_attachment_descriptor_ ==
+             other.back_stencil_attachment_descriptor_;
 }
 
 PipelineDescriptor& PipelineDescriptor::SetLabel(
@@ -90,6 +98,25 @@ PipelineDescriptor& PipelineDescriptor::SetDepthStencilPixelFormat(
   return *this;
 }
 
+PipelineDescriptor& PipelineDescriptor::SetDepthStencilAttachmentDescriptor(
+    DepthAttachmentDescriptor desc) {
+  depth_attachment_descriptor_ = desc;
+  return *this;
+}
+
+PipelineDescriptor& PipelineDescriptor::SetStencilAttachmentDescriptors(
+    StencilAttachmentDescriptor front_and_back) {
+  return SetStencilAttachmentDescriptors(front_and_back, front_and_back);
+}
+
+PipelineDescriptor& PipelineDescriptor::SetStencilAttachmentDescriptors(
+    StencilAttachmentDescriptor front,
+    StencilAttachmentDescriptor back) {
+  front_stencil_attachment_descriptor_ = front;
+  back_stencil_attachment_descriptor_ = back;
+  return *this;
+}
+
 MTLRenderPipelineDescriptor*
 PipelineDescriptor::GetMTLRenderPipelineDescriptor() const {
   auto descriptor = [[MTLRenderPipelineDescriptor alloc] init];
@@ -120,6 +147,16 @@ PipelineDescriptor::GetMTLRenderPipelineDescriptor() const {
       ToMTLPixelFormat(depth_stencil_pixel_format_);
 
   return descriptor;
+}
+
+id<MTLDepthStencilState> PipelineDescriptor::CreateDepthStencilDescriptor(
+    id<MTLDevice> device) const {
+  auto descriptor =
+      ToMTLDepthStencilDescriptor(depth_attachment_descriptor_,          //
+                                  front_stencil_attachment_descriptor_,  //
+                                  back_stencil_attachment_descriptor_    //
+      );
+  return [device newDepthStencilStateWithDescriptor:descriptor];
 }
 
 }  // namespace impeller
