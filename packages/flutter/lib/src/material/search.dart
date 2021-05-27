@@ -247,6 +247,8 @@ abstract class SearchDelegate<T> {
   ///
   /// If the user taps on a suggestion provided by [buildSuggestions] this
   /// string should be updated to that suggestion via the setter.
+  ///
+  /// As soon as the query is set, the cursor moves to the end position
   String get query => _queryTextController.text;
   set query(String value) {
     assert(query != null);
