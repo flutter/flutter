@@ -660,15 +660,45 @@ class WebDevFS implements DevFS {
 
   Dwds get dwds => webAssetServer.dwds;
 
-  @visibleForTesting
-  Future<DebugConnection> cachedExtensionFuture;
-
-  @visibleForTesting
-  StreamSubscription<void> connectedApps;
+  Future<DebugConnection> _cachedExtensionFuture;
+  StreamSubscription<void> _connectedApps;
 
   /// Connect and retrieve the [DebugConnection] for the current application.
+  ///
+  /// Only calls [AppConnection.runMain] on the subsequent connections.
   Future<ConnectionResult> connect(bool useDebugExtension) {
-    return connectToApplication(useDebugExtension, this, globals.logger, createVmServiceDelegate);
+    final Completer<ConnectionResult> firstConnection =
+        Completer<ConnectionResult>();
+    _connectedApps =
+        dwds.connectedApps.listen((AppConnection appConnection) async {
+      try {
+        final DebugConnection debugConnection = useDebugExtension
+            ? await (_cachedExtensionFuture ??=
+                dwds.extensionDebugConnections.stream.first)
+            : await dwds.debugConnection(appConnection);
+        if (firstConnection.isCompleted) {
+          appConnection.runMain();
+        } else {
+          final vm_service.VmService vmService = await createVmServiceDelegate(
+            Uri.parse(debugConnection.uri),
+            logger: globals.logger,
+          );
+          firstConnection
+              .complete(ConnectionResult(appConnection, debugConnection, vmService));
+        }
+      } on Exception catch (error, stackTrace) {
+        if (!firstConnection.isCompleted) {
+          firstConnection.completeError(error, stackTrace);
+        }
+      }
+    }, onError: (dynamic error, StackTrace stackTrace) {
+      globals.printError(
+          'Unknown error while waiting for debug connection:$error\n$stackTrace');
+      if (!firstConnection.isCompleted) {
+        firstConnection.completeError(error, stackTrace);
+      }
+    });
+    return firstConnection.future;
   }
 
   @override
@@ -723,7 +753,7 @@ class WebDevFS implements DevFS {
   @override
   Future<void> destroy() async {
     await webAssetServer.dispose();
-    await connectedApps?.cancel();
+    await _connectedApps?.cancel();
   }
 
   @override
@@ -1038,35 +1068,3 @@ To serve from a subpath "foo" (i.e. http://localhost:8080/foo/ instead of http:/
 
 For more information, see: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
 ''';
-
-
-/// Connect and retrieve the [DebugConnection] for the current application.
-@visibleForTesting
-Future<ConnectionResult> connectToApplication(bool useDebugExtension, WebDevFS devFS, Logger logger, Future<vm_service.VmService> Function(Uri, {Logger logger}) createVmService) {
-  final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
-  devFS.connectedApps = devFS.dwds.connectedApps.listen((AppConnection appConnection) async {
-    try {
-      final DebugConnection debugConnection = useDebugExtension
-          ? await (devFS.cachedExtensionFuture ??=
-              devFS.dwds.extensionDebugConnections.stream.first)
-          : await devFS.dwds.debugConnection(appConnection);
-      if (!firstConnection.isCompleted) {
-        final vm_service.VmService vmService = await createVmService(
-          Uri.parse(debugConnection.uri),
-          logger: logger,
-        );
-        firstConnection.complete(ConnectionResult(appConnection, debugConnection, vmService));
-      }
-    } on Exception catch (error, stackTrace) {
-      if (!firstConnection.isCompleted) {
-        firstConnection.completeError(error, stackTrace);
-      }
-    }
-  }, onError: (dynamic error, StackTrace stackTrace) {
-    logger.printError('Unknown error while waiting for debug connection:$error\n$stackTrace');
-    if (!firstConnection.isCompleted) {
-      firstConnection.completeError(error, stackTrace);
-    }
-  });
-  return firstConnection.future;
-}

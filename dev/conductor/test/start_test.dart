@@ -7,11 +7,11 @@
 import 'dart:convert' show jsonDecode;
 
 import 'package:args/command_runner.dart';
-import 'package:dev_tools/proto/conductor_state.pb.dart' as pb;
-import 'package:dev_tools/proto/conductor_state.pbenum.dart' show ReleasePhase;
-import 'package:dev_tools/repository.dart';
-import 'package:dev_tools/start.dart';
-import 'package:dev_tools/state.dart';
+import 'package:conductor/proto/conductor_state.pb.dart' as pb;
+import 'package:conductor/proto/conductor_state.pbenum.dart' show ReleasePhase;
+import 'package:conductor/repository.dart';
+import 'package:conductor/start.dart';
+import 'package:conductor/state.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';

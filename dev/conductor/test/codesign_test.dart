@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:dev_tools/codesign.dart';
-import 'package:dev_tools/globals.dart';
-import 'package:dev_tools/repository.dart';
+import 'package:conductor/codesign.dart';
+import 'package:conductor/globals.dart';
+import 'package:conductor/repository.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
