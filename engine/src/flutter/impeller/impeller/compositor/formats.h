@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <type_traits>
 
 #include "flutter/fml/hash_combine.h"
@@ -101,4 +102,111 @@ struct ColorAttachmentDescriptor {
   }
 };
 
+enum class CompareFunction {
+  kNever,
+  kLess,
+  kEqual,
+  kLessEqual,
+  kGreater,
+  kNotEqual,
+  kGreaterEqual,
+  kAlways,
+};
+
+enum class StencilOperation {
+  kKeep,
+  kZero,
+  kReplace,
+  kIncrementClamp,
+  kDecrementClamp,
+  kInvert,
+  kIncrementWrap,
+  kDecrementWrap,
+};
+
+struct DepthAttachmentDescriptor {
+  //----------------------------------------------------------------------------
+  /// Indicates how to compare the value with that in the depth buffer.
+  ///
+  CompareFunction depth_compare;
+  //----------------------------------------------------------------------------
+  /// Indicates when writes must be performed to the depth buffer.
+  ///
+  bool depth_write_enabled;
+
+  constexpr bool operator==(const DepthAttachmentDescriptor& o) const {
+    return depth_compare == o.depth_compare &&
+           depth_write_enabled == o.depth_write_enabled;
+  }
+
+  constexpr size_t GetHash() const {
+    return fml::HashCombine(depth_compare, depth_write_enabled);
+  }
+};
+
+struct StencilAttachmentDescriptor {
+  //----------------------------------------------------------------------------
+  /// Indicates the operation to perform between the reference value and the
+  /// value in the stencil buffer. Both values have the read_mask applied to
+  /// them before performing this operation.
+  ///
+  CompareFunction stencil_compare;
+  //----------------------------------------------------------------------------
+  /// Indicates what to do when the stencil test has failed.
+  ///
+  StencilOperation stencil_failure;
+  //----------------------------------------------------------------------------
+  /// Indicates what to do when the stencil test passes but the depth test
+  /// fails.
+  ///
+  StencilOperation depth_failure;
+  //----------------------------------------------------------------------------
+  /// Indicates what to do when both the stencil and depth tests pass.
+  ///
+  StencilOperation depth_stencil_pass;
+  //----------------------------------------------------------------------------
+  /// The mask applied to the reference and stencil buffer values before
+  /// performing the stencil_compare operation.
+  ///
+  uint32_t read_mask;
+  //----------------------------------------------------------------------------
+  /// The mask applied to the new stencil value before it is written into the
+  /// stencil buffer.
+  ///
+  uint32_t write_mask;
+
+  constexpr bool operator==(const StencilAttachmentDescriptor& o) const {
+    return stencil_compare == o.stencil_compare &&
+           stencil_failure == o.stencil_failure &&
+           depth_failure == o.depth_failure &&
+           depth_stencil_pass == o.depth_stencil_pass &&
+           read_mask == o.read_mask && write_mask == o.write_mask;
+  }
+
+  constexpr size_t GetHash() const {
+    return fml::HashCombine(stencil_compare, stencil_failure, depth_failure,
+                            depth_stencil_pass, read_mask);
+  }
+};
+
 }  // namespace impeller
+
+namespace std {
+
+template <>
+struct hash<impeller::DepthAttachmentDescriptor> {
+  constexpr std::size_t operator()(
+      const impeller::DepthAttachmentDescriptor& des) const {
+    return des.GetHash();
+  }
+};
+
+template <>
+struct hash<impeller::StencilAttachmentDescriptor> {
+  constexpr std::size_t operator()(
+      const impeller::StencilAttachmentDescriptor& des) const {
+    return des.GetHash();
+  }
+};
+
+}  // namespace std

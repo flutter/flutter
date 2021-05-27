@@ -33,8 +33,9 @@ std::future<std::shared_ptr<Pipeline>> PipelineLibrary::GetRenderPipeline(
                          << error.localizedDescription.UTF8String;
           promise->set_value(nullptr);
         } else {
-          auto new_pipeline =
-              std::shared_ptr<Pipeline>(new Pipeline(render_pipeline_state));
+          auto new_pipeline = std::shared_ptr<Pipeline>(
+              new Pipeline(render_pipeline_state,
+                           descriptor.CreateDepthStencilDescriptor(device_)));
           promise->set_value(new_pipeline);
           this->SavePipeline(descriptor, new_pipeline);
         }
