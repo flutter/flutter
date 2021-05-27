@@ -1786,7 +1786,7 @@ class SkParagraph {
     SkRectHeightStyle heightStyle,
     SkRectWidthStyle widthStyle,
   );
-  external List<Float32List> getRectsForPlaceholders();
+  external List<dynamic> getRectsForPlaceholders();
   external SkTextPosition getGlyphPositionAtCoordinate(
     double x,
     double y,
