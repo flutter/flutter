@@ -132,6 +132,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
         browserHistory.setRouteName(
           arguments!['location'],
           state: arguments['state'],
+          replace: arguments['replace'] ?? false,
         );
         return true;
     }
