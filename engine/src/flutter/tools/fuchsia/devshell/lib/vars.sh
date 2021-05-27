@@ -13,7 +13,6 @@ fi
 # Note: if this file location changes this path needs to change
 FLUTTER_ENGINE_SRC_DIR="$(dirname "$(dirname "$(dirname "$(dirname "$(dirname "${devshell_lib_dir}")")")")")"
 export FLUTTER_ENGINE_SRC_DIR
-export FLUTTER_ENGINE_OUT_DIR="${FLUTTER_ENGINE_OUT_DIR:-${FLUTTER_ENGINE_SRC_DIR}/out}"
 unset devshell_lib_dir
 
 # Find the fuchsia sdk location

@@ -41,46 +41,6 @@ template("_copy_debug_symbols") {
     }
 
     outputs = [ "${_dest_base}/.${target_name}_success" ]
-
-    if (!defined(deps)) {
-      deps = []
-    }
-    deps += [ ":${target_name}_soft_transition" ]
-  }
-
-  # TODO(fxbug.dev/76223): Soft transition recipes/engine.py to used
-  # canonicalized debug symbol name and then remove.
-  action(target_name + "_soft_transition") {
-    forward_variables_from(invoker,
-                           [
-                             "deps",
-                             "unstripped",
-                             "binary_path",
-                             "testonly",
-                           ])
-
-    script = "//flutter/tools/fuchsia/copy_debug_symbols.py"
-
-    sources = [ binary_path ]
-
-    _dest_base = "${root_out_dir}/flutter-debug-symbols-${flutter_runtime_mode}-${target_os}-${target_cpu}"
-
-    args = [
-      "--executable-name",
-      target_name,
-      "--executable-path",
-      rebase_path(binary_path),
-      "--destination-base",
-      rebase_path(_dest_base),
-      "--read-elf",
-      rebase_path("//buildtools/${host_os}-${host_cpu}/clang/bin/llvm-readelf"),
-    ]
-
-    if (unstripped) {
-      args += [ "--unstripped" ]
-    }
-
-    outputs = [ "${_dest_base}/.${target_name}_success" ]
   }
 }
 
