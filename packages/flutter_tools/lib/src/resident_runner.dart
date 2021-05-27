@@ -125,7 +125,7 @@ class FlutterDevice {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
-        initializeFromDill: getDefaultCachedKernelPath(
+        initializeFromDill: buildInfo.initializeFromDill ?? getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
@@ -168,7 +168,7 @@ class FlutterDevice {
         targetModel: targetModel,
         dartDefines: buildInfo.dartDefines,
         extraFrontEndOptions: extraFrontEndOptions,
-        initializeFromDill: getDefaultCachedKernelPath(
+        initializeFromDill: buildInfo.initializeFromDill ?? getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
