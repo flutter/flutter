@@ -16,7 +16,7 @@ class SettingsController with ChangeNotifier {
 
   // Make ThemeMode a private variable so it is not updated directly without
   // also persisting the changes with the SettingsService.
-  ThemeMode _themeMode;
+  late ThemeMode _themeMode;
 
   // Allow Widgets to read the user's preferred ThemeMode.
   ThemeMode get themeMode => _themeMode;
@@ -32,7 +32,9 @@ class SettingsController with ChangeNotifier {
   }
 
   /// Update and persist the ThemeMode based on the user's selection.
-  Future<void> updateThemeMode(ThemeMode newThemeMode) async {
+  Future<void> updateThemeMode(ThemeMode? newThemeMode) async {
+    if (newThemeMode == null) return;
+
     // Dot not perform any work if new and old ThemeMode are identical
     if (newThemeMode == _themeMode) return;
 

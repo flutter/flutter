@@ -137,7 +137,7 @@ void main() {
     ),
   });
 
-  testUsingContext('can create a list view/detail view app', () async {
+  testUsingContext('can create a skeleton (list/detail) app', () async {
     await _createAndAnalyzeProject(
       projectDir,
       <String>['-t', 'skeleton', '-i', 'objc', '-a', 'java', '--implementation-tests'],
@@ -2709,6 +2709,20 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     'cache',
     'flutter_tools.snapshot',
   ));
+
+  // Files generated using `flutter_gen` (for example, localization files)
+  // won't appear until we run `flutter packages get`.
+  await Process.run(
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    <String>[
+      flutterToolsSnapshotPath,
+      'packages',
+      'get',
+      // We don't actually need to download anything from pub.dev at this point.
+      '--offline'
+    ],
+    workingDirectory: workingDir,
+  );
 
   final List<String> args = <String>[
     flutterToolsSnapshotPath,

@@ -15,9 +15,9 @@ void main() {
   group('MyWidget', () {
     testWidgets('should display a string of text', (WidgetTester tester) async {
       // Define a Widget
-      final myWidget = MaterialApp(
+      const myWidget = MaterialApp(
         home: Scaffold(
-          body: const Text('Hello'),
+          body: Text('Hello'),
         ),
       );
 
