@@ -297,7 +297,7 @@ class AnimationSheetBuilder {
   ///
   /// This method can only be called if at least one frame has been recorded.
   @Deprecated(
-    "This method should only be useful to display, which should be replaced by collate. "
+    'The `sheetSize` is useful for `display`, which should be migrated to `collate`. '
     'This feature was deprecated after v2.3.0-13.0.pre.',
   )
   Size sheetSize({double maxWidth = _kDefaultTestViewportWidth}) {

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -772,8 +774,14 @@ void main() {
       ),
     ), const Duration(seconds: 2));
 
+    final ui.Image image = await animationSheet.collate(20);
+    // The deprecated `sheetSize` is used only for the migration from
+    // `AnimationSheetBuilder.display` to `collate`.
+    // ignore: deprecated_member_use
+    await tester.binding.setSurfaceSize(animationSheet.sheetSize());
+    await tester.pumpWidget(RawImage(image: image, filterQuality: FilterQuality.none));
     await expectLater(
-      animationSheet.collate(15),
+      find.byType(RawImage),
       matchesGoldenFile('material.circular_progress_indicator.indeterminate.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
