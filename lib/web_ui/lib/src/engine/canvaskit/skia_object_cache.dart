@@ -87,6 +87,85 @@ class SkiaObjectCache {
   }
 }
 
+/// Like [SkiaObjectCache] but enforces the [maximumSize] of the cache
+/// synchronously instead of waiting until a post-frame callback.
+class SynchronousSkiaObjectCache {
+  /// This cache will never exceed this limit, even temporarily.
+  final int maximumSize;
+
+  /// A doubly linked list of the objects in the cache.
+  ///
+  /// This makes it fast to move a recently used object to the front.
+  final DoubleLinkedQueue<SkiaObject> _itemQueue;
+
+  /// A map of objects to their associated node in the [_itemQueue].
+  ///
+  /// This makes it fast to find the node in the queue when we need to
+  /// move the object to the front of the queue.
+  final Map<SkiaObject, DoubleLinkedQueueEntry<SkiaObject>> _itemMap;
+
+  SynchronousSkiaObjectCache(this.maximumSize)
+      : _itemQueue = DoubleLinkedQueue<SkiaObject>(),
+        _itemMap = <SkiaObject, DoubleLinkedQueueEntry<SkiaObject>>{};
+
+  /// The number of objects in the cache.
+  int get length => _itemQueue.length;
+
+  /// Whether or not [object] is in the cache.
+  ///
+  /// This is only for testing.
+  @visibleForTesting
+  bool debugContains(SkiaObject object) {
+    return _itemMap.containsKey(object);
+  }
+
+  /// Adds [object] to the cache.
+  ///
+  /// If adding [object] causes the total size of the cache to exceed
+  /// [maximumSize], then the least recently used objects are evicted and
+  /// deleted.
+  void add(SkiaObject object) {
+    assert(
+      !_itemMap.containsKey(object),
+      'Cannot add object. Object is already in the cache: $object',
+    );
+    _itemQueue.addFirst(object);
+    _itemMap[object] = _itemQueue.firstEntry()!;
+    _enforceCacheLimit();
+  }
+
+  /// Marks the [object] as most recently used.
+  ///
+  /// If [object] is in the cache returns true. If the object is not in
+  /// the cache, for example, because it was never added or because it was
+  /// evicted as a result of the app reaching the cache limit, returns false.
+  bool markUsed(SkiaObject object) {
+    final DoubleLinkedQueueEntry<SkiaObject>? item = _itemMap[object];
+
+    if (item == null) {
+      return false;
+    }
+
+    item.remove();
+    _itemQueue.addFirst(object);
+    _itemMap[object] = _itemQueue.firstEntry()!;
+    return true;
+  }
+
+  /// Ensures the cache does not exceed [maximumSize], evicting objects if
+  /// necessary.
+  ///
+  /// Calls `delete` and `didDelete` on objects evicted from the cache.
+  void _enforceCacheLimit() {
+    while (_itemQueue.length > maximumSize) {
+      final SkiaObject oldObject = _itemQueue.removeLast();
+      _itemMap.remove(oldObject);
+      oldObject.delete();
+      oldObject.didDelete();
+    }
+  }
+}
+
 /// An object backed by a JavaScript object mapped onto a Skia C++ object in the
 /// WebAssembly heap.
 ///
@@ -304,13 +383,13 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object>
 
   /// If asserts are enabled, the [StackTrace]s representing when a reference
   /// was created.
-  List<StackTrace>? debugGetStackTraces() {
+  List<StackTrace> debugGetStackTraces() {
     if (assertionsEnabled) {
       return debugReferrers
           .map<StackTrace>((R referrer) => referrer.debugStackTrace)
           .toList();
     }
-    return null;
+    throw UnsupportedError('');
   }
 
   /// The Skia object whose lifecycle is being managed.

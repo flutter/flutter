@@ -524,15 +524,25 @@ SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
   return style;
 }
 
-class CkParagraph extends ManagedSkiaObject<SkParagraph>
-    implements ui.Paragraph {
+/// The CanvasKit implementation of [ui.Paragraph].
+///
+/// This class does not use [ManagedSkiaObject] because it requires that its
+/// memory is reclaimed synchronously. This protects our memory usage from
+/// blowing up if within a single frame the framework needs to layout a lot of
+/// paragraphs. One common use-case is `ListView.builder`, which needs to layout
+/// more of its content than it actually renders to compute the scroll position.
+/// More generally, this protects from the pattern of laying out a lot of text
+/// while painting a small subset of it. To achieve this a
+/// [SynchronousSkiaObjectCache] is used that limits the number of live laid out
+/// paragraphs at any point in time within or outside the frame.
+class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   CkParagraph(
-      this._initialParagraph, this._paragraphStyle, this._paragraphCommands);
+      this._skParagraph, this._paragraphStyle, this._paragraphCommands);
 
   /// The result of calling `build()` on the JS CkParagraphBuilder.
   ///
   /// This may be invalidated later.
-  final SkParagraph _initialParagraph;
+  SkParagraph? _skParagraph;
 
   /// The paragraph style used to build this paragraph.
   ///
@@ -553,74 +563,138 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
   ui.ParagraphConstraints? _lastLayoutConstraints;
 
   @override
-  SkParagraph createDefault() => _initialParagraph;
+  SkParagraph get skiaObject => _ensureInitialized(_lastLayoutConstraints!);
 
-  @override
-  SkParagraph resurrect() {
-    final builder = CkParagraphBuilder(_paragraphStyle);
-    for (_ParagraphCommand command in _paragraphCommands) {
-      switch (command.type) {
-        case _ParagraphCommandType.addText:
-          builder.addText(command.text!);
-          break;
-        case _ParagraphCommandType.pop:
-          builder.pop();
-          break;
-        case _ParagraphCommandType.pushStyle:
-          builder.pushStyle(command.style!);
-          break;
-        case _ParagraphCommandType.addPlaceholder:
-          builder._addPlaceholder(command.placeholderStyle!);
-          break;
+  SkParagraph _ensureInitialized(ui.ParagraphConstraints constraints) {
+    SkParagraph? paragraph = _skParagraph;
+
+    // Paragraph objects are immutable. It's OK to skip initialization and reuse
+    // existing object.
+    bool didRebuildSkiaObject = false;
+    if (paragraph == null) {
+      final builder = CkParagraphBuilder(_paragraphStyle);
+      for (_ParagraphCommand command in _paragraphCommands) {
+        switch (command.type) {
+          case _ParagraphCommandType.addText:
+            builder.addText(command.text!);
+            break;
+          case _ParagraphCommandType.pop:
+            builder.pop();
+            break;
+          case _ParagraphCommandType.pushStyle:
+            builder.pushStyle(command.style!);
+            break;
+          case _ParagraphCommandType.addPlaceholder:
+            builder._addPlaceholder(command.placeholderStyle!);
+            break;
+        }
+      }
+      paragraph = builder._buildSkParagraph();
+      _skParagraph = paragraph;
+      didRebuildSkiaObject = true;
+    }
+
+    final bool constraintsChanged = _lastLayoutConstraints != constraints;
+    if (didRebuildSkiaObject || constraintsChanged) {
+      _lastLayoutConstraints = constraints;
+      // TODO(het): CanvasKit throws an exception when laid out with
+      // a font that wasn't registered.
+      try {
+        paragraph.layout(constraints.width);
+        _alphabeticBaseline = paragraph.getAlphabeticBaseline();
+        _didExceedMaxLines = paragraph.didExceedMaxLines();
+        _height = paragraph.getHeight();
+        _ideographicBaseline = paragraph.getIdeographicBaseline();
+        _longestLine = paragraph.getLongestLine();
+        _maxIntrinsicWidth = paragraph.getMaxIntrinsicWidth();
+        _minIntrinsicWidth = paragraph.getMinIntrinsicWidth();
+        _width = paragraph.getMaxWidth();
+        _boxesForPlaceholders = skRectsToTextBoxes(paragraph.getRectsForPlaceholders());
+      } catch (e) {
+        printWarning('CanvasKit threw an exception while laying '
+            'out the paragraph. The font was "${_paragraphStyle._fontFamily}". '
+            'Exception:\n$e');
+        rethrow;
       }
     }
 
-    final SkParagraph result = builder._buildCkParagraph();
-    if (_lastLayoutConstraints != null) {
-      // We need to set the Skia object early so layout works.
-      rawSkiaObject = result;
-      this.layout(_lastLayoutConstraints!);
+    return paragraph;
+  }
+
+  // Caches laid out paragraphs and synchronously reclaims memory if there's
+  // memory pressure.
+  //
+  // On May 26, 2021, 500 seemed like a reasonable number to pick for the cache
+  // size. At the time a single laid out SkParagraph used 100KB of memory. So,
+  // 500 items in the cache is roughly 50MB of memory, which is not too high,
+  // while at the same time enough for most use-cases.
+  //
+  // TODO(yjbanov): this strategy is not sufficient for the use-case where a
+  //                lot of paragraphs are laid out _and_ rendered. To support
+  //                this use-case without blowing up memory usage we need this:
+  //                https://github.com/flutter/flutter/issues/81224
+  static SynchronousSkiaObjectCache _paragraphCache = SynchronousSkiaObjectCache(500);
+
+  /// Marks this paragraph as having been used this frame.
+  ///
+  /// Puts this paragraph in a [SynchronousSkiaObjectCache], which will delete it
+  /// if there's memory pressure to do so. This protects our memory usage from
+  /// blowing up if within a single frame the framework needs to layout a lot of
+  /// paragraphs. One common use-case is `ListView.builder`, which needs to layout
+  /// more of its content than it actually renders to compute the scroll position.
+  void markUsed() {
+    // If the paragraph is already in the cache, just mark it as most recently
+    // used. Otherwise, add to cache.
+    if (!_paragraphCache.markUsed(this)) {
+      _paragraphCache.add(this);
     }
-    return result;
   }
 
   @override
   void delete() {
-    rawSkiaObject?.delete();
+    _skParagraph!.delete();
   }
 
   @override
-  bool get isResurrectionExpensive => true;
-
-  @override
-  double get alphabeticBaseline => skiaObject.getAlphabeticBaseline();
-
-  @override
-  bool get didExceedMaxLines => skiaObject.didExceedMaxLines();
-
-  @override
-  double get height => skiaObject.getHeight();
-
-  @override
-  double get ideographicBaseline => skiaObject.getIdeographicBaseline();
-
-  @override
-  double get longestLine => skiaObject.getLongestLine();
-
-  @override
-  double get maxIntrinsicWidth => skiaObject.getMaxIntrinsicWidth();
-
-  @override
-  double get minIntrinsicWidth => skiaObject.getMinIntrinsicWidth();
-
-  @override
-  double get width => skiaObject.getMaxWidth();
-
-  @override
-  List<ui.TextBox> getBoxesForPlaceholders() {
-    List<List<double>> skRects = skiaObject.getRectsForPlaceholders();
-    return skRectsToTextBoxes(skRects);
+  void didDelete() {
+    _skParagraph = null;
   }
+
+  @override
+  double get alphabeticBaseline => _alphabeticBaseline;
+  double _alphabeticBaseline = 0;
+
+  @override
+  bool get didExceedMaxLines => _didExceedMaxLines;
+  bool _didExceedMaxLines = false;
+
+  @override
+  double get height => _height;
+  double _height = 0;
+
+  @override
+  double get ideographicBaseline => _ideographicBaseline;
+  double _ideographicBaseline = 0;
+
+  @override
+  double get longestLine => _longestLine;
+  double _longestLine = 0;
+
+  @override
+  double get maxIntrinsicWidth => _maxIntrinsicWidth;
+  double _maxIntrinsicWidth = 0;
+
+  @override
+  double get minIntrinsicWidth => _minIntrinsicWidth;
+  double _minIntrinsicWidth = 0;
+
+  @override
+  double get width => _width;
+  double _width = 0;
+
+  @override
+  List<ui.TextBox> getBoxesForPlaceholders() => _boxesForPlaceholders!;
+  List<ui.TextBox>? _boxesForPlaceholders;
 
   @override
   List<ui.TextBox> getBoxesForRange(
@@ -633,7 +707,8 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
       return const <ui.TextBox>[];
     }
 
-    List<List<double>> skRects = skiaObject.getRectsForRange(
+    final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
+    final List<List<double>> skRects = paragraph.getRectsForRange(
       start,
       end,
       toSkRectHeightStyle(boxHeightStyle),
@@ -643,7 +718,7 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
     return skRectsToTextBoxes(skRects);
   }
 
-  List<ui.TextBox> skRectsToTextBoxes(List<List<double>> skRects) {
+  List<ui.TextBox> skRectsToTextBoxes(List<dynamic> skRects) {
     List<ui.TextBox> result = <ui.TextBox>[];
 
     for (int i = 0; i < skRects.length; i++) {
@@ -662,8 +737,9 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
 
   @override
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
+    final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
     final SkTextPosition positionWithAffinity =
-        skiaObject.getGlyphPositionAtCoordinate(
+        paragraph.getGlyphPositionAtCoordinate(
       offset.dx,
       offset.dy,
     );
@@ -672,29 +748,27 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
 
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
-    final SkTextRange skRange = skiaObject.getWordBoundary(position.offset);
+    final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
+    final SkTextRange skRange = paragraph.getWordBoundary(position.offset);
     return ui.TextRange(start: skRange.start, end: skRange.end);
   }
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
-    _lastLayoutConstraints = constraints;
-
-    // TODO(het): CanvasKit throws an exception when laid out with
-    // a font that wasn't registered.
-    try {
-      skiaObject.layout(constraints.width);
-    } catch (e) {
-      printWarning('CanvasKit threw an exception while laying '
-          'out the paragraph. The font was "${_paragraphStyle._fontFamily}". '
-          'Exception:\n$e');
-      rethrow;
+    if (_lastLayoutConstraints == constraints) {
+      return;
     }
+    _ensureInitialized(constraints);
+
+    // See class-level and _paragraphCache doc comments for why we're releasing
+    // the paragraph immediately after layout.
+    markUsed();
   }
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    final List<SkLineMetrics> metrics = skiaObject.getLineMetrics();
+    final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
+    final List<SkLineMetrics> metrics = paragraph.getLineMetrics();
     final int offset = position.offset;
     for (final SkLineMetrics metric in metrics) {
       if (offset >= metric.startIndex && offset <= metric.endIndex) {
@@ -706,7 +780,8 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
 
   @override
   List<ui.LineMetrics> computeLineMetrics() {
-    final List<SkLineMetrics> skLineMetrics = skiaObject.getLineMetrics();
+    final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
+    final List<SkLineMetrics> skLineMetrics = paragraph.getLineMetrics();
     final List<ui.LineMetrics> result = <ui.LineMetrics>[];
     for (final SkLineMetrics metric in skLineMetrics) {
       result.add(CkLineMetrics._(metric));
@@ -997,15 +1072,14 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     _commands.add(_ParagraphCommand.addText(text));
     _paragraphBuilder.addText(text);
   }
-
   @override
   CkParagraph build() {
-    final builtParagraph = _buildCkParagraph();
+    final builtParagraph = _buildSkParagraph();
     return CkParagraph(builtParagraph, _style, _commands);
   }
 
   /// Builds the CkParagraph with the builder and deletes the builder.
-  SkParagraph _buildCkParagraph() {
+  SkParagraph _buildSkParagraph() {
     final SkParagraph result = _paragraphBuilder.build();
     _paragraphBuilder.delete();
     return result;
