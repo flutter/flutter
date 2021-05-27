@@ -754,6 +754,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return Rect.fromLTRB(topLeft.dx, topLeft.dy, bottomRight.dx, bottomRight.dy);
   }
 
+  /// Whether this focus node is already attached to the widget tree.
+  bool get hasAttachment => _context != null;
+
   /// Removes the focus on this node by moving the primary focus to another node.
   ///
   /// This method removes focus from a node that has the primary focus, cancels

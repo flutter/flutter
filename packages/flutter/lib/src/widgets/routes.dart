@@ -2099,10 +2099,6 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
         hitCurrentFocus = true;
         break;
       }
-      if (target is RenderFocusArea && target.focusNode == currentFocus) {
-        hitCurrentFocus = true;
-        break;
-      }
     }
     if (!hitCurrentFocus)
       focusScopeNode.unfocus(disposition: UnfocusDisposition.scope);
