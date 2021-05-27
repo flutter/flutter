@@ -87,7 +87,7 @@ class PhysicalKeyData {
   /// # key 101 "KEY_LINEFEED"
   /// key 477   F12               FUNCTION
   ///
-  /// We parse the commented out lines as well as the non-commented lines, so so
+  /// We parse the commented out lines as well as the non-commented lines, so
   /// that we can get names for all of the available scan codes, not just ones
   /// defined for the generic profile.
   ///
@@ -231,8 +231,8 @@ class PhysicalKeyData {
         linuxScanCode: linuxScanCode == 0 ? null : linuxScanCode,
         xKbScanCode: xKbScanCode == 0 ? null : xKbScanCode,
         windowsScanCode: windowsScanCode == 0 ? null : windowsScanCode,
-        macOsScanCode: macScanCode == 0xffff ? null : macScanCode,
-        iosScanCode: (usbHidCode & 0x070000) == 0x070000 ? (usbHidCode ^ 0x070000) : null,
+        macOSScanCode: macScanCode == 0xffff ? null : macScanCode,
+        iOSScanCode: (usbHidCode & 0x070000) == 0x070000 ? (usbHidCode ^ 0x070000) : null,
         name: name,
         chromiumCode: chromiumCode,
       );
@@ -267,8 +267,8 @@ class PhysicalKeyEntry {
     required this.linuxScanCode,
     required this.xKbScanCode,
     required this.windowsScanCode,
-    required this.macOsScanCode,
-    required this.iosScanCode,
+    required this.macOSScanCode,
+    required this.iOSScanCode,
     required this.chromiumCode,
     required this.glfwKeyCodes,
   });
@@ -283,8 +283,8 @@ class PhysicalKeyEntry {
       linuxScanCode: map['scanCodes']['linux'] as int?,
       xKbScanCode: map['scanCodes']['xkb'] as int?,
       windowsScanCode: map['scanCodes']['windows'] as int?,
-      macOsScanCode: map['scanCodes']['macos'] as int?,
-      iosScanCode: map['scanCodes']['ios'] as int?,
+      macOSScanCode: map['scanCodes']['macos'] as int?,
+      iOSScanCode: map['scanCodes']['ios'] as int?,
       glfwKeyCodes: (map['keyCodes']?['glfw'] as List<dynamic>?)?.cast<int>() ?? <int>[],
     );
   }
@@ -299,9 +299,9 @@ class PhysicalKeyEntry {
   /// The Windows scan code of the key from Chromium's header file.
   final int? windowsScanCode;
   /// The macOS scan code of the key from Chromium's header file.
-  final int? macOsScanCode;
+  final int? macOSScanCode;
   /// The iOS scan code of the key from UIKey's documentation (USB Hid table)
-  final int? iosScanCode;
+  final int? iOSScanCode;
   /// The list of Android scan codes matching this key, created by looking up
   /// the Android name in the Chromium data, and substituting the Android scan
   /// code value.
@@ -330,8 +330,8 @@ class PhysicalKeyEntry {
         'linux': linuxScanCode,
         'xkb': xKbScanCode,
         'windows': windowsScanCode,
-        'macos': macOsScanCode,
-        'ios': iosScanCode,
+        'macos': macOSScanCode,
+        'ios': iOSScanCode,
       },
       'keyCodes': <String, List<int>>{
         'glfw': glfwKeyCodes,
@@ -380,9 +380,9 @@ class PhysicalKeyEntry {
   String toString() {
     return """'$constantName': (name: "$name", usbHidCode: ${toHex(usbHidCode)}, """
         'linuxScanCode: ${toHex(linuxScanCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '
-        'windowsKeyCode: ${toHex(windowsScanCode)}, macOsScanCode: ${toHex(macOsScanCode)}, '
+        'windowsKeyCode: ${toHex(windowsScanCode)}, macOSScanCode: ${toHex(macOSScanCode)}, '
         'windowsScanCode: ${toHex(windowsScanCode)}, chromiumSymbolName: $chromiumCode '
-        'iOSScanCode: ${toHex(iosScanCode)})';
+        'iOSScanCode: ${toHex(iOSScanCode)})';
   }
 
   static int compareByUsbHidCode(PhysicalKeyEntry a, PhysicalKeyEntry b) =>

@@ -25,5 +25,5 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     ),
-  );
+  ).scheduleFrame();
 }

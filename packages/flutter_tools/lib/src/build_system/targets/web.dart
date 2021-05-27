@@ -17,7 +17,7 @@ import '../../build_info.dart';
 import '../../cache.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
-import '../../globals.dart' as globals;
+import '../../globals_null_migrated.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';

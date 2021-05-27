@@ -321,7 +321,11 @@ void main() {
     pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  });
+
+    // TODO(yjbanov): ahem.ttf doesn't have Chinese glyphs, making this test
+    //                sensitive to browser/OS when running in web mode:
+    //                https://github.com/flutter/flutter/issues/83129
+  }, skip: kIsWeb);
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();

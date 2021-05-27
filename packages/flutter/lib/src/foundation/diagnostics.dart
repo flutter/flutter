@@ -32,7 +32,7 @@ enum DiagnosticLevel {
   /// the diagnostics to be formatted consistently with other diagnostics and
   /// they should expect them to sometimes be misleading. For example,
   /// [FlagProperty] and [ObjectFlagProperty] have uglier formatting when the
-  /// property `value` does does not match a value with a custom flag
+  /// property `value` does not match a value with a custom flag
   /// description. An example of a misleading diagnostic is a diagnostic for
   /// a property that has no effect because some other property of the object is
   /// set in a way that causes the hidden property to have no effect.
