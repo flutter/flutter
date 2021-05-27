@@ -35,7 +35,7 @@ List<String> _xattrArgs(FlutterProject flutterProject) {
     '-r',
     '-d',
     'com.apple.FinderInfo',
-    flutterProject.ios.hostAppRoot.path,
+    flutterProject.directory.path,
   ];
 }
 

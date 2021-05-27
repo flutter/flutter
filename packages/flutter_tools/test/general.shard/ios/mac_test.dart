@@ -456,10 +456,10 @@ Exited (sigterm)''',
   });
 
   group('remove Finder extended attributes', () {
-    Directory iosProjectDirectory;
+    Directory projectDirectory;
     setUp(() {
       final MemoryFileSystem fs = MemoryFileSystem.test();
-      iosProjectDirectory = fs.directory('ios');
+      projectDirectory = fs.directory('flutter_project');
     });
 
     testWithoutContext('removes xattr', () async {
@@ -469,11 +469,11 @@ Exited (sigterm)''',
           '-r',
           '-d',
           'com.apple.FinderInfo',
-          iosProjectDirectory.path,
+          projectDirectory.path,
         ])
       ]);
 
-      await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
+      await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
       expect(processManager, hasNoRemainingExpectations);
     });
 
@@ -484,12 +484,12 @@ Exited (sigterm)''',
           '-r',
           '-d',
           'com.apple.FinderInfo',
-          iosProjectDirectory.path,
+          projectDirectory.path,
         ], exitCode: 1,
         )
       ]);
 
-      await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
+      await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
       expect(logger.traceText, contains('Failed to remove xattr com.apple.FinderInfo'));
       expect(processManager, hasNoRemainingExpectations);
     });
