@@ -294,6 +294,9 @@ def to_gn_args(args):
     # even with -fPIC everywhere.
     # gn_args['enable_profiling'] = args.runtime_mode != 'release' and args.android_cpu != 'x86'
 
+    # Make symbols visible in order to enable symbolization of unit test crash backtraces on Linux
+    gn_args['disable_hidden_visibility'] = args.target_os == 'linux' and args.unoptimized
+
     if args.arm_float_abi:
       gn_args['arm_float_abi'] = args.arm_float_abi
 
