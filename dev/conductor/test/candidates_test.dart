@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:dev_tools/candidates.dart';
-import 'package:dev_tools/repository.dart';
+import 'package:conductor/candidates.dart';
+import 'package:conductor/repository.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
@@ -147,7 +147,6 @@ void main() {
       expect(stdio.stdout.contains(newBranch), true);
       expect(stdio.stdout.contains(oldBranch), false);
       expect(stdio.stdout.contains(currentBranch), false);
-      print(stdio.stdout);
     });
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),

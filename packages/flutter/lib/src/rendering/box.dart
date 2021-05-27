@@ -2272,7 +2272,7 @@ abstract class RenderBox extends RenderObject {
         // Checking that getDryLayout computes the same size.
         _dryLayoutCalculationValid = true;
         RenderObject.debugCheckingIntrinsics = true;
-        late Size dryLayoutSize;
+        final Size dryLayoutSize;
         try {
           dryLayoutSize = getDryLayout(constraints);
         } finally {
@@ -2322,9 +2322,9 @@ abstract class RenderBox extends RenderObject {
 
   /// {@macro flutter.rendering.RenderObject.performResize}
   ///
-  /// By default this method calls [getDryLayout] with the current
-  /// [constraints]. Instead of overriding this method, consider overriding
-  /// [computeDryLayout] (the backend implementation of [getDryLayout]).
+  /// By default this method sets [size] to the result of [computeDryLayout]
+  /// called with the current [constraints]. Instead of overriding this method,
+  /// consider overriding [computeDryLayout].
   @override
   void performResize() {
     // default behavior for subclasses that have sizedByParent = true

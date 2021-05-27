@@ -395,11 +395,13 @@ Review licenses that have not been accepted (y/N)?
       userMessages: UserMessages(),
     );
 
+    final String errorMessage = UserMessages().androidMissingCmdTools;
+
     final ValidationResult validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.missing);
     expect(
       validationResult.messages.last.message,
-      'cmdline-tools component is missing',
+      errorMessage,
     );
   });
 
