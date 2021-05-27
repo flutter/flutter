@@ -176,6 +176,22 @@ template("gcc_toolchain") {
       replace_command = "if ! cmp -s $temporary_tocname $tocfile; then mv $temporary_tocname $tocfile; fi"
 
       command = "$link_command && $toc_command && $replace_command"
+      if (stripped_symbols) {
+        if (defined(invoker.strip) || defined(invoker.llvm_objcopy)) {
+          unstripped_outfile = "{{root_out_dir}}/lib.unstripped/$sofile"
+          pre_strip_command = "mkdir -p {{root_out_dir}}/lib.unstripped && cp $sofile {{root_out_dir}}/lib.unstripped/"
+        }
+        if (defined(invoker.strip)) {
+          strip = invoker.strip
+          strip_command =
+              "${strip} --strip-unneeded -o  $sofile $unstripped_outfile"
+          command += " && " + pre_strip_command + " && " + strip_command
+        } else if (defined(invoker.llvm_objcopy)) {
+          strip = invoker.llvm_objcopy
+          strip_command = "${strip} --strip-all $unstripped_outfile $sofile"
+          command += " && " + pre_strip_command + " && " + strip_command
+        }
+      }
       if (defined(invoker.postsolink)) {
         command += " && " + invoker.postsolink
       }
