@@ -6,11 +6,11 @@
 
 ### Serves the out directory
 ## usage:
-##   -p port for "pm serve" to listen on
-##   -d device_name to use for connecting
-##   -r If you are running a remote workflow
-##   --only-serve-runners If set will only serve the flutter and dart runners
-##   --out the out directory (ex: fuchsia_debug_x64)
+##   --out <out_dir> Required. The out directory (ex: out/fuchsia_debug_x64).
+##   -p <port> Optional. The port for "pm serve" to listen on. Defaults to 8084.
+##   -d <device_name> Required for local workflows. The device_name to use for connecting.
+##   -r Optional. Serve to a remote target.
+##   --only-serve-runners Optional. Only serve the flutter and dart runners.
 
 #TODO: Take an out directory and use that to find the list of packages to publish
 
@@ -19,12 +19,17 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/lib/vars.
 # We need to use the fuchsia checkout still, make sure it is there
 ensure_fuchsia_dir
 
-remote=false
-device_name=""
+out=""
 port="8084"
+device_name=""
+remote=false
 only_serve_runners=false
 while (($#)); do
   case "$1" in
+    --out)
+      out="$2"
+      shift
+      ;;
     -p)
       port="$2"
       shift
@@ -46,17 +51,25 @@ while (($#)); do
   shift
 done
 
+if [[ -z "${out}" ]]; then
+  engine-error "Must specify an out directory, such as out/fuchsia_debug_x64"
+  exit 1
+fi
+
 # Start our package server
 # TODO: Need to ask for the out directory to find the package list
 # TODO: Generate the all_packages.list file
 cd "${FLUTTER_ENGINE_SRC_DIR}" || exit
 "${FLUTTER_ENGINE_FUCHSIA_SDK_DIR}/tools/pm" serve -vt \
-  -repo "${FLUTTER_ENGINE_OUT_DIR}/tuf" \
+  -repo "${FLUTTER_ENGINE_FUCHSIA_SDK_DIR}/${out}/tuf" \
   -l ":${port}" \
   -p "${FLUTTER_ENGINE_SRC_DIR}/flutter/tools/fuchsia/all_packages.list"&
 serve_pid=$!
 
-# TODO: Set up the debug symbol server
+# Add debug symbols to the symbol index.
+"${FLUTTER_ENGINE_FUCHSIA_SDK_DIR}/tools/symbol-index" add \
+  "${FLUTTER_ENGINE_SRC_DIR}/${out}/.build-id" \
+  "${FLUTTER_ENGINE_SRC_DIR}/${out}"
 
 # Start our server and loop to check if our device is up give some slack time
 # to ensure that pm has started
