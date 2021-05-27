@@ -178,6 +178,10 @@ class AnimationSheetBuilder {
   /// This method can only be called if at least one frame has been recorded.
   ///
   /// The [display] is the legacy way of acquiring the output for comparison.
+  /// It is not recommended because it requires more boilerplate, and produces
+  /// a much large image than necessary: each pixel is rendered in 3x3 pixels
+  /// without higher definition. Use [collate] instead.
+  ///
   /// Using this way includes the following steps:
   ///
   ///  * Create an instance of this class.
@@ -243,6 +247,10 @@ class AnimationSheetBuilder {
   /// }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
   /// ```
   /// {@end-tool}
+  @Deprecated(
+    'Use collate instead. '
+    'This feature was deprecated after v2.3.0-13.0.pre.',
+  )
   Future<Widget> display({Key? key}) async {
     assert(_recordedFrames.isNotEmpty);
     final List<ui.Image> frames = await _frames;
@@ -288,6 +296,10 @@ class AnimationSheetBuilder {
   /// The `maxWidth` defaults to the width of the default viewport, 800.0.
   ///
   /// This method can only be called if at least one frame has been recorded.
+  @Deprecated(
+    "This method should only be useful to display, which should be replaced by collate. "
+    'This feature was deprecated after v2.3.0-13.0.pre.',
+  )
   Size sheetSize({double maxWidth = _kDefaultTestViewportWidth}) {
     assert(_recordedFrames.isNotEmpty);
     final int cellsPerRow = (maxWidth / frameSize.width).floor();
