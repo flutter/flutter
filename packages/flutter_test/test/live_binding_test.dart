@@ -58,22 +58,24 @@ void main() {
 
     await tester.pumpWidget(target);
 
-    final TestGesture gesture = await tester.createGesture();
-    await gesture.down(tester.getCenter(find.byType(Text)) + const Offset(10, 10));
+    await tester.pumpFrames(animationSheet.record(target, fullscreen: true), const Duration(milliseconds: 50));
 
-    await tester.pumpFrames(animationSheet.record(target, fullscreen: true), const Duration(seconds: 1));
+    final TestGesture gesture1 = await tester.createGesture();
+    await gesture1.down(tester.getCenter(find.byType(Text)) + const Offset(10, 10));
 
-    debugDumpLayerTree();
+    await tester.pumpFrames(animationSheet.record(target, fullscreen: true), const Duration(milliseconds: 100));
 
-    await gesture.up(timeStamp: const Duration(seconds: 1));
+    final TestGesture gesture2 = await tester.createGesture();
+    await gesture2.down(tester.getTopLeft(find.byType(Text)) + const Offset(30, -10));
+    await gesture1.moveBy(const Offset(50, 50));
 
-    await tester.pumpFrames(animationSheet.record(target, fullscreen: true), const Duration(seconds: 1));
+    await tester.pumpFrames(animationSheet.record(target, fullscreen: true), const Duration(milliseconds: 100));
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpFrames(animationSheet.record(target, fullscreen: true), const Duration(milliseconds: 50));
 
-    // tester.binding.setSurfaceSize(animationSheet.sheetSize());
-    // final Widget display = await animationSheet.display();
-    // await tester.pumpWidget(display);
     await expectLater(
-      await animationSheet.composite(),
+      await animationSheet.composite(1200),
       matchesGoldenFile('LiveBinding.press.animation.png'),
     );
   });

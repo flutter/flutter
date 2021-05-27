@@ -179,25 +179,8 @@ class AnimationSheetBuilder {
     );
   }
 
-  Future<ui.Image> composite() async {
-    final List<ui.Image> frames = await _frames;
-
-    // final ui.Image image = frames[(frames.length / 2).floor()];
-    // final ByteData bytes = (await image.toByteData())!;
-    // final List<int> d = <int>[];
-    // for (int i = 0; i < bytes.lengthInBytes / 8; i += 1)
-    //   d.add(bytes.getUint64(i));
-    // print(d);
-
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(
-      recorder,
-      Rect.fromLTWH(0, 0, frameSize.width, frameSize.height * frames.length),
-    );
-    for (int i = 0; i < frames.length; i += 1) {
-      canvas.drawImage(frames[i], Offset(0, frameSize.height * (i-1)), Paint());
-    }
-    return recorder.endRecording().toImage(frameSize.width.toInt(), (frameSize.height * frames.length).toInt());
+  Future<ui.Image> composite(double canvasWidth) async {
+    return _collateFrames(await _frames, frameSize, canvasWidth);
   }
 
   /// Returns the smallest size that can contain all recorded frames.
@@ -341,6 +324,28 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   }
 }
 
+Future<ui.Image> _collateFrames(List<ui.Image> frames, Size frameSize, double canvasWidth) async {
+  final int cellsPerRow = (canvasWidth / frameSize.width).floor();
+  final int rowNum = (frames.length / cellsPerRow).ceil();
+
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final Canvas canvas = Canvas(
+    recorder,
+    Rect.fromLTWH(0, 0, frameSize.width * cellsPerRow, frameSize.height * rowNum),
+  );
+  for (int i = 0; i < frames.length; i += 1) {
+    canvas.drawImage(
+      frames[i],
+      Offset(frameSize.width * (i % cellsPerRow), frameSize.height * (i / cellsPerRow).floor()),
+      Paint(),
+    );
+  }
+  return recorder.endRecording().toImage(
+    (frameSize.width * cellsPerRow).toInt(),
+    (frameSize.height * rowNum).toInt(),
+  );
+}
+
 // Layout children in a grid of fixed-sized cells.
 //
 // The sheet fills up as much space as the parent allows. The cells are
@@ -384,15 +389,20 @@ class _CellSheet extends StatelessWidget {
 
 class _RenderRootableRepaintBoundary extends RenderRepaintBoundary {
   Future<ui.Image> rootToImage({double pixelRatio = 1.0}) {
+    final TransformLayer rootLayer = _rootLayer();
+    final Matrix4 transform = (rootLayer.transform ?? Matrix4.identity()).clone();
+    // transform.scale(1 / transform[0]);
+    final RenderView renderView = RendererBinding.instance!.renderView;
+    final Rect rect = MatrixUtils.transformRect(transform, Offset.zero & renderView.size);
+    // print(transform);
+    return rootLayer.toImage(rect, pixelRatio: 1 / transform[0]);
+  }
+
+  TransformLayer _rootLayer() {
     Layer layer = this.layer!;
     while (layer.parent != null)
       layer = layer.parent!;
-    final TransformLayer rootLayer = layer as TransformLayer;
-    final Matrix4 transform = rootLayer.transform ?? Matrix4.identity();
-    final Size size = RendererBinding.instance!.renderView.size;
-    final Rect rect = MatrixUtils.transformRect(transform, Offset.zero & size);
-    print(rect);
-    return layer.toImage(rect, pixelRatio: 1.0 / 9.0);
+    return layer as TransformLayer;
   }
 }
 
