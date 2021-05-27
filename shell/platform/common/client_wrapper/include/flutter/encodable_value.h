@@ -110,6 +110,7 @@ using EncodableValueVariant = std::variant<std::monostate,
                                            std::vector<double>,
                                            EncodableList,
                                            EncodableMap,
+                                           std::vector<float>,
                                            CustomEncodableValue>;
 }  // namespace internal
 
@@ -158,6 +159,7 @@ using EncodableValueVariant = std::variant<std::monostate,
 // std::vector<double>  -> Float64List
 // EncodableList        -> List
 // EncodableMap         -> Map
+// std::vector<float>   -> Float32List
 class EncodableValue : public internal::EncodableValueVariant {
  public:
   // Rely on std::variant for most of the constructors/operators.
