@@ -476,10 +476,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     PointerEvent event, {
     TestBindingEventSource source = TestBindingEventSource.device,
   }) {
+    withPointerEventSource(source, () => handlePointerEvent(event));
+  }
+
+  @protected
+  void withPointerEventSource(TestBindingEventSource source, VoidCallback task) {
     final TestBindingEventSource previousSource = source;
     _pointerEventSource = source;
     try {
-      super.handlePointerEvent(event);
+      task();
     } finally {
       _pointerEventSource = previousSource;
     }
@@ -1513,11 +1518,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           );
           _handleViewNeedsPaint();
         }
-        super.handlePointerEventForSource(event, source: TestBindingEventSource.test);
+        super.handlePointerEvent(event);
         break;
       case TestBindingEventSource.device:
-        if (deviceEventDispatcher != null)
-          super.handlePointerEventForSource(event, source: TestBindingEventSource.device);
+        if (deviceEventDispatcher != null) {
+          withPointerEventSource(TestBindingEventSource.device,
+            () => super.handlePointerEvent(event)
+          );
+        }
         break;
     }
   }

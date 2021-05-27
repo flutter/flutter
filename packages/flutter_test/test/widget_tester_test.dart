@@ -763,43 +763,6 @@ void main() {
       binding.postTest();
     });
   });
-
-  testWidgets('Should render on pointer events', (WidgetTester tester) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200));
-    final Widget target = animationSheet.record(
-      MaterialApp(
-        home: Container(
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 128, 128, 128),
-            border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
-          ),
-          child: Center(
-            child: GestureDetector(
-              onTap: () {},
-              child: const Text('Test'),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final TestGesture gesture = await tester.createGesture();
-    await gesture.down(tester.getCenter(find.byType(Text)) + const Offset(10, 10));
-
-    await tester.pumpFrames(target, const Duration(seconds: 1));
-
-    await gesture.up(timeStamp: const Duration(seconds: 1));
-
-    await tester.pumpFrames(target, const Duration(seconds: 1));
-
-    tester.binding.setSurfaceSize(animationSheet.sheetSize());
-    final Widget display = await animationSheet.display();
-    await tester.pumpWidget(display);
-    await expectLater(
-      find.byWidget(display),
-      matchesGoldenFile('WidgetTester.press.animation.png'),
-    );
-  });
 }
 
 class FakeMatcher extends AsyncMatcher {

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+// import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
@@ -133,12 +134,14 @@ class AnimationSheetBuilder {
   ///    with a fixed time interval.
   Widget record(Widget child, {
     Key? key,
+    bool fullscreen = false,
     bool recording = true,
   }) {
     assert(child != null);
     return _AnimationSheetRecorder(
       key: key,
       size: frameSize,
+      fullscreen: fullscreen,
       handleRecorded: recording ? _recordedFrames.add : null,
       child: child,
     );
@@ -174,6 +177,27 @@ class AnimationSheetBuilder {
         filterQuality: ui.FilterQuality.none,
       )).toList(),
     );
+  }
+
+  Future<ui.Image> composite() async {
+    final List<ui.Image> frames = await _frames;
+
+    // final ui.Image image = frames[(frames.length / 2).floor()];
+    // final ByteData bytes = (await image.toByteData())!;
+    // final List<int> d = <int>[];
+    // for (int i = 0; i < bytes.lengthInBytes / 8; i += 1)
+    //   d.add(bytes.getUint64(i));
+    // print(d);
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(
+      recorder,
+      Rect.fromLTWH(0, 0, frameSize.width, frameSize.height * frames.length),
+    );
+    for (int i = 0; i < frames.length; i += 1) {
+      canvas.drawImage(frames[i], Offset(0, frameSize.height * (i-1)), Paint());
+    }
+    return recorder.endRecording().toImage(frameSize.width.toInt(), (frameSize.height * frames.length).toInt());
   }
 
   /// Returns the smallest size that can contain all recorded frames.
@@ -213,12 +237,14 @@ class _AnimationSheetRecorder extends StatefulWidget {
     this.handleRecorded,
     required this.child,
     required this.size,
+    required this.fullscreen,
     Key? key,
   }) : super(key: key);
 
   final _RecordedHandler? handleRecorded;
   final Widget child;
   final Size size;
+  final bool fullscreen;
 
   @override
   State<StatefulWidget> createState() => _AnimationSheetRecorderState();
@@ -229,8 +255,12 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
 
   void _record(Duration duration) {
     assert(widget.handleRecorded != null);
-    final RenderRepaintBoundary boundary = boundaryKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-    widget.handleRecorded!(boundary.toImage());
+    final _RenderRootableRepaintBoundary boundary = boundaryKey.currentContext!.findRenderObject()! as _RenderRootableRepaintBoundary;
+    if (widget.fullscreen) {
+      widget.handleRecorded!(boundary.rootToImage());
+    } else {
+      widget.handleRecorded!(boundary.toImage());
+    }
   }
 
   @override
@@ -239,7 +269,7 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
       alignment: Alignment.topLeft,
       child: SizedBox.fromSize(
         size: widget.size,
-        child: RepaintBoundary(
+        child: _RootableRepaintBoundary(
           key: boundaryKey,
           child: _PostFrameCallbacker(
             callback: widget.handleRecorded == null ? null : _record,
@@ -350,4 +380,26 @@ class _CellSheet extends StatelessWidget {
       );
     });
   }
+}
+
+class _RenderRootableRepaintBoundary extends RenderRepaintBoundary {
+  Future<ui.Image> rootToImage({double pixelRatio = 1.0}) {
+    Layer layer = this.layer!;
+    while (layer.parent != null)
+      layer = layer.parent!;
+    final TransformLayer rootLayer = layer as TransformLayer;
+    final Matrix4 transform = rootLayer.transform ?? Matrix4.identity();
+    final Size size = RendererBinding.instance!.renderView.size;
+    final Rect rect = MatrixUtils.transformRect(transform, Offset.zero & size);
+    print(rect);
+    return layer.toImage(rect, pixelRatio: 1.0 / 9.0);
+  }
+}
+
+class _RootableRepaintBoundary extends SingleChildRenderObjectWidget {
+  /// Creates a widget that isolates repaints.
+  const _RootableRepaintBoundary({ Key? key, Widget? child }) : super(key: key, child: child);
+
+  @override
+  _RenderRootableRepaintBoundary createRenderObject(BuildContext context) => _RenderRootableRepaintBoundary();
 }
