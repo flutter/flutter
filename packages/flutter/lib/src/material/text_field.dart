@@ -863,7 +863,6 @@ class TextField extends StatefulWidget {
 class _TextFieldState extends State<TextField> with RestorationMixin implements TextSelectionGestureDetectorBuilderDelegate {
   RestorableTextEditingController? _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
-  FocusAttachment? _focusAttachment;
 
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
@@ -976,7 +975,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       _createLocalController();
     }
     _effectiveFocusNode.canRequestFocus = _isEnabled;
-    _focusAttachment = _effectiveFocusNode.attach(context);
   }
 
   bool get _canRequestFocus {
@@ -1011,8 +1009,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         _showSelectionHandles = !widget.readOnly;
       }
     }
-    _focusAttachment?.detach();
-    _focusAttachment = _effectiveFocusNode.attach(context);
   }
 
   @override
@@ -1044,7 +1040,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   void dispose() {
     _focusNode?.dispose();
     _controller?.dispose();
-    _focusAttachment?.detach();
     super.dispose();
   }
 
@@ -1126,7 +1121,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         (widget.style!.fontSize == null || widget.style!.textBaseline == null)),
       'inherit false style must supply fontSize and textBaseline',
     );
-    _focusAttachment?.reparent();
 
     final ThemeData theme = Theme.of(context);
     final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
