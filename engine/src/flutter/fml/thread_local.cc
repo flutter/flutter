@@ -25,7 +25,11 @@ void* ThreadLocalPointer::get() const {
 
 void* ThreadLocalPointer::swap(void* ptr) {
   void* old_ptr = get();
-  FML_CHECK(pthread_setspecific(key_, ptr) == 0);
+  int err = pthread_setspecific(key_, ptr);
+  if (err) {
+    FML_CHECK(false) << "pthread_setspecific failed (" << err
+                     << "): " << strerror(err);
+  }
   return old_ptr;
 }
 
