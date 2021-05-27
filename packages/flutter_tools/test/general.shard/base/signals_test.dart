@@ -7,23 +7,20 @@ import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
 void main() {
   group('Signals', () {
-    Signals signals;
-    MockIoProcessSignal mockSignal;
-    ProcessSignal signalUnderTest;
-    StreamController<io.ProcessSignal> controller;
+    late Signals signals;
+    late FakeProcessSignal fakeSignal;
+    late ProcessSignal signalUnderTest;
 
     setUp(() {
       signals = Signals.test();
-      mockSignal = MockIoProcessSignal();
-      signalUnderTest = ProcessSignal(mockSignal);
-      controller = StreamController<io.ProcessSignal>();
-      when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
+      fakeSignal = FakeProcessSignal();
+      signalUnderTest = ProcessSignal(fakeSignal);
     });
 
     testWithoutContext('signal handler runs', () async {
@@ -33,7 +30,7 @@ void main() {
         completer.complete();
       });
 
-      controller.add(mockSignal);
+      fakeSignal.controller.add(fakeSignal);
       await completer.future;
     });
 
@@ -53,13 +50,28 @@ void main() {
         completer.complete();
       });
 
-      controller.add(mockSignal);
+      fakeSignal.controller.add(fakeSignal);
+      await completer.future;
+    });
+
+    testWithoutContext('signal handlers do not cause concurrent modification errors when removing handlers in a signal callback', () async {
+      final Completer<void> completer = Completer<void>();
+      late Object token;
+      Future<void> handle(ProcessSignal s) async {
+        expect(s, signalUnderTest);
+        expect(await signals.removeHandler(signalUnderTest, token), true);
+        completer.complete();
+      }
+
+      token = signals.addHandler(signalUnderTest, handle);
+
+      fakeSignal.controller.add(fakeSignal);
       await completer.future;
     });
 
     testWithoutContext('signal handler error goes on error stream', () async {
       final Exception exn = Exception('Error');
-      signals.addHandler(signalUnderTest, (ProcessSignal s) {
+      signals.addHandler(signalUnderTest, (ProcessSignal s) async {
         throw exn;
       });
 
@@ -72,7 +84,7 @@ void main() {
         },
       );
 
-      controller.add(mockSignal);
+      fakeSignal.controller.add(fakeSignal);
       await completer.future;
       await errSub.cancel();
       expect(errList, contains(exn));
@@ -81,7 +93,7 @@ void main() {
     testWithoutContext('removed signal handler does not run', () async {
       final Object token = signals.addHandler(
         signalUnderTest,
-        (ProcessSignal s) {
+        (ProcessSignal s) async {
           fail('Signal handler should have been removed.');
         },
       );
@@ -95,7 +107,7 @@ void main() {
         },
       );
 
-      controller.add(mockSignal);
+      fakeSignal.controller.add(fakeSignal);
 
       await errSub.cancel();
       expect(errList, isEmpty);
@@ -110,7 +122,7 @@ void main() {
 
       final Object token = signals.addHandler(
         signalUnderTest,
-        (ProcessSignal s) {
+        (ProcessSignal s) async {
           fail('Signal handler should have been removed.');
         },
       );
@@ -123,18 +135,15 @@ void main() {
         },
       );
 
-      controller.add(mockSignal);
+      fakeSignal.controller.add(fakeSignal);
       await completer.future;
       await errSub.cancel();
       expect(errList, isEmpty);
     });
 
     testWithoutContext('only handlers for the correct signal run', () async {
-      final MockIoProcessSignal mockSignal2 = MockIoProcessSignal();
-      final StreamController<io.ProcessSignal> controller2 = StreamController<io.ProcessSignal>();
+      final FakeProcessSignal mockSignal2 = FakeProcessSignal();
       final ProcessSignal otherSignal = ProcessSignal(mockSignal2);
-
-      when(mockSignal2.watch()).thenAnswer((Invocation invocation) => controller2.stream);
 
       final Completer<void> completer = Completer<void>();
       signals.addHandler(signalUnderTest, (ProcessSignal s) {
@@ -142,7 +151,7 @@ void main() {
         completer.complete();
       });
 
-      signals.addHandler(otherSignal, (ProcessSignal s) {
+      signals.addHandler(otherSignal, (ProcessSignal s) async {
         fail('Wrong signal!.');
       });
 
@@ -153,7 +162,7 @@ void main() {
         },
       );
 
-      controller.add(mockSignal);
+      fakeSignal.controller.add(fakeSignal);
       await completer.future;
       await errSub.cancel();
       expect(errList, isEmpty);
@@ -190,10 +199,15 @@ void main() {
         second = true;
       });
 
-      controller.add(mockSignal);
+      fakeSignal.controller.add(fakeSignal);
       await completer.future;
     });
   });
 }
 
-class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
+class FakeProcessSignal extends Fake implements io.ProcessSignal {
+  final StreamController<io.ProcessSignal> controller = StreamController<io.ProcessSignal>();
+
+  @override
+  Stream<io.ProcessSignal> watch() => controller.stream;
+}

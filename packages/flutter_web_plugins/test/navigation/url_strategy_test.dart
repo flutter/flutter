@@ -17,6 +17,12 @@ void main() {
       location = TestPlatformLocation();
     });
 
+    test('allows null state', () {
+      final HashUrlStrategy strategy = HashUrlStrategy(location);
+      expect(() => strategy.pushState(null, '', '/'), returnsNormally);
+      expect(() => strategy.replaceState(null, '', '/'), returnsNormally);
+    });
+
     test('leading slash is optional', () {
       final HashUrlStrategy strategy = HashUrlStrategy(location);
 
@@ -46,6 +52,13 @@ void main() {
 
     setUp(() {
       location = TestPlatformLocation();
+    });
+
+    test('allows null state', () {
+      location.baseHref = '/';
+      final PathUrlStrategy strategy = PathUrlStrategy(location);
+      expect(() => strategy.pushState(null, '', '/'), returnsNormally);
+      expect(() => strategy.replaceState(null, '', '/'), returnsNormally);
     });
 
     test('validates base href', () {
@@ -143,7 +156,7 @@ class TestPlatformLocation extends PlatformLocation {
   String hash = '';
 
   @override
-  Object? Function() state = () => null;
+  Object? get state => null;
 
   /// Mocks the base href of the document.
   String baseHref = '';
@@ -159,14 +172,10 @@ class TestPlatformLocation extends PlatformLocation {
   }
 
   @override
-  void pushState(dynamic state, String title, String url) {
-    throw UnimplementedError();
-  }
+  void pushState(Object? state, String title, String url) {}
 
   @override
-  void replaceState(dynamic state, String title, String url) {
-    throw UnimplementedError();
-  }
+  void replaceState(Object? state, String title, String url) {}
 
   @override
   void go(int count) {

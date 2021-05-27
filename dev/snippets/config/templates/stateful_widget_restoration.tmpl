@@ -1,21 +1,23 @@
 /// Flutter code sample for {{element}}
-// @dart = 2.9
 
 {{description}}
 
-import 'package:flutter/material.dart';
+{{code-dartImports}}
 
+import 'package:flutter/material.dart';
 {{code-imports}}
 
-void main() => runApp(new MyApp());
+void main() => runApp(const MyApp());
 
 /// This is the main application widget.
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
       title: 'Flutter Code Sample',
-      home: Center(
+      home: const Center(
         child: MyStatefulWidget(restorationId: 'main'),
       ),
       color: const Color(0xffffffff),
@@ -27,12 +29,12 @@ class MyApp extends StatelessWidget {
 
 /// This is the stateful widget that the main application instantiates.
 class MyStatefulWidget extends StatefulWidget {
-  MyStatefulWidget({Key key, this.restorationId}) : super(key: key);
+  const MyStatefulWidget({Key? key, this.restorationId}) : super(key: key);
 
-  final String restorationId;
+  final String? restorationId;
 
   @override
-  _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
 /// This is the private State class that goes with MyStatefulWidget.
@@ -41,7 +43,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> with RestorationMix
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.
   @override
-  String get restorationId => widget.restorationId;
+  String? get restorationId => widget.restorationId;
 
 {{code}}
 }

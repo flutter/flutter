@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter_test/src/finders.dart';
 import 'package:flutter_driver/driver_extension.dart';
-import 'package:flutter_driver/src/common/handler_factory.dart';
 import 'package:flutter_driver/src/common/find.dart';
+import 'package:flutter_test/src/finders.dart';
 
 import 'stub_finder.dart';
 

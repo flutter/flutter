@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   setUp(() {
@@ -19,15 +18,15 @@ void main() {
     );
     final List<String> log = <String>[];
 
-    final VoidCallback listener1 = () { log.add('listener1'); };
-    final VoidCallback listener3 = () { log.add('listener3'); };
-    final VoidCallback listener4 = () { log.add('listener4'); };
-    final VoidCallback listener2 = () {
+    void listener1() { log.add('listener1'); }
+    void listener3() { log.add('listener3'); }
+    void listener4() { log.add('listener4'); }
+    void listener2() {
       log.add('listener2');
       controller.removeListener(listener1);
       controller.removeListener(listener3);
       controller.addListener(listener4);
-    };
+    }
 
     controller.addListener(listener1);
     controller.addListener(listener2);
@@ -52,15 +51,15 @@ void main() {
     );
     final List<String> log = <String>[];
 
-    final AnimationStatusListener listener1 = (AnimationStatus status) { log.add('listener1'); };
-    final AnimationStatusListener listener3 = (AnimationStatus status) { log.add('listener3'); };
-    final AnimationStatusListener listener4 = (AnimationStatus status) { log.add('listener4'); };
-    final AnimationStatusListener listener2 = (AnimationStatus status) {
+    void listener1(AnimationStatus status) { log.add('listener1'); }
+    void listener3(AnimationStatus status) { log.add('listener3'); }
+    void listener4(AnimationStatus status) { log.add('listener4'); }
+    void listener2(AnimationStatus status) {
       log.add('listener2');
       controller.removeStatusListener(listener1);
       controller.removeStatusListener(listener3);
       controller.addStatusListener(listener4);
-    };
+    }
 
     controller.addStatusListener(listener1);
     controller.addStatusListener(listener2);
@@ -87,12 +86,12 @@ void main() {
     );
     final List<String> log = <String>[];
 
-    final VoidCallback listener1 = () { log.add('listener1'); };
-    final VoidCallback badListener = () {
+    void listener1() { log.add('listener1'); }
+    void badListener() {
       log.add('badListener');
       throw ArgumentError();
-    };
-    final VoidCallback listener2 = () { log.add('listener2'); };
+    }
+    void listener2() { log.add('listener2'); }
 
     controller.addListener(listener1);
     controller.addListener(badListener);
@@ -110,12 +109,12 @@ void main() {
     );
     final List<String> log = <String>[];
 
-    final AnimationStatusListener listener1 = (AnimationStatus status) { log.add('listener1'); };
-    final AnimationStatusListener badListener = (AnimationStatus status) {
+    void listener1(AnimationStatus status) { log.add('listener1'); }
+    void badListener(AnimationStatus status) {
       log.add('badListener');
       throw ArgumentError();
-    };
-    final AnimationStatusListener listener2 = (AnimationStatus status) { log.add('listener2'); };
+    }
+    void listener2(AnimationStatus status) { log.add('listener2'); }
 
     controller.addStatusListener(listener1);
     controller.addStatusListener(badListener);

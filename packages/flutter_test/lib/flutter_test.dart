@@ -42,6 +42,15 @@
 /// root of the project.
 ///
 /// If no configuration file is located, the test will be executed like normal.
+///
+/// See also:
+///
+///  * [WidgetController.hitTestWarningShouldBeFatal], which can be set
+///    in a `flutter_test_config.dart` file to turn warnings printed by
+///    [WidgetTester.tap] and similar APIs into fatal errors.
+///  * [debugCheckIntrinsicSizes], which can be set in a
+///    `flutter_test_config.dart` file to enable deeper [RenderBox]
+///    tests of the intrinsic APIs automatically while laying out widgets.
 library flutter_test;
 
 export 'dart:async' show Future;
@@ -52,6 +61,7 @@ export 'src/all_elements.dart';
 export 'src/animation_sheet.dart';
 export 'src/binding.dart';
 export 'src/controller.dart';
+export 'src/deprecated.dart';
 export 'src/event_simulation.dart';
 export 'src/finders.dart';
 export 'src/frame_timing_summarizer.dart';
@@ -64,6 +74,7 @@ export 'src/restoration.dart';
 export 'src/stack_manipulation.dart';
 export 'src/test_async_utils.dart';
 export 'src/test_compat.dart';
+export 'src/test_default_binary_messenger.dart';
 export 'src/test_exception_reporter.dart';
 export 'src/test_pointer.dart';
 export 'src/test_text_input.dart';

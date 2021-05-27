@@ -143,6 +143,12 @@ function upgrade_flutter () (
       PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
       VERBOSITY="--verbosity=normal"
     fi
+    # Increase verbosity for Flutter's LUCI CI infra.
+    if [[ -n "$LUCI_CI" ]]; then
+      PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
+      VERBOSITY="--verbosity=all"
+    fi
+
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
 
     if [[ -d "$FLUTTER_ROOT/.pub-cache" ]]; then
@@ -151,7 +157,7 @@ function upgrade_flutter () (
 
     retry_upgrade
 
-    "$DART" --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" --no-enable-mirrors "$SCRIPT_PATH"
+    "$DART" --verbosity=error --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" --no-enable-mirrors "$SCRIPT_PATH"
     echo "$revision" > "$STAMP_PATH"
   fi
   # The exit here is extraneous since the function is run in a subshell, but
@@ -190,8 +196,8 @@ function shared::execute() {
       ;;
   esac
 
-  # Test if running as superuser – but don't warn if running within Docker
-  if [[ "$EUID" == "0" && ! -f /.dockerenv ]]; then
+  # Test if running as superuser – but don't warn if running within Docker or CI.
+  if [[ "$EUID" == "0" && ! -f /.dockerenv && "$CI" != "true" && "$BOT" != "true" && "$CONTINUOUS_INTEGRATION" != "true" ]]; then
     >&2 echo "   Woah! You appear to be trying to run flutter as root."
     >&2 echo "   We strongly recommend running the flutter tool without superuser privileges."
     >&2 echo "  /"

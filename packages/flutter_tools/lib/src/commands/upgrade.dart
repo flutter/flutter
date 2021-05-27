@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -11,12 +13,15 @@ import '../base/process.dart';
 import '../base/time.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
 class UpgradeCommand extends FlutterCommand {
-  UpgradeCommand([UpgradeCommandRunner commandRunner])
+  UpgradeCommand({
+    @required bool verboseHelp,
+    UpgradeCommandRunner commandRunner,
+  })
     : _commandRunner = commandRunner ?? UpgradeCommandRunner() {
     argParser
       ..addFlag(
@@ -27,20 +32,22 @@ class UpgradeCommand extends FlutterCommand {
       )
       ..addFlag(
         'continue',
-        hide: true,
+        hide: !verboseHelp,
         negatable: false,
-        help: 'For the second half of the upgrade flow requiring the new '
-              'version of Flutter. Should not be invoked manually, but '
-              're-entrantly by the standard upgrade command.',
+        help: 'Trigger the second half of the upgrade flow. This should not be invoked '
+              'manually. It is used re-entrantly by the standard upgrade command after '
+              'the new version of Flutter is available, to hand off the upgrade process '
+              'from the old version to the new version.',
       )
       ..addOption(
         'working-directory',
-        hide: true,
-        help: 'Override the upgrade working directory for integration testing.'
+        hide: !verboseHelp,
+        help: 'Override the upgrade working directory. '
+              'This is only intended to enable integration testing of the tool itself.'
       )
       ..addFlag(
         'verify-only',
-        help: 'Verifies for any new flutter update, without fetching the update.',
+        help: 'Checks for any new flutter updates, without actually fetching them.',
         negatable: false,
       );
   }
@@ -136,7 +143,7 @@ class UpgradeCommandRunner {
         throwToolExit(
           'Unknown flutter tag. Abandoning upgrade to avoid destroying local '
           'changes. If it is okay to remove local changes, then re-run this '
-          'command with --force.'
+          'command with "--force".'
         );
       }
     }
@@ -148,7 +155,7 @@ class UpgradeCommandRunner {
         'upgrading. If you want to keep these changes, it is recommended that '
         'you stash them via "git stash" or else commit the changes to a local '
         'branch. If it is okay to remove local changes, then re-run this '
-        'command with --force.'
+        'command with "--force".'
       );
     }
     recordState(flutterVersion);
@@ -209,11 +216,10 @@ class UpgradeCommandRunner {
         'The tool could not verify the status of the current flutter checkout. '
         'This might be due to git not being installed or an internal error. '
         'If it is okay to ignore potential local changes, then re-run this '
-        'command with --force.'
-        '\nError: $error.'
+        'command with "--force".\n'
+        'Error: $error.'
       );
     }
-    return false;
   }
 
   /// Returns the remote HEAD flutter version.
@@ -240,15 +246,15 @@ class UpgradeCommandRunner {
       if (errorString.contains('fatal: HEAD does not point to a branch')) {
         throwToolExit(
           'You are not currently on a release branch. Use git to '
-          'check out an official branch (\'stable\', \'beta\', \'dev\', or \'master\') '
+          "check out an official branch ('stable', 'beta', 'dev', or 'master') "
           'and retry, for example:\n'
           '  git checkout stable'
         );
       } else if (errorString.contains('fatal: no upstream configured for branch')) {
         throwToolExit(
           'Unable to upgrade Flutter: no origin repository configured. '
-          'Run \'git remote add origin '
-          'https://github.com/flutter/flutter\' in $workingDirectory');
+          "Run 'git remote add origin "
+          "https://github.com/flutter/flutter' in $workingDirectory");
       } else {
         throwToolExit(errorString);
       }
@@ -298,7 +304,7 @@ class UpgradeCommandRunner {
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
     globals.printStatus('');
     globals.printStatus(flutterVersion.toString());
-    final String projectRoot = findProjectRoot();
+    final String projectRoot = findProjectRoot(globals.fs);
     if (projectRoot != null) {
       globals.printStatus('');
       await pub.get(

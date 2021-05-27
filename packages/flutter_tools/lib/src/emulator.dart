@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -266,7 +268,7 @@ abstract class Emulator {
         && other.id == id;
   }
 
-  Future<void> launch();
+  Future<void> launch({bool coldBoot});
 
   @override
   String toString() => name;

@@ -13,8 +13,11 @@ void main() {
     final RenderDecoratedBox box = RenderDecoratedBox(decoration: const BoxDecoration());
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 200.0, maxWidth: 200.0, minHeight: 200.0, maxHeight: 200.0),
-    );
+      minWidth: 200.0,
+      maxWidth: 200.0,
+      minHeight: 200.0,
+      maxHeight: 200.0,
+    ));
 
     expect(flex.size.width, equals(200.0), reason: 'flex width');
     expect(flex.size.height, equals(200.0), reason: 'flex height');
@@ -72,7 +75,7 @@ void main() {
 
   test('Vertical Overflow', () {
     final RenderConstrainedBox flexible = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints.expand()
+      additionalConstraints: const BoxConstraints.expand(),
     );
     final RenderFlex flex = RenderFlex(
       direction: Axis.vertical,
@@ -95,7 +98,7 @@ void main() {
 
   test('Horizontal Overflow', () {
     final RenderConstrainedBox flexible = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints.expand()
+      additionalConstraints: const BoxConstraints.expand(),
     );
     final RenderFlex flex = RenderFlex(
       direction: Axis.horizontal,
@@ -148,7 +151,7 @@ void main() {
         '   mainAxisAlignment: start\n'
         '   mainAxisSize: max\n'
         '   crossAxisAlignment: center\n'
-        '   verticalDirection: down\n'
+        '   verticalDirection: down\n',
       ),
     );
   });
@@ -158,8 +161,11 @@ void main() {
     final RenderDecoratedBox box2 = RenderDecoratedBox(decoration: const BoxDecoration());
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box1, box2]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0, maxWidth: 100.0, minHeight: 0.0, maxHeight: 100.0),
-    );
+      minWidth: 0.0,
+      maxWidth: 100.0,
+      minHeight: 0.0,
+      maxHeight: 100.0,
+    ));
     expect(box1.size.width, equals(0.0));
     expect(box1.size.height, equals(0.0));
     expect(box2.size.width, equals(0.0));
@@ -184,8 +190,11 @@ void main() {
     box2ParentData.flex = 2;
     flex.addAll(<RenderBox>[box1, box2]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0, maxWidth: 100.0, minHeight: 0.0, maxHeight: 100.0),
-    );
+      minWidth: 0.0,
+      maxWidth: 100.0,
+      minHeight: 0.0,
+      maxHeight: 100.0,
+    ));
     expect(box1.size.width, equals(0.0));
     expect(box1.size.height, equals(0.0));
     expect(box2.size.width, equals(100.0));
@@ -213,8 +222,11 @@ void main() {
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceEvenly);
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0),
-    );
+      minWidth: 0.0,
+      maxWidth: 500.0,
+      minHeight: 0.0,
+      maxHeight: 400.0,
+    ));
     Offset getOffset(RenderBox box) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
       return parentData.offset;
@@ -243,8 +255,11 @@ void main() {
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceBetween);
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0),
-    );
+      minWidth: 0.0,
+      maxWidth: 500.0,
+      minHeight: 0.0,
+      maxHeight: 400.0,
+    ));
     Offset getOffset(RenderBox box) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
       return parentData.offset;
@@ -295,8 +310,11 @@ void main() {
     );
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0),
-    );
+      minWidth: 0.0,
+      maxWidth: 500.0,
+      minHeight: 0.0,
+      maxHeight: 400.0,
+    ));
     Offset getOffset(RenderBox box) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
       return parentData.offset;
@@ -449,9 +467,9 @@ void main() {
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex);
     expect(flex.constraints.hasTightWidth, isTrue);
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 250.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 250.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 250.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 250.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(600.0, 250.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(500.0, 250.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
@@ -464,144 +482,144 @@ void main() {
     final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: square);
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box1, box2, box3]);
     layout(flex);
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 250.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(100.0, 250.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 250.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(100.0, 250.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(200.0, 250.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.mainAxisAlignment = MainAxisAlignment.end;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 250.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 250.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 250.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(500.0, 250.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(600.0, 250.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(700.0, 250.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.textDirection = TextDirection.rtl;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 250.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(100.0, 250.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 250.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(200.0, 250.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(100.0, 250.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.mainAxisAlignment = MainAxisAlignment.start;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 250.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 250.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 250.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 250.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(600.0, 250.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(500.0, 250.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.start; // vertical direction is down
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 0.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 0.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 0.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(600.0, 0.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(500.0, 0.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.end;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 500.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 500.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 500.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 500.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(600.0, 500.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(500.0, 500.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.verticalDirection = VerticalDirection.up;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 0.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 0.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 0.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(600.0, 0.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(500.0, 0.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.start;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 500.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 500.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 500.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 500.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(600.0, 500.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(500.0, 500.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.direction = Axis.vertical; // and main=start, cross=start, up, rtl
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 500.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 400.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 300.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 500.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(700.0, 400.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(700.0, 300.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.end;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 500.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(0.0, 500.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 400.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 300.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.stretch;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 500.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(0.0, 500.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 400.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 300.0));
     expect(box1.size, const Size(800.0, 100.0));
     expect(box2.size, const Size(800.0, 100.0));
     expect(box3.size, const Size(800.0, 100.0));
 
     flex.textDirection = TextDirection.ltr;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 500.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(0.0, 500.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 400.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 300.0));
     expect(box1.size, const Size(800.0, 100.0));
     expect(box2.size, const Size(800.0, 100.0));
     expect(box3.size, const Size(800.0, 100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.start;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 500.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(0.0, 500.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 400.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 300.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.end;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 500.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 400.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 300.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 500.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(700.0, 400.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(700.0, 300.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.verticalDirection = VerticalDirection.down;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 0.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 100.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 200.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 0.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(700.0, 100.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(700.0, 200.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
 
     flex.mainAxisAlignment = MainAxisAlignment.end;
     pumpFrame();
-    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 300.0));
-    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 400.0));
-    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 500.0));
+    expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 300.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(700.0, 400.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(700.0, 500.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
@@ -631,5 +649,21 @@ void main() {
     expect(() => flex.getMinIntrinsicHeight(100), cannotCalculateIntrinsics);
     expect(() => flex.getMaxIntrinsicWidth(100), cannotCalculateIntrinsics);
     expect(() => flex.getMinIntrinsicWidth(100), cannotCalculateIntrinsics);
+  });
+
+  test('Can call methods that check overflow even if overflow value is not set', () {
+    final List<dynamic> exceptions = <dynamic>[];
+    final RenderFlex flex = RenderFlex(children: const <RenderBox>[]);
+    // This forces a check for _hasOverflow
+    expect(flex.toStringShort(), isNot(contains('OVERFLOWING')));
+    layout(flex, phase: EnginePhase.paint, onErrors: () {
+      exceptions.addAll(renderer.takeAllFlutterExceptions());
+    });
+    // We expect the RenderFlex to throw during performLayout() for not having
+    // a text direction, thus leaving it with a null overflow value. It'll then
+    // try to paint(), which also checks _hasOverflow, and it should be able to
+    // do so without an ancillary error.
+    expect(exceptions, hasLength(1));
+    expect(exceptions.first.message, isNot(contains('Null check operator')));
   });
 }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,7 +23,7 @@ class RawKeyboardDemo extends StatefulWidget {
   const RawKeyboardDemo({Key key}) : super(key: key);
 
   @override
-  _HardwareKeyDemoState createState() => _HardwareKeyDemoState();
+  State<RawKeyboardDemo> createState() => _HardwareKeyDemoState();
 }
 
 class _HardwareKeyDemoState extends State<RawKeyboardDemo> {

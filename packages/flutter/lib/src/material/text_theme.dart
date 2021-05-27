@@ -126,52 +126,52 @@ class TextTheme with Diagnosticable {
     this.overline,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline1. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? display4,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline2. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? display3,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline3. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? display2,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline4. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? display1,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline5. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? headline,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline6. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? title,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is subtitle1. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? subhead,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is subtitle2. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? subtitle,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? body2,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is bodyText2. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? body1,
   }) : assert(
@@ -180,7 +180,9 @@ class TextTheme with Diagnosticable {
           bodyText1 == null && bodyText2 == null) ||
          (display4 == null && display3 == null && display2 == null && display1 == null && headline == null && title == null &&
           subhead == null && subtitle == null &&
-          body2 == null && body1 == null), 'Cannot mix 2014 and 2018 terms in call to TextTheme() constructor.'),
+          body2 == null && body1 == null),
+         'Cannot mix 2014 and 2018 terms in call to TextTheme() constructor.',
+       ),
        headline1 = headline1 ?? display4,
        headline2 = headline2 ?? display3,
        headline3 = headline3 ?? display2,
@@ -243,7 +245,7 @@ class TextTheme with Diagnosticable {
   /// specification calls this [headline1].
   @Deprecated(
     'This is the term used in the 2014 version of material design. The modern term is headline1. '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   TextStyle? get display4 => headline1;
 
@@ -253,7 +255,7 @@ class TextTheme with Diagnosticable {
   /// specification calls this [headline2].
   @Deprecated(
     'This is the term used in the 2014 version of material design. The modern term is headline2. '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   TextStyle? get display3 => headline2;
 
@@ -263,7 +265,7 @@ class TextTheme with Diagnosticable {
   /// specification calls this [headline3].
   @Deprecated(
     'This is the term used in the 2014 version of material design. The modern term is headline3. '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   TextStyle? get display2 => headline3;
 
@@ -273,7 +275,7 @@ class TextTheme with Diagnosticable {
   /// specification calls this [headline4].
   @Deprecated(
     'This is the term used in the 2014 version of material design. The modern term is headline4. '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   TextStyle? get display1 => headline4;
 
@@ -283,7 +285,7 @@ class TextTheme with Diagnosticable {
   /// specification calls this [headline5].
   @Deprecated(
     'This is the term used in the 2014 version of material design. The modern term is headline5. '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   TextStyle? get headline => headline5;
 
@@ -293,7 +295,7 @@ class TextTheme with Diagnosticable {
   /// specification calls this [headline6].
   @Deprecated(
     'This is the term used in the 2014 version of material design. The modern term is headline6. '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   TextStyle? get title => headline6;
 
@@ -303,7 +305,7 @@ class TextTheme with Diagnosticable {
   /// specification calls this [subtitle1].
   @Deprecated(
     'This is the term used in the 2014 version of material design. The modern term is subtitle1. '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   TextStyle? get subhead => subtitle1;
 
@@ -313,7 +315,7 @@ class TextTheme with Diagnosticable {
   /// specification calls this [subtitle2].
   @Deprecated(
     'This is the term used in the 2014 version of material design. The modern term is subtitle2. '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   TextStyle? get subtitle => subtitle2;
 
@@ -324,7 +326,7 @@ class TextTheme with Diagnosticable {
   /// [bodyText1].
   @Deprecated(
     'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   TextStyle? get body2 => bodyText1;
 
@@ -335,7 +337,7 @@ class TextTheme with Diagnosticable {
   /// [bodyText2].
   @Deprecated(
     'This is the term used in the 2014 version of material design. The modern term is bodyText2. '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   TextStyle? get body1 => bodyText2;
 
@@ -353,7 +355,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorThemeCopy extends StatelessWidget {
-  ///   TitleColorThemeCopy({Key key, this.child, this.titleColor}) : super(key: key);
+  ///   const TitleColorThemeCopy({Key? key, required this.child, required this.titleColor}) : super(key: key);
   ///
   ///   final Color titleColor;
   ///   final Widget child;
@@ -364,7 +366,7 @@ class TextTheme with Diagnosticable {
   ///     return Theme(
   ///       data: theme.copyWith(
   ///         textTheme: theme.textTheme.copyWith(
-  ///           headline6: theme.textTheme.headline6.copyWith(
+  ///           headline6: theme.textTheme.headline6!.copyWith(
   ///             color: titleColor,
   ///           ),
   ///         ),
@@ -396,52 +398,52 @@ class TextTheme with Diagnosticable {
     TextStyle? overline,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline1. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? display4,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline2. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? display3,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline3. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? display2,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline4. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? display1,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline5. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? headline,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline6. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? title,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is subtitle1. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? subhead,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is subtitle2. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? subtitle,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? body2,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is bodyText2. '
-      'This feature was deprecated after v1.13.8.'
+      'This feature was deprecated after v1.13.8.',
     )
     TextStyle? body1,
   }) {
@@ -451,7 +453,9 @@ class TextTheme with Diagnosticable {
        bodyText1 == null && bodyText2 == null) ||
       (display4 == null && display3 == null && display2 == null && display1 == null && headline == null && title == null &&
        subhead == null && subtitle == null &&
-       body2 == null && body1 == null), 'Cannot mix 2014 and 2018 terms in call to TextTheme.copyWith().');
+       body2 == null && body1 == null),
+      'Cannot mix 2014 and 2018 terms in call to TextTheme.copyWith().',
+    );
     return TextTheme(
       headline1: headline1 ?? display4 ?? this.headline1,
       headline2: headline2 ?? display3 ?? this.headline2,
@@ -494,7 +498,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorTheme extends StatelessWidget {
-  ///   TitleColorTheme({Key key, this.child, this.titleColor}) : super(key: key);
+  ///   const TitleColorTheme({Key? key, required this.child, required this.titleColor}) : super(key: key);
   ///
   ///   final Color titleColor;
   ///   final Widget child;
@@ -507,7 +511,7 @@ class TextTheme with Diagnosticable {
   ///     // set the title, but everything else would be null. This isn't very
   ///     // useful, so merge it with the existing theme to keep all of the
   ///     // preexisting definitions for the other styles.
-  ///     TextTheme partialTheme = TextTheme(headline6: TextStyle(color: titleColor));
+  ///     final TextTheme partialTheme = TextTheme(headline6: TextStyle(color: titleColor));
   ///     theme = theme.copyWith(textTheme: theme.textTheme.merge(partialTheme));
   ///     return Theme(data: theme, child: child);
   ///   }

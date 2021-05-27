@@ -11,7 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'debug.dart';
@@ -438,7 +437,7 @@ class Slider extends StatefulWidget {
   final _SliderType _sliderType ;
 
   @override
-  _SliderState createState() => _SliderState();
+  State<Slider> createState() => _SliderState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -478,7 +477,12 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   final GlobalKey _renderObjectKey = GlobalKey();
   // Keyboard mapping for a focused slider.
-  late Map<LogicalKeySet, Intent> _shortcutMap;
+  final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
+      SingleActivator(LogicalKeyboardKey.arrowUp): _AdjustSliderIntent.up(),
+      SingleActivator(LogicalKeyboardKey.arrowDown): _AdjustSliderIntent.down(),
+      SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
+      SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
+    };
   // Action mapping for a focused slider.
   late Map<Type, Action<Intent>> _actionMap;
 
@@ -507,12 +511,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     );
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
     positionController.value = _unlerp(widget.value);
-    _shortcutMap = <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const _AdjustSliderIntent.up(),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const _AdjustSliderIntent.down(),
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const _AdjustSliderIntent.left(),
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const _AdjustSliderIntent.right(),
-    };
     _actionMap = <Type, Action<Intent>>{
       _AdjustSliderIntent: CallbackAction<_AdjustSliderIntent>(
         onInvoke: _actionHandler,
@@ -905,8 +903,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _tap = TapGestureRecognizer()
       ..team = team
       ..onTapDown = _handleTapDown
-      ..onTapUp = _handleTapUp
-      ..onTapCancel = _endInteraction;
+      ..onTapUp = _handleTapUp;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
@@ -1226,14 +1223,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void _startInteraction(Offset globalPosition) {
     _state.showValueIndicator();
-    if (isInteractive) {
+    if (!_active && isInteractive) {
       _active = true;
       // We supply the *current* value as the start location, so that if we have
       // a tap, it consists of a call to onChangeStart with the previous value and
       // a call to onChangeEnd with the new value.
-      if (onChangeStart != null) {
-        onChangeStart!(_discretize(value));
-      }
+      onChangeStart?.call(_discretize(value));
       _currentDragValue = _getValueFromGlobalPosition(globalPosition);
       onChanged!(_discretize(_currentDragValue));
       _state.overlayController.forward();
@@ -1257,9 +1252,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (_active && _state.mounted) {
-      if (onChangeEnd != null) {
-        onChangeEnd!(_discretize(_currentDragValue));
-      }
+      onChangeEnd?.call(_discretize(_currentDragValue));
       _active = false;
       _currentDragValue = 0.0;
       _state.overlayController.reverse();
@@ -1514,7 +1507,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
 class _AdjustSliderIntent extends Intent {
   const _AdjustSliderIntent({
-    required this.type
+    required this.type,
   });
 
   const _AdjustSliderIntent.right() : type = _SliderAdjustmentType.right;
@@ -1585,9 +1578,7 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_state.paintValueIndicator != null) {
-      _state.paintValueIndicator!(context, offset);
-    }
+    _state.paintValueIndicator?.call(context, offset);
   }
 
   @override

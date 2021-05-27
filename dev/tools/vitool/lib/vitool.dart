@@ -77,7 +77,7 @@ class PathAnimation {
     final List<PathCommandAnimation> commands = <PathCommandAnimation>[];
     for (int commandIdx = 0; commandIdx < frames[0].paths[pathIdx].commands.length; commandIdx += 1) {
       final int numPointsInCommand = frames[0].paths[pathIdx].commands[commandIdx].points.length;
-      final List<List<Point<double>>> points = List<List<Point<double>>>(numPointsInCommand);
+      final List<List<Point<double>>> points = List<List<Point<double>>>.filled(numPointsInCommand, null);
       for (int j = 0; j < numPointsInCommand; j += 1)
         points[j] = <Point<double>>[];
       final String commandType = frames[0].paths[pathIdx].commands[commandIdx].type;
@@ -206,7 +206,7 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
     final XmlElement element = node as XmlElement;
 
     if (element.name.local == 'path') {
-      paths.add(SvgPath.fromElement(element).applyTransform(transform));
+      paths.add(SvgPath.fromElement(element)._applyTransform(transform));
     }
 
     if (element.name.local == 'g') {
@@ -313,9 +313,9 @@ class SvgPath {
     return SvgPath(id, commands);
   }
 
-  SvgPath applyTransform(_Transform transform) {
+  SvgPath _applyTransform(_Transform transform) {
     final List<SvgPathCommand> transformedCommands =
-      commands.map<SvgPathCommand>((SvgPathCommand c) => c.applyTransform(transform)).toList();
+      commands.map<SvgPathCommand>((SvgPathCommand c) => c._applyTransform(transform)).toList();
     return SvgPath(id, transformedCommands, opacity: opacity * transform.opacity);
   }
 
@@ -359,7 +359,7 @@ class SvgPathCommand {
   /// List of points used by this command.
   final List<Point<double>> points;
 
-  SvgPathCommand applyTransform(_Transform transform) {
+  SvgPathCommand _applyTransform(_Transform transform) {
     final List<Point<double>> transformedPoints =
     _vector3ArrayToPoints(
         transform.transformMatrix.applyToVector3Array(
@@ -422,7 +422,7 @@ class SvgPathCommandBuilder {
 }
 
 List<double> _pointsToVector3Array(List<Point<double>> points) {
-  final List<double> result = List<double>(points.length * 3);
+  final List<double> result = List<double>.filled(points.length * 3, null);
   for (int i = 0; i < points.length; i += 1) {
     result[i * 3] = points[i].x;
     result[i * 3 + 1] = points[i].y;
@@ -433,7 +433,7 @@ List<double> _pointsToVector3Array(List<Point<double>> points) {
 
 List<Point<double>> _vector3ArrayToPoints(List<double> vector) {
   final int numPoints = (vector.length / 3).floor();
-  final List<Point<double>> points = List<Point<double>>(numPoints);
+  final List<Point<double>> points = List<Point<double>>.filled(numPoints, null);
   for (int i = 0; i < numPoints; i += 1) {
     points[i] = Point<double>(vector[i*3], vector[i*3 + 1]);
   }

@@ -276,6 +276,68 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: selectedFillColor));
   });
+
+  testWidgets('Radio theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+    const Color activePressedOverlayColor = Color(0xFF000001);
+    const Color inactivePressedOverlayColor = Color(0xFF000002);
+
+    Color? getOverlayColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        if (states.contains(MaterialState.selected)) {
+          return activePressedOverlayColor;
+        }
+        return inactivePressedOverlayColor;
+      }
+      return null;
+    }
+    const double splashRadius = 24.0;
+
+    Widget buildRadio({required bool active}) {
+      return MaterialApp(
+        theme: ThemeData(
+          radioTheme: RadioThemeData(
+            overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+            splashRadius: splashRadius,
+          ),
+        ),
+        home: Scaffold(
+          body: Radio<int>(
+            value: active ? 1 : 0,
+            groupValue: 1,
+            onChanged: (_) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildRadio(active: false));
+    await tester.press(_findRadio());
+    await tester.pumpAndSettle();
+
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(
+          color: inactivePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Inactive pressed Radio should have overlay color: $inactivePressedOverlayColor',
+    );
+
+    await tester.pumpWidget(buildRadio(active: true));
+    await tester.press(_findRadio());
+    await tester.pumpAndSettle();
+
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(
+          color: activePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Active pressed Radio should have overlay color: $activePressedOverlayColor',
+    );
+  });
 }
 
 Finder _findRadio() {

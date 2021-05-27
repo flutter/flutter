@@ -47,11 +47,11 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///
 /// ```dart
 /// class MyHomePage extends StatefulWidget {
-///   MyHomePage({Key key, this.title}) : super(key: key);
+///   const MyHomePage({Key? key, required this.title}) : super(key: key);
 ///   final String title;
 ///
 ///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
+///   State<MyHomePage> createState() => _MyHomePageState();
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {
@@ -67,16 +67,16 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///         child: Column(
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
-///             Text('You have pushed the button this many times:'),
-///             ValueListenableBuilder(
-///               builder: (BuildContext context, int value, Widget child) {
+///             const Text('You have pushed the button this many times:'),
+///             ValueListenableBuilder<int>(
+///               builder: (BuildContext context, int value, Widget? child) {
 ///                 // This builder will only get called when the _counter
 ///                 // is updated.
 ///                 return Row(
 ///                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///                   children: <Widget>[
 ///                     Text('$value'),
-///                     child,
+///                     child!,
 ///                   ],
 ///                 );
 ///               },
@@ -90,7 +90,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///         ),
 ///       ),
 ///       floatingActionButton: FloatingActionButton(
-///         child: Icon(Icons.plus_one),
+///         child: const Icon(Icons.plus_one),
 ///         onPressed: () => _counter.value += 1,
 ///       ),
 ///     );

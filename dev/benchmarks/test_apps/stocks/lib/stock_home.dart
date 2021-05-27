@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
 import 'package:flutter/scheduler.dart' show timeDilation;
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'i18n/stock_strings.dart';
 import 'stock_data.dart';
@@ -52,7 +52,7 @@ class _NotImplementedDialog extends StatelessWidget {
 }
 
 class StockHome extends StatefulWidget {
-  const StockHome(this.stocks, this.configuration, this.updater);
+  const StockHome(this.stocks, this.configuration, this.updater, {Key? key}) : super(key: key);
 
   final StockData stocks;
   final StockConfiguration configuration;
@@ -69,7 +69,7 @@ class StockHomeState extends State<StockHome> {
   bool _autorefresh = false;
 
   void _handleSearchBegin() {
-    ModalRoute.of(context).addLocalHistoryEntry(LocalHistoryEntry(
+    ModalRoute.of(context)!.addLocalHistoryEntry(LocalHistoryEntry(
       onRemove: () {
         setState(() {
           _isSearching = false;
@@ -82,7 +82,7 @@ class StockHomeState extends State<StockHome> {
     });
   }
 
-  void _handleStockModeChange(StockMode value) {
+  void _handleStockModeChange(StockMode? value) {
     if (widget.updater != null)
       widget.updater(widget.configuration.copyWith(stockMode: value));
   }
@@ -231,8 +231,9 @@ class StockHomeState extends State<StockHome> {
   }
 
   static Iterable<Stock> _getStockList(StockData stocks, Iterable<String> symbols) {
-    return symbols.map<Stock>((String symbol) => stocks[symbol])
-        .where((Stock stock) => stock != null);
+    return symbols.map<Stock?>((String symbol) => stocks[symbol])
+      .where((Stock? stock) => stock != null)
+      .cast<Stock>();
   }
 
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
@@ -266,7 +267,7 @@ class StockHomeState extends State<StockHome> {
         Navigator.pushNamed(context, '/stock', arguments: stock.symbol);
       },
       onShow: (Stock stock) {
-        _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
+        _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
       },
     );
   }
@@ -275,7 +276,7 @@ class StockHomeState extends State<StockHome> {
     return AnimatedBuilder(
       key: ValueKey<StockHomeTab>(tab),
       animation: Listenable.merge(<Listenable>[_searchQuery, widget.stocks]),
-      builder: (BuildContext context, Widget child) {
+      builder: (BuildContext context, Widget? child) {
         return _buildStockList(context, _filterBySearchQuery(_getStockList(widget.stocks, stockSymbols)).toList(), tab);
       },
     );
@@ -286,7 +287,7 @@ class StockHomeState extends State<StockHome> {
   AppBar buildSearchBar() {
     return AppBar(
       leading: BackButton(
-        color: Theme.of(context).accentColor,
+        color: Theme.of(context).colorScheme.secondary,
       ),
       title: TextField(
         controller: _searchQuery,
@@ -309,9 +310,9 @@ class StockHomeState extends State<StockHome> {
   Widget buildFloatingActionButton() {
     return FloatingActionButton(
       tooltip: 'Create company',
-      child: const Icon(Icons.add),
-      backgroundColor: Theme.of(context).accentColor,
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       onPressed: _handleCreateCompany,
+      child: const Icon(Icons.add),
     );
   }
 

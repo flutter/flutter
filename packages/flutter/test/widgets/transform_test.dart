@@ -5,9 +5,9 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
@@ -30,7 +30,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
@@ -78,12 +78,12 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-                  alignment: const Alignment(1.0, 0.0),
+                  alignment: Alignment.centerRight,
                   child: GestureDetector(
                     onTap: () {
                       didReceiveTap = true;
@@ -127,7 +127,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
@@ -197,13 +197,13 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   origin: const Offset(100.0, 0.0),
-                  alignment: const Alignment(-1.0, 0.0),
+                  alignment: Alignment.centerLeft,
                   child: GestureDetector(
                     onTap: () {
                       didReceiveTap = true;
@@ -388,6 +388,119 @@ void main() {
     },
     skip: isBrowser, // due to https://github.com/flutter/flutter/issues/42767
   );
+
+  testWidgets('Transform.translate with FilterQuality produces filter layer', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform.translate(
+        offset: const Offset(25.0, 25.0),
+        child: const SizedBox(width: 100, height: 100),
+        filterQuality: FilterQuality.low,
+      ),
+    );
+    expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
+  });
+
+  testWidgets('Transform.scale with FilterQuality produces filter layer', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform.scale(
+        scale: 3.14159,
+        child: const SizedBox(width: 100, height: 100),
+        filterQuality: FilterQuality.low,
+      ),
+    );
+    expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
+  });
+
+  testWidgets('Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform.rotate(
+        angle: math.pi / 4,
+        child: const SizedBox(width: 100, height: 100),
+        filterQuality: FilterQuality.low,
+      ),
+    );
+    expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
+  });
+
+  testWidgets('Transform layers update to match child and filterQuality', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform.rotate(
+        angle: math.pi / 4,
+        child: const SizedBox(width: 100, height: 100),
+        filterQuality: FilterQuality.low,
+      ),
+    );
+    expect(tester.layers.whereType<ImageFilterLayer>(), hasLength(1));
+
+    await tester.pumpWidget(
+      Transform.rotate(
+        angle: math.pi / 4,
+        child: const SizedBox(width: 100, height: 100),
+      ),
+    );
+    expect(tester.layers.whereType<ImageFilterLayer>(), isEmpty);
+
+    await tester.pumpWidget(
+      Transform.rotate(
+        angle: math.pi / 4,
+        filterQuality: FilterQuality.low,
+      ),
+    );
+    expect(tester.layers.whereType<ImageFilterLayer>(), isEmpty);
+
+    await tester.pumpWidget(
+      Transform.rotate(
+        angle: math.pi / 4,
+        child: const SizedBox(width: 100, height: 100),
+        filterQuality: FilterQuality.low,
+      ),
+    );
+    expect(tester.layers.whereType<ImageFilterLayer>(), hasLength(1));
+  });
+
+  testWidgets('Transform layers with filterQuality golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.count(
+          crossAxisCount: 3,
+          children: <Widget>[
+            Transform.rotate(
+              angle: math.pi / 6,
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xffffff00))),
+            ),
+            Transform.scale(
+              scale: 1.5,
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xffffff00))),
+            ),
+            Transform.translate(
+              offset: const Offset(20.0, 60.0),
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xffffff00))),
+            ),
+            Transform.rotate(
+              angle: math.pi / 6,
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
+              filterQuality: FilterQuality.low,
+            ),
+            Transform.scale(
+              scale: 1.5,
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
+              filterQuality: FilterQuality.low,
+            ),
+            Transform.translate(
+              offset: const Offset(20.0, 60.0),
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
+              filterQuality: FilterQuality.low,
+            ),
+          ],
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(GridView),
+      matchesGoldenFile('transform_golden.BitmapRotate.png'),
+    );
+  });
 }
 
 class TestRectPainter extends CustomPainter {

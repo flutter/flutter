@@ -52,14 +52,9 @@ class RadioThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Radio.fillColor].
   final MaterialStateProperty<Color?>? fillColor;
 
-  /// The color for the checkbox's [Material].
+  /// {@macro flutter.material.radio.overlayColor}
   ///
-  /// Resolves in the following states:
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///
-  /// If specified, overrides the default value of [Radio.focusColor] and
-  /// [Radio.hoverColor].
+  /// If specified, overrides the default value of [Radio.overlayColor].
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.radio.splashRadius}

@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 
 export 'dart:ui' show SemanticsFlag, SemanticsAction;
 export 'package:flutter/rendering.dart' show SemanticsData;
@@ -735,7 +734,7 @@ class _IncludesNodeWith extends Matcher {
        scrollExtentMax != null ||
        scrollExtentMin != null ||
        maxValueLength != null ||
-       currentValueLength != null
+       currentValueLength != null,
      );
 
   final String? label;

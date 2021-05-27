@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../rendering/src/sector_layout.dart';
 
@@ -17,6 +16,8 @@ RenderBoxToRenderSectorAdapter initCircle() {
 }
 
 class SectorApp extends StatefulWidget {
+  const SectorApp({Key? key}) : super(key: key);
+
   @override
   SectorAppState createState() => SectorAppState();
 }
@@ -91,10 +92,12 @@ class SectorAppState extends State<SectorApp> {
 
   Widget buildBody() {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 25.0),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               ElevatedButton(
                 onPressed: _enabledAdd ? addSector : null,
@@ -127,14 +130,13 @@ class SectorAppState extends State<SectorApp> {
                 ),
               ),
             ],
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
           ),
         ),
         Expanded(
           child: Container(
             margin: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
-              border: Border.all()
+              border: Border.all(),
             ),
             padding: const EdgeInsets.all(8.0),
             child: WidgetToRenderBoxAdapter(
@@ -144,7 +146,6 @@ class SectorAppState extends State<SectorApp> {
           ),
         ),
       ],
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
     );
   }
 
@@ -164,5 +165,5 @@ class SectorAppState extends State<SectorApp> {
 }
 
 void main() {
-  runApp(SectorApp());
+  runApp(const SectorApp());
 }

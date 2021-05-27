@@ -37,11 +37,6 @@
                BlueprintName = "FlutterUITests"
                ReferencedContainer = "container:Host.xcodeproj">
             </BuildableReference>
-            <SkippedTests>
-               <Test
-                  Identifier = "FlutterUITests/testFlutterViewWarm">
-               </Test>
-            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

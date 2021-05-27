@@ -11,7 +11,7 @@ Future<void> main() async {
       '/example',
       method: 'GET',
     );
-    final String body = request.responseText;
+    final String? body = request.responseText;
     if (body == 'This is an Example') {
       print('--- TEST SUCCEEDED ---');
     } else {

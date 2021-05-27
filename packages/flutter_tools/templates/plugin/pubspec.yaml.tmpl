@@ -1,11 +1,10 @@
 name: {{projectName}}
 description: {{description}}
 version: 0.0.1
-author:
 homepage:
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: {{dartSdkVersionBounds}}
   flutter: ">=1.20.0"
 
 dependencies:
@@ -19,6 +18,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^1.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -33,7 +33,7 @@ flutter:
     platforms:
 {{#no_platforms}}
     # This plugin project was generated without specifying any
-    # platforms with the `--platform` argument. If you see the `fake_platform` map below, remove it and
+    # platforms with the `--platform` argument. If you see the `some_platform` map below, remove it and
     # then add platforms following the instruction here:
     # https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
     # -------------------

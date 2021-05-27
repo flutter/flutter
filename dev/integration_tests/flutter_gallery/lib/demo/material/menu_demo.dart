@@ -43,7 +43,7 @@ class MenuDemoState extends State<MenuDemo> {
 
   void showMenuSelection(String value) {
     if (<String>[_simpleValue1, _simpleValue2, _simpleValue3].contains(value))
-      _simpleValue = value;
+      setState(() => _simpleValue = value);
     showInSnackBar('You selected: $value');
   }
 

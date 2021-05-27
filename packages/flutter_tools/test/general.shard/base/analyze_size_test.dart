@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/analyze_size.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 
@@ -42,15 +41,15 @@ const String aotSizeOutput = '''
 ''';
 
 void main() {
-  MemoryFileSystem fileSystem;
-  BufferLogger logger;
+  late MemoryFileSystem fileSystem;
+  late BufferLogger logger;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
   });
 
-  test('matchesPattern matches only entire strings', () {
+  testWithoutContext('matchesPattern matches only entire strings', () {
     expect(matchesPattern('', pattern: ''), isNotNull);
     expect(matchesPattern('', pattern: 'foo'), null);
     expect(matchesPattern('foo', pattern: ''), null);
@@ -61,12 +60,12 @@ void main() {
     expect(matchesPattern('foobar', pattern: RegExp(r'.*b')), null);
   });
 
-  test('builds APK analysis correctly', () async {
+  testWithoutContext('builds APK analysis correctly', () async {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: MockUsage(),
+      flutterUsage: TestUsage(),
     );
 
     final Archive archive = Archive()
@@ -77,7 +76,7 @@ void main() {
       ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
     final File apk = fileSystem.file('test.apk')
-      ..writeAsBytesSync(ZipEncoder().encode(archive));
+      ..writeAsBytesSync(ZipEncoder().encode(archive)!);
     final File aotSizeJson = fileSystem.file('test.json')
       ..createSync()
       ..writeAsStringSync(aotSizeOutput);
@@ -138,12 +137,12 @@ void main() {
     expect(result['precompiler-trace'], <String, Object>{});
   });
 
-  test('outputs summary to command line correctly', () async {
+  testWithoutContext('outputs summary to command line correctly', () async {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: MockUsage(),
+      flutterUsage: TestUsage(),
     );
 
     final Archive archive = Archive()
@@ -154,7 +153,7 @@ void main() {
       ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
     final File apk = fileSystem.file('test.apk')
-      ..writeAsBytesSync(ZipEncoder().encode(archive));
+      ..writeAsBytesSync(ZipEncoder().encode(archive)!);
     final File aotSizeJson = fileSystem.file('test.json')
       ..writeAsStringSync(aotSizeOutput);
     final File precompilerTrace = fileSystem.file('trace.json')
@@ -180,12 +179,12 @@ void main() {
     );
   });
 
-  test('can analyze contents of output directory', () async {
+  testWithoutContext('can analyze contents of output directory', () async {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: MockUsage(),
+      flutterUsage: TestUsage(),
     );
 
     final Directory outputDirectory = fileSystem.directory('example/out/foo.app')
@@ -201,7 +200,7 @@ void main() {
     final File precompilerTrace = fileSystem.file('trace.json')
       ..writeAsStringSync('{}');
 
-    final Map<String, Object> result = await sizeAnalyzer.analyzeAotSnapshot(
+    final Map<String, Object?> result = await sizeAnalyzer.analyzeAotSnapshot(
       outputDirectory: outputDirectory,
       aotSnapshot: aotSizeJson,
       precompilerTrace: precompilerTrace,
@@ -222,6 +221,36 @@ void main() {
     expect(result['type'], 'linux');
     expect(result['precompiler-trace'], <String, Object>{});
   });
-}
 
-class MockUsage extends Mock implements Usage {}
+  testWithoutContext('handles null AOT snapshot json', () async {
+    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+      fileSystem: fileSystem,
+      logger: logger,
+      appFilenamePattern: RegExp(r'lib.*app\.so'),
+      flutterUsage: TestUsage(),
+    );
+
+    final Directory outputDirectory = fileSystem.directory('example/out/foo.app')..createSync(recursive: true);
+    final File invalidAotSizeJson = fileSystem.file('test.json')..writeAsStringSync('null');
+    final File precompilerTrace = fileSystem.file('trace.json');
+
+    await expectLater(
+        () => sizeAnalyzer.analyzeAotSnapshot(
+              outputDirectory: outputDirectory,
+              aotSnapshot: invalidAotSizeJson,
+              precompilerTrace: precompilerTrace,
+              type: 'linux',
+            ),
+        throwsToolExit());
+
+    final File apk = fileSystem.file('test.apk')..writeAsBytesSync(ZipEncoder().encode(Archive())!);
+    await expectLater(
+        () => sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
+              zipFile: apk,
+              aotSnapshot: invalidAotSizeJson,
+              precompilerTrace: precompilerTrace,
+              kind: 'apk',
+            ),
+        throwsToolExit());
+  });
+}

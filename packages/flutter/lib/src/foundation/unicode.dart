@@ -13,7 +13,6 @@
 class Unicode {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   Unicode._();
   /// `U+202A LEFT-TO-RIGHT EMBEDDING`
   ///

@@ -3,12 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-
 import 'package:macrobenchmarks/src/simple_scroll.dart';
 
 void main() {
@@ -17,13 +15,13 @@ void main() {
   testWidgets(
     'Frame Counter and Input Delay for benchmarkLive',
     (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: Scaffold(body: SimpleScroll())));
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SimpleScroll())));
       await tester.pumpAndSettle();
       final Offset location = tester.getCenter(find.byType(ListView));
       int frameCount = 0;
-      final FrameCallback frameCounter = (Duration elapsed) {
+      void frameCounter(Duration elapsed) {
         frameCount += 1;
-      };
+      }
       tester.binding.addPersistentFrameCallback(frameCounter);
 
       const int timeInSecond = 1;

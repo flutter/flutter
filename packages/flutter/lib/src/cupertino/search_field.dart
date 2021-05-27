@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -27,12 +25,14 @@ import 'text_field.dart';
 ///
 /// ```dart
 /// class MyPrefilledSearch extends StatefulWidget {
+///   const MyPrefilledSearch({Key? key}) : super(key: key);
+///
 ///   @override
-///   _MyPrefilledSearchState createState() => _MyPrefilledSearchState();
+///   State<MyPrefilledSearch> createState() => _MyPrefilledSearchState();
 /// }
 ///
 /// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
-///   TextEditingController _textController;
+///   late TextEditingController _textController;
 ///
 ///   @override
 ///   void initState() {
@@ -56,19 +56,21 @@ import 'text_field.dart';
 ///
 /// ```dart
 /// class MyPrefilledSearch extends StatefulWidget {
+///   const MyPrefilledSearch({Key? key}) : super(key: key);
+///
 ///   @override
-///   _MyPrefilledSearchState createState() => _MyPrefilledSearchState();
+///   State<MyPrefilledSearch> createState() => _MyPrefilledSearchState();
 /// }
 ///
 /// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return CupertinoSearchTextField(
-///       onChanged: (value) {
-///         print("The text has changed to: " + value);
+///       onChanged: (String value) {
+///         print('The text has changed to: $value');
 ///       },
-///       onSubmitted: (value) {
-///         print("Submitted text: " + value);
+///       onSubmitted: (String value) {
+///         print('Submitted text: $value');
 ///       },
 ///     );
 ///   }
@@ -114,6 +116,9 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// default fields were determined using the comparison tool in
   /// https://github.com/flutter/platform_tests/.
   ///
+  /// To customize the prefix icon, pass a [Widget] to [prefixIcon]. This
+  /// defaults to the search icon.
+  ///
   /// To customize the suffix icon, pass an [Icon] to [suffixIcon]. This
   /// defaults to the X-Mark.
   ///
@@ -139,12 +144,16 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.itemColor = CupertinoColors.secondaryLabel,
     this.itemSize = 20.0,
     this.prefixInsets = const EdgeInsetsDirectional.fromSTEB(6, 0, 0, 4),
+    this.prefixIcon = const Icon(CupertinoIcons.search),
     this.suffixInsets = const EdgeInsetsDirectional.fromSTEB(0, 0, 5, 2),
     this.suffixIcon = const Icon(CupertinoIcons.xmark_circle_fill),
     this.suffixMode = OverlayVisibilityMode.editing,
     this.onSuffixTap,
     this.restorationId,
     this.focusNode,
+    this.onTap,
+    this.autocorrect = true,
+    this.enabled,
   })  : assert(padding != null),
         assert(itemColor != null),
         assert(itemSize != null),
@@ -241,6 +250,11 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// the comparison tool in https://github.com/flutter/platform_tests/.
   final EdgeInsetsGeometry prefixInsets;
 
+  /// Sets a prefix widget.
+  ///
+  /// Cannot be null. Defaults to an [Icon] widget with the [CupertinoIcons.search] icon.
+  final Widget prefixIcon;
+
   /// Sets the padding insets for the prefix.
   ///
   /// Cannot be null. Defaults to padding that replicates the
@@ -272,6 +286,18 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
+
+  /// {@macro flutter.material.textfield.onTap}
+  final VoidCallback? onTap;
+
+  /// {@macro flutter.widgets.editableText.autocorrect}
+  final bool autocorrect;
+
+  /// Disables the text field when false.
+  ///
+  /// Text fields in disabled states have a light grey background and don't
+  /// respond to touch events including the [prefixIcon] and [suffixIcon] button.
+  final bool? enabled;
 
   @override
   State<StatefulWidget> createState() => _CupertinoSearchTextFieldState();
@@ -363,23 +389,29 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
         );
 
     final IconThemeData iconThemeData = IconThemeData(
-        color: CupertinoDynamicColor.resolve(widget.itemColor, context),
-        size: scaledIconSize);
+      color: CupertinoDynamicColor.resolve(widget.itemColor, context),
+      size: scaledIconSize,
+    );
 
     final Widget prefix = Padding(
-      child: IconTheme(
-          child: const Icon(CupertinoIcons.search), data: iconThemeData),
       padding: widget.prefixInsets,
+      child: IconTheme(
+        data: iconThemeData,
+        child: widget.prefixIcon,
+      ),
     );
 
     final Widget suffix = Padding(
+      padding: widget.suffixInsets,
       child: CupertinoButton(
-        child: IconTheme(child: widget.suffixIcon, data: iconThemeData),
         onPressed: widget.onSuffixTap ?? _defaultOnSuffixTap,
         minSize: 0,
         padding: EdgeInsets.zero,
+        child: IconTheme(
+          data: iconThemeData,
+          child: widget.suffixIcon,
+        ),
       ),
-      padding: widget.suffixInsets,
     );
 
     return CupertinoTextField(
@@ -388,6 +420,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       style: widget.style,
       prefix: prefix,
       suffix: suffix,
+      onTap: widget.onTap,
+      enabled: widget.enabled,
       suffixMode: widget.suffixMode,
       placeholder: placeholder,
       placeholderStyle: placeholderStyle,
@@ -395,6 +429,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       focusNode: widget.focusNode,
+      autocorrect: widget.autocorrect,
+      textInputAction: TextInputAction.search,
     );
   }
 }

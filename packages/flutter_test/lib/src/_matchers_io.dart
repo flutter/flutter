@@ -5,12 +5,11 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:flutter/widgets.dart';
+import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 
 import 'binding.dart';
 import 'finders.dart';

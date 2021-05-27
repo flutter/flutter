@@ -19,9 +19,9 @@
 
     [app.buttons[@"Full Screen (Cold)"] tap];
 
-    XCTAssertTrue([app.otherElements[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
+    XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
     [app.otherElements[@"Increment via Flutter"] tap];
-    XCTAssertTrue([app.otherElements[@"Button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
+    XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
 
     // Back navigation.
     [app.buttons[@"POP"] tap];
@@ -34,25 +34,24 @@
 
     [app.buttons[@"Full Screen (Warm)"] tap];
 
-    XCTAssertTrue([app.otherElements[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
+    XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
     [app.otherElements[@"Increment via Flutter"] tap];
-    XCTAssertTrue([app.otherElements[@"Button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
+    XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
 
     // Back navigation.
     [app.buttons[@"POP"] tap];
     XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:60.0]);
 }
 
-// TODO(dnfield): this test has become flaky, fix https://github.com/flutter/flutter/issues/70630 and re-enable.
 - (void)testFlutterViewWarm {
     XCUIApplication *app = [[XCUIApplication alloc] init];
     [app launch];
 
     [app.buttons[@"Flutter View (Warm)"] tap];
 
-    XCTAssertTrue([app.otherElements[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
+    XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
     [app.otherElements[@"Increment via Flutter"] tap];
-    XCTAssertTrue([app.otherElements[@"Button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
+    XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
 
     // Back navigation.
     [app.buttons[@"POP"] tap];
@@ -66,15 +65,15 @@
     [app.buttons[@"Hybrid View (Warm)"] tap];
 
     XCTAssertTrue([app.staticTexts[@"Flutter button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
-    XCTAssertTrue(app.otherElements[@"Platform button tapped 0 times."].exists);
+    XCTAssertTrue(app.staticTexts[@"Platform button tapped 0 times."].exists);
 
     [app.otherElements[@"Increment via Flutter"] tap];
     XCTAssertTrue([app.staticTexts[@"Flutter button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
-    XCTAssertTrue(app.otherElements[@"Platform button tapped 0 times."].exists);
+    XCTAssertTrue(app.staticTexts[@"Platform button tapped 0 times."].exists);
 
     [app.buttons[@"Increment via iOS"] tap];
     XCTAssertTrue([app.staticTexts[@"Flutter button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
-    XCTAssertTrue(app.otherElements[@"Platform button tapped 1 time."].exists);
+    XCTAssertTrue(app.staticTexts[@"Platform button tapped 1 time."].exists);
 
     // Back navigation.
     [app.navigationBars[@"Hybrid Flutter/Native"].buttons[@"Flutter iOS Demos Home"] tap];
@@ -88,8 +87,8 @@
     [app.buttons[@"Dual Flutter View (Cold)"] tap];
 
     // There are two marquees.
-    XCTAssertTrue([app.otherElements[@"This is Marquee"] waitForExistenceWithTimeout:60.0]);
-    XCTAssertEqual([app.otherElements matchingType:XCUIElementTypeOther identifier:@"This is Marquee"].count, 2);
+    XCTAssertTrue([app.staticTexts[@"This is Marquee"] waitForExistenceWithTimeout:60.0]);
+    XCTAssertEqual([app.staticTexts matchingType:XCUIElementTypeStaticText identifier:@"This is Marquee"].count, 2);
 
     // Back navigation.
     [app.navigationBars[@"Dual Flutter Views"].buttons[@"Flutter iOS Demos Home"] tap];

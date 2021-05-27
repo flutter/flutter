@@ -4,6 +4,8 @@
 
 import 'framework.dart';
 import 'navigator.dart';
+import 'restoration.dart';
+import 'restoration_properties.dart';
 import 'will_pop_scope.dart';
 
 /// An optional container for grouping together multiple form field widgets
@@ -24,7 +26,7 @@ import 'will_pop_scope.dart';
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/form.png)
 ///
 /// ```dart
-/// final _formKey = GlobalKey<FormState>();
+/// final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -37,8 +39,8 @@ import 'will_pop_scope.dart';
 ///           decoration: const InputDecoration(
 ///             hintText: 'Enter your email',
 ///           ),
-///           validator: (value) {
-///             if (value.isEmpty) {
+///           validator: (String? value) {
+///             if (value == null || value.isEmpty) {
 ///               return 'Please enter some text';
 ///             }
 ///             return null;
@@ -50,11 +52,11 @@ import 'will_pop_scope.dart';
 ///             onPressed: () {
 ///               // Validate will return true if the form is valid, or false if
 ///               // the form is invalid.
-///               if (_formKey.currentState.validate()) {
+///               if (_formKey.currentState!.validate()) {
 ///                 // Process data.
 ///               }
 ///             },
-///             child: Text('Submit'),
+///             child: const Text('Submit'),
 ///           ),
 ///         ),
 ///       ],
@@ -77,9 +79,9 @@ class Form extends StatefulWidget {
     Key? key,
     required this.child,
     @Deprecated(
-      'Use autoValidateMode parameter which provides more specific '
+      'Use autovalidateMode parameter which provides more specific '
       'behavior related to auto validation. '
-      'This feature was deprecated after v1.19.0.'
+      'This feature was deprecated after v1.19.0.',
     )
     this.autovalidate = false,
     this.onWillPop,
@@ -90,7 +92,7 @@ class Form extends StatefulWidget {
        assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.'
+         'autovalidate and autovalidateMode should not be used together.',
        ),
        autovalidateMode = autovalidateMode ??
          (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
@@ -143,9 +145,9 @@ class Form extends StatefulWidget {
   /// Used to enable/disable form fields auto validation and update their error
   /// text.
   @Deprecated(
-    'Use autoValidateMode parameter which provides more specific '
+    'Use autovalidateMode parameter which provides more specific '
     'behavior related to auto validation. '
-    'This feature was deprecated after v1.19.0.'
+    'This feature was deprecated after v1.19.0.',
   )
   final bool autovalidate;
 
@@ -167,12 +169,10 @@ class FormState extends State<Form> {
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
-    if (widget.onChanged != null)
-      widget.onChanged!();
-
+    widget.onChanged?.call();
 
     _hasInteractedByUser = _fields
-        .any((FormFieldState<dynamic> field) => field._hasInteractedByUser);
+        .any((FormFieldState<dynamic> field) => field._hasInteractedByUser.value);
     _forceRebuild();
   }
 
@@ -326,21 +326,22 @@ class FormField<T> extends StatefulWidget {
     this.validator,
     this.initialValue,
     @Deprecated(
-      'Use autoValidateMode parameter which provides more specific '
+      'Use autovalidateMode parameter which provides more specific '
       'behavior related to auto validation. '
-      'This feature was deprecated after v1.19.0.'
+      'This feature was deprecated after v1.19.0.',
     )
     this.autovalidate = false,
     this.enabled = true,
     AutovalidateMode? autovalidateMode,
+    this.restorationId,
   }) : assert(builder != null),
        assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.'
+         'autovalidate and autovalidateMode should not be used together.',
        ),
-        autovalidateMode = autovalidateMode ??
-          (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
+       autovalidateMode = autovalidateMode ??
+         (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
        super(key: key);
 
   /// An optional method to call with the final value when the form is saved via
@@ -395,11 +396,25 @@ class FormField<T> extends StatefulWidget {
   /// Used to enable/disable auto validation and update their error
   /// text.
   @Deprecated(
-    'Use autoValidateMode parameter which provides more specific '
+    'Use autovalidateMode parameter which provides more specific '
     'behavior related to auto validation. '
-    'This feature was deprecated after v1.19.0.'
+    'This feature was deprecated after v1.19.0.',
   )
   final bool autovalidate;
+
+  /// Restoration ID to save and restore the state of the form field.
+  ///
+  /// Setting the restoration ID to a non-null value results in whether or not
+  /// the form field validation persists.
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String? restorationId;
 
   @override
   FormFieldState<T> createState() => FormFieldState<T>();
@@ -407,10 +422,10 @@ class FormField<T> extends StatefulWidget {
 
 /// The current state of a [FormField]. Passed to the [FormFieldBuilder] method
 /// for use in constructing the form field's widget.
-class FormFieldState<T> extends State<FormField<T>> {
-  T? _value;
-  String? _errorText;
-  bool _hasInteractedByUser = false;
+class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
+  late T? _value = widget.initialValue;
+  final RestorableStringN _errorText = RestorableStringN(null);
+  final RestorableBool _hasInteractedByUser = RestorableBool(false);
 
   /// The current value of the form field.
   T? get value => _value;
@@ -418,10 +433,10 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// The current validation error returned by the [FormField.validator]
   /// callback, or null if no errors have been triggered. This only updates when
   /// [validate] is called.
-  String? get errorText => _errorText;
+  String? get errorText => _errorText.value;
 
   /// True if this field has any validation errors.
-  bool get hasError => _errorText != null;
+  bool get hasError => _errorText.value != null;
 
   /// True if the current value is valid.
   ///
@@ -435,16 +450,15 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
-    if (widget.onSaved != null)
-      widget.onSaved!(value);
+    widget.onSaved?.call(value);
   }
 
   /// Resets the field to its initial value.
   void reset() {
     setState(() {
       _value = widget.initialValue;
-      _hasInteractedByUser = false;
-      _errorText = null;
+      _hasInteractedByUser.value = false;
+      _errorText.value = null;
     });
     Form.of(context)?._fieldDidChange();
   }
@@ -465,7 +479,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   void _validate() {
     if (widget.validator != null)
-      _errorText = widget.validator!(_value);
+      _errorText.value = widget.validator!(_value);
   }
 
   /// Updates this field's state to the new value. Useful for responding to
@@ -477,7 +491,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   void didChange(T? value) {
     setState(() {
       _value = value;
-      _hasInteractedByUser = true;
+      _hasInteractedByUser.value = true;
     });
     Form.of(context)?._fieldDidChange();
   }
@@ -495,9 +509,12 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _value = widget.initialValue;
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_errorText, 'error_text');
+    registerForRestoration(_hasInteractedByUser, 'has_interacted_by_user');
   }
 
   @override
@@ -514,7 +531,7 @@ class FormFieldState<T> extends State<FormField<T>> {
           _validate();
           break;
         case AutovalidateMode.onUserInteraction:
-          if (_hasInteractedByUser) {
+          if (_hasInteractedByUser.value) {
             _validate();
           }
           break;

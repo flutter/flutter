@@ -243,10 +243,47 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TextDirection.ltr));
     for (int index = 0; index < actionCount; index += 1) {
-      expect(tester.getTopLeft(find.byKey(ValueKey<int>(index))), Offset(8, 134.0 + index * 10));
+      expect(tester.getTopLeft(find.byKey(ValueKey<int>(index))), Offset(592, 134.0 + index * 10));
     }
 
     await tester.pumpWidget(buildFrame(TextDirection.rtl));
+    for (int index = 0; index < actionCount; index += 1) {
+      expect(tester.getTopLeft(find.byKey(ValueKey<int>(index))), Offset(8, 134.0 + index * 10));
+    }
+  });
+
+  testWidgets('[overflowAlignment] test', (WidgetTester tester) async {
+    const int actionCount = 4;
+    Widget buildFrame(TextDirection textDirection, OverflowBarAlignment overflowAlignment) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: MaterialBanner(
+            overflowAlignment: overflowAlignment,
+            content: const SizedBox(width: 100, height: 100),
+            actions: List<Widget>.generate(actionCount, (int index) {
+              return SizedBox(
+                width: 200,
+                height: 10,
+                key: ValueKey<int>(index),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, OverflowBarAlignment.start));
+    for (int index = 0; index < actionCount; index += 1) {
+      expect(tester.getTopLeft(find.byKey(ValueKey<int>(index))), Offset(8, 134.0 + index * 10));
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, OverflowBarAlignment.center));
+    for (int index = 0; index < actionCount; index += 1) {
+      expect(tester.getTopLeft(find.byKey(ValueKey<int>(index))), Offset(300, 134.0 + index * 10));
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, OverflowBarAlignment.end));
     for (int index = 0; index < actionCount; index += 1) {
       expect(tester.getTopLeft(find.byKey(ValueKey<int>(index))), Offset(592, 134.0 + index * 10));
     }

@@ -135,10 +135,12 @@ class _ChipsTile extends StatelessWidget {
 }
 
 class ChipDemo extends StatefulWidget {
+  const ChipDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/chip';
 
   @override
-  _ChipDemoState createState() => _ChipDemoState();
+  State<ChipDemo> createState() => _ChipDemoState();
 }
 
 class _ChipDemoState extends State<ChipDemo> {

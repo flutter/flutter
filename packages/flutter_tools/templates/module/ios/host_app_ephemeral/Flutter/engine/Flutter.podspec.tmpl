@@ -14,5 +14,5 @@ Flutter provides an easy and productive way to build and deploy high-performance
   s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
   s.ios.deployment_target = '8.0'
-  s.vendored_frameworks = 'Flutter.framework'
+  s.vendored_frameworks = 'Flutter.xcframework'
 end

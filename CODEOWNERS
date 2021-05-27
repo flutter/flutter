@@ -8,6 +8,8 @@
 
 /CODEOWNERS @jmagman
 /dev/ci/ @christopherfujino
+/dev/prod_builders.json @caseyhillers @christopherfujino
+/dev/try_builders.json @caseyhillers @christopherfujino
 /packages/flutter_goldens @Piinks
 /packages/flutter_goldens_client @Piinks
 /packages/flutter_test/lib/src/_goldens_io.dart @Piinks

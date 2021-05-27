@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
 import 'package:meta/meta.dart';
 
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import 'gradle_utils.dart';
+import 'android_studio.dart';
 
 typedef GradleErrorTest = bool Function(String);
 
@@ -72,7 +72,10 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   permissionDeniedErrorHandler,
   flavorUndefinedHandler,
   r8FailureHandler,
-  androidXFailureHandler,
+  minSdkVersion,
+  transformInputIssue,
+  lockFileDepMissing,
+  androidXFailureHandler, // Keep last since the pattern is broader.
 ];
 
 // Permission defined error message.
@@ -87,7 +90,7 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
     bool usesAndroidX,
     bool shouldBuildPluginAsAar,
   }) async {
-    globals.printStatus('$warningMark Gradle does not have execution permission.', emphasis: true);
+    globals.printStatus('${globals.logger.terminal.warningMark} Gradle does not have execution permission.', emphasis: true);
     globals.printStatus(
       'You should change the ownership of the project directory to your user, '
       'or move the project to a directory with execute permissions.',
@@ -125,7 +128,7 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     bool shouldBuildPluginAsAar,
   }) async {
     globals.printError(
-      '$warningMark Gradle threw an error while downloading artifacts from the network. '
+      '${globals.logger.terminal.warningMark} Gradle threw an error while downloading artifacts from the network. '
       'Retrying to download...'
     );
     try {
@@ -154,7 +157,7 @@ final GradleHandledError r8FailureHandler = GradleHandledError(
     bool usesAndroidX,
     bool shouldBuildPluginAsAar,
   }) async {
-    globals.printStatus('$warningMark The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
+    globals.printStatus('${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
     globals.printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
     globals.printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
     return GradleBuildStatus.exit;
@@ -199,6 +202,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       // the incompatibility is coming from.
       BuildEvent(
         'gradle-android-x-failure',
+        type: 'gradle',
         eventError: 'app-not-using-plugins',
         flutterUsage: globals.flutterUsage,
       ).send();
@@ -212,6 +216,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       );
       BuildEvent(
         'gradle-android-x-failure',
+        type: 'gradle',
         eventError: 'app-not-using-androidx',
         flutterUsage: globals.flutterUsage,
       ).send();
@@ -222,17 +227,19 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       // AARs, Jetifier translated Support libraries for AndroidX equivalents.
       BuildEvent(
         'gradle-android-x-failure',
+        type: 'gradle',
         eventError: 'using-jetifier',
         flutterUsage: globals.flutterUsage,
       ).send();
     }
     if (hasPlugins && usesAndroidX && !shouldBuildPluginAsAar) {
       globals.printStatus(
-        'The built failed likely due to AndroidX incompatibilities in a plugin. '
-        'The tool is about to try using Jetfier to solve the incompatibility.'
+        'The build failed likely due to AndroidX incompatibilities in a plugin. '
+        'The tool is about to try using Jetifier to solve the incompatibility.'
       );
       BuildEvent(
         'gradle-android-x-failure',
+        type: 'gradle',
         eventError: 'not-using-jetifier',
         flutterUsage: globals.flutterUsage,
       ).send();
@@ -264,7 +271,7 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     assert(licenseFailure != null);
     final Match licenseMatch = licenseFailure.firstMatch(line);
     globals.printStatus(
-      '$warningMark Unable to download needed Android SDK components, as the '
+      '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
       'following licenses have not been accepted:\n'
       '${licenseMatch.group(1)}\n\n'
       'To resolve this, please run the following command in a Terminal:\n'
@@ -293,14 +300,17 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
   }) async {
     final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
-        gradleUtils.getExecutable(project),
+        globals.gradleUtils.getExecutable(project),
         'app:tasks' ,
         '--all',
         '--console=auto',
       ],
       throwOnError: true,
       workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: gradleEnvironment,
+      environment: <String, String>{
+        if (javaPath != null)
+          'JAVA_HOME': javaPath,
+      },
     );
     // Extract build types and product flavors.
     final Set<String> variants = <String>{};
@@ -325,7 +335,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       }
     }
     globals.printStatus(
-      '\n$warningMark  Gradle project does not define a task suitable '
+      '\n${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable '
       'for the requested build.'
     );
     if (productFlavors.isEmpty) {
@@ -344,4 +354,107 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'flavor-undefined',
+);
+
+
+final RegExp _minSdkVersionPattern = RegExp(r'uses-sdk:minSdkVersion ([0-9]+) cannot be smaller than version ([0-9]+) declared in library \[\:(.+)\]');
+
+/// Handler when a plugin requires a higher Android API level.
+@visibleForTesting
+final GradleHandledError minSdkVersion = GradleHandledError(
+  test: (String line) {
+    return _minSdkVersionPattern.hasMatch(line);
+  },
+  handler: ({
+    String line,
+    FlutterProject project,
+    bool usesAndroidX,
+    bool shouldBuildPluginAsAar,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle');
+
+    final Match minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
+    assert(minSdkVersionMatch.groupCount == 3);
+
+    globals.printStatus(
+      '\nThe plugin ${minSdkVersionMatch.group(3)} requires a higher Android SDK version.\n'+
+      globals.logger.terminal.bolden(
+        'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+        'android {\n'
+        '  defaultConfig {\n'
+        '    minSdkVersion ${minSdkVersionMatch.group(2)}\n'
+        '  }\n'
+        '}\n\n'
+      )+
+      "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch.group(2)}.\n"
+      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.'
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'plugin-min-sdk',
+);
+
+/// Handler when https://issuetracker.google.com/issues/141126614 or
+/// https://github.com/flutter/flutter/issues/58247 is triggered.
+@visibleForTesting
+final GradleHandledError transformInputIssue = GradleHandledError(
+  test: (String line) {
+    return line.contains('https://issuetracker.google.com/issues/158753935');
+  },
+  handler: ({
+    String line,
+    FlutterProject project,
+    bool usesAndroidX,
+    bool shouldBuildPluginAsAar,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle');
+
+    globals.printStatus(
+      '\nThis issue appears to be https://github.com/flutter/flutter/issues/58247.\n'+
+      globals.logger.terminal.bolden(
+        'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+        'android {\n'
+        '  lintOptions {\n'
+        '    checkReleaseBuilds false\n'
+        '  }\n'
+        '}'
+      )
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'transform-input-issue',
+);
+
+/// Handler when a dependency is missing in the lockfile.
+@visibleForTesting
+final GradleHandledError lockFileDepMissing = GradleHandledError(
+  test: (String line) {
+    return line.contains('which is not part of the dependency lock state');
+  },
+  handler: ({
+    String line,
+    FlutterProject project,
+    bool usesAndroidX,
+    bool shouldBuildPluginAsAar,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
+
+    globals.printStatus(
+      '\nYou need to update the lockfile, or disable Gradle dependency locking.\n'+
+      globals.logger.terminal.bolden(
+        'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
+        'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}\n'
+      )
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'lock-dep-issue',
 );

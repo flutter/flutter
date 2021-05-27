@@ -4,25 +4,20 @@
 
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
-
 import 'logger.dart';
 import 'platform.dart';
 import 'terminal.dart';
 
-// ignore_for_file: non_constant_identifier_names
-
 const String fire = '🔥';
-const String image = '🖼️';
 const int maxLineWidth = 84;
 
 /// Encapsulates the help text construction and printing.
 class CommandHelp {
   CommandHelp({
-    @required Logger logger,
-    @required AnsiTerminal terminal,
-    @required Platform platform,
-    @required OutputPreferences outputPreferences,
+    required Logger logger,
+    required AnsiTerminal terminal,
+    required Platform platform,
+    required OutputPreferences outputPreferences,
   }) : _logger = logger,
        _terminal = terminal,
        _platform = platform,
@@ -36,161 +31,150 @@ class CommandHelp {
 
   final OutputPreferences _outputPreferences;
 
-  CommandHelpOption _I;
-  CommandHelpOption get I => _I ??= _makeOption(
+  // COMMANDS IN ALPHABETICAL ORDER.
+  // Uppercase first, then lowercase.
+  // When updating this, update all the tests in command_help_test.dart accordingly.
+
+  late final CommandHelpOption I = _makeOption(
     'I',
-    'Toggle oversized image inversion $image.',
+    'Toggle oversized image inversion.',
     'debugInvertOversizedImages',
   );
 
-  CommandHelpOption _L;
-  CommandHelpOption get L => _L ??= _makeOption(
+  late final CommandHelpOption L = _makeOption(
     'L',
     'Dump layer tree to the console.',
     'debugDumpLayerTree',
   );
 
-  CommandHelpOption _P;
-  CommandHelpOption get P => _P ??= _makeOption(
+  late final CommandHelpOption M = _makeOption(
+    'M',
+    'Write SkSL shaders to a unique file in the project directory.',
+  );
+
+  late final CommandHelpOption P = _makeOption(
     'P',
     'Toggle performance overlay.',
     'WidgetsApp.showPerformanceOverlay',
   );
 
-  CommandHelpOption _R;
-  CommandHelpOption get R => _R ??= _makeOption(
+  late final CommandHelpOption R = _makeOption(
     'R',
     'Hot restart.',
   );
 
-  CommandHelpOption _S;
-  CommandHelpOption get S => _S ??= _makeOption(
+  late final CommandHelpOption S = _makeOption(
     'S',
     'Dump accessibility tree in traversal order.',
     'debugDumpSemantics',
   );
 
-  CommandHelpOption _U;
-  CommandHelpOption get U => _U ??= _makeOption(
+  late final CommandHelpOption U = _makeOption(
     'U',
     'Dump accessibility tree in inverse hit test order.',
     'debugDumpSemantics',
   );
 
-  CommandHelpOption _a;
-  CommandHelpOption get a => _a ??= _makeOption(
+  late final CommandHelpOption a = _makeOption(
     'a',
     'Toggle timeline events for all widget build methods.',
     'debugProfileWidgetBuilds',
   );
 
-  CommandHelpOption _b;
-  CommandHelpOption get b => _b ??= _makeOption(
+  late final CommandHelpOption b = _makeOption(
     'b',
-    'Toggle the platform brightness setting (dark and light mode).',
+    'Toggle platform brightness (dark and light mode).',
     'debugBrightnessOverride',
   );
 
-  CommandHelpOption _c;
-  CommandHelpOption get c => _c ??= _makeOption(
+  late final CommandHelpOption c = _makeOption(
     'c',
     'Clear the screen',
   );
 
-  CommandHelpOption _d;
-  CommandHelpOption get d => _d ??= _makeOption(
+  late final CommandHelpOption d = _makeOption(
     'd',
     'Detach (terminate "flutter run" but leave application running).',
   );
 
-  CommandHelpOption _g;
-  CommandHelpOption get g => _g ??= _makeOption(
+  late final CommandHelpOption g = _makeOption(
     'g',
     'Run source code generators.'
   );
 
-  CommandHelpOption _h;
-  CommandHelpOption get h => _h ??= _makeOption(
+  late final CommandHelpOption hWithDetails = _makeOption(
     'h',
     'Repeat this help message.',
   );
 
-  CommandHelpOption _i;
-  CommandHelpOption get i => _i ??= _makeOption(
+  late final CommandHelpOption hWithoutDetails = _makeOption(
+    'h',
+    'List all available interactive commands.',
+  );
+
+  late final CommandHelpOption i = _makeOption(
     'i',
     'Toggle widget inspector.',
     'WidgetsApp.showWidgetInspectorOverride',
   );
 
-  CommandHelpOption _o;
-  CommandHelpOption get o => _o ??= _makeOption(
+  late final CommandHelpOption k = _makeOption(
+    'k',
+    'Toggle CanvasKit rendering.',
+  );
+
+  late final CommandHelpOption o = _makeOption(
     'o',
     'Simulate different operating systems.',
     'defaultTargetPlatform',
   );
 
-  CommandHelpOption _p;
-  CommandHelpOption get p => _p ??= _makeOption(
+  late final CommandHelpOption p = _makeOption(
     'p',
     'Toggle the display of construction lines.',
     'debugPaintSizeEnabled',
   );
 
-  CommandHelpOption _q;
-  CommandHelpOption get q => _q ??= _makeOption(
+  late final CommandHelpOption q = _makeOption(
     'q',
     'Quit (terminate the application on the device).',
   );
 
-  CommandHelpOption _r;
-  CommandHelpOption get r => _r ??= _makeOption(
+  late final CommandHelpOption r = _makeOption(
     'r',
     'Hot reload. $fire$fire$fire',
   );
 
-  CommandHelpOption _s;
-  CommandHelpOption get s => _s ??= _makeOption(
+  late final CommandHelpOption s = _makeOption(
     's',
     'Save a screenshot to flutter.png.',
   );
 
-  CommandHelpOption _t;
-  CommandHelpOption get t => _t ??= _makeOption(
+  late final CommandHelpOption t = _makeOption(
     't',
     'Dump rendering tree to the console.',
     'debugDumpRenderTree',
   );
 
-  CommandHelpOption _v;
-  CommandHelpOption get v => _v ??= _makeOption(
+  late final CommandHelpOption v = _makeOption(
     'v',
-    'Launch DevTools.',
+    'Open Flutter DevTools.',
   );
 
-  CommandHelpOption _w;
-  CommandHelpOption get w => _w ??= _makeOption(
+  late final CommandHelpOption w = _makeOption(
     'w',
     'Dump widget hierarchy to the console.',
     'debugDumpApp',
   );
 
-  CommandHelpOption _z;
-  CommandHelpOption get z => _z ??= _makeOption(
+  late final CommandHelpOption z = _makeOption(
     'z',
     'Toggle elevation checker.',
+    'debugCheckElevationsEnabled',
   );
 
-  CommandHelpOption _k;
-  CommandHelpOption get k => _k ??= _makeOption(
-    'k',
-    'Toggle CanvasKit rendering.',
-  );
-
-  CommandHelpOption _M;
-  CommandHelpOption get M => _M ??= _makeOption(
-    'M',
-    'Write SkSL shaders to a unique file in the project directory.',
-  );
+  // When updating the list above, see the notes above the list regarding order
+  // and tests.
 
   CommandHelpOption _makeOption(String key, String description, [
     String inParenthesis = '',
@@ -213,10 +197,10 @@ class CommandHelpOption {
     this.key,
     this.description, {
     this.inParenthesis = '',
-    @required Logger logger,
-    @required Terminal terminal,
-    @required Platform platform,
-    @required OutputPreferences outputPreferences,
+    required Logger logger,
+    required Terminal terminal,
+    required Platform platform,
+    required OutputPreferences outputPreferences,
   }) : _logger = logger,
        _terminal = terminal,
        _platform = platform,
@@ -251,7 +235,7 @@ class CommandHelpOption {
 
     bool wrap = false;
     final int maxWidth = math.max(
-      _outputPreferences.wrapColumn ?? 0,
+      _outputPreferences.wrapColumn,
       maxLineWidth,
     );
     final int adjustedMessageLength = _platform.stdoutSupportsAnsi

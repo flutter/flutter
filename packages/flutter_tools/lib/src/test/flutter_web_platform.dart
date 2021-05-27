@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
+// @dart = 2.8
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -12,12 +12,13 @@ import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
+import 'package:process/process.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_core/src/platform.dart';
+import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
@@ -51,6 +52,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     @required ChromiumLauncher chromiumLauncher,
     @required Logger logger,
     @required Artifacts artifacts,
+    @required ProcessManager processManager,
   }) : _fileSystem = fileSystem,
       _flutterToolPackageConfig = flutterToolPackageConfig,
       _chromiumLauncher = chromiumLauncher,
@@ -75,6 +77,9 @@ class FlutterWebPlatform extends PlatformPlugin {
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
       () => TestCompiler(buildInfo, flutterProject),
+      fileSystem: _fileSystem,
+      logger: _logger,
+      processManager: processManager,
     );
   }
 
@@ -111,6 +116,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     @required Logger logger,
     @required ChromiumLauncher chromiumLauncher,
     @required Artifacts artifacts,
+    @required ProcessManager processManager,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -138,6 +144,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       artifacts: artifacts,
       logger: logger,
       nullAssertions: nullAssertions,
+      processManager: processManager,
     );
   }
 
@@ -145,6 +152,18 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// Uri of the test package.
   Uri get testUri => _flutterToolPackageConfig['test'].packageUriRoot;
+
+  WebRendererMode get _rendererMode  {
+    return buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')
+      ? WebRendererMode.canvaskit
+      : WebRendererMode.html;
+  }
+
+  NullSafetyMode get _nullSafetyMode {
+    return buildInfo.nullSafetyMode == NullSafetyMode.sound
+      ? NullSafetyMode.sound
+      : NullSafetyMode.unsound;
+  }
 
   final Configuration _config;
   final shelf.Server _server;
@@ -161,7 +180,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The require js binary.
   File get _requireJs => _fileSystem.file(_fileSystem.path.join(
-    _artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    _artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'kernel',
@@ -171,20 +190,18 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(_fileSystem.path.join(
-    _artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    _artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'web',
     'dart_stack_trace_mapper.js',
   ));
 
-  File get _dartSdk => _fileSystem.file(_artifacts.getArtifactPath(kDartSdkJsArtifactMap[WebRendererMode.html][
-    buildInfo.nullSafetyMode == NullSafetyMode.sound ? NullSafetyMode.sound : NullSafetyMode.unsound
-  ]));
+  File get _dartSdk => _fileSystem.file(
+    _artifacts.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode][_nullSafetyMode]));
 
-  File get _dartSdkSourcemaps => _fileSystem.file(_artifacts.getArtifactPath(kDartSdkJsMapArtifactMap[WebRendererMode.html][
-    buildInfo.nullSafetyMode == NullSafetyMode.sound ? NullSafetyMode.sound : NullSafetyMode.unsound
-  ]));
+  File get _dartSdkSourcemaps => _fileSystem.file(
+    _artifacts.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode][_nullSafetyMode]));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(
@@ -214,6 +231,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       final String generatedFile = _fileSystem.path.split(leadingPath).join('_') + '.dart.test.dart.js';
       return shelf.Response.ok(generateMainModule(
         nullAssertions: nullAssertions,
+        nativeNullAssertions: true,
         bootstrapModule: _fileSystem.path.basename(leadingPath) + '.dart.bootstrap',
         entrypoint: '/' + generatedFile
        ), headers: <String, String>{
@@ -607,7 +625,7 @@ class BrowserManager {
       throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
     }).catchError((dynamic error, StackTrace stackTrace) {
       if (completer.isCompleted) {
-        return;
+        return null;
       }
       completer.completeError(error, stackTrace);
     }));
@@ -619,7 +637,7 @@ class BrowserManager {
     }).catchError((dynamic error, StackTrace stackTrace) {
       chrome.close();
       if (completer.isCompleted) {
-        return;
+        return null;
       }
       completer.completeError(error, stackTrace);
     }));
@@ -627,7 +645,6 @@ class BrowserManager {
     return completer.future.timeout(const Duration(seconds: 30), onTimeout: () {
       chrome.close();
       throwToolExit('Timed out waiting for ${runtime.name} to connect.');
-      return;
     });
   }
 

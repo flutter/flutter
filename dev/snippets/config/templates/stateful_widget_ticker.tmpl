@@ -1,22 +1,24 @@
 /// Flutter code sample for {{element}}
-// @dart = 2.9
 
 {{description}}
 
-import 'package:flutter/widgets.dart';
+{{code-dartImports}}
 
+import 'package:flutter/widgets.dart';
 {{code-imports}}
 
-void main() => runApp(new MyApp());
+void main() => runApp(const MyApp());
 
 /// This is the main application widget.
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return WidgetsApp(
+    return const WidgetsApp(
       title: 'Flutter Code Sample',
       home: MyStatefulWidget(),
-      color: const Color(0xffffffff),
+      color: Color(0xffffffff),
     );
   }
 }
@@ -25,10 +27,10 @@ class MyApp extends StatelessWidget {
 
 /// This is the stateful widget that the main application instantiates.
 class MyStatefulWidget extends StatefulWidget {
-  MyStatefulWidget({Key key}) : super(key: key);
+  const MyStatefulWidget({Key? key}) : super(key: key);
 
   @override
-  _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
 /// This is the private State class that goes with MyStatefulWidget.

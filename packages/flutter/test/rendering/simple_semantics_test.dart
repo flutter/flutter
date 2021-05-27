@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -21,9 +20,9 @@ void main() {
     );
     int semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
-        listener: () {
-          ++semanticsUpdateCount;
-        }
+      listener: () {
+        ++semanticsUpdateCount;
+      },
     );
 
     layout(tree, phase: EnginePhase.flushSemantics);

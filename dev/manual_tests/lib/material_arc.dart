@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -410,7 +409,7 @@ class AnimationDemo extends StatefulWidget {
   const AnimationDemo({ Key key }) : super(key: key);
 
   @override
-  _AnimationDemoState createState() => _AnimationDemoState();
+  State<AnimationDemo> createState() => _AnimationDemoState();
 }
 
 class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateMixin {

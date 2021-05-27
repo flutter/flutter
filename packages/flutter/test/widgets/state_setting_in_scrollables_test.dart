@@ -19,7 +19,7 @@ class FooState extends State<Foo> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return ScrollConfiguration(
-          behavior: FooScrollBehavior(),
+          behavior: const FooScrollBehavior(),
           child: ListView(
             controller: scrollController,
             children: <Widget>[
@@ -68,12 +68,14 @@ class FooState extends State<Foo> {
             ],
           ),
         );
-      }
+      },
     );
   }
 }
 
 class FooScrollBehavior extends ScrollBehavior {
+  const FooScrollBehavior();
+
   @override
   bool shouldNotify(FooScrollBehavior old) => true;
 }

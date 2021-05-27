@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Constants taken from _ContextMenuActionState.
@@ -17,11 +17,11 @@ void main() {
     final UniqueKey actionKey = UniqueKey();
     final CupertinoContextMenuAction action = CupertinoContextMenuAction(
       key: actionKey,
-      child: const Text('I am a CupertinoContextMenuAction'),
       onPressed: onPressed,
       trailingIcon: CupertinoIcons.home,
       isDestructiveAction: isDestructiveAction,
       isDefaultAction: isDefaultAction,
+      child: const Text('I am a CupertinoContextMenuAction'),
     );
 
     return CupertinoApp(

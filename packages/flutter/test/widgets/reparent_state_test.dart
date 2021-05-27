@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 
 class StateMarker extends StatefulWidget {
   const StateMarker({ Key? key, this.child }) : super(key: key);
@@ -59,9 +59,11 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Container(
+            color: Colors.green,
             child: StateMarker(key: left),
           ),
           Container(
+            color: Colors.green,
             child: StateMarker(
               key: right,
               child: grandchild,
@@ -86,12 +88,14 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Container(
+            color: Colors.green,
             child: StateMarker(
               key: right,
               child: newGrandchild,
             ),
           ),
           Container(
+            color: Colors.green,
             child: StateMarker(key: left),
           ),
         ],
@@ -111,6 +115,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: Container(
+          color: Colors.green,
           child: StateMarker(
             key: left,
             child: Container(),
@@ -178,6 +183,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: Container(
+          color: Colors.green,
           child: StateMarker(
             key: left,
             child: Container(),
@@ -205,7 +211,7 @@ void main() {
         child: ListView(
           itemExtent: 100.0,
           children: <Widget>[
-            Container(
+            SizedBox(
               key: const Key('container'),
               height: 100.0,
               child: StateMarker(key: key),
@@ -279,7 +285,7 @@ void main() {
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(width: 100.0, height: 100.0, child: StateMarker(key: key)),
+        SizedBox(width: 100.0, height: 100.0, child: StateMarker(key: key)),
         const SizedBox(width: 100.0, height: 100.0),
       ],
     ));
@@ -303,7 +309,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 100.0, height: 100.0),
-        Container(width: 100.0, height: 100.0, child: StateMarker(key: key)),
+        SizedBox(width: 100.0, height: 100.0, child: StateMarker(key: key)),
       ],
     ));
 
@@ -329,13 +335,13 @@ void main() {
     final DeactivateLogger logger = DeactivateLogger(key: key, log: log);
 
     await tester.pumpWidget(
-      Container(key: UniqueKey(), child: logger)
+      Container(key: UniqueKey(), child: logger),
     );
 
     expect(log, equals(<String>['build']));
 
     await tester.pumpWidget(
-      Container(key: UniqueKey(), child: logger)
+      Container(key: UniqueKey(), child: logger),
     );
 
     expect(log, equals(<String>['build', 'deactivate', 'build']));

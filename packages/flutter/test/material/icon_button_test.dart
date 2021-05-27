@@ -337,8 +337,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('IconButton with explicit splash radius',
-      (WidgetTester tester) async {
+  testWidgets('IconButton with explicit splash radius', (WidgetTester tester) async {
     const double splashRadius = 30.0;
     await tester.pumpWidget(
       MaterialApp(
@@ -362,7 +361,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(IconButton))),
       paints
-        ..circle(radius: splashRadius)
+        ..circle(radius: splashRadius),
     );
 
     await gesture.up();
@@ -605,7 +604,7 @@ void main() {
   testWidgets('IconButton responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(
@@ -621,7 +620,7 @@ void main() {
       );
     }
 
-    await buildTest(const VisualDensity());
+    await buildTest(VisualDensity.standard);
     final RenderBox box = tester.renderObject(find.byKey(key));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(48, 48)));

@@ -86,6 +86,8 @@ class _ContactItem extends StatelessWidget {
 }
 
 class ContactsDemo extends StatefulWidget {
+  const ContactsDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/contacts';
 
   @override

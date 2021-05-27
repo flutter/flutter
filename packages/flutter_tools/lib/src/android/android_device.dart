@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -19,12 +21,14 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../device_port_forwarder.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 
 import 'android.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
+import 'application_package.dart';
 
 /// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
 enum HardwareType { emulator, physical }
@@ -1027,7 +1031,7 @@ class AdbLogReader extends DeviceLogReader {
       final String lastLogcatTimestamp = await device.lastLogcatTimestamp();
       args.addAll(<String>[
         '-T',
-        if (lastLogcatTimestamp != null) '\'$lastLogcatTimestamp\'' else '0',
+        if (lastLogcatTimestamp != null) "'$lastLogcatTimestamp'" else '0',
       ]);
     }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
@@ -1309,13 +1313,10 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
       ],
       throwOnError: false,
     );
-    // The port may have already been unforwarded, for example if there
-    // are multiple attach process already connected.
-    if (runResult.exitCode == 0 || runResult
-      .stderr.contains("listener '$tcpLine' not found")) {
+    if (runResult.exitCode == 0) {
       return;
     }
-    runResult.throwException('Process exited abnormally:\n$runResult');
+    _logger.printError('Failed to unforward port: $runResult');
   }
 
   @override

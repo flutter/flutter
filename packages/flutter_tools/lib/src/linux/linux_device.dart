@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -25,15 +27,20 @@ class LinuxDevice extends DesktopDevice {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required OperatingSystemUtils operatingSystemUtils,
-  }) : super(
-      'linux',
-      platformType: PlatformType.linux,
-      ephemeral: false,
-      logger: logger,
-      processManager: processManager,
-      fileSystem: fileSystem,
-      operatingSystemUtils: operatingSystemUtils,
-  );
+  })  : _operatingSystemUtils = operatingSystemUtils,
+        super(
+          'linux',
+          platformType: PlatformType.linux,
+          ephemeral: false,
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          operatingSystemUtils: operatingSystemUtils,
+        );
+
+  final OperatingSystemUtils _operatingSystemUtils;
+
+  TargetPlatform _targetPlatform;
 
   @override
   bool isSupported() => true;
@@ -42,7 +49,17 @@ class LinuxDevice extends DesktopDevice {
   String get name => 'Linux';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.linux_x64;
+  Future<TargetPlatform> get targetPlatform async {
+    if (_targetPlatform == null) {
+      if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
+        _targetPlatform = TargetPlatform.linux_x64;
+      } else {
+        _targetPlatform = TargetPlatform.linux_arm64;
+      }
+    }
+
+    return _targetPlatform;
+  }
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -59,6 +76,7 @@ class LinuxDevice extends DesktopDevice {
       FlutterProject.current().linux,
       buildInfo,
       target: mainPath,
+      targetPlatform: _targetPlatform,
     );
   }
 

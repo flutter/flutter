@@ -3,25 +3,25 @@
 // found in the LICENSE file.
 
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'android_platform_view.dart';
 import 'future_data_handler.dart';
 import 'page.dart';
 
 class NestedViewEventPage extends PageWidget {
-  const NestedViewEventPage()
-      : super('Nested View Event Tests', const ValueKey<String>('NestedViewEventTile'));
+  const NestedViewEventPage({Key key})
+      : super('Nested View Event Tests', const ValueKey<String>('NestedViewEventTile'), key: key);
 
   @override
-  Widget build(BuildContext context) => NestedViewEventBody();
+  Widget build(BuildContext context) => const NestedViewEventBody();
 }
 
 class NestedViewEventBody extends StatefulWidget {
+  const NestedViewEventBody({Key key}) : super(key: key);
+
   @override
   State<NestedViewEventBody> createState() => NestedViewEventBodyState();
 }
@@ -33,9 +33,8 @@ enum _LastTestStatus {
 }
 
 class NestedViewEventBodyState extends State<NestedViewEventBody> {
-
   MethodChannel viewChannel;
-  _LastTestStatus lastTestStatus = _LastTestStatus.pending;
+  _LastTestStatus _lastTestStatus = _LastTestStatus.pending;
   String lastError;
   int id;
   int nestedViewClickCount = 0;
@@ -58,29 +57,29 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
                   onPlatformViewCreated: onPlatformViewCreated,
                 ) : null,
           ),
-          if (lastTestStatus != _LastTestStatus.pending) _statusWidget(),
+          if (_lastTestStatus != _LastTestStatus.pending) _statusWidget(),
           if (viewChannel != null) ... <Widget>[
             ElevatedButton(
               key: const ValueKey<String>('ShowAlertDialog'),
-              child: const Text('SHOW ALERT DIALOG'),
               onPressed: onShowAlertDialogPressed,
+              child: const Text('SHOW ALERT DIALOG'),
             ),
             ElevatedButton(
               key: const ValueKey<String>('TogglePlatformView'),
-              child: const Text('TOGGLE PLATFORM VIEW'),
               onPressed: onTogglePlatformView,
+              child: const Text('TOGGLE PLATFORM VIEW'),
             ),
             Row(
               children: <Widget>[
                 ElevatedButton(
                   key: const ValueKey<String>('AddChildView'),
-                  child: const Text('ADD CHILD VIEW'),
                   onPressed: onChildViewPressed,
+                  child: const Text('ADD CHILD VIEW'),
                 ),
                 ElevatedButton(
                   key: const ValueKey<String>('TapChildView'),
-                  child: const Text('TAP CHILD VIEW'),
                   onPressed: onTapChildViewPressed,
+                  child: const Text('TAP CHILD VIEW'),
                 ),
                 if (nestedViewClickCount > 0)
                   Text(
@@ -96,34 +95,34 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
   }
 
   Widget _statusWidget() {
-    assert(lastTestStatus != _LastTestStatus.pending);
-    final String message = lastTestStatus == _LastTestStatus.success ? 'Success' : lastError;
+    assert(_lastTestStatus != _LastTestStatus.pending);
+    final String message = _lastTestStatus == _LastTestStatus.success ? 'Success' : lastError;
     return Container(
-      color: lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
+      color: _lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
       child: Text(
         message,
         key: const ValueKey<String>('Status'),
         style: TextStyle(
-          color: lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
+          color: _lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
         ),
       ),
     );
   }
 
   Future<void> onShowAlertDialogPressed() async {
-    if (lastTestStatus != _LastTestStatus.pending) {
+    if (_lastTestStatus != _LastTestStatus.pending) {
       setState(() {
-        lastTestStatus = _LastTestStatus.pending;
+        _lastTestStatus = _LastTestStatus.pending;
       });
     }
     try {
       await viewChannel.invokeMethod<void>('showAndHideAlertDialog');
       setState(() {
-        lastTestStatus = _LastTestStatus.success;
+        _lastTestStatus = _LastTestStatus.success;
       });
     } catch(e) {
       setState(() {
-        lastTestStatus = _LastTestStatus.error;
+        _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
       });
     }
@@ -143,7 +142,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
       });
     } catch(e) {
       setState(() {
-        lastTestStatus = _LastTestStatus.error;
+        _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
       });
     }

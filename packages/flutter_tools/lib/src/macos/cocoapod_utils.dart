@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../base/fingerprint.dart';
 import '../build_info.dart';
+import '../cache.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
-import '../plugins.dart';
 import '../project.dart';
 
 /// For a given build, determines whether dependencies have changed since the
@@ -28,6 +31,13 @@ Future<void> processPodsIfNeeded(
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
       xcodeProject.generatedXcodePropertiesFile.path,
+      globals.fs.path.join(
+        Cache.flutterRoot,
+        'packages',
+        'flutter_tools',
+        'bin',
+        'podhelper.rb',
+      ),
     ],
     fileSystem: globals.fs,
     logger: globals.logger,

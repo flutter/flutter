@@ -13,7 +13,7 @@
 # The first and only parameter should be the path to the Fuchsia system image
 # tarball, e.g. `./run_fuchsia_tests.sh generic-x64.tgz`.
 #
-# This script expects `pm`, `device-finder`, and `fuchsia_ctl` to all be in the
+# This script expects `pm`, `ffx`, and `fuchsia_ctl` to all be in the
 # same directory as the script.
 #
 # This script also expects a private key available at:
@@ -44,7 +44,7 @@ fi
 # Wrapper function to pass common args to fuchsia_ctl.
 fuchsia_ctl() {
   $script_dir/fuchsia_ctl -d $device_name \
-      --device-finder-path $script_dir/device-finder "$@"
+      --ffx-path $script_dir/ffx "$@"
 }
 
 reboot() {
@@ -114,6 +114,8 @@ Host *
 EOF
 
 export FUCHSIA_SSH_CONFIG=$script_dir/fuchsia_ssh_config
+
+export FUCHSIA_ANALYTICS_DISABLED="1"
 
 # Run the driver test
 echo "$(date) START:DRIVER_TEST -------------------------------------"

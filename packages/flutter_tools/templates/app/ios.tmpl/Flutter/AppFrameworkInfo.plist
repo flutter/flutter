@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleDevelopmentRegion</key>
-  <string>$(DEVELOPMENT_LANGUAGE)</string>
+  <string>en</string>
   <key>CFBundleExecutable</key>
   <string>App</string>
   <key>CFBundleIdentifier</key>

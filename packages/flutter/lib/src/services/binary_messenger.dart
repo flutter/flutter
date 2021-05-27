@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-
-import 'package:flutter/foundation.dart';
-import 'binding.dart';
 
 /// A function which takes a platform message and asynchronously returns an encoded response.
 typedef MessageHandler = Future<ByteData?>? Function(ByteData? message);
@@ -16,15 +12,43 @@ typedef MessageHandler = Future<ByteData?>? Function(ByteData? message);
 ///
 /// This class also registers handlers for incoming messages.
 abstract class BinaryMessenger {
-  /// A const constructor to allow subclasses to be const.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const BinaryMessenger();
 
-  /// Calls the handler registered for the given channel.
+  /// Queues a message.
   ///
-  /// Typically called by [ServicesBinding] to handle platform messages received
-  /// from [dart:ui.PlatformDispatcher.onPlatformMessage].
+  /// The returned future completes immediately.
+  ///
+  /// This method adds the provided message to the given channel (named by the
+  /// `channel` argument) of the [ChannelBuffers] object. This simulates what
+  /// happens when a plugin on the platform thread (e.g. Kotlin or Swift code)
+  /// sends a message to the plugin package on the Dart thread.
+  ///
+  /// The `data` argument contains the message as encoded bytes. (The format
+  /// used for the message depends on the channel.)
+  ///
+  /// The `callback` argument, if non-null, is eventually invoked with the
+  /// response that would have been sent to the platform thread.
+  ///
+  /// In production code, it is more efficient to call
+  /// `ServicesBinding.instance.channelBuffers.push` directly.
+  ///
+  /// In tests, consider using
+  /// `tester.binding.defaultBinaryMessenger.handlePlatformMessage` (see
+  /// [WidgetTester], [TestWidgetsFlutterBinding], [TestDefaultBinaryMessenger],
+  /// and [TestDefaultBinaryMessenger.handlePlatformMessage] respectively).
   ///
   /// To register a handler for a given message channel, see [setMessageHandler].
+  ///
+  /// To send a message _to_ a plugin on the platform thread, see [send].
+  // TODO(ianh): deprecate this method once cocoon and other customer_tests are migrated:
+  // @NotYetDeprecated(
+  //   'Instead of calling this method, use ServicesBinding.instance.channelBuffers.push. '
+  //   'In tests, consider using tester.binding.defaultBinaryMessenger.handlePlatformMessage '
+  //   'or TestDefaultBinaryMessenger.instance.defaultBinaryMessenger.handlePlatformMessage. '
+  //   'This feature was deprecated after v2.1.0-10.0.pre.'
+  // )
   Future<void> handlePlatformMessage(String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback);
 
   /// Send a binary message to the platform plugins on the given channel.
@@ -43,70 +67,6 @@ abstract class BinaryMessenger {
   /// The handler's return value, if non-null, is sent as a response, unencoded.
   void setMessageHandler(String channel, MessageHandler? handler);
 
-  /// Returns true if the `handler` argument matches the `handler` previously
-  /// passed to [setMessageHandler].
-  ///
-  /// This method is useful for tests or test harnesses that want to assert the
-  /// handler for the specified channel has not been altered by a previous test.
-  ///
-  /// Passing null for the `handler` returns true if the handler for the
-  /// `channel` is not set.
-  bool checkMessageHandler(String channel, MessageHandler? handler);
-
-  /// Set a mock callback for intercepting messages from the [send] method on
-  /// this class, on the given channel, without decoding them.
-  ///
-  /// The given callback will replace the currently registered mock callback for
-  /// that channel, if any. To remove the mock handler, pass null as the
-  /// `handler` argument.
-  ///
-  /// The handler's return value, if non-null, is used as a response, unencoded.
-  ///
-  /// This is intended for testing. Messages intercepted in this manner are not
-  /// sent to platform plugins.
-  void setMockMessageHandler(String channel, MessageHandler? handler);
-
-  /// Returns true if the `handler` argument matches the `handler` previously
-  /// passed to [setMockMessageHandler].
-  ///
-  /// This method is useful for tests or test harnesses that want to assert the
-  /// mock handler for the specified channel has not been altered by a previous
-  /// test.
-  ///
-  /// Passing null for the `handler` returns true if the handler for the
-  /// `channel` is not set.
-  bool checkMockMessageHandler(String channel, MessageHandler? handler);
-}
-
-/// The default instance of [BinaryMessenger].
-///
-/// This API has been deprecated in favor of [ServicesBinding.defaultBinaryMessenger].
-/// Please use [ServicesBinding.defaultBinaryMessenger] as the default
-/// instance of [BinaryMessenger].
-///
-/// This is used to send messages from the application to the platform, and
-/// keeps track of which handlers have been registered on each channel so
-/// it may dispatch incoming messages to the registered handler.
-@Deprecated(
-  'Use ServicesBinding.instance.defaultBinaryMessenger instead. '
-  'This feature was deprecated after v1.6.5.'
-)
-BinaryMessenger get defaultBinaryMessenger {
-  assert(() {
-    if (ServicesBinding.instance == null) {
-      throw FlutterError(
-        'ServicesBinding.defaultBinaryMessenger was accessed before the '
-        'binding was initialized.\n'
-        "If you're running an application and need to access the binary "
-        'messenger before `runApp()` has been called (for example, during '
-        'plugin initialization), then you need to explicitly call the '
-        '`WidgetsFlutterBinding.ensureInitialized()` first.\n'
-        "If you're running a test, you can call the "
-        '`TestWidgetsFlutterBinding.ensureInitialized()` as the first line in '
-        "your test's `main()` method to initialize the binding."
-      );
-    }
-    return true;
-  }());
-  return ServicesBinding.instance!.defaultBinaryMessenger;
+  // Looking for setMockMessageHandler or checkMockMessageHandler?
+  // See this shim package: packages/flutter_test/lib/src/deprecated.dart
 }

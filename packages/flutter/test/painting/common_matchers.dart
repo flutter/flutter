@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -15,7 +14,7 @@ final Matcher isUnitCircle = isPathThat(
     const Offset(-0.2138540316101296, -0.09997005339529785),
     const Offset(-0.46919827227410416, 0.29581721423767027),
     const Offset(-0.43628713652733153, 0.5065324817995975),
-    const Offset(0.0, 0.0),
+    Offset.zero,
     const Offset(0.49296904381712725, -0.5922438805080081),
     const Offset(0.2901141594861445, -0.3181478162967859),
     const Offset(0.45229946324502146, 0.4324593232323706),

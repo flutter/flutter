@@ -14,7 +14,7 @@ class {{pluginDartClass}}Web {
     final MethodChannel channel = MethodChannel(
       '{{projectName}}',
       const StandardMethodCodec(),
-      registrar.messenger,
+      registrar,
     );
 
     final pluginInstance = {{pluginDartClass}}Web();
@@ -28,7 +28,6 @@ class {{pluginDartClass}}Web {
     switch (call.method) {
       case 'getPlatformVersion':
         return getPlatformVersion();
-        break;
       default:
         throw PlatformException(
           code: 'Unimplemented',

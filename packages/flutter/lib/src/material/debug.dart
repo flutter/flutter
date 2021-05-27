@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'material.dart';
@@ -21,6 +20,8 @@ import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 /// assert(debugCheckHasMaterial(context));
 /// ```
 ///
+/// This method can be expensive (it walks the element tree).
+///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
@@ -35,22 +36,20 @@ bool debugCheckHasMaterial(BuildContext context) {
           'material is represented by the Material widget. It is the '
           'Material widget that renders ink splashes, for instance. '
           'Because of this, many material library widgets require that '
-          'there be a Material widget in the tree above them.'
+          'there be a Material widget in the tree above them.',
         ),
         ErrorHint(
           'To introduce a Material widget, you can either directly '
           'include one, or use a widget that contains Material itself, '
           'such as a Card, Dialog, Drawer, or Scaffold.',
         ),
-        ...context.describeMissingAncestor(expectedAncestorType: Material)
-      ]
-      );
+        ...context.describeMissingAncestor(expectedAncestorType: Material),
+      ]);
     }
     return true;
   }());
   return true;
 }
-
 
 /// Asserts that the given context has a [Localizations] ancestor that contains
 /// a [MaterialLocalizations] delegate.
@@ -65,6 +64,11 @@ bool debugCheckHasMaterial(BuildContext context) {
 /// assert(debugCheckHasMaterialLocalizations(context));
 /// ```
 ///
+/// This function has the side-effect of establishing an inheritance
+/// relationship with the nearest [Localizations] widget (see
+/// [BuildContext.dependOnInheritedWidgetOfExactType]). This is ok if the caller
+/// always also calls [Localizations.of] or [Localizations.localeOf].
+///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMaterialLocalizations(BuildContext context) {
   assert(() {
@@ -73,19 +77,19 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
         ErrorSummary('No MaterialLocalizations found.'),
         ErrorDescription(
           '${context.widget.runtimeType} widgets require MaterialLocalizations '
-          'to be provided by a Localizations widget ancestor.'
+          'to be provided by a Localizations widget ancestor.',
         ),
         ErrorDescription(
           'The material library uses Localizations to generate messages, '
-          'labels, and abbreviations.'
+          'labels, and abbreviations.',
         ),
         ErrorHint(
           'To introduce a MaterialLocalizations, either use a '
           'MaterialApp at the root of your application to include them '
           'automatically, or add a Localization widget with a '
-          'MaterialLocalizations delegate.'
+          'MaterialLocalizations delegate.',
         ),
-        ...context.describeMissingAncestor(expectedAncestorType: MaterialLocalizations)
+        ...context.describeMissingAncestor(expectedAncestorType: MaterialLocalizations),
       ]);
     }
     return true;
@@ -105,6 +109,8 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
 /// assert(debugCheckHasScaffold(context));
 /// ```
 ///
+/// This method can be expensive (it walks the element tree).
+///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasScaffold(BuildContext context) {
   assert(() {
@@ -115,8 +121,8 @@ bool debugCheckHasScaffold(BuildContext context) {
         ...context.describeMissingAncestor(expectedAncestorType: Scaffold),
         ErrorHint(
           'Typically, the Scaffold widget is introduced by the MaterialApp or '
-          'WidgetsApp widget at the top of your application widget tree.'
-        )
+          'WidgetsApp widget at the top of your application widget tree.',
+        ),
       ]);
     }
     return true;
@@ -136,6 +142,8 @@ bool debugCheckHasScaffold(BuildContext context) {
 /// assert(debugCheckHasScaffoldMessenger(context));
 /// ```
 ///
+/// This method can be expensive (it walks the element tree).
+///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasScaffoldMessenger(BuildContext context) {
   assert(() {
@@ -146,8 +154,8 @@ bool debugCheckHasScaffoldMessenger(BuildContext context) {
         ...context.describeMissingAncestor(expectedAncestorType: ScaffoldMessenger),
         ErrorHint(
           'Typically, the ScaffoldMessenger widget is introduced by the MaterialApp '
-          'at the top of your application widget tree.'
-        )
+          'at the top of your application widget tree.',
+        ),
       ]);
     }
     return true;

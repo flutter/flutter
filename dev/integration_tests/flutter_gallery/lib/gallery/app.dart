@@ -39,18 +39,18 @@ class GalleryApp extends StatefulWidget {
   final bool testMode;
 
   @override
-  _GalleryAppState createState() => _GalleryAppState();
+  State<GalleryApp> createState() => _GalleryAppState();
 }
 
 class _GalleryAppState extends State<GalleryApp> {
   GalleryOptions? _options;
   Timer? _timeDilationTimer;
-  late AppStateModel model;
+  late final AppStateModel model = AppStateModel()..loadProducts();
 
   Map<String, WidgetBuilder> _buildRoutes() {
     // For a different example of how to set up an application routing table
     // using named routes, consider the example in the Navigator class documentation:
-    // https://docs.flutter.io/flutter/widgets/Navigator-class.html
+    // https://api.flutter.dev/flutter/widgets/Navigator-class.html
     return <String, WidgetBuilder>{
       for (final GalleryDemo demo in kAllGalleryDemos) demo.routeName: demo.buildRoute,
     };
@@ -66,7 +66,6 @@ class _GalleryAppState extends State<GalleryApp> {
       timeDilation: timeDilation,
       platform: defaultTargetPlatform,
     );
-    model = AppStateModel()..loadProducts();
   }
 
   @override

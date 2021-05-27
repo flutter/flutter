@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -119,8 +117,13 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      _transformLayer = context.pushTransform(needsCompositing, offset, _paintTransform!, _paintChild,
-          oldLayer: _transformLayer);
+      _transformLayer = context.pushTransform(
+        needsCompositing,
+        offset,
+        _paintTransform!,
+        _paintChild,
+        oldLayer: _transformLayer,
+      );
     } else {
       _transformLayer = null;
     }

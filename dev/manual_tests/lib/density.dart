@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 
 final Map<int, Color> m2SwatchColors = <int, Color>{
   50: const Color(0xfff2e7fe),
@@ -21,9 +19,11 @@ final Map<int, Color> m2SwatchColors = <int, Color>{
 };
 final MaterialColor m2Swatch = MaterialColor(m2SwatchColors[500].value, m2SwatchColors);
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key key}) : super(key: key);
+
   static const String _title = 'Density Test';
 
   @override
@@ -41,7 +41,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class OptionModel extends ChangeNotifier {
@@ -55,7 +55,7 @@ class OptionModel extends ChangeNotifier {
   }
 
   VisualDensity get density => _density;
-  VisualDensity _density = const VisualDensity();
+  VisualDensity _density = VisualDensity.standard;
   set density(VisualDensity density) {
     if (density != _density) {
       _density = density;
@@ -134,12 +134,12 @@ class LabeledCheckbox extends StatelessWidget {
 }
 
 class Options extends StatefulWidget {
-  const Options(this.model);
+  const Options(this.model, {Key key}) : super(key: key);
 
   final OptionModel model;
 
   @override
-  _OptionsState createState() => _OptionsState();
+  State<Options> createState() => _OptionsState();
 }
 
 class _OptionsState extends State<Options> {
@@ -309,12 +309,12 @@ class _OptionsState extends State<Options> {
                       },
                       items: const <DropdownMenuItem<String>>[
                         DropdownMenuItem<String>(
-                          child: Text('Standard'),
                           value: 'standard',
+                          child: Text('Standard'),
                         ),
-                        DropdownMenuItem<String>(child: Text('Comfortable'), value: 'comfortable'),
-                        DropdownMenuItem<String>(child: Text('Compact'), value: 'compact'),
-                        DropdownMenuItem<String>(child: Text('Custom'), value: 'custom'),
+                        DropdownMenuItem<String>(value: 'comfortable', child: Text('Comfortable')),
+                        DropdownMenuItem<String>(value: 'compact', child: Text('Compact')),
+                        DropdownMenuItem<String>(value: 'custom', child: Text('Custom')),
                       ],
                       value: _densityToProfile(widget.model.density),
                     ),
