@@ -4799,13 +4799,16 @@ void main() {
 
   testWidgets('Ellipsis is painted when TextOverflow.ellipsis is provided', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Material(
           child: RepaintBoundary(
             child: SelectableText(
-              'This is a big text that cannot fit in two line.' * 10,
+              'This is a big text that\n'
+                  'cannot fit in\n'
+                  'two lines.',
               maxLines: 2,
-              style: const TextStyle(
+              style: TextStyle(
+                  fontFamily: 'Ahem',
                   overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -4816,7 +4819,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('selectable_text.ellipsis.png'),
+      matchesGoldenFile('widgets.selectable_text.ellipsis.png'),
     );
   });
 }
