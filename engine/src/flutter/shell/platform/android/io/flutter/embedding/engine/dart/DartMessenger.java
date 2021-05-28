@@ -75,18 +75,14 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
 
   @Override
   public void handleMessageFromDart(
-      @NonNull final String channel, @Nullable ByteBuffer message, final int replyId) {
+      @NonNull final String channel, @Nullable byte[] message, final int replyId) {
     Log.v(TAG, "Received message from Dart over channel '" + channel + "'");
     BinaryMessenger.BinaryMessageHandler handler = messageHandlers.get(channel);
     if (handler != null) {
       try {
         Log.v(TAG, "Deferring to registered handler to process message.");
-        handler.onMessage(message, new Reply(flutterJNI, replyId));
-        if (message != null && message.isDirect()) {
-          // This ensures that if a user retains an instance to the ByteBuffer and it happens to
-          // be direct they will get a deterministic error.
-          message.limit(0);
-        }
+        final ByteBuffer buffer = (message == null ? null : ByteBuffer.wrap(message));
+        handler.onMessage(buffer, new Reply(flutterJNI, replyId));
       } catch (Exception ex) {
         Log.e(TAG, "Uncaught exception in binary message listener", ex);
         flutterJNI.invokePlatformMessageEmptyResponseCallback(replyId);
@@ -100,18 +96,13 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   }
 
   @Override
-  public void handlePlatformMessageResponse(int replyId, @Nullable ByteBuffer reply) {
+  public void handlePlatformMessageResponse(int replyId, @Nullable byte[] reply) {
     Log.v(TAG, "Received message reply from Dart.");
     BinaryMessenger.BinaryReply callback = pendingReplies.remove(replyId);
     if (callback != null) {
       try {
         Log.v(TAG, "Invoking registered callback for reply from Dart.");
-        callback.reply(reply);
-        if (reply != null && reply.isDirect()) {
-          // This ensures that if a user retains an instance to the ByteBuffer and it happens to
-          // be direct they will get a deterministic error.
-          reply.limit(0);
-        }
+        callback.reply(reply == null ? null : ByteBuffer.wrap(reply));
       } catch (Exception ex) {
         Log.e(TAG, "Uncaught exception in binary message reply handler", ex);
       } catch (Error err) {

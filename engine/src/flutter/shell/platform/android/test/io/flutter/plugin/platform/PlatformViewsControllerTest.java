@@ -630,10 +630,12 @@ public class PlatformViewsControllerTest {
     assertFalse(shouldProxying);
   }
 
-  private static ByteBuffer encodeMethodCall(MethodCall call) {
+  private static byte[] encodeMethodCall(MethodCall call) {
     final ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
     buffer.rewind();
-    return buffer;
+    final byte[] dest = new byte[buffer.remaining()];
+    buffer.get(dest);
+    return dest;
   }
 
   private static void createPlatformView(
