@@ -16,11 +16,29 @@ const String kDartPluginClass = 'dartPluginClass';
 // Constant for 'defaultPackage' key in plugin maps.
 const String kDefaultPackage = 'default_package';
 
+/// Constant for 'supportedVariants' key in plugin maps.
+const String kSupportedVariants = 'supportedVariants';
+
+/// Platform variants that a Windows plugin can support.
+enum PluginPlatformVariant {
+  /// Win32 variant of Windows.
+  win32,
+
+  // UWP variant of Windows.
+  winuwp,
+}
+
 /// Marker interface for all platform specific plugin config implementations.
 abstract class PluginPlatform {
   const PluginPlatform();
 
   Map<String, dynamic> toMap();
+}
+
+/// A plugin that has platform variants.
+abstract class VariantPlatformPlugin {
+  /// The platform variants supported by the plugin.
+  Set<PluginPlatformVariant> get supportedVariants;
 }
 
 abstract class NativeOrDartPlugin {
@@ -259,12 +277,13 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
 ///
 /// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
 /// [pluginClass] will be the entry point to the plugin's native code.
-class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
+class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, VariantPlatformPlugin {
   const WindowsPlugin({
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
     this.defaultPackage,
+    this.variants = const <PluginPlatformVariant>{},
   }) : assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
@@ -274,11 +293,31 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
     if (pluginClass == 'none') {
       pluginClass = null;
     }
+    final Set<PluginPlatformVariant> variants = <PluginPlatformVariant>{};
+    final YamlList? variantList = yaml[kSupportedVariants] as YamlList?;
+    if (variantList == null) {
+      // If no variant list is provided assume Win32 for backward compatibility.
+      variants.add(PluginPlatformVariant.win32);
+    } else {
+      const Map<String, PluginPlatformVariant> variantByName = <String, PluginPlatformVariant>{
+        'win32': PluginPlatformVariant.win32,
+        'uwp': PluginPlatformVariant.winuwp,
+      };
+      for (final String variantName in variantList.cast<String>()) {
+        final PluginPlatformVariant? variant = variantByName[variantName];
+        if (variant != null) {
+          variants.add(variant);
+        }
+        // Ignore unrecognized variants to make adding new variants in the
+        // future non-breaking.
+      }
+    }
     return WindowsPlugin(
       name: name,
       pluginClass: pluginClass,
       dartPluginClass: yaml[kDartPluginClass] as String?,
       defaultPackage: yaml[kDefaultPackage] as String?,
+      variants: variants,
     );
   }
 
@@ -286,6 +325,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
     if (yaml == null) {
       return false;
     }
+
     return yaml[kPluginClass] is String ||
            yaml[kDartPluginClass] is String ||
            yaml[kDefaultPackage] is String;
@@ -297,6 +337,10 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   final String? pluginClass;
   final String? dartPluginClass;
   final String? defaultPackage;
+  final Set<PluginPlatformVariant> variants;
+
+  @override
+  Set<PluginPlatformVariant> get supportedVariants => variants;
 
   @override
   bool isNative() => pluginClass != null;

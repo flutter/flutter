@@ -97,6 +97,7 @@ class WebDriverService extends DriverService {
     bool androidEmulator,
     int driverPort,
     List<String> browserDimension,
+    String profileMemory,
   }) async {
     async_io.WebDriver webDriver;
     final Browser browser = _browserNameToEnum(browserName);

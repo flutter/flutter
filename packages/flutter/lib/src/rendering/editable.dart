@@ -727,7 +727,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     int? lastNonWhitespace;
     for (final String currentString in string.characters) {
       if (!includeWhitespace &&
-          !_isWhitespace(currentString.characters.first.toString().codeUnitAt(0))) {
+          !_isWhitespace(currentString.characters.first.codeUnitAt(0))) {
         lastNonWhitespace = count;
       }
       if (count + currentString.length >= index) {
@@ -1011,9 +1011,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
-  // Deletes the current uncollapsed selection.
+  // Deletes the text within `selection` if it's non-empty.
   void _deleteSelection(TextSelection selection, SelectionChangedCause cause) {
-    assert(selection.isCollapsed == false);
+    assert(!selection.isCollapsed);
 
     if (_readOnly || !selection.isValid || selection.isCollapsed) {
       return;
@@ -1023,12 +1023,53 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final String textBefore = selection.textBefore(text);
     final String textAfter = selection.textAfter(text);
     final int cursorPosition = math.min(selection.start, selection.end);
-
     final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
     _setTextEditingValue(
       TextEditingValue(text: textBefore + textAfter, selection: newSelection),
       cause,
     );
+  }
+
+  // Deletes the current non-empty selection.
+  //
+  // Operates on the text/selection contained in textSelectionDelegate, and does
+  // not depend on `RenderEditable.selection`.
+  //
+  // If the selection is currently non-empty, this method deletes the selected
+  // text and returns true. Otherwise this method does nothing and returns
+  // false.
+  bool _deleteNonEmptySelection(SelectionChangedCause cause) {
+    // TODO(LongCatIsLooong): remove this method from `RenderEditable`
+    // https://github.com/flutter/flutter/issues/80226.
+    assert(!readOnly);
+    final TextEditingValue controllerValue = textSelectionDelegate.textEditingValue;
+    final TextSelection selection = controllerValue.selection;
+    assert(selection.isValid);
+
+    if (selection.isCollapsed) {
+      return false;
+    }
+
+    final String textBefore = selection.textBefore(controllerValue.text);
+    final String textAfter = selection.textAfter(controllerValue.text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: selection.start);
+    final TextRange composing = controllerValue.composing;
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - selection.start).clamp(0, selection.end - selection.start),
+        end: composing.end - (composing.end - selection.start).clamp(0, selection.end - selection.start),
+      );
+
+    _setTextEditingValue(
+      TextEditingValue(
+        text: textBefore + textAfter,
+        selection: newSelection,
+        composing: newComposingRange,
+      ),
+      cause,
+    );
+    return true;
   }
 
   // Deletes the from the current collapsed selection to the start of the field.
@@ -1089,12 +1130,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes backwards from the current selection.
+  /// Deletes backwards from the selection in [textSelectionDelegate].
   ///
-  /// If the [selection] is collapsed, deletes a single character before the
+  /// This method operates on the text/selection contained in
+  /// [textSelectionDelegate], and does not depend on [selection].
+  ///
+  /// If the selection is collapsed, deletes a single character before the
   /// cursor.
   ///
-  /// If the [selection] is not collapsed, deletes the selection.
+  /// If the selection is not collapsed, deletes the selection.
   ///
   /// {@template flutter.rendering.RenderEditable.cause}
   /// The given [SelectionChangedCause] indicates the cause of this change and
@@ -1105,29 +1149,45 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [deleteForward], which is same but in the opposite direction.
   void delete(SelectionChangedCause cause) {
-    assert(_selection != null);
+    // `delete` does not depend on the text layout, and the boundary analysis is
+    // done using the `previousCharacter` method instead of ICU, we can keep
+    // deleting without having to layout the text. For this reason, we can
+    // directly delete the character before the caret in the controller.
+    //
+    // TODO(LongCatIsLooong): remove this method from RenderEditable.
+    // https://github.com/flutter/flutter/issues/80226.
+    final TextEditingValue controllerValue = textSelectionDelegate.textEditingValue;
+    final TextSelection selection = controllerValue.selection;
 
-    if (_readOnly || !_selection!.isValid) {
+    if (!selection.isValid || readOnly || _deleteNonEmptySelection(cause)) {
       return;
     }
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
-    }
-
-    final String text = textSelectionDelegate.textEditingValue.text;
-    String textBefore = _selection!.textBefore(text);
+    assert(selection.isCollapsed);
+    final String textBefore = selection.textBefore(controllerValue.text);
     if (textBefore.isEmpty) {
       return;
     }
 
-    final int characterBoundary = previousCharacter(textBefore.length, textBefore);
-    textBefore = textBefore.substring(0, characterBoundary);
+    final String textAfter = selection.textAfter(controllerValue.text);
 
-    final String textAfter = _selection!.textAfter(text);
+    final int characterBoundary = previousCharacter(textBefore.length, textBefore);
     final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
+    final TextRange composing = controllerValue.composing;
+    assert(textBefore.length >= characterBoundary);
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - characterBoundary).clamp(0, textBefore.length - characterBoundary),
+        end: composing.end - (composing.end - characterBoundary).clamp(0, textBefore.length - characterBoundary),
+      );
+
     _setTextEditingValue(
-      TextEditingValue(text: textBefore + textAfter, selection: newSelection),
+      TextEditingValue(
+        text: textBefore.substring(0, characterBoundary) + textAfter,
+        selection: newSelection,
+        composing: newComposingRange,
+      ),
       cause,
     );
   }
@@ -1238,12 +1298,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes in the foward direction from the current selection.
+  /// Deletes in the foward direction, from the current selection in
+  /// [textSelectionDelegate].
   ///
-  /// If the [selection] is collapsed, deletes a single character after the
+  /// This method operates on the text/selection contained in
+  /// [textSelectionDelegate], and does not depend on [selection].
+  ///
+  /// If the selection is collapsed, deletes a single character after the
   /// cursor.
   ///
-  /// If the [selection] is not collapsed, deletes the selection.
+  /// If the selection is not collapsed, deletes the selection.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1251,29 +1315,36 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [delete], which is same but in the opposite direction.
   void deleteForward(SelectionChangedCause cause) {
-    assert(_selection != null);
+    // TODO(LongCatIsLooong): remove this method from RenderEditable.
+    // https://github.com/flutter/flutter/issues/80226.
+    final TextEditingValue controllerValue = textSelectionDelegate.textEditingValue;
+    final TextSelection selection = controllerValue.selection;
 
-    if (_readOnly || !_selection!.isValid) {
+    if (!selection.isValid || _readOnly || _deleteNonEmptySelection(cause)) {
       return;
     }
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
-    }
-
-    final String text = textSelectionDelegate.textEditingValue.text;
-    final String textBefore = _selection!.textBefore(text);
-    String textAfter = _selection!.textAfter(text);
-
+    assert(selection.isCollapsed);
+    final String textAfter = selection.textAfter(controllerValue.text);
     if (textAfter.isEmpty) {
       return;
     }
 
-    final int deleteCount = nextCharacter(0, textAfter);
-    textAfter = textAfter.substring(deleteCount);
-
+    final String textBefore = selection.textBefore(controllerValue.text);
+    final int characterBoundary = nextCharacter(0, textAfter);
+    final TextRange composing = controllerValue.composing;
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - textBefore.length).clamp(0, characterBoundary),
+        end: composing.end - (composing.end - textBefore.length).clamp(0, characterBoundary),
+      );
     _setTextEditingValue(
-      TextEditingValue(text: textBefore + textAfter, selection: _selection!),
+      TextEditingValue(
+        text: textBefore + textAfter.substring(characterBoundary),
+        selection: selection,
+        composing: newComposingRange,
+      ),
       cause,
     );
   }
@@ -3123,7 +3194,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   double computeMaxIntrinsicWidth(double height) {
     _layoutText(maxWidth: double.infinity);
-    return _textPainter.maxIntrinsicWidth + cursorWidth;
+    return _textPainter.maxIntrinsicWidth + _caretMargin;
   }
 
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].

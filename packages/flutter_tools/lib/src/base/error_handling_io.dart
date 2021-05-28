@@ -90,7 +90,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       if (file.existsSync()) {
         throwToolExit(
           'The Flutter tool tried to delete the file or directory ${file.path} but was '
-          'unable to. This may be due to the file and/or project\'s location on a read-only '
+          "unable to. This may be due to the file and/or project's location on a read-only "
           'volume. Consider relocating the project and trying again',
         );
       }
@@ -212,6 +212,7 @@ class ErrorHandlingFile
       )),
       platform: _platform,
       failureMessage: 'Flutter failed to write to a file at "${delegate.path}"',
+      posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
     );
   }
 
@@ -221,6 +222,7 @@ class ErrorHandlingFile
       () => delegate.readAsStringSync(),
       platform: _platform,
       failureMessage: 'Flutter failed to read a file at "${delegate.path}"',
+      posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
     );
   }
 
@@ -234,6 +236,7 @@ class ErrorHandlingFile
       () => delegate.writeAsBytesSync(bytes, mode: mode, flush: flush),
       platform: _platform,
       failureMessage: 'Flutter failed to write to a file at "${delegate.path}"',
+      posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
     );
   }
 
@@ -253,6 +256,7 @@ class ErrorHandlingFile
       )),
       platform: _platform,
       failureMessage: 'Flutter failed to write to a file at "${delegate.path}"',
+      posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
     );
   }
 
@@ -272,6 +276,7 @@ class ErrorHandlingFile
       ),
       platform: _platform,
       failureMessage: 'Flutter failed to write to a file at "${delegate.path}"',
+      posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
     );
   }
 
@@ -283,6 +288,7 @@ class ErrorHandlingFile
       ),
       platform: _platform,
       failureMessage: 'Flutter failed to create file at "${delegate.path}"',
+      posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(<String>[delegate.parent.path]),
     );
   }
 
@@ -294,6 +300,7 @@ class ErrorHandlingFile
       ),
       platform: _platform,
       failureMessage: 'Flutter failed to open a file at "${delegate.path}"',
+      posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
     );
   }
 
@@ -307,7 +314,8 @@ class ErrorHandlingFile
     _runSync<void>(
       () => delegate.openSync(mode: FileMode.read).closeSync(),
       platform: _platform,
-      failureMessage: 'Flutter failed to copy $path to $newPath due to source location error'
+      failureMessage: 'Flutter failed to copy $path to $newPath due to source location error',
+      posixPermissionSuggestion: _posixPermissionSuggestion(<String>[path]),
     );
     // Next check if the destination file can be written. If not, bail through
     // error handling.
@@ -347,10 +355,16 @@ class ErrorHandlingFile
         source?.closeSync();
         sink?.closeSync();
       }
-    }, platform: _platform, failureMessage: 'Flutter failed to copy $path to $newPath due to unknown error');
+    }, platform: _platform,
+      failureMessage: 'Flutter failed to copy $path to $newPath due to unknown error',
+      posixPermissionSuggestion: _posixPermissionSuggestion(<String>[path, resultFile.parent.path]),
+    );
     // The original copy failed, but the manual copy worked.
     return wrapFile(resultFile);
   }
+
+  String _posixPermissionSuggestion(List<String> paths) => 'Try running:\n'
+      '  sudo chown -R \$(whoami) ${paths.map(fileSystem.path.absolute).join(' ')}';
 
   @override
   String toString() => delegate.toString();
@@ -420,6 +434,7 @@ class ErrorHandlingDirectory
       platform: _platform,
       failureMessage:
         'Flutter failed to create a directory at "${delegate.path}"',
+      posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.parent.path),
     );
   }
 
@@ -450,6 +465,7 @@ class ErrorHandlingDirectory
       platform: _platform,
       failureMessage:
         'Flutter failed to create a directory at "${delegate.path}"',
+      posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.parent.path),
     );
   }
 
@@ -460,6 +476,7 @@ class ErrorHandlingDirectory
       platform: _platform,
       failureMessage:
         'Flutter failed to delete a directory at "${delegate.path}"',
+      posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
     );
   }
 
@@ -470,6 +487,7 @@ class ErrorHandlingDirectory
       platform: _platform,
       failureMessage:
         'Flutter failed to delete a directory at "${delegate.path}"',
+      posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
     );
   }
 
@@ -480,8 +498,12 @@ class ErrorHandlingDirectory
       platform: _platform,
       failureMessage:
         'Flutter failed to check for directory existence at "${delegate.path}"',
+      posixPermissionSuggestion: _posixPermissionSuggestion(delegate.parent.path),
     );
   }
+
+  String _posixPermissionSuggestion(String path) => 'Try running:\n'
+      '  sudo chown -R \$(whoami) ${fileSystem.path.absolute(path)}';
 
   @override
   String toString() => delegate.toString();
@@ -538,6 +560,7 @@ const String _kNoExecutableFound = 'The Flutter tool could not locate an executa
 Future<T> _run<T>(Future<T> Function() op, {
   required Platform platform,
   String? failureMessage,
+  String? posixPermissionSuggestion,
 }) async {
   assert(platform != null);
   try {
@@ -551,14 +574,14 @@ Future<T> _run<T>(Future<T> Function() op, {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.osError?.errorCode ?? 0);
     } else if (platform.isLinux || platform.isMacOS) {
-      _handlePosixException(e, failureMessage, e.osError?.errorCode ?? 0);
+      _handlePosixException(e, failureMessage, e.osError?.errorCode ?? 0, posixPermissionSuggestion);
     }
     rethrow;
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode);
     } else if (platform.isLinux || platform.isMacOS) {
-      _handlePosixException(e, failureMessage, e.errorCode);
+      _handlePosixException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
     }
     rethrow;
   }
@@ -567,6 +590,7 @@ Future<T> _run<T>(Future<T> Function() op, {
 T _runSync<T>(T Function() op, {
   required Platform platform,
   String? failureMessage,
+  String? posixPermissionSuggestion,
 }) {
   assert(platform != null);
   try {
@@ -580,14 +604,14 @@ T _runSync<T>(T Function() op, {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.osError?.errorCode ?? 0);
     } else if (platform.isLinux || platform.isMacOS) {
-      _handlePosixException(e, failureMessage, e.osError?.errorCode ?? 0);
+      _handlePosixException(e, failureMessage, e.osError?.errorCode ?? 0, posixPermissionSuggestion);
     }
     rethrow;
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode);
     } else if (platform.isLinux || platform.isMacOS) {
-      _handlePosixException(e, failureMessage, e.errorCode);
+      _handlePosixException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
     }
     rethrow;
   }
@@ -617,6 +641,9 @@ class ErrorHandlingProcessManager extends ProcessManager {
     return _runSync(
       () => _delegate.canRun(executable, workingDirectory: workingDirectory),
       platform: _platform,
+      failureMessage: 'Flutter failed to run "$executable"',
+      posixPermissionSuggestion: 'Try running:\n'
+          '  sudo chown -R \$(whoami) $executable && chmod u+rx $executable',
     );
   }
 
@@ -695,7 +722,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
   }
 }
 
-void _handlePosixException(Exception e, String? message, int errorCode) {
+void _handlePosixException(Exception e, String? message, int errorCode, String? posixPermissionSuggestion) {
   // From:
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
@@ -714,10 +741,18 @@ void _handlePosixException(Exception e, String? message, int errorCode) {
       break;
     case eperm:
     case eacces:
-      errorMessage =
-        '$message. The flutter tool cannot access the file or directory.\n'
-        'Please ensure that the SDK and/or project is installed in a location '
-        'that has read/write permissions for the current user.';
+      final StringBuffer errorBuffer = StringBuffer();
+      if (message != null && message.isNotEmpty) {
+        errorBuffer.writeln('$message.');
+      } else {
+        errorBuffer.writeln('The flutter tool cannot access the file or directory.');
+      }
+      errorBuffer.writeln('Please ensure that the SDK and/or project is installed in a location '
+          'that has read/write permissions for the current user.');
+      if (posixPermissionSuggestion != null && posixPermissionSuggestion.isNotEmpty) {
+        errorBuffer.writeln(posixPermissionSuggestion);
+      }
+      errorMessage = errorBuffer.toString();
       break;
     default:
       // Caller must rethrow the exception.

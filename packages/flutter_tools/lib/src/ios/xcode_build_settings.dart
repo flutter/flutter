@@ -11,7 +11,7 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 
 String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
@@ -30,8 +30,6 @@ String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
 /// useMacOSConfig: Optional parameter that controls whether we use the macOS
 /// project file instead. Defaults to false.
 ///
-/// setSymroot: Optional parameter to control whether to set SYMROOT.
-///
 /// targetOverride: Optional parameter, if null or unspecified the default value
 /// from xcode_backend.sh is used 'lib/main.dart'.
 Future<void> updateGeneratedXcodeProperties({
@@ -39,7 +37,6 @@ Future<void> updateGeneratedXcodeProperties({
   @required BuildInfo buildInfo,
   String targetOverride,
   bool useMacOSConfig = false,
-  bool setSymroot = true,
   String buildDirOverride,
 }) async {
   final List<String> xcodeBuildSettings = _xcodeBuildSettingsLines(
@@ -47,7 +44,6 @@ Future<void> updateGeneratedXcodeProperties({
     buildInfo: buildInfo,
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
-    setSymroot: setSymroot,
     buildDirOverride: buildDirOverride,
   );
 
@@ -113,7 +109,7 @@ void _updateGeneratedEnvironmentVariablesScript({
 /// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.
 String parsedBuildName({
   @required FlutterManifest manifest,
-  @required BuildInfo buildInfo,
+  BuildInfo buildInfo,
 }) {
   final String buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
   return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
@@ -122,7 +118,7 @@ String parsedBuildName({
 /// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
 String parsedBuildNumber({
   @required FlutterManifest manifest,
-  @required BuildInfo buildInfo,
+  BuildInfo buildInfo,
 }) {
   String buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
   final String buildNumber = validatedBuildNumberForPlatform(
@@ -149,7 +145,6 @@ List<String> _xcodeBuildSettingsLines({
   @required BuildInfo buildInfo,
   String targetOverride,
   bool useMacOSConfig = false,
-  bool setSymroot = true,
   String buildDirOverride,
 }) {
   final List<String> xcodeBuildSettings = <String>[];
@@ -172,18 +167,15 @@ List<String> _xcodeBuildSettingsLines({
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
 
-  if (setSymroot) {
-    xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
-  }
-
   final String buildName = parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ?? '1.0.0';
   xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
 
   final String buildNumber = parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
-  if (globals.artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
+  final Artifacts artifacts = globals.artifacts;
+  if (artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
 

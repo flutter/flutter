@@ -156,7 +156,7 @@ void main() {
       final PointerRouter router = PointerRouter();
       router.addRoute(2, (PointerEvent event) => throw 'Pointer exception');
     } catch (e) {
-      expect(e, contains('router: Instance of \'PointerRouter\''));
+      expect(e, contains("router: Instance of 'PointerRouter'"));
       expect(e, contains('route: Closure: (PointerEvent) => Null'));
       expect(e, contains('event: PointerDownEvent#[a-zA-Z0-9]{5}(position: Offset(0.0, 0.0))'));
     }

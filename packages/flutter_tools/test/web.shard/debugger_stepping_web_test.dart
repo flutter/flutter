@@ -48,7 +48,8 @@ void main() {
         reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
       );
     }
-  });
+  }, skip: true, // Flaky: https://github.com/flutter/flutter/issues/83260
+  );
 
   tearDown(() async {
     await flutter.stop();

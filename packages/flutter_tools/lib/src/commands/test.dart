@@ -254,7 +254,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     _testFiles = argResults.rest.map<String>(globals.fs.path.absolute).toList();
     if (_testFiles.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
-      // files with names like like "hit_test.dart" don't get run.
+      // files with names like "hit_test.dart" don't get run.
       final Directory testDir = globals.fs.directory('test');
       if (!testDir.existsSync()) {
         throwToolExit('Test directory "${testDir.path}" not found.');

@@ -34,7 +34,12 @@ import 'gesture_detector.dart';
 /// [WidgetInspector.selectButtonBuilder].
 typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
 
-typedef _RegisterServiceExtensionCallback = void Function({
+/// Signature for a  method that registers the service extension `callback` with
+/// the given `name`.
+///
+/// Used as argument to [WidgetInspectorService.initServiceExtensions]. The
+/// [BindingBase.registerServiceExtension] implements this signature.
+typedef RegisterServiceExtensionCallback = void Function({
   required String name,
   required ServiceExtensionCallback callback,
 });
@@ -743,7 +748,7 @@ mixin WidgetInspectorService {
 
   FlutterExceptionHandler? _structuredExceptionHandler;
 
-  late _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
+  late RegisterServiceExtensionCallback _registerServiceExtensionCallback;
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.inspector.name").
   ///
@@ -975,7 +980,7 @@ mixin WidgetInspectorService {
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
-  void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
+  void initServiceExtensions(RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _structuredExceptionHandler = _reportError;
     if (isStructuredErrorsEnabled()) {
       FlutterError.onError = _structuredExceptionHandler;
@@ -1525,7 +1530,7 @@ mixin WidgetInspectorService {
     if (location == null || location.file == null) {
       return false;
     }
-    final String file = Uri.parse(location.file).path;
+    final String file = Uri.parse(location.file!).path;
 
     // By default check whether the creation location was within package:flutter.
     if (_pubRootDirectories == null) {
@@ -2122,11 +2127,13 @@ class _ElementLocationStatsTracker {
       final Map<String, List<int>> locationsJson = <String, List<int>>{};
       for (final _LocationCount entry in newLocations) {
         final _Location location = entry.location;
-        final List<int> jsonForFile = locationsJson.putIfAbsent(
-          location.file,
-          () => <int>[],
-        );
-        jsonForFile..add(entry.id)..add(location.line)..add(location.column);
+        if (location.file != null) {
+          final List<int> jsonForFile = locationsJson.putIfAbsent(
+            location.file!,
+            () => <int>[],
+          );
+          jsonForFile..add(entry.id)..add(location.line)..add(location.column);
+        }
       }
       json['newLocations'] = locationsJson;
     }
@@ -2184,7 +2191,7 @@ class WidgetInspector extends StatefulWidget {
   final InspectorSelectButtonBuilder? selectButtonBuilder;
 
   @override
-  _WidgetInspectorState createState() => _WidgetInspectorState();
+  State<WidgetInspector> createState() => _WidgetInspectorState();
 }
 
 class _WidgetInspectorState extends State<WidgetInspector>
@@ -2844,7 +2851,7 @@ class _Location {
   });
 
   /// File path of the location.
-  final String file;
+  final String? file;
 
   /// 1-based line number.
   final int line;
@@ -2880,7 +2887,9 @@ class _Location {
     if (name != null) {
       parts.add(name!);
     }
-    parts.add(file);
+    if (file != null) {
+      parts.add(file!);
+    }
     parts..add('$line')..add('$column');
     return parts.join(':');
   }
