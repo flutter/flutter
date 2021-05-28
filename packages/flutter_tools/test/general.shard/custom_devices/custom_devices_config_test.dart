@@ -63,11 +63,11 @@ void main() {
 
   testWithoutContext('JsonRevivalException serialization', () {
     expect(
-      const JsonRevivalException('testmessage').toString(),
+      const CustomDeviceRevivalException('testmessage').toString(),
       equals('JsonRevivalException: testmessage')
     );
     expect(
-      const JsonRevivalException.fromDescriptions('testfielddescription', 'testexpectedvaluedescription').toString(),
+      const CustomDeviceRevivalException.fromDescriptions('testfielddescription', 'testexpectedvaluedescription').toString(),
       equals('JsonRevivalException: Expected testfielddescription to be testexpectedvaluedescription.')
     );
   });

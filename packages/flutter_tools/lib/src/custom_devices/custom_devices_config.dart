@@ -98,7 +98,7 @@ class CustomDevicesConfig {
   void ensureFileExists() {
     if (!_fileSystem.file(_config.configPath).existsSync()) {
       _config.setValue(_kSchema, _defaultSchema);
-      _config.setValue(_kCustomDevices, <dynamic>[CustomDeviceConfig.example.toJson()]);
+      _config.setValue(_kCustomDevices, <dynamic>[CustomDeviceConfig.exampleWindows.toJson()]);
     }
   }
 
@@ -110,7 +110,7 @@ class CustomDevicesConfig {
     } else if (json is! List) {
       const String msg = 'Could not load custom devices config. config[\'$_kCustomDevicesConfigKey\'] is not a JSON array.';
       _logger.printError(msg);
-      throw const JsonRevivalException(msg);
+      throw const CustomDeviceRevivalException(msg);
     }
 
     return json;
@@ -119,8 +119,8 @@ class CustomDevicesConfig {
   /// Get the list of [CustomDeviceConfig]s that are listed in the config file
   /// including disabled ones.
   ///
-  /// Throws an Exception when the config could not be loaded. Doesn't
-  /// log any errors.
+  /// Throws an Exception when the config could not be loaded and logs any
+  /// errors.
   List<CustomDeviceConfig> get devices {
     final List<dynamic>? typedListNullable = _getDevicesJsonValue();
     if (typedListNullable == null) {
@@ -132,10 +132,10 @@ class CustomDevicesConfig {
     for (final MapEntry<int, dynamic> entry in typedList.asMap().entries) {
       try {
         revived.add(CustomDeviceConfig.fromJson(entry.value));
-      } on JsonRevivalException catch (e) {
+      } on CustomDeviceRevivalException catch (e) {
         final String msg = 'Could not load custom device from config index ${entry.key}: $e';
         _logger.printError(msg);
-        throw JsonRevivalException(msg);
+        throw CustomDeviceRevivalException(msg);
       }
     }
 

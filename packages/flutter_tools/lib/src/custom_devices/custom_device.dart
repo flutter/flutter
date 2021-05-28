@@ -135,7 +135,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     return Future.wait(List<ForwardedPort>.of(_forwardedPorts).map(unforward));
   }
 
-  Future<ForwardedPort> _tryForward(int devicePort, int hostPort) async {
+  Future<ForwardedPort> tryForward(int devicePort, int hostPort) async {
     final List<String> interpolated = interpolateCommand(
       _forwardPortCommand,
       <String, String>{
@@ -192,7 +192,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
         actualHostPort += 1;
       }
 
-      final ForwardedPort port = await _tryForward(devicePort, actualHostPort);
+      final ForwardedPort port = await tryForward(devicePort, actualHostPort);
 
       if (port != null) {
         _forwardedPorts.add(port);
@@ -488,7 +488,7 @@ class CustomDevice extends Device {
   /// it will be killed with a SIGTERM, false will be returned and the timeout
   /// will be reported in the log using [_logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
-  Future<bool> _tryPing({
+  Future<bool> tryPing({
     Duration timeout,
     Map<String, String> replacementValues = const <String, String>{}
   }) async {
@@ -510,8 +510,8 @@ class CustomDevice extends Device {
     // is good enough. Otherwise we check if either stdout or stderr have a match of
     // the pingSuccessRegex.
     return _config.pingSuccessRegex == null
-        || _config.pingSuccessRegex.hasMatch(result.stdout)
-        || _config.pingSuccessRegex.hasMatch(result.stderr);
+      || _config.pingSuccessRegex.hasMatch(result.stdout)
+      || _config.pingSuccessRegex.hasMatch(result.stderr);
   }
 
   /// Tries to execute the configs postBuild command using [appName] for the
@@ -564,7 +564,7 @@ class CustomDevice extends Device {
   /// will be killed with a SIGTERM, false will be returned and the timeout
   /// will be reported in the log using [_logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
-  Future<bool> _tryUninstall({
+  Future<bool> tryUninstall({
     @required String appName,
     Duration timeout,
     Map<String, String> additionalReplacementValues = const <String, String>{}
@@ -598,7 +598,7 @@ class CustomDevice extends Device {
   ///
   /// [appName] is the name of the app to be installed. Substituted for any occurrence
   /// of `${appName}` in the custom device configs `install` command.
-  Future<bool> _tryInstall({
+  Future<bool> tryInstall({
     @required String localPath,
     @required String appName,
     Duration timeout,
@@ -654,11 +654,11 @@ class CustomDevice extends Device {
 
   @override
   Future<bool> installApp(covariant ApplicationPackage app, {String userIdentifier}) async {
-    if (!await _tryUninstall(appName: app.name)) {
+    if (!await tryUninstall(appName: app.name)) {
       return false;
     }
 
-    final bool result = await _tryInstall(
+    final bool result = await tryInstall(
       localPath: getAssetBuildDirectory(),
       appName: app.name
     );
@@ -780,7 +780,7 @@ class CustomDevice extends Device {
 
   @override
   Future<bool> uninstallApp(covariant ApplicationPackage app, {String userIdentifier}) {
-    return _tryUninstall(appName: app.name);
+    return tryUninstall(appName: app.name);
   }
 }
 
@@ -838,7 +838,7 @@ class CustomDevices extends PollingDeviceDiscovery {
     // maps any custom device to whether its reachable or not.
     final Map<CustomDevice, bool> pingedDevices = Map<CustomDevice, bool>.fromIterables(
       devices,
-      await Future.wait(devices.map((CustomDevice e) => e._tryPing(timeout: timeout)))
+      await Future.wait(devices.map((CustomDevice e) => e.tryPing(timeout: timeout)))
     );
 
     // remove all the devices we couldn't reach.
