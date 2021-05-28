@@ -22,7 +22,8 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, ImageDescriptor);
   V(ImageDescriptor, instantiateCodec) \
   V(ImageDescriptor, width)            \
   V(ImageDescriptor, height)           \
-  V(ImageDescriptor, bytesPerPixel)
+  V(ImageDescriptor, bytesPerPixel)    \
+  V(ImageDescriptor, dispose)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
