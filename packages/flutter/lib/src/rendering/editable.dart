@@ -232,6 +232,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(clipBehavior != null),
        _textPainter = TextPainter(
          text: text,
+         maxLines: maxLines,
          textAlign: textAlign,
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
