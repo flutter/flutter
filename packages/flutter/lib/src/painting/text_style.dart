@@ -1205,7 +1205,7 @@ class TextStyle with Diagnosticable {
         forceStrutHeight: strutStyle.forceStrutHeight,
       ),
       maxLines: maxLines,
-      ellipsis: overflow == TextOverflow.ellipsis ? (ellipsis ?? kDefaultEllipsis) : null,
+      ellipsis: ellipsis ?? (overflow == TextOverflow.ellipsis ? kDefaultEllipsis : null),
       locale: locale,
     );
   }

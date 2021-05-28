@@ -189,7 +189,7 @@ void main() {
     // ellipsis, so this really means "append ellipsis as soon as we exceed the
     // width".
     relayoutWith(maxLines: null, softWrap: true, overflow: TextOverflow.ellipsis);
-    expect(paragraph.size.height, equals(24 * lineHeight));
+    expect(paragraph.size.height, equals(2 * lineHeight));
 
     // Now with no soft wrapping.
     relayoutWith(maxLines: 1, softWrap: false, overflow: TextOverflow.clip);
@@ -208,7 +208,7 @@ void main() {
     expect(paragraph.size.height, equals(3 * lineHeight));
 
     relayoutWith(maxLines: null, softWrap: false, overflow: TextOverflow.ellipsis);
-    expect(paragraph.size.height, equals(24 * lineHeight));
+    expect(paragraph.size.height, equals(2 * lineHeight));
 
     // Test presence of the fade effect.
     relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.fade);
