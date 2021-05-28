@@ -574,7 +574,6 @@ class ArchivePublisher {
   /// This method will throw if the target archive already exists on cloud
   /// storage.
   Future<void> publishArchive([bool forceUpload = false]) async {
-    //final String releaseFolder = gsReleaseFolder;
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     if (!forceUpload) {
       if (await _cloudPathExists(destGsPath) && !dryRun) {
@@ -592,7 +591,6 @@ class ArchivePublisher {
   }
 
   Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
-    //final String tmpBaseUrl = baseUrl;
     jsonData['base_url'] = '$baseUrl$releaseFolder';
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
