@@ -4799,15 +4799,13 @@ void main() {
 
   testWidgets('Ellipsis is painted when TextOverflow.ellipsis is provided', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: RepaintBoundary(
             child: SelectableText(
-              'This is a big text that\n'
-                  'cannot fit in\n'
-                  'two lines.',
+              'This is a big text that cannot fit in two lines.' * 10,
               maxLines: 2,
-              style: TextStyle(
+              style: const TextStyle(
                   fontFamily: 'Ahem',
                   overflow: TextOverflow.ellipsis,
               ),
