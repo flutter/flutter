@@ -54,8 +54,8 @@ class ImmutableBuffer : public RefCountedDartWrappable<ImmutableBuffer> {
   /// The byte buffer will continue to live if other objects hold a reference to
   /// it.
   void dispose() {
-    ClearDartWrapper();
     data_.reset();
+    ClearDartWrapper();
   }
 
   size_t GetAllocationSize() const override;
