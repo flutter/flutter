@@ -6,7 +6,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io' show exit, stdout;
+import 'dart:io' show stdout;
 import 'dart:isolate';
 
 import 'test.dart';
@@ -109,10 +109,8 @@ class _DefaultLifecycle implements Lifecycle {
     for (final Test t in _tests!) {
       testsSucceeded = testsSucceeded && (t.state == TestState.succeeded);
     }
-    if (testsSucceeded) {
-      exit(0);
-    } else {
-      exit(1);
+    if (!testsSucceeded) {
+      throw 'A test failed';
     }
   }
 }
