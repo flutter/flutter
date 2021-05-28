@@ -526,6 +526,58 @@ TEST(FlStandardMessageCodecTest, DecodeInt64ListShortData2) {
       FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
+TEST(FlStandardMessageCodecTest, EncodeFloat32ListEmpty) {
+  g_autoptr(FlValue) value = fl_value_new_float32_list(nullptr, 0);
+  g_autofree gchar* hex_string = encode_message(value);
+  EXPECT_STREQ(hex_string, "0e000000");
+}
+
+TEST(FlStandardMessageCodecTest, EncodeFloat32List) {
+  float data[] = {0.0f, -0.5f, 0.25f, -0.125f, 0.00625f};
+  g_autoptr(FlValue) value = fl_value_new_float32_list(data, 5);
+  g_autofree gchar* hex_string = encode_message(value);
+  EXPECT_STREQ(hex_string, "0e05000000000000000000bf0000803e000000becdcccc3b");
+}
+
+TEST(FlStandardMessageCodecTest, DecodeFloat32ListEmpty) {
+  g_autoptr(FlValue) value = decode_message("0e000000");
+  ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT32_LIST);
+  EXPECT_EQ(fl_value_get_length(value), static_cast<size_t>(0));
+}
+
+TEST(FlStandardMessageCodecTest, DecodeFloat32List) {
+  g_autoptr(FlValue) value =
+      decode_message("0e05000000000000000000bf0000803e000000becdcccc3b");
+  ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT32_LIST);
+  const float* data = fl_value_get_float32_list(value);
+  EXPECT_FLOAT_EQ(data[0], 0.0f);
+  EXPECT_FLOAT_EQ(data[1], -0.5f);
+  EXPECT_FLOAT_EQ(data[2], 0.25f);
+  EXPECT_FLOAT_EQ(data[3], -0.125f);
+  EXPECT_FLOAT_EQ(data[4], 0.00625f);
+}
+
+TEST(FlStandardMessageCodecTest, DecodeFloat32ListNoData) {
+  decode_error_value("0e", FL_MESSAGE_CODEC_ERROR,
+                     FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
+}
+
+TEST(FlStandardMessageCodecTest, DecodeFloat32ListLengthNoData) {
+  decode_error_value("0e050000", FL_MESSAGE_CODEC_ERROR,
+                     FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
+}
+
+TEST(FlStandardMessageCodecTest, DecodeFloat32ListShortData1) {
+  decode_error_value("0e05000000", FL_MESSAGE_CODEC_ERROR,
+                     FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
+}
+
+TEST(FlStandardMessageCodecTest, DecodeFloat32ListShortData2) {
+  decode_error_value("0e05000000000000000000bf0000803e000000becdcccc",
+                     FL_MESSAGE_CODEC_ERROR,
+                     FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
+}
+
 TEST(FlStandardMessageCodecTest, EncodeFloatListEmpty) {
   g_autoptr(FlValue) value = fl_value_new_float_list(nullptr, 0);
   g_autofree gchar* hex_string = encode_message(value);
@@ -1006,7 +1058,7 @@ TEST(FlStandardMessageCodecTest, EncodeDecodeLargeMap) {
 }
 
 TEST(FlStandardMessageCodecTest, DecodeUnknownType) {
-  decode_error_value("0e", FL_MESSAGE_CODEC_ERROR,
+  decode_error_value("0f", FL_MESSAGE_CODEC_ERROR,
                      FL_MESSAGE_CODEC_ERROR_UNSUPPORTED_TYPE);
 }
 

@@ -53,6 +53,12 @@ typedef struct {
 
 typedef struct {
   FlValue parent;
+  float* values;
+  size_t values_length;
+} FlValueFloat32List;
+
+typedef struct {
+  FlValue parent;
   double* values;
   size_t values_length;
 } FlValueFloatList;
@@ -178,6 +184,18 @@ static void value_to_string(FlValue* value, GString* buffer) {
       g_string_append(buffer, "]");
       return;
     }
+    case FL_VALUE_TYPE_FLOAT32_LIST: {
+      g_string_append(buffer, "[");
+      const float* values = fl_value_get_float32_list(value);
+      for (size_t i = 0; i < fl_value_get_length(value); i++) {
+        if (i != 0) {
+          g_string_append(buffer, ", ");
+        }
+        float_to_string(values[i], buffer);
+      }
+      g_string_append(buffer, "]");
+      return;
+    }
     case FL_VALUE_TYPE_FLOAT_LIST: {
       g_string_append(buffer, "[");
       const double* values = fl_value_get_float_list(value);
@@ -297,6 +315,16 @@ G_MODULE_EXPORT FlValue* fl_value_new_int64_list(const int64_t* data,
   return reinterpret_cast<FlValue*>(self);
 }
 
+G_MODULE_EXPORT FlValue* fl_value_new_float32_list(const float* data,
+                                                   size_t data_length) {
+  FlValueFloat32List* self = reinterpret_cast<FlValueFloat32List*>(
+      fl_value_new(FL_VALUE_TYPE_FLOAT32_LIST, sizeof(FlValueFloat32List)));
+  self->values_length = data_length;
+  self->values = static_cast<float*>(g_malloc(sizeof(float) * data_length));
+  memcpy(self->values, data, sizeof(float) * data_length);
+  return reinterpret_cast<FlValue*>(self);
+}
+
 G_MODULE_EXPORT FlValue* fl_value_new_float_list(const double* data,
                                                  size_t data_length) {
   FlValueFloatList* self = reinterpret_cast<FlValueFloatList*>(
@@ -364,6 +392,11 @@ G_MODULE_EXPORT void fl_value_unref(FlValue* self) {
     }
     case FL_VALUE_TYPE_INT64_LIST: {
       FlValueInt64List* v = reinterpret_cast<FlValueInt64List*>(self);
+      g_free(v->values);
+      break;
+    }
+    case FL_VALUE_TYPE_FLOAT32_LIST: {
+      FlValueFloat32List* v = reinterpret_cast<FlValueFloat32List*>(self);
       g_free(v->values);
       break;
     }
@@ -451,6 +484,19 @@ G_MODULE_EXPORT bool fl_value_equal(FlValue* a, FlValue* b) {
       }
       const int64_t* values_a = fl_value_get_int64_list(a);
       const int64_t* values_b = fl_value_get_int64_list(b);
+      for (size_t i = 0; i < fl_value_get_length(a); i++) {
+        if (values_a[i] != values_b[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+    case FL_VALUE_TYPE_FLOAT32_LIST: {
+      if (fl_value_get_length(a) != fl_value_get_length(b)) {
+        return false;
+      }
+      const float* values_a = fl_value_get_float32_list(a);
+      const float* values_b = fl_value_get_float32_list(b);
       for (size_t i = 0; i < fl_value_get_length(a); i++) {
         if (values_a[i] != values_b[i]) {
           return false;
@@ -621,6 +667,13 @@ G_MODULE_EXPORT const int64_t* fl_value_get_int64_list(FlValue* self) {
   return v->values;
 }
 
+G_MODULE_EXPORT const float* fl_value_get_float32_list(FlValue* self) {
+  g_return_val_if_fail(self != nullptr, nullptr);
+  g_return_val_if_fail(self->type == FL_VALUE_TYPE_FLOAT32_LIST, nullptr);
+  FlValueFloat32List* v = reinterpret_cast<FlValueFloat32List*>(self);
+  return v->values;
+}
+
 G_MODULE_EXPORT const double* fl_value_get_float_list(FlValue* self) {
   g_return_val_if_fail(self != nullptr, nullptr);
   g_return_val_if_fail(self->type == FL_VALUE_TYPE_FLOAT_LIST, nullptr);
@@ -633,6 +686,7 @@ G_MODULE_EXPORT size_t fl_value_get_length(FlValue* self) {
   g_return_val_if_fail(self->type == FL_VALUE_TYPE_UINT8_LIST ||
                            self->type == FL_VALUE_TYPE_INT32_LIST ||
                            self->type == FL_VALUE_TYPE_INT64_LIST ||
+                           self->type == FL_VALUE_TYPE_FLOAT32_LIST ||
                            self->type == FL_VALUE_TYPE_FLOAT_LIST ||
                            self->type == FL_VALUE_TYPE_LIST ||
                            self->type == FL_VALUE_TYPE_MAP,
@@ -649,6 +703,10 @@ G_MODULE_EXPORT size_t fl_value_get_length(FlValue* self) {
     }
     case FL_VALUE_TYPE_INT64_LIST: {
       FlValueInt64List* v = reinterpret_cast<FlValueInt64List*>(self);
+      return v->values_length;
+    }
+    case FL_VALUE_TYPE_FLOAT32_LIST: {
+      FlValueFloat32List* v = reinterpret_cast<FlValueFloat32List*>(self);
       return v->values_length;
     }
     case FL_VALUE_TYPE_FLOAT_LIST: {
