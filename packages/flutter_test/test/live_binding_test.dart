@@ -4,12 +4,11 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // This file is for testings that require a `LiveTestWidgetsFlutterBinding`
 void main() {
-  final LiveTestWidgetsFlutterBinding binding = LiveTestWidgetsFlutterBinding();
+  LiveTestWidgetsFlutterBinding();
   testWidgets('Input PointerAddedEvent', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('Test')));
     await tester.pump();
@@ -36,51 +35,5 @@ void main() {
     expect(hoverEvent, isNotNull);
     expect(hoverEvent!.position, location);
     await gesture.removePointer();
-  });
-
-  testWidgets('Should render on pointer events', (WidgetTester tester) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
-    final Widget target = Container(
-      padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
-      child: animationSheet.record(
-        MaterialApp(
-          home: Container(
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 128, 128, 128),
-              border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
-            ),
-            child: Center(
-              child: GestureDetector(
-                onTap: () {},
-                child: const Text('Test'),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.pumpWidget(target);
-
-    await tester.pumpFrames(target, const Duration(milliseconds: 50));
-
-    final TestGesture gesture1 = await tester.createGesture();
-    await gesture1.down(tester.getCenter(find.byType(Text)) + const Offset(10, 10));
-
-    await tester.pumpFrames(target, const Duration(milliseconds: 100));
-
-    final TestGesture gesture2 = await tester.createGesture();
-    await gesture2.down(tester.getTopLeft(find.byType(Text)) + const Offset(30, -10));
-    await gesture1.moveBy(const Offset(50, 50));
-
-    await tester.pumpFrames(target, const Duration(milliseconds: 100));
-    await gesture1.up();
-    await gesture2.up();
-    await tester.pumpFrames(target, const Duration(milliseconds: 50));
-
-    await expectLater(
-      animationSheet.collate(6),
-      matchesGoldenFile('LiveBinding.press.animation.png'),
-    );
   });
 }
