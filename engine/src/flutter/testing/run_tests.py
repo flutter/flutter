@@ -276,7 +276,7 @@ def RunDartTest(build_dir, test_packages, dart_file, verbose_dart_snapshot, mult
     threading = 'single-threaded'
 
   print("Running test '%s' using 'flutter_tester' (%s)" % (kernel_file_name, threading))
-  forbidden_output = [] if 'unopt' in build_dir else ['[ERROR']
+  forbidden_output = [] if 'unopt' in build_dir or expect_failure else ['[ERROR']
   RunEngineExecutable(build_dir, 'flutter_tester', None, command_args,
                       forbidden_output=forbidden_output, expect_failure=expect_failure)
 
