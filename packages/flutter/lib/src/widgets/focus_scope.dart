@@ -315,7 +315,7 @@ class Focus extends StatefulWidget {
   /// focus.
   ///
   /// Key events are first given to the [FocusNode] that has primary focus, and
-  /// if its [onKey] method return [KeyEventResult.ignored], then they are given
+  /// if its [onKey] method returns [KeyEventResult.ignored], then they are given
   /// to each ancestor node up the focus hierarchy in turn. If an event reaches
   /// the root of the hierarchy, it is discarded.
   ///
@@ -645,7 +645,7 @@ class _FocusState extends State<Focus> {
     }());
 
     if (oldWidget.focusNode == widget.focusNode) {
-      if (widget.onKey != null && widget.onKey != focusNode.onKey) {
+      if (widget.onKey != focusNode.onKey) {
         focusNode.onKey = widget.onKey;
       }
       if (widget.skipTraversal != null) {

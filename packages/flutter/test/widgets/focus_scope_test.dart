@@ -1627,7 +1627,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/83023
-    testWidgets("Do not override the node's `onKey` when `Focus.onKey` is null", (WidgetTester tester) async {
+    testWidgets('`Focus.onKey` has a higher priority', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       bool? keyEventHandled;
       final FocusNode focusNode = FocusNode(
@@ -1648,9 +1648,8 @@ void main() {
       Focus.of(key1.currentContext!).requestFocus();
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      expect(keyEventHandled, true);
+      expect(keyEventHandled, null);
 
-      keyEventHandled = null;
       // Update the Focus widget.
       await tester.pumpWidget(
         Focus(
@@ -1661,17 +1660,23 @@ void main() {
       );
 
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      expect(keyEventHandled, true);
+      expect(keyEventHandled, null);
 
-      keyEventHandled = null;
+      bool? keyEventHandledByFocus;
       await tester.pumpWidget(
         Focus(
-          onKey: (_, __) => KeyEventResult.ignored, // This one does nothing.
+          onKey: (_, __) {
+            keyEventHandledByFocus = true;
+            return KeyEventResult.ignored;
+          },
           focusNode: focusNode,
           child: Container(key: key1),
         ),
       );
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(keyEventHandled, null);
+      expect(keyEventHandledByFocus, true);
     });
   });
   group('ExcludeFocus', () {
