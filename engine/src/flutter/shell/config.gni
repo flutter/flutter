@@ -9,8 +9,6 @@ declare_args() {
   # TODO(gw280): Enable once Fuchsia supports Vulkan through the embedder
   shell_enable_vulkan = false
   shell_enable_software = true
-
-  stripped_symbols = true
 }
 
 declare_args() {
