@@ -24,6 +24,8 @@ impeller_component("compositor") {
     "pipeline_descriptor.mm",
     "pipeline_library.h",
     "pipeline_library.mm",
+    "range.cc",
+    "range.h",
     "renderer.h",
     "renderer.mm",
     "shader_function.h",
