@@ -814,7 +814,7 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @VisibleForTesting
   public void handlePlatformMessage(
-      @NonNull final String channel, ByteBuffer message, final int replyId) {
+      @NonNull final String channel, byte[] message, final int replyId) {
     if (platformMessageHandler != null) {
       platformMessageHandler.handleMessageFromDart(channel, message, replyId);
     }
@@ -825,7 +825,7 @@ public class FlutterJNI {
   // Called by native to respond to a platform message that we sent.
   // TODO(mattcarroll): determine if reply is nonull or nullable
   @SuppressWarnings("unused")
-  private void handlePlatformMessageResponse(int replyId, ByteBuffer reply) {
+  private void handlePlatformMessageResponse(int replyId, byte[] reply) {
     if (platformMessageHandler != null) {
       platformMessageHandler.handlePlatformMessageResponse(replyId, reply);
     }

@@ -6,12 +6,11 @@ package io.flutter.embedding.engine.dart;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import java.nio.ByteBuffer;
 
 /** Handler that receives messages from Dart code. */
 public interface PlatformMessageHandler {
   void handleMessageFromDart(
-      @NonNull final String channel, @Nullable ByteBuffer message, final int replyId);
+      @NonNull final String channel, @Nullable byte[] message, final int replyId);
 
-  void handlePlatformMessageResponse(int replyId, @Nullable ByteBuffer reply);
+  void handlePlatformMessageResponse(int replyId, @Nullable byte[] reply);
 }
