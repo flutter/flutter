@@ -26,6 +26,7 @@ static constexpr int kValueInt64List = 10;
 static constexpr int kValueFloat64List = 11;
 static constexpr int kValueList = 12;
 static constexpr int kValueMap = 13;
+static constexpr int kValueFloat32List = 14;
 
 struct _FlStandardMessageCodec {
   FlMessageCodec parent_instance;
@@ -295,6 +296,30 @@ static FlValue* read_int64_list_value(FlStandardMessageCodec* self,
   return value;
 }
 
+// Reads a 32 bit floating point number list from @buffer in standard codec
+// format. Returns a new #FlValue of type #FL_VALUE_TYPE_FLOAT32_LIST if
+// successful or %NULL on error.
+static FlValue* read_float32_list_value(FlStandardMessageCodec* self,
+                                        GBytes* buffer,
+                                        size_t* offset,
+                                        GError** error) {
+  uint32_t length;
+  if (!fl_standard_message_codec_read_size(self, buffer, offset, &length,
+                                           error)) {
+    return nullptr;
+  }
+  if (!read_align(buffer, offset, 4, error)) {
+    return nullptr;
+  }
+  if (!check_size(buffer, *offset, sizeof(float) * length, error)) {
+    return nullptr;
+  }
+  FlValue* value = fl_value_new_float32_list(
+      reinterpret_cast<const float*>(get_data(buffer, offset)), length);
+  *offset += sizeof(float) * length;
+  return value;
+}
+
 // Reads a floating point number list from @buffer in standard codec format.
 // Returns a new #FlValue of type #FL_VALUE_TYPE_FLOAT_LIST if successful or
 // %NULL on error.
@@ -547,6 +572,17 @@ gboolean fl_standard_message_codec_write_value(FlStandardMessageCodec* self,
           sizeof(int64_t) * length);
       return TRUE;
     }
+    case FL_VALUE_TYPE_FLOAT32_LIST: {
+      write_uint8(buffer, kValueFloat32List);
+      size_t length = fl_value_get_length(value);
+      fl_standard_message_codec_write_size(self, buffer, length);
+      write_align(buffer, 4);
+      g_byte_array_append(
+          buffer,
+          reinterpret_cast<const uint8_t*>(fl_value_get_float32_list(value)),
+          sizeof(float) * length);
+      return TRUE;
+    }
     case FL_VALUE_TYPE_FLOAT_LIST: {
       write_uint8(buffer, kValueFloat64List);
       size_t length = fl_value_get_length(value);
@@ -620,6 +656,8 @@ FlValue* fl_standard_message_codec_read_value(FlStandardMessageCodec* self,
     value = read_int32_list_value(self, buffer, offset, error);
   } else if (type == kValueInt64List) {
     value = read_int64_list_value(self, buffer, offset, error);
+  } else if (type == kValueFloat32List) {
+    value = read_float32_list_value(self, buffer, offset, error);
   } else if (type == kValueFloat64List) {
     value = read_float64_list_value(self, buffer, offset, error);
   } else if (type == kValueList) {

@@ -30,6 +30,7 @@ G_BEGIN_DECLS
  * - #FL_VALUE_TYPE_UINT8_LIST: Uint8List
  * - #FL_VALUE_TYPE_INT32_LIST: Int32List
  * - #FL_VALUE_TYPE_INT64_LIST: Int64List
+ * - #FL_VALUE_TYPE_FLOAT32_LIST: Float32List
  * - #FL_VALUE_TYPE_FLOAT_LIST: Float64List
  * - #FL_VALUE_TYPE_LIST: List<dynamic>
  * - #FL_VALUE_TYPE_MAP: Map<dynamic>
@@ -51,6 +52,7 @@ typedef struct _FlValue FlValue;
  * @FL_VALUE_TYPE_FLOAT_LIST: An ordered list of floating point numbers.
  * @FL_VALUE_TYPE_LIST: An ordered list of #FlValue objects.
  * @FL_VALUE_TYPE_MAP: A map of #FlValue objects keyed by #FlValue object.
+ * @FL_VALUE_TYPE_FLOAT32_LIST: An ordered list of 32bit floating point numbers.
  *
  * Types of #FlValue.
  */
@@ -66,6 +68,7 @@ typedef enum {
   FL_VALUE_TYPE_FLOAT_LIST,
   FL_VALUE_TYPE_LIST,
   FL_VALUE_TYPE_MAP,
+  FL_VALUE_TYPE_FLOAT32_LIST,
 } FlValueType;
 
 /**
@@ -180,6 +183,18 @@ FlValue* fl_value_new_int32_list(const int32_t* value, size_t value_length);
  * Returns: a new #FlValue.
  */
 FlValue* fl_value_new_int64_list(const int64_t* value, size_t value_length);
+
+/**
+ * fl_value_new_float32_list:
+ * @value: an array of floating point numbers.
+ * @value_length: number of elements in @value.
+ *
+ * Creates an ordered list containing 32 bit floating point numbers.
+ * The equivalent Dart type is a Float32List.
+ *
+ * Returns: a new #FlValue.
+ */
+FlValue* fl_value_new_float32_list(const float* value, size_t value_length);
 
 /**
  * fl_value_new_float_list:
@@ -435,7 +450,8 @@ const gchar* fl_value_get_string(FlValue* value);
  * fl_value_get_length:
  * @value: an #FlValue of type #FL_VALUE_TYPE_UINT8_LIST,
  * #FL_VALUE_TYPE_INT32_LIST, #FL_VALUE_TYPE_INT64_LIST,
- * #FL_VALUE_TYPE_FLOAT_LIST, #FL_VALUE_TYPE_LIST or #FL_VALUE_TYPE_MAP.
+ * #FL_VALUE_TYPE_FLOAT32_LIST, #FL_VALUE_TYPE_FLOAT_LIST, #FL_VALUE_TYPE_LIST
+ * or #FL_VALUE_TYPE_MAP.
  *
  * Gets the number of elements @value contains. This is only valid for list
  * and map types. Calling this with other types is a programming error.
@@ -479,6 +495,18 @@ const int32_t* fl_value_get_int32_list(FlValue* value);
  * Returns: an array of 64 bit integers.
  */
 const int64_t* fl_value_get_int64_list(FlValue* value);
+
+/**
+ * fl_value_get_float32_list:
+ * @value: an #FlValue of type #FL_VALUE_TYPE_FLOAT32_LIST.
+ *
+ * Gets the array of floating point numbers @value contains. The data
+ * contains fl_get_length() elements. Calling this with an #FlValue that is
+ * not of type #FL_VALUE_TYPE_FLOAT32_LIST is a programming error.
+ *
+ * Returns: an array of floating point numbers.
+ */
+const float* fl_value_get_float32_list(FlValue* value);
 
 /**
  * fl_value_get_float_list:
