@@ -297,7 +297,7 @@ class AnimationSheetBuilder {
   ///
   /// This method can only be called if at least one frame has been recorded.
   @Deprecated(
-    'The `sheetSize` is useful for `display`, which should be migrated to `collate`. '
+    'The `sheetSize` is only useful for `display`, which should be migrated to `collate`. '
     'This feature was deprecated after v2.3.0-13.0.pre.',
   )
   Size sheetSize({double maxWidth = _kDefaultTestViewportWidth}) {
@@ -486,8 +486,8 @@ class _CellSheet extends StatelessWidget {
 }
 
 class _RenderRootableRepaintBoundary extends RenderRepaintBoundary {
-  // Capture an image of the current state of the root (RenderView) and its
-  // children.
+  // Like [toImage], but captures an image of all layers (composited by
+  // RenderView and its children) clipped by the region of this object.
   Future<ui.Image> allLayersToImage() {
     final TransformLayer rootLayer = _rootLayer();
     final Matrix4 rootTransform = (rootLayer.transform ?? Matrix4.identity()).clone();
@@ -506,8 +506,7 @@ class _RenderRootableRepaintBoundary extends RenderRepaintBoundary {
   }
 }
 
-// A [RepaintBoundary], except that its render object has a `fullscreenToImage` method,
-// which can convert the root
+// A [RepaintBoundary], except that its render object has a `fullscreenToImage` method.
 class _RootableRepaintBoundary extends SingleChildRenderObjectWidget {
   /// Creates a widget that isolates repaints.
   const _RootableRepaintBoundary({ Key? key, Widget? child }) : super(key: key, child: child);
