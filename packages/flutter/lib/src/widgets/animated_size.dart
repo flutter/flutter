@@ -35,6 +35,7 @@ import 'ticker_provider.dart';
 ///         color: Colors.amberAccent,
 ///         child: AnimatedSize(
 ///           curve: Curves.easeIn,
+///           vsync: this,
 ///           duration: const Duration(seconds: 1),
 ///           child: FlutterLogo(size: _size),
 ///         ),
