@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:dds/dds.dart' as dds;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -14,6 +16,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../sksl_writer.dart';
 import '../vmservice.dart';
 import 'web_driver_service.dart';
 
@@ -125,7 +128,7 @@ class FlutterDriverService extends DriverService {
   Device _device;
   ApplicationPackage _applicationPackage;
   String _vmServiceUri;
-  vm_service.VmService _vmService;
+  FlutterVmService _vmService;
 
   @override
   Future<void> start(
@@ -207,6 +210,7 @@ class FlutterDriverService extends DriverService {
         debuggingOptions.ddsPort,
         ipv6,
         debuggingOptions.disableServiceAuthCodes,
+        logger: _logger,
       );
       _vmServiceUri = device.dds.uri.toString();
     } on dds.DartDevelopmentServiceException {
@@ -218,7 +222,7 @@ class FlutterDriverService extends DriverService {
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
 
-    final vm_service.VM vm = await _vmService.getVM();
+    final vm_service.VM vm = await _vmService.service.getVM();
     logReader.appPid = vm.pid;
   }
 
@@ -266,7 +270,7 @@ class FlutterDriverService extends DriverService {
       }
     } else if (_device.supportsFlutterExit) {
       // Otherwise use the VM Service URI to stop the app as a best effort approach.
-      final vm_service.VM vm = await _vmService.getVM();
+      final vm_service.VM vm = await _vmService.service.getVM();
       final vm_service.IsolateRef isolateRef = vm.isolates
         .firstWhere((vm_service.IsolateRef element) {
           return !element.isSystemIsolate;

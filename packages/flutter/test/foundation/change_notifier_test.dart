@@ -34,13 +34,13 @@ class B extends A with ChangeNotifier {
 void main() {
   testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
-    final VoidCallback listener = () { log.add('listener'); };
-    final VoidCallback listener1 = () { log.add('listener1'); };
-    final VoidCallback listener2 = () { log.add('listener2'); };
-    final VoidCallback badListener = () {
+    void listener() { log.add('listener'); }
+    void listener1() { log.add('listener1'); }
+    void listener2() { log.add('listener2'); }
+    void badListener() {
       log.add('badListener');
       throw ArgumentError();
-    };
+    }
 
     final TestNotifier test = TestNotifier();
 
@@ -111,15 +111,15 @@ void main() {
     final TestNotifier test = TestNotifier();
     final List<String> log = <String>[];
 
-    final VoidCallback listener1 = () { log.add('listener1'); };
-    final VoidCallback listener3 = () { log.add('listener3'); };
-    final VoidCallback listener4 = () { log.add('listener4'); };
-    final VoidCallback listener2 = () {
+    void listener1() { log.add('listener1'); }
+    void listener3() { log.add('listener3'); }
+    void listener4() { log.add('listener4'); }
+    void listener2() {
       log.add('listener2');
       test.removeListener(listener1);
       test.removeListener(listener3);
       test.addListener(listener4);
-    };
+    }
 
     test.addListener(listener1);
     test.addListener(listener2);
@@ -141,8 +141,8 @@ void main() {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 
-    final VoidCallback listener3 = () { log.add('listener3'); };
-    final VoidCallback listener2 = () { log.add('listener2'); };
+    void listener3() { log.add('listener3'); }
+    void listener2() { log.add('listener2'); }
     void listener1() {
       log.add('listener1');
       source.addListener(listener2);
@@ -167,7 +167,7 @@ void main() {
       log.add('selfRemovingListener');
       source.removeListener(selfRemovingListener);
     }
-    final VoidCallback listener1 = () { log.add('listener1'); };
+    void listener1() { log.add('listener1'); }
 
     source.addListener(listener1);
     source.addListener(selfRemovingListener);
@@ -205,8 +205,8 @@ void main() {
     final List<String> log = <String>[];
 
     final Listenable merged = Listenable.merge(<Listenable>[source1, source2]);
-    final VoidCallback listener1 = () { log.add('listener1'); };
-    final VoidCallback listener2 = () { log.add('listener2'); };
+    void listener1() { log.add('listener1'); }
+    void listener2() { log.add('listener2'); }
 
     merged.addListener(listener1);
     source1.notify();
@@ -237,7 +237,7 @@ void main() {
     final List<String> log = <String>[];
 
     final Listenable merged = Listenable.merge(<Listenable?>[null, source1, null, source2, null]);
-    final VoidCallback listener = () { log.add('listener'); };
+    void listener() { log.add('listener'); }
 
     merged.addListener(listener);
     source1.notify();
@@ -252,7 +252,7 @@ void main() {
     final List<String> log = <String>[];
 
     final Listenable merged = Listenable.merge(<Listenable>[source1, source2]);
-    final VoidCallback listener = () { log.add('listener'); };
+    void listener() { log.add('listener'); }
 
     merged.addListener(listener);
     source1.notify();
@@ -279,7 +279,7 @@ void main() {
     final ValueNotifier<double> notifier = ValueNotifier<double>(2.0);
 
     final List<double> log = <double>[];
-    final VoidCallback listener = () { log.add(notifier.value); };
+    void listener() { log.add(notifier.value); }
 
     notifier.addListener(listener);
     notifier.value = 3.0;
@@ -325,7 +325,7 @@ void main() {
 
     final TestNotifier source1 = TestNotifier();
     final TestNotifier source2 = TestNotifier();
-    final VoidCallback fakeListener = () { };
+    void fakeListener() { }
 
     final Listenable listenableUnderTest = Listenable.merge(<Listenable>[source1, source2]);
     expect(source1.isListenedTo, isFalse);

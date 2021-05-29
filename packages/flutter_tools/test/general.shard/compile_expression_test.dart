@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -18,23 +21,23 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
+import '../src/fakes.dart';
 
 void main() {
   ProcessManager mockProcessManager;
   ResidentCompiler generator;
   MockProcess mockFrontendServer;
-  MockStdIn mockFrontendServerStdIn;
-  MockStream mockFrontendServerStdErr;
+  MemoryIOSink frontendServerStdIn;
   StreamController<String> stdErrStreamController;
   BufferLogger testLogger;
+  MemoryFileSystem fileSystem;
 
   setUp(() {
     testLogger = BufferLogger.test();
     mockProcessManager = MockProcessManager();
     mockFrontendServer = MockProcess();
-    mockFrontendServerStdIn = MockStdIn();
-    mockFrontendServerStdErr = MockStream();
+    frontendServerStdIn = MemoryIOSink();
+    fileSystem = MemoryFileSystem.test();
     generator = ResidentCompiler(
       'sdkroot',
       buildMode: BuildMode.debug,
@@ -42,17 +45,16 @@ void main() {
       processManager: mockProcessManager,
       logger: testLogger,
       platform: FakePlatform(operatingSystem: 'linux'),
+      fileSystem: fileSystem,
     );
 
-    when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
+    stdErrStreamController = StreamController<String>();
+    when(mockFrontendServer.stdin).thenReturn(frontendServerStdIn);
     when(mockFrontendServer.stderr)
-        .thenAnswer((Invocation invocation) => mockFrontendServerStdErr);
+        .thenAnswer((Invocation invocation) => stdErrStreamController.stream.transform(utf8.encoder));
     when(mockFrontendServer.exitCode).thenAnswer((Invocation invocation) {
       return Completer<int>().future;
     });
-    stdErrStreamController = StreamController<String>();
-    when(mockFrontendServerStdErr.transform<String>(any))
-        .thenAnswer((Invocation invocation) => stdErrStreamController.stream);
 
     when(mockProcessManager.canRun(any)).thenReturn(true);
     when(mockProcessManager.start(any)).thenAnswer(
@@ -73,6 +75,9 @@ void main() {
         Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter =
         Completer<List<int>>();
+    fileSystem.file('/path/to/main.dart.dill')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(<int>[1, 2, 3, 4]);
 
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) =>
@@ -91,9 +96,8 @@ void main() {
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
     ).then((CompilerOutput output) {
-      expect(mockFrontendServerStdIn.getAndClear(),
+      expect(frontendServerStdIn.getAndClear(),
           'compile file:///path/to/main.dart\n');
-      verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(testLogger.errorText,
           equals('line1\nline2\n'));
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));
@@ -106,8 +110,7 @@ void main() {
           '2+2', null, null, null, null, false).then(
               (CompilerOutput outputExpression) {
                 expect(outputExpression, isNotNull);
-                expect(outputExpression.outputFilename, equals('/path/to/main.dart.dill.incremental'));
-                expect(outputExpression.errorCount, 0);
+                expect(outputExpression.expressionData, <int>[1, 2, 3, 4]);
               }
       );
     });
@@ -139,6 +142,9 @@ void main() {
             equals('line1\nline2\n'));
         expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
 
+        fileSystem.file('/path/to/main.dart.dill.incremental')
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(<int>[0, 1, 2, 3]);
         compileExpressionResponseCompleter1.complete(Future<List<int>>.value(utf8.encode(
             'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
         )));
@@ -151,9 +157,11 @@ void main() {
       generator.compileExpression('0+1', null, null, null, null, false).then(
         (CompilerOutput outputExpression) {
           expect(outputExpression, isNotNull);
-          expect(outputExpression.outputFilename,
-              equals('/path/to/main.dart.dill.incremental'));
-          expect(outputExpression.errorCount, 0);
+          expect(outputExpression.expressionData, <int>[0, 1, 2, 3]);
+
+          fileSystem.file('/path/to/main.dart.dill.incremental')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[4, 5, 6, 7]);
           compileExpressionResponseCompleter2.complete(Future<List<int>>.value(utf8.encode(
               'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
           )));
@@ -166,9 +174,7 @@ void main() {
       generator.compileExpression('1+1', null, null, null, null, false).then(
         (CompilerOutput outputExpression) {
           expect(outputExpression, isNotNull);
-          expect(outputExpression.outputFilename,
-              equals('/path/to/main.dart.dill.incremental'));
-          expect(outputExpression.errorCount, 0);
+          expect(outputExpression.expressionData, <int>[4, 5, 6, 7]);
           lastExpressionCompleted.complete(true);
         },
       ),

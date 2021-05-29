@@ -14,6 +14,22 @@ import '../rendering/mock_canvas.dart';
 
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
+const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
+const Rect _kAndroidTrackDimensions = Rect.fromLTRB(796.0, 0.0, 800.0, 600.0);
+const Radius _kDefaultThumbRadius = Radius.circular(8.0);
+const Color _kDefaultIdleThumbColor = Color(0x1a000000);
+const Offset _kTrackBorderPoint1 = Offset(796.0, 0.0);
+const Offset _kTrackBorderPoint2 = Offset(796.0, 600.0);
+
+Rect getStartingThumbRect({ required bool isAndroid }) {
+  return isAndroid
+    // On Android the thumb is slightly different. The thumb is only 4 pixels wide,
+    // and has no margin along the side of the viewport.
+    ? const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0)
+    // The Material Design thumb is 8 pixels wide, with a 2
+    // pixel margin to the right edge of the viewport.
+    : const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0);
+}
 
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
@@ -33,9 +49,19 @@ Widget _buildBoilerplate({
     textDirection: textDirection,
     child: MediaQuery(
       data: MediaQueryData(padding: padding),
-      child: child,
+      child: ScrollConfiguration(
+        behavior: const NoScrollbarBehavior(),
+        child: child,
+      ),
     ),
   );
+}
+
+class NoScrollbarBehavior extends MaterialScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 void main() {
@@ -51,15 +77,15 @@ void main() {
             width: 300.0,
             child: Scrollbar(
               child: ListView(
-                children: <Widget>[
-                  Container(height: 40.0, child: const Text('0')),
-                  Container(height: 40.0, child: const Text('1')),
-                  Container(height: 40.0, child: const Text('2')),
-                  Container(height: 40.0, child: const Text('3')),
-                  Container(height: 40.0, child: const Text('4')),
-                  Container(height: 40.0, child: const Text('5')),
-                  Container(height: 40.0, child: const Text('6')),
-                  Container(height: 40.0, child: const Text('7')),
+                children: const <Widget>[
+                  SizedBox(height: 40.0, child: Text('0')),
+                  SizedBox(height: 40.0, child: Text('1')),
+                  SizedBox(height: 40.0, child: Text('2')),
+                  SizedBox(height: 40.0, child: Text('3')),
+                  SizedBox(height: 40.0, child: Text('4')),
+                  SizedBox(height: 40.0, child: Text('5')),
+                  SizedBox(height: 40.0, child: Text('6')),
+                  SizedBox(height: 40.0, child: Text('7')),
                 ],
               ),
             ),
@@ -85,13 +111,13 @@ void main() {
 
   testWidgets('ScrollbarPainter does not divide by zero', (WidgetTester tester) async {
     await tester.pumpWidget(
-      _buildBoilerplate(child: Container(
+      _buildBoilerplate(child: SizedBox(
         height: 200.0,
         width: 300.0,
         child: Scrollbar(
           child: ListView(
-            children: <Widget>[
-              Container(height: 40.0, child: const Text('0')),
+            children: const <Widget>[
+              SizedBox(height: 40.0, child: Text('0')),
             ],
           ),
         ),
@@ -509,17 +535,17 @@ void main() {
       paints
         ..rect(
           rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..line(
           p1: const Offset(780.0, 0.0),
           p2: const Offset(780.0, 600.0),
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 300.0),
-          color: const Color(0x1a000000),
+          color: _kAndroidThumbIdleColor,
         ),
     );
     await tester.pumpWidget(viewWithScroll(radius: const Radius.circular(10)));
@@ -538,6 +564,7 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: Scrollbar(
+            interactive: true,
             isAlwaysShown: true,
             controller: scrollController,
             child: SingleChildScrollView(
@@ -555,18 +582,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 360.0),
-          color: const Color(0x1a000000),
+          color: _kAndroidThumbIdleColor,
         ),
     );
 
@@ -579,18 +606,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 240.0, 800.0, 600.0),
-          color: const Color(0x1a000000),
+          color: _kAndroidThumbIdleColor,
         ),
     );
 
@@ -603,18 +630,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 360.0),
-          color: const Color(0x1a000000),
+          color: _kAndroidThumbIdleColor,
         ),
     );
   });
@@ -638,18 +665,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 3.0, 800.0, 93.0),
-          color: const Color(0x1a000000),
+          color: _kAndroidThumbIdleColor,
         ),
     );
 
@@ -660,18 +687,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 3.0, 800.0, 93.0),
-          color: const Color(0x1a000000),
+          color: _kAndroidThumbIdleColor,
         ),
     );
 
@@ -684,18 +711,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 3.0, 800.0, 93.0),
-          color: const Color(0x14000000),
+          color: const Color(0xc6bcbcbc),
         ),
     );
   });
@@ -707,6 +734,7 @@ void main() {
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
+            interactive: true,
             isAlwaysShown: true,
             controller: scrollController,
             child: const SingleChildScrollView(
@@ -722,18 +750,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
-          color: const Color(0x1a000000),
+          rect: getStartingThumbRect(isAndroid: true),
+          color: _kAndroidThumbIdleColor,
         ),
     );
 
@@ -746,17 +774,17 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
+          rect: getStartingThumbRect(isAndroid: true),
           // Drag color
           color: const Color(0x99000000),
         ),
@@ -767,42 +795,35 @@ void main() {
     await dragScrollbarGesture.up();
     await tester.pumpAndSettle();
 
-    // The view has scrolled more than it would have by a swipe gesture of the
+    // The view has scrolled more than it would have by a swipe pointer of the
     // same distance.
     expect(scrollController.offset, greaterThan(scrollAmount * 2));
     expect(
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
-          color: const Color(0x1a000000),
+          color: _kAndroidThumbIdleColor,
         ),
     );
   });
 
   testWidgets('Scrollbar thumb color completes a hover animation', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(isAlwaysShown: true)),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -811,10 +832,10 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
-          const Radius.circular(8.0),
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
         ),
-        color: const Color(0x1a000000),
+        color: _kDefaultIdleThumbColor,
       ),
     );
 
@@ -828,8 +849,8 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
-          const Radius.circular(8.0),
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
         ),
         // Hover color
         color: const Color(0x80000000),
@@ -840,24 +861,18 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.macOS,
       TargetPlatform.windows,
-      TargetPlatform.fuchsia,
     }),
   );
 
   testWidgets('Hover animation is not triggered by tap gestures', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            showTrackOnHover: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(
+          isAlwaysShown: true,
+          showTrackOnHover: true,
+        )),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -866,10 +881,10 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
-          const Radius.circular(8.0),
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
         ),
-        color: const Color(0x1a000000),
+        color: _kDefaultIdleThumbColor,
       ),
     );
     await tester.tapAt(const Offset(794.0, 5.0));
@@ -881,10 +896,10 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
-          const Radius.circular(8.0),
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
         ),
-        color: const Color(0x1a000000),
+        color: _kDefaultIdleThumbColor,
       ),
     );
 
@@ -906,39 +921,31 @@ void main() {
           p1: const Offset(784.0, 0.0),
           p2: const Offset(784.0, 600.0),
           strokeWidth: 1.0,
-          color: const Color(0x1a000000),
+          color: _kDefaultIdleThumbColor,
         )
         ..rrect(
           rrect: RRect.fromRectAndRadius(
             // Scrollbar thumb is larger
             const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
-            const Radius.circular(8.0),
+            _kDefaultThumbRadius,
           ),
           // Hover color
           color: const Color(0x80000000),
         ),
     );
-
   },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.linux,
-    }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }),
   );
 
   testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            showTrackOnHover: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(
+          isAlwaysShown: true,
+          showTrackOnHover: true,
+        )),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -947,10 +954,10 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
-          const Radius.circular(8.0),
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
         ),
-        color: const Color(0x1a000000),
+        color: _kDefaultIdleThumbColor,
       ),
     );
 
@@ -971,13 +978,13 @@ void main() {
           p1: const Offset(784.0, 0.0),
           p2: const Offset(784.0, 600.0),
           strokeWidth: 1.0,
-          color: const Color(0x1a000000),
+          color: _kDefaultIdleThumbColor,
         )
         ..rrect(
           rrect: RRect.fromRectAndRadius(
             // Scrollbar thumb is larger
             const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
-            const Radius.circular(8.0),
+            _kDefaultThumbRadius,
           ),
           // Hover color
           color: const Color(0x80000000),
@@ -988,7 +995,6 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.macOS,
       TargetPlatform.windows,
-      TargetPlatform.fuchsia,
     }),
   );
 
@@ -1070,33 +1076,36 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: Scrollbar(
-            key: key2,
-            notificationPredicate: null,
-            child: SingleChildScrollView(
-              key: outerKey,
-              child: SizedBox(
-                height: 1000.0,
-                width: double.infinity,
-                child: Column(
-                  children: <Widget>[
-                    Scrollbar(
-                      key: key1,
-                      notificationPredicate: null,
-                      child: SizedBox(
-                        height: 300.0,
-                        width: double.infinity,
-                        child: SingleChildScrollView(
-                          key: innerKey,
-                          child: const SizedBox(
-                            key: Key('Inner scrollable'),
-                            height: 1000.0,
-                            width: double.infinity,
+          child: ScrollConfiguration(
+            behavior: const NoScrollbarBehavior(),
+            child: Scrollbar(
+              key: key2,
+              notificationPredicate: null,
+              child: SingleChildScrollView(
+                key: outerKey,
+                child: SizedBox(
+                  height: 1000.0,
+                  width: double.infinity,
+                  child: Column(
+                    children: <Widget>[
+                      Scrollbar(
+                        key: key1,
+                        notificationPredicate: null,
+                        child: SizedBox(
+                          height: 300.0,
+                          width: double.infinity,
+                          child: SingleChildScrollView(
+                            key: innerKey,
+                            child: const SizedBox(
+                              key: Key('Inner scrollable'),
+                              height: 1000.0,
+                              width: double.infinity,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1121,4 +1130,360 @@ void main() {
       paintsExactlyCountTimes(#drawRect, 2),
     );
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Scrollbar dragging can be disabled', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            interactive: false,
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: const SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(788.0, 0.0, 800.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: const Offset(788.0, 0.0),
+          p2: const Offset(788.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            getStartingThumbRect(isAndroid: false),
+            _kDefaultThumbRadius,
+          ),
+          color: _kDefaultIdleThumbColor,
+        ),
+    );
+
+    // Try to drag the thumb down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarThumbGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarThumbGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarThumbGesture.up();
+    await tester.pumpAndSettle();
+    // Dragging on the thumb does not change the offset.
+    expect(scrollController.offset, 0.0);
+
+    // Drag in the track area to validate pass through to scrollable.
+    final TestGesture dragPassThroughTrack = await tester.startGesture(const Offset(797.0, 250.0));
+    await dragPassThroughTrack.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pumpAndSettle();
+    await dragPassThroughTrack.up();
+    await tester.pumpAndSettle();
+    // The scroll view received the drag.
+    expect(scrollController.offset, scrollAmount);
+
+    // Tap on the track to validate the scroll view will not page.
+    await tester.tapAt(const Offset(797.0, 200.0));
+    await tester.pumpAndSettle();
+    // The offset should not have changed.
+    expect(scrollController.offset, scrollAmount);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
+
+  testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: const SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0)
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: getStartingThumbRect(isAndroid: true),
+          color: _kAndroidThumbIdleColor,
+        ),
+    );
+
+    // Try to drag the thumb down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarThumbGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarThumbGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarThumbGesture.up();
+    await tester.pumpAndSettle();
+    // Dragging on the thumb does not change the offset.
+    expect(scrollController.offset, 0.0);
+
+    // Drag in the track area to validate pass through to scrollable.
+    final TestGesture dragPassThroughTrack = await tester.startGesture(const Offset(797.0, 250.0));
+    await dragPassThroughTrack.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pumpAndSettle();
+    await dragPassThroughTrack.up();
+    await tester.pumpAndSettle();
+    // The scroll view received the drag.
+    expect(scrollController.offset, scrollAmount);
+
+    // Tap on the track to validate the scroll view will not page.
+    await tester.tapAt(const Offset(797.0, 200.0));
+    await tester.pumpAndSettle();
+    // The offset should not have changed.
+    expect(scrollController.offset, scrollAmount);
+  });
+
+  testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/70105
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            interactive: true,
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: const SingleChildScrollView(
+                child: SizedBox(width: 4000.0, height: 4000.0)
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: getStartingThumbRect(isAndroid: true),
+          color: _kAndroidThumbIdleColor,
+        ),
+    );
+
+    // Drag the thumb down to scroll down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: getStartingThumbRect(isAndroid: true),
+          // Drag color
+          color: const Color(0x99000000),
+        ),
+    );
+
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, greaterThan(10.0));
+    final double previousOffset = scrollController.offset;
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
+          color: const Color(0x99000000),
+        ),
+    );
+
+    // Execute a pointer scroll while dragging (drag gesture has not come up yet)
+    final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    pointer.hover(const Offset(798.0, 15.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 20.0)));
+    await tester.pumpAndSettle();
+    // Scrolling while holding the drag on the scrollbar and still hovered over
+    // the scrollbar should not have changed the scroll offset.
+    expect(pointer.location, const Offset(798.0, 15.0));
+    expect(scrollController.offset, previousOffset);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
+          color: const Color(0x99000000),
+        ),
+    );
+
+    // Drag is still being held, move pointer to be hovering over another area
+    // of the scrollable (not over the scrollbar) and execute another pointer scroll
+    pointer.hover(tester.getCenter(find.byType(SingleChildScrollView)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -70.0)));
+    await tester.pumpAndSettle();
+    // Scrolling while holding the drag on the scrollbar changed the offset
+    expect(pointer.location, const Offset(400.0, 300.0));
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
+          color: const Color(0x99000000),
+        ),
+    );
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
+          color: const Color(0xffbcbcbc),
+        ),
+    );
+  });
+
+  testWidgets('Scrollbar.isAlwaysShown triggers assertion when multiple ScrollPositions are attached.', (WidgetTester tester) async {
+    Widget _getTabContent({ ScrollController? scrollController }) {
+      return Scrollbar(
+        isAlwaysShown: true,
+        controller: scrollController,
+        child: ListView.builder(
+          controller: scrollController,
+          itemCount: 200,
+          itemBuilder: (BuildContext context, int index) => const Text('Test'),
+        ),
+      );
+    }
+
+    Widget _buildApp({ ScrollController? scrollController }) {
+      return MaterialApp(
+        home: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            body: TabBarView(
+              children: <Widget>[
+                _getTabContent(scrollController: scrollController),
+                _getTabContent(scrollController: scrollController),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Asserts when using the PrimaryScrollController.
+    await tester.pumpWidget(_buildApp());
+
+    // Swipe to the second tab, resulting in two attached ScrollPositions during
+    // the transition.
+    try {
+      await tester.drag(find.text('Test').first, const Offset(10.0, 0.0));
+    } on FlutterError catch (error) {
+      expect(
+        error.message,
+        contains('The Scrollbar attempted to paint using the position attached to the PrimaryScrollController.'),
+      );
+    }
+
+    // Asserts when using the ScrollController provided by the user.
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(_buildApp(scrollController: scrollController));
+
+    // Swipe to the second tab, resulting in two attached ScrollPositions during
+    // the transition.
+    try {
+      await tester.drag(find.text('Test').first, const Offset(10.0, 0.0));
+    } on AssertionError catch (error) {
+      expect(
+        error.message,
+        contains('The Scrollbar attempted to paint using the position attached to the provided ScrollController.'),
+      );
+    }
+  });
 }

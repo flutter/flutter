@@ -33,20 +33,18 @@ void main() {
       MaterialApp(
         routes: <String, WidgetBuilder>{
           '/': (BuildContext context) => RepaintBoundary(
-            child: Container(
-              child: RepaintBoundary(
-                child: FlipWidget(
-                  left: CustomPaint(
-                    painter: TestCustomPainter(
-                      log: log,
-                      name: 'left',
-                    ),
+            child: RepaintBoundary(
+              child: FlipWidget(
+                left: CustomPaint(
+                  painter: TestCustomPainter(
+                    log: log,
+                    name: 'left',
                   ),
-                  right: CustomPaint(
-                    painter: TestCustomPainter(
-                      log: log,
-                      name: 'right',
-                    ),
+                ),
+                right: CustomPaint(
+                  painter: TestCustomPainter(
+                    log: log,
+                    name: 'right',
                   ),
                 ),
               ),

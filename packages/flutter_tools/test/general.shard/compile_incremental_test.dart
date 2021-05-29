@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -43,6 +46,7 @@ void main() {
       processManager: mockProcessManager,
       artifacts: Artifacts.test(),
       platform: FakePlatform(operatingSystem: 'linux'),
+      fileSystem: MemoryFileSystem.test(),
     );
     generatorWithScheme = ResidentCompiler(
       'sdkroot',
@@ -55,6 +59,7 @@ void main() {
         '/foo/bar/fizz',
       ],
       fileSystemScheme: 'scheme',
+      fileSystem: MemoryFileSystem.test(),
     );
 
     when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);

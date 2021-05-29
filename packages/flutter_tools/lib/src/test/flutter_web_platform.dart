@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
+// @dart = 2.8
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -17,7 +17,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_core/src/platform.dart';
+import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
@@ -638,7 +638,6 @@ class BrowserManager {
     return completer.future.timeout(const Duration(seconds: 30), onTimeout: () {
       chrome.close();
       throwToolExit('Timed out waiting for ${runtime.name} to connect.');
-      return;
     });
   }
 

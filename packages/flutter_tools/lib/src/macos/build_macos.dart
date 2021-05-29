@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
@@ -32,7 +34,7 @@ Future<void> buildMacOS({
 }) async {
   if (!flutterProject.macos.xcodeWorkspace.existsSync()) {
     throwToolExit('No macOS desktop project configured. '
-      'See https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
+      'See https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding macOS support to a project.');
   }
 

@@ -172,6 +172,7 @@ void main() {
   });
 
   testWidgets('LinearProgressIndicator with colors', (WidgetTester tester) async {
+    // With valueColor & color provided
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -180,7 +181,88 @@ void main() {
             width: 200.0,
             child: LinearProgressIndicator(
               value: 0.25,
+              backgroundColor: Colors.black,
+              color: Colors.blue,
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Should use valueColor
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: Colors.white),
+    );
+
+    // With just color provided
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              value: 0.25,
+              backgroundColor: Colors.black,
+              color: Colors.white12,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Should use color
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: Colors.white12),
+    );
+
+    // With no color provided
+    const Color primaryColor = Color(0xff008800);
+    final ThemeData theme = ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith(primary: primaryColor));
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: LinearProgressIndicator(
+                value: 0.25,
+                backgroundColor: Colors.black,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Should use the theme's primary color
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: primaryColor),
+    );
+  });
+
+  testWidgets('LinearProgressIndicator with animation with null colors', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              value: 0.25,
+              valueColor: AlwaysStoppedAnimation<Color?>(null),
               backgroundColor: Colors.black,
             ),
           ),
@@ -192,7 +274,7 @@ void main() {
       find.byType(LinearProgressIndicator),
       paints
         ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: Colors.white),
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0)),
     );
   });
 
@@ -275,22 +357,39 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
-  testWidgets('CircularProgressIndicator paint background color', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
     const Color blue = Color(0xFF0000FF);
+    const Color red = Color(0xFFFF0000);
 
+    // With valueColor & color provided
     await tester.pumpWidget(const CircularProgressIndicator(
+      color: red,
       valueColor: AlwaysStoppedAnimation<Color>(blue),
     ));
-
     expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
     expect(find.byType(CircularProgressIndicator), paints..arc(color: blue));
 
+    // With just color provided
+    await tester.pumpWidget(const CircularProgressIndicator(
+      color: red,
+    ));
+    expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
+    expect(find.byType(CircularProgressIndicator), paints..arc(color: red));
+
+    // With no color provided
+    await tester.pumpWidget(Theme(
+      data: ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith(primary: green)),
+      child: const CircularProgressIndicator(),
+    ));
+    expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
+    expect(find.byType(CircularProgressIndicator), paints..arc(color: green));
+
+    // With background
     await tester.pumpWidget(const CircularProgressIndicator(
       backgroundColor: green,
-      valueColor: AlwaysStoppedAnimation<Color>(blue),
+      color: blue,
     ));
-
     expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 2));
     expect(find.byType(CircularProgressIndicator), paints..arc(color: green)..arc(color: blue));
   });

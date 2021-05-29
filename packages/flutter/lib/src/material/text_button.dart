@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -14,6 +13,8 @@ import 'button_style_button.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'ink_ripple.dart';
+import 'ink_well.dart';
 import 'material_state.dart';
 import 'text_button_theme.dart';
 import 'theme.dart';
@@ -48,6 +49,70 @@ import 'theme_data.dart';
 ///
 /// If the [onPressed] and [onLongPress] callbacks are null, then this
 /// button will be disabled, it will not react to touch.
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows how to render a disabled TextButton, an enabled TextButton
+/// and lastly a TextButton with gradient background.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Column(
+///       mainAxisSize: MainAxisSize.min,
+///       children: <Widget>[
+///         TextButton(
+///            style: TextButton.styleFrom(
+///              textStyle: const TextStyle(fontSize: 20),
+///            ),
+///            onPressed: null,
+///            child: const Text('Disabled'),
+///         ),
+///         const SizedBox(height: 30),
+///         TextButton(
+///           style: TextButton.styleFrom(
+///             textStyle: const TextStyle(fontSize: 20),
+///           ),
+///           onPressed: () {},
+///           child: const Text('Enabled'),
+///         ),
+///         const SizedBox(height: 30),
+///         ClipRRect(
+///           borderRadius: BorderRadius.circular(4),
+///           child: Stack(
+///             children: <Widget>[
+///               Positioned.fill(
+///                 child: Container(
+///                   decoration: const BoxDecoration(
+///                     gradient: LinearGradient(
+///                       colors: <Color>[
+///                         Color(0xFF0D47A1),
+///                         Color(0xFF1976D2),
+///                         Color(0xFF42A5F5),
+///                       ],
+///                     ),
+///                   ),
+///                 ),
+///               ),
+///               TextButton(
+///                 style: TextButton.styleFrom(
+///                   padding: const EdgeInsets.all(16.0),
+///                   primary: Colors.white,
+///                   textStyle: const TextStyle(fontSize: 20),
+///                 ),
+///                 onPressed: () {},
+///                  child: const Text('Gradient'),
+///               ),
+///             ],
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+///
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -137,6 +202,7 @@ class TextButton extends ButtonStyleButton {
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
     Size? minimumSize,
+    Size? fixedSize,
     BorderSide? side,
     OutlinedBorder? shape,
     MouseCursor? enabledMouseCursor,
@@ -146,6 +212,7 @@ class TextButton extends ButtonStyleButton {
     Duration? animationDuration,
     bool? enableFeedback,
     AlignmentGeometry? alignment,
+    InteractiveInkFeatureFactory? splashFactory,
   }) {
     final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
       ? null
@@ -166,6 +233,7 @@ class TextButton extends ButtonStyleButton {
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
+      fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
       mouseCursor: mouseCursor,
@@ -174,6 +242,7 @@ class TextButton extends ButtonStyleButton {
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
       alignment: alignment,
+      splashFactory: splashFactory,
     );
   }
 
@@ -219,6 +288,7 @@ class TextButton extends ButtonStyleButton {
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
+  /// * `fixedSize` - null
   /// * `side` - null
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
@@ -229,6 +299,7 @@ class TextButton extends ButtonStyleButton {
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
+  /// * `splashFactory` - InkRipple.splashFactory
   ///
   /// The default padding values for the [TextButton.icon] factory are slightly different:
   ///
@@ -271,6 +342,7 @@ class TextButton extends ButtonStyleButton {
       animationDuration: kThemeChangeDuration,
       enableFeedback: true,
       alignment: Alignment.center,
+      splashFactory: InkRipple.splashFactory,
     );
   }
 
@@ -371,7 +443,7 @@ class _TextButtonWithIcon extends TextButton {
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
+      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
     );
   }
 }

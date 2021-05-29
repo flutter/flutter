@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
@@ -84,9 +86,25 @@ class FlutterProject {
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   static FlutterProject current() => globals.projectFactory.fromDirectory(globals.fs.currentDirectory);
 
-  /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
-  /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject fromPath(String path) => globals.projectFactory.fromDirectory(globals.fs.directory(path));
+  /// Create a [FlutterProject] and bypass the project caching.
+  @visibleForTesting
+  static FlutterProject fromDirectoryTest(Directory directory, [Logger logger]) {
+    final FileSystem fileSystem = directory.fileSystem;
+    logger ??= BufferLogger.test();
+    final FlutterManifest manifest = FlutterProject._readManifest(
+      directory.childFile(bundle.defaultManifestPath).path,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    final FlutterManifest exampleManifest = FlutterProject._readManifest(
+      FlutterProject._exampleDirectory(directory)
+        .childFile(bundle.defaultManifestPath)
+        .path,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    return FlutterProject(directory, manifest, exampleManifest);
+  }
 
   /// The location of this project.
   final Directory directory;
@@ -152,6 +170,10 @@ class FlutterProject {
   WindowsProject _windows;
   WindowsProject get windows => _windows ??= WindowsProject._(this);
 
+  /// The Windows UWP sub project of this project.
+  WindowsUwpProject _windowUwp;
+  WindowsUwpProject get windowsUwp => _windowUwp ??= WindowsUwpProject._(this);
+
   /// The Fuchsia sub project of this project.
   FuchsiaProject _fuchsia;
   FuchsiaProject get fuchsia => _fuchsia ??= FuchsiaProject._(this);
@@ -198,6 +220,9 @@ class FlutterProject {
 
   /// True if this project is a Flutter module project.
   bool get isModule => manifest.isModule;
+
+  /// True if this project is a Flutter plugin project.
+  bool get isPlugin => manifest.isPlugin;
 
   /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => manifest.usesAndroidX;
@@ -254,6 +279,7 @@ class FlutterProject {
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
+      winUwpPlatform: featureFlags.isWindowsUwpEnabled && windowsUwp.existsSync(),
     );
   }
 
@@ -266,8 +292,9 @@ class FlutterProject {
     bool macOSPlatform = false,
     bool windowsPlatform = false,
     bool webPlatform = false,
+    bool winUwpPlatform = false,
   }) async {
-    if (!directory.existsSync() || hasExampleApp) {
+    if (!directory.existsSync() || hasExampleApp || isPlugin) {
       return;
     }
     await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
@@ -289,6 +316,9 @@ class FlutterProject {
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
+    if (winUwpPlatform) {
+      await windowsUwp.ensureReadyForPlatformSpecificTooling();
+    }
     await injectPlugins(
       this,
       androidPlatform: androidPlatform,
@@ -297,6 +327,7 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       webPlatform: webPlatform,
+      winUwpPlatform: winUwpPlatform,
     );
   }
 
@@ -407,7 +438,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppProjectName = 'Runner';
 
-  Directory get ephemeralDirectory => parent.directory.childDirectory('.ios');
+  Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
   /// This parent folder of `Runner.xcodeproj`.
@@ -415,7 +446,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     if (!isModule || _editableDirectory.existsSync()) {
       return _editableDirectory;
     }
-    return ephemeralDirectory;
+    return ephemeralModuleDirectory;
   }
 
   /// The root directory of the iOS wrapping of Flutter and plugins. This is the
@@ -424,13 +455,16 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   ///
   /// This is the same as [hostAppRoot] except when the project is
   /// a Flutter module with an editable host app.
-  Directory get _flutterLibRoot => isModule ? ephemeralDirectory : _editableDirectory;
+  Directory get _flutterLibRoot => isModule ? ephemeralModuleDirectory : _editableDirectory;
 
   /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
 
   /// Whether the flutter application has an iOS project.
   bool get exists => hostAppRoot.existsSync();
+
+  /// Put generated files here.
+  Directory get ephemeralDirectory => _flutterLibRoot.childDirectory('Flutter').childDirectory('ephemeral');
 
   @override
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
@@ -643,29 +677,29 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       return;
     }
     final bool pubspecChanged = globals.fsUtils.isOlderThanReference(
-      entity: ephemeralDirectory,
+      entity: ephemeralModuleDirectory,
       referenceFile: parent.pubspecFile,
     );
-    final bool toolingChanged = globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
+    final bool toolingChanged = globals.cache.isOlderThanToolsStamp(ephemeralModuleDirectory);
     if (!pubspecChanged && !toolingChanged) {
       return;
     }
 
-    _deleteIfExistsSync(ephemeralDirectory);
+    _deleteIfExistsSync(ephemeralModuleDirectory);
     await _overwriteFromTemplate(
       globals.fs.path.join('module', 'ios', 'library'),
-      ephemeralDirectory,
+      ephemeralModuleDirectory,
     );
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
       await _overwriteFromTemplate(
         globals.fs.path.join('module', 'ios', 'host_app_ephemeral'),
-        ephemeralDirectory,
+        ephemeralModuleDirectory,
       );
       if (hasPlugins(parent)) {
         await _overwriteFromTemplate(
           globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
-          ephemeralDirectory,
+          ephemeralModuleDirectory,
         );
       }
       // Use release mode so host project can link on bitcode variant.
@@ -687,7 +721,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       )
     );
     if (framework.existsSync()) {
-      globals.fsUtils.copyDirectorySync(
+      copyDirectory(
         framework,
         engineCopyDirectory.childDirectory('Flutter.xcframework'),
       );
@@ -738,7 +772,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
 
   Directory get engineCopyDirectory {
     return isModule
-        ? ephemeralDirectory.childDirectory('Flutter').childDirectory('engine')
+        ? ephemeralModuleDirectory.childDirectory('Flutter').childDirectory('engine')
         : hostAppRoot.childDirectory('Flutter');
   }
 
@@ -803,6 +837,31 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => parent.usesAndroidX;
+
+  /// Returns true if the current version of the Gradle plugin is supported.
+  bool get isSupportedVersion => _isSupportedVersion ??= _computeSupportedVersion();
+  bool _isSupportedVersion;
+
+  bool _computeSupportedVersion() {
+    final FileSystem fileSystem = hostAppGradleRoot.fileSystem;
+    final File plugin = hostAppGradleRoot.childFile(
+        fileSystem.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
+    if (plugin.existsSync()) {
+      return false;
+    }
+    final File appGradle = hostAppGradleRoot.childFile(
+        fileSystem.path.join('app', 'build.gradle'));
+    if (!appGradle.existsSync()) {
+      return false;
+    }
+    for (final String line in appGradle.readAsLinesSync()) {
+      if (line.contains(RegExp(r'apply from: .*/flutter.gradle')) ||
+          line.contains("def flutterPluginVersion = 'managed'")) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
@@ -898,7 +957,7 @@ to migrate your project.
       'library_new_embedding',
     ), ephemeralDirectory);
     await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
-    gradle.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
+    globals.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
@@ -1114,6 +1173,8 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   @override
   String get pluginConfigKey => WindowsPlugin.kConfigKey;
 
+  String get _childDirectory => 'windows';
+
   @override
   bool existsSync() => _editableDirectory.existsSync() && cmakeFile.existsSync();
 
@@ -1132,7 +1193,7 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   @override
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
-  Directory get _editableDirectory => parent.directory.childDirectory('windows');
+  Directory get _editableDirectory => parent.directory.childDirectory(_childDirectory);
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
@@ -1145,6 +1206,17 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
+}
+
+/// The Windows UWP version of the Windows project.
+class WindowsUwpProject extends WindowsProject {
+  WindowsUwpProject._(FlutterProject parent) : super._(parent);
+
+  @override
+  String get _childDirectory => 'winuwp';
+
+  /// Eventually this will be used to check if the user's unstable project needs to be regenerated.
+  int get projectVersion => int.tryParse(_editableDirectory.childFile('project_version').readAsStringSync());
 }
 
 /// The Linux sub project.

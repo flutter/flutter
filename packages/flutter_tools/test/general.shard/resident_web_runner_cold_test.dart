@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
-import 'package:dwds/dwds.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
@@ -21,44 +21,24 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
-import '../src/testbed.dart';
+import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
-  Testbed testbed;
   ResidentWebRunner residentWebRunner;
   MockFlutterDevice mockFlutterDevice;
   MockWebDevFS mockWebDevFS;
-  MockBuildSystem mockBuildSystem;
 
   setUp(() {
     mockWebDevFS = MockWebDevFS();
-    mockBuildSystem = MockBuildSystem();
     final MockWebDevice mockWebDevice = MockWebDevice();
     mockFlutterDevice = MockFlutterDevice();
     when(mockFlutterDevice.device).thenReturn(mockWebDevice);
     when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
     when(mockWebDevFS.sources).thenReturn(<Uri>[]);
-    when(mockBuildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
-      return BuildResult(success: true);
-    });
-    testbed = Testbed(
-      setup: () {
-        residentWebRunner = residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
-          mockFlutterDevice,
-          flutterProject: FlutterProject.current(),
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-          ipv6: true,
-          stayResident: true,
-          urlTunneller: null,
-        ) as ResidentWebRunner;
-      }, overrides: <Type, Generator>{
-        Pub: () => MockPub(),
-      }
-    );
   });
 
   void _setupMocks() {
@@ -66,9 +46,23 @@ void main() {
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
+    residentWebRunner = ResidentWebRunner(
+      mockFlutterDevice,
+      flutterProject: project,
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      ipv6: true,
+      stayResident: true,
+      urlTunneller: null,
+      featureFlags: TestFeatureFlags(),
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      systemClock: globals.systemClock,
+      usage: globals.flutterUsage,
+    );
   }
 
-  test('Can successfully run and connect without vmservice', () => testbed.run(() async {
+  testUsingContext('Can successfully run and connect without vmservice', () async {
     _setupMocks();
     final FakeStatusLogger fakeStatusLogger = globals.logger as FakeStatusLogger;
     final MockStatus mockStatus = MockStatus();
@@ -82,43 +76,37 @@ void main() {
     expect(debugConnectionInfo.wsUri, null);
     verify(mockStatus.stop()).called(1);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => mockBuildSystem,
-    Logger: () => FakeStatusLogger(BufferLogger(
-      terminal: AnsiTerminal(
-        stdio: null,
-        platform: const LocalPlatform(),
-      ),
-      outputPreferences: OutputPreferences.test(),
-    )),
-  }));
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    Logger: () => FakeStatusLogger(BufferLogger.test()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
-  test('ResidentWebRunner calls appFailedToStart if initial compilation fails', () => testbed.run(() async {
+  testUsingContext('ResidentWebRunner calls appFailedToStart if initial compilation fails', () async {
     _setupMocks();
-    when(mockBuildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
-      return BuildResult(success: false);
-    });
-    expect(() async => await residentWebRunner.run(), throwsToolExit());
-    expect(await residentWebRunner.waitForAppToFinish(), 1);
 
+    expect(() async => residentWebRunner.run(), throwsToolExit());
+    expect(await residentWebRunner.waitForAppToFinish(), 1);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => mockBuildSystem,
-  }));
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: false)),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
-  test('ResidentWebRunner calls appFailedToStart if error is thrown during startup', () => testbed.run(() async {
+  testUsingContext('ResidentWebRunner calls appFailedToStart if error is thrown during startup', () async {
     _setupMocks();
-    when(mockBuildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
-      throw Exception('foo');
-    });
-    expect(() async => await residentWebRunner.run(), throwsA(isA<Exception>()));
+
+    expect(() async => residentWebRunner.run(), throwsA(isA<Exception>()));
     expect(await residentWebRunner.waitForAppToFinish(), 1);
-
   }, overrides: <Type, Generator>{
-    BuildSystem: () => mockBuildSystem,
-  }));
+    BuildSystem: () => TestBuildSystem.error(Exception('foo')),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Can full restart after attaching', () => testbed.run(() async {
+  testUsingContext('Can full restart after attaching', () async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -129,28 +117,32 @@ void main() {
 
     expect(result.code, 0);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => mockBuildSystem,
-  }));
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Fails on compilation errors in hot restart', () => testbed.run(() async {
+  testUsingContext('Fails on compilation errors in hot restart', () async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    when(mockBuildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
-      return BuildResult(success: false);
-    });
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
     expect(result.code, 1);
     expect(result.message, contains('Failed to recompile application.'));
   }, overrides: <Type, Generator>{
-    BuildSystem: () => mockBuildSystem,
-  }));
+    BuildSystem: () => TestBuildSystem.list(<BuildResult>[
+      BuildResult(success: true),
+      BuildResult(success: false),
+    ]),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Correctly performs a full refresh on attached chrome device.', () => testbed.run(() async {
+  testUsingContext('Correctly performs a full refresh on attached chrome device.', () async {
     _setupMocks();
     final MockChromeDevice chromeDevice = MockChromeDevice();
     final MockChrome chrome = MockChrome();
@@ -182,15 +174,14 @@ void main() {
       'ignoreCache': true,
     })).called(1);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => mockBuildSystem,
-  }));
-
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
 
 class MockWebDevFS extends Mock implements WebDevFS {}
 class MockWebDevice extends Mock implements Device {}
-class MockDebugConnection extends Mock implements DebugConnection {}
-class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockChromeDevice extends Mock implements ChromiumDevice {}
@@ -198,6 +189,4 @@ class MockChrome extends Mock implements Chromium {}
 class MockChromeConnection extends Mock implements ChromeConnection {}
 class MockChromeTab extends Mock implements ChromeTab {}
 class MockWipConnection extends Mock implements WipConnection {}
-class MockBuildSystem extends Mock implements BuildSystem {}
-class MockPub extends Mock implements Pub {}
 class MockChromiumLauncher extends Mock implements ChromiumLauncher {}

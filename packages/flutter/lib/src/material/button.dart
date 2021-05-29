@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -331,9 +330,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     if (_pressed != value) {
       setState(() {
         _updateState(MaterialState.pressed, value);
-        if (widget.onHighlightChanged != null) {
-          widget.onHighlightChanged!(value);
-        }
+        widget.onHighlightChanged?.call(value);
       });
     }
   }

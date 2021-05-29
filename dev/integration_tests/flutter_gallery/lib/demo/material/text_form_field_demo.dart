@@ -26,6 +26,7 @@ class PersonData {
 
 class PasswordField extends StatefulWidget {
   const PasswordField({
+    Key? key,
     this.fieldKey,
     this.hintText,
     this.labelText,
@@ -33,7 +34,7 @@ class PasswordField extends StatefulWidget {
     this.onSaved,
     this.validator,
     this.onFieldSubmitted,
-  });
+  }) : super(key: key);
 
   final Key? fieldKey;
   final String? hintText;
@@ -142,7 +143,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     if (form == null || !_formWasEdited || form.validate())
       return true;
 
-    return await (showDialog<bool>(
+    return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -160,7 +161,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           ],
         );
       },
-    ) as Future<bool>);
+    ) as Future<bool>;
   }
 
   @override

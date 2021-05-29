@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -54,8 +56,6 @@ final Platform windowsPlatform = FakePlatform(
   }
 );
 
-class MockPlistUtils extends Mock implements PlistParser {}
-
 Platform macPlatform() {
   return FakePlatform(
     operatingSystem: 'macos',
@@ -98,10 +98,10 @@ void main() {
   group('pluginsPath on Mac', () {
     FileSystemUtils fsUtils;
     Platform platform;
-    MockPlistUtils plistUtils;
+    FakePlistUtils plistUtils;
 
     setUp(() {
-      plistUtils = MockPlistUtils();
+      plistUtils = FakePlistUtils();
       platform = macPlatform();
       fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
@@ -119,7 +119,7 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist4_1);
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
@@ -152,7 +152,7 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist);
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist;
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
@@ -174,6 +174,39 @@ void main() {
       PlistParser: () => plistUtils,
     });
 
+    testUsingContext('finds latest valid install', () {
+      final String applicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Applications',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(applicationPlistFolder).createSync(recursive: true);
+
+      final String applicationsPlistFilePath = globals.fs.path.join(applicationPlistFolder, 'Info.plist');
+      plistUtils.fileContents[applicationsPlistFilePath] = macStudioInfoPlist;
+
+      final String homeDirectoryPlistFolder = globals.fs.path.join(
+        globals.fsUtils.homeDirPath,
+        'Applications',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(homeDirectoryPlistFolder).createSync(recursive: true);
+
+      final String homeDirectoryPlistFilePath = globals.fs.path.join(homeDirectoryPlistFolder, 'Info.plist');
+      plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist4_1;
+
+      expect(AndroidStudio.allInstalled().length, 2);
+      expect(AndroidStudio.latestValid().version, Version(4, 1, 0));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
+
     testUsingContext('extracts custom paths for directly downloaded Android Studio on Mac', () {
       final String studioInApplicationPlistFolder = globals.fs.path.join(
         '/',
@@ -184,7 +217,7 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist);
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist;
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
@@ -224,7 +257,7 @@ void main() {
         jetbrainsStudioInApplicationPlistFolder,
         'Info.plist',
       );
-      when(plistUtils.parseFile(jetbrainsPlistFilePath)).thenReturn(jetbrainsInfoPlist);
+      plistUtils.fileContents[jetbrainsPlistFilePath] = jetbrainsInfoPlist;
 
       final String studioInApplicationPlistFolder = globals.fs.path.join(
         globals.fs.path.join(homeMac,'Library','Application Support'),
@@ -241,7 +274,7 @@ void main() {
         studioInApplicationPlistFolder,
         'Info.plist',
       );
-      when(plistUtils.parseFile(studioPlistFilePath)).thenReturn(macStudioInfoPlist);
+      plistUtils.fileContents[studioPlistFilePath] = macStudioInfoPlist;
 
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(jetbrainsStudioInApplicationPlistFolder)?.parent?.path,
@@ -287,4 +320,123 @@ void main() {
     FileSystem: () => windowsFileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
+
+  testUsingContext('Does not discover Android Studio 4.1 location on Windows if LOCALAPPDATA is null', () {
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+    windowsFileSystem
+      .directory(r'C:\Program Files\AndroidStudio')
+      .createSync(recursive: true);
+
+    expect(AndroidStudio.allInstalled(), isEmpty);
+  }, overrides: <Type, Generator>{
+    Platform: () => FakePlatform(
+      operatingSystem: 'windows',
+      environment: <String, String>{}, // Does not include LOCALAPPDATA
+    ),
+    FileSystem: () => windowsFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  group('Installation detection on Linux', () {
+    FileSystemUtils fsUtils;
+
+    setUp(() {
+      fsUtils = FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: linuxPlatform,
+      );
+    });
+
+    testUsingContext('Discover Android Studio <4.1', () {
+      const String studioHomeFilePath =
+          '$homeLinux/.AndroidStudio4.0/system/.home';
+      const String studioInstallPath = '$homeLinux/AndroidStudio';
+
+      globals.fs.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
+
+      globals.fs.directory(studioInstallPath).createSync();
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, Version(4, 0, 0));
+      expect(studio.studioAppName, 'AndroidStudio');
+      expect(
+        studio.pluginsPath,
+        '/home/me/.AndroidStudio4.0/config/plugins',
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Discover Android Studio >=4.1', () {
+      const String studioHomeFilePath =
+          '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
+      const String studioInstallPath = '$homeLinux/AndroidStudio';
+
+      globals.fs.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
+
+      globals.fs.directory(studioInstallPath).createSync();
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, Version(4, 1, 0));
+      expect(studio.studioAppName, 'AndroidStudio');
+      expect(
+        studio.pluginsPath,
+        '/home/me/.local/share/Google/AndroidStudio4.1',
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Discover when installed with Toolbox', () {
+      const String studioHomeFilePath =
+          '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
+      const String studioInstallPath =
+          '$homeLinux/.local/share/JetBrains/Toolbox/apps/AndroidStudio/ch-0/201.7042882';
+      const String pluginsInstallPath = '$studioInstallPath.plugins';
+
+      globals.fs.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
+
+      globals.fs.directory(studioInstallPath).createSync(recursive: true);
+      globals.fs.directory(pluginsInstallPath).createSync();
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, Version(4, 1, 0));
+      expect(studio.studioAppName, 'AndroidStudio');
+      expect(
+        studio.pluginsPath,
+        pluginsInstallPath,
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
+}
+
+class FakePlistUtils extends Fake implements PlistParser {
+  final Map<String, Map<String, dynamic>> fileContents = <String, Map<String, dynamic>>{};
+
+  @override
+  Map<String, dynamic> parseFile(String plistFilePath) {
+    return fileContents[plistFilePath];
+  }
 }

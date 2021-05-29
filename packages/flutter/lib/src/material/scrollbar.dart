@@ -4,7 +4,6 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
 import 'material_state.dart';
@@ -35,7 +34,54 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// [showTrackOnHover]. The thickness of the track and scrollbar thumb will
 /// become larger when hovering, unless overridden by [hoverThickness].
 ///
-// TODO(Piinks): Add code sample
+/// {@tool dartpad --template=stateless_widget_scaffold}
+/// This sample shows a [Scrollbar] that executes a fade animation as scrolling occurs.
+/// The Scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scrollbar(
+///     child: GridView.builder(
+///       itemCount: 120,
+///       gridDelegate:
+///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+///       itemBuilder: (BuildContext context, int index) {
+///         return Center(
+///           child: Text('item $index'),
+///         );
+///       },
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+/// When isAlwaysShown is true, the scrollbar thumb will remain visible without the
+/// fade animation. This requires that a ScrollController is provided to controller,
+/// or that the PrimaryScrollController is available.
+/// ```dart
+/// final ScrollController _controllerOne = ScrollController();
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scrollbar(
+///     controller: _controllerOne,
+///     isAlwaysShown: true,
+///     child: GridView.builder(
+///       controller: _controllerOne,
+///       itemCount: 120,
+///       gridDelegate:
+///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+///       itemBuilder: (BuildContext context, int index) {
+///         return Center(
+///           child: Text('item $index'),
+///         );
+///       },
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -70,6 +116,7 @@ class Scrollbar extends StatefulWidget {
     this.thickness,
     this.radius,
     this.notificationPredicate,
+    this.interactive,
   }) : super(key: key);
 
   /// {@macro flutter.widgets.Scrollbar.child}
@@ -104,13 +151,16 @@ class Scrollbar extends StatefulWidget {
   /// default thickness of 8.0 pixels.
   final double? thickness;
 
-  /// The color of the scrollbar thumb.
+  /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
   ///
   /// If null, the default value is platform dependent. On [TargetPlatform.android],
   /// no radius is applied to the scrollbar thumb. On [TargetPlatform.iOS],
   /// [CupertinoScrollbar.defaultRadius] is used. The remaining platforms have a
   /// default [Radius.circular] of 8.0 pixels.
   final Radius? radius;
+
+  /// {@macro flutter.widgets.Scrollbar.interactive}
+  final bool? interactive;
 
   /// {@macro flutter.widgets.Scrollbar.notificationPredicate}
   final ScrollNotificationPredicate? notificationPredicate;
@@ -145,6 +195,7 @@ class _ScrollbarState extends State<Scrollbar> {
       thickness: widget.thickness,
       radius: widget.radius,
       notificationPredicate: widget.notificationPredicate,
+      interactive: widget.interactive,
     );
   }
 }
@@ -160,6 +211,7 @@ class _MaterialScrollbar extends RawScrollbar {
     double? thickness,
     Radius? radius,
     ScrollNotificationPredicate? notificationPredicate,
+    bool? interactive,
   }) : super(
          key: key,
          child: child,
@@ -171,6 +223,7 @@ class _MaterialScrollbar extends RawScrollbar {
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: Duration.zero,
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
+         interactive: interactive,
        );
 
   final bool? showTrackOnHover;
@@ -192,6 +245,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   @override
   bool get showScrollbar => widget.isAlwaysShown ?? _scrollbarTheme.isAlwaysShown ?? false;
 
+  @override
+  bool get enableGestures => widget.interactive ?? _scrollbarTheme.interactive ?? !_useAndroidScrollbar;
+
   bool get _showTrackOnHover => widget.showTrackOnHover ?? _scrollbarTheme.showTrackOnHover ?? false;
 
   Set<MaterialState> get _states => <MaterialState>{
@@ -209,12 +265,16 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       case Brightness.light:
         dragColor = onSurface.withOpacity(0.6);
         hoverColor = onSurface.withOpacity(0.5);
-        idleColor = onSurface.withOpacity(0.1);
+        idleColor = _useAndroidScrollbar
+          ? Theme.of(context).highlightColor.withOpacity(1.0)
+          : onSurface.withOpacity(0.1);
         break;
       case Brightness.dark:
         dragColor = onSurface.withOpacity(0.75);
         hoverColor = onSurface.withOpacity(0.65);
-        idleColor = onSurface.withOpacity(0.3);
+        idleColor = _useAndroidScrollbar
+          ? Theme.of(context).highlightColor.withOpacity(1.0)
+          : onSurface.withOpacity(0.3);
         break;
     }
 
@@ -339,7 +399,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   void handleHover(PointerHoverEvent event) {
     super.handleHover(event);
     // Check if the position of the pointer falls over the painted scrollbar
-    if (isPointerOverScrollbar(event.position)) {
+    if (isPointerOverScrollbar(event.position, event.kind)) {
       // Pointer is hovering over the scrollbar
       setState(() { _hoverIsActive = true; });
       _hoverAnimationController.forward();

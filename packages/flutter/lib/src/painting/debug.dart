@@ -13,6 +13,12 @@ import 'package:flutter/foundation.dart';
 /// This is useful when writing golden file tests (see [matchesGoldenFile]) since
 /// the rendering of shadows is not guaranteed to be pixel-for-pixel identical from
 /// version to version (or even from run to run).
+///
+/// In those tests, this is usually set to false at the beginning of a test and back
+/// to true before the end of the test case.
+///
+/// If it remains true when the test ends, an exception is thrown to avoid state
+/// leaking from one test case to another.
 bool debugDisableShadows = false;
 
 /// Signature for a method that returns an [HttpClient].

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -24,6 +26,9 @@ import 'visual_studio.dart';
 // future major versions of Visual Studio.
 const String _cmakeVisualStudioGeneratorIdentifier = 'Visual Studio 16 2019';
 
+/// Update the string when non-backwards compatible changes are made to the UWP template.
+const int kCurrentUwpTemplateVersion = 0;
+
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String target,
@@ -33,7 +38,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
       'No Windows desktop project configured. See '
-      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding Windows support to a project.');
   }
 
@@ -108,6 +113,56 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   }
 }
 
+/// Build the Windows UWP project.
+///
+/// Note that this feature is currently unfinished.
+Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildInfo, {
+  String target,
+  VisualStudio visualStudioOverride,
+}) async {
+  if (!windowsProject.existsSync()) {
+    throwToolExit(
+      'No Windows UWP desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding Windows support to a project.',
+    );
+  }
+  if (windowsProject.projectVersion != kCurrentUwpTemplateVersion) {
+    throwToolExit(
+      'The Windows UWP project template and build process has changed. In order to build '
+      'you must delete the winuwp directory and re-create the project.',
+    );
+  }
+   // Ensure that necessary ephemeral files are generated and up to date.
+  _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
+  createPluginSymlinks(windowsProject.parent);
+
+  final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio(
+    fileSystem: globals.fs,
+    platform: globals.platform,
+    logger: globals.logger,
+    processManager: globals.processManager,
+  );
+  final String cmakePath = visualStudio.cmakePath;
+  if (cmakePath == null) {
+    throwToolExit('Unable to find suitable Visual Studio toolchain. '
+        'Please run `flutter doctor` for more details.');
+  }
+
+  final Directory buildDirectory = globals.fs.directory(getWindowsBuildUwpDirectory());
+  final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
+  final Status status = globals.logger.startProgress(
+    'Building Windows application...',
+  );
+  try {
+    await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
+    await _runBuild(cmakePath, buildDirectory, buildModeName, install: false);
+  } finally {
+    status.cancel();
+  }
+  throwToolExit('Windows UWP builds are not implemented.');
+}
+
 Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory sourceDir) async {
   final Stopwatch sw = Stopwatch()..start();
 
@@ -135,7 +190,12 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory
   globals.flutterUsage.sendTiming('build', 'windows-cmake-generation', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
-Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeName) async {
+Future<void> _runBuild(
+  String cmakePath,
+  Directory buildDir,
+  String buildModeName,
+  { bool install = true }
+) async {
   final Stopwatch sw = Stopwatch()..start();
 
   // MSBuild sends all output to stdout, including build errors. This surfaces
@@ -151,8 +211,8 @@ Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeNam
         buildDir.path,
         '--config',
         toTitleCase(buildModeName),
-        '--target',
-        'INSTALL',
+        if (install)
+          ...<String>['--target', 'INSTALL'],
         if (globals.logger.isVerbose)
           '--verbose'
       ],

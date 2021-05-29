@@ -53,7 +53,7 @@ task printEngineMavenUrl() {
           '$mavenUrl instead');
         }
 
-        section('Checking overriden maven URL');
+        section('Checking overridden maven URL');
         mavenUrl = await eval(
           gradlewExecutable,
           <String>['printEngineMavenUrl', '-q'],
@@ -63,7 +63,7 @@ task printEngineMavenUrl() {
         );
 
         if (mavenUrl != 'https://my.special.proxy/download.flutter.io') {
-          throw TaskResult.failure('Expected overriden Android engine maven '
+          throw TaskResult.failure('Expected overridden Android engine maven '
           'dependency URL to resolve to proxy location '
           'https://my.special.proxy/download.flutter.io. Got '
           '$mavenUrl instead');

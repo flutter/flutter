@@ -12,7 +12,7 @@ import 'common.dart';
 /// Example Integration Test which can also run WebDriver command depending on
 /// the requests coming from the test methods.
 Future<void> integrationDriver(
-    {FlutterDriver driver, Function onScreenshot}) async {
+    {FlutterDriver? driver, Function? onScreenshot}) async {
   driver ??= await FlutterDriver.connect();
   // Test states that it's waiting on web driver commands.
   // [DriverTestMessage] is converted to string since json format causes an
@@ -24,15 +24,15 @@ Future<void> integrationDriver(
   // Until `integration_test` returns a [WebDriverCommandType.noop], keep
   // executing WebDriver commands.
   while (response.data != null &&
-      response.data['web_driver_command'] != null &&
-      response.data['web_driver_command'] != '${WebDriverCommandType.noop}') {
-    final String webDriverCommand = response.data['web_driver_command'] as String;
+      response.data!['web_driver_command'] != null &&
+      response.data!['web_driver_command'] != '${WebDriverCommandType.noop}') {
+    final String? webDriverCommand = response.data!['web_driver_command'] as String?;
     if (webDriverCommand == '${WebDriverCommandType.screenshot}') {
       // Use `driver.screenshot()` method to get a screenshot of the web page.
       final List<int> screenshotImage = await driver.screenshot();
-      final String screenshotName = response.data['screenshot_name'] as String;
+      final String? screenshotName = response.data!['screenshot_name'] as String?;
 
-      final bool screenshotSuccess = await onScreenshot(screenshotName, screenshotImage) as bool;
+      final bool screenshotSuccess = await onScreenshot!(screenshotName, screenshotImage) as bool;
       if (screenshotSuccess) {
         jsonResponse = await driver.requestData(DriverTestMessage.complete().toString());
       } else {
@@ -54,9 +54,9 @@ Future<void> integrationDriver(
 
   // If No-op command is sent, ask for the result of all tests.
   if (response.data != null &&
-      response.data['web_driver_command'] != null &&
-      response.data['web_driver_command'] == '${WebDriverCommandType.noop}') {
-    jsonResponse = await driver.requestData(null);
+      response.data!['web_driver_command'] != null &&
+      response.data!['web_driver_command'] == '${WebDriverCommandType.noop}') {
+    jsonResponse = await driver.requestData('');
 
     response = Response.fromJson(jsonResponse);
     print('result $jsonResponse');

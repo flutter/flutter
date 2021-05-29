@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/flutter_cache.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -19,6 +23,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 final Platform _kNoColorTerminalPlatform = FakePlatform(stdoutSupportsAnsi: false);
 
@@ -109,13 +114,20 @@ void main() {
     processManager = const LocalProcessManager();
     platform = const LocalPlatform();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
-    fileSystem = LocalFileSystem.instance;
+    fileSystem = globals.localFileSystem;
     logger = BufferLogger.test();
     analyzerSeparator = platform.isWindows ? '-' : '•';
+    final OperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     artifacts = CachedArtifacts(
-      cache: globals.cache,
+      cache: FlutterCache(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        osUtils: operatingSystemUtils,
+      ),
       fileSystem: fileSystem,
       platform: platform,
+      operatingSystemUtils: operatingSystemUtils,
     );
     Cache.flutterRoot = Cache.defaultFlutterRoot(
       fileSystem: fileSystem,

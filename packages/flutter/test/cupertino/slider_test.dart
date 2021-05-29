@@ -59,7 +59,7 @@ void main() {
     );
 
     expect(value, equals(0.0));
-    await tester.tap(find.byKey(sliderKey));
+    await tester.tap(find.byKey(sliderKey), warnIfMissed: false);
     expect(value, equals(0.0));
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
@@ -95,7 +95,7 @@ void main() {
     );
 
     expect(value, equals(0.0));
-    await tester.tap(find.byKey(sliderKey));
+    await tester.tap(find.byKey(sliderKey), warnIfMissed: false);
     expect(value, equals(0.0));
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure

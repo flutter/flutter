@@ -5,12 +5,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
-import 'colors.dart';
 import 'floating_action_button_theme.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -70,14 +68,14 @@ class _DefaultHeroTag {
 ///     appBar: AppBar(
 ///       title: const Text('Floating Action Button'),
 ///     ),
-///     body: Center(
-///       child: const Text('Press the button below!')
+///     body: const Center(
+///       child: Text('Press the button below!')
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
 ///       onPressed: () {
 ///         // Add your onPressed code here!
 ///       },
-///       child: Icon(Icons.navigation),
+///       child: const Icon(Icons.navigation),
 ///       backgroundColor: Colors.green,
 ///     ),
 ///   );
@@ -98,15 +96,15 @@ class _DefaultHeroTag {
 ///     appBar: AppBar(
 ///       title: const Text('Floating Action Button Label'),
 ///     ),
-///     body: Center(
-///       child: const Text('Press the button with a label below!'),
+///     body: const Center(
+///       child: Text('Press the button with a label below!'),
 ///     ),
 ///     floatingActionButton: FloatingActionButton.extended(
 ///       onPressed: () {
 ///         // Add your onPressed code here!
 ///       },
-///       label: Text('Approve'),
-///       icon: Icon(Icons.thumb_up),
+///       label: const Text('Approve'),
+///       icon: const Icon(Icons.thumb_up),
 ///       backgroundColor: Colors.pink,
 ///     ),
 ///   );
@@ -243,11 +241,6 @@ class FloatingActionButton extends StatelessWidget {
   /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
   /// null, then the [ColorScheme.onSecondary] color of [ThemeData.colorScheme]
   /// is used.
-  ///
-  /// Although the color of theme's `accentIconTheme` currently provides a
-  /// default that supersedes the `onSecondary` color, this dependency
-  /// has been deprecated:  https://flutter.dev/go/remove-fab-accent-theme-dependency.
-  /// It will be removed in the future.
   final Color? foregroundColor;
 
   /// The button's background color.
@@ -429,25 +422,6 @@ class FloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
-
-    // Applications should no longer use accentIconTheme's color to configure
-    // the foreground color of floating action buttons. For more information, see
-    // https://flutter.dev/go/remove-fab-accent-theme-dependency.
-    if (this.foregroundColor == null && floatingActionButtonTheme.foregroundColor == null) {
-      final bool accentIsDark = theme.accentColorBrightness == Brightness.dark;
-      final Color defaultAccentIconThemeColor = accentIsDark ? Colors.white : Colors.black;
-      if (theme.accentIconTheme.color != defaultAccentIconThemeColor) {
-        debugPrint(
-          'Warning: '
-          'The support for configuring the foreground color of '
-          'FloatingActionButtons using ThemeData.accentIconTheme '
-          'has been deprecated. Please use ThemeData.floatingActionButtonTheme '
-          'instead. See '
-          'https://flutter.dev/go/remove-fab-accent-theme-dependency. '
-          'This feature was deprecated after v1.13.2.'
-        );
-      }
-    }
 
     final Color foregroundColor = this.foregroundColor
       ?? floatingActionButtonTheme.foregroundColor

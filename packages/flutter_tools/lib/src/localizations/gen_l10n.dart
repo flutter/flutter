@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
@@ -64,6 +66,7 @@ void generateLocalizations({
         useSyntheticPackage: options.useSyntheticPackage ?? true,
         areResourceAttributesRequired: options.areResourceAttributesRequired ?? false,
         untranslatedMessagesFile: options?.untranslatedMessagesFile?.toFilePath(),
+        usesNullableGetter: options?.usesNullableGetter ?? true,
       )
       ..loadResources()
       ..writeOutputFiles(logger, isFromYaml: true);
@@ -144,13 +147,24 @@ String generateNumberFormattingLogic(Message message) {
       }
       final Iterable<String> parameters =
         placeholder.optionalParameters.map<String>((OptionalParameter parameter) {
-          return '${parameter.name}: ${parameter.value}';
+          if (parameter.value is num) {
+            return '${parameter.name}: ${parameter.value}';
+          } else {
+            return '${parameter.name}: ${generateString(parameter.value.toString())}';
+          }
         },
       );
-      return numberFormatTemplate
-        .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', placeholder.format)
-        .replaceAll('@(parameters)', parameters.join(',    \n'));
+
+      if (placeholder.hasNumberFormatWithParameters) {
+        return numberFormatNamedTemplate
+            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(format)', placeholder.format)
+            .replaceAll('@(parameters)', parameters.join(',\n      '));
+      } else {
+        return numberFormatPositionalTemplate
+            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(format)', placeholder.format);
+      }
     });
 
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
@@ -187,7 +201,7 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
     '=2': 'two',
     'few': 'few',
     'many': 'many',
-    'other': 'other'
+    'other': 'other',
   };
 
   final List<String> pluralLogicArgs = <String>[];
@@ -198,9 +212,19 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
       String argValue = generateString(match.group(2));
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
+          argValue = argValue.replaceAll(
+            '#${placeholder.name}#',
+            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
+              ? '\${${placeholder.name}String}'
+              : '\$${placeholder.name}String'
+          );
         } else {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
+          argValue = argValue.replaceAll(
+            '#${placeholder.name}#',
+            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
+              ? '\${${placeholder.name}}'
+              : '\$${placeholder.name}'
+          );
         }
       }
       pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
@@ -225,14 +249,61 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(none)\n', '');
 }
 
+bool _needsCurlyBracketStringInterpolation(String messageString, String placeholder) {
+  final int placeholderIndex = messageString.indexOf(placeholder);
+  // This means that this message does not contain placeholders/parameters,
+  // since one was not found in the message.
+  if (placeholderIndex == -1) {
+    return false;
+  }
+
+  final bool isPlaceholderEndOfSubstring = placeholderIndex + placeholder.length + 2 == messageString.length;
+
+  if (placeholderIndex > 2 && !isPlaceholderEndOfSubstring) {
+    // Normal case
+    // Examples:
+    // "'The number of {hours} elapsed is: 44'" // no curly brackets.
+    // "'哈{hours}哈'" // no curly brackets.
+    // "'m#hours#m'" // curly brackets.
+    // "'I have to work _#hours#_' sometimes." // curly brackets.
+    final RegExp commonCaseRE = RegExp('[^a-zA-Z_][#{]$placeholder[#}][^a-zA-Z_]');
+    return !commonCaseRE.hasMatch(messageString);
+  } else if (placeholderIndex == 2) {
+    // Example:
+    // "'{hours} elapsed.'" // no curly brackets
+    // '#placeholder# ' // no curly brackets
+    // '#placeholder#m' // curly brackets
+    final RegExp startOfString = RegExp('[#{]$placeholder[#}][^a-zA-Z_]');
+    return !startOfString.hasMatch(messageString);
+  } else {
+    // Example:
+    // "'hours elapsed: {hours}'"
+    // "'Time elapsed: {hours}'" // no curly brackets
+    // ' #placeholder#' // no curly brackets
+    // 'm#placeholder#' // curly brackets
+    final RegExp endOfString = RegExp('[^a-zA-Z_][#{]$placeholder[#}]');
+    return !endOfString.hasMatch(messageString);
+  }
+}
+
 String generateMethod(Message message, AppResourceBundle bundle) {
   String generateMessage() {
     String messageValue = generateString(bundle.translationFor(message));
     for (final Placeholder placeholder in message.placeholders) {
       if (placeholder.requiresFormatting) {
-        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}String}');
+        messageValue = messageValue.replaceAll(
+          '{${placeholder.name}}',
+          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
+            ? '\${${placeholder.name}String}'
+            : '\$${placeholder.name}String'
+        );
       } else {
-        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
+        messageValue = messageValue.replaceAll(
+          '{${placeholder.name}}',
+          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
+            ? '\${${placeholder.name}}'
+            : '\$${placeholder.name}'
+        );
       }
     }
 
@@ -407,13 +478,13 @@ String _generateLookupBody(
   bool useDeferredLoading,
   String fileName,
 ) {
-  final String Function(LocaleInfo) generateSwitchClauseTemplate = (LocaleInfo locale) {
+  String generateSwitchClauseTemplate(LocaleInfo locale) {
     return (useDeferredLoading ?
       switchClauseDeferredLoadingTemplate : switchClauseTemplate)
       .replaceAll('@(localeClass)', '$className${locale.camelCase()}')
       .replaceAll('@(appClass)', className)
       .replaceAll('@(library)', '${fileName}_${locale.languageCode}');
-  };
+  }
   return lookupBodyTemplate
     .replaceAll('@(lookupAllCodesSpecified)', _generateLookupByAllCodes(
       allBundles,
@@ -475,6 +546,10 @@ class LocalizationsGenerator {
   AppResourceBundleCollection _allBundles;
   LocaleInfo _templateArbLocale;
   bool _useSyntheticPackage = true;
+  // Used to decide if the generated code is nullable or not
+  // (whether AppLocalizations? or AppLocalizations is returned from
+  // `static {name}Localizations{?} of (BuildContext context))`
+  bool _usesNullableGetter = true;
 
   /// The directory that contains the project's arb files, as well as the
   /// header file, if specified.
@@ -619,8 +694,10 @@ class LocalizationsGenerator {
     String projectPathString,
     bool areResourceAttributesRequired = false,
     String untranslatedMessagesFile,
+    bool usesNullableGetter = true,
   }) {
     _useSyntheticPackage = useSyntheticPackage;
+    _usesNullableGetter = usesNullableGetter;
     setProjectDir(projectPathString);
     setInputDirectory(inputPathString);
     setOutputDirectory(outputPathString ?? inputPathString);
@@ -951,7 +1028,8 @@ class LocalizationsGenerator {
       .replaceAll('@(fileName)', fileName)
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
-      .replaceAll('@(methods)', methods.join('\n\n'));
+      .replaceAll('@(methods)', methods.join('\n\n'))
+      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '');
   }
 
   String _generateSubclass(
@@ -1090,8 +1168,14 @@ class LocalizationsGenerator {
       .replaceAll('@(supportedLocales)', supportedLocalesCode.join(',\n    '))
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
-      .replaceAll('@(delegateClass)', delegateClass);
+      .replaceAll('@(delegateClass)', delegateClass)
+      .replaceAll('@(requiresFoundationImport)', _useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
+      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '')
+      .replaceAll('@(canBeNullable)', _usesNullableGetter ? '?' : '')
+      .replaceAll('@(needsNullCheck)', _usesNullableGetter ? '' : '!');
   }
+
+  bool _containsPluralMessage() => _allMessages.any((Message message) => message.isPlural);
 
   void writeOutputFiles(Logger logger, { bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.

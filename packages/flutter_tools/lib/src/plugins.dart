@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
@@ -1001,7 +1003,7 @@ List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
 }
 
 Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
-  final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
   final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'windows',
@@ -1010,6 +1012,21 @@ Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugi
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
   await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context);
+}
+
+/// The tooling does not currently support any UWP plugins.
+///
+/// Always generates an empty file to satisfy the cmake template.
+Future<void> _writeWindowsUwpPluginFiles(FlutterProject project, List<Plugin> plugins) async {
+  final List<Plugin> nativePlugins = <Plugin>[];
+  final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
+  final Map<String, dynamic> context = <String, dynamic>{
+    'os': 'windows',
+    'plugins': windowsPlugins,
+    'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windowsUwp),
+  };
+  await _writeCppPluginRegistrant(project.windowsUwp.managedDirectory, context);
+  await _writePluginCmakefile(project.windowsUwp.generatedPluginCmakeFile, context);
 }
 
 Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
@@ -1073,6 +1090,13 @@ void createPluginSymlinks(FlutterProject project, {bool force = false}) {
     _createPlatformPluginSymlinks(
       project.linux.pluginSymlinkDirectory,
       platformPlugins[project.linux.pluginConfigKey] as List<dynamic>,
+      force: force,
+    );
+  }
+  if (featureFlags.isWindowsUwpEnabled && project.windowsUwp.existsSync()) {
+    _createPlatformPluginSymlinks(
+      project.windowsUwp.pluginSymlinkDirectory,
+      <dynamic>[],
       force: force,
     );
   }
@@ -1168,6 +1192,7 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
+  bool winUwpPlatform = false,
   bool webPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
@@ -1187,6 +1212,9 @@ Future<void> injectPlugins(
   }
   if (windowsPlatform) {
     await _writeWindowsPluginFiles(project, plugins);
+  }
+  if (winUwpPlatform) {
+    await _writeWindowsUwpPluginFiles(project, plugins);
   }
   if (!project.isModule) {
     final List<XcodeBasedProject> darwinProjects = <XcodeBasedProject>[

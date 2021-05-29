@@ -45,7 +45,8 @@ class AppBarTheme with Diagnosticable {
     this.backwardsCompatibility,
   }) : assert(
          color == null || backgroundColor == null,
-         'The color and backgroundColor parameters mean the same thing. Only specify one.'),
+         'The color and backgroundColor parameters mean the same thing. Only specify one.',
+       ),
        backgroundColor = backgroundColor ?? color;
 
   /// This property is obsolete, please use [systemOverlayStyle] instead.
@@ -190,7 +191,8 @@ class AppBarTheme with Diagnosticable {
   }) {
     assert(
       color == null || backgroundColor == null,
-      'The color and backgroundColor parameters mean the same thing. Only specify one.');
+      'The color and backgroundColor parameters mean the same thing. Only specify one.',
+    );
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
       backgroundColor: backgroundColor ?? color ?? this.backgroundColor,

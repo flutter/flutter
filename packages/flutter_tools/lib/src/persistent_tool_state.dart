@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import 'base/config.dart';
@@ -53,7 +55,7 @@ abstract class PersistentToolState {
   /// Whether this client was already determined to be or not be a bot.
   bool isRunningOnBot;
 
-  /// The last time the the DevTools package was activated from pub.
+  /// The last time the DevTools package was activated from pub.
   DateTime lastDevToolsActivationTime;
 }
 
@@ -74,7 +76,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
     @required Directory directory,
     @required Logger logger,
   }) : _config = Config.test(
-      _kFileName,
+      name: _kFileName,
       directory: directory,
       logger: logger,
     );

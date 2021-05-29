@@ -5,8 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/services/keyboard_key.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
@@ -70,7 +68,6 @@ void main() {
         LogicalKeyboardKey.keyC,
         LogicalKeyboardKey.keyD,
       );
-      // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
       final LogicalKeySet setFromSet = LogicalKeySet.fromSet(<LogicalKeyboardKey>{
         LogicalKeyboardKey.keyA,
         LogicalKeyboardKey.keyB,
@@ -126,7 +123,6 @@ void main() {
         LogicalKeyboardKey.keyB,
         LogicalKeyboardKey.keyA,
       );
-      // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
       final LogicalKeySet set4 = LogicalKeySet.fromSet(<LogicalKeyboardKey>{
         LogicalKeyboardKey.keyD,
         LogicalKeyboardKey.keyC,
@@ -142,7 +138,6 @@ void main() {
       expect(map.containsKey(LogicalKeySet(LogicalKeyboardKey.keyA)), isTrue);
       expect(
           set2,
-          // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
           equals(LogicalKeySet.fromSet(<LogicalKeyboardKey>{
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,
@@ -223,7 +218,7 @@ void main() {
           },
           child: Focus(
             autofocus: true,
-            child: Container(key: containerKey, width: 100, height: 100),
+            child: SizedBox(key: containerKey, width: 100, height: 100),
           ),
         ),
       );
@@ -284,7 +279,7 @@ void main() {
             },
             child: Focus(
               autofocus: true,
-              child: Container(key: containerKey, width: 100, height: 100),
+              child: SizedBox(key: containerKey, width: 100, height: 100),
             ),
           ),
         ),
@@ -321,7 +316,7 @@ void main() {
               },
               child: Focus(
                 autofocus: true,
-                child: Container(key: containerKey, width: 100, height: 100),
+                child: SizedBox(key: containerKey, width: 100, height: 100),
               ),
             ),
           ),
@@ -360,7 +355,7 @@ void main() {
                 },
                 child: Focus(
                   autofocus: true,
-                  child: Container(key: containerKey, width: 100, height: 100),
+                  child: SizedBox(key: containerKey, width: 100, height: 100),
                 ),
               ),
             ),

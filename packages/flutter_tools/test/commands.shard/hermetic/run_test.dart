@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -9,7 +11,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -32,8 +33,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart';
-import '../../src/testbed.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   group('run', () {
@@ -144,16 +144,14 @@ void main() {
       MemoryFileSystem fs;
       Artifacts artifacts;
       MockCache mockCache;
-      MockProcessManager mockProcessManager;
-      Usage usage;
+      TestUsage usage;
       Directory tempDir;
 
       setUp(() {
         artifacts = Artifacts.test();
         mockCache = MockCache();
-        usage = Usage.test();
+        usage = TestUsage();
         fs = MemoryFileSystem.test();
-        mockProcessManager = MockProcessManager();
 
         tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');
         fs.currentDirectory = tempDir;
@@ -200,7 +198,7 @@ void main() {
       }, overrides: <Type, Generator>{
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('fails when targeted device is not Android with --device-user', () async {
@@ -231,7 +229,7 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         DeviceManager: () => mockDeviceManager,
-        Stdio: () => MockStdio(),
+        Stdio: () => FakeStdio(),
       });
 
       testUsingContext('shows unsupported devices when no supported devices are found',  () async {
@@ -288,7 +286,7 @@ void main() {
       }, overrides: <Type, Generator>{
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('updates cache before checking for devices', () async {
@@ -332,7 +330,7 @@ void main() {
         Cache: () => mockCache,
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('passes device target platform to usage', () async {
@@ -372,25 +370,24 @@ void main() {
           ..writeAsStringSync('# Hello, World');
         globals.fs.currentDirectory = tempDir;
 
-        // Capture Usage.test() events.
-        final StringBuffer buffer = await capturedConsolePrint(() =>
-          expectToolExitLater(createTestCommandRunner(command).run(<String>[
-            'run',
-            '--no-pub',
-            '--no-hot',
-          ]), isNull)
-        );
-        // Allow any CustomDimensions.localTime (cd33) timestamp.
-        final RegExp usageRegexp = RegExp(
-          'screenView {cd3: false, cd4: ios, cd22: iOS 13, cd23: debug, cd18: false, cd15: swift, cd31: false, cd33: .*, viewName: run'
-        );
-        expect(buffer.toString(), matches(usageRegexp));
+        await expectToolExitLater(createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+          '--no-hot',
+        ]), isNull);
+
+        expect(usage.commands, contains(
+          const TestUsageCommand('run', parameters: <String, String>{
+            'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
+            'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'false',
+          }
+        )));
       }, overrides: <Type, Generator>{
         Artifacts: () => artifacts,
-        Cache: () => mockCache,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => FakeProcessManager.any(),
         Usage: () => usage,
       });
 
@@ -573,7 +570,6 @@ void main() {
 }
 
 class MockCache extends Mock implements Cache {}
-class MockUsage extends Mock implements Usage {}
 
 class MockDeviceManager extends Mock implements DeviceManager {}
 class MockDevice extends Mock implements Device {

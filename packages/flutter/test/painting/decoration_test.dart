@@ -9,8 +9,8 @@ import 'dart:ui' as ui show Image, ColorFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart';
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';

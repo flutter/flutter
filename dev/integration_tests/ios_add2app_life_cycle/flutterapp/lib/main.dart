@@ -28,7 +28,7 @@ void main() {
 ///
 /// Rewiring semantics is a signal to native IOS test that the test has passed.
 class LifeCycleSpy extends StatefulWidget {
-  const LifeCycleSpy();
+  const LifeCycleSpy({Key key}) : super(key: key);
 
   @override
   _LifeCycleSpyState createState() => _LifeCycleSpyState();

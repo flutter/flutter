@@ -218,7 +218,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   // top and bottom. Since _kToolbarHeight includes the height of one arrow, the
   // total height that the child is given is that plus one more arrow height.
   // The extra height on the opposite side of the arrow will be clipped out. By
-  // using this appraoch, the buttons don't need any special padding that
+  // using this approach, the buttons don't need any special padding that
   // depends on isAbove.
   final BoxConstraints _heightConstraint = BoxConstraints.tightFor(
     height: _kToolbarHeight + _kToolbarArrowSize.height,
@@ -295,7 +295,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       Offset.zero & child!.size,
       _clipPath(),
       (PaintingContext innerContext, Offset innerOffset) => innerContext.paintChild(child!, innerOffset),
-      oldLayer: _clipPathLayer
+      oldLayer: _clipPathLayer,
     );
   }
 
@@ -358,8 +358,7 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
     required this.toolbarBuilder,
     required this.children,
   }) : assert(children != null),
-       // This ignore is used because .isNotEmpty isn't compatible with const.
-       assert(children.length > 0), // ignore: prefer_is_empty
+       assert(children.length > 0),
        super(key: key);
 
   final Offset anchor;
@@ -536,7 +535,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, Object? slot) {
     if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
       _updateRenderObject(child as RenderBox, slot);
@@ -563,7 +562,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, dynamic slot) {
+  void removeRenderObjectChild(RenderObject child, Object? slot) {
     // Check if the child is in a slot.
     if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
@@ -594,7 +593,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     assert(!_forgottenChildren.contains(child));
     // Handle forgetting a child in children or in a slot.
     if (slotToChild.containsKey(child.slot)) {
-      final _CupertinoTextSelectionToolbarItemsSlot slot = child.slot as _CupertinoTextSelectionToolbarItemsSlot;
+      final _CupertinoTextSelectionToolbarItemsSlot slot = child.slot! as _CupertinoTextSelectionToolbarItemsSlot;
       slotToChild.remove(slot);
     } else {
       _forgottenChildren.add(child);
@@ -615,7 +614,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     // Mount slotted children.
     _mountChild(widget.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);

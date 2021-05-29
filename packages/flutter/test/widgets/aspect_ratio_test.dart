@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double aspectRatio) async {

@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/application_package.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -11,6 +13,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
@@ -20,7 +23,6 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:fake_async/fake_async.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -33,7 +35,7 @@ List<String> _xattrArgs(FlutterProject flutterProject) {
     '-r',
     '-d',
     'com.apple.FinderInfo',
-    flutterProject.ios.hostAppRoot.path,
+    flutterProject.directory.path,
   ];
 }
 
@@ -80,7 +82,7 @@ void main() {
     FileSystem fileSystem;
     FakeProcessManager processManager;
     BufferLogger logger;
-    MockXcode mockXcode;
+    Xcode xcode;
     MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
 
     setUp(() {
@@ -90,6 +92,8 @@ void main() {
 
       mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(1000);
+      when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
       when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer(
           (_) {
           return Future<XcodeProjectInfo>.value(XcodeProjectInfo(
@@ -100,9 +104,7 @@ void main() {
           ));
         }
       );
-      mockXcode = MockXcode();
-      when(mockXcode.isRequiredVersionSatisfactory).thenReturn(true);
-      when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
+      xcode = Xcode.test(processManager: FakeProcessManager.any(), xcodeProjectInterpreter: mockXcodeProjectInterpreter);
       fileSystem.file('foo/.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
@@ -118,10 +120,22 @@ void main() {
       setUpIOSProject(fileSystem);
       final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
       final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App.app');
+      fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
-      processManager.addCommand(const FakeCommand(command: <String>[...kRunReleaseArgs, '-showBuildSettings']));
+      processManager.addCommand(const FakeCommand(command: <String>[...kRunReleaseArgs, '-showBuildSettings'], stdout: r'''
+      TARGET_BUILD_DIR=build/ios/Release-iphoneos
+      WRAPPER_NAME=My Super Awesome App.app
+      '''
+      ));
+      processManager.addCommand(const FakeCommand(command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        'build/ios/Release-iphoneos/My Super Awesome App.app',
+        'build/ios/iphoneos',
+      ]));
       processManager.addCommand(FakeCommand(
         command: <String>[
           iosDeployPath,
@@ -129,6 +143,8 @@ void main() {
           '123',
           '--bundle',
           'build/ios/iphoneos/My Super Awesome App.app',
+          '--app_deltas',
+          'build/ios/app-delta',
           '--no-wifi',
           '--justlaunch',
           '--args',
@@ -145,15 +161,16 @@ void main() {
         platformArgs: <String, Object>{},
       );
 
+      expect(fileSystem.directory('build/ios/iphoneos'), exists);
       expect(launchResult.started, true);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     });
 
     testUsingContext('with flaky buildSettings call', () async {
@@ -168,6 +185,7 @@ void main() {
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
         final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App.app');
+        fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
         processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
@@ -182,7 +200,18 @@ void main() {
           const FakeCommand(
             command: <String>[...kRunReleaseArgs, '-showBuildSettings'],
             exitCode: 0,
+            stdout: r'''
+      TARGET_BUILD_DIR=build/ios/Release-iphoneos
+      WRAPPER_NAME=My Super Awesome App.app
+      '''
           ));
+        processManager.addCommand(const FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          'build/ios/Release-iphoneos/My Super Awesome App.app',
+          'build/ios/iphoneos',
+        ]));
         processManager.addCommand(FakeCommand(
           command: <String>[
             iosDeployPath,
@@ -190,6 +219,8 @@ void main() {
             '123',
             '--bundle',
             'build/ios/iphoneos/My Super Awesome App.app',
+            '--app_deltas',
+            'build/ios/app-delta',
             '--no-wifi',
             '--justlaunch',
             '--args',
@@ -220,14 +251,15 @@ void main() {
       });
 
       expect(launchResult?.started, true);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(fileSystem.directory('build/ios/iphoneos'), exists);
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     });
 
     testUsingContext('with concurrent build failures', () async {
@@ -284,7 +316,7 @@ void main() {
         expect(logger.statusText,
           contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'));
         expect(launchResult.started, true);
-        expect(processManager.hasRemainingExpectations, false);
+        expect(processManager, hasNoRemainingExpectations);
       });
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
@@ -292,7 +324,7 @@ void main() {
       Logger: () => logger,
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     }, skip: true); // TODO(jonahwilliams): clean up with https://github.com/flutter/flutter/issues/60675
   });
 }
@@ -319,6 +351,7 @@ IOSDevice setUpIOSDevice({
     artifacts: <ArtifactSet>[
       FakeDyldEnvironmentArtifact(),
     ],
+    processManager: FakeProcessManager.any(),
   );
 
   logger ??= BufferLogger.test();
@@ -347,6 +380,4 @@ IOSDevice setUpIOSDevice({
   );
 }
 
-class MockXcode extends Mock implements Xcode {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockVmService extends Mock implements VmService {}

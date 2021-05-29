@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
+
+const int kMaxFrameworkAccessibilityIdentifier = (1<<16) - 1;
 
 void main() {
   setUp(() {
@@ -568,6 +569,24 @@ void main() {
     );
   });
 
+  test('Semantics id does not repeat', () {
+    final SemanticsOwner owner = SemanticsOwner();
+    const int expectId = 1400;
+    SemanticsNode? nodeToRemove;
+    for (int i = 0; i < kMaxFrameworkAccessibilityIdentifier; i++) {
+      final SemanticsNode node = SemanticsNode();
+      node.attach(owner);
+      if (node.id == expectId) {
+        nodeToRemove = node;
+      }
+    }
+    nodeToRemove!.detach();
+    final SemanticsNode newNode = SemanticsNode();
+    newNode.attach(owner);
+    // Id is reused.
+    expect(newNode.id, expectId);
+  });
+
   test('Tags show up in debug properties', () {
     final SemanticsNode actionNode = SemanticsNode()
       ..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
@@ -617,18 +636,18 @@ void main() {
     config.isFocused = true;
     config.isTextField = true;
 
-    final VoidCallback onShowOnScreen = () { };
-    final VoidCallback onScrollDown = () { };
-    final VoidCallback onScrollUp = () { };
-    final VoidCallback onScrollLeft = () { };
-    final VoidCallback onScrollRight = () { };
-    final VoidCallback onLongPress = () { };
-    final VoidCallback onDecrease = () { };
-    final VoidCallback onIncrease = () { };
-    final MoveCursorHandler onMoveCursorForwardByCharacter = (bool _) { };
-    final MoveCursorHandler onMoveCursorBackwardByCharacter = (bool _) { };
-    final VoidCallback onTap = () { };
-    final VoidCallback onCustomAction = () { };
+    void onShowOnScreen() { }
+    void onScrollDown() { }
+    void onScrollUp() { }
+    void onScrollLeft() { }
+    void onScrollRight() { }
+    void onLongPress() { }
+    void onDecrease() { }
+    void onIncrease() { }
+    void onMoveCursorForwardByCharacter(bool _) { }
+    void onMoveCursorBackwardByCharacter(bool _) { }
+    void onTap() { }
+    void onCustomAction() { }
 
     config.onShowOnScreen = onShowOnScreen;
     config.onScrollDown = onScrollDown;

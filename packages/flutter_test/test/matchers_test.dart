@@ -216,7 +216,7 @@ void main() {
     expect(const Color(0x00000000), within<Color>(distance: 1, from: const Color(0x01010101)));
     expect(const Color(0x00000000), isNot(within<Color>(distance: 1, from: const Color(0x02000000))));
 
-    expect(const Offset(1.0, 0.0), within(distance: 1.0, from: const Offset(0.0, 0.0)));
+    expect(const Offset(1.0, 0.0), within(distance: 1.0, from: Offset.zero));
     expect(const Offset(1.0, 0.0), isNot(within(distance: 1.0, from: const Offset(-1.0, 0.0))));
 
     expect(const Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), within<Rect>(distance: 4.0, from: const Rect.fromLTRB(1.0, 3.0, 5.0, 7.0)));
@@ -574,6 +574,7 @@ void main() {
          isSelected: true,
          isButton: true,
          isSlider: true,
+         isKeyboardKey: true,
          isLink: true,
          isTextField: true,
          isReadOnly: true,
@@ -608,6 +609,7 @@ void main() {
          hasMoveCursorBackwardByCharacterAction: true,
          hasMoveCursorForwardByWordAction: true,
          hasMoveCursorBackwardByWordAction: true,
+         hasSetTextAction: true,
          hasSetSelectionAction: true,
          hasCopyAction: true,
          hasCutAction: true,

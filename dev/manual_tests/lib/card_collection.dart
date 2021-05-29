@@ -18,6 +18,8 @@ class CardModel {
 }
 
 class CardCollection extends StatefulWidget {
+  const CardCollection({Key key}) : super(key: key);
+
   @override
   CardCollectionState createState() => CardCollectionState();
 }
@@ -180,7 +182,7 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  Widget buildDrawerCheckbox(String label, bool value, void callback(), { bool enabled = true }) {
+  Widget buildDrawerCheckbox(String label, bool value, void Function() callback, { bool enabled = true }) {
     return ListTile(
       onTap: enabled ? callback : null,
       title: Text(label),
@@ -389,7 +391,7 @@ class CardCollectionState extends State<CardCollection> {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     title: 'Cards',
     home: CardCollection(),
   ));

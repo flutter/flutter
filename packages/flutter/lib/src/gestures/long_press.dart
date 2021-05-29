@@ -429,8 +429,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
           );
-          invokeCallback<void>(
-              'onSecondaryLongPressStart', () => onSecondaryLongPressStart!(details));
+          invokeCallback<void>('onSecondaryLongPressStart', () => onSecondaryLongPressStart!(details));
         }
         if (onSecondaryLongPress != null) {
           invokeCallback<void>('onSecondaryLongPress', onSecondaryLongPress!);
@@ -442,8 +441,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
           );
-          invokeCallback<void>(
-              'onTertiaryLongPressStart', () => onTertiaryLongPressStart!(details));
+          invokeCallback<void>('onTertiaryLongPressStart', () => onTertiaryLongPressStart!(details));
         }
         if (onTertiaryLongPress != null) {
           invokeCallback<void>('onTertiaryLongPress', onTertiaryLongPress!);
@@ -464,20 +462,17 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onLongPressMoveUpdate != null) {
-          invokeCallback<void>('onLongPressMoveUpdate',
-            () => onLongPressMoveUpdate!(details));
+          invokeCallback<void>('onLongPressMoveUpdate', () => onLongPressMoveUpdate!(details));
         }
         break;
       case kSecondaryButton:
         if (onSecondaryLongPressMoveUpdate != null) {
-          invokeCallback<void>('onSecondaryLongPressMoveUpdate',
-            () => onSecondaryLongPressMoveUpdate!(details));
+          invokeCallback<void>('onSecondaryLongPressMoveUpdate', () => onSecondaryLongPressMoveUpdate!(details));
         }
         break;
       case kTertiaryButton:
         if (onTertiaryLongPressMoveUpdate != null) {
-          invokeCallback<void>('onTertiaryLongPressMoveUpdate',
-                  () => onTertiaryLongPressMoveUpdate!(details));
+          invokeCallback<void>('onTertiaryLongPressMoveUpdate', () => onTertiaryLongPressMoveUpdate!(details));
         }
         break;
       default:

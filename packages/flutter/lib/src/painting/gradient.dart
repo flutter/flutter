@@ -55,7 +55,7 @@ _ColorsAndStops _interpolateColorsAndStops(
     ..addAll(bStops);
   final List<double> interpolatedStops = stops.toList(growable: false);
   final List<Color> interpolatedColors = interpolatedStops.map<Color>(
-          (double stop) => Color.lerp(_sample(aColors, aStops, stop), _sample(bColors, bStops, stop), t)!
+          (double stop) => Color.lerp(_sample(aColors, aStops, stop), _sample(bColors, bStops, stop), t)!,
   ).toList(growable: false);
   return _ColorsAndStops(interpolatedColors, interpolatedStops);
 }
@@ -68,7 +68,8 @@ _ColorsAndStops _interpolateColorsAndStops(
 /// a [GradientRotation] of `pi/4` radians (i.e. 45 degrees).
 @immutable
 abstract class GradientTransform {
-  /// A const constructor so that subclasses may be const.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const GradientTransform();
 
   /// When a [Gradient] creates its [Shader], it will call this method to
@@ -337,11 +338,11 @@ abstract class Gradient {
 /// ```dart
 ///  Widget build(BuildContext context) {
 ///    return Container(
-///      decoration: BoxDecoration(
-///        gradient: LinearGradient(
+///      decoration: const BoxDecoration(
+///        gradient: const LinearGradient(
 ///          begin: Alignment.topLeft,
 ///          end: Alignment(0.8, 0.0), // 10% of the width, so there are ten blinds.
-///          colors: [const Color(0xffee0000), const Color(0xffeeee00)], // red to yellow
+///          colors: const <Color>[Color(0xffee0000), Color(0xffeeee00)], // red to yellow
 ///          tileMode: TileMode.repeated, // repeats the gradient over the canvas
 ///        ),
 ///      ),
@@ -561,17 +562,17 @@ class LinearGradient extends Gradient {
 ///
 /// ```dart
 /// void paintSky(Canvas canvas, Rect rect) {
-///   var gradient = RadialGradient(
-///     center: const Alignment(0.7, -0.6), // near the top right
+///   const RadialGradient gradient = RadialGradient(
+///     center: Alignment(0.7, -0.6), // near the top right
 ///     radius: 0.2,
-///     colors: [
-///       const Color(0xFFFFFF00), // yellow sun
-///       const Color(0xFF0099FF), // blue sky
+///     colors: <Color>[
+///       Color(0xFFFFFF00), // yellow sun
+///       Color(0xFF0099FF), // blue sky
 ///     ],
-///     stops: [0.4, 1.0],
+///     stops: <double>[0.4, 1.0],
 ///   );
 ///   // rect is the area we are painting over
-///   var paint = Paint()
+///   final Paint paint = Paint()
 ///     ..shader = gradient.createShader(rect);
 ///   canvas.drawRect(rect, paint);
 /// }
@@ -809,19 +810,19 @@ class RadialGradient extends Gradient {
 ///
 /// ```dart
 /// Container(
-///   decoration: BoxDecoration(
+///   decoration: const BoxDecoration(
 ///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
 ///       startAngle: 0.0,
 ///       endAngle: math.pi * 2,
-///       colors: const <Color>[
+///       colors: <Color>[
 ///         Color(0xFF4285F4), // blue
 ///         Color(0xFF34A853), // green
 ///         Color(0xFFFBBC05), // yellow
 ///         Color(0xFFEA4335), // red
 ///         Color(0xFF4285F4), // blue again to seamlessly transition to the start
 ///       ],
-///       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
+///       stops: <double>[0.0, 0.25, 0.5, 0.75, 1.0],
 ///     ),
 ///   )
 /// )
@@ -835,19 +836,19 @@ class RadialGradient extends Gradient {
 ///
 /// ```dart
 /// Container(
-///   decoration: BoxDecoration(
+///   decoration: const BoxDecoration(
 ///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
 ///       startAngle: 0.0,
 ///       endAngle: math.pi * 2,
-///       colors: const <Color>[
+///       colors: <Color>[
 ///         Color(0xFF4285F4), // blue
 ///         Color(0xFF34A853), // green
 ///         Color(0xFFFBBC05), // yellow
 ///         Color(0xFFEA4335), // red
 ///         Color(0xFF4285F4), // blue again to seamlessly transition to the start
 ///       ],
-///       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
+///       stops: <double>[0.0, 0.25, 0.5, 0.75, 1.0],
 ///       transform: GradientRotation(math.pi/4),
 ///     ),
 ///   ),

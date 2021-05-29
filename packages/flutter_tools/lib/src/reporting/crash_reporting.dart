@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 part of reporting;
 
 /// Tells crash backend that the error is from the Flutter CLI.
@@ -95,12 +97,12 @@ class CrashReporter {
 /// wish to use your own server for collecting crash reports from Flutter Tools.
 class CrashReportSender {
   CrashReportSender({
-    @required http.Client client,
+    http.Client client,
     @required Usage usage,
     @required Platform platform,
     @required Logger logger,
     @required OperatingSystemUtils operatingSystemUtils,
-  }) : _client = client,
+  }) : _client = client ?? http.Client(),
       _usage = usage,
       _platform = platform,
       _logger = logger,
@@ -134,7 +136,7 @@ class CrashReportSender {
   Future<void> sendReport({
     @required dynamic error,
     @required StackTrace stackTrace,
-    @required String getFlutterVersion(),
+    @required String Function() getFlutterVersion,
     @required String command,
   }) async {
     // Only send one crash report per run.

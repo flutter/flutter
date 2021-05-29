@@ -7,10 +7,12 @@ import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(DriverTestApp());
+  runApp(const DriverTestApp());
 }
 
 class DriverTestApp extends StatefulWidget {
+  const DriverTestApp({Key key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return DriverTestAppState();

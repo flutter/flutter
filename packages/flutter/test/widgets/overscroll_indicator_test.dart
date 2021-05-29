@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -66,11 +65,11 @@ void main() {
           axisDirection: AxisDirection.down,
           color: const Color(0x0DFFFFFF),
           notificationPredicate: (ScrollNotification notification) => notification.depth == 1,
-          child: SingleChildScrollView(
+          child: const SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Container(
+            child: SizedBox(
                 width: 600.0,
-                child: const CustomScrollView(
+                child: CustomScrollView(
                   slivers: <Widget>[
                     SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
                   ],
@@ -279,11 +278,11 @@ void main() {
     RenderObject painter;
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
           behavior: TestScrollBehavior1(),
-          child: const CustomScrollView(
+          child: CustomScrollView(
             scrollDirection: Axis.horizontal,
             physics: AlwaysScrollableScrollPhysics(),
             reverse: true,
@@ -301,11 +300,11 @@ void main() {
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
           behavior: TestScrollBehavior2(),
-          child: const CustomScrollView(
+          child: CustomScrollView(
             scrollDirection: Axis.horizontal,
             physics: AlwaysScrollableScrollPhysics(),
             slivers: <Widget>[
@@ -327,21 +326,21 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
-          behavior: TestScrollBehavior2(),
+          behavior: const TestScrollBehavior2(),
           child: CustomScrollView(
             center: centerKey,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => Text('First sliver $index',),
+                  (BuildContext context, int index) => Text('First sliver $index'),
                   childCount: 2,
                 ),
               ),
               SliverList(
                 key: centerKey,
                 delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => Text('Second sliver $index',),
+                  (BuildContext context, int index) => Text('Second sliver $index'),
                   childCount: 5,
                 ),
               ),
@@ -366,7 +365,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
-          behavior: TestScrollBehavior2(),
+          behavior: const TestScrollBehavior2(),
           child: NotificationListener<OverscrollIndicatorNotification>(
             onNotification: (OverscrollIndicatorNotification notification) {
               if (notification.leading) {
@@ -380,14 +379,14 @@ void main() {
               slivers: <Widget>[
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) => Text('First sliver $index',),
+                    (BuildContext context, int index) => Text('First sliver $index'),
                     childCount: 2,
                   ),
                 ),
                 SliverList(
                   key: centerKey,
                   delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) => Text('Second sliver $index',),
+                    (BuildContext context, int index) => Text('Second sliver $index'),
                     childCount: 5,
                   ),
                 ),
@@ -535,22 +534,26 @@ void main() {
 }
 
 class TestScrollBehavior1 extends ScrollBehavior {
+  const TestScrollBehavior1();
+
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
       child: child,
-      axisDirection: axisDirection,
+      axisDirection: details.direction,
       color: const Color(0xFF00FF00),
     );
   }
 }
 
 class TestScrollBehavior2 extends ScrollBehavior {
+  const TestScrollBehavior2();
+
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
       child: child,
-      axisDirection: axisDirection,
+      axisDirection: details.direction,
       color: const Color(0xFF0000FF),
     );
   }

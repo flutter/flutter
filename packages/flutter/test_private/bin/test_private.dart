@@ -175,7 +175,7 @@ class TestCase {
         return false;
       }
     }
-    // Copy the test files into the the tmpdir's lib directory.
+    // Copy the test files into the tmpdir's lib directory.
     for (final File file in tests) {
       String destination = tmpdir.path;
       try {

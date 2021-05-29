@@ -329,7 +329,7 @@ class _ShapeDecorationPainter extends BoxPainter {
         _interiorPaint!.color = _decoration.color!;
     }
     if (_decoration.gradient != null)
-      _interiorPaint!.shader = _decoration.gradient!.createShader(rect);
+      _interiorPaint!.shader = _decoration.gradient!.createShader(rect, textDirection: textDirection);
     if (_decoration.shadows != null) {
       if (_shadowCount == null) {
         _shadowCount = _decoration.shadows!.length;

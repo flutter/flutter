@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestIntent extends Intent {
@@ -40,7 +39,7 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   });
 
-  testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
+  testWidgets('WidgetsApp default key bindings', (WidgetTester tester) async {
     bool? checked = false;
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
@@ -65,9 +64,12 @@ void main() {
     await tester.pumpAndSettle();
     // Default key mapping worked.
     expect(checked, isTrue);
-    checked = false;
+  });
 
+  testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
     final TestAction action = TestAction();
+    bool? checked = false;
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       WidgetsApp(
         key: key,
@@ -308,6 +310,20 @@ void main() {
       color: const Color(0xFF123456),
     ));
     expect(find.text('/'), findsOneWidget);
+  });
+
+  testWidgets('WidgetsApp has correct default ScrollBehavior', (WidgetTester tester) async {
+    late BuildContext capturedContext;
+    await tester.pumpWidget(
+      WidgetsApp(
+        builder: (BuildContext context, Widget? child) {
+          capturedContext = context;
+          return const Placeholder();
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+    expect(ScrollConfiguration.of(capturedContext).runtimeType, ScrollBehavior);
   });
 }
 

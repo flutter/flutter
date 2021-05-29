@@ -20,7 +20,7 @@ Widget buildCard(BuildContext context, int index) {
     return const SizedBox(height: 100);
   }
 
-  return Container(
+  return SizedBox(
     key: ValueKey<String>(items[index]),
     height: 100.0,
     child: DefaultTextStyle(

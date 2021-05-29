@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 // Examples can assume:
 // late String userAvatarUrl;
@@ -47,7 +46,7 @@ import 'theme_data.dart';
 /// ```dart
 /// CircleAvatar(
 ///   backgroundColor: Colors.brown.shade800,
-///   child: Text('AH'),
+///   child: const Text('AH'),
 /// )
 /// ```
 /// {@end-tool}

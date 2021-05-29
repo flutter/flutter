@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -33,7 +31,7 @@ enum DayPeriod {
 ///
 /// ```dart
 /// TimeOfDay now = TimeOfDay.now();
-/// TimeOfDay releaseTime = TimeOfDay(hour: 15, minute: 0); // 3:00pm
+/// const TimeOfDay releaseTime = TimeOfDay(hour: 15, minute: 0); // 3:00pm
 /// TimeOfDay roomBooked = TimeOfDay.fromDateTime(DateTime.parse('2018-10-20 16:30:04Z')); // 4:30pm
 /// ```
 /// {@end-tool}

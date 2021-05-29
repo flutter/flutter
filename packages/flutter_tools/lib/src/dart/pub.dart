@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -331,6 +332,7 @@ class _DefaultPub implements Pub {
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
   }) async {
+    // Fully resolved pub or pub.bat is calculated based on current platform.
     final io.Process process = await _processUtils.start(
       _pubCommand(arguments),
       workingDirectory: directory,

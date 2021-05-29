@@ -608,7 +608,7 @@ void main() {
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
@@ -633,7 +633,7 @@ void main() {
       );
     }
 
-    await buildTest(const VisualDensity());
+    await buildTest(VisualDensity.standard);
     final RenderBox box = tester.renderObject(find.byKey(key));
     Rect childRect = tester.getRect(find.byKey(childKey));
     await tester.pumpAndSettle();
@@ -652,7 +652,7 @@ void main() {
     expect(box.size, equals(const Size(108, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
-    await buildTest(const VisualDensity(), useText: true);
+    await buildTest(VisualDensity.standard, useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(88, 48)));
@@ -793,11 +793,13 @@ void main() {
     for (final double textScaleFactor in textScaleFactorOptions) {
       for (final TextDirection textDirection in textDirectionOptions) {
         for (final Widget? icon in iconOptions) {
-          final String testName = 'ElevatedButton'
-            ', text scale $textScaleFactor'
-            '${icon != null ? ", with icon" : ""}'
-            '${textDirection == TextDirection.rtl ? ", RTL" : ""}';
-
+          final String testName = <String>[
+            'ElevatedButton, text scale $textScaleFactor',
+            if (icon != null)
+              'with icon',
+            if (textDirection == TextDirection.rtl)
+              'RTL',
+          ].join(', ');
           testWidgets(testName, (WidgetTester tester) async {
             await tester.pumpWidget(
               MaterialApp(
@@ -1038,6 +1040,79 @@ void main() {
     );
 
     expect(find.byType(ElevatedButton), paints ..path(strokeWidth: 4) ..drrect(color: borderColor));
+  });
+
+  testWidgets('Fixed size ElevatedButtons', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(fixedSize: const Size(100, 100)),
+                onPressed: () {},
+                child: const Text('100x100'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(fixedSize: const Size.fromWidth(200)),
+                onPressed: () {},
+                child: const Text('200xh'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(fixedSize: const Size.fromHeight(200)),
+                onPressed: () {},
+                child: const Text('wx200'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, '100x100')), const Size(100, 100));
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, '200xh')).width, 200);
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, 'wx200')).height, 200);
+  });
+
+  testWidgets('ElevatedButton with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
+    Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                splashFactory: splashFactory,
+              ),
+              onPressed: () { },
+              child: const Text('test'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // NoSplash.splashFactory, no splash circles drawn
+    await tester.pumpWidget(buildFrame(splashFactory: NoSplash.splashFactory));
+    {
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
+      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
+
+    // Default splashFactory (from Theme.of().splashFactory), one splash circle drawn.
+    await tester.pumpWidget(buildFrame());
+    {
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
+      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
   });
 }
 

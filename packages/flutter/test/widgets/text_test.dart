@@ -872,14 +872,12 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: Container(
-                // Each word takes up more than a half of a line. Together they
-                // wrap onto two lines, but leave a lot of extra space.
-                child: Text(
-                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
-                  textDirection: TextDirection.ltr,
-                  textWidthBasis: textWidthBasis,
-                ),
+              // Each word takes up more than a half of a line. Together they
+              // wrap onto two lines, but leave a lot of extra space.
+              child: Text(
+                'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
+                textDirection: TextDirection.ltr,
+                textWidthBasis: textWidthBasis,
               ),
             ),
           ),
@@ -1216,7 +1214,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 100,
             child: IntrinsicWidth(
               child: RichText(
@@ -1228,9 +1226,9 @@ void main() {
                       alignment: PlaceholderAlignment.top,
                       child: Wrap(
                         direction: Axis.vertical,
-                        children: <Widget>[
-                          Container(width: 200, height: 100),
-                          Container(width: 200, height: 30),
+                        children: const <Widget>[
+                          SizedBox(width: 200, height: 100),
+                          SizedBox(width: 200, height: 30),
                         ],
                       ),
                     ),
@@ -1262,7 +1260,7 @@ Future<void> _pumpTextWidget({
     Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: 50.0,
           height: 50.0,
           child: Text(

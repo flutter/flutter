@@ -8,7 +8,6 @@ import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart' show Fake;
 import '../rendering/mock_canvas.dart';
 
 const Color _kScrollbarColor = Color(0xFF123456);
@@ -865,6 +864,292 @@ void main() {
     expect(
       tester.renderObject(find.byKey(key1)),
       paintsExactlyCountTimes(#drawRect, 2),
+    );
+  });
+
+  testWidgets('Scrollbar hit test area adjusts for PointerDeviceKind', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              isAlwaysShown: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                child: SizedBox(width: 4000.0, height: 4000.0)
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Drag the scrollbar just outside of the painted thumb with touch input.
+    // The hit test area is padded to meet the minimum interactive size.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(790.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    // The scrollbar moved by scrollAmount, and the scrollOffset moved forward.
+    expect(scrollController.offset, greaterThan(0.0));
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 100.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Move back to reset.
+    await dragScrollbarGesture.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // The same should not be possible with a mouse since it is more precise,
+    // the padding it not necessary.
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.down(const Offset(790.0, 45.0));
+    await tester.pump();
+    await gesture.moveTo(const Offset(790.0, 55.0));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // The scrollbar/scrollable should not have moved.
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  });
+
+  testWidgets('RawScrollbar.isAlwaysShown asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            isAlwaysShown: true,
+            controller: ScrollController(),
+            thumbColor: const Color(0x11111111),
+            child: const SingleChildScrollView(
+              child: SizedBox(
+                height: 1000.0,
+                width: 50.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(
+      (exception as AssertionError).message,
+      contains('The Scrollbar\'s ScrollController has no ScrollPosition attached.'),
+    );
+  });
+
+  testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/70105
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              isAlwaysShown: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                  child: SizedBox(width: 4000.0, height: 4000.0)
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: const Offset(794.0, 0.0),
+          p2: const Offset(794.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66bcbcbc),
+        ),
+    );
+
+    // Drag the thumb down to scroll down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: const Offset(794.0, 0.0),
+          p2: const Offset(794.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          // Drag color
+          color: const Color(0x66bcbcbc),
+        ),
+    );
+
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, greaterThan(10.0));
+    final double previousOffset = scrollController.offset;
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: const Offset(794.0, 0.0),
+          p2: const Offset(794.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 100.0),
+          color: const Color(0x66bcbcbc),
+        ),
+    );
+
+    // Execute a pointer scroll while dragging (drag gesture has not come up yet)
+    final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    pointer.hover(const Offset(798.0, 15.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 20.0)));
+    await tester.pumpAndSettle();
+    // Scrolling while holding the drag on the scrollbar and still hovered over
+    // the scrollbar should not have changed the scroll offset.
+    expect(pointer.location, const Offset(798.0, 15.0));
+    expect(scrollController.offset, previousOffset);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: const Offset(794.0, 0.0),
+          p2: const Offset(794.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 100.0),
+          color: const Color(0x66bcbcbc),
+        ),
+    );
+
+    // Drag is still being held, move pointer to be hovering over another area
+    // of the scrollable (not over the scrollbar) and execute another pointer scroll
+    pointer.hover(tester.getCenter(find.byType(SingleChildScrollView)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -70.0)));
+    await tester.pumpAndSettle();
+    // Scrolling while holding the drag on the scrollbar changed the offset
+    expect(pointer.location, const Offset(400.0, 300.0));
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: const Offset(794.0, 0.0),
+          p2: const Offset(794.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66bcbcbc),
+        ),
+    );
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: const Offset(794.0, 0.0),
+          p2: const Offset(794.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66bcbcbc),
+        ),
     );
   });
 }

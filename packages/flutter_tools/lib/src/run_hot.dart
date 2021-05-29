@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
-import 'package:package_config/package_config.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
+
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -24,6 +27,7 @@ import 'device.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'reporting/reporting.dart';
+import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
@@ -76,6 +80,7 @@ class HotRunner extends ResidentRunner {
     bool stayResident = true,
     bool ipv6 = false,
     bool machine = false,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : super(
           devices,
           target: target,
@@ -86,6 +91,7 @@ class HotRunner extends ResidentRunner {
           dillOutputPath: dillOutputPath,
           ipv6: ipv6,
           machine: machine,
+          devtoolsHandler: devtoolsHandler,
         );
 
   final bool benchmarkMode;
@@ -158,8 +164,8 @@ class HotRunner extends ResidentRunner {
         final CompilerOutput compilerOutput =
             await device.generator.compileExpression(expression, definitions,
                 typeDefinitions, libraryUri, klass, isStatic);
-        if (compilerOutput != null && compilerOutput.outputFilename != null) {
-          return base64.encode(globals.fs.file(compilerOutput.outputFilename).readAsBytesSync());
+        if (compilerOutput != null && compilerOutput.expressionData != null) {
+          return base64.encode(compilerOutput.expressionData);
         }
       }
     }
@@ -172,21 +178,17 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
+    bool enableDevTools = false,
   }) async {
     _didAttach = true;
     try {
-      await Future.wait(<Future<void>>[
-        connectToServiceProtocol(
-          reloadSources: _reloadSourcesService,
-          restart: _restartService,
-          compileExpression: _compileExpressionService,
-          getSkSLMethod: writeSkSL,
-          allowExistingDdsInstance: allowExistingDdsInstance,
-        ),
-        serveDevToolsGracefully(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-        ),
-      ]);
+      await connectToServiceProtocol(
+        reloadSources: _reloadSourcesService,
+        restart: _restartService,
+        compileExpression: _compileExpressionService,
+        getSkSLMethod: writeSkSL,
+        allowExistingDdsInstance: allowExistingDdsInstance,
+      );
     // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) { // ignore: avoid_catches_without_on_clauses
       if (error is! Exception && error is! String) {
@@ -194,6 +196,14 @@ class HotRunner extends ResidentRunner {
       }
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
+    }
+
+    if (enableDevTools) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        flutterDevices: flutterDevices,
+      ));
     }
 
     for (final FlutterDevice device in flutterDevices) {
@@ -215,9 +225,6 @@ class HotRunner extends ResidentRunner {
       globals.printError('Error initializing DevFS: $error');
       return 3;
     }
-
-    unawaited(maybeCallDevToolsUriServiceExtension());
-    unawaited(callConnectedVmServiceUriExtension());
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
@@ -270,7 +277,7 @@ class HotRunner extends ResidentRunner {
       // Measure time to perform a hot restart.
       globals.printStatus('Benchmarking hot restart');
       await restart(fullRestart: true);
-      // Wait multiple seconds to stabilize benchmark on slower devicelab hardware.
+      // Wait multiple seconds to stabilize benchmark on slower device lab hardware.
       // Hot restart finishes when the new isolate is started, not when the new isolate
       // is ready. This process can actually take multiple seconds.
       await Future<void>.delayed(const Duration(seconds: 10));
@@ -304,6 +311,7 @@ class HotRunner extends ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool enableDevTools = false,
     String route,
   }) async {
     firstBuildTime = DateTime.now();
@@ -354,6 +362,7 @@ class HotRunner extends ResidentRunner {
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
+      enableDevTools: enableDevTools,
     );
   }
 
@@ -513,17 +522,17 @@ class HotRunner extends ResidentRunner {
             // The embedder requires that the isolate is unpaused, because the
             // runInView method requires interaction with dart engine APIs that
             // are not thread-safe, and thus must be run on the same thread that
-            // would be blocked by the pause. Simply unpausing is not sufficient,
+            // would be blocked by the pause. Simply un-pausing is not sufficient,
             // because this does not prevent the isolate from immediately hitting
             // a breakpoint, for example if the breakpoint was placed in a loop
             // or in a frequently called method. Instead, all breakpoints are first
             // disabled and then the isolate resumed.
             final List<Future<void>> breakpointRemoval = <Future<void>>[
               for (final vm_service.Breakpoint breakpoint in isolate.breakpoints)
-                device.vmService.removeBreakpoint(isolate.id, breakpoint.id)
+                device.vmService.service.removeBreakpoint(isolate.id, breakpoint.id)
             ];
             await Future.wait(breakpointRemoval);
-            await device.vmService.resume(view.uiIsolate.id);
+            await device.vmService.service.resume(view.uiIsolate.id);
           }
         }));
       }
@@ -531,12 +540,12 @@ class HotRunner extends ResidentRunner {
       // The engine handles killing and recreating isolates that it has spawned
       // ("uiIsolates"). The isolates that were spawned from these uiIsolates
       // will not be restarted, and so they must be manually killed.
-      final vm_service.VM vm = await device.vmService.getVM();
+      final vm_service.VM vm = await device.vmService.service.getVM();
       for (final vm_service.IsolateRef isolateRef in vm.isolates) {
         if (uiIsolatesIds.contains(isolateRef.id)) {
           continue;
         }
-        operations.add(device.vmService.kill(isolateRef.id)
+        operations.add(device.vmService.service.kill(isolateRef.id)
           .catchError((dynamic error, StackTrace stackTrace) {
             // Do nothing on a SentinelException since it means the isolate
             // has already been killed.
@@ -635,8 +644,7 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
-      unawaited(maybeCallDevToolsUriServiceExtension());
-      unawaited(callConnectedVmServiceUriExtension());
+      unawaited(residentDevtoolsHandler.hotRestart(flutterDevices));
       return result;
     }
     final OperationResult result = await _hotReloadHelper(
@@ -770,10 +778,10 @@ class HotRunner extends ResidentRunner {
   }) async {
     final String deviceEntryUri = device.devFS.baseUri
       .resolve(entryPath).toString();
-    final vm_service.VM vm = await device.vmService.getVM();
+    final vm_service.VM vm = await device.vmService.service.getVM();
     return <Future<vm_service.ReloadReport>>[
       for (final vm_service.IsolateRef isolateRef in vm.isolates)
-        device.vmService.reloadSources(
+        device.vmService.service.reloadSources(
           isolateRef.id,
           pause: pause,
           rootLibUri: deviceEntryUri,
@@ -832,7 +840,7 @@ class HotRunner extends ResidentRunner {
     await _evictDirtyAssets();
 
     // Check if any isolates are paused and reassemble those that aren't.
-    final Map<FlutterView, vm_service.VmService> reassembleViews = <FlutterView, vm_service.VmService>{};
+    final Map<FlutterView, FlutterVmService> reassembleViews = <FlutterView, FlutterVmService>{};
     final List<Future<void>> reassembleFutures = <Future<void>>[];
     String serviceEventKind;
     int pausedIsolatesFound = 0;
@@ -1084,7 +1092,7 @@ class HotRunner extends ResidentRunner {
     if (canHotRestart) {
       commandHelp.R.print();
     }
-    commandHelp.h.print();
+    commandHelp.h.print(); // TODO(ianh): print different message if "details" is false
     if (_didAttach) {
       commandHelp.d.print();
     }
@@ -1092,26 +1100,6 @@ class HotRunner extends ResidentRunner {
     commandHelp.q.print();
     if (details) {
       printHelpDetails();
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      // Caution: This log line is parsed by device lab tests.
-      globals.printStatus(
-        'An Observatory debugger and profiler on ${device.device.name} is available at: '
-        '${device.vmService.httpAddress}',
-      );
-
-      final DevToolsServerAddress devToolsServerAddress = activeDevToolsServer();
-      if (devToolsServerAddress != null) {
-        final Uri uri = devToolsServerAddress.uri?.replace(
-          queryParameters: <String, dynamic>{'uri': '${device.vmService.httpAddress}'},
-        );
-        if (uri != null) {
-          globals.printStatus(
-            '\nFlutter DevTools, a Flutter debugger and profiler, on '
-            '${device.device.name} is available at: $uri',
-          );
-        }
-      }
     }
     globals.printStatus('');
     if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
@@ -1125,6 +1113,8 @@ class HotRunner extends ResidentRunner {
         'For more information see https://dart.dev/null-safety/unsound-null-safety',
       );
     }
+    globals.printStatus('');
+    printDebuggerList();
   }
 
   Future<void> _evictDirtyAssets() async {

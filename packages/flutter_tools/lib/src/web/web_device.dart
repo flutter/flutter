@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -14,6 +16,7 @@ import '../base/platform.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../project.dart';
 import 'chrome.dart';

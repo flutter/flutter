@@ -148,7 +148,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
             'AutomaticKeepAlive handle triggered after AutomaticKeepAlive was disposed.\n'
             'Widgets should always trigger their KeepAliveNotification handle when they are '
             'deactivated, so that they (or their handle) do not send spurious events later '
-            'when they are no longer in the tree.'
+            'when they are no longer in the tree.',
           );
         }
         return true;
@@ -405,7 +405,7 @@ class _NullWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     throw FlutterError(
       'Widgets that mix AutomaticKeepAliveClientMixin into their State must '
-      'call super.build() but must ignore the return value of the superclass.'
+      'call super.build() but must ignore the return value of the superclass.',
     );
   }
 }

@@ -5,7 +5,6 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_sheet_theme.dart';
@@ -194,9 +193,7 @@ class _BottomSheetState extends State<BottomSheet> {
   bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
 
   void _handleDragStart(DragStartDetails details) {
-    if (widget.onDragStart != null) {
-      widget.onDragStart!(details);
-    }
+    widget.onDragStart?.call(details);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -227,12 +224,10 @@ class _BottomSheetState extends State<BottomSheet> {
       widget.animationController!.forward();
     }
 
-    if (widget.onDragEnd != null) {
-      widget.onDragEnd!(
-        details,
-        isClosing: isClosing,
-      );
-    }
+    widget.onDragEnd?.call(
+      details,
+      isClosing: isClosing,
+    );
 
     if (isClosing) {
       widget.onClosing();
@@ -375,30 +370,27 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
     return AnimatedBuilder(
       animation: widget.route!.animation!,
-      child: Padding(
-        padding: MediaQuery.of(context).viewInsets,
-        child: BottomSheet(
-          animationController: widget.route!._animationController,
-          onClosing: () {
-            if (widget.route!.isCurrent) {
-              Navigator.pop(context);
-            }
-          },
-          builder: widget.route!.builder!,
-          backgroundColor: widget.backgroundColor,
-          elevation: widget.elevation,
-          shape: widget.shape,
-          clipBehavior: widget.clipBehavior,
-          enableDrag: widget.enableDrag,
-          onDragStart: handleDragStart,
-          onDragEnd: handleDragEnd,
-        ),
+      child: BottomSheet(
+        animationController: widget.route!._animationController,
+        onClosing: () {
+          if (widget.route!.isCurrent) {
+            Navigator.pop(context);
+          }
+        },
+        builder: widget.route!.builder!,
+        backgroundColor: widget.backgroundColor,
+        elevation: widget.elevation,
+        shape: widget.shape,
+        clipBehavior: widget.clipBehavior,
+        enableDrag: widget.enableDrag,
+        onDragStart: handleDragStart,
+        onDragEnd: handleDragEnd,
       ),
       builder: (BuildContext context, Widget? child) {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
         final double animationValue = animationCurve.transform(
-            mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value
+            mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value,
         );
         return Semantics(
           scopesRoute: true,

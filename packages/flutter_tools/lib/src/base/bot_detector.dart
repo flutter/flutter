@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -28,9 +30,6 @@ class BotDetector {
   final PersistentToolState _persistentToolState;
 
   Future<bool> get isRunningOnBot async {
-    if (_persistentToolState.isRunningOnBot != null) {
-      return _persistentToolState.isRunningOnBot;
-    }
     if (
       // Explicitly stated to not be a bot.
       _platform.environment['BOT'] == 'false'
@@ -41,6 +40,10 @@ class BotDetector {
       || _platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
     ) {
       return _persistentToolState.isRunningOnBot = false;
+    }
+
+    if (_persistentToolState.isRunningOnBot != null) {
+      return _persistentToolState.isRunningOnBot;
     }
 
     return _persistentToolState.isRunningOnBot = _platform.environment['BOT'] == 'true'

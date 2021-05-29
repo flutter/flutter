@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -218,5 +220,23 @@ void main() {
 
     expect(result.exitCode, isNot(0));
     expect(result.stderr, contains('Could not find an option named "release"'));
+  });
+
+  testWithoutContext('flutter can report crashes', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'update-packages',
+      '--crash',
+    ], environment: <String, String>{
+      'BOT': 'false',
+    });
+
+    expect(result.exitCode, isNot(0));
+    expect(result.stderr, contains(
+      'Oops; flutter has exited unexpectedly: "Bad state: test crash please ignore.".\n'
+      'A crash report has been written to',
+    ));
   });
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -16,7 +18,7 @@ import 'package:fake_async/fake_async.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_devices.dart';
-import '../src/mocks.dart';
+import '../src/fakes.dart';
 
 void main() {
   group('DeviceManager', () {
@@ -148,11 +150,11 @@ void main() {
   });
 
   group('Filter devices', () {
-    final FakeDevice ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne', true);
-    final FakeDevice ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo', true);
-    final FakeDevice nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', false);
-    final FakeDevice nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
-    final FakeDevice unsupported = FakeDevice('unsupported', 'unsupported', true, false);
+    final FakeDevice ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne');
+    final FakeDevice ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo');
+    final FakeDevice nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', ephemeral: false);
+    final FakeDevice nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', ephemeral: false);
+    final FakeDevice unsupported = FakeDevice('unsupported', 'unsupported', isSupported: false);
     final FakeDevice webDevice = FakeDevice('webby', 'webby')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
     final FakeDevice fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
@@ -331,7 +333,7 @@ void main() {
         terminal: mockTerminal,
       );
       await expectLater(
-        () async => await deviceManager.findTargetDevices(FakeFlutterProject()),
+        () async => deviceManager.findTargetDevices(FakeFlutterProject()),
         throwsA(isA<ToolExit>())
       );
     });
@@ -475,24 +477,6 @@ void main() {
       expect(filtered.single, ephemeralOne);
       verify(mockDeviceDiscovery.devices).called(1);
       verify(mockDeviceDiscovery.discoverDevices(timeout: anyNamed('timeout'))).called(1);
-    });
-  });
-
-  group('ForwardedPort', () {
-    group('dispose()', () {
-      testUsingContext('does not throw exception if no process is present', () {
-        final ForwardedPort forwardedPort = ForwardedPort(123, 456);
-        expect(forwardedPort.context, isNull);
-        forwardedPort.dispose();
-      });
-
-      testUsingContext('kills process if process was available', () {
-        final MockProcess mockProcess = MockProcess();
-        final ForwardedPort forwardedPort = ForwardedPort.withContext(123, 456, mockProcess);
-        forwardedPort.dispose();
-        expect(forwardedPort.context, isNotNull);
-        verify(mockProcess.kill());
-      });
     });
   });
 

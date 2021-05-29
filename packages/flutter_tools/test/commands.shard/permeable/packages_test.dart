@@ -2,24 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:process/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess, AlwaysTrueBotDetector, AlwaysFalseBotDetector;
-import '../../src/testbed.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
@@ -374,7 +379,7 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
-      Stdio: () => MockStdio()..stdout.terminalColumns = 80,
+      Stdio: () => FakeStdio()..stdout.terminalColumns = 80,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -435,25 +440,29 @@ void main() {
   });
 
   group('packages test/pub', () {
-    MockProcessManager mockProcessManager;
-    MockStdio mockStdio;
+    FakeProcessManager processManager;
+    FakeStdio mockStdio;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
-      mockStdio = MockStdio()..stdout.terminalColumns = 80;
+      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      mockStdio = FakeStdio()..stdout.terminalColumns = 80;
     });
 
     testUsingContext('test without bot', () async {
+      Cache.flutterRoot = '';
+      globals.fs.file('pubspec.yaml').createSync();
+      processManager.addCommand(
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/pub', 'run', 'test']),
+      );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(3));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'run');
-      expect(commands[2], 'test');
+
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      FileSystem: () => MemoryFileSystem.test(),
+      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysFalseBotDetector(),
+      BotDetector: () => const FakeBotDetector(false),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -465,17 +474,20 @@ void main() {
     });
 
     testUsingContext('test with bot', () async {
+      Cache.flutterRoot = '';
+      globals.fs.file('pubspec.yaml').createSync();
+      processManager.addCommand(
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/pub', '--trace', 'run', 'test']),
+      );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(4));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], '--trace');
-      expect(commands[2], 'run');
-      expect(commands[3], 'test');
+
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      FileSystem: () => MemoryFileSystem.test(),
+      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
+      BotDetector: () => const FakeBotDetector(true),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -486,238 +498,24 @@ void main() {
       ),
     });
 
-    testUsingContext('run', () async {
+    testUsingContext('run pass arguments through to pub', () async {
+      Cache.flutterRoot = '';
+      globals.fs.file('pubspec.yaml').createSync();
+      final IOSink stdin = IOSink(StreamController<List<int>>().sink);
+      processManager.addCommand(
+        FakeCommand(command: const <String>[
+          '/bin/cache/dart-sdk/bin/pub', 'run', '--foo', 'bar'],
+          stdin: stdin,
+        ),
+      );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(4));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'run');
-      expect(commands[2], '--foo');
-      expect(commands[3], 'bar');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Stdio: () => mockStdio,
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    });
 
-    testUsingContext('pub publish', () async {
-      final PromptingProcess process = PromptingProcess();
-      mockProcessManager.processFactory = (List<String> commands) => process;
-      final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'publish']);
-      final Future<void> runPrompt = process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
-      final Future<void> simulateUserInput = Future<void>(() {
-        mockStdio.simulateStdin('y');
-      });
-      await Future.wait<void>(<Future<void>>[runPackages, runPrompt, simulateUserInput]);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(2));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'publish');
-      final List<String> stdout = mockStdio.writtenToStdout;
-      expect(stdout, hasLength(4));
-      expect(stdout.sublist(0, 2), contains('Proceed (y/n)? '));
-      expect(stdout.sublist(0, 2), contains('y\n'));
-      expect(stdout[2], 'hello\n');
-      expect(stdout[3], 'world\n');
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      FileSystem: () => MemoryFileSystem.test(),
+      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    });
-
-    testUsingContext('pub publish input fails', () async {
-      final PromptingProcess process = PromptingProcess(stdinError: true);
-      mockProcessManager.processFactory = (List<String> commands) => process;
-      final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'publish']);
-      final Future<void> runPrompt = process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
-      final Future<void> simulateUserInput = Future<void>(() {
-        mockStdio.simulateStdin('y');
-      });
-      await Future.wait<void>(<Future<void>>[runPackages, runPrompt, simulateUserInput]);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(2));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'publish');
-      // We get a trace message about the write to stdin failing.
-      expect(testLogger.traceText, contains('Echoing stdin to the pub subprocess failed'));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Stdio: () => mockStdio,
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    });
-
-    testUsingContext('publish', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'publish']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(2));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'publish');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    });
-
-    testUsingContext('packages publish', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(2));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'publish');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    });
-
-    testUsingContext('deps', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'deps']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(2));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'deps');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    });
-
-    testUsingContext('cache', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'cache']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(2));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'cache');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    });
-
-    testUsingContext('version', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'version']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(2));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'version');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    });
-
-    testUsingContext('uploader', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'uploader']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(2));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'uploader');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    });
-
-    testUsingContext('global', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'global', 'list']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(3));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'global');
-      expect(commands[2], 'list');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    });
-
-    testUsingContext('outdated', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'outdated']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(2));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'outdated');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,

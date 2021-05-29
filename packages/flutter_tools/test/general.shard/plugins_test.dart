@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -12,7 +14,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -22,7 +24,8 @@ import 'package:mockito/mockito.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/context.dart' hide FakeOperatingSystemUtils;
+import '../src/fakes.dart';
 import '../src/pubspec_schema.dart';
 
 void main() {
@@ -35,8 +38,8 @@ void main() {
     MockWebProject webProject;
     MockWindowsProject windowsProject;
     MockLinuxProject linuxProject;
-    SystemClock mockClock;
-    FlutterVersion mockVersion;
+    FakeSystemClock systemClock;
+    FlutterVersion flutterVersion;
     // A Windows-style filesystem. This is not populated by default, so tests
     // using it instead of fs must re-run any necessary setup (e.g.,
     // setUpProject).
@@ -110,19 +113,13 @@ void main() {
     setUp(() async {
       fs = MemoryFileSystem.test();
       fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
-      mockClock = MockClock();
-      mockVersion = MockFlutterVersion();
+      systemClock = FakeSystemClock()
+        ..currentTime = DateTime(1970, 1, 1);
+      flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
 
       // Add basic properties to the Flutter project and subprojects
       setUpProject(fs);
       flutterProject.directory.childFile('.packages').createSync(recursive: true);
-
-      when(mockClock.now()).thenAnswer(
-        (Invocation _) => DateTime(1970, 1, 1)
-      );
-      when(mockVersion.frameworkVersion).thenAnswer(
-        (Invocation _) => '1.0.0'
-      );
     });
 
     // Makes fake plugin packages for each plugin, adds them to flutterProject,
@@ -423,13 +420,7 @@ dependencies:
         when(iosProject.existsSync()).thenReturn(true);
 
         final DateTime dateCreated = DateTime(1970, 1, 1);
-        when(mockClock.now()).thenAnswer(
-          (Invocation _) => dateCreated
-        );
-        const String version = '1.0.0';
-        when(mockVersion.frameworkVersion).thenAnswer(
-          (Invocation _) => version
-        );
+        systemClock.currentTime = dateCreated;
 
         await refreshPluginsList(flutterProject);
 
@@ -500,7 +491,7 @@ dependencies:
 
         expect(jsonContent['dependencyGraph'], expectedDependencyGraph);
         expect(jsonContent['date_created'], dateCreated.toString());
-        expect(jsonContent['version'], version);
+        expect(jsonContent['version'], '1.0.0');
 
         // Make sure tests are updated if a new object is added/removed.
         final List<String> expectedKeys = <String>[
@@ -514,8 +505,8 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        SystemClock: () => mockClock,
-        FlutterVersion: () => mockVersion
+        SystemClock: () => systemClock,
+        FlutterVersion: () => flutterVersion
       });
 
       testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () async {
@@ -531,8 +522,8 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        SystemClock: () => mockClock,
-        FlutterVersion: () => mockVersion
+        SystemClock: () => systemClock,
+        FlutterVersion: () => flutterVersion
       });
 
       testUsingContext('No changes to the plugin list does not invalidate the Cocoapod lockfiles', () async {
@@ -554,8 +545,8 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        SystemClock: () => mockClock,
-        FlutterVersion: () => mockVersion
+        SystemClock: () => systemClock,
+        FlutterVersion: () => flutterVersion
       });
     });
 
@@ -1169,12 +1160,10 @@ flutter:
     });
 
     group('createPluginSymlinks', () {
-      MockFeatureFlags featureFlags;
+      FeatureFlags featureFlags;
 
       setUp(() {
-        featureFlags = MockFeatureFlags();
-        when(featureFlags.isLinuxEnabled).thenReturn(true);
-        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        featureFlags = TestFeatureFlags(isLinuxEnabled: true, isWindowsEnabled: true);
       });
 
       testUsingContext('Symlinks are created for Linux plugins', () async {
@@ -1317,7 +1306,7 @@ flutter:
         projectDir.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(yamlString);
       }
 
-      test('validatePubspecForPlugin works', () async {
+      testUsingContext('validatePubspecForPlugin works', () async {
         const String pluginYaml = '''
   flutter:
     plugin:
@@ -1343,7 +1332,7 @@ flutter:
         ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');
       });
 
-      test('createPlatformsYamlMap should create the correct map', () async {
+      testUsingContext('createPlatformsYamlMap should create the correct map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
         expect(map['ios'], <String, String> {
           'pluginClass' : 'PluginClass'
@@ -1357,7 +1346,7 @@ flutter:
         });
       });
 
-      test('createPlatformsYamlMap should create empty map', () async {
+      testUsingContext('createPlatformsYamlMap should create empty map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>[], null, null);
         expect(map.isEmpty, true);
       });
@@ -1366,8 +1355,7 @@ flutter:
 
     testWithoutContext('Symlink failures give developer mode instructions on recent versions of Windows', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14972.1]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972.1]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
@@ -1377,8 +1365,7 @@ flutter:
 
     testWithoutContext('Symlink failures instruct developers to run as administrator on older versions of Windows', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
@@ -1388,8 +1375,7 @@ flutter:
 
     testWithoutContext('Symlink failures only give instructions for specific errors', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 999));
 
@@ -1399,7 +1385,6 @@ flutter:
 }
 
 class MockAndroidProject extends Mock implements AndroidProject {}
-class MockFeatureFlags extends Mock implements FeatureFlags {}
 class MockFlutterProject extends Mock implements FlutterProject {}
 class MockIosProject extends Mock implements IosProject {}
 class MockMacOSProject extends Mock implements MacOSProject {}
@@ -1407,4 +1392,19 @@ class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterprete
 class MockWebProject extends Mock implements WebProject {}
 class MockWindowsProject extends Mock implements WindowsProject {}
 class MockLinuxProject extends Mock implements LinuxProject {}
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+
+class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  FakeOperatingSystemUtils(this.name);
+
+  @override
+  final String name;
+}
+
+class FakeSystemClock extends Fake implements SystemClock {
+  DateTime currentTime;
+
+  @override
+  DateTime now() {
+    return currentTime;
+  }
+}

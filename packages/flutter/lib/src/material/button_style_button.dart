@@ -5,14 +5,12 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'colors.dart';
 import 'constants.dart';
-import 'ink_ripple.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
@@ -28,7 +26,8 @@ import 'theme_data.dart';
 ///  * [ElevatedButton], a filled ButtonStyleButton whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
 abstract class ButtonStyleButton extends StatefulWidget {
-  /// Create a [ButtonStyleButton].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const ButtonStyleButton({
     Key? key,
     required this.onPressed,
@@ -268,6 +267,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final Color? resolvedShadowColor = resolve<Color?>((ButtonStyle? style) => style?.shadowColor);
     final EdgeInsetsGeometry? resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding);
     final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
+    final Size? resolvedFixedSize = resolve<Size?>((ButtonStyle? style) => style?.fixedSize);
     final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
     final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
 
@@ -285,12 +285,30 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final bool? resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback);
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
-    final BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
+    final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);
+
+    BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
         minWidth: resolvedMinimumSize!.width,
         minHeight: resolvedMinimumSize.height,
       ),
     );
+    if (resolvedFixedSize != null) {
+      final Size size = effectiveConstraints.constrain(resolvedFixedSize);
+      if (size.width.isFinite) {
+        effectiveConstraints = effectiveConstraints.copyWith(
+          minWidth: size.width,
+          maxWidth: size.width,
+        );
+      }
+      if (size.height.isFinite) {
+        effectiveConstraints = effectiveConstraints.copyWith(
+          minHeight: size.height,
+          maxHeight: size.height,
+        );
+      }
+    }
+
     final EdgeInsetsGeometry padding = resolvedPadding!.add(
       EdgeInsets.only(
         left: densityAdjustment.dx,
@@ -353,7 +371,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           canRequestFocus: widget.enabled,
           onFocusChange: _handleFocusedChanged,
           autofocus: widget.autofocus,
-          splashFactory: InkRipple.splashFactory,
+          splashFactory: resolvedSplashFactory,
           overlayColor: overlayColor,
           highlightColor: Colors.transparent,
           customBorder: resolvedShape,

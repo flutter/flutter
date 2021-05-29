@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
@@ -26,7 +28,7 @@ void main() {
   testUsingContext('All build commands support null safety options', () {
     final List<FlutterCommand> commands = <FlutterCommand>[
       BuildWindowsCommand(verboseHelp: false),
-      BuildLinuxCommand(verboseHelp: false),
+      BuildLinuxCommand(verboseHelp: false, operatingSystemUtils: globals.os),
       BuildMacosCommand(verboseHelp: false),
       BuildWebCommand(verboseHelp: false),
       BuildApkCommand(verboseHelp: false),

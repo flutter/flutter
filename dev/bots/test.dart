@@ -15,6 +15,7 @@ import 'package:path/path.dart' as path;
 import 'browser.dart';
 import 'flutter_compact_formatter.dart';
 import 'run_command.dart';
+import 'service_worker_test.dart';
 import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -55,13 +56,6 @@ final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
-
-/// The number of Cirrus jobs that run build tests in parallel.
-///
-/// WARNING: if you change this number, also change .cirrus.yml
-/// and make sure it runs _all_ shards.
-const int kBuildTestShardCount = 2;
-
 const String kShardKey = 'SHARD';
 const String kSubshardKey = 'SUBSHARD';
 
@@ -77,12 +71,6 @@ const String kSubshardKey = 'SUBSHARD';
 int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
   ? int.parse(Platform.environment['WEB_SHARD_COUNT'])
   : 8;
-
-/// The number of shards the long-running Web tests are split into.
-///
-/// WARNING: this number must match the shard count in LUCI configs.
-const int kWebLongRunningTestShardCount = 3;
-
 /// Tests that we don't run on Web for compilation reasons.
 //
 // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
@@ -117,10 +105,9 @@ Future<void> main(List<String> args) async {
       'build_tests': _runBuildTests,
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
-      'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
+      'web_tool_tests': _runToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
-      'web_tool_tests': _runWebToolTests,
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
@@ -266,30 +253,6 @@ Future<void> _runSmokeTests() async {
     exitWithError(<String>[versionError]);
 }
 
-Future<void> _runToolCoverage() async {
-  await _pubRunTest(
-    toolRoot,
-    testPaths: <String>[
-      path.join('test', 'general.shard'),
-      path.join('test', 'commands.shard', 'hermetic'),
-    ],
-    coverage: 'coverage',
-  );
-  await runCommand(pub,
-    <String>[
-      'run',
-      'coverage:format_coverage',
-      '--lcov',
-      '--in=coverage',
-      '--out=coverage/lcov.info',
-      '--packages=.packages',
-      '--report-on=lib/'
-    ],
-    workingDirectory: toolRoot,
-    outputMode: OutputMode.capture,
-  );
-}
-
 Future<void> _runGeneralToolTests() async {
   await _pubRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
@@ -311,6 +274,16 @@ Future<void> _runCommandsToolTests() async {
   );
 }
 
+Future<void> _runWebToolTests() async {
+  await _pubRunTest(
+    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    forceSingleCore: true,
+    testPaths: <String>[path.join('test', 'web.shard')],
+    enableFlutterToolAsserts: true,
+    perTestTimeout: const Duration(minutes: 3),
+  );
+}
+
 Future<void> _runIntegrationToolTests() async {
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
   final List<String> allTests = Directory(path.join(toolsPath, 'test', 'integration.shard'))
@@ -329,28 +302,8 @@ Future<void> _runToolTests() async {
   await selectSubshard(<String, ShardRunner>{
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
+    'web': _runWebToolTests,
   });
-}
-
-Future<void> _runWebToolTests() async {
-  const String kDotShard = '.shard';
-  const String kWeb = 'web';
-  const String kTest = 'test';
-  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
-
-  final Map<String, ShardRunner> subshards = <String, ShardRunner>{
-      kWeb:
-      () async {
-        await _pubRunTest(
-          toolsPath,
-          forceSingleCore: true,
-          testPaths: <String>[path.join(kTest, '$kWeb$kDotShard', '')],
-          enableFlutterToolAsserts: true,
-        );
-      }
-  };
-
-  await selectSubshard(subshards);
 }
 
 /// Verifies that APK, and IPA (if on macOS) builds the examples apps
@@ -361,8 +314,14 @@ Future<void> _runWebToolTests() async {
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
     ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_views')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'channels')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'hybrid_android_views')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_platform_view_tests')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
-    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
 
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
@@ -383,10 +342,7 @@ Future<void> _runBuildTests() async {
     ],
   ]..shuffle(math.Random(0));
 
-  if (!await _runShardRunnerIndexOfTotalSubshard(tests)) {
-    // TODO(jmagman): Remove fallback once LUCI configs are migrated to d+_d+ subshard format.
-    await _selectIndexedSubshard(tests, kBuildTestShardCount);
-  }
+  await _runShardRunnerIndexOfTotalSubshard(tests);
 }
 
 Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) async {
@@ -553,7 +509,7 @@ Future<void> _flutterBuild(
     final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
     if (!_allTargetsCached(file)) {
       print('${red}Not all build targets cached after second run.$reset');
-      print('The target performance data was: ${file.readAsStringSync()}');
+      print('The target performance data was: ${file.readAsStringSync().replaceAll('},', '},\n')}');
       exit(1);
     }
   }
@@ -690,15 +646,15 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')]);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')], options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'));
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: mixedModeNullSafetyOptions);
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'tracing_tests'),
@@ -822,8 +778,6 @@ Future<void> _runWebUnitTests() async {
 }
 
 /// Coarse-grained integration tests running on the Web.
-///
-/// These tests are sharded into [kWebLongRunningTestShardCount] shards.
 Future<void> _runWebLongRunningTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
     () => _runGalleryE2eWebTest('debug'),
@@ -832,12 +786,10 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('profile', canvasKit: true),
     () => _runGalleryE2eWebTest('release'),
     () => _runGalleryE2eWebTest('release', canvasKit: true),
+    () => runWebServiceWorkerTest(headless: true),
   ];
   await _ensureChromeDriverIsRunning();
-  if (!await _runShardRunnerIndexOfTotalSubshard(tests)) {
-    // TODO(jmagman): Remove fallback once LUCI configs are migrated to d+_d+ subshard format.
-    await _selectIndexedSubshard(tests, kWebLongRunningTestShardCount);
-  }
+  await _runShardRunnerIndexOfTotalSubshard(tests);
   await _stopChromeDriver();
 }
 
@@ -888,23 +840,14 @@ Future<void> _runFlutterPluginsTests() async {
       workingDirectory: checkout.path,
     );
     await runCommand(
-      pub,
+      './script/incremental_build.sh',
       <String>[
-        'global',
-        'activate',
-        'flutter_plugin_tools',
-      ],
-      workingDirectory: checkout.path,
-    );
-    await runCommand(
-      pub,
-      <String>[
-        'global',
-        'run',
-        'flutter_plugin_tools',
         'analyze',
       ],
       workingDirectory: checkout.path,
+      environment: <String, String>{
+        'BRANCH_NAME': 'master',
+      },
     );
   }
   await selectSubshard(<String, ShardRunner>{
@@ -1453,37 +1396,6 @@ Future<String> verifyVersion(File file) async {
   return null;
 }
 
-/// Parse (zero-)index-named subshards and equally distribute [tests]
-/// between them. Last shard should end in "_last" to catch mismatches
-/// between `.cirrus.yml` and `test.dart`. See [selectShard] for naming details.
-///
-/// Examples:
-/// build_tests-0-linux
-/// build_tests-1-linux
-/// build_tests-2_last-linux
-Future<void> _selectIndexedSubshard(List<ShardRunner> tests, int numberOfShards) async {
-  final int testsPerShard = tests.length ~/ numberOfShards;
-  final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
-
-  for (int subshard = 0; subshard < numberOfShards; subshard += 1) {
-    String last = '';
-    List<ShardRunner> sublist;
-    if (subshard < numberOfShards - 1) {
-      sublist = tests.sublist(subshard * testsPerShard, (subshard + 1) * testsPerShard);
-    } else {
-      sublist = tests.sublist(subshard * testsPerShard, tests.length);
-      // We make sure the last shard ends in _last.
-      last = '_last';
-    }
-    subshards['$subshard$last'] = () async {
-      for (final ShardRunner test in sublist)
-        await test();
-    };
-  }
-
-  await selectSubshard(subshards);
-}
-
 /// Parse (one-)index/total-named subshards from environment variable SUBSHARD
 /// and equally distribute [tests] between them.
 /// Subshard format is "{index}_{total number of shards}".
@@ -1507,8 +1419,7 @@ List<T> _selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSub
   final Match match = pattern.firstMatch(subshardName);
   if (match == null || match.groupCount != 2) {
     print('${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"');
-    // TODO(jmagman): exit(1) here instead once LUCI configs are migrated to d+_d+ subshard format.
-    return null;
+    exit(1);
   }
   // One-indexed.
   final int index = int.parse(match.group(1));
@@ -1526,25 +1437,25 @@ List<T> _selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSub
   return tests.sublist(start, end);
 }
 
-Future<bool> _runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
+Future<void> _runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
   final List<ShardRunner> sublist = _selectIndexOfTotalSubshard<ShardRunner>(tests);
-  // TODO(jmagman): Remove the boolean return to indicate fallback to unsharded variant once LUCI configs are migrated to d+_d+ subshard format.
-  if (sublist == null) {
-    return false;
-  }
   for (final ShardRunner test in sublist) {
     await test();
   }
-  return true;
 }
 
 /// If the CIRRUS_TASK_NAME environment variable exists, we use that to determine
 /// the shard and sub-shard (parsing it in the form shard-subshard-platform, ignoring
 /// the platform).
 ///
-/// However, for local testing you can just set the SHARD and SUBSHARD
+/// For local testing you can just set the SHARD and SUBSHARD
 /// environment variables. For example, to run all the framework tests you can
-/// just set SHARD=framework_tests. To run specifically the third subshard of
+/// just set SHARD=framework_tests. Some shards support named subshards, like
+/// SHARD=framework_tests SUBSHARD=widgets. Others support arbitrary numbered
+/// subsharding, like SHARD=build_tests SUBSHARD=1_2 (where 1_2 means "one of two"
+/// as in run the first half of the tests).
+///
+/// To run specifically the third subshard of
 /// the Web tests you can set SHARD=web_tests SUBSHARD=2 (it's zero-based).
 Future<void> selectShard(Map<String, ShardRunner> shards) => _runFromList(shards, kShardKey, 'shard', 0);
 Future<void> selectSubshard(Map<String, ShardRunner> subshards) => _runFromList(subshards, kSubshardKey, 'subshard', 1);

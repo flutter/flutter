@@ -45,11 +45,11 @@ import 'ticker_provider.dart';
 /// Widget build(BuildContext context) {
 ///   return Center(
 ///     child: InteractiveViewer(
-///       boundaryMargin: EdgeInsets.all(20.0),
+///       boundaryMargin: const EdgeInsets.all(20.0),
 ///       minScale: 0.1,
 ///       maxScale: 1.6,
 ///       child: Container(
-///         decoration: BoxDecoration(
+///         decoration: const BoxDecoration(
 ///           gradient: LinearGradient(
 ///             begin: Alignment.topCenter,
 ///             end: Alignment.bottomCenter,
@@ -99,10 +99,12 @@ class InteractiveViewer extends StatefulWidget {
        assert(scaleEnabled != null),
        // boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
-       assert((boundaryMargin.horizontal.isInfinite
+       assert(
+         (boundaryMargin.horizontal.isInfinite
            && boundaryMargin.vertical.isInfinite) || (boundaryMargin.top.isFinite
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
-           && boundaryMargin.left.isFinite)),
+           && boundaryMargin.left.isFinite),
+       ),
        super(key: key);
 
   /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
@@ -253,11 +255,12 @@ class InteractiveViewer extends StatefulWidget {
   /// Called when the user ends a pan or scale gesture on the widget.
   ///
   /// At the time this is called, the [TransformationController] will have
-  /// already been updated to reflect the change caused by the interaction.
+  /// already been updated to reflect the change caused by the interaction,
+  /// though a pan may cause an inertia animation after this is called as well.
   ///
   /// {@template flutter.widgets.InteractiveViewer.onInteractionEnd}
-  /// Will be called even if the interaction is disabled with
-  /// [panEnabled] or [scaleEnabled].
+  /// Will be called even if the interaction is disabled with [panEnabled] or
+  /// [scaleEnabled] for both touch gestures and mouse interactions.
   ///
   /// A [GestureDetector] wrapping the InteractiveViewer will not respond to
   /// [GestureDetector.onScaleStart], [GestureDetector.onScaleUpdate], and
@@ -294,7 +297,8 @@ class InteractiveViewer extends StatefulWidget {
   /// Called when the user updates a pan or scale gesture on the widget.
   ///
   /// At the time this is called, the [TransformationController] will have
-  /// already been updated to reflect the change caused by the interaction.
+  /// already been updated to reflect the change caused by the interaction, if
+  /// the interation caused the matrix to change.
   ///
   /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///
@@ -386,13 +390,13 @@ class InteractiveViewer extends StatefulWidget {
   ///     ),
   ///     body: Center(
   ///       child: InteractiveViewer(
-  ///         boundaryMargin: EdgeInsets.all(double.infinity),
+  ///         boundaryMargin: const EdgeInsets.all(double.infinity),
   ///         transformationController: _transformationController,
   ///         minScale: 0.1,
   ///         maxScale: 1.0,
   ///         onInteractionStart: _onInteractionStart,
   ///         child: Container(
-  ///           decoration: BoxDecoration(
+  ///           decoration: const BoxDecoration(
   ///             gradient: LinearGradient(
   ///               begin: Alignment.topCenter,
   ///               end: Alignment.bottomCenter,
@@ -403,7 +407,7 @@ class InteractiveViewer extends StatefulWidget {
   ///         ),
   ///       ),
   ///     ),
-  ///     persistentFooterButtons: [
+  ///     persistentFooterButtons: <Widget>[
   ///       IconButton(
   ///         onPressed: _animateResetInitialize,
   ///         tooltip: 'Reset',
@@ -580,11 +584,14 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Rect boundaryRect = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
     // Boundaries that are partially infinite are not allowed because Matrix4's
     // rotation and translation methods don't handle infinites well.
-    assert(boundaryRect.isFinite ||
+    assert(
+      boundaryRect.isFinite ||
         (boundaryRect.left.isInfinite
         && boundaryRect.top.isInfinite
         && boundaryRect.right.isInfinite
-        && boundaryRect.bottom.isInfinite), 'boundaryRect must either be infinite in all directions or finite in all directions.');
+        && boundaryRect.bottom.isInfinite),
+      'boundaryRect must either be infinite in all directions or finite in all directions.',
+    );
     return boundaryRect;
   }
 
@@ -796,6 +803,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       _gestureType ??= _getGestureType(details);
     }
     if (!_gestureIsSupported(_gestureType)) {
+      widget.onInteractionUpdate?.call(details);
       return;
     }
 
@@ -839,6 +847,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
       case _GestureType.rotate:
         if (details.rotation == 0.0) {
+          widget.onInteractionUpdate?.call(details);
           return;
         }
         final double desiredRotation = _rotationStart! + details.rotation;
@@ -856,6 +865,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         // In an effort to keep the behavior similar whether or not scaleEnabled
         // is true, these gestures are thrown away.
         if (details.scale != 1.0) {
+          widget.onInteractionUpdate?.call(details);
           return;
         }
         _panAxis ??= _getPanAxis(_referenceFocalPoint!, focalPointScene);
@@ -871,12 +881,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         );
         break;
     }
-    widget.onInteractionUpdate?.call(ScaleUpdateDetails(
-      focalPoint: details.focalPoint,
-      localFocalPoint: details.localFocalPoint,
-      scale: details.scale,
-      rotation: details.rotation,
-    ));
+    widget.onInteractionUpdate?.call(details);
   }
 
   // Handle the end of a gesture of _GestureType. All of pan, scale, and rotate
@@ -932,25 +937,36 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle mousewheel scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent) {
+      // Ignore left and right scroll.
+      if (event.scrollDelta.dy == 0.0) {
+        return;
+      }
       widget.onInteractionStart?.call(
         ScaleStartDetails(
           focalPoint: event.position,
           localFocalPoint: event.localPosition,
         ),
       );
+
+      // In the Flutter engine, the mousewheel scrollDelta is hardcoded to 20
+      // per scroll, while a trackpad scroll can be any amount. The calculation
+      // for scaleChange here was arbitrarily chosen to feel natural for both
+      // trackpads and mousewheels on all platforms.
+      final double scaleChange = math.exp(-event.scrollDelta.dy / 200);
+
       if (!_gestureIsSupported(_GestureType.scale)) {
+        widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+          focalPoint: event.position,
+          localFocalPoint: event.localPosition,
+          rotation: 0.0,
+          scale: scaleChange,
+          horizontalScale: 1.0,
+          verticalScale: 1.0,
+        ));
         widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
       }
 
-      // Ignore left and right scroll.
-      if (event.scrollDelta.dy == 0.0) {
-        return;
-      }
-
-      // In the Flutter engine, the mousewheel scrollDelta is hardcoded to 20 per scroll, while a trackpad scroll can be any amount.
-      // The calculation for scaleChange here was arbitrarily chosen to feel natural for both trackpads and mousewheels on all platforms.
-      final double scaleChange = math.exp(-event.scrollDelta.dy / 200);
       final Offset focalPointScene = _transformationController!.toScene(
         event.localPosition,
       );

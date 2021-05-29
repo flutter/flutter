@@ -276,7 +276,7 @@ enum StackFit {
 /// Deprecated. Use [Stack.clipBehavior] instead.
 @Deprecated(
   'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-  'This feature was deprecated after v1.22.0-12.0.pre.'
+  'This feature was deprecated after v1.22.0-12.0.pre.',
 )
 enum Overflow {
   /// Overflowing children will be visible.
@@ -436,7 +436,7 @@ class RenderStack extends RenderBox
   }
 
   /// Helper function for calculating the intrinsics metrics of a Stack.
-  static double getIntrinsicDimension(RenderBox? firstChild, double mainChildSizeGetter(RenderBox child)) {
+  static double getIntrinsicDimension(RenderBox? firstChild, double Function(RenderBox child) mainChildSizeGetter) {
     double extent = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
@@ -632,8 +632,14 @@ class RenderStack extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (clipBehavior != Clip.none && _hasVisualOverflow) {
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      _clipRectLayer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        paintStack,
+        clipBehavior: clipBehavior,
+        oldLayer: _clipRectLayer,
+      );
     } else {
       _clipRectLayer = null;
       paintStack(context, offset);

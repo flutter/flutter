@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_bar.dart';
@@ -195,10 +194,10 @@ class Dialog extends StatelessWidget {
 ///     barrierDismissible: false, // user must tap button!
 ///     builder: (BuildContext context) {
 ///       return AlertDialog(
-///         title: Text('AlertDialog Title'),
+///         title: const Text('AlertDialog Title'),
 ///         content: SingleChildScrollView(
 ///           child: ListBody(
-///             children: <Widget>[
+///             children: const <Widget>[
 ///               Text('This is a demo alert dialog.'),
 ///               Text('Would you like to approve of this message?'),
 ///             ],
@@ -206,7 +205,7 @@ class Dialog extends StatelessWidget {
 ///         ),
 ///         actions: <Widget>[
 ///           TextButton(
-///             child: Text('Approve'),
+///             child: const Text('Approve'),
 ///             onPressed: () {
 ///               Navigator.of(context).pop();
 ///             },
@@ -216,6 +215,39 @@ class Dialog extends StatelessWidget {
 ///     },
 ///   );
 /// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// This demo shows a [TextButton] which when pressed, calls [showDialog]. When called, this method
+/// displays a Material dialog above the current contents of the app and returns
+/// a [Future] that completes when the dialog is dismissed.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextButton(
+///     onPressed: () => showDialog<String>(
+///       context: context,
+///       builder: (BuildContext context) => AlertDialog(
+///         title: const Text('AlertDialog Tilte'),
+///         content: const Text('AlertDialog description'),
+///         actions: <Widget>[
+///           TextButton(
+///             onPressed: () => Navigator.pop(context, 'Cancel'),
+///             child: const Text('Cancel'),
+///           ),
+///           TextButton(
+///             onPressed: () => Navigator.pop(context, 'OK'),
+///             child: const Text('OK'),
+///           ),
+///         ],
+///       ),
+///     ),
+///     child: const Text('Show Dialog'),
+///   );
+/// }
+///
 /// ```
 /// {@end-tool}
 ///
@@ -335,13 +367,13 @@ class AlertDialog extends StatelessWidget {
   /// This is an example of a set of actions aligned with the content widget.
   /// ```dart
   /// AlertDialog(
-  ///   title: Text('Title'),
+  ///   title: const Text('Title'),
   ///   content: Container(width: 200, height: 200, color: Colors.green),
   ///   actions: <Widget>[
-  ///     ElevatedButton(onPressed: () {}, child: Text('Button 1')),
-  ///     ElevatedButton(onPressed: () {}, child: Text('Button 2')),
+  ///     ElevatedButton(onPressed: () {}, child: const Text('Button 1')),
+  ///     ElevatedButton(onPressed: () {}, child: const Text('Button 2')),
   ///   ],
-  ///   actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
+  ///   actionsPadding: const EdgeInsets.symmetric(horizontal: 8.0),
   /// )
   /// ```
   /// {@end-tool}
@@ -392,13 +424,8 @@ class AlertDialog extends StatelessWidget {
   /// This is different from [actionsPadding], which defines the padding
   /// between the entire button bar and the edges of the dialog.
   ///
-  /// If this property is null, then it will use the surrounding
-  /// [ButtonBarThemeData.buttonPadding]. If that is null, it will default to
+  /// If this property is null, then it will default to
   /// 8.0 logical pixels on the left and right.
-  ///
-  /// See also:
-  ///
-  /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry? buttonPadding;
 
   /// {@macro flutter.material.dialog.backgroundColor}
@@ -439,13 +466,6 @@ class AlertDialog extends StatelessWidget {
   /// to overflow. Both [title] and [content] are wrapped in a scroll view,
   /// allowing all overflowed content to be visible while still showing the
   /// button bar.
-  @Deprecated(
-    'Set scrollable to `true`. This parameter will be removed and '
-    'was introduced to migrate AlertDialog to be scrollable by '
-    'default. For more information, see '
-    'https://flutter.dev/docs/release/breaking-changes/scrollable_alert_dialog. '
-    'This feature was deprecated after v1.13.2.'
-  )
   final bool scrollable;
 
   @override
@@ -506,20 +526,29 @@ class AlertDialog extends StatelessWidget {
         ),
         child: DefaultTextStyle(
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1!,
-          child: content!,
+          child: Semantics(
+            container: true,
+            child: content!,
+          ),
         ),
       );
     }
 
 
     if (actions != null) {
+      final double spacing = (buttonPadding?.horizontal ?? 16) / 2;
       actionsWidget = Padding(
         padding: actionsPadding,
-        child: ButtonBar(
-          buttonPadding: buttonPadding,
-          overflowDirection: actionsOverflowDirection,
-          overflowButtonSpacing: actionsOverflowButtonSpacing,
-          children: actions!,
+        child: Container(
+          alignment: AlignmentDirectional.centerEnd,
+          padding: EdgeInsets.all(spacing),
+          child: OverflowBar(
+            spacing: spacing,
+            overflowAlignment: OverflowBarAlignment.end,
+            overflowDirection: actionsOverflowDirection ?? VerticalDirection.down,
+            overflowSpacing: actionsOverflowButtonSpacing ?? 0,
+            children: actions!,
+          ),
         ),
       );
     }
@@ -851,7 +880,11 @@ class SimpleDialog extends StatelessWidget {
         ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6!,
-          child: Semantics(namesRoute: label == null, child: title),
+          child: Semantics(
+            namesRoute: label == null,
+            container: true,
+            child: title,
+          ),
         ),
       );
     }
@@ -968,7 +1001,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=freeform}
+/// {@tool sample --template=stateless_widget_restoration_material}
 ///
 /// This sample demonstrates how to create a restorable Material dialog. This is
 /// accomplished by enabling state restoration by specifying
@@ -977,47 +1010,25 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
 /// ```dart
-/// void main() {
-///   runApp(MyApp());
-/// }
-///
-/// class MyApp extends StatelessWidget {
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       restorationScopeId: 'app',
-///       title: 'Restorable Routes Demo',
-///       home: MyHomePage(),
-///     );
-///   }
-/// }
-///
-/// class MyHomePage extends StatelessWidget {
-///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-///     return DialogRoute<void>(
-///       context: context,
-///       builder: (BuildContext context) => const AlertDialog(title: Text('Material Alert!')),
-///     );
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       body: Center(
-///         child: OutlinedButton(
-///           onPressed: () {
-///             Navigator.of(context).restorablePush(_dialogBuilder);
-///           },
-///           child: const Text('Open Dialog'),
-///         ),
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: OutlinedButton(
+///         onPressed: () {
+///           Navigator.of(context).restorablePush(_dialogBuilder);
+///         },
+///         child: const Text('Open Dialog'),
 ///       ),
-///     );
-///   }
+///     ),
+///   );
+/// }
+///
+/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+///   return DialogRoute<void>(
+///     context: context,
+///     builder: (BuildContext context) => const AlertDialog(title: Text('Material Alert!')),
+///   );
 /// }
 /// ```
 ///

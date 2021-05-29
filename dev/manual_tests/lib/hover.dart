@@ -12,7 +12,7 @@ void main() {
 }
 
 class DemoButton extends StatelessWidget {
-  const DemoButton({this.name});
+  const DemoButton({Key key, this.name}) : super(key: key);
 
   final String name;
 

@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -16,6 +17,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
@@ -23,11 +26,9 @@ import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 void main() {
   final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
@@ -44,7 +45,7 @@ void main() {
 
     setUp(() {
       final Artifacts artifacts = Artifacts.test();
-      cache = Cache.test();
+      cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
       iosDeploy = IOSDeploy(
         artifacts: artifacts,
@@ -247,7 +248,9 @@ void main() {
         mockProcess2 = MockProcess();
         mockProcess3 = MockProcess();
         forwardedPort = ForwardedPort.withContext(123, 456, mockProcess3);
-        cache = Cache.test();
+        cache = Cache.test(
+          processManager: FakeProcessManager.any(),
+        );
         iosDeploy = IOSDeploy(
           artifacts: Artifacts.test(),
           cache: cache,
@@ -301,7 +304,7 @@ void main() {
     setUp(() {
       mockXcdevice = MockXcdevice();
       final Artifacts artifacts = Artifacts.test();
-      cache = Cache.test();
+      cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
       mockIosWorkflow = MockIOSWorkflow();
       fakeProcessManager = FakeProcessManager.any();
@@ -581,8 +584,6 @@ void main() {
 }
 
 class MockIOSApp extends Mock implements IOSApp {}
-class MockIMobileDevice extends Mock implements IMobileDevice {}
-class MockIOSDeploy extends Mock implements IOSDeploy {}
 class MockIOSWorkflow extends Mock implements IOSWorkflow {}
 class MockXcdevice extends Mock implements XCDevice {}
-class MockVmService extends Mock implements VmService {}
+class MockProcess extends Mock implements Process {}

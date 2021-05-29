@@ -2,23 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
+// @dart = 2.8
 
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/mocks.dart';
-import '../src/testbed.dart';
 
 const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
 const FakeEmulator emulator2 = FakeEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
@@ -45,14 +44,16 @@ const FakeCommand kListEmulatorsCommand = FakeCommand(
 );
 
 void main() {
-  MockProcessManager mockProcessManager;
+  FakeProcessManager fakeProcessManager;
   MockAndroidSdk mockSdk;
-  MockXcode mockXcode;
+  FileSystem fileSystem;
+  Xcode xcode;
 
   setUp(() {
-    mockProcessManager = MockProcessManager();
+    fileSystem = MemoryFileSystem.test();
+    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     mockSdk = MockAndroidSdk();
-    mockXcode = MockXcode();
+    xcode = Xcode.test(processManager: fakeProcessManager, fileSystem: fileSystem);
 
     when(mockSdk.avdManagerPath).thenReturn('avdmanager');
     when(mockSdk.getAvdManagerPath()).thenReturn('avdmanager');
@@ -77,10 +78,11 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
 
-      await expectLater(() async => await emulatorManager.getAllAvailableEmulators(),
+      await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
         returnsNormally);
     });
 
@@ -99,10 +101,11 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: null,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
 
-      await expectLater(() async => await emulatorManager.getAllAvailableEmulators(),
+      await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
         returnsNormally);
     });
 
@@ -133,6 +136,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -174,6 +178,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -210,6 +215,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
@@ -248,6 +254,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'existing-avd-1');
@@ -289,6 +296,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -299,25 +307,35 @@ void main() {
   });
 
   group('ios_emulators', () {
-    bool didAttemptToRunSimulator = false;
-    setUp(() {
-      when(mockXcode.xcodeSelectPath).thenReturn('/fake/Xcode.app/Contents/Developer');
-      when(mockXcode.getSimulatorPath()).thenAnswer((_) => '/fake/simulator.app');
-      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
-        final List<String> args = invocation.positionalArguments[0] as List<String>;
-        if (args.length >= 3 && args[0] == 'open' && args[1] == '-a' && args[2] == '/fake/simulator.app') {
-          didAttemptToRunSimulator = true;
-        }
-        return ProcessResult(101, 0, '', '');
-      });
-    });
     testUsingContext('runs correct launch commands', () async {
+      fileSystem.directory('/fake/Xcode.app/Contents/Developer/Applications/Simulator.app').createSync(recursive: true);
+      fakeProcessManager.addCommands(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <String>['/usr/bin/xcode-select', '--print-path'],
+            stdout: '/fake/Xcode.app/Contents/Developer',
+          ),
+          const FakeCommand(command: <String>[
+            'open',
+            '-n',
+            '-a',
+            '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app',
+          ]),
+          const FakeCommand(command: <String>[
+            'open',
+            '-a',
+            '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app',
+          ])
+        ],
+      );
+
       const Emulator emulator = IOSEmulator('ios');
       await emulator.launch();
-      expect(didAttemptToRunSimulator, equals(true));
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Xcode: () => mockXcode,
+      ProcessManager: () => fakeProcessManager,
+      Xcode: () => xcode,
+      FileSystem: () => fileSystem,
     });
   });
 }
@@ -354,28 +372,3 @@ class FakeEmulator extends Emulator {
     throw UnimplementedError('Not implemented in Mock');
   }
 }
-
-class MockProcessManager extends Mock implements ProcessManager {
-
-  @override
-  ProcessResult runSync(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding stdoutEncoding = systemEncoding,
-    Encoding stderrEncoding = systemEncoding,
-  }) {
-    final String program = command[0] as String;
-    final List<String> args = command.sublist(1) as List<String>;
-    switch (program) {
-      case '/usr/bin/xcode-select':
-        throw ProcessException(program, args);
-        break;
-    }
-    throw StateError('Unexpected process call: $command');
-  }
-}
-
-class MockXcode extends Mock implements Xcode {}

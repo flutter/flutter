@@ -8,14 +8,14 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('AnimatedList', (WidgetTester tester) async {
-    final AnimatedListItemBuilder builder = (BuildContext context, int index, Animation<double> animation) {
+    Widget builder(BuildContext context, int index, Animation<double> animation) {
       return SizedBox(
         height: 100.0,
         child: Center(
           child: Text('item $index'),
         ),
       );
-    };
+    }
     final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
@@ -341,7 +341,7 @@ void main() {
         'StatefulWidget that built the AnimatedList. Please see the\n'
         'AnimatedList documentation for examples of how to refer to an\n'
         'AnimatedListState object:\n'
-        'https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html\n'
+        '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html\n'
       ),
     );
     expect(error.diagnostics[3], isA<DiagnosticsProperty<Element>>());
@@ -357,10 +357,34 @@ void main() {
         '   StatefulWidget that built the AnimatedList. Please see the\n'
         '   AnimatedList documentation for examples of how to refer to an\n'
         '   AnimatedListState object:\n'
-        '   https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html\n'
+        '     https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html\n'
         '   The context used was:\n'
         '     Container-[GlobalKey#32cc6]\n'
       ),
     );
+  });
+
+  testWidgets('AnimatedList.clipBehavior is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
+  const Clip clipBehavior = Clip.none;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList(
+          initialItemCount: 2,
+          clipBehavior: clipBehavior,
+          itemBuilder: (BuildContext context, int index, Animation<double> _) {
+            return SizedBox(
+              height: 100.0,
+              child: Center(
+                child: Text('item $index'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior, clipBehavior);
   });
 }

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -98,7 +98,7 @@ void main() {
       expect(actual, 5);
     });
 
-    test('should be 0 when offset is 0.00000001 times greater than item extent where the divison will return more than 13 zero decimals', () {
+    test('should be 0 when offset is 0.00000001 times greater than item extent where the division will return more than 13 zero decimals', () {
       final int actual = testGetMaxChildIndexForScrollOffset(
         genericItemExtent + extraValueToHaveRoundingIssues, genericItemExtent);
       expect(actual, 0);

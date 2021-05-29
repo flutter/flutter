@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -106,9 +106,9 @@ void main() {
       );
 
       final List<RenderObject> visitedChildren = <RenderObject>[];
-      final RenderObjectVisitor visitor = (RenderObject child) {
+      void visitor(RenderObject child) {
         visitedChildren.add(child);
-      };
+      }
 
       stack.visitChildrenForSemantics(visitor);
 

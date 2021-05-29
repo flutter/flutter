@@ -1,0 +1,41 @@
+<<skip until matching line>>
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown running a test:
+Who lives, who dies, who tells your story\?
+
+When the exception was thrown, this was the stack:
+#0      main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]integration_test[/\\]exception_handling_test\.dart:10:5\)
+<<skip until matching line>>
+The test description was:
+Exception handling in test harness - string
+<<skip until matching line>>
+  Test failed\. See exception logs above\.
+  The test description was: Exception handling in test harness - string
+<<skip until matching line>>
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+Who lives, who dies, who tells your story\?
+
+When the exception was thrown, this was the stack:
+#0      main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]integration_test[/\\]exception_handling_test\.dart:13:5\)
+<<skip until matching line>>
+The test description was:
+Exception handling in test harness - FlutterError
+<<skip until matching line>>
+  Test failed\. See exception logs above\.
+  The test description was: Exception handling in test harness - FlutterError
+<<skip until matching line>>
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown running a test:
+Who lives, who dies, who tells your story\?
+
+When the exception was thrown, this was the stack:
+#2      main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]integration_test[/\\]exception_handling_test\.dart:16:5\)
+<<skip until matching line>>
+The test description was:
+Exception handling in test harness - uncaught Future error
+<<skip until matching line>>
+  Test failed\. See exception logs above\.
+  The test description was: Exception handling in test harness - uncaught Future error
+<<skip until matching line>>
+.*..:.. \+0 -3: Some tests failed\. *

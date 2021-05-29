@@ -38,7 +38,7 @@ Future<String> getAndroidKeyCodes() async {
 
 Future<String> getWindowsKeyCodes() async {
   final Uri keyCodesUri = Uri.parse('https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.10240.0/um/WinUser.h');
-  return await http.read(keyCodesUri);
+  return http.read(keyCodesUri);
 }
 
 /// Get contents of the file that contains the scan codes in Android source.
@@ -54,12 +54,12 @@ Future<String> getAndroidScanCodes() async {
 
 Future<String> getGlfwKeyCodes() async {
   final Uri keyCodesUri = Uri.parse('https://raw.githubusercontent.com/glfw/glfw/master/include/GLFW/glfw3.h');
-  return await http.read(keyCodesUri);
+  return http.read(keyCodesUri);
 }
 
 Future<String> getGtkKeyCodes() async {
   final Uri keyCodesUri = Uri.parse('https://gitlab.gnome.org/GNOME/gtk/-/raw/master/gdk/gdkkeysyms.h');
-  return await http.read(keyCodesUri);
+  return http.read(keyCodesUri);
 }
 
 Future<void> main(List<String> rawArguments) async {

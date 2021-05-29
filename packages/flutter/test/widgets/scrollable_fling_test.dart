@@ -147,6 +147,6 @@ void main() {
     expect(log, equals(<String>['tap 21']));
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 21', 'tap 48']));
+    expect(log, equals(<String>['tap 21', 'tap 49']));
   });
 }

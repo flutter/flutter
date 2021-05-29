@@ -143,7 +143,7 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
       throw FlutterError(
         'Duplicate keys found.\n'
         'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-        '$parent has multiple children with key $nonUniqueKey.'
+        '$parent has multiple children with key $nonUniqueKey.',
       );
     }
     return true;
@@ -226,7 +226,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
           'that was passed to MediaQuery.of(). This can happen because you '
           'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget '
           '(those widgets introduce a MediaQuery), or it can happen if the '
-          'context you use comes from a widget above those widgets.'
+          'context you use comes from a widget above those widgets.',
         ),
       ]);
     }
@@ -282,7 +282,7 @@ bool debugCheckHasDirectionality(BuildContext context, { String? why, String? hi
           'determines the ambient reading direction and is used, for example, to '
           'determine how to lay out text, how to interpret "start" and "end" '
           'values, and to resolve EdgeInsetsDirectional, '
-          'AlignmentDirectional, and other *Directional objects.'
+          'AlignmentDirectional, and other *Directional objects.',
         ),
         if (alternative != null)
           ErrorHint(alternative),
@@ -308,7 +308,7 @@ void debugWidgetBuilderValue(Widget widget, Widget? built) {
         ErrorDescription('Build functions must never return null.'),
         ErrorHint(
           'To return an empty space that causes the building widget to fill available room, return "Container()". '
-          'To return an empty space that takes as little room as possible, return "Container(width: 0.0, height: 0.0)".'
+          'To return an empty space that takes as little room as possible, return "Container(width: 0.0, height: 0.0)".',
         ),
       ]);
     }
@@ -318,7 +318,7 @@ void debugWidgetBuilderValue(Widget widget, Widget? built) {
         DiagnosticsProperty<Widget>('The offending widget is', widget, style: DiagnosticsTreeStyle.errorProperty),
         ErrorDescription(
           'Build functions must never return their BuildContext parameter\'s widget or a child that contains "context.widget". '
-          'Doing so introduces a loop in the widget tree that can cause the app to crash.'
+          'Doing so introduces a loop in the widget tree that can cause the app to crash.',
         ),
       ]);
     }
@@ -344,19 +344,19 @@ bool debugCheckHasWidgetsLocalizations(BuildContext context) {
         ErrorSummary('No WidgetsLocalizations found.'),
         ErrorDescription(
           '${context.widget.runtimeType} widgets require WidgetsLocalizations '
-          'to be provided by a Localizations widget ancestor.'
+          'to be provided by a Localizations widget ancestor.',
         ),
         ErrorDescription(
           'The widgets library uses Localizations to generate messages, '
-          'labels, and abbreviations.'
+          'labels, and abbreviations.',
         ),
         ErrorHint(
           'To introduce a WidgetsLocalizations, either use a '
           'WidgetsApp at the root of your application to include them '
           'automatically, or add a Localization widget with a '
-          'WidgetsLocalizations delegate.'
+          'WidgetsLocalizations delegate.',
         ),
-        ...context.describeMissingAncestor(expectedAncestorType: WidgetsLocalizations)
+        ...context.describeMissingAncestor(expectedAncestorType: WidgetsLocalizations),
       ]);
     }
     return true;
@@ -382,16 +382,15 @@ bool debugCheckHasOverlay(BuildContext context) {
         ErrorDescription(
           '${context.widget.runtimeType} widgets require an Overlay '
           'widget ancestor.\n'
-          'An overlay lets widgets float on top of other widget children.'
+          'An overlay lets widgets float on top of other widget children.',
         ),
         ErrorHint(
           'To introduce an Overlay widget, you can either directly '
           'include one, or use a widget that contains an Overlay itself, '
           'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
         ),
-        ...context.describeMissingAncestor(expectedAncestorType: Overlay)
-      ]
-      );
+        ...context.describeMissingAncestor(expectedAncestorType: Overlay),
+      ]);
     }
     return true;
   }());

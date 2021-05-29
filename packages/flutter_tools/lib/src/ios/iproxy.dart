@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/io.dart';
@@ -14,10 +13,10 @@ import '../base/process.dart';
 /// See https://github.com/libimobiledevice/libusbmuxd.
 class IProxy {
   IProxy({
-    @required String iproxyPath,
-    @required Logger logger,
-    @required ProcessManager processManager,
-    @required MapEntry<String, String> dyLdLibEntry,
+    required String iproxyPath,
+    required Logger logger,
+    required ProcessManager processManager,
+    required MapEntry<String, String> dyLdLibEntry,
   }) : _dyLdLibEntry = dyLdLibEntry,
         _processUtils = ProcessUtils(processManager: processManager, logger: logger),
         _iproxyPath = iproxyPath;
@@ -27,8 +26,8 @@ class IProxy {
   /// This specifies the path to iproxy as 'iproxy` and the dyLdLibEntry as
   /// 'DYLD_LIBRARY_PATH: /path/to/libs'.
   factory IProxy.test({
-    @required Logger logger,
-    @required ProcessManager processManager,
+    required Logger logger,
+    required ProcessManager processManager,
   }) {
     return IProxy(
       iproxyPath: 'iproxy',

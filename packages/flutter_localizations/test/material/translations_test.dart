@@ -31,6 +31,8 @@ void main() {
       expect(localizations.previousMonthTooltip, isNotNull);
       expect(localizations.nextPageTooltip, isNotNull);
       expect(localizations.previousPageTooltip, isNotNull);
+      expect(localizations.firstPageTooltip, isNotNull);
+      expect(localizations.lastPageTooltip, isNotNull);
       expect(localizations.showMenuTooltip, isNotNull);
       expect(localizations.licensesPageTitle, isNotNull);
       expect(localizations.rowsPerPageTitle, isNotNull);
@@ -97,6 +99,21 @@ void main() {
       expect(localizations.formatTimeOfDay(const TimeOfDay(hour: 10, minute: 0)), isNotNull);
     });
   }
+
+  testWidgets('translations spot check', (WidgetTester tester) async {
+    Locale locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: null, countryCode: null);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations.firstPageTooltip, '第一页');
+    expect(localizations.lastPageTooltip, '最后一页');
+
+    locale = const Locale.fromSubtags(languageCode: 'zu', scriptCode: null, countryCode: null);
+    localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    expect(localizations.firstPageTooltip, 'Ikhasi lokuqala');
+    expect(localizations.lastPageTooltip, 'Ikhasi lokugcina');
+  });
 
   testWidgets('spot check selectedRowCount translations', (WidgetTester tester) async {
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en'));

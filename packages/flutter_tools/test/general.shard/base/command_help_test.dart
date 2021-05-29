@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -9,7 +11,7 @@ import 'package:flutter_tools/src/base/terminal.dart' show AnsiTerminal, OutputP
 import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart' show MockStdio;
+import '../../src/fakes.dart';
 
 CommandHelp _createCommandHelp({
   @required bool ansi,
@@ -21,7 +23,7 @@ CommandHelp _createCommandHelp({
   return CommandHelp(
     logger: BufferLogger.test(),
     terminal: AnsiTerminal(
-      stdio:  MockStdio(),
+      stdio:  FakeStdio(),
       platform: platform,
     ),
     platform: platform,
@@ -71,7 +73,6 @@ void _testMessageLength({
   expect(commandHelp.r.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.s.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.t.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.v.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.w.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.z.toString().length, lessThanOrEqualTo(expectedWidth));
 }
@@ -117,7 +118,6 @@ void main() {
         expect(commandHelp.r.toString(), startsWith('\x1B[1mr\x1B[22m'));
         expect(commandHelp.s.toString(), startsWith('\x1B[1ms\x1B[22m'));
         expect(commandHelp.t.toString(), startsWith('\x1B[1mt\x1B[22m'));
-        expect(commandHelp.v.toString(), startsWith('\x1B[1mv\x1B[22m'));
         expect(commandHelp.w.toString(), startsWith('\x1B[1mw\x1B[22m'));
         expect(commandHelp.z.toString(), startsWith('\x1B[1mz\x1B[22m'));
       });
@@ -128,16 +128,16 @@ void main() {
           wrapColumn: maxLineWidth,
         );
 
-        expect(commandHelp.L.toString(), endsWith('\x1B[1;30m(debugDumpLayerTree)\x1B[39m\x1b[22m'));
-        expect(commandHelp.P.toString(), endsWith('\x1B[1;30m(WidgetsApp.showPerformanceOverlay)\x1B[39m\x1b[22m'));
-        expect(commandHelp.S.toString(), endsWith('\x1B[1;30m(debugDumpSemantics)\x1B[39m\x1b[22m'));
-        expect(commandHelp.U.toString(), endsWith('\x1B[1;30m(debugDumpSemantics)\x1B[39m\x1b[22m'));
-        expect(commandHelp.a.toString(), endsWith('\x1B[1;30m(debugProfileWidgetBuilds)\x1B[39m\x1b[22m'));
-        expect(commandHelp.i.toString(), endsWith('\x1B[1;30m(WidgetsApp.showWidgetInspectorOverride)\x1B[39m\x1b[22m'));
-        expect(commandHelp.o.toString(), endsWith('\x1B[1;30m(defaultTargetPlatform)\x1B[39m\x1b[22m'));
-        expect(commandHelp.p.toString(), endsWith('\x1B[1;30m(debugPaintSizeEnabled)\x1B[39m\x1b[22m'));
-        expect(commandHelp.t.toString(), endsWith('\x1B[1;30m(debugDumpRenderTree)\x1B[39m\x1b[22m'));
-        expect(commandHelp.w.toString(), endsWith('\x1B[1;30m(debugDumpApp)\x1B[39m\x1b[22m'));
+        expect(commandHelp.L.toString(), endsWith('\x1B[90m(debugDumpLayerTree)\x1B[39m\x1b[22m'));
+        expect(commandHelp.P.toString(), endsWith('\x1B[90m(WidgetsApp.showPerformanceOverlay)\x1B[39m\x1b[22m'));
+        expect(commandHelp.S.toString(), endsWith('\x1B[90m(debugDumpSemantics)\x1B[39m\x1b[22m'));
+        expect(commandHelp.U.toString(), endsWith('\x1B[90m(debugDumpSemantics)\x1B[39m\x1b[22m'));
+        expect(commandHelp.a.toString(), endsWith('\x1B[90m(debugProfileWidgetBuilds)\x1B[39m\x1b[22m'));
+        expect(commandHelp.i.toString(), endsWith('\x1B[90m(WidgetsApp.showWidgetInspectorOverride)\x1B[39m\x1b[22m'));
+        expect(commandHelp.o.toString(), endsWith('\x1B[90m(defaultTargetPlatform)\x1B[39m\x1b[22m'));
+        expect(commandHelp.p.toString(), endsWith('\x1B[90m(debugPaintSizeEnabled)\x1B[39m\x1b[22m'));
+        expect(commandHelp.t.toString(), endsWith('\x1B[90m(debugDumpRenderTree)\x1B[39m\x1b[22m'));
+        expect(commandHelp.w.toString(), endsWith('\x1B[90m(debugDumpApp)\x1B[39m\x1b[22m'));
       });
 
       testWithoutContext('should not create a help text longer than maxLineWidth without ansi support', () {
@@ -178,24 +178,23 @@ void main() {
           wrapColumn: maxLineWidth,
         );
 
-        expect(commandHelp.L.toString(), equals('\x1B[1mL\x1B[22m Dump layer tree to the console.                               \x1B[1;30m(debugDumpLayerTree)\x1B[39m\x1b[22m'));
-        expect(commandHelp.P.toString(), equals('\x1B[1mP\x1B[22m Toggle performance overlay.                    \x1B[1;30m(WidgetsApp.showPerformanceOverlay)\x1B[39m\x1b[22m'));
+        expect(commandHelp.L.toString(), equals('\x1B[1mL\x1B[22m Dump layer tree to the console.                               \x1B[90m(debugDumpLayerTree)\x1B[39m\x1b[22m'));
+        expect(commandHelp.P.toString(), equals('\x1B[1mP\x1B[22m Toggle performance overlay.                    \x1B[90m(WidgetsApp.showPerformanceOverlay)\x1B[39m\x1b[22m'));
         expect(commandHelp.R.toString(), equals('\x1B[1mR\x1B[22m Hot restart.'));
-        expect(commandHelp.S.toString(), equals('\x1B[1mS\x1B[22m Dump accessibility tree in traversal order.                   \x1B[1;30m(debugDumpSemantics)\x1B[39m\x1b[22m'));
-        expect(commandHelp.U.toString(), equals('\x1B[1mU\x1B[22m Dump accessibility tree in inverse hit test order.            \x1B[1;30m(debugDumpSemantics)\x1B[39m\x1b[22m'));
-        expect(commandHelp.a.toString(), equals('\x1B[1ma\x1B[22m Toggle timeline events for all widget build methods.    \x1B[1;30m(debugProfileWidgetBuilds)\x1B[39m\x1b[22m'));
+        expect(commandHelp.S.toString(), equals('\x1B[1mS\x1B[22m Dump accessibility tree in traversal order.                   \x1B[90m(debugDumpSemantics)\x1B[39m\x1b[22m'));
+        expect(commandHelp.U.toString(), equals('\x1B[1mU\x1B[22m Dump accessibility tree in inverse hit test order.            \x1B[90m(debugDumpSemantics)\x1B[39m\x1b[22m'));
+        expect(commandHelp.a.toString(), equals('\x1B[1ma\x1B[22m Toggle timeline events for all widget build methods.    \x1B[90m(debugProfileWidgetBuilds)\x1B[39m\x1b[22m'));
         expect(commandHelp.d.toString(), equals('\x1B[1md\x1B[22m Detach (terminate "flutter run" but leave application running).'));
         expect(commandHelp.g.toString(), equals('\x1B[1mg\x1B[22m Run source code generators.'));
         expect(commandHelp.h.toString(), equals('\x1B[1mh\x1B[22m Repeat this help message.'));
-        expect(commandHelp.i.toString(), equals('\x1B[1mi\x1B[22m Toggle widget inspector.                  \x1B[1;30m(WidgetsApp.showWidgetInspectorOverride)\x1B[39m\x1b[22m'));
-        expect(commandHelp.o.toString(), equals('\x1B[1mo\x1B[22m Simulate different operating systems.                      \x1B[1;30m(defaultTargetPlatform)\x1B[39m\x1b[22m'));
-        expect(commandHelp.p.toString(), equals('\x1B[1mp\x1B[22m Toggle the display of construction lines.                  \x1B[1;30m(debugPaintSizeEnabled)\x1B[39m\x1b[22m'));
+        expect(commandHelp.i.toString(), equals('\x1B[1mi\x1B[22m Toggle widget inspector.                  \x1B[90m(WidgetsApp.showWidgetInspectorOverride)\x1B[39m\x1b[22m'));
+        expect(commandHelp.o.toString(), equals('\x1B[1mo\x1B[22m Simulate different operating systems.                      \x1B[90m(defaultTargetPlatform)\x1B[39m\x1b[22m'));
+        expect(commandHelp.p.toString(), equals('\x1B[1mp\x1B[22m Toggle the display of construction lines.                  \x1B[90m(debugPaintSizeEnabled)\x1B[39m\x1b[22m'));
         expect(commandHelp.q.toString(), equals('\x1B[1mq\x1B[22m Quit (terminate the application on the device).'));
         expect(commandHelp.r.toString(), equals('\x1B[1mr\x1B[22m Hot reload. $fire$fire$fire'));
         expect(commandHelp.s.toString(), equals('\x1B[1ms\x1B[22m Save a screenshot to flutter.png.'));
-        expect(commandHelp.t.toString(), equals('\x1B[1mt\x1B[22m Dump rendering tree to the console.                          \x1B[1;30m(debugDumpRenderTree)\x1B[39m\x1b[22m'));
-        expect(commandHelp.v.toString(), equals('\x1B[1mv\x1B[22m Launch DevTools.'));
-        expect(commandHelp.w.toString(), equals('\x1B[1mw\x1B[22m Dump widget hierarchy to the console.                               \x1B[1;30m(debugDumpApp)\x1B[39m\x1b[22m'));
+        expect(commandHelp.t.toString(), equals('\x1B[1mt\x1B[22m Dump rendering tree to the console.                          \x1B[90m(debugDumpRenderTree)\x1B[39m\x1b[22m'));
+        expect(commandHelp.w.toString(), equals('\x1B[1mw\x1B[22m Dump widget hierarchy to the console.                               \x1B[90m(debugDumpApp)\x1B[39m\x1b[22m'));
         expect(commandHelp.z.toString(), equals('\x1B[1mz\x1B[22m Toggle elevation checker.'));
       });
 
@@ -221,7 +220,6 @@ void main() {
         expect(commandHelp.r.toString(), equals('r Hot reload. $fire$fire$fire'));
         expect(commandHelp.s.toString(), equals('s Save a screenshot to flutter.png.'));
         expect(commandHelp.t.toString(), equals('t Dump rendering tree to the console.                          (debugDumpRenderTree)'));
-        expect(commandHelp.v.toString(), equals('v Launch DevTools.'));
         expect(commandHelp.w.toString(), equals('w Dump widget hierarchy to the console.                               (debugDumpApp)'));
         expect(commandHelp.z.toString(), equals('z Toggle elevation checker.'));
       });

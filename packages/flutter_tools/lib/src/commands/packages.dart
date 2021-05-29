@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 
 import '../base/common.dart';
@@ -82,11 +84,11 @@ class PackagesGetCommand extends FlutterCommand {
   Future<Map<CustomDimensions, String>> get usageValues async {
     final Map<CustomDimensions, String> usageValues = <CustomDimensions, String>{};
     final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
-    final String target = findProjectRoot(workingDirectory);
+    final String target = findProjectRoot(globals.fs, workingDirectory);
     if (target == null) {
       return usageValues;
     }
-    final FlutterProject rootProject = FlutterProject.fromPath(target);
+    final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
     // Do not send plugin analytics if pub has not run before.
     final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
       && rootProject.packagesFile.existsSync()
@@ -116,6 +118,7 @@ class PackagesGetCommand extends FlutterCommand {
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
+        platform: globals.platform,
         projectDir: flutterProject.directory,
       );
 
@@ -151,14 +154,14 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
-    final String target = findProjectRoot(workingDirectory);
+    final String target = findProjectRoot(globals.fs, workingDirectory);
     if (target == null) {
       throwToolExit(
        'Expected to find project root in '
        '${ workingDirectory ?? "current working directory" }.'
       );
     }
-    final FlutterProject rootProject = FlutterProject.fromPath(target);
+    final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
     await _runPubGet(target, rootProject);
     await rootProject.regeneratePlatformSpecificTooling();
@@ -300,16 +303,16 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
             rest[0].contains(r'\'))) {
       // HACK: Supporting flutter specific behavior where you can pass a
       //       folder to the command.
-      target = findProjectRoot(rest[0]);
+      target = findProjectRoot(globals.fs, rest[0]);
       rest = <String>[];
     } else {
-      target = findProjectRoot();
+      target = findProjectRoot(globals.fs);
     }
     if (target == null) {
       throwToolExit('Expected to find project root in '
           'current working directory.');
     }
-    final FlutterProject flutterProject = FlutterProject.fromPath(target);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
     if (flutterProject.manifest.generateSyntheticPackage) {
       final Environment environment = Environment(
@@ -321,6 +324,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
+        platform: globals.platform,
         projectDir: flutterProject.directory,
       );
 

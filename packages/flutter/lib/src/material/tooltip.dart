@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'feedback.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 import 'tooltip_theme.dart';
 
 /// A material design tooltip.
@@ -39,9 +38,9 @@ import 'tooltip_theme.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Tooltip(
-///     message: "I am a Tooltip",
-///     child: Text("Hover over the text to show a tooltip."),
+///   return const Tooltip(
+///     message: 'I am a Tooltip',
+///     child: Text('Hover over the text to show a tooltip.'),
 ///   );
 /// }
 /// ```
@@ -64,20 +63,20 @@ import 'tooltip_theme.dart';
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Tooltip(
-///     message: "I am a Tooltip",
-///     child: Text("Tap this text and hold down to show a tooltip."),
+///     message: 'I am a Tooltip',
+///     child: const Text('Tap this text and hold down to show a tooltip.'),
 ///     decoration: BoxDecoration(
 ///       borderRadius: BorderRadius.circular(25),
-///       gradient: LinearGradient(colors: [Colors.amber, Colors.red]),
+///       gradient: const LinearGradient(colors: <Color>[Colors.amber, Colors.red]),
 ///     ),
 ///     height: 50,
-///     padding: EdgeInsets.all(8.0),
+///     padding: const EdgeInsets.all(8.0),
 ///     preferBelow: false,
-///     textStyle: TextStyle(
+///     textStyle: const TextStyle(
 ///       fontSize: 24,
 ///     ),
-///     showDuration: Duration(seconds: 2),
-///     waitDuration: Duration(seconds: 1),
+///     showDuration: const Duration(seconds: 2),
+///     waitDuration: const Duration(seconds: 1),
 ///   );
 /// }
 /// ```
@@ -224,7 +223,7 @@ class Tooltip extends StatefulWidget {
 class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const double _defaultVerticalOffset = 24.0;
   static const bool _defaultPreferBelow = true;
-  static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.all(0.0);
+  static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.zero;
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
   static const Duration _defaultShowDuration = Duration(milliseconds: 1500);

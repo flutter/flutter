@@ -118,46 +118,30 @@ void main() {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
-      Container(
-        child: ValueInherited(
-          value: 1,
-          child: Container(
-            child: FlipWidget(
-              left: Container(
-                child: ValueInherited(
-                  value: 2,
-                  child: Container(
-                    child: ValueInherited(
-                      value: 3,
-                      child: Container(
-                        child: Builder(
-                          builder: (BuildContext context) {
-                            final ValueInherited v = context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
-                            log.add('a: ${v.value}');
-                            return const Text('', textDirection: TextDirection.ltr);
-                          }
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+      ValueInherited(
+        value: 1,
+        child: FlipWidget(
+          left: ValueInherited(
+            value: 2,
+            child: ValueInherited(
+              value: 3,
+              child: Builder(
+                builder: (BuildContext context) {
+                  final ValueInherited v = context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
+                  log.add('a: ${v.value}');
+                  return const Text('', textDirection: TextDirection.ltr);
+                }
               ),
-              right: Container(
-                child: ValueInherited(
-                  value: 2,
-                  child: Container(
-                    child: Container(
-                      child: Builder(
-                        builder: (BuildContext context) {
-                          final ValueInherited v = context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
-                          log.add('b: ${v.value}');
-                          return const Text('', textDirection: TextDirection.ltr);
-                        }
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            ),
+          ),
+          right: ValueInherited(
+            value: 2,
+            child: Builder(
+              builder: (BuildContext context) {
+                final ValueInherited v = context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
+                log.add('b: ${v.value}');
+                return const Text('', textDirection: TextDirection.ltr);
+              }
             ),
           ),
         ),
@@ -192,47 +176,35 @@ void main() {
     final Key key = GlobalKey();
 
     await tester.pumpWidget(
-      Container(
-        child: ValueInherited(
-          value: 1,
-          child: Container(
-            child: FlipWidget(
-              left: Container(
-                child: ValueInherited(
-                  value: 2,
-                  child: Container(
-                    child: ValueInherited(
-                      value: 3,
-                      child: Container(
-                        key: key,
-                        child: Builder(
-                          builder: (BuildContext context) {
-                            final ValueInherited v = context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
-                            log.add('a: ${v.value}');
-                            return const Text('', textDirection: TextDirection.ltr);
-                          }
-                        ),
-                      ),
-                    ),
-                  ),
+      ValueInherited(
+        value: 1,
+        child: FlipWidget(
+          left: ValueInherited(
+            value: 2,
+            child: ValueInherited(
+              value: 3,
+              child: Container(
+                key: key,
+                child: Builder(
+                  builder: (BuildContext context) {
+                    final ValueInherited v = context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
+                    log.add('a: ${v.value}');
+                    return const Text('', textDirection: TextDirection.ltr);
+                  }
                 ),
               ),
-              right: Container(
-                child: ValueInherited(
-                  value: 2,
-                  child: Container(
-                    child: Container(
-                      key: key,
-                      child: Builder(
-                        builder: (BuildContext context) {
-                          final ValueInherited v = context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
-                          log.add('b: ${v.value}');
-                          return const Text('', textDirection: TextDirection.ltr);
-                        }
-                      ),
-                    ),
-                  ),
-                ),
+            ),
+          ),
+          right: ValueInherited(
+            value: 2,
+            child: Container(
+              key: key,
+              child: Builder(
+                builder: (BuildContext context) {
+                  final ValueInherited v = context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
+                  log.add('b: ${v.value}');
+                  return const Text('', textDirection: TextDirection.ltr);
+                }
               ),
             ),
           ),
@@ -275,36 +247,24 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Container(
-        child: ValueInherited(
-          value: 1,
-          child: Container(
-            child: FlipWidget(
-              left: Container(
-                child: ValueInherited(
-                  value: 2,
-                  child: Container(
-                    child: ValueInherited(
-                      value: 3,
-                      child: Container(
-                        key: key,
-                        child: child,
-                      ),
-                    ),
-                  ),
-                ),
+      ValueInherited(
+        value: 1,
+        child: FlipWidget(
+          left: ValueInherited(
+            value: 2,
+            child: ValueInherited(
+              value: 3,
+              child: Container(
+                key: key,
+                child: child,
               ),
-              right: Container(
-                child: ValueInherited(
-                  value: 2,
-                  child: Container(
-                    child: Container(
-                      key: key,
-                      child: child,
-                    ),
-                  ),
-                ),
-              ),
+            ),
+          ),
+          right: ValueInherited(
+            value: 2,
+            child: Container(
+              key: key,
+              child: child,
             ),
           ),
         ),

@@ -194,7 +194,7 @@ void main() {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
-        expect(VisualDensity.adaptivePlatformDensity, equals(const VisualDensity()));
+        expect(VisualDensity.adaptivePlatformDensity, equals(VisualDensity.standard));
         break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
@@ -209,7 +209,7 @@ void main() {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
-        expect(themeData.visualDensity, equals(const VisualDensity()));
+        expect(themeData.visualDensity, equals(VisualDensity.standard));
         break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
@@ -241,7 +241,7 @@ void main() {
     );
 
     final ThemeData theme = ThemeData.raw(
-      visualDensity: const VisualDensity(),
+      visualDensity: VisualDensity.standard,
       primaryColor: Colors.black,
       primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,
@@ -334,7 +334,7 @@ void main() {
     );
 
     final ThemeData otherTheme = ThemeData.raw(
-      visualDensity: const VisualDensity(),
+      visualDensity: VisualDensity.standard,
       primaryColor: Colors.white,
       primaryColorBrightness: Brightness.light,
       primaryColorLight: Colors.white,

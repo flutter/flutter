@@ -42,10 +42,10 @@ void main() {
     await tester.pumpWidget(
       Stack(
         alignment: Alignment.topLeft,
-        children: <Widget>[
+        children: const <Widget>[
           Positioned(
             left: 10.0,
-            child: Container(
+            child: SizedBox(
               key: key,
               width: 10.0,
               height: 10.0,
@@ -70,10 +70,10 @@ void main() {
     await tester.pumpWidget(
       Stack(
         alignment: Alignment.topLeft,
-        children: <Widget>[
+        children: const <Widget>[
           Positioned(
             right: 10.0,
-            child: Container(
+            child: SizedBox(
               key: key,
               width: 10.0,
               height: 10.0,
@@ -95,12 +95,12 @@ void main() {
 
   testWidgets('Can remove parent data', (WidgetTester tester) async {
     const Key key = Key('container');
-    final Container container = Container(key: key, width: 10.0, height: 10.0);
+    const SizedBox sizedBox = SizedBox(key: key, width: 10.0, height: 10.0);
 
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[ Positioned(left: 10.0, child: container) ],
+        children: const <Widget>[ Positioned(left: 10.0, child: sizedBox) ],
       ),
     );
     Element containerElement = tester.element(find.byKey(key));
@@ -117,7 +117,7 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[ container ],
+        children: const <Widget>[ sizedBox ],
       ),
     );
     containerElement = tester.element(find.byKey(key));
@@ -141,9 +141,9 @@ void main() {
         child: Center(
           child: Stack(
             alignment: Alignment.center,
-            children: <Widget>[
-              Container(key: child0Key, width: 20.0, height: 20.0),
-              Container(key: child1Key, width: 10.0, height: 10.0),
+            children: const <Widget>[
+              SizedBox(key: child0Key, width: 20.0, height: 20.0),
+              SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
           ),
         ),
@@ -152,7 +152,7 @@ void main() {
 
     final Element child0 = tester.element(find.byKey(child0Key));
     final StackParentData child0RenderObjectParentData = child0.renderObject!.parentData! as StackParentData;
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
 
     final Element child1 = tester.element(find.byKey(child1Key));
     final StackParentData child1RenderObjectParentData = child1.renderObject!.parentData! as StackParentData;
@@ -164,16 +164,16 @@ void main() {
         child: Center(
           child: Stack(
             alignment: AlignmentDirectional.bottomEnd,
-            children: <Widget>[
-              Container(key: child0Key, width: 20.0, height: 20.0),
-              Container(key: child1Key, width: 10.0, height: 10.0),
+            children: const <Widget>[
+              SizedBox(key: child0Key, width: 20.0, height: 20.0),
+              SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
           ),
         ),
       ),
     );
 
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
     expect(child1RenderObjectParentData.offset, equals(const Offset(10.0, 10.0)));
   });
 
@@ -187,9 +187,9 @@ void main() {
         child: Center(
           child: Stack(
             alignment: Alignment.center,
-            children: <Widget>[
-              Container(key: child0Key, width: 20.0, height: 20.0),
-              Container(key: child1Key, width: 10.0, height: 10.0),
+            children: const <Widget>[
+              SizedBox(key: child0Key, width: 20.0, height: 20.0),
+              SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
           ),
         ),
@@ -198,7 +198,7 @@ void main() {
 
     final Element child0 = tester.element(find.byKey(child0Key));
     final StackParentData child0RenderObjectParentData = child0.renderObject!.parentData! as StackParentData;
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
 
     final Element child1 = tester.element(find.byKey(child1Key));
     final StackParentData child1RenderObjectParentData = child1.renderObject!.parentData! as StackParentData;
@@ -210,16 +210,16 @@ void main() {
         child: Center(
           child: Stack(
             alignment: AlignmentDirectional.bottomEnd,
-            children: <Widget>[
-              Container(key: child0Key, width: 20.0, height: 20.0),
-              Container(key: child1Key, width: 10.0, height: 10.0),
+            children: const <Widget>[
+              SizedBox(key: child0Key, width: 20.0, height: 20.0),
+              SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
           ),
         ),
       ),
     );
 
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
     expect(child1RenderObjectParentData.offset, equals(const Offset(0.0, 10.0)));
   });
 
@@ -409,7 +409,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byType(IndexedStack));
+    await tester.tap(find.byType(IndexedStack), warnIfMissed: false);
     final RenderBox box = tester.renderObject(find.byType(IndexedStack));
     expect(box.size, equals(const Size(200.0, 200.0)));
     expect(tapped, isNull);
@@ -559,7 +559,7 @@ void main() {
             Positioned.directional(
               textDirection: TextDirection.rtl,
               start: 50.0,
-              child: Container(key: key, width: 75.0, height: 175.0),
+              child: SizedBox(key: key, width: 75.0, height: 175.0),
             ),
           ],
         ),
@@ -576,7 +576,7 @@ void main() {
             Positioned.directional(
               textDirection: TextDirection.ltr,
               start: 50.0,
-              child: Container(key: key, width: 75.0, height: 175.0),
+              child: SizedBox(key: key, width: 75.0, height: 175.0),
             ),
           ],
         ),
@@ -595,7 +595,7 @@ void main() {
           children: <Widget>[
             PositionedDirectional(
               start: 50.0,
-              child: Container(key: key, width: 75.0, height: 175.0),
+              child: SizedBox(key: key, width: 75.0, height: 175.0),
             ),
           ],
         ),
@@ -611,7 +611,7 @@ void main() {
           children: <Widget>[
             PositionedDirectional(
               start: 50.0,
-              child: Container(key: key, width: 75.0, height: 175.0),
+              child: SizedBox(key: key, width: 75.0, height: 175.0),
             ),
           ],
         ),

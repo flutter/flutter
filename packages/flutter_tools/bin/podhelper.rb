@@ -46,7 +46,7 @@ def flutter_additional_ios_build_settings(target)
 
   unless Dir.exist?(debug_framework_dir)
     # iOS artifacts have not been downloaded.
-    raise "#{debug_framework_dir} must exist. If you're running pod install manually, make sure flutter build ios is executed first"
+    raise "#{debug_framework_dir} must exist. If you're running pod install manually, make sure \"flutter precache --ios\" is executed first"
   end
 
   release_framework_dir = File.expand_path(File.join(artifacts_dir, 'ios-release', 'Flutter.xcframework'), __FILE__)
@@ -71,6 +71,9 @@ def flutter_additional_ios_build_settings(target)
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
     # If the pod only supports a higher version, do not delete to correctly produce an error.
     build_configuration.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET' if inherit_deployment_target
+
+    # Apple Silicon ARM simulators not yet supported.
+    build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64 i386'
   end
 end
 
@@ -95,6 +98,11 @@ def flutter_additional_macos_build_settings(target)
   artifacts_dir = File.join('..', '..', '..', '..', 'bin', 'cache', 'artifacts', 'engine')
   debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64'), __FILE__)
   release_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64-release'), __FILE__)
+
+  unless Dir.exist?(debug_framework_dir)
+    # macOS artifacts have not been downloaded.
+    raise "#{debug_framework_dir} must exist. If you're running pod install manually, make sure \"flutter precache --macos\" is executed first"
+  end
 
   target.build_configurations.each do |build_configuration|
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).

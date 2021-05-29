@@ -30,7 +30,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
@@ -78,12 +78,12 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-                  alignment: const Alignment(1.0, 0.0),
+                  alignment: Alignment.centerRight,
                   child: GestureDetector(
                     onTap: () {
                       didReceiveTap = true;
@@ -127,7 +127,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
@@ -197,13 +197,13 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   origin: const Offset(100.0, 0.0),
-                  alignment: const Alignment(-1.0, 0.0),
+                  alignment: Alignment.centerLeft,
                   child: GestureDetector(
                     onTap: () {
                       didReceiveTap = true;

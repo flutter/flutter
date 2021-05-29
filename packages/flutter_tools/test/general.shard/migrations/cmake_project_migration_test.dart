@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -11,7 +13,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/migrations/cmake_custom_command_migration.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
@@ -32,7 +34,7 @@ void main () {
     group('migrate add_custom_command() to use VERBATIM', () {
       MemoryFileSystem memoryFileSystem;
       BufferLogger testLogger;
-      MockCmakeProject mockCmakeProject;
+      FakeCmakeProject mockCmakeProject;
       File managedCmakeFile;
 
       setUp(() {
@@ -47,8 +49,7 @@ void main () {
           outputPreferences: OutputPreferences.test(),
         );
 
-        mockCmakeProject = MockCmakeProject();
-        when(mockCmakeProject.managedCmakeFile).thenReturn(managedCmakeFile);
+        mockCmakeProject = FakeCmakeProject(managedCmakeFile);
       });
 
       testWithoutContext('skipped if files are missing', () {
@@ -88,7 +89,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E env
     ${FLUTTER_TOOL_ENVIRONMENT}
     "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.sh"
-      linux-x64 ${CMAKE_BUILD_TYPE}
+      ${FLUTTER_TARGET_PLATFORM} ${CMAKE_BUILD_TYPE}
   VERBATIM
 )
 ''';
@@ -115,7 +116,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E env
     ${FLUTTER_TOOL_ENVIRONMENT}
     "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.sh"
-      linux-x64 ${CMAKE_BUILD_TYPE}
+      ${FLUTTER_TARGET_PLATFORM} ${CMAKE_BUILD_TYPE}
 )
 ''');
 
@@ -132,18 +133,57 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E env
     ${FLUTTER_TOOL_ENVIRONMENT}
     "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.sh"
+      ${FLUTTER_TARGET_PLATFORM} ${CMAKE_BUILD_TYPE}
+  VERBATIM
+)
+''');
+
+        expect(testLogger.statusText, contains('add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.'));
+      });
+
+      testWithoutContext('is migrated to use FLUTTER_TARGET_PLATFORM', () {
+        managedCmakeFile.writeAsStringSync(r'''
+add_custom_command(
+  OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
+    ${CMAKE_CURRENT_BINARY_DIR}/_phony_
+  COMMAND ${CMAKE_COMMAND} -E env
+    ${FLUTTER_TOOL_ENVIRONMENT}
+    "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.sh"
       linux-x64 ${CMAKE_BUILD_TYPE}
   VERBATIM
 )
 ''');
 
-        expect(testLogger.statusText, contains('add_custom_command() missing VERBATIM, updating.'));
+        final CmakeCustomCommandMigration cmakeProjectMigration = CmakeCustomCommandMigration(
+          mockCmakeProject,
+          testLogger,
+        );
+        expect(cmakeProjectMigration.migrate(), isTrue);
+
+        expect(managedCmakeFile.readAsStringSync(), r'''
+add_custom_command(
+  OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
+    ${CMAKE_CURRENT_BINARY_DIR}/_phony_
+  COMMAND ${CMAKE_COMMAND} -E env
+    ${FLUTTER_TOOL_ENVIRONMENT}
+    "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.sh"
+      ${FLUTTER_TARGET_PLATFORM} ${CMAKE_BUILD_TYPE}
+  VERBATIM
+)
+''');
+
+        expect(testLogger.statusText, contains('add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.'));
       });
     });
   });
 }
 
-class MockCmakeProject extends Mock implements CmakeBasedProject {}
+class FakeCmakeProject extends Fake implements CmakeBasedProject {
+  FakeCmakeProject(this.managedCmakeFile);
+
+  @override
+  final File managedCmakeFile;
+}
 
 class FakeCmakeMigrator extends ProjectMigrator {
   FakeCmakeMigrator({@required this.succeeds})

@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class BottomAppBarDemo extends StatefulWidget {
+  const BottomAppBarDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/bottom_app_bar';
 
   @override
@@ -431,11 +433,11 @@ class _DiamondFab extends StatelessWidget {
       color: Colors.orange,
       child: InkWell(
         onTap: onPressed,
-        child: Container(
+        child: SizedBox(
           width: 56.0,
           height: 56.0,
           child: IconTheme.merge(
-            data: IconThemeData(color: Theme.of(context).accentIconTheme.color),
+            data: IconThemeData(color: Theme.of(context).colorScheme.secondary),
             child: child!,
           ),
         ),
@@ -488,7 +490,7 @@ class _DiamondBorder extends ShapeBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return const EdgeInsets.only();
+    return EdgeInsets.zero;
   }
 
   @override

@@ -19,5 +19,9 @@ const String kImageFilteredTransformAnimationRouteName = '/imagefiltered_transfo
 const String kMultiWidgetConstructionRouteName = '/multi_widget_construction';
 const String kHeavyGridViewRouteName = '/heavy_gridview';
 const String kSimpleScrollRouteName = '/simple_scroll';
+const String kStackSizeRouteName = '/stack_size';
+const String kAnimationWithMicrotasksRouteName = '/animation_with_microtasks';
 
 const String kScrollableName = '/macrobenchmark_listview';
+
+const String kStackSizeKey = 'stack_size';

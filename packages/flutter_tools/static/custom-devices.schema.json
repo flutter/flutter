@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/flutter/flutter/stable/packages/flutter_tools/static/custom-devices.schema.json",
+  "title": "Flutter Custom Devices",
+  "description": "The schema for the flutter custom devices config file.",
+  "type": "object",
+  "properties": {
+    "custom-devices": {
+      "description": "The actual list of custom devices.",
+      "type": "array",
+      "items": {
+        "description": "A single custom device to be configured.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "A unique, short identification string for this device. Used for example as an argument to the flutter run command.",
+            "type": "string"
+          },
+          "label": {
+            "description": "A more descriptive, user-friendly label for the device.",
+            "type": "string"
+          },
+          "sdkNameAndVersion": {
+            "description": "Additional information about the device. For other devices, this is the SDK (for example Android SDK, Windows SDK) name and version.",
+            "type": "string"
+          },
+          "disabled": {
+            "description": "If true, this device will be ignored completely by the flutter SDK and none of the commands configured will be called. You can use this as a way to comment out device configs you're still working on, for example.",
+            "type": "boolean"
+          },
+          "ping": {
+            "description": "The command to be invoked to ping the device. Used to find out whether its available or not. Every exit code unequal 0 will be treated as \"unavailable\". On Windows, consider providing a \"pingSuccessRegex\" since Windows' ping will also return 0 on failure. Make sure the command times out internally since it's not guaranteed the flutter SDK will enforce a timeout itself.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "default": [
+              "ping", "-w", "500", "-n", "1", "raspberrypi"
+            ]
+          },
+          "pingSuccessRegex": {
+            "description": "When the output of the ping command matches this regex (and the ping command finished with exit code 0), the ping will be considered successful and the pinged device reachable. If this regex is not provided the ping command will be considered successful when it returned with exit code 0. The regex syntax is the standard dart syntax.",
+            "type": ["string", "null"],
+            "format": "regex",
+            "default": "ms TTL=",
+            "required": false
+          },
+          "postBuild": {
+            "description": "The command to be invoked after the build process is done, to do any additional packaging for example.",
+            "type": ["array", "null"],
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "default": null,
+            "required": false
+          },
+          "install": {
+            "description": "The command to be invoked to install the app on the device. The path to the directory / file to be installed (copied over) to the device is available via the ${localPath} string interpolation and the name of the app to be installed via the ${appName} string interpolation.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "default": [
+              "scp", "-r", "${localPath}", "pi@raspberrypi:/tmp/${appName}"
+            ]
+          },
+          "uninstall": {
+            "description": "The command to be invoked to remove the app from the device. Invoked before every invocation of the app install command. The name of the app to be removed is available via the ${appName} string interpolation.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "default": [
+              "ssh", "pi@raspberrypi", "rm -rf \"/tmp/${appName}\""
+            ]
+          },
+          "runDebug": {
+            "description": "The command to be invoked to run the app in debug mode. The name of the app to be started is available via the ${appName} string interpolation. Make sure the flutter cmdline output is available via this commands stdout/stderr since the SDK needs the \"Observatory is now listening on ...\" message to function. If the forwardPort command is not specified, the observatory URL will be connected to as-is, without any port forwarding. In that case you need to make sure it is reachable from your host device, possibly via the \"--observatory-host=<ip>\" engine flag.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "default": [
+              "ssh", "pi@raspberrypi", "flutter-pi /tmp/${appName} --observatory-host=192.168.178.123"
+            ]
+          },
+          "forwardPort": {
+            "description": "The command to be invoked to forward a specific device port to a port on the host device. The host port is available via ${hostPort} and the device port via ${devicePort}. On success, the command should stay running for the duration of the forwarding. The command will be terminated using SIGTERM when the forwarding should be stopped. When using ssh, make sure ssh quits when the forwarding fails since thats not the default behaviour.",
+            "type": ["array", "null"],
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "default": [
+              "ssh", "-o", "ExitOnForwardFailure=yes", "-L", "127.0.0.1:${hostPort}:127.0.0.1:${devicePort}", "pi@raspberrypi"
+            ],
+            "required": false
+          },
+          "forwardPortSuccessRegex": {
+            "description": "A regular expression to be used to classify a successful port forwarding. As soon as any line of stdout or stderr of the forward port command matches this regex, the port forwarding is considered successful. The regex syntax is the standard dart syntax. This value needs to be present & non-null when \"forwardPort\" specified.",
+            "type": ["string", "null"],
+            "format": "regex",
+            "default": "Linux",
+            "required": false
+          }
+        }
+      }
+    }
+  }
+}

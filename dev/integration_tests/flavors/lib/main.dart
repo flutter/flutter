@@ -8,10 +8,12 @@ import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(Center(child: Flavor()));
+  runApp(const Center(child: Flavor()));
 }
 
 class Flavor extends StatefulWidget {
+  const Flavor({Key key}) : super(key: key);
+
   @override
   _FlavorState createState() => _FlavorState();
 }

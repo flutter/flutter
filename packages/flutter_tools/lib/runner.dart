@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
 
@@ -24,9 +25,6 @@ import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
-///
-/// [commands] must be either `List<FlutterCommand>` or `List<FlutterCommand> Function()`.
-// TODO(jonahwilliams): update command type once g3 has rolled.
 Future<int> run(
   List<String> args,
   List<FlutterCommand> Function() commands, {
@@ -59,7 +57,7 @@ Future<int> run(
     String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
     Object firstError;
     StackTrace firstStackTrace;
-    return await runZoned<Future<int>>(() async {
+    return runZoned<Future<int>>(() async {
       try {
         await runner.run(args);
 
@@ -76,7 +74,7 @@ Future<int> run(
       } catch (error, stackTrace) {  // ignore: avoid_catches_without_on_clauses
         firstError = error;
         firstStackTrace = stackTrace;
-        return await _handleToolError(
+        return _handleToolError(
             error, stackTrace, verbose, args, reportCrashes, getVersion);
       }
     }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
@@ -96,7 +94,7 @@ Future<int> _handleToolError(
   bool verbose,
   List<String> args,
   bool reportCrashes,
-  String getFlutterVersion(),
+  String Function() getFlutterVersion,
 ) async {
   if (error is UsageException) {
     globals.printError('${error.message}\n');
@@ -134,7 +132,6 @@ Future<int> _handleToolError(
     globals.flutterUsage.sendException(error);
     await asyncGuard(() async {
       final CrashReportSender crashReportSender = CrashReportSender(
-        client: http.Client(),
         usage: globals.flutterUsage,
         platform: globals.platform,
         logger: globals.logger,
@@ -253,7 +250,7 @@ Future<int> _exit(int code) async {
   }
 
   // Run shutdown hooks before flushing logs
-  await shutdownHooks.runShutdownHooks();
+  await globals.shutdownHooks.runShutdownHooks();
 
   final Completer<void> completer = Completer<void>();
 

@@ -14,6 +14,8 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 const double _leftColumnWidth = 60.0;
 
 class ShoppingCartPage extends StatefulWidget {
+  const ShoppingCartPage({Key? key}) : super(key: key);
+
   @override
   _ShoppingCartPageState createState() => _ShoppingCartPageState();
 }
@@ -39,63 +41,61 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     return Scaffold(
       backgroundColor: kShrinePink50,
       body: SafeArea(
-        child: Container(
-          child: ScopedModelDescendant<AppStateModel>(
-            builder: (BuildContext context, Widget? child, AppStateModel model) {
-              return Stack(
-                children: <Widget>[
-                  ListView(
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          SizedBox(
-                            width: _leftColumnWidth,
-                            child: IconButton(
-                              icon: const Icon(Icons.keyboard_arrow_down),
-                              onPressed: () => ExpandingBottomSheet.of(context)!.close(),
-                            ),
+        child: ScopedModelDescendant<AppStateModel>(
+          builder: (BuildContext context, Widget? child, AppStateModel model) {
+            return Stack(
+              children: <Widget>[
+                ListView(
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        SizedBox(
+                          width: _leftColumnWidth,
+                          child: IconButton(
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                            onPressed: () => ExpandingBottomSheet.of(context)!.close(),
                           ),
-                          Text(
-                            'CART',
-                            style: localTheme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(width: 16.0),
-                          Text('${model.totalCartQuantity} ITEMS'),
-                        ],
-                      ),
-                      const SizedBox(height: 16.0),
-                      Column(
-                        children: _createShoppingCartRows(model),
-                      ),
-                      ShoppingCartSummary(model: model),
-                      const SizedBox(height: 100.0),
-                    ],
-                  ),
-                  Positioned(
-                    bottom: 16.0,
-                    left: 16.0,
-                    right: 16.0,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: kShrinePink100,
-                        shape: const BeveledRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(7.0)),
                         ),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12.0),
-                        child: Text('CLEAR CART'),
-                      ),
-                      onPressed: () {
-                        model.clearCart();
-                        ExpandingBottomSheet.of(context)!.close();
-                      },
+                        Text(
+                          'CART',
+                          style: localTheme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(width: 16.0),
+                        Text('${model.totalCartQuantity} ITEMS'),
+                      ],
                     ),
+                    const SizedBox(height: 16.0),
+                    Column(
+                      children: _createShoppingCartRows(model),
+                    ),
+                    ShoppingCartSummary(model: model),
+                    const SizedBox(height: 100.0),
+                  ],
+                ),
+                Positioned(
+                  bottom: 16.0,
+                  left: 16.0,
+                  right: 16.0,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: kShrinePink100,
+                      shape: const BeveledRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                      ),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: Text('CLEAR CART'),
+                    ),
+                    onPressed: () {
+                      model.clearCart();
+                      ExpandingBottomSheet.of(context)!.close();
+                    },
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -103,7 +103,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 }
 
 class ShoppingCartSummary extends StatelessWidget {
-  const ShoppingCartSummary({this.model});
+  const ShoppingCartSummary({Key? key, this.model}) : super(key: key);
 
   final AppStateModel? model;
 
@@ -183,10 +183,11 @@ class ShoppingCartSummary extends StatelessWidget {
 
 class ShoppingCartRow extends StatelessWidget {
   const ShoppingCartRow({
+    Key? key,
     required this.product,
     required this.quantity,
     this.onPressed,
-  });
+  }) : super(key: key);
 
   final Product product;
   final int? quantity;

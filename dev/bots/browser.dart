@@ -57,3 +57,57 @@ Future<String> evalTestAppInChrome({
     await server?.close();
   }
 }
+
+typedef ServerRequestListener = void Function(Request);
+
+class AppServer {
+  AppServer._(this._server, this.chrome, this.onChromeError);
+
+  static Future<AppServer> start({
+    @required String appUrl,
+    @required String appDirectory,
+    @required String cacheControl,
+    int serverPort = 8080,
+    int browserDebugPort = 8081,
+    bool headless = true,
+    List<Handler> additionalRequestHandlers,
+  }) async {
+    io.HttpServer server;
+    Chrome chrome;
+    server = await io.HttpServer.bind('localhost', serverPort);
+    final Handler staticHandler = createStaticHandler(appDirectory, defaultDocument: 'index.html');
+    Cascade cascade = Cascade();
+    if (additionalRequestHandlers != null) {
+      for (final Handler handler in additionalRequestHandlers) {
+        cascade = cascade.add(handler);
+      }
+    }
+    cascade = cascade.add((Request request) async {
+      final Response response = await staticHandler(request);
+      return response.change(headers: <String, Object>{
+        'cache-control': cacheControl,
+      });
+    });
+    shelf_io.serveRequests(server, cascade.handler);
+    final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('chrome_user_data_');
+    final Completer<String> chromeErrorCompleter = Completer<String>();
+    chrome = await Chrome.launch(ChromeOptions(
+      headless: headless,
+      debugPort: browserDebugPort,
+      url: appUrl,
+      userDataDirectory: userDataDirectory.path,
+      windowHeight: 1024,
+      windowWidth: 1024,
+    ), onError: chromeErrorCompleter.complete);
+    return AppServer._(server, chrome, chromeErrorCompleter.future);
+  }
+
+  final Future<String> onChromeError;
+  final io.HttpServer _server;
+  final Chrome chrome;
+
+  Future<void> stop() async {
+    chrome?.stop();
+    await _server?.close();
+  }
+}

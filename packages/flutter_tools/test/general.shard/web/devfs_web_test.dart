@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+// @dart = 2.8
 
-import 'package:dwds/dwds.dart';
+import 'dart:io' hide Directory, File;
+
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
@@ -616,6 +616,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -625,6 +626,7 @@ void main() {
         nullSafetyMode: NullSafetyMode.unsound,
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -732,6 +734,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -741,6 +744,7 @@ void main() {
         nullSafetyMode: NullSafetyMode.sound,
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -845,8 +849,10 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -888,6 +894,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -899,6 +906,7 @@ void main() {
         ]
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -939,6 +947,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -950,6 +959,7 @@ void main() {
         ]
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -974,11 +984,13 @@ void main() {
       null,
       true,
       true,
+      true,
       const BuildInfo(
         BuildMode.debug,
         '',
         treeShakeIcons: false,
       ),
+      false,
       false,
       Uri.base,
       null,
@@ -1021,7 +1033,7 @@ void main() {
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
     // Not base href.
-    expect(() async  => await webAssetServer.metadataContents('bar/main_module.ddc_merged_metadata'), throwsException);
+    expect(() async => webAssetServer.metadataContents('bar/main_module.ddc_merged_metadata'), throwsException);
   }));
 
   test('DevFS URI includes any specified base path.', () => testbed.run(() async {
@@ -1055,10 +1067,12 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -1083,4 +1097,3 @@ void main() {
 
 class MockHttpServer extends Mock implements HttpServer {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
-class MockDwds extends Mock implements Dwds {}

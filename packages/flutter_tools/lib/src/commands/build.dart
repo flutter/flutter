@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../build_info.dart';
@@ -18,6 +20,7 @@ import 'build_fuchsia.dart';
 import 'build_ios.dart';
 import 'build_ios_framework.dart';
 import 'build_web.dart';
+import 'build_winuwp.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({ bool verboseHelp = false }) {
@@ -33,8 +36,12 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildWebCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildMacosCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildLinuxCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildLinuxCommand(
+      operatingSystemUtils: globals.os,
+      verboseHelp: verboseHelp
+    ));
     addSubcommand(BuildWindowsCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildWindowsUwpCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));
   }
 

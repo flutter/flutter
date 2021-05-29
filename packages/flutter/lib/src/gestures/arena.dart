@@ -267,7 +267,7 @@ class GestureArenaManager {
   bool _debugLogDiagnostic(int pointer, String message, [ _GestureArena? state ]) {
     assert(() {
       if (debugPrintGestureArenaDiagnostics) {
-        final int? count = state != null ? state.members.length : null;
+        final int? count = state?.members.length;
         final String s = count != 1 ? 's' : '';
         debugPrint('Gesture arena ${pointer.toString().padRight(4)} ❙ $message${ count != null ? " with $count member$s." : ""}');
       }

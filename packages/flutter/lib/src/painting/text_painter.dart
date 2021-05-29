@@ -616,7 +616,7 @@ class TextPainter {
       if (_needsLayout) {
         throw FlutterError(
           'TextPainter.paint called when text geometry was not yet calculated.\n'
-          'Please call layout() before paint() to position the text before painting it.'
+          'Please call layout() before paint() to position the text before painting it.',
         );
       }
       return true;
@@ -853,6 +853,13 @@ class TextPainter {
   /// A given selection might have more than one rect if this text painter
   /// contains bidirectional text because logically contiguous text might not be
   /// visually contiguous.
+  ///
+  /// Leading or trailing newline characters will be represented by zero-width
+  /// `Textbox`es.
+  ///
+  /// The method only returns `TextBox`es of glyphs that are entirely enclosed by
+  /// the given `selection`: a multi-code-unit glyph will be excluded if only
+  /// part of its code units are in `selection`.
   List<TextBox> getBoxesForSelection(
     TextSelection selection, {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
@@ -865,7 +872,7 @@ class TextPainter {
       selection.start,
       selection.end,
       boxHeightStyle: boxHeightStyle,
-      boxWidthStyle: boxWidthStyle
+      boxWidthStyle: boxWidthStyle,
     );
   }
 

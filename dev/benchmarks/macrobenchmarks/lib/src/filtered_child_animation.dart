@@ -12,10 +12,11 @@ enum FilterType {
 }
 
 class FilteredChildAnimationPage extends StatefulWidget {
-  const FilteredChildAnimationPage(this.initialFilterType, [
+  const FilteredChildAnimationPage(this.initialFilterType, {
+    Key key,
     this.initialComplexChild = true,
     this.initialUseRepaintBoundary = true,
-  ]);
+  }) : super(key: key);
 
   final FilterType initialFilterType;
   final bool initialComplexChild;

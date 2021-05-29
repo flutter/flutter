@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../base/common.dart';
 import '../base/utils.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import '../emulator.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
@@ -17,7 +19,7 @@ class EmulatorsCommand extends FlutterCommand {
         help: 'Creates a new Android emulator based on a Pixel device.',
         negatable: false);
     argParser.addOption('name',
-        help: 'Used with flag --create. Specifies a name for the emulator being created.');
+        help: 'Used with the "--create" flag. Specifies a name for the emulator being created.');
   }
 
   @override

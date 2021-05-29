@@ -24,7 +24,7 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
   @override
   void registerServiceExtension({
     required String name,
-    required FutureOr<Map<String, Object?>> callback(Map<String, String> parameters),
+    required FutureOr<Map<String, Object?>> Function(Map<String, String> parameters) callback,
   }) {
     assert(!extensions.containsKey(name));
     extensions[name] = callback;

@@ -238,7 +238,7 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -258,7 +258,7 @@ void main() {
     );
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -278,7 +278,7 @@ void main() {
     );
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -298,7 +298,7 @@ void main() {
     );
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -328,7 +328,7 @@ void main() {
     await gesture.updateWithCustomEvent(
       PointerMoveEvent(
         pointer: pointerValue,
-        position: const Offset(0.0, 0.0),
+        position: Offset.zero,
         pressure: 0.0,
         pressureMin: 0,
         pressureMax: 1,
@@ -350,7 +350,7 @@ void main() {
     );
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -603,7 +603,7 @@ void main() {
   testWidgets('test TextSelectionGestureDetectorBuilder mouse drag disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, selectionEnabled: false);
     final TestGesture gesture = await tester.startGesture(
-      const Offset(0.0, 0.0),
+      Offset.zero,
       kind: PointerDeviceKind.mouse,
     );
     addTearDown(gesture.removePointer);
@@ -797,6 +797,7 @@ class FakeRenderEditable extends RenderEditable {
     ),
     startHandleLayerLink: LayerLink(),
     endHandleLayerLink: LayerLink(),
+    ignorePointer: true,
     textAlign: TextAlign.start,
     textDirection: TextDirection.ltr,
     locale: const Locale('en', 'US'),

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
+// @dart = 2.8
+
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -11,7 +12,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import 'test_compiler.dart';
 import 'test_config.dart';
 
@@ -146,11 +147,11 @@ class TestGoldenComparatorProcess {
   }
 
   static String generateBootstrap(Uri testUri) {
-    final File testConfigFile = findTestConfigFile(globals.fs.file(testUri));
+    final File testConfigFile = findTestConfigFile(globals.fs.file(testUri), globals.logger);
     // Generate comparator process for the file.
     return '''
-import 'dart:convert'; // ignore: dart_convert_import
-import 'dart:io'; // ignore: dart_io_import
+import 'dart:convert'; // flutter_ignore: dart_convert_import
+import 'dart:io'; // flutter_ignore: dart_io_import
 
 import 'package:flutter_test/flutter_test.dart';
 

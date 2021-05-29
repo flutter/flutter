@@ -339,8 +339,8 @@ class Cubic extends Curve {
 ///     Offset(0.93, 0.93),
 ///     Offset(0.05, 0.75),
 ///   ],
-///   startHandle: Offset(0.93, 0.93),
-///   endHandle: Offset(0.18, 0.23),
+///   startHandle: const Offset(0.93, 0.93),
+///   endHandle: const Offset(0.18, 0.23),
 ///   tension: 0.0,
 /// );
 ///
@@ -389,7 +389,7 @@ class Cubic extends Curve {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     // Scale the path values to match the -1.0 to 1.0 domain of the Alignment widget.
-///     final Offset position = widget.path.transform(animation.value) * 2.0 - Offset(1.0, 1.0);
+///     final Offset position = widget.path.transform(animation.value) * 2.0 - const Offset(1.0, 1.0);
 ///     return Align(
 ///       alignment: Alignment(position.dx, position.dy),
 ///       child: widget.child,
@@ -411,7 +411,7 @@ class Cubic extends Curve {
 ///           backgroundColor: Colors.yellow,
 ///           child: DefaultTextStyle(
 ///             style: Theme.of(context).textTheme.headline6!,
-///             child: Text("B"), // Buzz, buzz!
+///             child: const Text('B'), // Buzz, buzz!
 ///           ),
 ///         ),
 ///       ),
@@ -550,7 +550,7 @@ abstract class Curve2D extends ParametricCurve<Offset> {
 ///  * [Curve2D.generateSamples], which generates samples of this type.
 ///  * [Curve2D], a parametric curve that maps a double parameter to a 2D location.
 class Curve2DSample {
-  /// A const constructor for the sample so that subclasses can be const.
+  /// Creates an object that holds a sample; used with [Curve2D] subclasses.
   ///
   /// All arguments must not be null.
   const Curve2DSample(this.t, this.value) : assert(t != null), assert(value != null);
@@ -931,17 +931,21 @@ class CatmullRomCurve extends Curve {
           i < controlPoints.length - 2 &&
           (controlPoints[i].dx <= 0.0 || controlPoints[i].dx >= 1.0)) {
         assert(() {
-          reasons?.add('Control points must have X values between 0.0 and 1.0, exclusive. '
-              'Point $i has an x value (${controlPoints![i].dx}) which is outside the range.');
+          reasons?.add(
+            'Control points must have X values between 0.0 and 1.0, exclusive. '
+            'Point $i has an x value (${controlPoints![i].dx}) which is outside the range.',
+          );
           return true;
         }());
         return false;
       }
       if (controlPoints[i].dx <= lastX) {
         assert(() {
-          reasons?.add('Each X coordinate must be greater than the preceding X coordinate '
-              '(i.e. must be monotonically increasing in X). Point $i has an x value of '
-              '${controlPoints![i].dx}, which is not greater than $lastX');
+          reasons?.add(
+            'Each X coordinate must be greater than the preceding X coordinate '
+            '(i.e. must be monotonically increasing in X). Point $i has an x value of '
+            '${controlPoints![i].dx}, which is not greater than $lastX',
+          );
           return true;
         }());
         return false;
@@ -964,9 +968,11 @@ class CatmullRomCurve extends Curve {
       bool bail = true;
       success = false;
       assert(() {
-        reasons?.add('The curve has more than one Y value at X = ${samplePoints.first.value.dx}. '
-            'Try moving some control points further away from this value of X, or increasing '
-            'the tension.');
+        reasons?.add(
+          'The curve has more than one Y value at X = ${samplePoints.first.value.dx}. '
+          'Try moving some control points further away from this value of X, or increasing '
+          'the tension.',
+        );
         // No need to keep going if we're not giving reasons.
         bail = reasons == null;
         return true;
@@ -985,8 +991,10 @@ class CatmullRomCurve extends Curve {
         bool bail = true;
         success = false;
         assert(() {
-          reasons?.add('The resulting curve has an X value ($x) which is outside '
-              'the range [0.0, 1.0], inclusive.');
+          reasons?.add(
+            'The resulting curve has an X value ($x) which is outside '
+            'the range [0.0, 1.0], inclusive.',
+          );
           // No need to keep going if we're not giving reasons.
           bail = reasons == null;
           return true;
@@ -1001,8 +1009,10 @@ class CatmullRomCurve extends Curve {
         bool bail = true;
         success = false;
         assert(() {
-          reasons?.add('The curve has more than one Y value at x = $x. Try moving '
-            'some control points further apart in X, or increasing the tension.');
+          reasons?.add(
+            'The curve has more than one Y value at x = $x. Try moving '
+            'some control points further apart in X, or increasing the tension.',
+          );
           // No need to keep going if we're not giving reasons.
           bail = reasons == null;
           return true;
@@ -1304,7 +1314,6 @@ class ElasticInOutCurve extends Curve {
 class Curves {
   // This class is not meant to be instatiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   Curves._();
 
   /// A linear animation curve.

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:mockito/mockito.dart';
@@ -73,6 +73,4 @@ void main() {
 }
 
 class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
-class MockProcessUtils extends Mock implements ProcessUtils {}
-class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}

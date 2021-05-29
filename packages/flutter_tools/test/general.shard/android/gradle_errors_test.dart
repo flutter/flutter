@@ -2,27 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 void main() {
   group('gradleErrors', () {
-    test('list of errors', () {
+    testWithoutContext('list of errors', () {
       // If you added a new Gradle error, please update this test.
       expect(gradleErrors,
         equals(<GradleHandledError>[
@@ -323,9 +320,9 @@ Command: /home/android/gradlew assembleRelease
   });
 
   group('AndroidX', () {
-    final Usage mockUsage = MockUsage();
+    final TestUsage testUsage = TestUsage();
 
-    test('pattern', () {
+    testWithoutContext('pattern', () {
       expect(androidXFailureHandler.test(
         'AAPT: error: resource android:attr/fontVariationSettings not found.'
       ), isTrue);
@@ -353,22 +350,24 @@ Command: /home/android/gradlew assembleRelease
 
     testUsingContext('handler - no plugins', () async {
       final GradleBuildStatus status = await androidXFailureHandler
-        .handler(line: '', project: FlutterProject.current());
+        .handler(line: '', project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
 
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-android-x-failure',
-        parameters: <String, String>{
-          'cd43': 'app-not-using-plugins',
-        },
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-android-x-failure',
+          parameters: <String, String>{
+            'cd43': 'app-not-using-plugins',
+          },
+        ),
+      ));
 
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => MockProcessManager(),
-      Usage: () => mockUsage,
+      ProcessManager: () => FakeProcessManager.any(),
+      Usage: () => testUsage,
     });
 
     testUsingContext('handler - plugins and no AndroidX', () async {
@@ -377,7 +376,7 @@ Command: /home/android/gradlew assembleRelease
       final GradleBuildStatus status = await androidXFailureHandler
         .handler(
           line: '',
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
           usesAndroidX: false,
         );
 
@@ -387,20 +386,23 @@ Command: /home/android/gradlew assembleRelease
           'Please migrate your app to AndroidX. See https://goo.gl/CP92wY .'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-android-x-failure',
-        parameters: <String, String>{
-          'cd43': 'app-not-using-androidx',
-        },
-      )).called(1);
+
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-android-x-failure',
+          parameters: <String, String>{
+            'cd43': 'app-not-using-androidx',
+          },
+        ),
+      ));
 
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => MockProcessManager(),
-      Usage: () => mockUsage,
+      ProcessManager: () => FakeProcessManager.any(),
+      Usage: () => testUsage,
     });
 
     testUsingContext('handler - plugins, AndroidX, and AAR', () async {
@@ -408,25 +410,27 @@ Command: /home/android/gradlew assembleRelease
 
       final GradleBuildStatus status = await androidXFailureHandler.handler(
         line: '',
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
         usesAndroidX: true,
         shouldBuildPluginAsAar: true,
       );
 
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-android-x-failure',
-        parameters: <String, String>{
-          'cd43': 'using-jetifier',
-        },
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-android-x-failure',
+          parameters: <String, String>{
+            'cd43': 'using-jetifier',
+          },
+        ),
+      ));
 
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => MockProcessManager(),
-      Usage: () => mockUsage,
+      ProcessManager: () => FakeProcessManager.any(),
+      Usage: () => testUsage,
     });
 
     testUsingContext('handler - plugins, AndroidX, and no AAR', () async {
@@ -434,7 +438,7 @@ Command: /home/android/gradlew assembleRelease
 
       final GradleBuildStatus status = await androidXFailureHandler.handler(
         line: '',
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
         usesAndroidX: true,
         shouldBuildPluginAsAar: false,
       );
@@ -445,19 +449,22 @@ Command: /home/android/gradlew assembleRelease
           'The tool is about to try using Jetifier to solve the incompatibility.'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-android-x-failure',
-        parameters: <String, String>{
-          'cd43': 'not-using-jetifier',
-        },
-      )).called(1);
+
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-android-x-failure',
+          parameters: <String, String>{
+            'cd43': 'not-using-jetifier',
+          },
+        ),
+      ));
       expect(status, equals(GradleBuildStatus.retryWithAarPlugins));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => MockProcessManager(),
-      Usage: () => mockUsage,
+      ProcessManager: () => FakeProcessManager.any(),
+      Usage: () => testUsage,
     });
   });
 
@@ -488,7 +495,7 @@ Command: /home/android/gradlew assembleRelease
   });
 
   group('license not accepted', () {
-    test('pattern', () {
+    testWithoutContext('pattern', () {
       expect(
         licenseNotAcceptedHandler.test(
           'You have not accepted the license agreements of the following SDK components'
@@ -500,7 +507,7 @@ Command: /home/android/gradlew assembleRelease
     testUsingContext('handler', () async {
       await licenseNotAcceptedHandler.handler(
         line: 'You have not accepted the license agreements of the following SDK components: [foo, bar]',
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
       expect(
@@ -517,13 +524,13 @@ Command: /home/android/gradlew assembleRelease
   });
 
   group('flavor undefined', () {
-    MockProcessManager mockProcessManager;
+    FakeProcessManager fakeProcessManager;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     });
 
-    test('pattern', () {
+    testWithoutContext('pattern', () {
       expect(
         flavorUndefinedHandler.test(
           'Task assembleFooRelease not found in root project.'
@@ -551,20 +558,14 @@ Command: /home/android/gradlew assembleRelease
     });
 
     testUsingContext('handler - with flavor', () async {
-      when(mockProcessManager.run(
-        <String>[
-          'gradlew',
-          'app:tasks' ,
-          '--all',
-          '--console=auto',
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+      'gradlew',
+        'app:tasks' ,
+        '--all',
+        '--console=auto',
         ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenAnswer((_) async {
-        return ProcessResult(
-          1,
-          0,
-          '''
+        stdout: '''
 assembleRelease
 assembleFlavor1
 assembleFlavor1Release
@@ -575,12 +576,10 @@ assembleProfile
 assembles
 assembleFooTest
           ''',
-          '',
-        );
-      });
+      ));
 
       await flavorUndefinedHandler.handler(
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
       expect(
@@ -598,38 +597,31 @@ assembleFooTest
           'You must specify a --flavor option to select one of them.'
         )
       );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       FileSystem: () => MemoryFileSystem.test(),
     });
 
     testUsingContext('handler - without flavor', () async {
-      when(mockProcessManager.run(
-        <String>[
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
           'gradlew',
           'app:tasks' ,
           '--all',
           '--console=auto',
         ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenAnswer((_) async {
-        return ProcessResult(
-          1,
-          0,
-          '''
+        stdout: '''
 assembleRelease
 assembleDebug
 assembleProfile
           ''',
-          '',
-        );
-      });
+      ));
 
       await flavorUndefinedHandler.handler(
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
       expect(
@@ -646,16 +638,15 @@ assembleProfile
           'You cannot use the --flavor option.'
         )
       );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       FileSystem: () => MemoryFileSystem.test(),
     });
   });
 }
-
-class MockUsage extends Mock implements Usage {}
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {
   return errorMessage

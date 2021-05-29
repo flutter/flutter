@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
@@ -33,11 +32,11 @@ abstract class NativeOrDartPlugin {
 /// the [pluginClass] that will be the entry point to the plugin's native code.
 class AndroidPlugin extends PluginPlatform {
   AndroidPlugin({
-    @required this.name,
-    @required this.package,
-    @required this.pluginClass,
-    @required this.pluginPath,
-    @required FileSystem fileSystem,
+    required this.name,
+    required this.package,
+    required this.pluginClass,
+    required this.pluginPath,
+    required FileSystem fileSystem,
   }) : _fileSystem = fileSystem;
 
   factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath, FileSystem fileSystem) {
@@ -86,7 +85,7 @@ class AndroidPlugin extends PluginPlatform {
     };
   }
 
-  Set<String> _cachedEmbeddingVersion;
+  Set<String>? _cachedEmbeddingVersion;
 
   /// Returns the version of the Android embedding.
   Set<String> get _supportedEmbedings => _cachedEmbeddingVersion ??= _getSupportedEmbeddings();
@@ -116,7 +115,7 @@ class AndroidPlugin extends PluginPlatform {
       )
     ];
 
-    File mainPluginClass;
+    File? mainPluginClass;
     bool mainClassFound = false;
     for (final String mainClassCandidate in mainClassCandidates) {
       mainPluginClass = _fileSystem.file(mainClassCandidate);
@@ -125,7 +124,7 @@ class AndroidPlugin extends PluginPlatform {
         break;
       }
     }
-    if (!mainClassFound) {
+    if (mainPluginClass == null || !mainClassFound) {
       assert(mainClassCandidates.length <= 2);
       throwToolExit(
         "The plugin `$name` doesn't have a main class defined in ${mainClassCandidates.join(' or ')}. "
@@ -156,9 +155,9 @@ class AndroidPlugin extends PluginPlatform {
 /// will be the entry point to the plugin's native code.
 class IOSPlugin extends PluginPlatform {
   const IOSPlugin({
-    @required this.name,
-    this.classPrefix,
-    @required this.pluginClass,
+    required this.name,
+    required this.classPrefix,
+    required this.pluginClass,
   });
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
@@ -202,7 +201,7 @@ class IOSPlugin extends PluginPlatform {
 /// [pluginClass] will be the entry point to the plugin's native code.
 class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   const MacOSPlugin({
-    @required this.name,
+    required this.name,
     this.pluginClass,
     this.dartPluginClass,
   });
@@ -210,7 +209,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
@@ -231,8 +230,8 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   static const String kConfigKey = 'macos';
 
   final String name;
-  final String pluginClass;
-  final String dartPluginClass;
+  final String? pluginClass;
+  final String? dartPluginClass;
 
   @override
   bool isNative() => pluginClass != null;
@@ -253,7 +252,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
 /// [pluginClass] will be the entry point to the plugin's native code.
 class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   const WindowsPlugin({
-    @required this.name,
+    required this.name,
     this.pluginClass,
     this.dartPluginClass,
   }) : assert(pluginClass != null || dartPluginClass != null);
@@ -261,7 +260,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
@@ -282,8 +281,8 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   static const String kConfigKey = 'windows';
 
   final String name;
-  final String pluginClass;
-  final String dartPluginClass;
+  final String? pluginClass;
+  final String? dartPluginClass;
 
   @override
   bool isNative() => pluginClass != null;
@@ -293,7 +292,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
     return <String, dynamic>{
       'name': name,
       if (pluginClass != null) 'class': pluginClass,
-      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass),
+      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
       if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
     };
   }
@@ -305,7 +304,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
 /// [pluginClass] will be the entry point to the plugin's native code.
 class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   const LinuxPlugin({
-    @required this.name,
+    required this.name,
     this.pluginClass,
     this.dartPluginClass,
   }) : assert(pluginClass != null || dartPluginClass != null);
@@ -313,7 +312,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
@@ -334,8 +333,8 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   static const String kConfigKey = 'linux';
 
   final String name;
-  final String pluginClass;
-  final String dartPluginClass;
+  final String? pluginClass;
+  final String? dartPluginClass;
 
   @override
   bool isNative() => pluginClass != null;
@@ -345,7 +344,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     return <String, dynamic>{
       'name': name,
       if (pluginClass != null) 'class': pluginClass,
-      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass),
+      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
       if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
     };
   }
@@ -358,9 +357,9 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
 /// containing the code.
 class WebPlugin extends PluginPlatform {
   const WebPlugin({
-    @required this.name,
-    @required this.pluginClass,
-    @required this.fileName,
+    required this.name,
+    required this.pluginClass,
+    required this.fileName,
   });
 
   factory WebPlugin.fromYaml(String name, YamlMap yaml) {

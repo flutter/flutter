@@ -20,7 +20,7 @@ void main() {
       ],
       child: const Text('loaded')
     ));
-    final dynamic state = tester.state(find.byType(Localizations)); // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic state = tester.state(find.byType(Localizations));
     expect(state!.locale, isNull);
     expect(find.text('loaded'), findsNothing);
 

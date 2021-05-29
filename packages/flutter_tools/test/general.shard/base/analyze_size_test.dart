@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/analyze_size.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 
@@ -66,7 +67,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: MockUsage(),
+      flutterUsage: TestUsage(),
     );
 
     final Archive archive = Archive()
@@ -143,7 +144,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: MockUsage(),
+      flutterUsage: TestUsage(),
     );
 
     final Archive archive = Archive()
@@ -185,7 +186,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: MockUsage(),
+      flutterUsage: TestUsage(),
     );
 
     final Directory outputDirectory = fileSystem.directory('example/out/foo.app')
@@ -223,5 +224,3 @@ void main() {
     expect(result['precompiler-trace'], <String, Object>{});
   });
 }
-
-class MockUsage extends Mock implements Usage {}

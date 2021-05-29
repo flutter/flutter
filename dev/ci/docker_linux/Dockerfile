@@ -110,7 +110,7 @@ ENV PATH="${GOPATH}/bin:${PATH}"
 RUN $GOBINARY get -u github.com/technosophos/dashing
 
 # Set locale to en_US
-RUN locale-gen en_US "en_US.UTF-8" && dpkg-reconfigure locales
+RUN locale-gen en_US "en_US.UTF-8" && DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
 ENV LANG en_US.UTF-8
 
 # Install fastlane via pinned Gemfile & Gemfile.lock

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is used by ../analyze-sample-code_test.dart, which depends on the
+// This file is used by ../analyze_sample_code_test.dart, which depends on the
 // precise contents (including especially the comments) of this file.
 
 // Examples can assume:

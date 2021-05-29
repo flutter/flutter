@@ -21,7 +21,7 @@ class Response {
       : _allTestsPassed = false;
 
   /// Constructor for failure response.
-  Response.toolException({String ex})
+  Response.toolException({String? ex})
       : _allTestsPassed = false,
         _failureDetails = <Failure>[Failure('ToolException', ex)];
 
@@ -30,22 +30,22 @@ class Response {
       : _allTestsPassed = false,
         _failureDetails = null;
 
-  final List<Failure> _failureDetails;
+  final List<Failure>? _failureDetails;
 
   final bool _allTestsPassed;
 
   /// The extra information to be added along side the test result.
-  Map<String, dynamic> data;
+  Map<String, dynamic>? data;
 
   /// Whether the test ran successfully or not.
   bool get allTestsPassed => _allTestsPassed;
 
   /// If the result are failures get the formatted details.
   String get formattedFailureDetails =>
-      _allTestsPassed ? '' : formatFailures(_failureDetails);
+      _allTestsPassed ? '' : formatFailures(_failureDetails!);
 
   /// Failure details as a list.
-  List<Failure> get failureDetails => _failureDetails;
+  List<Failure>? get failureDetails => _failureDetails;
 
   /// Serializes this message to a JSON map.
   String toJson() => json.encode(<String, dynamic>{
@@ -57,12 +57,12 @@ class Response {
   /// Deserializes the result from JSON.
   static Response fromJson(String source) {
     final Map<String, dynamic> responseJson = json.decode(source) as Map<String, dynamic>;
-    if (responseJson['result'] as String == 'true') {
-      return Response.allTestsPassed(data: responseJson['data'] as Map<String, dynamic>);
+    if ((responseJson['result'] as String?) == 'true') {
+      return Response.allTestsPassed(data: responseJson['data'] as Map<String, dynamic>?);
     } else {
       return Response.someTestsFailed(
         _failureDetailsFromJson(responseJson['failureDetails'] as List<dynamic>),
-        data: responseJson['data'] as Map<String, dynamic>,
+        data: responseJson['data'] as Map<String, dynamic>?,
       );
     }
   }
@@ -87,11 +87,11 @@ class Response {
   /// Create a list of Strings from [_failureDetails].
   List<String> _failureDetailsAsString() {
     final List<String> list = <String>[];
-    if (_failureDetails == null || _failureDetails.isEmpty) {
+    if (_failureDetails == null || _failureDetails!.isEmpty) {
       return list;
     }
 
-    for (final Failure failure in _failureDetails) {
+    for (final Failure failure in _failureDetails!) {
       list.add(failure.toJson());
     }
 
@@ -115,11 +115,11 @@ class Failure {
   final String methodName;
 
   /// The details of the failure such as stack trace.
-  final String details;
+  final String? details;
 
   /// Serializes the object to JSON.
   String toJson() {
-    return json.encode(<String, String>{
+    return json.encode(<String, String?>{
       'methodName': methodName,
       'details': details,
     });
@@ -131,7 +131,7 @@ class Failure {
   /// Decode a JSON string to create a Failure object.
   static Failure fromJsonString(String jsonString) {
     final Map<String, dynamic> failure = json.decode(jsonString) as Map<String, dynamic>;
-    return Failure(failure['methodName'] as String, failure['details'] as String);
+    return Failure(failure['methodName'] as String, failure['details'] as String?);
   }
 }
 
@@ -291,8 +291,8 @@ abstract class IntegrationTestResults {
   List<Failure> get failureMethodsDetails;
 
   /// The extra data for the reported result.
-  Map<String, dynamic> get reportData;
+  Map<String, dynamic>? get reportData;
 
-  /// Whether all the test methods completed succesfully.
+  /// Whether all the test methods completed successfully.
   Completer<bool> get allTestsPassed;
 }

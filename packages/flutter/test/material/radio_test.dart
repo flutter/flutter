@@ -308,7 +308,7 @@ void main() {
     ));
 
     await tester.tap(find.byKey(key));
-    final RenderObject object = tester.firstRenderObject(find.byType(Focus));
+    final RenderObject object = tester.firstRenderObject(find.byKey(key));
 
     expect(radioValue, 1);
     expect(semanticEvent, <String, dynamic>{
@@ -632,7 +632,7 @@ void main() {
   testWidgets('Radio responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(
@@ -649,7 +649,7 @@ void main() {
       );
     }
 
-    await buildTest(const VisualDensity());
+    await buildTest(VisualDensity.standard);
     final RenderBox box = tester.renderObject(find.byKey(key));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(48, 48)));
@@ -1077,5 +1077,30 @@ void main() {
         ),
       reason: 'Hovered Radio should use overlay color $hoverOverlayColor over $hoverColor',
     );
+  });
+
+  testWidgets('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+
+    Widget buildRadio(bool show) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: show ? Radio<bool>(key: key, value: true, groupValue: false, onChanged: (_) { }) : Container(),
+          )
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildRadio(true));
+    final Offset center = tester.getCenter(find.byKey(key));
+    // Put a pointer down on the screen.
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump();
+    // While the pointer is down, the widget disappears.
+    await tester.pumpWidget(buildRadio(false));
+    expect(find.byKey(key), findsNothing);
+    // Release pointer after widget disappeared.
+    await gesture.up();
   });
 }

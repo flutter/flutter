@@ -4,7 +4,7 @@
 
 @TestOn('chrome') // Uses web-only Flutter SDK
 
-import 'dart:ui' as ui; // ignore: unused_import, it looks unused as web-only elements are the only elements used.
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,7 +56,7 @@ void main() {
       final List<String> loggedMessages = <String>[];
       ServicesBinding.instance!.defaultBinaryMessenger
           .setMessageHandler('test_send', (ByteData? data) {
-        loggedMessages.add(codec.decodeMessage(data) as String);
+        loggedMessages.add(codec.decodeMessage(data)! as String);
         return Future<ByteData?>.value(null);
       });
 

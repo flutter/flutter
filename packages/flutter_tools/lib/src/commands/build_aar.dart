@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../android/android_builder.dart';
@@ -10,7 +12,7 @@ import '../base/common.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -56,7 +58,7 @@ class BuildAarCommand extends BuildSubCommand {
       ..addOption(
         'output-dir',
         help: 'The absolute path to the directory where the repository is generated. '
-              "By default, this is '<current-directory>android/build'. ",
+              'By default, this is "<current-directory>android/build".',
       );
   }
 
@@ -143,6 +145,6 @@ class BuildAarCommand extends BuildSubCommand {
     if (argResults.rest.isEmpty) {
       return FlutterProject.current();
     }
-    return FlutterProject.fromPath(findProjectRoot(argResults.rest.first));
+    return FlutterProject.fromDirectory(globals.fs.directory(findProjectRoot(globals.fs, argResults.rest.first)));
   }
 }

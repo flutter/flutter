@@ -21,7 +21,7 @@ class ChildLayoutHelper {
   const ChildLayoutHelper._();
 
   /// Returns the [Size] that the [RenderBox] would have if it were to
-  /// be layed out with the given [BoxConstraints].
+  /// be laid out with the given [BoxConstraints].
   ///
   /// This method calls [RenderBox.getDryLayout] on the given [RenderBox].
   ///
@@ -33,8 +33,8 @@ class ChildLayoutHelper {
   ///
   ///  * [layoutChild], which actually lays out the child with the given
   ///    constraints.
-  static Size dryLayoutChild(RenderBox child, BoxConstraints constrains) {
-    return child.getDryLayout(constrains);
+  static Size dryLayoutChild(RenderBox child, BoxConstraints constraints) {
+    return child.getDryLayout(constraints);
   }
 
   /// Lays out the [RenderBox] with the given constraints and returns its

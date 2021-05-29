@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
@@ -22,24 +23,29 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_http_client.dart';
+import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
-import '../../src/testbed.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn\'t yet support any platforms.\n';
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
-// TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
-final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
+
+// This needs to be created from the local platform due to re-entrant flutter calls made in this test.
+FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
+
 const String samplesIndexJson = '''
 [
   { "id": "sample1" },
@@ -49,7 +55,7 @@ const String samplesIndexJson = '''
 void main() {
   Directory tempDir;
   Directory projectDir;
-  FlutterVersion mockFlutterVersion;
+  FakeFlutterVersion fakeFlutterVersion;
   LoggingProcessManager loggingProcessManager;
   BufferLogger logger;
 
@@ -63,7 +69,10 @@ void main() {
     logger = BufferLogger.test();
     tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     projectDir = tempDir.childDirectory('flutter_project');
-    mockFlutterVersion = MockFlutterVersion();
+    fakeFlutterVersion = FakeFlutterVersion(
+      frameworkRevision: frameworkRevision,
+      channel: frameworkChannel,
+    );
   });
 
   tearDown(() {
@@ -160,7 +169,7 @@ void main() {
   testUsingContext('cannot create a project if non-empty non-project directory exists with .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
     await projectDir.absolute.childFile('.metadata').writeAsString('project_type: blag\n');
-    expect(() async => await _createAndAnalyzeProject(
+    expect(() async => _createAndAnalyzeProject(
         projectDir,
         <String>[],
         <String>[],
@@ -171,6 +180,31 @@ void main() {
           '.ios/',
         ]),
       throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+    ...noColorTerminalOverride,
+  });
+
+  testUsingContext('cannot create a project in flutter root', () async {
+    Cache.flutterRoot = '../..';
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', globals.platform.isWindows ? 'flutter.bat' : 'flutter');
+    final ProcessResult exec = await Process.run(
+      flutterBin,
+      <String>[
+        'create',
+        'flutter_project',
+      ],
+      workingDirectory: Cache.flutterRoot,
+    );
+    expect(exec.exitCode, 2);
+    expect(exec.stderr, contains('Cannot create a project within the Flutter SDK'));
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
       fileSystem: globals.fs,
@@ -583,8 +617,6 @@ void main() {
 
   testUsingContext('androidx is used by default in an app project', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -604,8 +636,6 @@ void main() {
 
   testUsingContext('androidx is used by default in a module project', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -621,8 +651,6 @@ void main() {
 
   testUsingContext('androidx is used by default in a plugin project', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -642,8 +670,6 @@ void main() {
 
   testUsingContext('creating a new project should create v2 embedding and never show an Android v1 deprecation warning', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -667,10 +693,46 @@ void main() {
     Logger: () => logger,
   });
 
+  testUsingContext('app supports android and ios by default', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('android'), exists);
+    expect(projectDir.childDirectory('ios'), exists);
+  }, overrides: <Type, Generator>{});
+
+  testUsingContext('app does not include android if disabled in config', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('android'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
+  });
+
+  testUsingContext('app does not include ios if disabled in config', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('ios'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
+  });
+
   testUsingContext('app does not include desktop or web by default', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -681,6 +743,7 @@ void main() {
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), isNot(exists));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
   });
@@ -688,8 +751,6 @@ void main() {
   testUsingContext('plugin does not include desktop or web by default',
       () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -701,22 +762,44 @@ void main() {
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('linux'),
-        isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('macos'),
-        isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('windows'),
-        isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('web'),
-        isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('linux'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('winuwp'), isNot(exists));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
   });
 
+  testUsingContext('app supports Windows UWP if requested', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=winuwp',
+      projectDir.path,
+    ]);
+
+    expect(projectDir.childDirectory('linux'), isNot(exists));
+    expect(projectDir.childDirectory('android'), isNot(exists));
+    expect(projectDir.childDirectory('ios'), isNot(exists));
+    expect(projectDir.childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('macos'), isNot(exists));
+    expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), exists);
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+    Logger: () => logger,
+  });
+
   testUsingContext('app supports Linux if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -728,13 +811,13 @@ void main() {
       projectDir.path,
     ]);
 
-    expect(
-        projectDir.childDirectory('linux').childFile('CMakeLists.txt'), exists);
+    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt'), exists);
     expect(projectDir.childDirectory('android'), isNot(exists));
     expect(projectDir.childDirectory('ios'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), isNot(exists));
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
@@ -743,8 +826,6 @@ void main() {
 
   testUsingContext('plugin supports Linux if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -780,8 +861,6 @@ void main() {
 
   testUsingContext('app supports macOS if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -809,8 +888,6 @@ void main() {
 
   testUsingContext('plugin supports macOS if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -843,8 +920,6 @@ void main() {
 
   testUsingContext('app supports Windows if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -871,8 +946,6 @@ void main() {
 
   testUsingContext('Windows has correct VERSIONINFO', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -890,8 +963,6 @@ void main() {
 
   testUsingContext('plugin supports Windows if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -935,8 +1006,6 @@ void main() {
 
   testUsingContext('app supports web if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -964,8 +1033,6 @@ void main() {
 
   testUsingContext('plugin uses new platform schema', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -979,8 +1046,6 @@ void main() {
 
   testUsingContext('has correct content and formatting with module template', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1027,6 +1092,7 @@ void main() {
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('FLUTTER_TARGET='));
+    expect(xcodeConfig, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
 
     // Generated export environment variables script
     final String buildPhaseScriptPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_export_environment.sh');
@@ -1036,6 +1102,7 @@ void main() {
     expect(buildPhaseScript, contains('FLUTTER_ROOT='));
     expect(buildPhaseScript, contains('FLUTTER_APPLICATION_PATH='));
     expect(buildPhaseScript, contains('FLUTTER_TARGET='));
+    expect(buildPhaseScript, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
 
     // Generated podspec
     final String podspecPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_project.podspec');
@@ -1079,14 +1146,12 @@ void main() {
     expect(sdkMetaContents, contains('<root url="file:/'));
     expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => mockFlutterVersion,
+    FlutterVersion: () => fakeFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
   });
 
   testUsingContext('has correct content and formatting with app template', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1128,6 +1193,7 @@ void main() {
     final String xcodeConfig = xcodeConfigFile.readAsStringSync();
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
+    expect(xcodeConfig, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
     // App identification
     final String xcodeProjectPath = globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);
@@ -1162,14 +1228,12 @@ void main() {
     expect(sdkMetaContents, contains('<root url="file:/'));
     expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => mockFlutterVersion,
+    FlutterVersion: () => fakeFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
   });
 
   testUsingContext('has correct application id for android, bundle id for ios and application id for Linux', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1230,7 +1294,7 @@ void main() {
         'flutter_project.untitled',
     );
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => mockFlutterVersion,
+    FlutterVersion: () => fakeFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
@@ -1599,7 +1663,39 @@ void main() {
     expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
       contains('void main() {}'));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() {}'),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            response: FakeResponse(body: utf8.encode('void main() {}')),
+          )
+        ]);
+      };
+    },
+  });
+
+  testUsingContext('null-safe sample-based project have no analyzer errors', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--no-pub', '--sample=foo.bar.Baz'],
+      <String>['lib/main.dart'],
+    );
+    expect(
+      projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      contains('String?'), // uses null-safe syntax
+    );
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); }')),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('null-safe sample-based project have no analyzer errors', () async {
@@ -1631,8 +1727,16 @@ void main() {
     expect(expectedFile, exists);
     expect(expectedFile.readAsStringSync(), equals(samplesIndexJson));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () =>
-        () => MockHttpClient(200, result: samplesIndexJson),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            response: FakeResponse(body: utf8.encode(samplesIndexJson)),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('Throws tool exit on empty samples index', () async {
@@ -1652,8 +1756,15 @@ void main() {
         message: 'Unable to download samples',
     ));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () =>
-        () => MockHttpClient(200, result: ''),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('provides an error to the user if samples json download fails', () async {
@@ -1669,14 +1780,20 @@ void main() {
     await expectLater(runner.run(args), throwsToolExit(exitCode: 2, message: 'Failed to write samples'));
     expect(globals.fs.file(outputFile), isNot(exists));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () =>
-        () => MockHttpClient(404, result: 'not found'),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            response: const FakeResponse(statusCode: HttpStatus.notFound),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('plugin does not support any platform by default', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1712,8 +1829,6 @@ void main() {
 
   testUsingContext('plugin supports ios if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1734,8 +1849,6 @@ void main() {
 
   testUsingContext('plugin supports android if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1758,8 +1871,6 @@ void main() {
 
   testUsingContext('plugin supports web if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1782,8 +1893,6 @@ void main() {
 
   testUsingContext('plugin doe not support web if feature is not enabled', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1804,8 +1913,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add ios', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1820,8 +1927,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add android', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1837,8 +1942,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add linux', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1854,8 +1957,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add macos', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1871,8 +1972,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add windows', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1888,8 +1987,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add web', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1905,8 +2002,6 @@ void main() {
 
   testUsingContext('create a plugin with ios, then add macos', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1930,8 +2025,6 @@ void main() {
 
   testUsingContext('create a plugin with ios and android', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1953,8 +2046,6 @@ void main() {
 
   testUsingContext('create a module with --platforms throws error.', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1965,8 +2056,6 @@ void main() {
 
   testUsingContext('create a package with --platforms throws error.', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1977,8 +2066,6 @@ void main() {
 
   testUsingContext('create a plugin with android, delete then re-create folders', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2002,8 +2089,6 @@ void main() {
 
   testUsingContext('create a plugin with android, delete then re-create folders while also adding windows', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2032,8 +2117,6 @@ void main() {
 
   testUsingContext('flutter create . on and existing plugin does not add android folders if android is not supported in pubspec', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2046,8 +2129,6 @@ void main() {
 
   testUsingContext('flutter create . on and existing plugin does not add windows folder even feature is enabled', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2062,8 +2143,6 @@ void main() {
 
   testUsingContext('flutter create . on and existing plugin does not add linux folder even feature is enabled', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2078,8 +2157,6 @@ void main() {
 
   testUsingContext('flutter create . on and existing plugin does not add web files even feature is enabled', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2093,8 +2170,6 @@ void main() {
 
   testUsingContext('flutter create . on and existing plugin does not add macos folder even feature is enabled', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2109,8 +2184,6 @@ void main() {
 
   testUsingContext('flutter create -t plugin in an empty folder should not show pubspec.yaml updating suggestion', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2124,8 +2197,6 @@ void main() {
 
   testUsingContext('flutter create -t plugin in an existing plugin should show pubspec.yaml updating suggestion', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2141,8 +2212,6 @@ void main() {
 
   testUsingContext('newly created plugin has min flutter sdk version as 1.20.0', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2156,8 +2225,6 @@ void main() {
 
   testUsingContext('default app uses Android SDK 30', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2174,8 +2241,6 @@ void main() {
 
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2207,8 +2272,6 @@ void main() {
 
   testUsingContext('Windows plugins handle partially camel-case project names correctly', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2241,8 +2304,6 @@ void main() {
 
   testUsingContext('Linux plugins handle project names ending in _plugin correctly', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2279,8 +2340,6 @@ void main() {
 
   testUsingContext('Windows plugins handle project names ending in _plugin correctly', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2317,8 +2376,6 @@ void main() {
 
   testUsingContext('created plugin supports no platforms should print `no platforms` message', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2335,8 +2392,6 @@ void main() {
 
   testUsingContext('created plugin with no --platforms flag should not print `no platforms` message if the existing plugin supports a platform.', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2350,22 +2405,63 @@ void main() {
     Logger: () => logger,
   });
 
-  testUsingContext('flutter create prints note about null safety', () async {
-    await _createProject(
-      projectDir,
-      <String>[],
-      <String>[],
-    );
-    expect(logger.statusText, contains('dart migrate --apply-changes'));
+  testUsingContext('should show warning when disabled platforms are selected while creating a plugin', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android,ios,web,windows,macos,linux', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
+
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
+  testUsingContext("shouldn't show warning when only enabled platforms are selected while creating a plugin", () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android,ios,windows', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    expect(logger.statusText, isNot(contains(_kDisabledPlatformRequestedMessage)));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    Logger: () => logger,
+  });
+
+  testUsingContext('should show warning when disabled platforms are selected while creating a app', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--platforms=android,ios,web,windows,macos,linux', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
+  testUsingContext("shouldn't show warning when only enabled platforms are selected while creating a app", () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    expect(logger.statusText, isNot(contains(_kDisabledPlatformRequestedMessage)));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true, isAndroidEnabled: false, isIOSEnabled: false),
     Logger: () => logger,
   });
 }
@@ -2532,8 +2628,6 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   expect(exec.exitCode, 0);
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {}
-
 /// A ProcessManager that invokes a real process manager, but keeps
 /// track of all commands sent to it.
 class LoggingProcessManager extends LocalProcessManager {
@@ -2541,14 +2635,14 @@ class LoggingProcessManager extends LocalProcessManager {
 
   @override
   Future<Process> start(
-    List<String> command, {
+    List<Object> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
-    commands.add(command);
+    commands.add(command.map((Object arg) => arg.toString()).toList());
     return super.start(
       command,
       workingDirectory: workingDirectory,
@@ -2557,78 +2651,5 @@ class LoggingProcessManager extends LocalProcessManager {
       runInShell: runInShell,
       mode: mode,
     );
-  }
-}
-
-class MockHttpClient implements HttpClient {
-  MockHttpClient(this.statusCode, {this.result});
-
-  final int statusCode;
-  final String result;
-
-  @override
-  Future<HttpClientRequest> getUrl(Uri url) async {
-    return MockHttpClientRequest(statusCode, result: result);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw 'io.HttpClient - $invocation';
-  }
-}
-
-class MockHttpClientRequest implements HttpClientRequest {
-  MockHttpClientRequest(this.statusCode, {this.result});
-
-  final int statusCode;
-  final String result;
-
-  @override
-  Future<HttpClientResponse> close() async {
-    return MockHttpClientResponse(statusCode, result: result);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw 'io.HttpClientRequest - $invocation';
-  }
-}
-
-class MockHttpClientResponse implements HttpClientResponse {
-  MockHttpClientResponse(this.statusCode, {this.result});
-
-  @override
-  final int statusCode;
-
-  final String result;
-
-  @override
-  String get reasonPhrase => '<reason phrase>';
-
-  @override
-  HttpClientResponseCompressionState get compressionState {
-    return HttpClientResponseCompressionState.decompressed;
-  }
-
-  @override
-  StreamSubscription<Uint8List> listen(
-    void onData(Uint8List event), {
-    Function onError,
-    void onDone(),
-    bool cancelOnError,
-  }) {
-    return Stream<Uint8List>.fromIterable(<Uint8List>[Uint8List.fromList(result.codeUnits)])
-      .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
-  }
-
-  @override
-  Future<dynamic> forEach(void Function(Uint8List element) action) {
-    action(Uint8List.fromList(result.codeUnits));
-    return Future<void>.value();
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw 'io.HttpClientResponse - $invocation';
   }
 }

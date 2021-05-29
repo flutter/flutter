@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -12,6 +14,7 @@ import '../build_system/depfile.dart';
 import '../build_system/targets/android.dart';
 import '../build_system/targets/assets.dart';
 import '../build_system/targets/common.dart';
+import '../build_system/targets/deferred_components.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
@@ -25,31 +28,34 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
 /// All currently implemented targets.
-const List<Target> _kDefaultTargets = <Target>[
+List<Target> _kDefaultTargets = <Target>[
   // Shared targets
-  CopyAssets(),
-  KernelSnapshot(),
-  AotElfProfile(TargetPlatform.android_arm),
-  AotElfRelease(TargetPlatform.android_arm),
-  AotAssemblyProfile(),
-  AotAssemblyRelease(),
+  const CopyAssets(),
+  const KernelSnapshot(),
+  const AotElfProfile(TargetPlatform.android_arm),
+  const AotElfRelease(TargetPlatform.android_arm),
+  const AotAssemblyProfile(),
+  const AotAssemblyRelease(),
   // macOS targets
-  DebugMacOSFramework(),
-  DebugMacOSBundleFlutterAssets(),
-  ProfileMacOSBundleFlutterAssets(),
-  ReleaseMacOSBundleFlutterAssets(),
+  const DebugMacOSFramework(),
+  const DebugMacOSBundleFlutterAssets(),
+  const ProfileMacOSBundleFlutterAssets(),
+  const ReleaseMacOSBundleFlutterAssets(),
   // Linux targets
-  DebugBundleLinuxAssets(),
-  ProfileBundleLinuxAssets(),
-  ReleaseBundleLinuxAssets(),
+  const DebugBundleLinuxAssets(TargetPlatform.linux_x64),
+  const DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
+  const ProfileBundleLinuxAssets(TargetPlatform.linux_x64),
+  const ProfileBundleLinuxAssets(TargetPlatform.linux_arm64),
+  const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
+  const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
   // Web targets
-  WebServiceWorker(),
-  ReleaseAndroidApplication(),
+  const WebServiceWorker(),
+  const ReleaseAndroidApplication(),
   // This is a one-off rule for bundle and aot compat.
-  CopyFlutterBundle(),
+  const CopyFlutterBundle(),
   // Android targets,
-  DebugAndroidApplication(),
-  ProfileAndroidApplication(),
+  const DebugAndroidApplication(),
+  const ProfileAndroidApplication(),
   // Android ABI specific AOT rules.
   androidArmProfileBundle,
   androidArm64ProfileBundle,
@@ -57,25 +63,43 @@ const List<Target> _kDefaultTargets = <Target>[
   androidArmReleaseBundle,
   androidArm64ReleaseBundle,
   androidx64ReleaseBundle,
+  // Deferred component enabled AOT rules
+  androidArmProfileDeferredComponentsBundle,
+  androidArm64ProfileDeferredComponentsBundle,
+  androidx64ProfileDeferredComponentsBundle,
+  androidArmReleaseDeferredComponentsBundle,
+  androidArm64ReleaseDeferredComponentsBundle,
+  androidx64ReleaseDeferredComponentsBundle,
   // iOS targets
-  DebugIosApplicationBundle(),
-  ProfileIosApplicationBundle(),
-  ReleaseIosApplicationBundle(),
+  const DebugIosApplicationBundle(),
+  const ProfileIosApplicationBundle(),
+  const ReleaseIosApplicationBundle(),
   // Windows targets
-  UnpackWindows(),
-  DebugBundleWindowsAssets(),
-  ProfileBundleWindowsAssets(),
-  ReleaseBundleWindowsAssets(),
+  const UnpackWindows(),
+  const DebugBundleWindowsAssets(),
+  const ProfileBundleWindowsAssets(),
+  const ReleaseBundleWindowsAssets(),
+  // Windows UWP targets
+  const DebugBundleWindowsAssetsUwp(),
+  const ProfileBundleWindowsAssetsUwp(),
+  const ReleaseBundleWindowsAssetsUwp(),
 ];
+
+// TODO(ianh): https://github.com/dart-lang/args/issues/181 will allow us to remove useLegacyNames
+// and just switch to arguments that use the regular style, which still supporting the old names.
+// When fixing this, remove the hack in test/general.shard/args_test.dart that ignores these names.
+const bool useLegacyNames = true;
 
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
-  AssembleCommand() {
+  AssembleCommand({ bool verboseHelp = false, @required BuildSystem buildSystem })
+    : _buildSystem = buildSystem {
     argParser.addMultiOption(
       'define',
       abbr: 'd',
-      help: 'Allows passing configuration to a target with --define=target=key=value.',
+      valueHelp: 'target=key=value',
+      help: 'Allows passing configuration to a target, as in "--define=target=key=value".',
     );
     argParser.addOption(
       'performance-measurement-file',
@@ -84,33 +108,35 @@ class AssembleCommand extends FlutterCommand {
     argParser.addMultiOption(
       'input',
       abbr: 'i',
-      help: 'Allows passing additional inputs with --input=key=value. Unlike '
-      'defines, additional inputs do not generate a new configuration, instead '
+      help: 'Allows passing additional inputs with "--input=key=value". Unlike '
+      'defines, additional inputs do not generate a new configuration; instead '
       'they are treated as dependencies of the targets that use them.'
     );
-    argParser.addOption('depfile', help: 'A file path where a depfile will be written. '
-      'This contains all build inputs and outputs in a make style syntax'
+    argParser.addOption('depfile',
+      help: 'A file path where a depfile will be written. '
+            'This contains all build inputs and outputs in a Make-style syntax.'
     );
-    argParser.addOption('build-inputs', help: 'A file path where a newline '
-        'separated file containing all inputs used will be written after a build.'
-        ' This file is not included as a build input or output. This file is not'
-        ' written if the build fails for any reason.');
-    argParser.addOption('build-outputs', help: 'A file path where a newline '
-        'separated file containing all outputs used will be written after a build.'
-        ' This file is not included as a build input or output. This file is not'
-        ' written if the build fails for any reason.');
+    argParser.addOption('build-inputs', help: 'A file path where a newline-separated '
+        'file containing all inputs used will be written after a build. '
+        'This file is not included as a build input or output. This file is not '
+        'written if the build fails for any reason.');
+    argParser.addOption('build-outputs', help: 'A file path where a newline-separated '
+        'file containing all outputs created will be written after a build. '
+        'This file is not included as a build input or output. This file is not '
+        'written if the build fails for any reason.');
     argParser.addOption('output', abbr: 'o', help: 'A directory where output '
         'files will be written. Must be either absolute or relative from the '
         'root of the current Flutter project.',
     );
-    argParser.addOption(kExtraGenSnapshotOptions);
-    argParser.addOption(kExtraFrontEndOptions);
-    argParser.addOption(kDartDefines);
+    usesExtraDartFlagOptions(verboseHelp: verboseHelp, useLegacyNames: useLegacyNames);
+    usesDartDefineOption(useLegacyNames: useLegacyNames);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
     );
   }
+
+  final BuildSystem _buildSystem;
 
   @override
   String get description => 'Assemble and build Flutter resources.';
@@ -125,15 +151,29 @@ class AssembleCommand extends FlutterCommand {
       return const <CustomDimensions, String>{};
     }
     try {
-      final Environment localEnvironment = createEnvironment();
       return <CustomDimensions, String>{
-        CustomDimensions.commandBuildBundleTargetPlatform: localEnvironment.defines['TargetPlatform'],
+        CustomDimensions.commandBuildBundleTargetPlatform: environment.defines[kTargetPlatform],
         CustomDimensions.commandBuildBundleIsModule: '${flutterProject.isModule}',
       };
     } on Exception {
       // We've failed to send usage.
     }
     return const <CustomDimensions, String>{};
+  }
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    final String platform = environment.defines[kTargetPlatform];
+    if (platform == null) {
+      return super.requiredArtifacts;
+    }
+
+    final TargetPlatform targetPlatform = getTargetPlatformForName(platform);
+    final DevelopmentArtifact artifact = artifactFromTargetPlatform(targetPlatform);
+    if (artifact != null) {
+      return <DevelopmentArtifact>{artifact};
+    }
+    return super.requiredArtifacts;
   }
 
   /// The target(s) we are building.
@@ -156,6 +196,27 @@ class AssembleCommand extends FlutterCommand {
     }
     return results;
   }
+
+  bool isDeferredComponentsTargets() {
+    for (final String targetName in argResults.rest) {
+      if (deferredComponentsTargets.contains(targetName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool isDebug() {
+    for (final String targetName in argResults.rest) {
+      if (targetName.contains('debug')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Environment get environment => _environment ??= createEnvironment();
+  Environment _environment;
 
   /// The environmental configuration for a build invocation.
   Environment createEnvironment() {
@@ -182,6 +243,7 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      platform: globals.platform,
       engineVersion: globals.artifacts.isLocalEngine
         ? null
         : globals.flutterVersion.engineRevision
@@ -200,15 +262,18 @@ class AssembleCommand extends FlutterCommand {
       final String value = chunk.substring(indexEquals + 1);
       results[key] = value;
     }
-    // Workaround for extraGenSnapshot formatting.
-    if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
-      results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
+    if (argResults.wasParsed(useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions)) {
+      results[kExtraGenSnapshotOptions] = (argResults[useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
-    if (argResults.wasParsed(kDartDefines)) {
-      results[kDartDefines] = argResults[kDartDefines] as String;
+    if (argResults.wasParsed(useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption)) {
+      results[kDartDefines] = (argResults[useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption] as List<String>).join(',');
     }
-    if (argResults.wasParsed(kExtraFrontEndOptions)) {
-      results[kExtraFrontEndOptions] = argResults[kExtraFrontEndOptions] as String;
+    results[kDeferredComponents] = 'false';
+    if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets() && !isDebug()) {
+      results[kDeferredComponents] = 'true';
+    }
+    if (argResults.wasParsed(useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions)) {
+      results[kExtraFrontEndOptions] = (argResults[useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions] as List<String>).join(',');
     }
     return results;
   }
@@ -216,10 +281,43 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = createTargets();
-    final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
-    final BuildResult result = await globals.buildSystem.build(
+    final List<Target> nonDeferredTargets = <Target>[];
+    final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
+    for (final Target target in targets) {
+      if (deferredComponentsTargets.contains(target.name)) {
+        deferredTargets.add(target);
+      } else {
+        nonDeferredTargets.add(target);
+      }
+    }
+    Target target;
+    List<String> decodedDefines;
+    try {
+      decodedDefines = decodeDartDefines(environment.defines, kDartDefines);
+    } on FormatException {
+      throwToolExit(
+        'Error parsing assemble command: your generated configuration may be out of date. '
+        "Try re-running 'flutter build ios' or the appropriate build command."
+      );
+    }
+    if (FlutterProject.current().manifest.deferredComponents != null
+        && decodedDefines.contains('validate-deferred-components=true')
+        && deferredTargets.isNotEmpty
+        && !isDebug()) {
+      // Add deferred components validation target that require loading units.
+      target = DeferredComponentsGenSnapshotValidatorTarget(
+        deferredComponentsDependencies: deferredTargets.cast<AndroidAotDeferredComponentsBundle>(),
+        nonDeferredComponentsDependencies: nonDeferredTargets,
+        title: 'Deferred components gen_snapshot validation',
+      );
+    } else if (targets.length > 1) {
+      target = CompositeTarget(targets);
+    } else if (targets.isNotEmpty) {
+      target = targets.single;
+    }
+    final BuildResult result = await _buildSystem.build(
       target,
-      createEnvironment(),
+      environment,
       buildSystemConfig: BuildSystemConfig(
         resourcePoolSize: argResults.wasParsed('resource-pool-size')
           ? int.tryParse(stringArg('resource-pool-size'))
@@ -237,6 +335,7 @@ class AssembleCommand extends FlutterCommand {
       throwToolExit('');
     }
     globals.printTrace('build succeeded.');
+
     if (argResults.wasParsed('build-inputs')) {
       writeListIfChanged(result.inputFiles, stringArg('build-inputs'));
     }
@@ -296,23 +395,4 @@ void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File ou
     outFile.parent.createSync(recursive: true);
   }
   outFile.writeAsStringSync(json.encode(jsonData));
-}
-
-class _CompositeTarget extends Target {
-  _CompositeTarget(this.dependencies);
-
-  @override
-  final List<Target> dependencies;
-
-  @override
-  String get name => '_composite';
-
-  @override
-  Future<void> build(Environment environment) async { }
-
-  @override
-  List<Source> get inputs => <Source>[];
-
-  @override
-  List<Source> get outputs => <Source>[];
 }

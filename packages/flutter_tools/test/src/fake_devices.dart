@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -10,7 +13,7 @@ import 'package:flutter_tools/src/project.dart';
 /// (`Device.toJson()` and `--machine` flag for `devices` command)
 List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
   FakeDeviceJsonData(
-    FakeDevice('ephemeral', 'ephemeral', true, true, PlatformType.android),
+    FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
     <String, Object>{
       'name': 'ephemeral',
       'id': 'ephemeral',
@@ -55,17 +58,50 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
 
 /// Fake device to test `devices` command.
 class FakeDevice extends Device {
-  FakeDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true, PlatformType type = PlatformType.web]) : super(
-      id,
-      platformType: type,
-      category: Category.mobile,
-      ephemeral: ephemeral,
-  );
+  FakeDevice(this.name, String id, {
+    bool ephemeral = true,
+    bool isSupported = true,
+    PlatformType type = PlatformType.web,
+    LaunchResult launchResult,
+  }) : _isSupported = isSupported,
+      _launchResult = launchResult ?? LaunchResult.succeeded(),
+      super(
+        id,
+        platformType: type,
+        category: Category.mobile,
+        ephemeral: ephemeral,
+      );
 
   final bool _isSupported;
+  final LaunchResult _launchResult;
 
   @override
   final String name;
+
+  @override
+  Future<LaunchResult> startApp(covariant ApplicationPackage package, {
+    String mainPath,
+    String route,
+    DebuggingOptions debuggingOptions,
+    Map<String, dynamic> platformArgs,
+    bool prebuiltApplication = false,
+    bool ipv6 = false,
+    String userIdentifier,
+  }) async => _launchResult;
+
+  @override
+  Future<bool> stopApp(covariant ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
+
+  @override
+  Future<bool> uninstallApp(
+  covariant ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
+
+  @override
+  Future<void> dispose() async {}
 
   @override
   Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);

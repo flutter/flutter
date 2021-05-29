@@ -7,6 +7,8 @@ import 'package:flutter/cupertino.dart';
 import '../../gallery/demo.dart';
 
 class CupertinoAlertDemo extends StatefulWidget {
+  const CupertinoAlertDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/cupertino/alert';
 
   @override

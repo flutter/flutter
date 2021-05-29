@@ -35,7 +35,7 @@ import 'text_style.dart';
 /// The text "Hello world!", in black:
 ///
 /// ```dart
-/// TextSpan(
+/// const TextSpan(
 ///   text: 'Hello world!',
 ///   style: TextStyle(color: Colors.black),
 /// )
@@ -60,7 +60,7 @@ import 'text_style.dart';
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
-class TextSpan extends InlineSpan {
+class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotation {
   /// Creates a [TextSpan] with the given values.
   ///
   /// For the object to be useful, at least one of [text] or
@@ -70,8 +70,14 @@ class TextSpan extends InlineSpan {
     this.children,
     TextStyle? style,
     this.recognizer,
+    MouseCursor? mouseCursor,
+    this.onEnter,
+    this.onExit,
     this.semanticsLabel,
-  }) : super(style: style);
+  }) : mouseCursor = mouseCursor ??
+         (recognizer == null ? MouseCursor.defer : SystemMouseCursors.click),
+       assert(!(text == null && semanticsLabel != null)),
+       super(style: style);
 
   /// The text contained in this span.
   ///
@@ -80,7 +86,6 @@ class TextSpan extends InlineSpan {
   ///
   /// This getter does not include the contents of its children.
   final String? text;
-
 
   /// Additional spans to include as children.
   ///
@@ -114,10 +119,13 @@ class TextSpan extends InlineSpan {
   /// provided to an [InlineSpan] object. It defines a `BuzzingText` widget
   /// which uses the [HapticFeedback] class to vibrate the device when the user
   /// long-presses the "find the" span, which is underlined in wavy green. The
-  /// hit-testing is handled by the [RichText] widget.
+  /// hit-testing is handled by the [RichText] widget. It also changes the
+  /// hovering mouse cursor to `precise`.
   ///
   /// ```dart
   /// class BuzzingText extends StatefulWidget {
+  ///   const BuzzingText({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   _BuzzingTextState createState() => _BuzzingTextState();
   /// }
@@ -147,18 +155,19 @@ class TextSpan extends InlineSpan {
   ///     return Text.rich(
   ///       TextSpan(
   ///         text: 'Can you ',
-  ///         style: TextStyle(color: Colors.black),
+  ///         style: const TextStyle(color: Colors.black),
   ///         children: <InlineSpan>[
   ///           TextSpan(
   ///             text: 'find the',
-  ///             style: TextStyle(
+  ///             style: const TextStyle(
   ///               color: Colors.green,
   ///               decoration: TextDecoration.underline,
   ///               decorationStyle: TextDecorationStyle.wavy,
   ///             ),
   ///             recognizer: _longPressRecognizer,
+  ///             mouseCursor: SystemMouseCursors.precise,
   ///           ),
-  ///           TextSpan(
+  ///           const TextSpan(
   ///             text: ' secret?',
   ///           ),
   ///         ],
@@ -169,6 +178,32 @@ class TextSpan extends InlineSpan {
   /// ```
   /// {@end-tool}
   final GestureRecognizer? recognizer;
+
+  /// Mouse cursor when the mouse hovers over this span.
+  ///
+  /// The default value is [SystemMouseCursors.click] if [recognizer] is not
+  /// null, or [MouseCursor.defer] otherwise.
+  ///
+  /// [TextSpan] itself does not implement hit testing or cursor changing.
+  /// The object that manages the [TextSpan] painting is responsible
+  /// to return the [TextSpan] in its hit test, as well as providing the
+  /// correct mouse cursor when the [TextSpan]'s mouse cursor is
+  /// [MouseCursor.defer].
+  final MouseCursor mouseCursor;
+
+  @override
+  final PointerEnterEventListener? onEnter;
+
+  @override
+  final PointerExitEventListener? onExit;
+
+  /// Returns the value of [mouseCursor].
+  ///
+  /// This field, required by [MouseTrackerAnnotation], is hidden publicly to
+  /// avoid the confusion as a text cursor.
+  @protected
+  @override
+  MouseCursor get cursor => mouseCursor;
 
   /// An alternative semantics label for this [TextSpan].
   ///
@@ -182,6 +217,15 @@ class TextSpan extends InlineSpan {
   /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
   /// ```
   final String? semanticsLabel;
+
+  @override
+  bool get validForMouseTracker => true;
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    if (event is PointerDownEvent)
+      recognizer?.addPointer(event);
+  }
 
   /// Apply the [style], [text], and [children] of this object to the
   /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
@@ -258,7 +302,7 @@ class TextSpan extends InlineSpan {
   void computeToPlainText(
     StringBuffer buffer, {
     bool includeSemanticsLabels = true,
-    bool includePlaceholders = true
+    bool includePlaceholders = true,
   }) {
     assert(debugAssertIsValid());
     if (semanticsLabel != null && includeSemanticsLabels) {
@@ -279,7 +323,7 @@ class TextSpan extends InlineSpan {
   @override
   void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector) {
     assert(debugAssertIsValid());
-    if (text != null || semanticsLabel != null) {
+    if (text != null) {
       collector.add(InlineSpanSemanticsInformation(
         text!,
         semanticsLabel: semanticsLabel,
@@ -340,16 +384,16 @@ class TextSpan extends InlineSpan {
     assert(() {
       if (children != null) {
         for (final InlineSpan child in children!) {
-          // `child` has a non-nullable return type, but might be null when
-          // running with weak checking, so we need to null check it anyway (and
-          // ignore the warning that the null-handling logic is dead code).
-          if (child == null) { // ignore: dead_code
+          if (child == null) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('TextSpan contains a null child.'),
               ErrorDescription(
-                  'A TextSpan object with a non-null child list should not have any nulls in its child list.'),
-              toDiagnosticsNode(name: 'The full text in question was',
-                  style: DiagnosticsTreeStyle.errorProperty),
+                'A TextSpan object with a non-null child list should not have any nulls in its child list.',
+              ),
+              toDiagnosticsNode(
+                name: 'The full text in question was',
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
             ]);
           }
           assert(child.debugAssertIsValid());
@@ -405,6 +449,9 @@ class TextSpan extends InlineSpan {
         && other.text == text
         && other.recognizer == recognizer
         && other.semanticsLabel == semanticsLabel
+        && onEnter == other.onEnter
+        && onExit == other.onExit
+        && mouseCursor == other.mouseCursor
         && listEquals<InlineSpan>(other.children, children);
   }
 
@@ -414,6 +461,9 @@ class TextSpan extends InlineSpan {
     text,
     recognizer,
     semanticsLabel,
+    onEnter,
+    onExit,
+    mouseCursor,
     hashList(children),
   );
 
@@ -430,7 +480,7 @@ class TextSpan extends InlineSpan {
         text,
         showName: false,
         defaultValue: null,
-      )
+      ),
     );
     if (style == null && text == null && children == null)
       properties.add(DiagnosticsNode.message('(empty)'));
@@ -440,6 +490,15 @@ class TextSpan extends InlineSpan {
       description: recognizer?.runtimeType.toString(),
       defaultValue: null,
     ));
+
+    properties.add(FlagsSummary<Function?>(
+      'callbacks',
+      <String, Function?> {
+        'enter': onEnter,
+        'exit': onExit,
+      },
+    ));
+    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', cursor, defaultValue: MouseCursor.defer));
 
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
@@ -456,7 +515,7 @@ class TextSpan extends InlineSpan {
       // warning that the null-handling logic is dead code).
       if (child != null) {
         return child.toDiagnosticsNode();
-      } else { // ignore: dead_code
+      } else {
         return DiagnosticsNode.message('<null child>');
       }
     }).toList();

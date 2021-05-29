@@ -442,7 +442,7 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  Future<R> then<R>(FutureOr<R> onValue(void value), { Function? onError }) {
+  Future<R> then<R>(FutureOr<R> Function(void value) onValue, { Function? onError }) {
     return _primaryCompleter.future.then<R>(onValue, onError: onError);
   }
 
@@ -452,7 +452,7 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  Future<void> whenComplete(dynamic action()) {
+  Future<void> whenComplete(dynamic Function() action) {
     return _primaryCompleter.future.whenComplete(action);
   }
 

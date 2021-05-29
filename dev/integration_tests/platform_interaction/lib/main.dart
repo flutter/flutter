@@ -12,10 +12,12 @@ import 'src/test_step.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(TestApp());
+  runApp(const TestApp());
 }
 
 class TestApp extends StatefulWidget {
+  const TestApp({Key key}) : super(key: key);
+
   @override
   _TestAppState createState() => _TestAppState();
 }

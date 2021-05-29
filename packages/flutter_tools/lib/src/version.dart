@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
@@ -11,7 +13,7 @@ import 'base/process.dart';
 import 'base/time.dart';
 import 'cache.dart';
 import 'convert.dart';
-import 'globals.dart' as globals;
+import 'globals_null_migrated.dart' as globals;
 
 /// The flutter GitHub repository.
 String get _flutterGit => globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
@@ -142,8 +144,6 @@ class FlutterVersion {
   String _frameworkVersion;
   String get frameworkVersion => _frameworkVersion;
 
-  String get frameworkDate => frameworkCommitDate;
-
   String get dartSdkVersion => globals.cache.dartSdkVersion;
 
   String get engineRevision => globals.cache.engineRevision;
@@ -178,6 +178,8 @@ class FlutterVersion {
     'engineRevision': engineRevision,
     'dartSdkVersion': dartSdkVersion,
   };
+
+  String get frameworkDate => frameworkCommitDate;
 
   /// A date String describing the last framework commit.
   ///

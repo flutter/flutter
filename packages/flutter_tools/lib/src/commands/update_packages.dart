@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -9,57 +11,65 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
 /// package version in cases when upgrading to the latest breaks Flutter.
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
-  // Add pinned packages here.
+  // Add pinned packages here. Please leave a comment explaining why.
+  // PACKAGES WITH INCOMPATIBLE LATER VERSIONS
   // Dart analyzer does not catch renamed or deleted files.
   // Therefore, we control the version of flutter_gallery_assets so that
   // existing tests do not fail when the package has a new version.
-  'flutter_gallery_assets': '^0.2.0',
-  'mockito': '4.1.1',  // Prevent mockito from upgrading to the source gen version.
-  'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
+  'flutter_gallery_assets': '^1.0.1',
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
-  'shelf': '0.7.5',
-  // Pinned for 1.26.x release branch to allow updating stable null-safe
-  '_fe_analyzer_shared': '12.0.0',
-  'analyzer': '0.40.6',
-  'cli_util': '0.2.0',
-  'coverage': '0.14.2',
-  'devtools': '0.9.6+3',
-  'devtools_shared': '0.9.6+3',
-  'file_testing': '2.1.0',
-  'mime': '0.9.7',
-  'node_preamble': '1.4.12',
-  'pubspec_parse': '0.1.7',
-  'shelf_packages_handler': '2.0.0',
-  'shelf_static': '0.2.9+1',
-  'shelf_web_socket': '0.2.3',
-  'source_span': '1.8.0',
-  'sse': '3.6.0',
-  'vm_service': '5.5.0',
-  'watcher': '0.9.7+15',
-  'webkit_inspection_protocol': '0.7.4',
-  'yaml': '2.2.1',
-  // Flutter team owned nnbd deps
-  'platform': '3.0.0',
-  'file': '6.0.0',
-  'process': '4.0.0',
-  'process_runner': '4.0.0-nullsafety.5',
-  'path_provider': '1.6.14',
-  'video_player': '2.0.0-nullsafety.2',
-  'url_launcher': '6.0.0-nullsafety.1',
-  'connectivity': '3.0.0-nullsafety.1',
-  'device_info': '2.0.0-nullsafety.1',
-  'camera': '0.6.4+5',
+  'mockito': '4.1.1+1', // Prevent mockito from upgrading to the source gen version.
+  // DART TEAM OWNED NNBD DEPS
+  'archive': '">=3.0.0-nullsafety.0"',
+  'async': '">=2.5.0-nullsafety.3"',
+  'boolean_selector': '">=2.1.0-nullsafety.3"',
+  'characters': '">=1.1.0-nullsafety.5"',
+  'charcode': '">=1.2.0-nullsafety.3"',
+  'clock': '">=1.1.0-nullsafety.3"',
+  'collection': '">=1.15.0-nullsafety.5"',
+  'fake_async': '">=1.2.0-nullsafety.3"',
+  'intl': '">=0.17.0-nullsafety.2"',
+  'js': '">=0.6.3-nullsafety.3"',
+  'matcher': '">=0.12.10-nullsafety.3"',
+  'meta': '">=1.3.0-nullsafety.6"',
+  'path': '">=1.8.0-nullsafety.3"',
+  'pedantic': '">=1.10.0-nullsafety.3"',
+  'petitparser': '">=4.0.0-nullsafety.1"',
+  'pool': '">=1.5.0-nullsafety.3"',
+  'source_map_stack_trace': '">=2.1.0-nullsafety.4"',
+  'source_maps': '">=0.10.10-nullsafety.3"',
+  'source_span': '">=1.8.0-nullsafety.4"',
+  'stack_trace': '">=1.10.0-nullsafety.6"',
+  'stream_channel': '">=2.1.0-nullsafety.3"',
+  'string_scanner': '">=1.1.0-nullsafety.3"',
+  'term_glyph': '">=1.2.0-nullsafety.3"',
+  'test': '">=1.16.0-nullsafety.16"',
+  'test_api': '">=0.2.19-nullsafety.6"',
+  'test_core': '">=0.3.12-nullsafety.15"',
+  'typed_data': '">=1.3.0-nullsafety.5"',
+  'vector_math': '">=2.1.0-nullsafety.5"',
+  'vm_service': '">=6.0.1-nullsafety.1"',
+  'xml': '">=5.0.0-nullsafety.1"',
+  // FLUTTER TEAM OWNED NNBD DEPS
+  'connectivity': '">=3.0.0-nullsafety.1"',
+  'device_info': '">=2.0.0-nullsafety.1"',
+  'file': '">=6.0.0-nullsafety.4"',
+  'path_provider': '">=2.0.0-nullsafety.1"',
+  'platform': '">=3.0.0-nullsafety.4"',
+  'process': '">=4.0.0-nullsafety.4"',
+  'process_runner': '">=4.0.0-nullsafety.5"',
+  'url_launcher': '">=6.0.0-nullsafety.1"',
+  'video_player': '">=2.0.0-nullsafety.2"',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -75,19 +85,19 @@ class UpdatePackagesCommand extends FlutterCommand {
       ..addFlag(
         'paths',
         help: 'Finds paths in the dependency chain leading from package specified '
-              'in --from to package specified in --to.',
+              'in "--from" to package specified in "--to".',
         defaultsTo: false,
         negatable: false,
       )
       ..addOption(
         'from',
-        help: 'Used with flag --dependency-path. Specifies the package to begin '
+        help: 'Used with "--dependency-path". Specifies the package to begin '
               'searching dependency path from.',
       )
       ..addOption(
         'to',
-        help: 'Used with flag --dependency-path. Specifies the package that the '
-              'sought after dependency path leads to.',
+        help: 'Used with "--dependency-path". Specifies the package that the '
+              'sought-after dependency path leads to.',
       )
       ..addFlag(
         'transitive-closure',
@@ -99,20 +109,26 @@ class UpdatePackagesCommand extends FlutterCommand {
       ..addFlag(
         'consumer-only',
         help: 'Only prints the dependency graph that is the transitive closure '
-              'that a consumer of the Flutter SDK will observe (When combined '
-              'with transitive-closure)',
+              'that a consumer of the Flutter SDK will observe (when combined '
+              'with transitive-closure).',
         defaultsTo: false,
         negatable: false,
       )
       ..addFlag(
         'verify-only',
-        help: 'verifies the package checksum without changing or updating deps',
+        help: 'Verifies the package checksum without changing or updating deps.',
         defaultsTo: false,
         negatable: false,
       )
       ..addFlag(
         'offline',
-        help: 'Use cached packages instead of accessing the network',
+        help: 'Use cached packages instead of accessing the network.',
+        defaultsTo: false,
+        negatable: false,
+      )
+      ..addFlag(
+        'crash',
+        help: 'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
         defaultsTo: false,
         negatable: false,
       );
@@ -134,7 +150,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   // Lazy-initialize the net utilities with values from the context.
   Net _cachedNet;
   Net get _net => _cachedNet ??= Net(
-    httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+    httpClientFactory: context.get<HttpClientFactory>(),
     logger: globals.logger,
     platform: globals.platform,
   );
@@ -144,7 +160,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       'Downloading lcov data for package:flutter...',
     );
     final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
-    final Uri coverageUri = Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info');
+    final Uri coverageUri = Uri.parse('$urlBase/flutter_infra_release/flutter/coverage/lcov.info');
     final List<int> data = await _net.fetchUrl(coverageUri);
     final String coverageDir = globals.fs.path.join(
       Cache.flutterRoot,
@@ -169,6 +185,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = boolArg('verify-only');
     final bool isConsumerOnly = boolArg('consumer-only');
     final bool offline = boolArg('offline');
+    final bool crash = boolArg('crash');
+
+    if (crash) {
+      throw StateError('test crash please ignore.');
+    }
 
     if (upgrade && offline) {
       throwToolExit(
@@ -722,23 +743,6 @@ class PubspecYaml {
   /// This returns all regular dependencies and all dev dependencies.
   Iterable<PubspecDependency> get allDependencies sync* {
     for (final PubspecLine data in inputData) {
-      // Only for branch, to allow rolling nullsafe packages and work around not
-      // being able to pin transitive deps.
-      const List<String> transitiveDepsAllowlist = <String>[
-        '_fe_analyzer_shared',
-        'analyzer',
-        'cli_util',
-        'devtools',
-        'devtools_shared',
-        'node_preamble',
-        'shelf_packages_handler',
-        'source_span',
-        'sse',
-        'watcher',
-      ];
-      if (data is PubspecDependency && transitiveDepsAllowlist.contains(data.name)) {
-        yield data;
-      }
       if (data is PubspecDependency && data.kind != DependencyKind.overridden && !data.isTransitive) {
         yield data;
       }
@@ -1403,7 +1407,7 @@ class PubDependencyTree {
 
 // Produces a 16-bit checksum from the codePoints of the package name and
 // version strings using Fletcher's algorithm.
-String _computeChecksum(Iterable<String> names, String getVersion(String name)) {
+String _computeChecksum(Iterable<String> names, String Function(String name) getVersion) {
   int lowerCheck = 0;
   int upperCheck = 0;
   final List<String> sortedNames = names.toList()..sort();

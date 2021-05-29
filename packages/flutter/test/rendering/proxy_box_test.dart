@@ -9,7 +9,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -517,7 +517,7 @@ void main() {
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
-    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
+    expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
 
   test('RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is false', () {
@@ -528,7 +528,7 @@ void main() {
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
-    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isFalse);
+    expect(follower.hitTest(hitTestResult, position: Offset.zero), isFalse);
   });
 
   test('RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is true', () {
@@ -544,7 +544,7 @@ void main() {
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
-    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
+    expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
 
   test('RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is false', () {
@@ -561,7 +561,7 @@ void main() {
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
     // The follower is still hit testable because there is a leader layer.
-    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
+    expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
 }
 

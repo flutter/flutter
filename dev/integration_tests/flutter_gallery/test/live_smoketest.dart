@@ -109,7 +109,7 @@ class _LiveWidgetController extends LiveWidgetController {
   bool frameSync = true;
 
   /// Waits until at the end of a frame the provided [condition] is [true].
-  Future<void> _waitUntilFrame(bool condition(), [Completer<void>? completer]) {
+  Future<void> _waitUntilFrame(bool Function() condition, [Completer<void>? completer]) {
     completer ??= Completer<void>();
     if (!condition()) {
       SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {
@@ -132,8 +132,8 @@ class _LiveWidgetController extends LiveWidgetController {
   }
 
   @override
-  Future<void> tap(Finder finder, { int? pointer, int buttons = kPrimaryButton }) async {
-    await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons);
+  Future<void> tap(Finder finder, { int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true }) async {
+    await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons, warnIfMissed: warnIfMissed);
   }
 
   Future<void> scrollIntoView(Finder finder, {required double alignment}) async {

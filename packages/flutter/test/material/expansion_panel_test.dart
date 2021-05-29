@@ -103,9 +103,7 @@ class ExpansionPanelListSemanticsTestState extends State<ExpansionPanelListSeman
                   ),
                 );
               },
-              body: Container(
-                child: const Placeholder(),
-              ),
+              body: const Placeholder(),
             ),
           ],
         ),

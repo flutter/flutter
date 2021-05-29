@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../base/context.dart';
 import '../base/user_messages.dart' hide userMessages;
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import 'visual_studio.dart';
 
-VisualStudioValidator get visualStudioValidator => context.get<VisualStudioValidator>();
+VisualStudioValidator? get visualStudioValidator => context.get<VisualStudioValidator>();
 
 class VisualStudioValidator extends DoctorValidator {
   const VisualStudioValidator({
-    @required VisualStudio visualStudio,
-    @required UserMessages userMessages,
+    required VisualStudio visualStudio,
+    required UserMessages userMessages,
   }) : _visualStudio = visualStudio,
        _userMessages = userMessages,
        super('Visual Studio - develop for Windows');
@@ -26,7 +24,7 @@ class VisualStudioValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType status = ValidationType.missing;
-    String versionInfo;
+    String? versionInfo;
 
     if (_visualStudio.isInstalled) {
       status = ValidationType.installed;
@@ -44,7 +42,7 @@ class VisualStudioValidator extends DoctorValidator {
         messages.add(ValidationMessage(_userMessages.visualStudioIsPrerelease));
       }
 
-      final String windows10SdkVersion = _visualStudio.getWindows10SDKVersion();
+      final String? windows10SdkVersion = _visualStudio.getWindows10SDKVersion();
       if (windows10SdkVersion != null) {
         messages.add(ValidationMessage(_userMessages.windows10SdkVersion(windows10SdkVersion)));
       }

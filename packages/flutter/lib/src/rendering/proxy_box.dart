@@ -8,15 +8,13 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
-import 'mouse_cursor.dart';
-import 'mouse_tracking.dart';
 import 'object.dart';
 
 export 'package:flutter/gestures.dart' show
@@ -504,7 +502,7 @@ class RenderAspectRatio extends RenderProxyBox {
           'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
           'both unbounded width and unbounded height constraints. Because both '
           'constraints were unbounded, this render object doesn\'t know how much '
-          'size to consume.'
+          'size to consume.',
         );
       }
       return true;
@@ -1500,10 +1498,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
        assert(clipBehavior != Clip.none),
        _borderRadius = borderRadius,
        super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
-    // `_borderRadius` has a non-nullable return type, but might be null when
-    // running with weak checking, so we need to null check it anyway (and
-    // ignore the warning that the null-handling logic is dead code).
-    assert(_borderRadius != null || clipper != null);// ignore: dead_code
+    assert(_borderRadius != null || clipper != null);
   }
 
   /// The border radius of the rounded corners.
@@ -1605,8 +1600,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(_clip != null);
     final Offset center = _clip!.center;
     // convert the position to an offset from the center of the unit circle
-    final Offset offset = Offset((position.dx - center.dx) / _clip!.width,
-                                     (position.dy - center.dy) / _clip!.height);
+    final Offset offset = Offset(
+      (position.dx - center.dx) / _clip!.width,
+      (position.dy - center.dy) / _clip!.height,
+    );
     // check if the point is outside the unit circle
     if (offset.distanceSquared > 0.25) // x^2 + y^2 > r^2
       return false;
@@ -2151,7 +2148,7 @@ class RenderDecoratedBox extends RenderProxyBox {
             ErrorDescription(
               'Before painting the decoration, the canvas save count was $debugSaveCount. '
               'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
-              'Every call to save() or saveLayer() must be matched by a call to restore().'
+              'Every call to save() or saveLayer() must be matched by a call to restore().',
             ),
             DiagnosticsProperty<Decoration>('The decoration was', decoration, style: DiagnosticsTreeStyle.errorProperty),
             DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
@@ -2587,8 +2584,13 @@ class RenderFittedBox extends RenderProxyBox {
   TransformLayer? _paintChildWithTransform(PaintingContext context, Offset offset) {
     final Offset? childOffset = MatrixUtils.getAsTranslation(_transform!);
     if (childOffset == null)
-      return context.pushTransform(needsCompositing, offset, _transform!, super.paint,
-          oldLayer: layer is TransformLayer ? layer! as TransformLayer : null);
+      return context.pushTransform(
+        needsCompositing,
+        offset,
+        _transform!,
+        super.paint,
+        oldLayer: layer is TransformLayer ? layer! as TransformLayer : null,
+      );
     else
       super.paint(context, offset + childOffset);
     return null;
@@ -2601,8 +2603,14 @@ class RenderFittedBox extends RenderProxyBox {
     _updatePaintData();
     if (child != null) {
       if (_hasVisualOverflow! && clipBehavior != Clip.none)
-        layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
-            oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null, clipBehavior: clipBehavior);
+        layer = context.pushClipRect(
+          needsCompositing,
+          offset,
+          Offset.zero & size,
+          _paintChildWithTransform,
+          oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null,
+          clipBehavior: clipBehavior,
+        );
       else
         layer = _paintChildWithTransform(context, offset);
     }
@@ -3048,7 +3056,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// ```dart
   /// class PngHome extends StatefulWidget {
-  ///   PngHome({Key? key}) : super(key: key);
+  ///   const PngHome({Key? key}) : super(key: key);
   ///
   ///   @override
   ///   _PngHomeState createState() => _PngHomeState();
@@ -3058,10 +3066,10 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///   GlobalKey globalKey = GlobalKey();
   ///
   ///   Future<void> _capturePng() async {
-  ///     RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-  ///     ui.Image image = await boundary.toImage();
-  ///     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  ///     Uint8List pngBytes = byteData!.buffer.asUint8List();
+  ///     final RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+  ///     final ui.Image image = await boundary.toImage();
+  ///     final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  ///     final Uint8List pngBytes = byteData!.buffer.asUint8List();
   ///     print(pngBytes);
   ///   }
   ///
@@ -3071,7 +3079,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///       key: globalKey,
   ///       child: Center(
   ///         child: TextButton(
-  ///           child: Text('Hello World', textDirection: TextDirection.ltr),
+  ///           child: const Text('Hello World', textDirection: TextDirection.ltr),
   ///           onPressed: _capturePng,
   ///         ),
   ///       ),
@@ -3514,10 +3522,10 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
 
 /// Listens for the specified gestures from the semantics server (e.g.
 /// an accessibility tool).
-class RenderSemanticsGestureHandler extends RenderProxyBox {
+class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a render object that listens for specific semantic gestures.
   ///
-  /// The [scrollFactor] argument must not be null.
+  /// The [scrollFactor] and [behavior] arguments must not be null.
   RenderSemanticsGestureHandler({
     RenderBox? child,
     GestureTapCallback? onTap,
@@ -3525,12 +3533,13 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     GestureDragUpdateCallback? onHorizontalDragUpdate,
     GestureDragUpdateCallback? onVerticalDragUpdate,
     this.scrollFactor = 0.8,
+    HitTestBehavior behavior = HitTestBehavior.deferToChild,
   }) : assert(scrollFactor != null),
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onHorizontalDragUpdate = onHorizontalDragUpdate,
        _onVerticalDragUpdate = onVerticalDragUpdate,
-       super(child);
+       super(behavior: behavior, child: child);
 
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.
@@ -3708,6 +3717,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool? selected,
     bool? button,
     bool? slider,
+    bool? keyboardKey,
     bool? link,
     bool? header,
     bool? textField,
@@ -3750,6 +3760,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     MoveCursorHandler? onMoveCursorForwardByWord,
     MoveCursorHandler? onMoveCursorBackwardByWord,
     SetSelectionHandler? onSetSelection,
+    SetTextHandler? onSetText,
     VoidCallback? onDidGainAccessibilityFocus,
     VoidCallback? onDidLoseAccessibilityFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
@@ -3763,6 +3774,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _selected = selected,
        _button = button,
        _slider = slider,
+       _keyboardKey = keyboardKey,
        _link = link,
        _header = header,
        _textField = textField,
@@ -3805,6 +3817,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
        _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
        _onSetSelection = onSetSelection,
+       _onSetText = onSetText,
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
        _customSemanticsActions = customSemanticsActions,
@@ -3918,6 +3931,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (slider == value)
       return;
     _slider = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsConfiguration.isKeyboardKey] semantic to the
+  /// given value.
+  bool? get keyboardKey => _keyboardKey;
+  bool? _keyboardKey;
+  set keyboardKey(bool? value) {
+    if (keyboardKey == value)
+      return;
+    _keyboardKey = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4540,6 +4564,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.setText].
+  ///
+  /// This handler is invoked when the user wants to replace the current text in
+  /// the text field with a new text.
+  ///
+  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// their Android devices.
+  SetTextHandler? get onSetText => _onSetText;
+  SetTextHandler? _onSetText;
+  set onSetText(SetTextHandler? handler) {
+    if (_onSetText == handler)
+      return;
+    final bool hadValue = _onSetText != null;
+    _onSetText = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].
   ///
   /// This handler is invoked when the node annotated with this handler gains
@@ -4626,10 +4668,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
-    assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
-      'explicitChildNodes must be set to true if scopes route is true');
-    assert(!(toggled == true && checked == true),
-      'A semantics node cannot be toggled and checked at the same time');
+    assert(
+      (scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
+      'explicitChildNodes must be set to true if scopes route is true',
+    );
+    assert(
+      !(toggled == true && checked == true),
+      'A semantics node cannot be toggled and checked at the same time',
+    );
 
     if (enabled != null)
       config.isEnabled = enabled;
@@ -4645,6 +4691,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isLink = link!;
     if (slider != null)
       config.isSlider = slider!;
+    if (keyboardKey != null)
+      config.isKeyboardKey = keyboardKey!;
     if (header != null)
       config.isHeader = header!;
     if (textField != null)
@@ -4732,6 +4780,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorBackwardByWord = _performMoveCursorBackwardByWord;
     if (onSetSelection != null)
       config.onSetSelection = _performSetSelection;
+    if (onSetText != null)
+      config.onSetText = _performSetText;
     if (onDidGainAccessibilityFocus != null)
       config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
     if (onDidLoseAccessibilityFocus != null)
@@ -4741,98 +4791,83 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   void _performTap() {
-    if (onTap != null)
-      onTap!();
+    onTap?.call();
   }
 
   void _performLongPress() {
-    if (onLongPress != null)
-      onLongPress!();
+    onLongPress?.call();
   }
 
   void _performDismiss() {
-    if (onDismiss != null)
-      onDismiss!();
+    onDismiss?.call();
   }
 
   void _performScrollLeft() {
-    if (onScrollLeft != null)
-      onScrollLeft!();
+    onScrollLeft?.call();
   }
 
   void _performScrollRight() {
-    if (onScrollRight != null)
-      onScrollRight!();
+    onScrollRight?.call();
   }
 
   void _performScrollUp() {
-    if (onScrollUp != null)
-      onScrollUp!();
+    onScrollUp?.call();
   }
 
   void _performScrollDown() {
-    if (onScrollDown != null)
-      onScrollDown!();
+    onScrollDown?.call();
   }
 
   void _performIncrease() {
-    if (onIncrease != null)
-      onIncrease!();
+    onIncrease?.call();
   }
 
   void _performDecrease() {
-    if (onDecrease != null)
-      onDecrease!();
+    onDecrease?.call();
   }
 
   void _performCopy() {
-    if (onCopy != null)
-      onCopy!();
+    onCopy?.call();
   }
 
   void _performCut() {
-    if (onCut != null)
-      onCut!();
+    onCut?.call();
   }
 
   void _performPaste() {
-    if (onPaste != null)
-      onPaste!();
+    onPaste?.call();
   }
 
   void _performMoveCursorForwardByCharacter(bool extendSelection) {
-    if (onMoveCursorForwardByCharacter != null)
-      onMoveCursorForwardByCharacter!(extendSelection);
+    onMoveCursorForwardByCharacter?.call(extendSelection);
   }
 
   void _performMoveCursorBackwardByCharacter(bool extendSelection) {
-    if (onMoveCursorBackwardByCharacter != null)
-      onMoveCursorBackwardByCharacter!(extendSelection);
+    onMoveCursorBackwardByCharacter?.call(extendSelection);
   }
 
   void _performMoveCursorForwardByWord(bool extendSelection) {
-    if (onMoveCursorForwardByWord != null)
-      onMoveCursorForwardByWord!(extendSelection);
+    onMoveCursorForwardByWord?.call(extendSelection);
   }
 
   void _performMoveCursorBackwardByWord(bool extendSelection) {
-    if (onMoveCursorBackwardByWord != null)
-      onMoveCursorBackwardByWord!(extendSelection);
+    onMoveCursorBackwardByWord?.call(extendSelection);
   }
 
   void _performSetSelection(TextSelection selection) {
-    if (onSetSelection != null)
-      onSetSelection!(selection);
+    onSetSelection?.call(selection);
+  }
+
+  void _performSetText(String text) {
+    onSetText?.call(text);
   }
 
   void _performDidGainAccessibilityFocus() {
-    if (onDidGainAccessibilityFocus != null)
-      onDidGainAccessibilityFocus!();
+    onDidGainAccessibilityFocus?.call();
   }
 
   void _performDidLoseAccessibilityFocus() {
-    if (onDidLoseAccessibilityFocus != null)
-      onDidLoseAccessibilityFocus!();
+    onDidLoseAccessibilityFocus?.call();
   }
 }
 
@@ -5221,7 +5256,7 @@ class RenderFollowerLayer extends RenderProxyBox {
     assert(
       link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
       '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
-      'leaderSize is required when leaderAnchor is not Alignment.topLeft'
+      'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );
     final Offset effectiveLinkedOffset = leaderSize == null

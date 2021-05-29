@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
@@ -158,6 +160,7 @@ Future<void> buildWithAssemble({
     fileSystem: globals.fs,
     logger: globals.logger,
     processManager: globals.processManager,
+    platform: globals.platform,
   );
   final Target target = buildMode == BuildMode.debug
     ? const CopyFlutterBundle()

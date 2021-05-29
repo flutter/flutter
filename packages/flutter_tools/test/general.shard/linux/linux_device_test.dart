@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -16,7 +18,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fakes.dart';
 
 final FakePlatform linux = FakePlatform(
   operatingSystem: 'linux',
@@ -49,6 +51,16 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.profile), true);
     expect(device.supportsRuntimeMode(BuildMode.release), true);
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
+  });
+
+  testWithoutContext('LinuxDevice on arm64 hosts is arm64', () async {
+    final LinuxDevice deviceArm64Host = LinuxDevice(
+      processManager: FakeProcessManager.any(),
+      logger: BufferLogger.test(),
+      fileSystem: MemoryFileSystem.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+    );
+    expect(await deviceArm64Host.targetPlatform, TargetPlatform.linux_arm64);
   });
 
   testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {
@@ -157,6 +169,15 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class MockLinuxApp extends Mock implements LinuxApp {}
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  FakeOperatingSystemUtils({
+    HostPlatform hostPlatform = HostPlatform.linux_x64
+  })  : _hostPlatform = hostPlatform;
+
+  final HostPlatform _hostPlatform;
+
   @override
   String get name => 'Linux';
+
+  @override
+  HostPlatform get hostPlatform => _hostPlatform;
 }

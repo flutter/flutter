@@ -14,9 +14,7 @@ Widget buildFrame() {
       itemExtent: 290.0,
       scrollDirection: Axis.vertical,
       children: items.map<Widget>((int item) {
-        return Container(
-          child: Text('$item'),
-        );
+        return Text('$item');
       }).toList(),
     ),
   );
@@ -75,9 +73,7 @@ void main() {
           padding: const EdgeInsets.only(top: 250.0),
           scrollDirection: Axis.vertical,
           children: items.map<Widget>((int item) {
-            return Container(
-              child: Text('$item'),
-            );
+            return Text('$item');
           }).toList(),
         ),
       ),

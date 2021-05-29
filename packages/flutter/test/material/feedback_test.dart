@@ -70,9 +70,9 @@ void main () {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       int callbackCount = 0;
-      final VoidCallback callback = () {
+      void callback() {
         callbackCount++;
-      };
+      }
 
       await tester.pumpWidget(TestWidget(
         tapHandler: (BuildContext context) {
@@ -132,9 +132,9 @@ void main () {
     testWidgets('forLongPress Wrapper', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
       int callbackCount = 0;
-      final VoidCallback callback = () {
+      void callback() {
         callbackCount++;
-      };
+      }
 
       await tester.pumpWidget(TestWidget(
         longPressHandler: (BuildContext context) {

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -24,6 +23,7 @@ void main() {
     expect(style.elevation, null);
     expect(style.padding, null);
     expect(style.minimumSize, null);
+    expect(style.fixedSize, null);
     expect(style.side, null);
     expect(style.shape, null);
     expect(style.mouseCursor, null);
@@ -93,6 +93,7 @@ void main() {
     final MaterialStateProperty<double> elevation =  MaterialStateProperty.all<double>(1);
     final MaterialStateProperty<EdgeInsets> padding = MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(1));
     final MaterialStateProperty<Size> minimumSize = MaterialStateProperty.all<Size>(const Size(1, 2));
+    final MaterialStateProperty<Size> fixedSize = MaterialStateProperty.all<Size>(const Size(3, 4));
     final MaterialStateProperty<BorderSide> side = MaterialStateProperty.all<BorderSide>(const BorderSide());
     final MaterialStateProperty<OutlinedBorder> shape  = MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder());
     final MaterialStateProperty<MouseCursor> mouseCursor = MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden);
@@ -109,6 +110,7 @@ void main() {
       elevation: elevation,
       padding: padding,
       minimumSize: minimumSize,
+      fixedSize: fixedSize,
       side: side,
       shape: shape,
       mouseCursor: mouseCursor,
@@ -128,6 +130,7 @@ void main() {
         elevation: elevation,
         padding: padding,
         minimumSize: minimumSize,
+        fixedSize: fixedSize,
         side: side,
         shape: shape,
         mouseCursor: mouseCursor,
@@ -147,5 +150,39 @@ void main() {
       style.copyWith(),
       style.merge(const ButtonStyle())
     );
+  });
+
+  test('ButtonStyle.lerp BorderSide', () {
+    // This is regression test for https://github.com/flutter/flutter/pull/78051
+    expect(ButtonStyle.lerp(null, null, 0), null);
+    expect(ButtonStyle.lerp(null, null, 0.5), null);
+    expect(ButtonStyle.lerp(null, null, 1), null);
+
+    const BorderSide blackSide = BorderSide(width: 1, color: Color(0xFF000000));
+    const BorderSide whiteSide = BorderSide(width: 1, color: Color(0xFFFFFFFF));
+    const BorderSide emptyBlackSide = BorderSide(width: 0, color: Color(0x00000000));
+
+    final ButtonStyle blackStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(blackSide));
+    final ButtonStyle whiteStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(whiteSide));
+
+    // MaterialState.all<Foo>(value) properties resolve to value
+    // for any set of MaterialStates.
+    const Set<MaterialState> states = <MaterialState>{ };
+
+    expect(ButtonStyle.lerp(blackStyle, blackStyle, 0)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, blackStyle, 0.5)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, blackStyle, 1)?.side?.resolve(states), blackSide);
+
+    expect(ButtonStyle.lerp(blackStyle, null, 0)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, null, 0.5)?.side?.resolve(states), BorderSide.lerp(blackSide, emptyBlackSide, 0.5));
+    expect(ButtonStyle.lerp(blackStyle, null, 1)?.side?.resolve(states), emptyBlackSide);
+
+    expect(ButtonStyle.lerp(null, blackStyle, 0)?.side?.resolve(states), emptyBlackSide);
+    expect(ButtonStyle.lerp(null, blackStyle, 0.5)?.side?.resolve(states), BorderSide.lerp(emptyBlackSide, blackSide, 0.5));
+    expect(ButtonStyle.lerp(null, blackStyle, 1)?.side?.resolve(states), blackSide);
+
+    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 0)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 0.5)?.side?.resolve(states), BorderSide.lerp(blackSide, whiteSide, 0.5));
+    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 1)?.side?.resolve(states), whiteSide);
   });
 }

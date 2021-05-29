@@ -20,7 +20,7 @@ class _PageSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TabController? controller = DefaultTabController.of(context);
-    final Color color = Theme.of(context).accentColor;
+    final Color color = Theme.of(context).colorScheme.secondary;
     return SafeArea(
       top: false,
       bottom: false,
@@ -74,6 +74,8 @@ class _PageSelector extends StatelessWidget {
 }
 
 class PageSelectorDemo extends StatelessWidget {
+  const PageSelectorDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/page-selector';
   static final List<Icon> icons = <Icon>[
     const Icon(Icons.event, semanticLabel: 'Event'),

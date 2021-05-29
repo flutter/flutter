@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
@@ -35,15 +37,9 @@ Future<void> generateLocalizationsSyntheticPackage({
     );
   }
 
-  BuildResult result;
-  // If an l10n.yaml file exists but is empty, attempt to build synthetic
-  // package with default settings.
-  if (yamlNode.value == null) {
-    result = await buildSystem.build(
-      const GenerateLocalizationsTarget(),
-      environment,
-    );
-  } else {
+  // If an l10n.yaml file exists and is not empty, attempt to parse settings in
+  // it.
+  if (yamlNode.value != null) {
     final YamlMap yamlMap = yamlNode as YamlMap;
     final Object value = yamlMap['synthetic-package'];
     if (value is! bool && value != null) {
@@ -61,7 +57,7 @@ Future<void> generateLocalizationsSyntheticPackage({
     }
   }
 
-  result = await buildSystem.build(
+  final BuildResult result = await buildSystem.build(
     const GenerateLocalizationsTarget(),
     environment,
   );

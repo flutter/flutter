@@ -6,8 +6,6 @@ import 'dart:ui' show Color, hashList, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
 import 'banner_theme.dart';
@@ -153,20 +151,27 @@ enum MaterialTapTargetSize {
 ///
 /// {@tool snippet}
 ///
-/// This sample creates a [MaterialApp] widget that stores `ThemeData` and
-/// passes the `ThemeData` to descendant widgets. The [AppBar] widget uses the
-/// [primaryColor] to create a blue background. The [Text] widget uses the
-/// [TextTheme.bodyText2] to create purple text. The [FloatingActionButton] widget
-/// uses the [accentColor] to create a green background.
+/// This sample creates a [MaterialApp] with a [Theme] whose
+/// [ColorScheme] is based on [Colors.blue], but with the color
+/// scheme's [ColorScheme.secondary] color overridden to be green. The
+/// [AppBar] widget uses the color scheme's [ColorScheme.primary] as
+/// its default background color and the [FloatingActionButton] widget
+/// uses the color scheme's [ColorScheme.secondary] for its default
+/// background. By default, the [Text] widget uses
+/// [TextTheme.bodyText2], and the color of that [TextStyle] has been
+/// changed to purple.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
 ///
 /// ```dart
 /// MaterialApp(
 ///   theme: ThemeData(
-///     primaryColor: Colors.blue,
-///     accentColor: Colors.green,
-///     textTheme: TextTheme(bodyText2: TextStyle(color: Colors.purple)),
+///     colorScheme: ColorScheme.fromSwatch(
+///       primarySwatch: Colors.blue,
+///     ).copyWith(
+///       secondary: Colors.green,
+///     ),
+///     textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.purple)),
 ///   ),
 ///   home: Scaffold(
 ///     appBar: AppBar(
@@ -176,10 +181,8 @@ enum MaterialTapTargetSize {
 ///       child: const Icon(Icons.add),
 ///       onPressed: () {},
 ///     ),
-///     body: Center(
-///       child: Text(
-///         'Button pressed 0 times',
-///       ),
+///     body: const Center(
+///       child: Text('Button pressed 0 times'),
 ///     ),
 ///   ),
 /// )
@@ -242,17 +245,17 @@ class ThemeData with Diagnosticable {
     Color? secondaryHeaderColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? textSelectionColor,
     @Deprecated(
       'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? cursorColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? textSelectionHandleColor,
     Color? backgroundColor,
@@ -306,7 +309,7 @@ class ThemeData with Diagnosticable {
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     bool? useTextSelectionTheme,
   }) {
@@ -561,8 +564,20 @@ class ThemeData with Diagnosticable {
     required this.buttonColor,
     required this.toggleButtonsTheme,
     required this.secondaryHeaderColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionColor instead. '
+      'This feature was deprecated after v1.26.0-18.0.pre.',
+    )
     required this.textSelectionColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.cursorColor instead. '
+      'This feature was deprecated after v1.26.0-18.0.pre.',
+    )
     required this.cursorColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionHandleColor instead. '
+      'This feature was deprecated after v1.26.0-18.0.pre.',
+    )
     required this.textSelectionHandleColor,
     required this.backgroundColor,
     required this.dialogBackgroundColor,
@@ -612,6 +627,10 @@ class ThemeData with Diagnosticable {
     required this.radioTheme,
     required this.switchTheme,
     required this.fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v1.23.0-4.0.pre.',
+    )
     required this.useTextSelectionTheme,
   }) : assert(visualDensity != null),
        assert(primaryColor != null),
@@ -708,8 +727,8 @@ class ThemeData with Diagnosticable {
   ///
   /// ```dart
   /// MaterialApp(
-  ///   theme: ThemeData.from(colorScheme: ColorScheme.light()),
-  ///   darkTheme: ThemeData.from(colorScheme: ColorScheme.dark()),
+  ///   theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+  ///   darkTheme: ThemeData.from(colorScheme: const ColorScheme.dark()),
   /// )
   /// ```
   /// {@end-tool}
@@ -934,21 +953,21 @@ class ThemeData with Diagnosticable {
   /// The color of text selections in text fields, such as [TextField].
   @Deprecated(
     'Use TextSelectionThemeData.selectionColor instead. '
-    'This feature was deprecated after v1.23.0-4.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   final Color textSelectionColor;
 
   /// The color of cursors in Material-style text fields, such as [TextField].
   @Deprecated(
     'Use TextSelectionThemeData.cursorColor instead. '
-    'This feature was deprecated after v1.23.0-4.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   final Color cursorColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
   @Deprecated(
     'Use TextSelectionThemeData.selectionHandleColor instead. '
-    'This feature was deprecated after v1.23.0-4.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   final Color textSelectionHandleColor;
 
@@ -1207,7 +1226,7 @@ class ThemeData with Diagnosticable {
   /// reference to this property, as it will be removed in future releases.
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v1.23.0-4.0.pre.'
+    'This feature was deprecated after v1.23.0-4.0.pre.',
   )
   final bool useTextSelectionTheme;
 
@@ -1243,17 +1262,17 @@ class ThemeData with Diagnosticable {
     Color? secondaryHeaderColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? textSelectionColor,
     @Deprecated(
       'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? cursorColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? textSelectionHandleColor,
     Color? backgroundColor,
@@ -1306,7 +1325,7 @@ class ThemeData with Diagnosticable {
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     bool? useTextSelectionTheme,
   }) {
@@ -1964,7 +1983,7 @@ class _FifoCache<K, V> {
   /// if not, calls the given callback to obtain it first.
   ///
   /// The arguments must not be null.
-  V putIfAbsent(K key, V loader()) {
+  V putIfAbsent(K key, V Function() loader) {
     assert(key != null);
     assert(loader != null);
     final V? result = _cache[key];
@@ -2062,7 +2081,7 @@ class VisualDensity with Diagnosticable {
       case TargetPlatform.windows:
         return compact;
     }
-    return const VisualDensity();
+    return VisualDensity.standard;
   }
 
   /// Copy the current [VisualDensity] with the given values replacing the

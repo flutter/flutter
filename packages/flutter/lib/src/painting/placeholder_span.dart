@@ -39,7 +39,7 @@ abstract class PlaceholderSpan extends InlineSpan {
     this.alignment = ui.PlaceholderAlignment.bottom,
     this.baseline,
     TextStyle? style,
-  }) : super(style: style,);
+  }) : super(style: style);
 
   /// How the placeholder aligns vertically with the text.
   ///

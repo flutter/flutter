@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -10,7 +14,7 @@ import '../src/common.dart';
 
 void main() {
   testWithoutContext('StdoutHandler can produce output message', () async {
-    final StdoutHandler stdoutHandler = StdoutHandler(logger: BufferLogger.test());
+    final StdoutHandler stdoutHandler = StdoutHandler(logger: BufferLogger.test(), fileSystem: MemoryFileSystem.test());
     stdoutHandler.handler('result 12345');
     expect(stdoutHandler.boundaryKey, '12345');
     stdoutHandler.handler('12345');
@@ -18,6 +22,41 @@ void main() {
     final CompilerOutput output = await stdoutHandler.compilerOutput.future;
     expect(output.errorCount, 0);
     expect(output.outputFilename, 'message');
+    expect(output.expressionData, null);
+  });
+
+  testWithoutContext('StdoutHandler can read output bytes', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final StdoutHandler stdoutHandler = StdoutHandler(logger: BufferLogger.test(), fileSystem: fileSystem);
+    fileSystem.file('message').writeAsBytesSync(<int>[1, 2, 3 ,4]);
+
+    stdoutHandler.reset(readFile: true);
+    stdoutHandler.handler('result 12345');
+    expect(stdoutHandler.boundaryKey, '12345');
+    stdoutHandler.handler('12345');
+    stdoutHandler.handler('12345 message 0');
+    final CompilerOutput output = await stdoutHandler.compilerOutput.future;
+
+    expect(output.errorCount, 0);
+    expect(output.outputFilename, 'message');
+    expect(output.expressionData, <int>[1, 2, 3, 4]);
+  });
+
+  testWithoutContext('StdoutHandler reads output bytes if errorCount > 0', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final StdoutHandler stdoutHandler = StdoutHandler(logger: BufferLogger.test(), fileSystem: fileSystem);
+    fileSystem.file('message').writeAsBytesSync(<int>[1, 2, 3 ,4]);
+
+    stdoutHandler.reset(readFile: true);
+    stdoutHandler.handler('result 12345');
+    expect(stdoutHandler.boundaryKey, '12345');
+    stdoutHandler.handler('12345');
+    stdoutHandler.handler('12345 message 1');
+    final CompilerOutput output = await stdoutHandler.compilerOutput.future;
+
+    expect(output.errorCount, 1);
+    expect(output.outputFilename, 'message');
+    expect(output.expressionData, <int>[1, 2, 3, 4]);
   });
 
   testWithoutContext('TargetModel values', () {
