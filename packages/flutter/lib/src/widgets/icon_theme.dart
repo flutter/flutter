@@ -66,6 +66,7 @@ class IconTheme extends InheritedTheme {
         size: iconThemeData.size ?? const IconThemeData.fallback().size,
         color: iconThemeData.color ?? const IconThemeData.fallback().color,
         opacity: iconThemeData.opacity ?? const IconThemeData.fallback().opacity,
+        shadows: iconThemeData.shadows ?? const IconThemeData.fallback().shadows,
       );
   }
 
