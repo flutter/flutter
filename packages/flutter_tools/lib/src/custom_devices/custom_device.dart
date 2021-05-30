@@ -255,6 +255,13 @@ class CustomDeviceAppSession {
   Process _process;
   int _forwardedHostPort;
 
+  /// Get the engine options for the given [debuggingOptions],
+  /// [traceStartup] and [route].
+  ///
+  /// [debuggingOptions] and [route] can be null.
+  ///
+  /// For example, `_getEngineOptions(null, false, null)` will return
+  /// `['enable-dart-profiling=true', 'enable-background-compilation=true']`
   List<String> _getEngineOptions(DebuggingOptions debuggingOptions, bool traceStartup, String route) {
     final List<String> options = <String>[];
 
@@ -271,77 +278,96 @@ class CustomDeviceAppSession {
     if (route != null) {
       addFlag('route=$route');
     }
-    if (debuggingOptions.enableSoftwareRendering) {
-      addFlag('enable-software-rendering=true');
-    }
-    if (debuggingOptions.skiaDeterministicRendering) {
-      addFlag('skia-deterministic-rendering=true');
-    }
-    if (debuggingOptions.traceSkia) {
-      addFlag('trace-skia=true');
-    }
-    if (debuggingOptions.traceAllowlist != null) {
-      addFlag('trace-allowlist=${debuggingOptions.traceAllowlist}');
-    }
-    if (debuggingOptions.traceSystrace) {
-      addFlag('trace-systrace=true');
-    }
-    if (debuggingOptions.endlessTraceBuffer) {
-      addFlag('endless-trace-buffer=true');
-    }
-    if (debuggingOptions.dumpSkpOnShaderCompilation) {
-      addFlag('dump-skp-on-shader-compilation=true');
-    }
-    if (debuggingOptions.cacheSkSL) {
-      addFlag('cache-sksl=true');
-    }
-    if (debuggingOptions.purgePersistentCache) {
-      addFlag('purge-persistent-cache=true');
-    }
-    // Options only supported when there is a VM Service connection between the
-    // tool and the device, usually in debug or profile mode.
-    if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.deviceVmServicePort != null) {
-        addFlag('observatory-port=${debuggingOptions.deviceVmServicePort}');
+    if (debuggingOptions != null) {
+      if (debuggingOptions.enableSoftwareRendering) {
+        addFlag('enable-software-rendering=true');
       }
-      if (debuggingOptions.buildInfo.isDebug) {
-        addFlag('enable-checked-mode=true');
-        addFlag('verify-entry-points=true');
+      if (debuggingOptions.skiaDeterministicRendering) {
+        addFlag('skia-deterministic-rendering=true');
       }
-      if (debuggingOptions.startPaused) {
-        addFlag('start-paused=true');
+      if (debuggingOptions.traceSkia) {
+        addFlag('trace-skia=true');
       }
-      if (debuggingOptions.disableServiceAuthCodes) {
-        addFlag('disable-service-auth-codes=true');
+      if (debuggingOptions.traceAllowlist != null) {
+        addFlag('trace-allowlist=${debuggingOptions.traceAllowlist}');
       }
-      final String dartVmFlags = computeDartVmFlags(debuggingOptions);
-      if (dartVmFlags.isNotEmpty) {
-        addFlag('dart-flags=$dartVmFlags');
+      if (debuggingOptions.traceSystrace) {
+        addFlag('trace-systrace=true');
       }
-      if (debuggingOptions.useTestFonts) {
-        addFlag('use-test-fonts=true');
+      if (debuggingOptions.endlessTraceBuffer) {
+        addFlag('endless-trace-buffer=true');
       }
-      if (debuggingOptions.verboseSystemLogs) {
-        addFlag('verbose-logging=true');
+      if (debuggingOptions.dumpSkpOnShaderCompilation) {
+        addFlag('dump-skp-on-shader-compilation=true');
+      }
+      if (debuggingOptions.cacheSkSL) {
+        addFlag('cache-sksl=true');
+      }
+      if (debuggingOptions.purgePersistentCache) {
+        addFlag('purge-persistent-cache=true');
+      }
+      // Options only supported when there is a VM Service connection between the
+      // tool and the device, usually in debug or profile mode.
+      if (debuggingOptions.debuggingEnabled) {
+        if (debuggingOptions.deviceVmServicePort != null) {
+          addFlag('observatory-port=${debuggingOptions.deviceVmServicePort}');
+        }
+        if (debuggingOptions.buildInfo.isDebug) {
+          addFlag('enable-checked-mode=true');
+          addFlag('verify-entry-points=true');
+        }
+        if (debuggingOptions.startPaused) {
+          addFlag('start-paused=true');
+        }
+        if (debuggingOptions.disableServiceAuthCodes) {
+          addFlag('disable-service-auth-codes=true');
+        }
+        final String dartVmFlags = computeDartVmFlags(debuggingOptions);
+        if (dartVmFlags.isNotEmpty) {
+          addFlag('dart-flags=$dartVmFlags');
+        }
+        if (debuggingOptions.useTestFonts) {
+          addFlag('use-test-fonts=true');
+        }
+        if (debuggingOptions.verboseSystemLogs) {
+          addFlag('verbose-logging=true');
+        }
       }
     }
 
     return options;
   }
 
+  /// Get the engine options for the given [debuggingOptions],
+  /// [traceStartup] and [route].
+  ///
+  /// [debuggingOptions] and [route] can be null.
+  ///
+  /// For example, `_getEngineOptionsForCmdline(null, false, null)` will return
+  /// `--enable-dart-profiling=true --enable-background-compilation=true`
   String _getEngineOptionsForCmdline(DebuggingOptions debuggingOptions, bool traceStartup, String route) {
     return _getEngineOptions(debuggingOptions, traceStartup, route).map((String e) => '--$e').join(' ');
   }
 
+  /// Start the app on the device.
+  /// Needs the app to be installed on the device and not running already.
+  ///
+  /// [mainPath], [route], [debuggingOptions], [platformArgs] and
+  /// [userIdentifier] may be null.
+  ///
+  /// [ipv6] may not be respected since it depends on the device config whether
+  /// it uses ipv6 or ipv4
   Future<LaunchResult> start({
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    Map<String, dynamic> platformArgs = const <String, dynamic>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier
   }) async {
+    platformArgs ??= <String, dynamic>{};
+
     final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
     final List<String> interpolated = interpolateCommand(
       _device._config.runDebugCommand,
@@ -392,6 +418,9 @@ class CustomDeviceAppSession {
     }
   }
 
+  /// Stop the app on the device.
+  /// Returns false if the app is not yet running. Also unforwards any
+  /// forwarded ports.
   Future<bool> stop() async {
     if (_process == null) {
       return false;
@@ -816,7 +845,7 @@ class CustomDevices extends PollingDeviceDiscovery {
   CustomDevicesConfig get _customDevicesConfig => _config;
 
   List<CustomDevice> get _enabledCustomDevices {
-    return _customDevicesConfig.devices
+    return _customDevicesConfig.tryGetDevices()
       .where((CustomDeviceConfig element) => !element.disabled)
       .map(
         (CustomDeviceConfig config) => CustomDevice(
