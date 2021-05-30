@@ -4,8 +4,6 @@
 
 import 'dart:convert' show json;
 
-import 'package:meta/meta.dart';
-
 /// This class knows how to format benchmark results for machine and human
 /// consumption.
 ///
