@@ -83,7 +83,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     )..addFlag(
       'allow-provisioning-device-registration',
       defaultsTo: false,
-      help: 'Allow xcodebuild to register your destination device on the developer portal if necessary. This flag only takes effect if --allow-provisioning-updates is also passed.',
+      help: 'Allow xcodebuild to register your destination device on the developer portal if necessary. This flag only takes effect if "--allow-provisioning-updates" is also passed.',
     );
   }
 
