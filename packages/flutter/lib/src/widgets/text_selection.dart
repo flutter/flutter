@@ -114,7 +114,7 @@ abstract class TextSelectionControls {
   ///
   /// The top left corner of this widget is positioned at the bottom of the
   /// selection position.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, VoidCallback? onTap);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
@@ -852,7 +852,6 @@ class _TextSelectionHandleOverlayState
             dragStartBehavior: widget.dragStartBehavior,
             onPanStart: _handleDragStart,
             onPanUpdate: _handleDragUpdate,
-            onTap: widget.onSelectionHandleTapped,
             child: Padding(
               padding: EdgeInsets.only(
                 left: padding.left,
@@ -864,6 +863,7 @@ class _TextSelectionHandleOverlayState
                 context,
                 type,
                 widget.renderObject.preferredLineHeight,
+                widget.onSelectionHandleTapped,
               ),
             ),
           ),

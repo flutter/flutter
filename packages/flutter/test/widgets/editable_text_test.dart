@@ -706,7 +706,7 @@ void main() {
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
-          matching: find.byType(GestureDetector),
+          matching: find.byType(Padding),
         ),
       ),
     );
@@ -722,7 +722,7 @@ void main() {
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
-          matching: find.byType(GestureDetector),
+          matching: find.byType(Padding),
         ),
       ),
     );
@@ -3907,7 +3907,7 @@ void main() {
         tester.renderObjectList<RenderBox>(
           find.descendant(
             of: find.byType(CompositedTransformFollower),
-            matching: find.byType(GestureDetector),
+            matching: find.byType(Padding),
           ),
         ),
       );
@@ -4027,7 +4027,7 @@ void main() {
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
-          matching: find.byType(GestureDetector),
+          matching: find.byType(Padding),
         ),
       ),
     );
@@ -5058,7 +5058,7 @@ void main() {
         tester.renderObjectList<RenderBox>(
           find.descendant(
             of: find.byType(CompositedTransformFollower),
-            matching: find.byType(GestureDetector),
+            matching: find.byType(Padding),
           ),
         ),
       );
@@ -7569,7 +7569,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, VoidCallback? onTap) {
     return Container();
   }
 
