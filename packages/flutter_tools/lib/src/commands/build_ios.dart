@@ -77,15 +77,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         help:
         'Optionally export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
       )..addFlag(
-      'allowProvisioningUpdates',
+      'allow-provisioning-updates',
       defaultsTo: false,
-      negatable: false,
       help: 'Allow xcodebuild to communicate with the Apple Developer website. For automatically signed targets, xcodebuild will create and update profiles, app IDs, and certificates. For manually signed targets, xcodebuild will download missing or updated provisioning profiles. Requires a developer account to have been added in Xcode`s Accounts preference pane.',
     )..addFlag(
-      'allowProvisioningDeviceRegistration',
+      'allow-provisioning-device-registration',
       defaultsTo: false,
-      negatable: false,
-      help: 'Allow xcodebuild to register your destination device on the developer portal if necessary. This flag only takes effect if -allowProvisioningUpdates is also passed.',
+      help: 'Allow xcodebuild to register your destination device on the developer portal if necessary. This flag only takes effect if --allow-provisioning-updates is also passed.',
     );
   }
 
@@ -113,10 +111,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   String get exportOptionsPlist => stringArg('export-options-plist');
 
   bool get allowProvisioningDeviceRegistration =>
-      boolArg('allowProvisioningDeviceRegistration');
+      boolArg('allow-provisioning-device-registration');
 
   bool get allowProvisioningUpdates =>
-      boolArg('allowProvisioningUpdates');
+      boolArg('allow-provisioning-updates');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
