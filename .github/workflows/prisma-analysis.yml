@@ -1,0 +1,49 @@
+# A sample workflow that checks for security issues using
+# the Prisma Cloud Infrastructure as Code Scan Action on
+# the IaC files present in the repository.
+# The results are uploaded to GitHub Security Code Scanning
+#
+# For more details on the Action configuration see https://github.com/prisma-cloud-shiftleft/iac-scan-action
+
+name: Prisma Cloud IaC Scan
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ master ]
+  schedule:
+    - cron: '26 6 * * 6'
+
+jobs:
+  prisma_cloud_iac_scan:
+    runs-on: ubuntu-latest
+    name: Run Prisma Cloud IaC Scan to check
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - id: iac-scan
+        name: Run Scan on CFT files in the repository
+        uses: prisma-cloud-shiftleft/iac-scan-action@v1
+        with:
+          # You will need Prisma Cloud API Access Token
+          # More details in https://github.com/prisma-cloud-shiftleft/iac-scan-action
+          prisma_api_url: ${{ secrets.PRISMA_CLOUD_API_URL }}
+          access_key: ${{ secrets.PRISMA_CLOUD_ACCESS_KEY }}
+          secret_key: ${{ secrets.PRISMA_CLOUD_SECRET_KEY }}
+          # Scan sources on Prisma Cloud are uniquely identified by their name
+          asset_name: 'my-asset-name'
+          # The service need to know the type of IaC being scanned
+          template_type: 'CFT'
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v1
+        # Results are generated only on a success or failure
+        # this is required since GitHub by default won't run the next step
+        # when the previous one has failed.
+        # And alternative it to add `continue-on-error: true` to the previous step
+        if: success() || failure()
+        with:
+          # The SARIF Log file name is configurable on scan action
+          # therefore the file name is best read from the steps output
+          sarif_file: ${{ steps.iac-scan.outputs.iac_scan_result_sarif_path }}
