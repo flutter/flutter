@@ -129,9 +129,9 @@ class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
 
 class _TestRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   @override
-  RouteInformation? get value => _value;
-  RouteInformation? _value = const RouteInformation(location: '/home');
-  set value(RouteInformation? value) {
+  RouteInformation get value => _value;
+  RouteInformation _value = const RouteInformation(location: '/home');
+  set value(RouteInformation value) {
     if (value == _value) {
       return;
     }

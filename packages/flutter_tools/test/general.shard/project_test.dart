@@ -94,7 +94,7 @@ void main() {
       _testInMemory('treats missing pubspec.yaml as empty', () async {
         final Directory directory = globals.fs.directory('myproject')
           ..createSync(recursive: true);
-        expect((FlutterProject.fromDirectory(directory)).manifest.isEmpty,
+        expect(FlutterProject.fromDirectory(directory).manifest.isEmpty,
           true,
         );
       });
