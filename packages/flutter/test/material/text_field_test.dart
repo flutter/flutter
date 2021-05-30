@@ -9720,8 +9720,8 @@ void main() {
     });
   });
 
-  testWidgets('prefix/suffix buttons', (WidgetTester tester) async {
-  // Regression test for https://github.com/flutter/flutter/issues/39376.
+  testWidgets('prefix/suffix buttons do not leak touch events', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/39376.
 
     int textFieldTapCount = 0;
     int prefixTapCount = 0;

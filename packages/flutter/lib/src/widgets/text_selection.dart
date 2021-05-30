@@ -401,11 +401,19 @@ class TextSelectionOverlay {
   final DragStartBehavior dragStartBehavior;
 
   /// {@template flutter.widgets.TextSelectionOverlay.onSelectionHandleTapped}
-  /// A callback that's invoked when a selection handle is tapped.
+  /// A callback that's optionally invoked when a selection handle is tapped.
   ///
-  /// Both regular taps and long presses invoke this callback, but a drag
-  /// gesture won't.
+  /// The [TextSelectionControls.buildHandle] implementation the text field
+  /// uses decides where the the handle's tap "hotspot" is, or the selection
+  /// handle supports tap gestures at all. For instance,
+  /// [MaterialTextSelectionControls] calls [onSelectionHandleTapped] when the
+  /// selection handle's "knob" is tapped or long pressed, while
+  /// [CupertinoTextSelectionControls] builds a handle that's is not
+  /// sufficiently large for tapping (as it's not meant to be tapped) so it
+  /// does not call [onSelectionHandleTapped] at all.
   /// {@endtemplate}
+  // See https://github.com/flutter/flutter/issues/39376#issuecomment-848406415
+  // for provenance.
   final VoidCallback? onSelectionHandleTapped;
 
   /// Maintains the status of the clipboard for determining if its contents can
