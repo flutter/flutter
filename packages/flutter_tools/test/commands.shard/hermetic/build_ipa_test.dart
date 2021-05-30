@@ -109,8 +109,6 @@ void main() {
       'xcrun',
       'xcodebuild',
       '-exportArchive',
-      '-allowProvisioningDeviceRegistration',
-      '-allowProvisioningUpdates',
       '-archivePath',
       '/build/ios/archive/Runner.xcarchive',
       '-exportPath',
