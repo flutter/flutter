@@ -366,6 +366,8 @@ class DatePickerDialog extends StatefulWidget {
   final SelectableDayPredicate? selectableDayPredicate;
 
   /// Describes what format will be used to display the date in the input box.
+  ///
+  /// This will default to en_US if null, i.e. it will default to mm-dd-yyyy.
   final intl.DateFormat? dateFormat;
 
   /// The text that is displayed on the cancel button.
@@ -1143,9 +1145,9 @@ Future<DateTimeRange?> showDateRangePicker({
   );
 }
 
-/// Returns a string describing a date
+/// Returns a string describing a date.
 ///
-/// If `dateFormat` is null, then it uses `localizations` to format the date
+/// If `dateFormat` is null, then it uses `localizations` to format the date.
 String _formatDate(MaterialLocalizations localizations, DateTime date, intl.DateFormat? dateFormat, bool sameYear){
   return dateFormat == null ? (sameYear ? localizations.formatShortMonthDay(date) : localizations.formatShortDate(date)) : dateFormat.format(date);
 }
@@ -2957,16 +2959,15 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   }
 
   DateTime? _parseDate(String? text, intl.DateFormat? dateFormat) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     DateTime? date;
-    if(dateFormat != null){
+    if (dateFormat != null) {
       try{
         date = dateFormat.parse(text!);
       } on FormatException {
         date = null;
       }
     }
-    return dateFormat == null ? localizations.parseCompactDate(text) : date;
+    return dateFormat == null ? MaterialLocalizations.of(context).parseCompactDate(text) : date;
   }
 
   String? _validateDate(DateTime? date) {

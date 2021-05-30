@@ -309,11 +309,9 @@ void main() {
     });
 
     testWidgets('DateFormat is followed when provided', (WidgetTester tester) async {
-      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       final DateTime initialDate = DateTime(2016, DateTime.february, 21);
       await tester.pumpWidget(_inputDatePickerField(
         initialDate: initialDate,
-        formKey: formKey,
         dateFormat: DateFormat('yyyy/MM/dd')
       ));
       expect(_textFieldController(tester).value.text, equals('2016/02/21'));
