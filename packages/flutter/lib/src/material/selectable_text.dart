@@ -435,8 +435,6 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
   bool _showSelectionHandles = false;
 
-  late _SelectableTextSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
-
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
   late bool forcePressEnabled;
@@ -451,7 +449,6 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _SelectableTextSelectionGestureDetectorBuilder(state: this);
     _controller = _TextSpanEditingController(
         textSpan: widget.textSpan ?? TextSpan(text: widget.data),
     );
@@ -496,12 +493,6 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   TextSelection? _lastSeenTextSelection;
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
-    final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
-    if (willShowSelectionHandles != _showSelectionHandles) {
-      setState(() {
-        _showSelectionHandles = willShowSelectionHandles;
-      });
-    }
     // TODO(chunhtai): The selection may be the same. We should remove this
     // check once this is fixed https://github.com/flutter/flutter/issues/76349.
     if (widget.onSelectionChanged != null && _lastSeenTextSelection != selection) {
@@ -531,25 +522,33 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     }
   }
 
-  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
-    // When the text field is activated by something that doesn't trigger the
-    // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
-      return false;
-
+  bool _shouldShowSelectionHandles(SelectionHandleControlIntent intent) {
     if (_controller.selection.isCollapsed)
       return false;
 
-    if (cause == SelectionChangedCause.keyboard)
-      return false;
+    switch (intent.deviceKind) {
+      case null:
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.stylus:
+        break;
+      case PointerDeviceKind.unknown:
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.invertedStylus:
+        return false;
+    }
 
-    if (cause == SelectionChangedCause.longPress)
-      return true;
-
-    if (_controller.text.isNotEmpty)
-      return true;
-
-    return false;
+    switch (intent.cause) {
+      case SelectionChangedCause.forcePress:
+      case SelectionChangedCause.tap:
+      case SelectionChangedCause.doubleTap:
+      case SelectionChangedCause.drag:
+      case SelectionChangedCause.toolBar:
+        return _controller.text.isNotEmpty;
+      case SelectionChangedCause.longPress:
+        return true;
+      case SelectionChangedCause.keyboard:
+        return false;
+    }
   }
 
   @override
@@ -672,12 +671,32 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       ),
     );
 
-    return Semantics(
-      onLongPress: () {
-        _effectiveFocusNode.requestFocus();
+    return Actions(
+      actions: <Type, Action<Intent>> {
+        SelectionToolbarControlIntent: TextEditingCallbackAction<SelectionToolbarControlIntent>(
+          (SelectionToolbarControlIntent intent) {
+            if (!intent.showSelectionToolbar) {
+              _editableText!.hideToolbar();
+            } else {
+              _editableText!.showToolbar(intent.toolbarLocation);
+            }
+          },
+          enabledPredicate: (SelectionToolbarControlIntent intent) => widget.selectionEnabled,
+        ),
+        SelectionHandleControlIntent: TextEditingCallbackAction<SelectionHandleControlIntent>(
+          (SelectionHandleControlIntent intent) {
+            final bool willShowSelectionHandles = _shouldShowSelectionHandles(intent);
+            if (willShowSelectionHandles != _showSelectionHandles) {
+              setState(() {
+                _showSelectionHandles = willShowSelectionHandles;
+              });
+            }
+          },
+          enabledPredicate: (SelectionHandleControlIntent intent) => widget.selectionEnabled,
+        ),
       },
-      child: _selectionGestureDetectorBuilder.buildGestureDetector(
-        behavior: HitTestBehavior.translucent,
+      child: Semantics(
+        onLongPress: _effectiveFocusNode.requestFocus,
         child: child,
       ),
     );

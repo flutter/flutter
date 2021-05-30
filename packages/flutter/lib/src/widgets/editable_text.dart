@@ -2542,7 +2542,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
   /// is already shown, or when no text selection currently exists.
-  bool showToolbar() {
+  bool showToolbar([Offset? globalLocation]) {
     // Web is using native dom elements to enable clipboard functionality of the
     // toolbar: copy, paste, select, cut. It might also provide additional
     // functionality depending on the browser (such as translate). Due to this
@@ -2551,11 +2551,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
 
-    if (_selectionOverlay == null || _selectionOverlay!.toolbarIsVisible) {
+    final TextSelectionOverlay? selectionOverlay = _selectionOverlay;
+    if (selectionOverlay == null || selectionOverlay.toolbarIsVisible) {
       return false;
     }
 
-    _selectionOverlay!.showToolbar();
+    selectionOverlay.showToolbar(globalLocation);
     return true;
   }
 
@@ -2655,7 +2656,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         case TextBoundary.word:
           renderEditable.selectWordsInRange(
             from: intent.fromPosition,
-            to: intent.fromPosition,
+            to: intent.toPosition,
             cause: intent.cause,
           );
           return;
@@ -2667,7 +2668,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   );
 
   late final Action<SelectWordEdgeIntent> _selectWordEdge = TextEditingCallbackAction<SelectWordEdgeIntent>(
-    (SelectWordEdgeIntent intent) => renderEditable.selectWordEdge(cause: intent.cause),
+    (SelectWordEdgeIntent intent) {
+      final TextPosition textPosition = renderEditable.getTextPositionForOffset(intent.globalPosition);
+      final TextRange word = renderEditable.getTextBoundaryAtTextPosition(
+        textPosition,
+        boundaryType: TextBoundary.word,
+      );
+      final TextSelection newSelection = textPosition.offset - word.start <= 1
+        ? TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream)
+        : TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
+      _handleSelectionChanged(newSelection, intent.cause);
+      _scheduleShowCaretOnScreen();
+    },
     enabledPredicate: (SelectWordEdgeIntent intent) => widget.selectionEnabled,
   );
 
@@ -2886,6 +2898,14 @@ class _TextEditingGestureDetectorState extends State<_TextEditingGestureDetector
     for (final GestureRecognizer recognizer in recognizers.values) {
       recognizer.addPointer(event);
     }
+  }
+
+  @override
+  void dispose() {
+    for (final GestureRecognizer recognizer in recognizers.values) {
+      recognizer.dispose();
+    }
+    super.dispose();
   }
 
   @override

@@ -907,8 +907,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
-      return false;
 
     // On iOS, we don't show handles when the selection is collapsed.
     if (_effectiveController.selection.isCollapsed)

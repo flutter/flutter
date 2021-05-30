@@ -878,8 +878,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool _showSelectionHandles = false;
 
-  late final _TextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
-
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
   late bool forcePressEnabled;
@@ -1048,38 +1046,38 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _editableText?.requestKeyboard();
   }
 
-  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
-    // When the text field is activated by something that doesn't trigger the
-    // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
+  bool _shouldShowSelectionHandles(SelectionHandleControlIntent intent) {
+    if (!_isEnabled)
       return false;
-
-    if (cause == SelectionChangedCause.keyboard)
-      return false;
-
     if (widget.readOnly && _effectiveController.selection.isCollapsed)
       return false;
 
-    if (!_isEnabled)
-      return false;
+    switch (intent.deviceKind) {
+      case null:
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.stylus:
+        break;
+      case PointerDeviceKind.unknown:
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.invertedStylus:
+        return false;
+    }
 
-    if (cause == SelectionChangedCause.longPress)
-      return true;
-
-    if (_effectiveController.text.isNotEmpty)
-      return true;
-
-    return false;
+    switch (intent.cause) {
+      case SelectionChangedCause.forcePress:
+      case SelectionChangedCause.tap:
+      case SelectionChangedCause.doubleTap:
+      case SelectionChangedCause.drag:
+      case SelectionChangedCause.toolBar:
+        return _effectiveController.text.isNotEmpty;
+      case SelectionChangedCause.longPress:
+        return true;
+      case SelectionChangedCause.keyboard:
+        return false;
+    }
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
-    final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
-    if (willShowSelectionHandles != _showSelectionHandles) {
-      setState(() {
-        _showSelectionHandles = willShowSelectionHandles;
-      });
-    }
-
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -1301,11 +1299,32 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
+    final VoidCallback? onTap = widget.onTap;
     return Actions(
       actions: <Type, Action<Intent>> {
         SelectionToolbarControlIntent: TextEditingCallbackAction<SelectionToolbarControlIntent>(
-          (SelectionToolbarControlIntent intent) => _editableText?.showToolbar(),
-          enabledPredicate: (SelectionToolbarControlIntent intent) => _selectionGestureDetectorBuilder.shouldShowSelectionToolbar,
+          (SelectionToolbarControlIntent intent) {
+            if (!intent.showSelectionToolbar) {
+              _editableText!.hideToolbar();
+            } else {
+              _editableText!.showToolbar(intent.toolbarLocation);
+            }
+          } ,
+          enabledPredicate: (SelectionToolbarControlIntent intent) => widget.selectionEnabled,
+        ),
+        SelectionHandleControlIntent: TextEditingCallbackAction<SelectionHandleControlIntent>(
+          (SelectionHandleControlIntent intent) {
+            final bool willShowSelectionHandles = _shouldShowSelectionHandles(intent);
+            if (willShowSelectionHandles != _showSelectionHandles) {
+              setState(() {
+                _showSelectionHandles = willShowSelectionHandles;
+              });
+            }
+          },
+          enabledPredicate: (SelectionHandleControlIntent intent) => widget.selectionEnabled,
+        ),
+        if (onTap != null) InvokeTextEditingComponentOnTapCallbackIntent: TextEditingCallbackAction<InvokeTextEditingComponentOnTapCallbackIntent>(
+          (InvokeTextEditingComponentOnTapCallbackIntent intent) => onTap(),
         ),
       },
       child: MouseRegion(
@@ -1329,10 +1348,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 child: child,
               );
             },
-            child: _selectionGestureDetectorBuilder.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: child,
-            ),
+            child: child
           ),
         ),
       ),

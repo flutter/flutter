@@ -489,9 +489,9 @@ class TextSelectionOverlay {
   }
 
   /// Shows the toolbar by inserting it into the [context]'s overlay.
-  void showToolbar() {
+  void showToolbar([Offset? globalLocation]) {
     assert(_toolbar == null);
-    _toolbar = OverlayEntry(builder: _buildToolbar);
+    _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(globalLocation));
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
     _toolbarController.forward(from: 0.0);
   }
@@ -567,7 +567,8 @@ class TextSelectionOverlay {
   }
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
-    Widget handle;
+    final Widget handle;
+    final TextSelectionControls? selectionControls = this.selectionControls;
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
          selectionControls == null)
       handle = Container(); // hide the second handle when collapsed
@@ -594,9 +595,11 @@ class TextSelectionOverlay {
     );
   }
 
-  Widget _buildToolbar(BuildContext context) {
-    if (selectionControls == null)
+  Widget _buildToolbar(Offset? toolbarAnchor) {
+    final TextSelectionControls? selectionControls = this.selectionControls;
+    if (selectionControls == null) {
       return Container();
+    }
 
     // Find the horizontal midpoint, just above the selected text.
     final List<TextSelectionPoint> endpoints =
@@ -623,7 +626,7 @@ class TextSelectionOverlay {
     );
 
     return Directionality(
-      textDirection: Directionality.of(this.context),
+      textDirection: Directionality.of(context),
       child: FadeTransition(
         opacity: _toolbarOpacity,
         child: CompositedTransformFollower(
@@ -632,7 +635,7 @@ class TextSelectionOverlay {
           offset: -editingRegion.topLeft,
           child: Builder(
             builder: (BuildContext context) {
-              return selectionControls!.buildToolbar(
+              return selectionControls.buildToolbar(
                 context,
                 editingRegion,
                 renderObject.preferredLineHeight,
@@ -640,7 +643,7 @@ class TextSelectionOverlay {
                 endpoints,
                 selectionDelegate!,
                 clipboardStatus!,
-                renderObject.lastSecondaryTapDownPosition,
+                toolbarAnchor,
               );
             },
           ),
@@ -689,7 +692,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final RenderEditable renderObject;
   final ValueChanged<TextSelection> onSelectionHandleChanged;
   final VoidCallback? onSelectionHandleTapped;
-  final TextSelectionControls? selectionControls;
+  final TextSelectionControls selectionControls;
   final DragStartBehavior dragStartBehavior;
 
   @override
@@ -746,7 +749,7 @@ class _TextSelectionHandleOverlayState
   }
 
   void _handleDragStart(DragStartDetails details) {
-    final Size handleSize = widget.selectionControls!.getHandleSize(
+    final Size handleSize = widget.selectionControls.getHandleSize(
       widget.renderObject.preferredLineHeight,
     );
     _dragPosition = details.globalPosition + Offset(0.0, -handleSize.height);
@@ -813,11 +816,11 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
-    final Offset handleAnchor = widget.selectionControls!.getHandleAnchor(
+    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
       widget.renderObject.preferredLineHeight,
     );
-    final Size handleSize = widget.selectionControls!.getHandleSize(
+    final Size handleSize = widget.selectionControls.getHandleSize(
       widget.renderObject.preferredLineHeight,
     );
 
@@ -862,7 +865,7 @@ class _TextSelectionHandleOverlayState
                 right: padding.right,
                 bottom: padding.bottom,
               ),
-              child: widget.selectionControls!.buildHandle(
+              child: widget.selectionControls.buildHandle(
                 context,
                 type,
                 widget.renderObject.preferredLineHeight,

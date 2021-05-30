@@ -300,18 +300,38 @@ class ExtendSelectionToPointIntent extends Intent {
 }
 
 class SelectWordEdgeIntent extends Intent {
-  const SelectWordEdgeIntent({ required this.cause });
+  const SelectWordEdgeIntent({
+    required this.globalPosition,
+    required this.cause,
+  });
 
+  final Offset globalPosition;
   final SelectionChangedCause cause;
 }
 
 class SelectionToolbarControlIntent extends Intent {
-  const SelectionToolbarControlIntent._(this.shouldShowSelectionToolbar);
+  const SelectionToolbarControlIntent._(this.showSelectionToolbar, this.toolbarLocation);
 
-  static const SelectionToolbarControlIntent show = SelectionToolbarControlIntent._(true);
-  static const SelectionToolbarControlIntent hide = SelectionToolbarControlIntent._(false);
+  const SelectionToolbarControlIntent.showAt({
+    required Offset location,
+  }) : this._(true, location);
 
-  final bool shouldShowSelectionToolbar;
+  static const SelectionToolbarControlIntent show = SelectionToolbarControlIntent._(true, null);
+  static const SelectionToolbarControlIntent hide = SelectionToolbarControlIntent._(false, null);
+
+  final bool showSelectionToolbar;
+  final Offset? toolbarLocation;
+}
+
+// TODO: ?????
+class SelectionHandleControlIntent extends Intent {
+  const SelectionHandleControlIntent({
+    required this.deviceKind,
+    required this.cause,
+  });
+
+  final PointerDeviceKind? deviceKind;
+  final SelectionChangedCause cause;
 }
 
 class KeyboardControlIntent extends Intent {

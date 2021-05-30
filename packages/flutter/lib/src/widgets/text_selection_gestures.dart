@@ -103,6 +103,11 @@ class TextEditingGestures extends InheritedWidget {
             ),
           );
           Feedback.forLongPress(context);
+          Actions.maybeInvoke(context, const SelectionHandleControlIntent(
+            // TODO() stop faking this.
+            deviceKind: PointerDeviceKind.touch,
+            cause: SelectionChangedCause.longPress,
+          ));
         }
         ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
           Actions.invoke(
@@ -160,6 +165,10 @@ class TextEditingGestures extends InheritedWidget {
               cause: SelectionChangedCause.drag,
             ),
           );
+          Actions.maybeInvoke(context, SelectionHandleControlIntent(
+            deviceKind: details.kind,
+            cause: SelectionChangedCause.longPress,
+          ));
         }
         ..onUpdate = (DragUpdateDetails details) {
           Actions.invoke(
@@ -191,6 +200,10 @@ class TextEditingGestures extends InheritedWidget {
             ),
           );
           Actions.maybeInvoke(context, SelectionToolbarControlIntent.show);
+          Actions.maybeInvoke(context, SelectionHandleControlIntent(
+            deviceKind: details.kind,
+            cause: SelectionChangedCause.doubleTap,
+          ));
         }
         ..onTapUp = (TapUpDetails details, int tapDownCount) {
           if (tapDownCount != 1) {
@@ -202,6 +215,10 @@ class TextEditingGestures extends InheritedWidget {
               cause: SelectionChangedCause.tap,
             ),
           );
+          Actions.maybeInvoke(context, SelectionHandleControlIntent(
+            deviceKind: details.kind,
+            cause: SelectionChangedCause.tap,
+          ));
           Actions.maybeInvoke(context, KeyboardControlIntent.showKeyboard);
           Actions.maybeInvoke(context, const InvokeTextEditingComponentOnTapCallbackIntent());
         };
@@ -225,6 +242,10 @@ class TextEditingGestures extends InheritedWidget {
             ),
           );
           Actions.maybeInvoke(context, SelectionToolbarControlIntent.show);
+          Actions.maybeInvoke(context, SelectionHandleControlIntent(
+            deviceKind: details.kind,
+            cause: SelectionChangedCause.doubleTap,
+          ));
         }
         ..onTapUp = (TapUpDetails details, int tapDownCount) {
           if (tapDownCount != 1) {
@@ -243,9 +264,16 @@ class TextEditingGestures extends InheritedWidget {
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-              Actions.invoke(context, const SelectWordEdgeIntent(cause: SelectionChangedCause.tap));
+              Actions.invoke(context, SelectWordEdgeIntent(
+                globalPosition: details.globalPosition,
+                cause: SelectionChangedCause.tap,
+              ));
               break;
           }
+          Actions.maybeInvoke(context, SelectionHandleControlIntent(
+            deviceKind: details.kind,
+            cause: SelectionChangedCause.tap,
+          ));
           Actions.maybeInvoke(context, KeyboardControlIntent.showKeyboard);
           Actions.maybeInvoke(context, const InvokeTextEditingComponentOnTapCallbackIntent());
         };
@@ -266,7 +294,11 @@ class TextEditingGestures extends InheritedWidget {
             cause: SelectionChangedCause.tap,
           ),
         );
-        Actions.maybeInvoke(context, SelectionToolbarControlIntent.show);
+        Actions.maybeInvoke(context, SelectionHandleControlIntent(
+          deviceKind: details.kind,
+          cause: SelectionChangedCause.tap,
+        ));
+        Actions.maybeInvoke(context, SelectionToolbarControlIntent.showAt(location: details.globalPosition));
       };
     }
   );
@@ -284,6 +316,11 @@ class TextEditingGestures extends InheritedWidget {
               cause: SelectionChangedCause.forcePress,
             ),
           );
+          Actions.maybeInvoke(context, const SelectionHandleControlIntent(
+            // TODO(): stop faking this.
+            deviceKind: PointerDeviceKind.touch,
+            cause: SelectionChangedCause.forcePress,
+          ));
           Actions.maybeInvoke(context, SelectionToolbarControlIntent.show);
         };
     },
@@ -558,5 +595,12 @@ class TextEditingTapGestureRecognizer extends BaseTapGestureRecognizer {
     _tapSequenceTimer?.cancel();
     _tapSequenceTimer = null;
     _tapStatus = null;
+  }
+
+  @override
+  void dispose() {
+    _tapSequenceTimer?.cancel();
+    _tapSequenceTimer = null;
+    super.dispose();
   }
 }

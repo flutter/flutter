@@ -27,7 +27,7 @@ class DefaultTextEditingActions extends Actions {
     required Widget child,
   }) : super(
     key: key,
-    actions: shortcutsActions,
+    actions: _shortcutsActions,
     child: child,
   );
 
