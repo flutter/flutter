@@ -114,7 +114,7 @@ class CustomDevicesConfig {
     if (json == null) {
       return null;
     } else if (json is! List) {
-      const String msg = 'Could not load custom devices config. config[\'$_kCustomDevicesConfigKey\'] is not a JSON array.';
+      const String msg = "Could not load custom devices config. config['$_kCustomDevicesConfigKey'] is not a JSON array.";
       _logger.printError(msg);
       throw const CustomDeviceRevivalException(msg);
     }

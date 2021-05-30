@@ -897,7 +897,7 @@ void main() {
         );
         expect(
           logger.errorText,
-          contains('Could not load custom devices config. config[\'custom-devices\'] is not a JSON array.')
+          contains("Could not load custom devices config. config['custom-devices'] is not a JSON array.")
         );
       }
     );

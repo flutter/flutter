@@ -14,14 +14,14 @@ import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
-import '../base/io.dart';
 import '../convert.dart';
+import '../custom_devices/custom_device.dart';
 import '../custom_devices/custom_device_config.dart';
 import '../custom_devices/custom_devices_config.dart';
-import '../custom_devices/custom_device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../runner/flutter_command.dart';
@@ -377,9 +377,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     try {
       final bool reachable = await device.tryPing();
       if (!reachable) {
-        _printConfigCheckingError(
-          'Couldn\'t ping device.'
-        );
+        _printConfigCheckingError("Couldn't ping device.");
         result = false;
       }
     } on Exception catch (e) {
@@ -395,7 +393,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         appName: temp.basename
       );
       if (!ok) {
-        _printConfigCheckingError('Couldn\'t install test app on device.');
+        _printConfigCheckingError("Couldn't install test app on device.");
         result = false;
       }
     } on Exception catch (e) {
@@ -408,7 +406,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     try {
       final bool ok = await device.tryUninstall(appName: temp.basename);
       if (!ok) {
-        _printConfigCheckingError('Couldn\'t uninstall test app from device.');
+        _printConfigCheckingError("Couldn't uninstall test app from device.");
         result = false;
       }
     } on Exception catch (e) {
@@ -431,9 +429,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
         final ForwardedPort forwardedPort = await portForwarder.tryForward(port, port);
         if (forwardedPort == null) {
-          _printConfigCheckingError(
-            'Couldn\'t forward test port $port from device.',
-          );
+          _printConfigCheckingError("Couldn't forward test port $port from device.",);
           result = false;
         }
 
@@ -472,7 +468,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     }
 
     if (shouldCheck && !await _checkConfigWithLogging(config)) {
-      throwToolExit('Custom device didn\'t pass all checks.');
+      throwToolExit("Custom device didn't pass all checks.");
     }
 
     customDevicesConfig.add(config);
@@ -620,7 +616,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
     final String username = await askForString(
       'username',
-      description: 'Please enter the username used for ssh\'ing into the remote device.',
+      description: 'Please enter the username used for ssh-ing into the remote device.',
       example: 'pi',
       defaultsTo: 'no username',
     );

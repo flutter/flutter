@@ -19,7 +19,7 @@ Map<String, dynamic> copyJsonObjectWith(
 ) => Map<String, dynamic>.of(object)..addAll(overrides);
 
 void main() {
-  testWithoutContext('CustomDevicesConfig logs no error when \'custom-devices\' key is missing in config', () {
+  testWithoutContext("CustomDevicesConfig logs no error when 'custom-devices' key is missing in config", () {
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('custom_devices_config');
@@ -39,7 +39,7 @@ void main() {
     expect(logger.errorText, hasLength(0));
   });
 
-  testWithoutContext('CustomDevicesConfig logs error when \'custom-devices\' key is not a JSON array', () {
+  testWithoutContext("CustomDevicesConfig logs error when 'custom-devices' key is not a JSON array", () {
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('custom_devices_config');

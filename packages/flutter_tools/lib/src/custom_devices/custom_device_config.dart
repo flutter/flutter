@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import '../build_info.dart';
+
 import '../base/platform.dart';
+import '../build_info.dart';
 
 /// Quiver has this, but unfortunately we can't depend on it bc flutter_tools
 /// uses non-nullsafe quiver by default (because of dwds).
