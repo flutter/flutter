@@ -57,18 +57,19 @@ void main() {
       logger: logger
     );
 
-    expect(customDevicesConfig.devices, hasLength(0));
-    expect(logger.errorText, contains('Could not load custom devices config. config[\'custom-devices\'] is not a JSON array.'));
+    const String msg = "Could not load custom devices config. config['custom-devices'] is not a JSON array.";
+    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
+    expect(logger.errorText, contains(msg));
   });
 
   testWithoutContext('JsonRevivalException serialization', () {
     expect(
       const CustomDeviceRevivalException('testmessage').toString(),
-      equals('JsonRevivalException: testmessage')
+      equals('testmessage')
     );
     expect(
       const CustomDeviceRevivalException.fromDescriptions('testfielddescription', 'testexpectedvaluedescription').toString(),
-      equals('JsonRevivalException: Expected testfielddescription to be testexpectedvaluedescription.')
+      equals('Expected testfielddescription to be testexpectedvaluedescription.')
     );
   });
 
@@ -119,8 +120,9 @@ void main() {
       logger: logger
     );
 
-    expect(customDevicesConfig.devices, hasLength(0));
-    expect(logger.errorText, contains('Could not load custom device from config index 0: JsonRevivalException: Expected id to be a string.'));
+    const String msg = 'Could not load custom device from config index 0: Expected id to be a string.';
+    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
+    expect(logger.errorText, contains(msg));
   });
 
   testWithoutContext('CustomDevicesConfig logs error when id is not a string', () {
@@ -146,8 +148,9 @@ void main() {
       logger: logger
     );
 
-    expect(customDevicesConfig.devices, hasLength(0));
-    expect(logger.errorText, contains('Could not load custom device from config index 0: JsonRevivalException: Expected id to be a string.'));
+    const String msg = 'Could not load custom device from config index 0: Expected id to be a string.';
+    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
+    expect(logger.errorText, contains(msg));
   });
 
   testWithoutContext('CustomDevicesConfig logs error when id is not a string', () {
@@ -173,8 +176,9 @@ void main() {
       logger: logger
     );
 
-    expect(customDevicesConfig.devices, hasLength(0));
-    expect(logger.errorText, contains('Could not load custom device from config index 0: JsonRevivalException: Expected id to be a string.'));
+    const String msg = 'Could not load custom device from config index 0: Expected id to be a string.';
+    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
+    expect(logger.errorText, contains(msg));
   });
 
   testWithoutContext('CustomDevicesConfig loads config when postBuild is null', () {
@@ -256,9 +260,8 @@ void main() {
       logger: logger,
     );
 
-    final List<CustomDeviceConfig> devices = customDevicesConfig.devices;
-
-    expect(devices, hasLength(0));
-    expect(logger.errorText, contains('Could not load custom device from config index 0: JsonRevivalException: When forwardPort is given, forwardPortSuccessRegex must be specified too.'));
+    const String msg = 'Could not load custom device from config index 0: When forwardPort is given, forwardPortSuccessRegex must be specified too.';
+    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
+    expect(logger.errorText, contains(msg));
   });
 }

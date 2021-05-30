@@ -792,16 +792,7 @@ class CustomDevicesDeleteCommand extends CustomDevicesCommandBase {
          featureFlags: featureFlags,
          fileSystem: fileSystem,
          logger: logger
-       )
-  {
-    argParser.addOption(
-      'id',
-      abbr: 'i',
-      help: 'The id of the custom device to be deleted.',
-      valueHelp: 'device id',
-      mandatory: true,
-    );
-  }
+       );
 
   @override
   String get description => '''
@@ -815,14 +806,14 @@ Delete a device from the config file.
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    final String id = stringArg('id');
-    await backup();
-    if (!customDevicesConfig.remove(id)) {
-      logger.printError('Couldn\'t find device with id `$id` in config at `${customDevicesConfig.configPath}`');
-    } else {
-      logger.printStatus('Successfully removed device with id `$id` from config at `${customDevicesConfig.configPath}`');
+    final String id = globalResults['device-id'] as String;
+    if (!customDevicesConfig.contains(id)) {
+      throwToolExit('Couldn\'t find device with id `$id` in config at `${customDevicesConfig.configPath}`');
     }
 
+    await backup();
+    customDevicesConfig.remove(id);
+    logger.printStatus('Successfully removed device with id `$id` from config at `${customDevicesConfig.configPath}`');
     return FlutterCommandResult.success();
   }
 }

@@ -59,6 +59,15 @@ class CustomDeviceRevivalException implements Exception {
   String toString() {
     return message;
   }
+
+  @override
+  bool operator ==(Object other) {
+    return (other is CustomDeviceRevivalException) &&
+        (other.message == message);
+  }
+
+  @override
+  int get hashCode => message.hashCode;
 }
 
 /// A single configured custom device.

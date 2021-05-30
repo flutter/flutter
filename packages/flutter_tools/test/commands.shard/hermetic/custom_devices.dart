@@ -5,10 +5,12 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -185,6 +187,7 @@ CustomDevicesCommand createCustomDevicesCommand({
     customDevicesConfig: config != null
       ? config(fileSystem, logger)
       : CustomDevicesConfig.test(
+        platform: platform,
         fileSystem: fileSystem,
         directory: fileSystem.directory('/'),
         logger: logger
@@ -291,11 +294,28 @@ void main() {
           logger.statusText,
           contains('Makes changes to the config file at `/.flutter_custom_devices.json`.')
         );
-      },
-      overrides: <Type, dynamic Function()>{
-        Platform: () => linuxPlatform,
-        ProcessManager: () => FakeProcessManager.empty(),
-        FileSystem: () => MemoryFileSystem.test(),
+      }
+    );
+
+    testUsingContext(
+      'running custom-devices command without arguments prints usage',
+      () async {
+        final BufferLogger logger = BufferLogger.test();
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          logger: logger,
+          usagePrintFn: (Object o) => logger.printStatus(o.toString()),
+          featureEnabled: true
+        );
+
+        await expectLater(
+          runner.run(const <String>['custom-devices']),
+          completes
+        );
+        expect(
+          logger.statusText,
+          contains('Makes changes to the config file at `/.flutter_custom_devices.json`.')
+        );
       }
     );
 
@@ -318,14 +338,9 @@ void main() {
       () async {
         final CommandRunner<void> runner = createCustomDevicesCommandRunner();
         expect(
-          runner.run(const <String>['custom-devices', 'delete', '--id', '0']),
+          runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
           throwsToolExit(message: featureNotEnabledMessage),
         );
-      },
-      overrides: <Type, dynamic Function()>{
-        Platform: () => linuxPlatform,
-        ProcessManager: () => FakeProcessManager.empty(),
-        FileSystem: () => MemoryFileSystem.test(),
       }
     );
 
@@ -337,11 +352,6 @@ void main() {
           runner.run(const <String>['custom-devices', 'list']),
           throwsToolExit(message: featureNotEnabledMessage),
         );
-      },
-      overrides: <Type, dynamic Function()>{
-        Platform: () => linuxPlatform,
-        ProcessManager: () => FakeProcessManager.empty(),
-        FileSystem: () => MemoryFileSystem.test(),
       }
     );
 
@@ -350,14 +360,9 @@ void main() {
       () async {
         final CommandRunner<void> runner = createCustomDevicesCommandRunner();
         expect(
-           runner.run(const <String>['custom-devices', 'reset']),
+          runner.run(const <String>['custom-devices', 'reset']),
           throwsToolExit(message: featureNotEnabledMessage),
         );
-      },
-      overrides: <Type, dynamic Function()>{
-        Platform: () => linuxPlatform,
-        ProcessManager: () => FakeProcessManager.empty(),
-        FileSystem: () => MemoryFileSystem.test(),
       }
     );
 
@@ -383,7 +388,6 @@ void main() {
           ),
           fileSystem: fs,
           processManager: FakeProcessManager.any(),
-          platform: linuxPlatform,
           featureEnabled: true
         );
 
@@ -473,7 +477,6 @@ void main() {
           ),
           processManager: FakeProcessManager.any(),
           fileSystem: fs,
-          platform: linuxPlatform,
           featureEnabled: true
         );
 
@@ -713,11 +716,6 @@ void main() {
             )
           )
         );
-      },
-      overrides: <Type, dynamic Function()>{
-        Platform: () => linuxPlatform,
-        ProcessManager: () => FakeProcessManager.empty(),
-        FileSystem: () => MemoryFileSystem.test(),
       }
     );
 
@@ -800,111 +798,303 @@ void main() {
             )
           )
         );
-      },
-      overrides: <Type, dynamic Function()>{
-        Platform: () => linuxPlatform,
-        ProcessManager: () => FakeProcessManager.empty(),
-        FileSystem: () => MemoryFileSystem.test(),
+      }
+    );
+
+    testUsingContext(
+      'custom-devices delete command deletes device and creates backup',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+
+        final CustomDevicesConfig config = CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: BufferLogger.test(),
+        );
+
+        config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid'));
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          config: (_, __) => config,
+          fileSystem: fs,
+          featureEnabled: true
+        );
+
+        final Uint8List contentsBefore = fs.file('.flutter_custom_devices.json').readAsBytesSync();
+
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
+          completes
+        );
+        expect(fs.file('/.flutter_custom_devices.json.bak'), exists);
+        expect(config.devices, hasLength(0));
+
+        final Uint8List backupContents = fs.file('.flutter_custom_devices.json.bak').readAsBytesSync();
+        expect(contentsBefore, equals(backupContents));
+      }
+    );
+
+    testUsingContext(
+      'custom-devices delete command without device argument throws tool exit',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+
+        final CustomDevicesConfig config = CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: BufferLogger.test(),
+        );
+        config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid'));
+        final Uint8List contentsBefore = fs.file('.flutter_custom_devices.json').readAsBytesSync();
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          featureEnabled: true
+        );
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'delete']),
+          throwsToolExit()
+        );
+
+        final Uint8List contentsAfter = fs.file('.flutter_custom_devices.json').readAsBytesSync();
+        expect(contentsBefore, equals(contentsAfter));
+        expect(fs.file('.flutter_custom_devices.json.bak').existsSync(), isFalse);
+      }
+    );
+
+    testUsingContext(
+      'custom-devices delete command throws tool exit with invalid device id',
+      () async {
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          featureEnabled: true
+        );
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
+          throwsToolExit(message: 'Couldn\'t find device with id `testid` in config at `/.flutter_custom_devices.json`')
+        );
+      }
+    );
+
+    testUsingContext(
+      'custom-devices list command throws tool exit when config contains errors',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final BufferLogger logger = BufferLogger.test();
+
+        fs.file('.flutter_custom_devices.json').writeAsStringSync('{"custom-devices": {}}');
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          fileSystem: fs,
+          logger: logger,
+          featureEnabled: true
+        );
+
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'list']),
+          throwsToolExit(message: 'Could not list custom devices.')
+        );
+        expect(
+          logger.errorText,
+          contains('Could not load custom devices config. config[\'custom-devices\'] is not a JSON array.')
+        );
+      }
+    );
+
+    testUsingContext(
+      'custom-devices list command prints message when no devices found',
+      () async {
+        final BufferLogger logger = BufferLogger.test();
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          logger: logger,
+          featureEnabled: true
+        );
+
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'list']),
+          completes
+        );
+        expect(
+          logger.statusText,
+          contains('No custom devices found in `/.flutter_custom_devices.json`')
+        );
+      }
+    );
+
+    testUsingContext(
+      'custom-devices list command lists all devices',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final BufferLogger logger = BufferLogger.test();
+
+        CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: logger,
+        )..add(
+          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', disabled: false)
+        )..add(
+          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2', label: 'testlabel2', disabled: true)
+        );
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          logger: logger,
+          fileSystem: fs,
+          featureEnabled: true
+        );
+
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'list']),
+          completes
+        );
+        expect(
+          logger.statusText,
+          contains('List of custom devices in `/.flutter_custom_devices.json`:')
+        );
+        expect(
+          logger.statusText,
+          contains('id: testid, label: testlabel, enabled: true')
+        );
+        expect(
+          logger.statusText,
+          contains('id: testid2, label: testlabel2, enabled: false')
+        );
+      }
+    );
+
+    testUsingContext(
+      'custom-devices reset correctly backs up the config file',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final BufferLogger logger = BufferLogger.test();
+
+        CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: logger,
+        )..add(
+          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', disabled: false)
+        )..add(
+          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2', label: 'testlabel2', disabled: true)
+        );
+
+        final Uint8List contentsBefore = fs.file('.flutter_custom_devices.json').readAsBytesSync();
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          logger: logger,
+          fileSystem: fs,
+          featureEnabled: true
+        );
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'reset']),
+          completes
+        );
+        expect(
+          logger.statusText,
+          contains(
+            'Successfully resetted the custom devices config file and created a '
+            'backup at `/.flutter_custom_devices.json.bak`.'
+          )
+        );
+
+        final Uint8List backupContents = fs.file('.flutter_custom_devices.json.bak').readAsBytesSync();
+        expect(contentsBefore, equals(backupContents));
       }
     );
   });
 
-  group(
-    'windows',
-    () {
-      setUp(() {
-        Cache.flutterRoot = windowsFlutterRoot;
-      });
+  group('windows', () {
+    setUp(() {
+      Cache.flutterRoot = windowsFlutterRoot;
+    });
 
-      testUsingContext(
-        'custom-devices add command correctly adds ssh device config on windows',
-        () async {
-          final MemoryFileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    testUsingContext(
+      'custom-devices add command correctly adds ssh device config on windows',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
-          final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-            terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
-              platform: platform,
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+            platform: platform,
+            id: 'testid',
+            label: 'testlabel',
+            sdkNameAndVersion: 'testsdknameandversion',
+            enabled: 'y',
+            hostname: 'testhostname',
+            username: 'testuser',
+            runDebug: 'testrundebug',
+            usePortForwarding: 'y',
+            screenshot: 'testscreenshot',
+            apply: 'y',
+          ),
+          fileSystem: fs,
+          platform: windowsPlatform,
+          featureEnabled: true
+        );
+
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'add', '--no-check']),
+          completes
+        );
+
+        final CustomDevicesConfig config = CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: BufferLogger.test()
+        );
+
+        expect(
+          config.devices,
+          contains(
+            CustomDeviceConfig(
               id: 'testid',
               label: 'testlabel',
               sdkNameAndVersion: 'testsdknameandversion',
-              enabled: 'y',
-              hostname: 'testhostname',
-              username: 'testuser',
-              runDebug: 'testrundebug',
-              usePortForwarding: 'y',
-              screenshot: 'testscreenshot',
-              apply: 'y',
-            ),
-            fileSystem: fs,
-            platform: windowsPlatform,
-            featureEnabled: true
-          );
-
-          await expectLater(
-            runner.run(const <String>['custom-devices', 'add', '--no-check']),
-            completes
-          );
-
-          final CustomDevicesConfig config = CustomDevicesConfig.test(
-            fileSystem: fs,
-            directory: fs.directory('/'),
-            logger: BufferLogger.test()
-          );
-
-          expect(
-            config.devices,
-            contains(
-              CustomDeviceConfig(
-                id: 'testid',
-                label: 'testlabel',
-                sdkNameAndVersion: 'testsdknameandversion',
-                disabled: false,
-                pingCommand: const <String>[
-                  'ping',
-                  '-n', '1',
-                  '-w', '500',
-                  'testhostname'
-                ],
-                pingSuccessRegex: RegExp(r'[<=]\d+ms'),
-                postBuildCommand: null,
-                installCommand: const <String>[
-                  'scp',
-                  '-r',
-                  '-o', 'BatchMode=yes',
-                  r'${localPath}',
-                  r'testuser@testhostname:/tmp/${appName}'
-                ],
-                uninstallCommand: const <String>[
-                  'ssh',
-                  '-o', 'BatchMode=yes',
-                  'testuser@testhostname',
-                  r'rm -rf "/tmp/${appName}"'
-                ],
-                runDebugCommand: const <String>[
-                  'ssh',
-                  '-o', 'BatchMode=yes',
-                  'testuser@testhostname',
-                  'testrundebug'
-                ],
-                forwardPortCommand: const <String>[
-                  'ssh',
-                  '-o', 'BatchMode=yes',
-                  '-o', 'ExitOnForwardFailure=yes',
-                  '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
-                  'testuser@testhostname'
-                ],
-                forwardPortSuccessRegex: RegExp('Linux'),
-                screenshotCommand: const <String>[
-                  'ssh',
-                  '-o', 'BatchMode=yes',
-                  'testuser@testhostname',
-                  'testscreenshot'
-                ]
-              )
+              disabled: false,
+              pingCommand: const <String>[
+                'ping',
+                '-n', '1',
+                '-w', '500',
+                'testhostname'
+              ],
+              pingSuccessRegex: RegExp(r'[<=]\d+ms'),
+              postBuildCommand: null,
+              installCommand: const <String>[
+                'scp',
+                '-r',
+                '-o', 'BatchMode=yes',
+                r'${localPath}',
+                r'testuser@testhostname:/tmp/${appName}'
+              ],
+              uninstallCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                r'rm -rf "/tmp/${appName}"'
+              ],
+              runDebugCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testrundebug'
+              ],
+              forwardPortCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                '-o', 'ExitOnForwardFailure=yes',
+                '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
+                'testuser@testhostname'
+              ],
+              forwardPortSuccessRegex: RegExp('Linux'),
+              screenshotCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testscreenshot'
+              ]
             )
-          );
-        },
-      );
-    }
-  );
+          )
+        );
+      },
+    );
+  });
 }

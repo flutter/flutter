@@ -21,10 +21,11 @@ class CustomDevicesConfig {
   /// when it's not valid JSON (which other configurations do) and will not
   /// be implicitly created when it doesn't exist.
   CustomDevicesConfig({
+    required Platform platform,
     required FileSystem fileSystem,
     required Logger logger,
-    required Platform platform
-  }) : _fileSystem = fileSystem,
+  }) : _platform = platform,
+       _fileSystem = fileSystem,
        _logger = logger,
        _configLoader = (() => Config.managed(
          _kCustomDevicesConfigName,
@@ -36,9 +37,11 @@ class CustomDevicesConfig {
   @visibleForTesting
   CustomDevicesConfig.test({
     required FileSystem fileSystem,
+    required Logger logger,
     Directory? directory,
-    required Logger logger
-  }) : _fileSystem = fileSystem,
+    Platform? platform,
+  }) : _platform = platform ?? FakePlatform(),
+       _fileSystem = fileSystem,
        _logger = logger,
        _configLoader = (() => Config.test(
          name: _kCustomDevicesConfigName,
@@ -52,6 +55,7 @@ class CustomDevicesConfig {
   static const String _kSchema = r'$schema';
   static const String _kCustomDevices = 'custom-devices';
 
+  final Platform _platform;
   final FileSystem _fileSystem;
   final Logger _logger;
   final Config Function() _configLoader;
@@ -98,7 +102,9 @@ class CustomDevicesConfig {
   void ensureFileExists() {
     if (!_fileSystem.file(_config.configPath).existsSync()) {
       _config.setValue(_kSchema, _defaultSchema);
-      _config.setValue(_kCustomDevices, <dynamic>[CustomDeviceConfig.exampleWindows.toJson()]);
+      _config.setValue(_kCustomDevices, <dynamic>[
+        CustomDeviceConfig.getExampleForPlatform(_platform).toJson(),
+      ]);
     }
   }
 
@@ -180,6 +186,11 @@ class CustomDevicesConfig {
         config.toJson()
       ]
     );
+  }
+
+  /// Returns true if the config file contains a device with id [deviceId].
+  bool contains(String deviceId) {
+    return devices.any((CustomDeviceConfig device) => device.id == deviceId);
   }
 
   /// Removes the first device with this device id from the config file.
