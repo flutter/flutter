@@ -122,6 +122,9 @@ class FakeTerminal implements Terminal {
 
   @override
   String get warningMark => terminal.warningMark;
+
+  @override
+  int get preferredStyle => terminal.preferredStyle;
 }
 
 class FakeCommandRunner extends FlutterCommandRunner {

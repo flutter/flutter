@@ -320,9 +320,9 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         'of configuring. Useful if you want to use the "flutter custom-devices '
         'add" command from a script, or use it non-interactively for some '
         'other reason.\n'
-        'By default, this won\'t check whether the passed in config actually '
+        "By default, this won't check whether the passed in config actually "
         'works (only if it is valid). To make sure the config works use the '
-        '"--check" option',
+        '"--check" option.',
       valueHelp: 'JSON config',
       aliases: _kJsonAliases
     );
@@ -332,7 +332,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       help:
         'Add a ssh-device. This will automatically fill out some of the config '
         'options for you with good defaults, and in other cases save you some '
-        'typing. So you\'ll only need to enter some things like hostname and '
+        "typing. So you'll only need to enter some things like hostname and "
         'username of the remote device instead of entering each individual '
         'command.',
       defaultsTo: true,
