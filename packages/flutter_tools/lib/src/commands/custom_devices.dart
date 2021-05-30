@@ -317,8 +317,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       help:
         'Add the custom device described by this JSON-encoded string to the '
         'list of custom-devices instead of using the normal, interactive way '
-        'of configuring. Useful if you want to use the `flutter custom-devices '
-        'add` command from a script, or use it non-interactively for some '
+        'of configuring. Useful if you want to use the "flutter custom-devices '
+        'add" command from a script, or use it non-interactively for some '
         'other reason.\n'
         'By default, this won\'t check whether the passed in config actually '
         'works (only if it is valid). To make sure the config works use the '
