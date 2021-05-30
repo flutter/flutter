@@ -144,8 +144,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
 
   # TODO(jmagman): use assemble copied engine in add-to-app.
   if [[ -e "${project_path}/.ios" ]]; then
-    RunCommand rm -rf -- "${derived_dir}/engine/Flutter.framework"
-    RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
+    RunCommand rsync -av --delete --filter "- .DS_Store" "${flutter_framework}" "${derived_dir}/engine"
   fi
 
   RunCommand pushd "${project_path}" > /dev/null

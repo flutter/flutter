@@ -119,6 +119,7 @@ class FlutterOptions {
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
+  static const String kInitializeFromDill = 'initialize-from-dill';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -288,6 +289,22 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// This can be overridden by some of its subclasses.
   String get packagesPath => globalResults['packages'] as String;
+
+  /// The value of the `--filesystem-scheme` argument.
+  ///
+  /// This can be overridden by some of its subclasses.
+  String get fileSystemScheme =>
+    argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
+          ? stringArg(FlutterOptions.kFileSystemScheme)
+          : null;
+
+  /// The values of the `--filesystem-root` argument.
+  ///
+  /// This can be overridden by some of its subclasses.
+  List<String> get fileSystemRoots =>
+    argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
+          ? stringsArg(FlutterOptions.kFileSystemRoot)
+          : null;
 
   void usesPubOption({bool hide = false}) {
     argParser.addFlag('pub',
@@ -791,6 +808,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesInitializeFromDillOption({ @required bool hide }) {
+    argParser.addOption(FlutterOptions.kInitializeFromDill,
+      help: 'Initializes the resident compiler with a specific kernel file instead of '
+        'the default cached location.',
+      hide: hide,
+    );
+  }
+
   /// Adds build options common to all of the desktop build commands.
   void addCommonDesktopBuildOptions({ @required bool verboseHelp }) {
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -1032,12 +1057,8 @@ abstract class FlutterCommand extends Command<void> {
       extraGenSnapshotOptions: extraGenSnapshotOptions?.isNotEmpty ?? false
         ? extraGenSnapshotOptions
         : null,
-      fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
-          ? stringsArg(FlutterOptions.kFileSystemRoot)
-          : null,
-      fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? stringArg(FlutterOptions.kFileSystemScheme)
-          : null,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme: fileSystemScheme,
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
@@ -1055,6 +1076,9 @@ abstract class FlutterCommand extends Command<void> {
       androidGradleDaemon: androidGradleDaemon,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
+      initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
+          ? stringArg(FlutterOptions.kInitializeFromDill)
+          : null,
     );
   }
 
