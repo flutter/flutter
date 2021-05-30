@@ -292,7 +292,7 @@ void main() {
         );
         expect(
           logger.statusText,
-          contains('Makes changes to the config file at `/.flutter_custom_devices.json`.')
+          contains('Makes changes to the config file at "/.flutter_custom_devices.json".')
         );
       }
     );
@@ -314,7 +314,7 @@ void main() {
         );
         expect(
           logger.statusText,
-          contains('Makes changes to the config file at `/.flutter_custom_devices.json`.')
+          contains('Makes changes to the config file at "/.flutter_custom_devices.json".')
         );
       }
     );
@@ -869,7 +869,7 @@ void main() {
         );
         await expectLater(
           runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
-          throwsToolExit(message: 'Couldn\'t find device with id `testid` in config at `/.flutter_custom_devices.json`')
+          throwsToolExit(message: 'Couldn\'t find device with id `testid` in config at "/.flutter_custom_devices.json"')
         );
       }
     );
@@ -915,7 +915,7 @@ void main() {
         );
         expect(
           logger.statusText,
-          contains('No custom devices found in `/.flutter_custom_devices.json`')
+          contains('No custom devices found in "/.flutter_custom_devices.json"')
         );
       }
     );
@@ -948,7 +948,7 @@ void main() {
         );
         expect(
           logger.statusText,
-          contains('List of custom devices in `/.flutter_custom_devices.json`:')
+          contains('List of custom devices in "/.flutter_custom_devices.json":')
         );
         expect(
           logger.statusText,
@@ -992,7 +992,7 @@ void main() {
           logger.statusText,
           contains(
             'Successfully resetted the custom devices config file and created a '
-            'backup at `/.flutter_custom_devices.json.bak`.'
+            'backup at "/.flutter_custom_devices.json.bak".'
           )
         );
 

@@ -129,7 +129,7 @@ class CustomDevicesCommand extends FlutterCommand {
   String get description {
     String configFileLine;
     if (_featureFlags.areCustomDevicesEnabled) {
-      configFileLine = '\nMakes changes to the config file at `${_customDevicesConfig.configPath}`.\n';
+      configFileLine = '\nMakes changes to the config file at "${_customDevicesConfig.configPath}".\n';
     } else {
       configFileLine = '';
     }
@@ -142,7 +142,7 @@ ssh devices, resetting (with backup) and checking the config file. For advanced
 configuration or more complete documentation, edit the config file with an
 editor that supports JSON schemas like VS Code.
 
-Requires the custom devices feature to be enabled. You can enable it using `flutter config --enable-custom-devices`.
+Requires the custom devices feature to be enabled. You can enable it using "flutter config --enable-custom-devices".
 ''';
   }
 
@@ -307,8 +307,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         help:
           'Make sure the config actually works. This will execute some of the '
           'commands in the config (if necessary with dummy arguments). This '
-          'flag is enabled by default when `--json` is not specified. If '
-          '`--json` is given, it is disabled by default.',
+          'flag is enabled by default when "--json" is not specified. If '
+          '"--json" is given, it is disabled by default.',
         defaultsTo: null
     );
 
@@ -322,7 +322,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         'other reason.\n'
         'By default, this won\'t check whether the passed in config actually '
         'works (only if it is valid). To make sure the config works use the '
-        '`--check` option',
+        '"--check" option',
       valueHelp: 'JSON config',
       aliases: _kJsonAliases
     );
@@ -482,7 +482,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   }
 
   void printSuccessfullyAdded() {
-    logger.printStatus('Successfully added custom device to config file at `${customDevicesConfig.configPath}`.');
+    logger.printStatus('Successfully added custom device to config file at "${customDevicesConfig.configPath}".');
   }
 
   bool _isValidHostname(String s) => _hostnameRegex.hasMatch(s);
@@ -629,7 +629,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       'run command',
       description:
         'Please enter the command executed on the remote device for starting '
-        r'the app. `/tmp/${appName}` is the path to the asset bundle.',
+        r'the app. "/tmp/${appName}" is the path to the asset bundle.',
       example: r'flutter-pi /tmp/${appName}'
     );
 
@@ -638,7 +638,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       description: 'Should the device use port forwarding? '
         'Using port forwarding is the default because it works in all cases, however if your '
         'remote device has a static IP address and you have a way of '
-        'specifying the `--observatory-host=<ip>` engine option, you might prefer '
+        'specifying the "--observatory-host=<ip>" engine option, you might prefer '
         'not using port forwarding.',
       defaultsTo: true,
     );
@@ -808,12 +808,12 @@ Delete a device from the config file.
 
     final String id = globalResults['device-id'] as String;
     if (!customDevicesConfig.contains(id)) {
-      throwToolExit('Couldn\'t find device with id `$id` in config at `${customDevicesConfig.configPath}`');
+      throwToolExit('Couldn\'t find device with id "$id" in config at "${customDevicesConfig.configPath}"');
     }
 
     await backup();
     customDevicesConfig.remove(id);
-    logger.printStatus('Successfully removed device with id `$id` from config at `${customDevicesConfig.configPath}`');
+    logger.printStatus('Successfully removed device with id "$id" from config at "${customDevicesConfig.configPath}"');
     return FlutterCommandResult.success();
   }
 }
