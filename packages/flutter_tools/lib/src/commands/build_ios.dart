@@ -80,7 +80,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       'allowProvisioningUpdates',
       defaultsTo: false,
       negatable: false,
-      help: 'Allow xcodebuild to communicate with the Apple Developer website. For automatically signed targets, xcodebuild will create and update profiles, app IDs, and certificates. For manually signed targets, xcodebuild will download missing or updated provisioning profiles. Requires a developer account to have been added in Xcode\'s Accounts preference pane.',
+      help: 'Allow xcodebuild to communicate with the Apple Developer website. For automatically signed targets, xcodebuild will create and update profiles, app IDs, and certificates. For manually signed targets, xcodebuild will download missing or updated provisioning profiles. Requires a developer account to have been added in Xcode`s Accounts preference pane.',
     )..addFlag(
       'allowProvisioningDeviceRegistration',
       defaultsTo: false,
