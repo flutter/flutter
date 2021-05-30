@@ -428,7 +428,7 @@ const double _kDefaultFontSize = 14.0;
 ///
 /// By default, fonts differ depending on the platform. 
 ///
-///  * Default font-family for `Android`,`Fuchsia` and `Linux` is `Segoe UI`.
+///  * Default font-family for `Android`,`Fuchsia` and `Linux` is `Roboto`.
 ///  * Default font-family for `iOS` is `.SF UI Display`/`.SF UI Text`.
 ///  * Default font-family for `MacOS` is `.AppleSystemUIFont`.
 ///  * Default font-family for `Windows` is `Segoe UI`.
