@@ -26,6 +26,8 @@ import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../runner/flutter_command.dart';
 
+/// just the function signature of the [print] function.
+/// The Object arg may be null.
 typedef PrintFn = void Function(Object);
 
 class CustomDevicesCommand extends FlutterCommand {
@@ -365,6 +367,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     logger.printError(err);
   }
 
+  /// Check this config by executing some of the commands, see if they run
+  /// fine.
   Future<bool> _checkConfigWithLogging(final CustomDeviceConfig config) async {
     final CustomDevice device = CustomDevice(
       config: config,
@@ -449,6 +453,10 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     return result;
   }
 
+  /// Run non-interactively (useful if running from scripts or bots),
+  /// add value of the `--json` arg to the config.
+  ///
+  /// Only check if `--check` is explicitly specified. (Don't check by default)
   Future<FlutterCommandResult> runNonInteractively() async {
     final String jsonStr = stringArg(_kJson);
     final bool shouldCheck = boolArg(_kCheck) ?? false;
@@ -485,6 +493,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
   bool _isValidIpAddr(String s) => InternetAddress.tryParse(s) != null;
 
+  /// Ask the user to input a string.
   Future<String> askForString(
     String name, {
     String description,
@@ -519,6 +528,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     }
   }
 
+  /// Ask the user for a y(es) / n(o) or empty input.
   Future<bool> askForBool(
     String name, {
     String description,
@@ -541,6 +551,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     }
   }
 
+  /// Ask the user if he wants to apply the config.
+  /// Shows a different prompt if errors or warnings exist in the config.
   Future<bool> askApplyConfig({bool hasErrorsOrWarnings = false}) {
     return askForBool(
       'apply',
@@ -552,6 +564,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     );
   }
 
+  /// Run interactively (with user prompts), the target device should be
+  /// connected to via ssh.
   Future<FlutterCommandResult> runInteractivelySsh() async {
     final bool shouldCheck = boolArg(_kCheck) ?? true;
 
