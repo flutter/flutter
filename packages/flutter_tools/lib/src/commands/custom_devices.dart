@@ -304,37 +304,37 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   {
     argParser.addFlag(
         _kCheck,
-        help: '''
-Make sure the config actually works. This will execute some of the commands in
-the config (if necessary with dummy arguments). This flag is enabled by default
-when `--json` is not specified. If `--json` is given, it is disabled by default.
-''' '\n ',
+        help:
+          'Make sure the config actually works. This will execute some of the '
+          'commands in the config (if necessary with dummy arguments). This '
+          'flag is enabled by default when `--json` is not specified. If '
+          '`--json` is given, it is disabled by default.',
         defaultsTo: null
     );
 
     argParser.addOption(
       _kJson,
-      help: '''
-Add the custom device described by this JSON-encoded string to the list of
-custom-devices instead of using the normal, interactive way of configuring.
-Useful if you want to use the `flutter custom-devices add` command from a
-script, or use it non-interactively for some other reason.
-
-By default, this won't check whether the passed in config actually works (only
-if it is valid). To make sure the config works use the `--check` option.
-''' '\n ',
+      help:
+        'Add the custom device described by this JSON-encoded string to the '
+        'list of custom-devices instead of using the normal, interactive way '
+        'of configuring. Useful if you want to use the `flutter custom-devices '
+        'add` command from a script, or use it non-interactively for some '
+        'other reason.\n'
+        'By default, this won\'t check whether the passed in config actually '
+        'works (only if it is valid). To make sure the config works use the '
+        '`--check` option',
       valueHelp: 'JSON config',
       aliases: _kJsonAliases
     );
 
     argParser.addFlag(
       _kSsh,
-      help: '''
-Add a ssh-device. This will automatically fill out some of the config options
-for you with good defaults, and in other cases save you some typing. So you'll
-only need to enter some things like hostname and username of the remote device
-instead of entering each individual command.
-''' '\n ',
+      help:
+        'Add a ssh-device. This will automatically fill out some of the config '
+        'options for you with good defaults, and in other cases save you some '
+        'typing. So you\'ll only need to enter some things like hostname and '
+        'username of the remote device instead of entering each individual '
+        'command.',
       defaultsTo: true,
       negatable: false
     );
