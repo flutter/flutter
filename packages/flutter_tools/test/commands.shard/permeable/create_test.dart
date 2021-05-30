@@ -2175,6 +2175,26 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
+  testUsingContext('flutter create . on and existing plugin should show "Your example app code in"', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
+    final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
+
+    await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platforms=android', projectDir.path]);
+    expect(logger.statusText, isNot(contains('Your example app code in $relativePluginPath\n')));
+
+    await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platforms=ios', projectDir.path]);
+    expect(logger.statusText, isNot(contains('Your example app code in $relativePluginPath\n')));
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(logger.statusText, isNot(contains('Your example app code in $relativePluginPath\n')));
+  }, overrides: <Type, Generator> {
+    Logger: () => logger,
+  });
+
   testUsingContext('flutter create -t plugin in an empty folder should not show pubspec.yaml updating suggestion', () async {
     Cache.flutterRoot = '../..';
 
