@@ -31,7 +31,7 @@ class BenchmarkResultPrinter {
   /// result value. [unit] is the unit of measurement, such as "ms", "km", "h".
   /// [name] is a computer-readable name of the result used as a key in the JSON
   /// serialization of the results.
-  void addResult({ @required String description, @required double value, @required String unit, @required String name }) {
+  void addResult({ required String description, required double value, required String unit, required String name }) {
     _results.add(_BenchmarkResult(description, value, unit, name));
   }
 

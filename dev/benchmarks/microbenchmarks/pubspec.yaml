@@ -2,7 +2,7 @@ name: microbenchmarks
 description: Small benchmarks for very specific parts of the Flutter framework.
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   meta: 1.4.0
