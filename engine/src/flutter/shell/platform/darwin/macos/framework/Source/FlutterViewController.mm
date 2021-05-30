@@ -51,9 +51,9 @@ struct MouseState {
   /**
    * Whether or not mouseExited: was received while a button was down. Cocoa's behavior when
    * dragging out of a tracked area is to send an exit, then keep sending drag events until the last
-   * button is released. If it was released inside the view, mouseEntered: is sent the next time the
-   * mouse moves. Flutter doesn't expect to receive events after a kRemove, so the kRemove for the
-   * exit needs to be delayed until after the last mouse button is released.
+   * button is released. Flutter doesn't expect to receive events after a kRemove, so the kRemove
+   * for the exit needs to be delayed until after the last mouse button is released. If cursor
+   * returns back to the window while still dragging, the flag is cleared in mouseEntered:.
    */
   bool has_pending_exit = false;
 
@@ -360,8 +360,8 @@ static void CommonInit(FlutterViewController* controller) {
 
 - (void)configureTrackingArea {
   if (_mouseTrackingMode != FlutterMouseTrackingModeNone && self.view) {
-    NSTrackingAreaOptions options =
-        NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved | NSTrackingInVisibleRect;
+    NSTrackingAreaOptions options = NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved |
+                                    NSTrackingInVisibleRect | NSTrackingEnabledDuringMouseDrag;
     switch (_mouseTrackingMode) {
       case FlutterMouseTrackingModeInKeyWindow:
         options |= NSTrackingActiveInKeyWindow;
@@ -612,7 +612,11 @@ static void CommonInit(FlutterViewController* controller) {
 }
 
 - (void)mouseEntered:(NSEvent*)event {
-  [self dispatchMouseEvent:event phase:kAdd];
+  if (_mouseState.has_pending_exit) {
+    _mouseState.has_pending_exit = false;
+  } else {
+    [self dispatchMouseEvent:event phase:kAdd];
+  }
 }
 
 - (void)mouseExited:(NSEvent*)event {
