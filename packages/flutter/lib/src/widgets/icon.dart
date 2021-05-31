@@ -164,8 +164,7 @@ class Icon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
-    final TextDirection textDirection =
-        this.textDirection ?? Directionality.of(context);
+    final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
 
     final IconThemeData iconTheme = IconTheme.of(context);
 
@@ -187,8 +186,7 @@ class Icon extends StatelessWidget {
 
     Widget iconWidget = RichText(
       overflow: TextOverflow.visible, // Never clip.
-      textDirection:
-          textDirection, // Since we already fetched it for the assert...
+      textDirection: textDirection, // Since we already fetched it for the assert...
       text: TextSpan(
         text: String.fromCharCode(icon!.codePoint),
         style: TextStyle(
