@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -21,15 +19,15 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  FileSystem fileSystem;
-  Environment environment;
-  Target fooTarget;
-  Target barTarget;
-  Target fizzTarget;
-  Target sharedTarget;
-  int fooInvocations;
-  int barInvocations;
-  int shared;
+  late FileSystem fileSystem;
+  late Environment environment;
+  late Target fooTarget;
+  late Target barTarget;
+  late Target fizzTarget;
+  late Target sharedTarget;
+  late int fooInvocations;
+  late int barInvocations;
+  late int shared;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -136,7 +134,7 @@ void main() {
 
     expect(stampFile, exists);
 
-    final Map<String, dynamic> stampContents = castStringKeyedMap(
+    final Map<String, Object?>? stampContents = castStringKeyedMap(
       json.decode(stampFile.readAsStringSync()));
 
     expect(stampContents, containsPair('inputs', <Object>['/foo.dart']));
@@ -312,7 +310,7 @@ void main() {
   testWithoutContext('Can describe itself with JSON output', () {
     environment.buildDir.createSync(recursive: true);
 
-    expect(fooTarget.toJson(environment), <String, dynamic>{
+    expect(fooTarget.toJson(environment), <String, Object?>{
       'inputs':  <Object>[
         '/foo.dart',
       ],
@@ -685,7 +683,7 @@ void main() {
 
 }
 
-BuildSystem setUpBuildSystem(FileSystem fileSystem, [FakePlatform platform]) {
+BuildSystem setUpBuildSystem(FileSystem fileSystem, [FakePlatform? platform]) {
   return FlutterBuildSystem(
     fileSystem: fileSystem,
     logger: BufferLogger.test(),
@@ -694,16 +692,17 @@ BuildSystem setUpBuildSystem(FileSystem fileSystem, [FakePlatform platform]) {
 }
 
 class TestTarget extends Target {
-  TestTarget([this._build, this._canSkip]);
+  TestTarget([Future<void> Function(Environment environment)? build, this._canSkip])
+      : _build = build ?? ((Environment environment) async {});
 
   final Future<void> Function(Environment environment) _build;
 
-  final bool Function(Environment environment) _canSkip;
+  final bool Function(Environment environment)? _canSkip;
 
   @override
   bool canSkip(Environment environment) {
     if (_canSkip != null) {
-      return _canSkip(environment);
+      return _canSkip!(environment);
     }
     return super.canSkip(environment);
   }

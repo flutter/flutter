@@ -483,12 +483,12 @@ void main() {
           'runtime-mode',
           label: 'NullSafetyMode.sound',
         ),
-        const TestUsageEvent(
+        TestUsageEvent(
           NullSafetyAnalysisEvent.kNullSafetyCategory,
           'stats',
-          parameters: <String, String>{
+          parameters: CustomDimensions.fromMap(<String, String>{
             'cd49': '1', 'cd50': '1',
-          },
+          }),
         ),
         const TestUsageEvent(
           NullSafetyAnalysisEvent.kNullSafetyCategory,
@@ -507,6 +507,18 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
       final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
       expect(buildInfo.packagesPath, 'foo');
+    });
+
+    testUsingContext('use fileSystemScheme to generate BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(fileSystemScheme: 'foo');
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.fileSystemScheme, 'foo');
+    });
+
+    testUsingContext('use fileSystemRoots to generate BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(fileSystemRoots: <String>['foo', 'bar']);
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.fileSystemRoots, <String>['foo', 'bar']);
     });
 
     testUsingContext('dds options', () async {

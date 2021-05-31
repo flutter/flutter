@@ -114,7 +114,7 @@ abstract class TextSelectionControls {
   ///
   /// The top left corner of this widget is positioned at the bottom of the
   /// selection position.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, VoidCallback? onTap);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
@@ -385,8 +385,9 @@ class TextSelectionOverlay {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], handle drag behavior will
-  /// begin upon the detection of a drag gesture. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// begin at the position where the drag gesture won the arena. If set to
+  /// [DragStartBehavior.down] it will begin at the position where a down
+  /// event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -400,11 +401,19 @@ class TextSelectionOverlay {
   final DragStartBehavior dragStartBehavior;
 
   /// {@template flutter.widgets.TextSelectionOverlay.onSelectionHandleTapped}
-  /// A callback that's invoked when a selection handle is tapped.
+  /// A callback that's optionally invoked when a selection handle is tapped.
   ///
-  /// Both regular taps and long presses invoke this callback, but a drag
-  /// gesture won't.
+  /// The [TextSelectionControls.buildHandle] implementation the text field
+  /// uses decides where the the handle's tap "hotspot" is, or the selection
+  /// handle supports tap gestures at all. For instance,
+  /// [MaterialTextSelectionControls] calls [onSelectionHandleTapped] when the
+  /// selection handle's "knob" is tapped or long pressed, while
+  /// [CupertinoTextSelectionControls] builds a handle that's is not
+  /// sufficiently large for tapping (as it's not meant to be tapped) so it
+  /// does not call [onSelectionHandleTapped] at all.
   /// {@endtemplate}
+  // See https://github.com/flutter/flutter/issues/39376#issuecomment-848406415
+  // for provenance.
   final VoidCallback? onSelectionHandleTapped;
 
   /// Maintains the status of the clipboard for determining if its contents can
@@ -786,10 +795,6 @@ class _TextSelectionHandleOverlayState
     widget.onSelectionHandleChanged(newSelection);
   }
 
-  void _handleTap() {
-    widget.onSelectionHandleTapped?.call();
-  }
-
   @override
   Widget build(BuildContext context) {
     final LayerLink layerLink;
@@ -857,7 +862,6 @@ class _TextSelectionHandleOverlayState
             dragStartBehavior: widget.dragStartBehavior,
             onPanStart: _handleDragStart,
             onPanUpdate: _handleDragUpdate,
-            onTap: _handleTap,
             child: Padding(
               padding: EdgeInsets.only(
                 left: padding.left,
@@ -869,6 +873,7 @@ class _TextSelectionHandleOverlayState
                 context,
                 type,
                 widget.renderObject.preferredLineHeight,
+                widget.onSelectionHandleTapped,
               ),
             ),
           ),
@@ -1526,9 +1531,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     // Use _TransparentTapGestureRecognizer so that TextSelectionGestureDetector
     // can receive the same tap events that a selection handle placed visually
     // on top of it also receives.
-    gestures[_TransparentTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_TransparentTapGestureRecognizer>(
-      () => _TransparentTapGestureRecognizer(debugOwner: this),
-      (_TransparentTapGestureRecognizer instance) {
+    gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+      () => TapGestureRecognizer(debugOwner: this),
+      (TapGestureRecognizer instance) {
         instance
           ..onSecondaryTap = widget.onSecondaryTap
           ..onSecondaryTapDown = widget.onSecondaryTapDown
@@ -1588,35 +1593,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       behavior: widget.behavior,
       child: widget.child,
     );
-  }
-}
-
-// A TapGestureRecognizer which allows other GestureRecognizers to win in the
-// GestureArena. This means both _TransparentTapGestureRecognizer and other
-// GestureRecognizers can handle the same event.
-//
-// This enables proper handling of events on both the selection handle and the
-// underlying input, since there is significant overlap between the two given
-// the handle's padded hit area.  For example, the selection handle needs to
-// handle single taps on itself, but double taps need to be handled by the
-// underlying input.
-class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
-  _TransparentTapGestureRecognizer({
-    Object? debugOwner,
-  }) : super(debugOwner: debugOwner);
-
-  @override
-  void rejectGesture(int pointer) {
-    // Accept new gestures that another recognizer has already won.
-    // Specifically, this needs to accept taps on the text selection handle on
-    // behalf of the text field in order to handle double tap to select. It must
-    // not accept other gestures like longpresses and drags that end outside of
-    // the text field.
-    if (state == GestureRecognizerState.ready) {
-      acceptGesture(pointer);
-    } else {
-      super.rejectGesture(pointer);
-    }
   }
 }
 

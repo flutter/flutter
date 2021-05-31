@@ -549,4 +549,17 @@ void main() {
     final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
     expect(textField.enabled, false);
   });
+
+  testWidgets('textInputAction is set to TextInputAction.search by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.textInputAction, TextInputAction.search);
+  });
 }

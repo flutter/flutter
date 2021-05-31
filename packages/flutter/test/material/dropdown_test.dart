@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -604,12 +605,12 @@ void main() {
                           value: 1,
                           items: const <DropdownMenuItem<int>>[
                             DropdownMenuItem<int>(
-                              child: Text('First Item'),
                               value: 1,
+                              child: Text('First Item'),
                             ),
                             DropdownMenuItem<int>(
-                              child: Text('Second Item'),
                               value: 2,
+                              child: Text('Second Item'),
                             ),
                           ],
                           onChanged: (_) { },
@@ -1512,12 +1513,12 @@ void main() {
                 hint: hint,
                 items: const <DropdownMenuItem<String>>[
                   DropdownMenuItem<String>(
-                    child: Text('one'),
                     value: 'one',
+                    child: Text('one'),
                   ),
                   DropdownMenuItem<String>(
-                    child: Text('two'),
                     value: 'two',
+                    child: Text('two'),
                   ),
                 ],
                 value: value,
@@ -2107,8 +2108,8 @@ void main() {
                 },
                 items: items.map((String string) {
                   return DropdownMenuItem<String>(
-                    child: Text(string),
                     value: string,
+                    child: Text(string),
                   );
                 }).toList(),
               ),
@@ -2163,8 +2164,8 @@ void main() {
                 },
                 items: items.map((String item) {
                   return DropdownMenuItem<String>(
-                    child: Text(item),
                     value: item,
+                    child: Text(item),
                   );
                 }).toList(),
               ),
@@ -2523,8 +2524,8 @@ void main() {
                 },
                 items: items.map((MapEntry<String?, String> item) {
                   return DropdownMenuItem<String>(
-                    child: Text(item.value),
                     value: item.key,
+                    child: Text(item.value),
                   );
                 }).toList(),
               ),
@@ -3389,5 +3390,63 @@ void main() {
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
     });
+  });
+
+  testWidgets('DropdownButton changes mouse cursor when hovered', (WidgetTester tester) async {
+    const Key key = Key('testDropdownButton');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButton<String>(
+              key: key,
+              onChanged: (String? newValue) {},
+              items: <String>['One', 'Two', 'Three', 'Four']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList()
+          ),
+        ),
+      ),
+    );
+
+    final Finder dropdownButtonFinder = find.byKey(key);
+    final Offset onDropdownButton = tester.getCenter(dropdownButtonFinder);
+    final Offset offDropdownButton = tester.getBottomRight(dropdownButtonFinder) + const Offset(1, 1);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+
+    await gesture.addPointer(location: onDropdownButton);
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    await gesture.moveTo(offDropdownButton);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test that mouse cursor doesn't change when button is disabled
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButton<String>(
+              key: key,
+              items: <String>['One', 'Two', 'Three', 'Four']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList()
+          ),
+        ),
+      ),
+    );
+
+    await gesture.moveTo(onDropdownButton);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    await gesture.moveTo(offDropdownButton);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 }

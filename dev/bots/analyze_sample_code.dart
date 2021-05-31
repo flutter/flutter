@@ -164,7 +164,7 @@ class SampleCheckerException implements Exception {
 class SampleChecker {
   /// Creates a [SampleChecker].
   ///
-  /// The positional argument is the path to the the package directory for the
+  /// The positional argument is the path to the package directory for the
   /// flutter package within the Flutter root dir.
   ///
   /// The optional `tempDirectory` argument supplies the location for the

@@ -9,20 +9,21 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import 'test_utils.dart';
+
+// This test file does not use [getLocalEngineArguments] because it requires
+// multiple specific artifact output types.
 
 const String apkDebugMessage = 'A summary of your APK analysis can be found at: ';
 const String iosDebugMessage = 'A summary of your iOS bundle analysis can be found at: ';
 const String runDevToolsMessage = 'flutter pub global activate devtools; flutter pub global run devtools ';
 
 void main() {
-  testUsingContext('--analyze-size flag produces expected output on hello_world for Android', () async {
+  testWithoutContext('--analyze-size flag produces expected output on hello_world for Android', () async {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       'build',
       'apk',
       '--analyze-size',
@@ -56,7 +57,6 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-       ...getLocalEngineArguments(),
       'build',
       'ios',
       '--analyze-size',
@@ -88,7 +88,6 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-       ...getLocalEngineArguments(),
       'build',
       'apk',
       '--analyze-size',
@@ -107,7 +106,6 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-       ...getLocalEngineArguments(),
       'build',
       'apk',
       '--analyze-size',
@@ -126,7 +124,6 @@ void main() {
 
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-       ...getLocalEngineArguments(),
       'build',
       'apk',
       '--analyze-size',

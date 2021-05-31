@@ -23,7 +23,6 @@ import '../../src/fake_process_manager.dart';
 class MockFile extends Mock implements File {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockDirectory extends Mock implements Directory {}
-class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -39,50 +38,6 @@ final Platform macOSPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{}
 );
-
-void setupWriteMocks({
-  FileSystem mockFileSystem,
-  ErrorHandlingFileSystem fs,
-  int errorCode,
-}) {
-  final MockFile mockFile = MockFile();
-  final MockDirectory mockParentDirectory = MockDirectory();
-  when(mockFileSystem.file(any)).thenReturn(mockFile);
-  when(mockFile.path).thenReturn('parent/file');
-  when(mockFile.parent).thenReturn(mockParentDirectory);
-  when(mockParentDirectory.path).thenReturn('parent');
-  when(mockFile.writeAsBytes(
-    any,
-    mode: anyNamed('mode'),
-    flush: anyNamed('flush'),
-  )).thenAnswer((_) async {
-    throw FileSystemException('', '', OSError('', errorCode));
-  });
-  when(mockFile.writeAsString(
-    any,
-    mode: anyNamed('mode'),
-    encoding: anyNamed('encoding'),
-    flush: anyNamed('flush'),
-  )).thenAnswer((_) async {
-    throw FileSystemException('', '', OSError('', errorCode));
-  });
-  when(mockFile.writeAsBytesSync(
-    any,
-    mode: anyNamed('mode'),
-    flush: anyNamed('flush'),
-  )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockFile.writeAsStringSync(
-    any,
-    mode: anyNamed('mode'),
-    encoding: anyNamed('encoding'),
-    flush: anyNamed('flush'),
-  )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockFile.openSync(
-    mode: anyNamed('mode'),
-  )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockFile.createSync(recursive: anyNamed('recursive')))
-    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
-}
 
 void setupReadMocks({
   FileSystem mockFileSystem,
@@ -118,31 +73,21 @@ void setupDirectoryMocks({
   });
   when(mockDirectory.createTempSync(any))
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockDirectory.createSync(recursive: anyNamed('recursive')))
-    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockDirectory.create())
-    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockDirectory.createSync())
-    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockDirectory.delete())
-    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockDirectory.deleteSync())
-    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
   when(mockDirectory.existsSync())
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
 void main() {
   testWithoutContext('deleteIfExists does not delete if file does not exist', () {
-    final File file = MockFile();
-    when(file.existsSync()).thenReturn(false);
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('file');
 
     expect(ErrorHandlingFileSystem.deleteIfExists(file), false);
   });
 
   testWithoutContext('deleteIfExists deletes if file exists', () {
-    final File file = MockFile();
-    when(file.existsSync()).thenReturn(true);
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('file')..createSync();
 
      expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
@@ -163,20 +108,36 @@ void main() {
   });
 
   testWithoutContext('deleteIfExists throws tool exit if file exists on read-only volume', () {
-    final File file = MockFile();
-    when(file.existsSync()).thenReturn(true);
-    when(file.deleteSync(recursive: false))
-      .thenThrow(const FileSystemException('', '', OSError('', 2)));
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+      delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+      platform: linuxPlatform,
+    );
+    final File file = fileSystem.file('file')..createSync();
+
+    exceptionHandler.addError(
+      file,
+      FileSystemOp.delete,
+      FileSystemException('', file.path, const OSError('', 2)),
+    );
 
     expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsToolExit());
   });
 
   testWithoutContext('deleteIfExists does not tool exit if file exists on read-only '
     'volume and it is run under noExitOnFailure', () {
-    final File file = MockFile();
-    when(file.existsSync()).thenReturn(true);
-    when(file.deleteSync(recursive: false))
-      .thenThrow(const FileSystemException('', '', OSError('', 2)));
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+      delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+      platform: linuxPlatform,
+    );
+    final File file = fileSystem.file('file')..createSync();
+
+    exceptionHandler.addError(
+      file,
+      FileSystemOp.delete,
+      FileSystemException('', file.path, const OSError('', 2)),
+    );
 
     expect(() {
       ErrorHandlingFileSystem.noExitOnFailure(() {
@@ -192,6 +153,7 @@ void main() {
     const int kFatalDeviceHardwareError =  483;
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
+    FileExceptionHandler exceptionHandler;
 
     setUp(() {
       mockFileSystem = MockFileSystem();
@@ -201,16 +163,21 @@ void main() {
       );
       // For fs.path.absolute usage.
       when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
+      exceptionHandler = FileExceptionHandler();
     });
 
     testWithoutContext('bypasses error handling when withAllowedFailure is used', () {
-      setupWriteMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: kUserPermissionDenied,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
       );
+      final File file = fileSystem.file('file');
 
-      final File file = fs.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
+      );
 
       expect(() => ErrorHandlingFileSystem.noExitOnFailure(
         () => file.writeAsStringSync('')), throwsException);
@@ -228,13 +195,27 @@ void main() {
     });
 
     testWithoutContext('when access is denied', () async {
-      setupWriteMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: kUserPermissionDenied,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
       );
+      final File file = fileSystem.file('file');
 
-      final File file = fs.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.open,
+        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
+      );
 
       const String expectedMessage = 'The flutter tool cannot access the file';
       expect(() async => file.writeAsBytes(<int>[0]),
@@ -252,13 +233,17 @@ void main() {
     });
 
     testWithoutContext('when writing to a full device', () async {
-      setupWriteMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: kDeviceFull,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
       );
+      final File file = fileSystem.file('file');
 
-      final File file = fs.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kDeviceFull)),
+      );
 
       const String expectedMessage = 'The target device is full';
       expect(() async => file.writeAsBytes(<int>[0]),
@@ -272,13 +257,17 @@ void main() {
     });
 
     testWithoutContext('when the file is being used by another program', () async {
-      setupWriteMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: kUserMappedSectionOpened,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
       );
+      final File file = fileSystem.file('file');
 
-      final File file = fs.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kUserMappedSectionOpened)),
+      );
 
       const String expectedMessage = 'The file is being used by another program';
       expect(() async => file.writeAsBytes(<int>[0]),
@@ -292,13 +281,27 @@ void main() {
     });
 
     testWithoutContext('when the device driver has a fatal error', () async {
-      setupWriteMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: kFatalDeviceHardwareError,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
       );
+      final File file = fileSystem.file('file');
 
-      final File file = fs.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kFatalDeviceHardwareError)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.open,
+        FileSystemException('', file.path, const OSError('', kFatalDeviceHardwareError)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', kFatalDeviceHardwareError)),
+      );
 
       const String expectedMessage = 'There is a problem with the device driver '
         'that this file or directory is stored on';
@@ -333,13 +336,17 @@ void main() {
     });
 
     testWithoutContext('when creating a directory with permission issues', () async {
-      setupDirectoryMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: kUserPermissionDenied,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
       );
+      final Directory directory = fileSystem.directory('directory');
 
-      final Directory directory = fs.directory('directory');
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.create,
+        FileSystemException('', directory.path, const OSError('', kUserPermissionDenied)),
+      );
 
       const String expectedMessage = 'Flutter failed to create a directory at';
       expect(() => directory.createSync(recursive: true),
@@ -502,13 +509,17 @@ void main() {
     });
 
     testWithoutContext('when writing to a full device', () async {
-      setupWriteMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: enospc,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
       );
+      final File file = fileSystem.file('file');
 
-      final File file = fs.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', enospc)),
+      );
 
       const String expectedMessage = 'The target device is full';
       expect(() async => file.writeAsBytes(<int>[0]),
@@ -689,13 +700,17 @@ void main() {
     });
 
     testWithoutContext('when writing to a full device', () async {
-      setupWriteMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: enospc,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
       );
+      final File file = fileSystem.file('file');
 
-      final File file = fs.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', enospc)),
+      );
 
       const String expectedMessage = 'The target device is full';
       expect(() async => file.writeAsBytes(<int>[0]),
@@ -1086,25 +1101,25 @@ void main() {
 
   group('CopySync' , () {
     const int eaccess = 13;
-    MockFileSystem mockFileSystem;
+    FileExceptionHandler exceptionHandler;
     ErrorHandlingFileSystem fileSystem;
 
     setUp(() {
-      mockFileSystem = MockFileSystem();
+      exceptionHandler = FileExceptionHandler();
       fileSystem = ErrorHandlingFileSystem(
-        delegate: mockFileSystem,
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
       );
-      // For fs.path.absolute usage.
-      when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
     });
 
     testWithoutContext('copySync handles error if openSync on source file fails', () {
-      final MockFile source = MockFile();
-      when(source.path).thenReturn('source');
-      when(source.openSync(mode: anyNamed('mode')))
-        .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
-      when(mockFileSystem.file('source')).thenReturn(source);
+      final File source = fileSystem.file('source');
+
+      exceptionHandler.addError(
+        source,
+        FileSystemOp.open,
+        FileSystemException('', source.path, const OSError('', eaccess)),
+      );
 
       const String expectedMessage =
           'Flutter failed to copy source to dest due to source location error.\n'
@@ -1115,18 +1130,14 @@ void main() {
     });
 
     testWithoutContext('copySync handles error if createSync on destination file fails', () {
-      final MockFile source = MockFile();
-      when(source.path).thenReturn('source');
-      final MockDirectory parent = MockDirectory();
-      when(parent.path).thenReturn('destParent');
-      final MockFile dest = MockFile();
-      when(dest.parent).thenReturn(parent);
-      when(source.openSync(mode: anyNamed('mode')))
-        .thenReturn(MockRandomAccessFile());
-      when(dest.createSync(recursive: anyNamed('recursive')))
-        .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
-      when(mockFileSystem.file('source')).thenReturn(source);
-      when(mockFileSystem.file('dest')).thenReturn(dest);
+      fileSystem.file('source').createSync();
+      final File dest = fileSystem.file('dest');
+
+      exceptionHandler.addError(
+        dest,
+        FileSystemOp.create,
+        FileSystemException('', dest.path, const OSError('', eaccess)),
+      );
 
       const String expectedMessage =
           'Flutter failed to copy source to dest due to destination location error.\n'
@@ -1136,76 +1147,53 @@ void main() {
 
     // dart:io is able to clobber read-only files.
     testWithoutContext('copySync will copySync even if the destination is not writable', () {
-      final MockFile source = MockFile();
-      when(source.path).thenReturn('source');
-      final MockDirectory parent = MockDirectory();
-      when(parent.path).thenReturn('destParent');
-      final MockFile dest = MockFile();
-      when(dest.parent).thenReturn(parent);
+      fileSystem.file('source').createSync();
+      final File dest = fileSystem.file('dest');
 
-      when(source.copySync(any)).thenReturn(dest);
-      when(mockFileSystem.file('source')).thenReturn(source);
-      when(source.openSync(mode: anyNamed('mode')))
-        .thenReturn(MockRandomAccessFile());
-      when(mockFileSystem.file('dest')).thenReturn(dest);
-      when(dest.openSync(mode: FileMode.writeOnly))
-        .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
+      exceptionHandler.addError(
+        dest,
+        FileSystemOp.open,
+        FileSystemException('', dest.path, const OSError('', eaccess)),
+      );
 
+      expect(dest, isNot(exists));
       fileSystem.file('source').copySync('dest');
-
-      verify(source.copySync('dest')).called(1);
+      expect(dest, exists);
     });
 
     testWithoutContext('copySync will copySync if there are no exceptions', () {
-      final MockFile source = MockFile();
-      when(source.path).thenReturn('source');
-      final MockDirectory parent = MockDirectory();
-      when(parent.path).thenReturn('destParent');
-      final MockFile dest = MockFile();
-      when(dest.parent).thenReturn(parent);
+      fileSystem.file('source').createSync();
+      final File dest = fileSystem.file('dest');
 
-      when(source.copySync(any)).thenReturn(dest);
-      when(mockFileSystem.file('source')).thenReturn(source);
-      when(source.openSync(mode: anyNamed('mode')))
-        .thenReturn(MockRandomAccessFile());
-      when(mockFileSystem.file('dest')).thenReturn(dest);
-      when(dest.openSync(mode: anyNamed('mode')))
-        .thenReturn(MockRandomAccessFile());
-
+      expect(dest, isNot(exists));
       fileSystem.file('source').copySync('dest');
-
-      verify(source.copySync('dest')).called(1);
+      expect(dest, exists);
     });
 
     testWithoutContext('copySync can directly copy bytes if both files can be opened but copySync fails', () {
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
-      final MockFile source = MockFile();
-      when(source.path).thenReturn('source');
-      final MockDirectory parent = MockDirectory();
-      when(parent.path).thenReturn('destParent');
-      final MockFile dest = MockFile();
-      when(dest.parent).thenReturn(parent);
       final List<int> expectedBytes = List<int>.generate(64 * 1024 + 3, (int i) => i.isEven ? 0 : 1);
-      final File memorySource = memoryFileSystem.file('source')
-        ..writeAsBytesSync(expectedBytes);
-      final File memoryDest = memoryFileSystem.file('dest')
-        ..createSync();
+      fileSystem.file('source').writeAsBytesSync(expectedBytes);
+      final File dest = fileSystem.file('dest');
 
-      when(source.copySync(any))
-        .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
-      when(source.openSync(mode: anyNamed('mode')))
-        .thenAnswer((Invocation invocation) => memorySource.openSync(mode: invocation.namedArguments[#mode] as FileMode));
-      when(dest.openSync(mode: anyNamed('mode')))
-        .thenAnswer((Invocation invocation) => memoryDest.openSync(mode: invocation.namedArguments[#mode] as FileMode));
-      when(mockFileSystem.file('source')).thenReturn(source);
-      when(mockFileSystem.file('dest')).thenReturn(dest);
+      exceptionHandler.addError(
+        dest,
+        FileSystemOp.copy,
+        FileSystemException('', dest.path, const OSError('', eaccess)),
+      );
 
       fileSystem.file('source').copySync('dest');
-
-      expect(memoryDest.readAsBytesSync(), expectedBytes);
+      expect(dest.readAsBytesSync(), expectedBytes);
     });
 
     testWithoutContext('copySync deletes the result file if the fallback fails', () {
+      final MockFileSystem mockFileSystem = MockFileSystem();
+      // For fs.path.absolute usage.
+      when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
+
+      final FileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: mockFileSystem,
+        platform: linuxPlatform,
+      );
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
       final MockFile source = MockFile();
       when(source.path).thenReturn('source');

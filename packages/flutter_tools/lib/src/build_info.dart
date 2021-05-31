@@ -25,6 +25,7 @@ class BuildInfo {
     List<String>? extraFrontEndOptions,
     List<String>? extraGenSnapshotOptions,
     List<String>? fileSystemRoots,
+    this.androidProjectArgs = const <String>[],
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
@@ -141,6 +142,10 @@ class BuildInfo {
   ///
   /// The Gradle daemon may also be disabled in the Android application's properties file.
   final bool androidGradleDaemon;
+
+  /// Additional key value pairs that are passed directly to the gradle project via the `-P`
+  /// flag.
+  final List<String> androidProjectArgs;
 
   /// The package configuration for the loaded application.
   ///
@@ -276,6 +281,8 @@ class BuildInfo {
         '-Pbundle-sksl-path=$bundleSkSLPath',
       if (codeSizeDirectory != null)
         '-Pcode-size-directory=$codeSizeDirectory',
+      for (String projectArg in androidProjectArgs)
+        '-P$projectArg',
     ];
   }
 }

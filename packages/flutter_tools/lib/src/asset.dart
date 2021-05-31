@@ -72,6 +72,9 @@ abstract class AssetBundle {
   /// output result.
   List<File> get additionalDependencies;
 
+  /// Input files used to build this asset bundle.
+  List<File> get inputFiles;
+
   bool wasBuiltOnce();
 
   bool needsBuild({ String manifestPath = defaultManifestPath });
@@ -132,6 +135,9 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   final Map<String, Map<String, DevFSContent>> deferredComponentsEntries = <String, Map<String, DevFSContent>>{};
+
+  @override
+  final List<File> inputFiles = <File>[];
 
   // If an asset corresponds to a wildcard directory, then it may have been
   // updated without changes to the manifest. These are only tracked for
@@ -213,8 +219,10 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     final String assetBasePath = _fileSystem.path.dirname(_fileSystem.path.absolute(manifestPath));
+    final File packageConfigFile = _fileSystem.file(packagesPath);
+    inputFiles.add(packageConfigFile);
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      _fileSystem.file(packagesPath),
+      packageConfigFile,
       logger: _logger,
     );
     final List<Uri> wildcardDirectories = <Uri>[];
@@ -279,6 +287,7 @@ class ManifestAssetBundle implements AssetBundle {
       final Uri packageUri = package.packageUriRoot;
       if (packageUri != null && packageUri.scheme == 'file') {
         final String packageManifestPath = _fileSystem.path.fromUri(packageUri.resolve('../pubspec.yaml'));
+        inputFiles.add(_fileSystem.file(packageManifestPath));
         final FlutterManifest packageFlutterManifest = FlutterManifest.createFromPath(
           packageManifestPath,
           logger: _logger,
@@ -417,6 +426,7 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     additionalDependencies = licenseResult.dependencies;
+    inputFiles.addAll(additionalDependencies);
 
     if (wildcardDirectories.isNotEmpty) {
       // Force the depfile to contain missing files so that Gradle does not skip

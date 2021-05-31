@@ -21,7 +21,7 @@ import 'build_system/targets/common.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'devfs.dart';
-import 'globals.dart' as globals;
+import 'globals_null_migrated.dart' as globals;
 import 'project.dart';
 
 String get defaultMainPath => globals.fs.path.join('lib', 'main.dart');

@@ -85,7 +85,7 @@ void main() {
     );
     expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
     // The width includes the width of the cursor (1.0).
-    expect(editable.getMaxIntrinsicWidth(double.infinity), 51.0);
+    expect(editable.getMaxIntrinsicWidth(double.infinity), 52.0);
     expect(editable.getMinIntrinsicHeight(double.infinity), 10.0);
     expect(editable.getMaxIntrinsicHeight(double.infinity), 10.0);
 
@@ -321,7 +321,11 @@ void main() {
     pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  });
+
+    // TODO(yjbanov): ahem.ttf doesn't have Chinese glyphs, making this test
+    //                sensitive to browser/OS when running in web mode:
+    //                https://github.com/flutter/flutter/issues/83129
+  }, skip: kIsWeb);
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();

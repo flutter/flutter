@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle;
 
@@ -164,14 +165,20 @@ void main() {
 
   setUp(() async {
     debugResetSemanticsIdCounter();
-    SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      mockClipboard.handleMethodCall,
+    );
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
   tearDown(() {
-    SystemChannels.platform.setMockMethodCallHandler(null);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
   });
 
   final Key textFieldKey = UniqueKey();
@@ -339,7 +346,7 @@ void main() {
 
   testWidgets('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
-    late String textFieldValue;
+    String? textFieldValue;
 
     await tester.pumpWidget(
       overlay(
@@ -362,15 +369,16 @@ void main() {
 
     Future<void> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
+        expect(textFieldValue, isNull);
         await tester.enterText(find.byType(TextField), testValue);
         // Check that the onChanged event handler fired.
         expect(textFieldValue, equals(testValue));
+        textFieldValue = null;
         await skipPastScrollingAnimation(tester);
       });
     }
 
     await checkText(' ');
-
     expect(findTextFieldBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
@@ -416,6 +424,8 @@ void main() {
       text: 'X',
       selection: TextSelection.collapsed(offset: 1),
     ));
+    await tester.idle();
+    expect(tester.state(find.byType(EditableText)), editableText);
     await checkCursorToggle();
   });
 
@@ -479,7 +489,7 @@ void main() {
     await tester.tap(find.byKey(icon));
     await tester.pump();
     expect(controller.text, '');
-    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream));
   });
 
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
@@ -4694,8 +4704,8 @@ void main() {
       );
 
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4767,8 +4777,8 @@ void main() {
       );
 
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4840,8 +4850,8 @@ void main() {
     );
 
     const String clipboardContent = 'I love Flutter!';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};
         return null;
@@ -4890,8 +4900,8 @@ void main() {
         maxLines: 3,
       );
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4964,8 +4974,8 @@ void main() {
       obscureText: true,
     );
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -6611,6 +6621,7 @@ void main() {
     // the cursor regardless of alignment.
     stepWidth = null;
     const double WIDTH_OF_CHAR = 16.0;
+    const double CARET_GAP = 1.0;
     await tester.pumpWidget(buildFrame(
       stepWidth: stepWidth,
       cursorWidth: 18.0,
@@ -6618,7 +6629,7 @@ void main() {
     ));
     await tester.enterText(find.byType(TextField), text);
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(TextField)).width, WIDTH_OF_CHAR * text.length + 18.0);
+    expect(tester.getSize(find.byType(TextField)).width, WIDTH_OF_CHAR * text.length + 18.0 + CARET_GAP);
     await tester.pumpWidget(buildFrame(
       stepWidth: stepWidth,
       cursorWidth: 18.0,
@@ -6626,7 +6637,7 @@ void main() {
     ));
     await tester.enterText(find.byType(TextField), text);
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(TextField)).width, WIDTH_OF_CHAR * text.length + 18.0);
+    expect(tester.getSize(find.byType(TextField)).width, WIDTH_OF_CHAR * text.length + 18.0 + CARET_GAP);
   });
 
   testWidgets('TextField style is merged with theme', (WidgetTester tester) async {
@@ -9370,8 +9381,8 @@ void main() {
     );
 
     bool triedToReadClipboard = false;
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.getData') {
           triedToReadClipboard = true;
         }
@@ -9707,5 +9718,45 @@ void main() {
       expect(state.currentTextEditingValue.text, '侬好啊旁友');
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
+  });
+
+  testWidgets('prefix/suffix buttons do not leak touch events', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/39376.
+
+    int textFieldTapCount = 0;
+    int prefixTapCount = 0;
+    int suffixTapCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            //focusNode: focusNode,
+            onTap: () { textFieldTapCount += 1; },
+            decoration: InputDecoration(
+              labelText: 'Label',
+              prefix: RaisedButton(
+                onPressed: () { prefixTapCount += 1; },
+                child: const Text('prefix'),
+              ),
+              suffix: RaisedButton(
+                onPressed: () { suffixTapCount += 1; },
+                child: const Text('suffix'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('prefix'));
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 0);
+
+    await tester.tap(find.text('suffix'));
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 1);
   });
 }

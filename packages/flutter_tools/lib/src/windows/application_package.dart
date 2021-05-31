@@ -75,3 +75,14 @@ class BuildableWindowsApp extends WindowsApp {
   @override
   String get name => project.parent.manifest.appName;
 }
+
+class BuildableUwpApp extends ApplicationPackage {
+  BuildableUwpApp({@required this.project}) : super(id: project.packageGuid);
+
+  final WindowsUwpProject project;
+
+  String get projectVersion => project.packageVersion;
+
+  @override
+  String get name => getCmakeExecutableName(project);
+}
