@@ -216,7 +216,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   String? _validateDate(String? text) {
     final DateTime? date;
-    if (widget.dateFormat != null && text != null){
+    if (widget.dateFormat != null && text != null) {
       date = widget.dateFormat!.parse(text);
     }
     else {

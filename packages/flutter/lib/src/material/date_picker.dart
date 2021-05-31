@@ -367,7 +367,7 @@ class DatePickerDialog extends StatefulWidget {
 
   /// Describes what format will be used to display the date in the input box.
   ///
-  /// This will default to en_US if null, i.e. it will default to mm-dd-yyyy.
+  /// This will default to en_US if null, i.e. it will default to mm/dd/yyyy.
   final intl.DateFormat? dateFormat;
 
   /// The text that is displayed on the cancel button.
@@ -1235,6 +1235,8 @@ class DateRangePickerDialog extends StatefulWidget {
   final DateTime? currentDate;
 
   /// The optional [DateFormat] to be used for the text input.
+  ///
+  /// This will default to en_US if null, i.e. it will default to mm/dd/yyyy.
   final intl.DateFormat? dateFormat;
 
   /// The initial date range picker entry mode.

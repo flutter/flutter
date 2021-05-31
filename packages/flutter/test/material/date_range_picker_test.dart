@@ -1063,4 +1063,3 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
     );
   }
 }
-
