@@ -249,9 +249,10 @@ void main() {
   });
 
   test('The task was successfully executed after the animation', () async {
-    bool taskExecuted = false;
     scheduler.schedulingStrategy = defaultSchedulingStrategy;
+    scheduler.resetEventLoop();
 
+    bool taskExecuted = false;
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: const TestVSync(),

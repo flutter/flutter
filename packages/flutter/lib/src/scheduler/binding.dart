@@ -1170,6 +1170,12 @@ mixin SchedulerBinding on BindingBase {
       return true;
     }());
   }
+
+  /// Resets the relative state of EventLoop, which is used to schedule when an error occurs
+  void resetEventLoop() {
+    _hasRequestedAnEventLoopCallback = false;
+    _taskQueue.clear();
+  }
 }
 
 /// The default [SchedulingStrategy] for [SchedulerBinding.schedulingStrategy].
