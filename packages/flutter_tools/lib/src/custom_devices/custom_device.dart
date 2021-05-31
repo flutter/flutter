@@ -846,7 +846,7 @@ class CustomDevices extends PollingDeviceDiscovery {
 
   List<CustomDevice> get _enabledCustomDevices {
     return _customDevicesConfig.tryGetDevices()
-      .where((CustomDeviceConfig element) => !element.disabled)
+      .where((CustomDeviceConfig element) => element.enabled)
       .map(
         (CustomDeviceConfig config) => CustomDevice(
           config: config,

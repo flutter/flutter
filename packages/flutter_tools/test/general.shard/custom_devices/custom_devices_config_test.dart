@@ -62,7 +62,7 @@ void main() {
     expect(logger.errorText, contains(msg));
   });
 
-  testWithoutContext('JsonRevivalException serialization', () {
+  testWithoutContext('CustomDeviceRevivalException serialization', () {
     expect(
       const CustomDeviceRevivalException('testmessage').toString(),
       equals('testmessage')
@@ -153,7 +153,7 @@ void main() {
     expect(logger.errorText, contains(msg));
   });
 
-  testWithoutContext('CustomDevicesConfig logs error when id is not a string', () {
+  testWithoutContext('CustomDevicesConfig logs error when label is not a string', () {
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('custom_devices_config');
@@ -164,7 +164,7 @@ void main() {
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
-            'id': 1
+            'label': 1
           },
         ),
       ],
@@ -176,7 +176,7 @@ void main() {
       logger: logger
     );
 
-    const String msg = 'Could not load custom device from config index 0: Expected id to be a string.';
+    const String msg = 'Could not load custom device from config index 0: Expected label to be a string.';
     expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
     expect(logger.errorText, contains(msg));
   });

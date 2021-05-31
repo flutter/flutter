@@ -166,7 +166,7 @@ class CustomDevicesConfig {
   ///
   /// It should generally be avoided to call this often, since this could mean
   /// data loss. If you want to add or remove a device from the config,
-  /// consider using [add] or [remove]
+  /// consider using [add] or [remove].
   set devices(List<CustomDeviceConfig> configs) {
     _config.setValue(
       _kCustomDevicesConfigKey,
@@ -178,6 +178,9 @@ class CustomDevicesConfig {
   ///
   /// Works even when some of the custom devices in the config file are not
   /// valid.
+  ///
+  /// May throw a [CustomDeviceRevivalException] if `config['custom-devices']`
+  /// is not a list.
   void add(CustomDeviceConfig config) {
     _config.setValue(
       _kCustomDevicesConfigKey,

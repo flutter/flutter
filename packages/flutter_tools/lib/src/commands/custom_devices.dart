@@ -232,11 +232,11 @@ List the currently configured custom devices, both enabled and disabled, reachab
     }
 
     if (devices.isEmpty) {
-      logger.printStatus('No custom devices found in `${customDevicesConfig.configPath}`');
+      logger.printStatus('No custom devices found in "${customDevicesConfig.configPath}"');
     } else {
-      logger.printStatus('List of custom devices in `${customDevicesConfig.configPath}`:');
+      logger.printStatus('List of custom devices in "${customDevicesConfig.configPath}":');
       for (final CustomDeviceConfig device in devices) {
-        logger.printStatus('id: ${device.id}, label: ${device.label}, enabled: ${!device.disabled}', indent: 2, hangingIndent: 2);
+        logger.printStatus('id: ${device.id}, label: ${device.label}, enabled: ${device.enabled}', indent: 2, hangingIndent: 2);
       }
     }
 
@@ -279,7 +279,7 @@ If a file already exists at the backup location, it will be overwritten.
 
     logger.printStatus(
       'Successfully resetted the custom devices config file and created a '
-      'backup at `$configBackupPath`.'
+      'backup at "$configBackupPath".'
     );
     return FlutterCommandResult.success();
   }
@@ -677,7 +677,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       id: id,
       label: label,
       sdkNameAndVersion: sdkNameAndVersion,
-      disabled: !enabled,
+      enabled: enabled,
 
       // host-platform specific, filled out later
       pingCommand: const <String>[],

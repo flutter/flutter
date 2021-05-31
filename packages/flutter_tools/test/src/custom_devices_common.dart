@@ -29,7 +29,7 @@ final CustomDeviceConfig testConfig = CustomDeviceConfig(
   id: 'testid',
   label: 'testlabel',
   sdkNameAndVersion: 'testsdknameandversion',
-  disabled: false,
+  enabled: true,
   pingCommand: const <String>['testping'],
   pingSuccessRegex: RegExp('testpingsuccess'),
   postBuildCommand: const <String>['testpostbuild'],
@@ -42,7 +42,7 @@ final CustomDeviceConfig testConfig = CustomDeviceConfig(
 
 const String testConfigPingSuccessOutput = 'testpingsuccess\n';
 const String testConfigForwardPortSuccessOutput = 'testforwardportsuccess\n';
-final CustomDeviceConfig disabledTestConfig = testConfig.copyWith(disabled: true);
+final CustomDeviceConfig disabledTestConfig = testConfig.copyWith(enabled: false);
 final CustomDeviceConfig testConfigNonForwarding = testConfig.copyWith(
   explicitForwardPortCommand: true,
   forwardPortCommand: null,
@@ -54,7 +54,7 @@ const Map<String, dynamic> testConfigJson = <String, dynamic>{
   'id': 'testid',
   'label': 'testlabel',
   'sdkNameAndVersion': 'testsdknameandversion',
-  'disabled': false,
+  'enabled': true,
   'ping': <String>['testping'],
   'pingSuccessRegex': 'testpingsuccess',
   'postBuild': <String>['testpostbuild'],

@@ -45,6 +45,9 @@ bool _regexesEqual(RegExp? a, RegExp? b) {
     && a.isDotAll == b.isDotAll;
 }
 
+/// Something went wrong while trying to load the custom devices config from the
+/// JSON representation. Maybe some value is missing, maybe something has the
+/// wrong type, etc.
 @immutable
 class CustomDeviceRevivalException implements Exception {
   const CustomDeviceRevivalException(this.message);
@@ -82,7 +85,7 @@ class CustomDeviceConfig {
     required this.label,
     required this.sdkNameAndVersion,
     this.platform,
-    required this.disabled,
+    required this.enabled,
     required this.pingCommand,
     this.pingSuccessRegex,
     required this.postBuildCommand,
@@ -161,7 +164,7 @@ class CustomDeviceConfig {
       label: _castString(typedMap[_kLabel], _kLabel, 'a string'),
       sdkNameAndVersion: _castString(typedMap[_kSdkNameAndVersion], _kSdkNameAndVersion, 'a string'),
       platform: platform,
-      disabled: _castBool(typedMap[_kDisabled], _kDisabled, 'a boolean'),
+      enabled: _castBool(typedMap[_kEnabled], _kEnabled, 'a boolean'),
       pingCommand: _castStringList(
         typedMap[_kPingCommand],
         _kPingCommand,
@@ -208,7 +211,7 @@ class CustomDeviceConfig {
   static const String _kLabel = 'label';
   static const String _kSdkNameAndVersion = 'sdkNameAndVersion';
   static const String _kPlatform = 'platform';
-  static const String _kDisabled = 'disabled';
+  static const String _kEnabled = 'enabled';
   static const String _kPingCommand = 'ping';
   static const String _kPingSuccessRegex = 'pingSuccessRegex';
   static const String _kPostBuildCommand = 'postBuild';
@@ -227,7 +230,7 @@ class CustomDeviceConfig {
     label: 'Raspberry Pi',
     sdkNameAndVersion: 'Raspberry Pi 4 Model B+',
     platform: TargetPlatform.linux_arm64,
-    disabled: true,
+    enabled: false,
     pingCommand: const <String>[
       'ping',
       '-w', '500',
@@ -268,7 +271,7 @@ class CustomDeviceConfig {
       '-o', 'BatchMode=yes',
       'pi@raspberrypi',
       r"fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \n\t'",
-    ]
+    ],
   );
 
   /// An example device config used for creating the default config file.
@@ -304,7 +307,7 @@ class CustomDeviceConfig {
   final String label;
   final String sdkNameAndVersion;
   final TargetPlatform? platform;
-  final bool disabled;
+  final bool enabled;
   final List<String> pingCommand;
   final RegExp? pingSuccessRegex;
   final List<String>? postBuildCommand;
@@ -467,7 +470,7 @@ class CustomDeviceConfig {
       _kLabel: label,
       _kSdkNameAndVersion: sdkNameAndVersion,
       _kPlatform: platform == null ? null : getNameForTargetPlatform(platform!),
-      _kDisabled: disabled,
+      _kEnabled: enabled,
       _kPingCommand: pingCommand,
       _kPingSuccessRegex: pingSuccessRegex?.pattern,
       _kPostBuildCommand: postBuildCommand,
@@ -486,7 +489,7 @@ class CustomDeviceConfig {
     String? sdkNameAndVersion,
     bool explicitPlatform = false,
     TargetPlatform? platform,
-    bool? disabled,
+    bool? enabled,
     List<String>? pingCommand,
     bool explicitPingSuccessRegex = false,
     RegExp? pingSuccessRegex,
@@ -507,7 +510,7 @@ class CustomDeviceConfig {
       label: label ?? this.label,
       sdkNameAndVersion: sdkNameAndVersion ?? this.sdkNameAndVersion,
       platform: explicitPlatform ? platform : (platform ?? this.platform),
-      disabled: disabled ?? this.disabled,
+      enabled: enabled ?? this.enabled,
       pingCommand: pingCommand ?? this.pingCommand,
       pingSuccessRegex: explicitPingSuccessRegex ? pingSuccessRegex : (pingSuccessRegex ?? this.pingSuccessRegex),
       postBuildCommand: explicitPostBuildCommand ? postBuildCommand : (postBuildCommand ?? this.postBuildCommand),
@@ -527,7 +530,7 @@ class CustomDeviceConfig {
       && other.label == label
       && other.sdkNameAndVersion == sdkNameAndVersion
       && other.platform == platform
-      && other.disabled == disabled
+      && other.enabled == enabled
       && _listsEqual(other.pingCommand, pingCommand)
       && _regexesEqual(other.pingSuccessRegex, pingSuccessRegex)
       && _listsEqual(other.postBuildCommand, postBuildCommand)
@@ -545,7 +548,7 @@ class CustomDeviceConfig {
       ^ label.hashCode
       ^ sdkNameAndVersion.hashCode
       ^ platform.hashCode
-      ^ disabled.hashCode
+      ^ enabled.hashCode
       ^ pingCommand.hashCode
       ^ (pingSuccessRegex?.pattern).hashCode
       ^ postBuildCommand.hashCode
@@ -564,7 +567,7 @@ class CustomDeviceConfig {
       'label: $label, '
       'sdkNameAndVersion: $sdkNameAndVersion, '
       'platform: $platform, '
-      'disabled: $disabled, '
+      'enabled: $enabled, '
       'pingCommand: $pingCommand, '
       'pingSuccessRegex: $pingSuccessRegex, '
       'postBuildCommand: $postBuildCommand, '

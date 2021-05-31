@@ -412,7 +412,7 @@ void main() {
               id: 'testid',
               label: 'testlabel',
               sdkNameAndVersion: 'testsdknameandversion',
-              disabled: false,
+              enabled: true,
               pingCommand: const <String>[
                 'ping',
                 '-c', '1',
@@ -501,7 +501,7 @@ void main() {
               id: 'testid',
               label: 'testlabel',
               sdkNameAndVersion: 'testsdknameandversion',
-              disabled: false,
+              enabled: true,
               pingCommand: const <String>[
                 'ping',
                 '-c', '1',
@@ -589,7 +589,7 @@ void main() {
               id: 'testid',
               label: 'testlabel',
               sdkNameAndVersion: 'testsdknameandversion',
-              disabled: false,
+              enabled: true,
               pingCommand: const <String>[
                 'ping',
                 '-6',
@@ -683,7 +683,7 @@ void main() {
               id: 'testid',
               label: 'testlabel',
               sdkNameAndVersion: 'testsdknameandversion',
-              disabled: false,
+              enabled: true,
               pingCommand: <String>[
                 'ping',
                 '-c', '1',
@@ -763,7 +763,7 @@ void main() {
               id: 'testid',
               label: 'testlabel',
               sdkNameAndVersion: 'testsdknameandversion',
-              disabled: false,
+              enabled: true,
               pingCommand: const <String>[
                 'ping',
                 '-c', '1',
@@ -847,7 +847,7 @@ void main() {
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
         );
-        config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid'));
+        config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2'));
         final Uint8List contentsBefore = fs.file('.flutter_custom_devices.json').readAsBytesSync();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
@@ -872,7 +872,7 @@ void main() {
         );
         await expectLater(
           runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
-          throwsToolExit(message: 'Couldn\'t find device with id `testid` in config at "/.flutter_custom_devices.json"')
+          throwsToolExit(message: 'Couldn\'t find device with id "testid" in config at "/.flutter_custom_devices.json"')
         );
       }
     );
@@ -934,9 +934,9 @@ void main() {
           directory: fs.directory('/'),
           logger: logger,
         )..add(
-          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', disabled: false)
+          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', enabled: true)
         )..add(
-          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2', label: 'testlabel2', disabled: true)
+          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2', label: 'testlabel2', enabled: false)
         );
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
@@ -975,9 +975,9 @@ void main() {
           directory: fs.directory('/'),
           logger: logger,
         )..add(
-          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', disabled: false)
+          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', enabled: true)
         )..add(
-          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2', label: 'testlabel2', disabled: true)
+          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2', label: 'testlabel2', enabled: false)
         );
 
         final Uint8List contentsBefore = fs.file('.flutter_custom_devices.json').readAsBytesSync();
@@ -1052,7 +1052,7 @@ void main() {
               id: 'testid',
               label: 'testlabel',
               sdkNameAndVersion: 'testsdknameandversion',
-              disabled: false,
+              enabled: true,
               pingCommand: const <String>[
                 'ping',
                 '-n', '1',
