@@ -17,7 +17,8 @@ class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
     Color? color,
     double? opacity,
     double? size,
-  }) : super(color: color, opacity: opacity, size: size);
+    List<Shadow>? shadows,
+  }) : super(color: color, opacity: opacity, size: size, shadows: shadows);
 
   /// Called by [IconTheme.of] to resolve [color] against the given [BuildContext].
   @override
@@ -29,11 +30,12 @@ class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
   @override
-  CupertinoIconThemeData copyWith({ Color? color, double? opacity, double? size }) {
+  CupertinoIconThemeData copyWith({ Color? color, double? opacity, double? size, List<Shadow>? shadows }) {
     return CupertinoIconThemeData(
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,
       size: size ?? this.size,
+      shadows: shadows ?? this.shadows,
     );
   }
 
