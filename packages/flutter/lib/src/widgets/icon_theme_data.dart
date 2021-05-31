@@ -24,8 +24,7 @@ class IconThemeData with Diagnosticable {
   ///
   /// The opacity applies to both explicit and default icon colors. The value
   /// is clamped between 0.0 and 1.0.
-  const IconThemeData({this.color, double? opacity, this.size, this.shadows})
-      : _opacity = opacity;
+  const IconThemeData({this.color, double? opacity, this.size, this.shadows}) : _opacity = opacity;
 
   /// Creates an icon theme with some reasonable default values.
   ///
@@ -51,7 +50,8 @@ class IconThemeData with Diagnosticable {
   /// replaced by the non-null parameters of the given icon theme. If the given
   /// icon theme is null, simply returns this icon theme.
   IconThemeData merge(IconThemeData? other) {
-    if (other == null) return this;
+    if (other == null)
+      return this;
     return copyWith(
       color: other.color,
       opacity: other.opacity,
@@ -109,12 +109,13 @@ class IconThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is IconThemeData &&
-        other.color == color &&
-        other.opacity == opacity &&
-        other.size == size &&
-        const ListEquality<Shadow>().equals(other.shadows, shadows);
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is IconThemeData
+        && other.color == color
+        && other.opacity == opacity
+        && other.size == size
+        && const ListEquality<Shadow>().equals(other.shadows, shadows);
   }
 
   @override
