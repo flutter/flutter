@@ -1048,7 +1048,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('FloatingActionButton.enableFeedback is overriden by FloatingActionButtonThemeData.enableFeedback', (WidgetTester tester) async {
+    testWidgets('FloatingActionButton.enableFeedback is overridden by FloatingActionButtonThemeData.enableFeedback', (WidgetTester tester) async {
       const bool enableFeedbackTheme = false;
       const bool enableFeedback = true;
       final ThemeData theme = ThemeData(

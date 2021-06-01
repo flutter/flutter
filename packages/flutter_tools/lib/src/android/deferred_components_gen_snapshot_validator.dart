@@ -183,7 +183,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   /// considered new.
   bool checkAgainstLoadingUnitsCache(
       List<LoadingUnit> generatedLoadingUnits) {
-    final List<LoadingUnit> cachedLoadingUnits = _parseLodingUnitsCache(projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName));
+    final List<LoadingUnit> cachedLoadingUnits = _parseLoadingUnitsCache(projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName));
     loadingUnitComparisonResults = <String, Object>{};
     final Set<LoadingUnit> unmatchedLoadingUnits = <LoadingUnit>{};
     final List<LoadingUnit> newLoadingUnits = <LoadingUnit>[];
@@ -215,7 +215,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     return loadingUnitComparisonResults!['match']! as bool;
   }
 
-  List<LoadingUnit> _parseLodingUnitsCache(File cacheFile) {
+  List<LoadingUnit> _parseLoadingUnitsCache(File cacheFile) {
     final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
     inputs.add(cacheFile);
     if (!cacheFile.existsSync()) {

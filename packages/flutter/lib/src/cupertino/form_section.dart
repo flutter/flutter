@@ -217,7 +217,7 @@ class CupertinoFormSection extends StatelessWidget {
 
     // Short divider is used between rows.
     // The value of the starting inset (15.0) is determined using SwiftUI's Form
-    // seperators in the iOS 14.2 SDK.
+    // separators in the iOS 14.2 SDK.
     final Widget shortDivider = Container(
       margin: const EdgeInsetsDirectional.only(start: 15.0),
       color: dividerColor,

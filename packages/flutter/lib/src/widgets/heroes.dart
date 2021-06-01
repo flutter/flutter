@@ -705,20 +705,20 @@ class _HeroFlight {
 
     manifest = initialManifest;
 
-    final bool shouldIncludeChildInPlacehold;
+    final bool shouldIncludeChildInPlaceholder;
     switch (manifest.type) {
       case HeroFlightDirection.pop:
         _proxyAnimation.parent = ReverseAnimation(manifest.animation);
-        shouldIncludeChildInPlacehold = false;
+        shouldIncludeChildInPlaceholder = false;
         break;
       case HeroFlightDirection.push:
         _proxyAnimation.parent = manifest.animation;
-        shouldIncludeChildInPlacehold = true;
+        shouldIncludeChildInPlaceholder = true;
         break;
     }
 
     heroRectTween = manifest.createHeroRectTween(begin: manifest.fromHeroLocation, end: manifest.toHeroLocation);
-    manifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: shouldIncludeChildInPlacehold);
+    manifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: shouldIncludeChildInPlaceholder);
     manifest.toHero.startFlight();
     manifest.overlay.insert(overlayEntry = OverlayEntry(builder: _buildOverlay));
     _proxyAnimation.addListener(onTick);
