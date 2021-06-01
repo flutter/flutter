@@ -35,7 +35,7 @@ void main() {
     'koala',
     'lemur',
     'mouse',
-    'northern white rhinocerous',
+    'northern white rhinoceros',
   ];
 
   const List<User> kOptionsUsers = <User>[
@@ -125,7 +125,7 @@ void main() {
     expect(lastOptions.elementAt(2), 'goose');
     expect(lastOptions.elementAt(3), 'lemur');
     expect(lastOptions.elementAt(4), 'mouse');
-    expect(lastOptions.elementAt(5), 'northern white rhinocerous');
+    expect(lastOptions.elementAt(5), 'northern white rhinoceros');
   });
 
   testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {

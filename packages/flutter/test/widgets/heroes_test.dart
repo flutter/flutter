@@ -2974,7 +2974,7 @@ Future<void> main() async {
     navigatorKey.currentState?.pop();
     await tester.pump();
     controller.jumpTo(1000);
-    // Starts Hero animation and scroll animation almost simutaneously.
+    // Starts Hero animation and scroll animation almost simultaneously.
     // Scroll to make the Hero invisible.
     await tester.pump();
     expect(findRenderOpacity()?.opacity, anyOf(isNull, 1.0));

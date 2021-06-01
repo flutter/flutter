@@ -427,7 +427,7 @@ class _HeroState extends State<Hero> {
 
     _placeholderSize = null;
     if (mounted) {
-      // Tell the widget to rebuild if it's mounted. _paceholderSize has already
+      // Tell the widget to rebuild if it's mounted. _placeholderSize has already
       // been updated.
       setState(() {});
     }

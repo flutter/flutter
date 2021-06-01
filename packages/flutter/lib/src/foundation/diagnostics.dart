@@ -2549,7 +2549,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   //
   // For a non-null value, its description is its key.
   //
-  // For a null value, it is omitted unless `includeEmtpy` is true and
+  // For a null value, it is omitted unless `includeEmpty` is true and
   // [ifEntryNull] contains a corresponding description.
   Iterable<String> _formattedValues() sync* {
     for (final MapEntry<String, T?> entry in value.entries) {

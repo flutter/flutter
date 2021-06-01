@@ -671,7 +671,7 @@ abstract class ResidentHandlers {
   /// Called to print help to the terminal.
   void printHelp({ @required bool details });
 
-  /// Perfor a hot reload or hot restart of all attached applications.
+  /// Perform a hot reload or hot restart of all attached applications.
   ///
   /// If [fullRestart] is true, a hot restart is performed. Otherwise a hot reload
   /// is run instead. On web devices, this only performs a hot restart regardless of

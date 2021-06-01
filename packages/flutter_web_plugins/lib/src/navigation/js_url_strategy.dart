@@ -104,7 +104,7 @@ abstract class JsUrlStrategy {
   /// Moves forwards or backwards through the history stack.
   ///
   /// A negative [count] value causes a backward move in the history stack. And
-  /// a positive [count] value causs a forward move.
+  /// a positive [count] value causes a forward move.
   ///
   /// Examples:
   ///

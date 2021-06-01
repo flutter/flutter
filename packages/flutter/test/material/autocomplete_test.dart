@@ -35,7 +35,7 @@ void main() {
     'koala',
     'lemur',
     'mouse',
-    'northern white rhinocerous',
+    'northern white rhinoceros',
   ];
 
   const List<User> kOptionsUsers = <User>[
@@ -100,7 +100,7 @@ void main() {
     expect(find.byType(ListView), findsOneWidget);
     list = find.byType(ListView).evaluate().first.widget as ListView;
     // 'chameleon', 'elephant', 'goose', 'lemur', 'mouse', and
-    // 'northern white rhinocerous' are displayed.
+    // 'northern white rhinoceros' are displayed.
     expect(list.semanticChildCount, 6);
   });
 
