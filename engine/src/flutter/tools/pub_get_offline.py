@@ -32,7 +32,7 @@ def FetchPackage(pub, package):
     subprocess.check_output(pub, cwd=package, stderr=subprocess.STDOUT)
   except subprocess.CalledProcessError as err:
     print("'%s' failed in '%s' with status %d:\n%s" %
-          (' '.join(cmd), cwd, err.returncode, err.output))
+          (' '.join(pub), package, err.returncode, err.output))
     return 1
   return 0
 
