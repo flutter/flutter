@@ -3818,7 +3818,7 @@ void main() {
 
     expect((renderEditable.text! as TextSpan).children, isNull);
     // Everything's just formated the same way now.
-    expect((renderEditable.text! as TextSpan), 'text composing text');
+    expect((renderEditable.text! as TextSpan).text, 'text composing text');
     expect(renderEditable.text!.style!.decoration, isNull);
   });
 
