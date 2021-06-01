@@ -1926,7 +1926,7 @@ class _DoesNotMatchAccessibilityGuideline extends AsyncMatcher {
 
   @override
   Description describe(Description description) {
-    return description.add('Does not ' + guideline.description);
+    return description.add('Does not ${guideline.description}');
   }
 
   @override

@@ -951,8 +951,7 @@ void handleSymlinkException(FileSystemException e, {
           '  start ms-settings:developers\n'
           'to open settings.'
         : 'You must build from a terminal run as administrator.';
-    throwToolExit('Building with plugins requires symlink support.\n\n' +
-        instructions);
+    throwToolExit('Building with plugins requires symlink support.\n\n$instructions');
   }
 }
 

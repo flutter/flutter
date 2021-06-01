@@ -379,16 +379,18 @@ final GradleHandledError minSdkVersion = GradleHandledError(
     final Match minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
     assert(minSdkVersionMatch.groupCount == 3);
 
+    final String bold = globals.logger.terminal.bolden(
+      'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+      'android {\n'
+      '  defaultConfig {\n'
+      '    minSdkVersion ${minSdkVersionMatch.group(2)}\n'
+      '  }\n'
+      '}\n'
+    );
     globals.printStatus(
-      '\nThe plugin ${minSdkVersionMatch.group(3)} requires a higher Android SDK version.\n'+
-      globals.logger.terminal.bolden(
-        'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
-        'android {\n'
-        '  defaultConfig {\n'
-        '    minSdkVersion ${minSdkVersionMatch.group(2)}\n'
-        '  }\n'
-        '}\n\n'
-      )+
+      '\n'
+      'The plugin ${minSdkVersionMatch.group(3)} requires a higher Android SDK version.\n'
+      '$bold\n'
       "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch.group(2)}.\n"
       'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.'
     );
@@ -414,17 +416,18 @@ final GradleHandledError transformInputIssue = GradleHandledError(
         .childDirectory('android')
         .childDirectory('app')
         .childFile('build.gradle');
-
+    final String bold = globals.logger.terminal.bolden(
+      'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+      'android {\n'
+      '  lintOptions {\n'
+      '    checkReleaseBuilds false\n'
+      '  }\n'
+      '}'
+    );
     globals.printStatus(
-      '\nThis issue appears to be https://github.com/flutter/flutter/issues/58247.\n'+
-      globals.logger.terminal.bolden(
-        'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
-        'android {\n'
-        '  lintOptions {\n'
-        '    checkReleaseBuilds false\n'
-        '  }\n'
-        '}'
-      )
+      '\n'
+      'This issue appears to be https://github.com/flutter/flutter/issues/58247.\n'
+      '$bold'
     );
     return GradleBuildStatus.exit;
   },
@@ -446,13 +449,14 @@ final GradleHandledError lockFileDepMissing = GradleHandledError(
     final File gradleFile = project.directory
         .childDirectory('android')
         .childFile('build.gradle');
-
+    final String bold = globals.logger.terminal.bolden(
+      'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
+      'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}\n'
+    );
     globals.printStatus(
-      '\nYou need to update the lockfile, or disable Gradle dependency locking.\n'+
-      globals.logger.terminal.bolden(
-        'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
-        'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}\n'
-      )
+      '\n'
+      'You need to update the lockfile, or disable Gradle dependency locking.\n'
+      '$bold'
     );
     return GradleBuildStatus.exit;
   },

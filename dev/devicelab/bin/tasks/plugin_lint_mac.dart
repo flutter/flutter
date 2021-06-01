@@ -224,7 +224,7 @@ Future<void> main() async {
 
       section('Build Objective-C application with Swift and Objective-C plugins as frameworks');
 
-      objcPodfileContent = 'use_frameworks!\n' + objcPodfileContent;
+      objcPodfileContent = 'use_frameworks!\n$objcPodfileContent';
       objcPodfile.writeAsStringSync(objcPodfileContent, flush: true);
 
       await inDirectory(objcAppPath, () async {

@@ -35,7 +35,7 @@ void loadDateIntlDataIfNotLoaded() {
         } else if (codes.length == 3) {
           countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
         }
-        locale = codes[0] + (countryCode != null ? '_' + countryCode : '');
+        locale = codes[0] + (countryCode != null ? '_$countryCode' : '');
         if (initializedLocales.contains(locale))
           return;
         initializedLocales.add(locale);

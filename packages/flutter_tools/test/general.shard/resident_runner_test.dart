@@ -2101,7 +2101,7 @@ void main() {
         .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
-      globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path + '/');
+      '${globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
     expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelDill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
@@ -2132,7 +2132,7 @@ void main() {
         .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
-      globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path + '/');
+      '${globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
     expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformSoundKernelDill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),

@@ -126,7 +126,7 @@ class Cocoon {
     if (resultFile.existsSync()) {
       resultFile.deleteSync();
     }
-    logger.fine('Writing results: ' + json.encode(updateRequest));
+    logger.fine('Writing results: ${json.encode(updateRequest)}');
     resultFile.createSync();
     resultFile.writeAsStringSync(json.encode(updateRequest));
   }

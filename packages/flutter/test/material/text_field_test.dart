@@ -158,8 +158,8 @@ void main() {
     'Second line goes until\n'
     'Third line of stuff';
   const String kMoreThanFourLines =
-    kThreeLines +
-    "\nFourth line won't display and ends at";
+    '$kThreeLines\n'
+    "Fourth line won't display and ends at";
   // Gap between caret and edge of input, defined in editable.dart.
   const int kCaretGap = 1;
 
@@ -992,7 +992,7 @@ void main() {
     // Enter a string with the same number of characters as testValueTwoLines,
     // but where the overflowing part is all spaces. Assert that it only renders
     // on one line.
-    const String testValueSpaces = testValueOneLine + '          ';
+    const String testValueSpaces = '$testValueOneLine          ';
     expect(testValueSpaces.length, testValueTwoLines.length);
     await tester.enterText(find.byType(TextField), testValueSpaces);
     await skipPastScrollingAnimation(tester);
@@ -1002,7 +1002,7 @@ void main() {
     expect(inputBox.size.height, oneLineInputSize.height);
 
     // Swapping the final space for a letter causes it to wrap to 2 lines.
-    const String testValueSpacesOverflow = testValueOneLine + '         a';
+    const String testValueSpacesOverflow = '$testValueOneLine         a';
     expect(testValueSpacesOverflow.length, testValueTwoLines.length);
     await tester.enterText(find.byType(TextField), testValueSpacesOverflow);
     await skipPastScrollingAnimation(tester);
@@ -3873,8 +3873,8 @@ void main() {
     ));
 
     const String surrogatePair = '😆';
-    await tester.enterText(find.byType(TextField), surrogatePair + '0123456789101112');
-    expect(textController.text, surrogatePair + '012345678');
+    await tester.enterText(find.byType(TextField), '${surrogatePair}0123456789101112');
+    expect(textController.text, '${surrogatePair}012345678');
   });
 
   testWidgets('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
@@ -3888,8 +3888,8 @@ void main() {
     ));
 
     const String graphemeCluster = '👨‍👩‍👦';
-    await tester.enterText(find.byType(TextField), graphemeCluster + '0123456789101112');
-    expect(textController.text, graphemeCluster + '012345678');
+    await tester.enterText(find.byType(TextField), '${graphemeCluster}0123456789101112');
+    expect(textController.text, '${graphemeCluster}012345678');
   });
 
   testWidgets('maxLength limits input in the center of a maxed-out field.', (WidgetTester tester) async {
@@ -3909,7 +3909,7 @@ void main() {
     expect(textController.text, testValue);
 
     // Entering more characters at the end does nothing.
-    await tester.enterText(find.byType(TextField), testValue + '9999999');
+    await tester.enterText(find.byType(TextField), '${testValue}9999999');
     expect(textController.text, testValue);
 
     // Entering text in the middle of the field also does nothing.
@@ -3943,7 +3943,7 @@ void main() {
       // Entering more characters at the end does nothing.
       await tester.showKeyboard(find.byType(TextField));
       tester.testTextInput.updateEditingValue(const TextEditingValue(
-        text: testValue + '9999999',
+        text: '${testValue}9999999',
         selection: TextSelection.collapsed(offset: 10 + 7),
         composing: TextRange.empty,
       ));
@@ -4175,8 +4175,8 @@ void main() {
     ));
 
     const String surrogatePair = '😆';
-    await tester.enterText(find.byType(TextField), surrogatePair + '0123456789101112');
-    expect(textController.text, surrogatePair + '012345678');
+    await tester.enterText(find.byType(TextField), '${surrogatePair}0123456789101112');
+    expect(textController.text, '${surrogatePair}012345678');
   });
 
   testWidgets('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
@@ -4190,8 +4190,8 @@ void main() {
     ));
 
     const String graphemeCluster = '👨‍👩‍👦';
-    await tester.enterText(find.byType(TextField), graphemeCluster + '0123456789101112');
-    expect(textController.text, graphemeCluster + '012345678');
+    await tester.enterText(find.byType(TextField), '${graphemeCluster}0123456789101112');
+    expect(textController.text, '${graphemeCluster}012345678');
   });
 
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {

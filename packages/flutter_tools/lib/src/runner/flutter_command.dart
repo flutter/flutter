@@ -942,7 +942,7 @@ abstract class FlutterCommand extends Command<void> {
 
     if (experiments.isNotEmpty) {
       for (final String expFlag in experiments) {
-        final String flag = '--enable-experiment=' + expFlag;
+        final String flag = '--enable-experiment=$expFlag';
         extraFrontEndOptions.add(flag);
         extraGenSnapshotOptions.add(flag);
       }

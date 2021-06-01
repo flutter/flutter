@@ -114,7 +114,7 @@ void main() {
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.ios, mode: BuildMode.release) + '_armv7',
+            '${artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.ios, mode: BuildMode.release)}_armv7',
             '--additional_arg'
           ],
         ),
@@ -129,10 +129,15 @@ void main() {
     });
 
     testWithoutContext('iOS arm64', () async {
+      final String genSnapshotPath = artifacts.getArtifactPath(
+        Artifact.genSnapshot,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.release,
+      );
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.ios, mode: BuildMode.release) + '_arm64',
+            '${genSnapshotPath}_arm64',
            '--additional_arg',
           ],
         ),
@@ -238,11 +243,14 @@ void main() {
     testWithoutContext('builds iOS with bitcode', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String assembly = fileSystem.path.join(outputPath, 'snapshot_assembly.S');
+      final String genSnapshotPath = artifacts.getArtifactPath(
+        Artifact.genSnapshot,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.profile,
+      );
       processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
-          artifacts.getArtifactPath(Artifact.genSnapshot,
-                  platform: TargetPlatform.ios, mode: BuildMode.profile) +
-              '_armv7',
+          '${genSnapshotPath}_armv7',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
@@ -295,11 +303,14 @@ void main() {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String assembly = fileSystem.path.join(outputPath, 'snapshot_assembly.S');
       final String debugPath = fileSystem.path.join('foo', 'app.ios-armv7.symbols');
+      final String genSnapshotPath = artifacts.getArtifactPath(
+        Artifact.genSnapshot,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.profile,
+      );
       processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
-          artifacts.getArtifactPath(Artifact.genSnapshot,
-                  platform: TargetPlatform.ios, mode: BuildMode.profile) +
-              '_armv7',
+          '${genSnapshotPath}_armv7',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
@@ -352,11 +363,14 @@ void main() {
     testWithoutContext('builds iOS armv7 snapshot with obfuscate', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String assembly = fileSystem.path.join(outputPath, 'snapshot_assembly.S');
+      final String genSnapshotPath = artifacts.getArtifactPath(
+        Artifact.genSnapshot,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.profile,
+      );
       processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
-          artifacts.getArtifactPath(Artifact.genSnapshot,
-                  platform: TargetPlatform.ios, mode: BuildMode.profile) +
-              '_armv7',
+          '${genSnapshotPath}_armv7',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
@@ -408,11 +422,14 @@ void main() {
 
     testWithoutContext('builds iOS armv7 snapshot', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
+      final String genSnapshotPath = artifacts.getArtifactPath(
+        Artifact.genSnapshot,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.release,
+      );
       processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
-          artifacts.getArtifactPath(Artifact.genSnapshot,
-                  platform: TargetPlatform.ios, mode: BuildMode.release) +
-              '_armv7',
+          '${genSnapshotPath}_armv7',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=${fileSystem.path.join(outputPath, 'snapshot_assembly.S')}',
@@ -462,11 +479,14 @@ void main() {
 
     testWithoutContext('builds iOS arm64 snapshot', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
+      final String genSnapshotPath = artifacts.getArtifactPath(
+        Artifact.genSnapshot,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.release,
+      );
       processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
-          artifacts.getArtifactPath(Artifact.genSnapshot,
-                  platform: TargetPlatform.ios, mode: BuildMode.release) +
-              '_arm64',
+          '${genSnapshotPath}_arm64',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=${fileSystem.path.join(outputPath, 'snapshot_assembly.S')}',

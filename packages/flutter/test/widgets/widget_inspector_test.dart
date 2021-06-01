@@ -1009,8 +1009,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           .pathSegments;
         // Strip a couple subdirectories away to generate a plausible pub root
         // directory.
-        pubRootTest = '/' +
-          segments.take(segments.length - 2).join('/');
+        pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
         service.setPubRootDirectories(<String>[pubRootTest]);
       }
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -1072,8 +1071,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           .pathSegments;
         // Strip a couple subdirectories away to generate a plausible pub root
         // directory.
-        pubRootTest = '/' +
-          segments.take(segments.length - 2).join('/');
+        pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
         service.setPubRootDirectories(<String>[pubRootTest]);
       }
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -1231,7 +1229,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<String> segments = Uri.parse(fileA).pathSegments;
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
-      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       service.setPubRootDirectories(<String>[pubRootTest]);
 
       service.setSelection(elementA, 'my-group');
@@ -1270,7 +1268,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(pathSegmentsFramework.join('/'), endsWith('/flutter/lib/src/widgets/text.dart'));
 
       // Strip off /src/widgets/text.dart.
-      final String pubRootFramework = '/' + pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/');
+      final String pubRootFramework = '/${pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/')}';
       service.setPubRootDirectories(<String>[pubRootFramework]);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
       service.setSelection(elementA, 'my-group');
@@ -1621,7 +1619,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<String> segments = Uri.parse(testFile).pathSegments;
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
-      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootTest});
 
       rootJson = (await service.testExtension('getRootWidgetSummaryTree', <String, String>{'objectGroup': group}))! as Map<String, Object?>;
@@ -1704,7 +1702,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<String> segments = Uri.parse(testFile).pathSegments;
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
-      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootTest});
 
       summarySelection = (await service.testExtension('getSelectedSummaryWidget', <String, String>{'objectGroup': group}))! as Map<String, Object?>;
@@ -1805,7 +1803,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<String> segments = Uri.parse(fileA).pathSegments;
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
-      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootTest});
 
       service.setSelection(elementA, 'my-group');
@@ -1845,7 +1843,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(pathSegmentsFramework.join('/'), endsWith('/flutter/lib/src/widgets/text.dart'));
 
       // Strip off /src/widgets/text.dart.
-      final String pubRootFramework = '/' + pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/');
+      final String pubRootFramework = '/${pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/')}';
       await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootFramework});
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
       service.setSelection(elementA, 'my-group');
@@ -1886,7 +1884,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<String> segments = Uri.parse(fileA).pathSegments;
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
-      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootTest, 'isolateId': '34'});
 
       service.setSelection(elementA, 'my-group');
@@ -1929,8 +1927,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<String> segments = Uri.parse(file).pathSegments;
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
-      final String pubRootTest =
-          '/' + segments.take(segments.length - 2).join('/');
+      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootTest});
 
       final List<Map<Object, Object?>> rebuildEvents =
@@ -2125,8 +2122,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<String> segments = Uri.parse(file).pathSegments;
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
-      final String pubRootTest =
-          '/' + segments.take(segments.length - 2).join('/');
+      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootTest});
 
       final List<Map<Object, Object?>> repaintEvents =
@@ -2861,7 +2857,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(file, endsWith('widget_inspector_test.dart'));
       final List<String> segments = Uri.parse(file).pathSegments;
       // Strip a couple subdirectories away to generate a plausible pub rootdirectory.
-      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       service.setPubRootDirectories(<String>[pubRootTest]);
 
       final String summary = service.getRootWidgetSummaryTree('foo1');
@@ -3034,8 +3030,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     final List<String> segments = Uri
         .parse(file)
         .pathSegments;
-    final String pubRootTest = '/' +
-        segments.take(segments.length - 2).join('/');
+    final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
 
     // Strip a couple subdirectories away to generate a plausible pub root
     // directory.

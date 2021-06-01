@@ -85,11 +85,7 @@ abstract class GoldenFileComparator {
       return key;
     final String keyString = key.toString();
     final String extension = path.extension(keyString);
-    return Uri.parse(
-      keyString
-        .split(extension)
-        .join() + '.' + version.toString() + extension
-    );
+    return Uri.parse('${keyString.split(extension).join()}.$version$extension');
   }
 
   /// Returns a [ComparisonResult] to describe the pixel differential of the
@@ -196,11 +192,7 @@ abstract class WebGoldenComparator {
       return key;
     final String keyString = key.toString();
     final String extension = path.extension(keyString);
-    return Uri.parse(
-      keyString
-        .split(extension)
-        .join() + '.' + version.toString() + extension
-    );
+    return Uri.parse('${keyString.split(extension).join()}.$version$extension');
   }
 }
 
