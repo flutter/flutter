@@ -248,8 +248,8 @@ class AnimationSheetBuilder {
   /// ```
   /// {@end-tool}
   @Deprecated(
-    'Use collate instead. '
-    'This feature was deprecated after v2.3.0-13.0.pre.',
+    'Use AnimationSheetBuilder.collate instead. '
+    'This feature was deprecated after v2.3.0-13.0.pre',
   )
   Future<Widget> display({Key? key}) async {
     assert(_recordedFrames.isNotEmpty);
@@ -298,7 +298,7 @@ class AnimationSheetBuilder {
   /// This method can only be called if at least one frame has been recorded.
   @Deprecated(
     'The `sheetSize` is only useful for `display`, which should be migrated to `collate`. '
-    'This feature was deprecated after v2.3.0-13.0.pre.',
+    'This feature was deprecated after v2.3.0-13.0.pre',
   )
   Size sheetSize({double maxWidth = _kDefaultTestViewportWidth}) {
     assert(_recordedFrames.isNotEmpty);
