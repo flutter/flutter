@@ -44,25 +44,9 @@ constexpr int32_t kRootNodeId = 0;
 @property(nonatomic, readonly) fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge;
 
 /**
- * Due to the fact that VoiceOver may hold onto SemanticObjects even after it shuts down,
- * there can be situations where the AccessibilityBridge is shutdown, but the SemanticObject
- * will still be alive. If VoiceOver is turned on again, it may try to access this orphaned
- * SemanticObject. Methods that are called from the accessiblity framework should use
- * this to guard against this case by just returning early if its bridge has been shutdown.
- *
- * See https://github.com/flutter/flutter/issues/43795 for more information.
- */
-- (BOOL)isAccessibilityBridgeAlive;
-
-/**
  * The semantics node used to produce this semantics object.
  */
 @property(nonatomic, readonly) flutter::SemanticsNode node;
-
-/**
- * Updates this semantics object using data from the `node` argument.
- */
-- (void)setSemanticsNode:(const flutter::SemanticsNode*)node NS_REQUIRES_SUPER;
 
 /**
  * Whether this semantics object has child semantics objects.
@@ -80,21 +64,41 @@ constexpr int32_t kRootNodeId = 0;
  */
 @property(strong, nonatomic) FlutterPlatformViewSemanticsContainer* platformViewSemanticsContainer;
 
+/**
+ * Due to the fact that VoiceOver may hold onto SemanticObjects even after it shuts down,
+ * there can be situations where the AccessibilityBridge is shutdown, but the SemanticObject
+ * will still be alive. If VoiceOver is turned on again, it may try to access this orphaned
+ * SemanticObject. Methods that are called from the accessiblity framework should use
+ * this to guard against this case by just returning early if its bridge has been shutdown.
+ *
+ * See https://github.com/flutter/flutter/issues/43795 for more information.
+ */
+- (BOOL)isAccessibilityBridgeAlive;
+
+/**
+ * Updates this semantics object using data from the `node` argument.
+ */
+- (void)setSemanticsNode:(const flutter::SemanticsNode*)node NS_REQUIRES_SUPER;
+
 - (void)replaceChildAtIndex:(NSInteger)index withChild:(SemanticsObject*)child;
 
 - (BOOL)nodeWillCauseLayoutChange:(const flutter::SemanticsNode*)node;
+
+- (BOOL)nodeWillCauseScroll:(const flutter::SemanticsNode*)node;
+
+- (BOOL)nodeShouldTriggerAnnouncement:(const flutter::SemanticsNode*)node;
+
+- (void)collectRoutes:(NSMutableArray<SemanticsObject*>*)edges;
+
+- (NSString*)routeName;
+
+- (BOOL)onCustomAccessibilityAction:(FlutterCustomAccessibilityAction*)action;
 
 #pragma mark - Designated initializers
 
 - (instancetype)init __attribute__((unavailable("Use initWithBridge instead")));
 - (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
                            uid:(int32_t)uid NS_DESIGNATED_INITIALIZER;
-
-- (BOOL)nodeWillCauseScroll:(const flutter::SemanticsNode*)node;
-- (BOOL)nodeShouldTriggerAnnouncement:(const flutter::SemanticsNode*)node;
-- (void)collectRoutes:(NSMutableArray<SemanticsObject*>*)edges;
-- (NSString*)routeName;
-- (BOOL)onCustomAccessibilityAction:(FlutterCustomAccessibilityAction*)action;
 
 @end
 
