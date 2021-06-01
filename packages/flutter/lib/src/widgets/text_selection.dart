@@ -404,13 +404,13 @@ class TextSelectionOverlay {
   /// A callback that's optionally invoked when a selection handle is tapped.
   ///
   /// The [TextSelectionControls.buildHandle] implementation the text field
-  /// uses decides where the the handle's tap "hotspot" is, or the selection
-  /// handle supports tap gestures at all. For instance,
+  /// uses decides where the the handle's tap "hotspot" is, or whether the
+  /// selection handle supports tap gestures at all. For instance,
   /// [MaterialTextSelectionControls] calls [onSelectionHandleTapped] when the
-  /// selection handle's "knob" is tapped or long pressed, while
-  /// [CupertinoTextSelectionControls] builds a handle that's is not
-  /// sufficiently large for tapping (as it's not meant to be tapped) so it
-  /// does not call [onSelectionHandleTapped] at all.
+  /// selection handle's "knob" is tapped, while
+  /// [CupertinoTextSelectionControls] builds a handle that's not sufficiently
+  /// large for tapping (as it's not meant to be tapped) so it does not call
+  /// [onSelectionHandleTapped] even when tapped.
   /// {@endtemplate}
   // See https://github.com/flutter/flutter/issues/39376#issuecomment-848406415
   // for provenance.
@@ -1525,9 +1525,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
-    // Use _TransparentTapGestureRecognizer so that TextSelectionGestureDetector
-    // can receive the same tap events that a selection handle placed visually
-    // on top of it also receives.
     gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
       () => TapGestureRecognizer(debugOwner: this),
       (TapGestureRecognizer instance) {
