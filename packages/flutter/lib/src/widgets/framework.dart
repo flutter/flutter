@@ -3199,11 +3199,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     RenderObject? result;
     void visit(Element element) {
       assert(result == null); // this verifies that there's only one child
-      if (element is RenderObjectElement) {
-        // Don't use the getter, the _renderObject may be null if the element
-        // is defunct, and the getter asserts that it is not null. This method
-        // does not guarantee a non-null return anyway.
-        result = element._renderObject;
+      if (element._lifecycleState == _ElementLifecycle.defunct) {
+        return;
+      } else if (element is RenderObjectElement) {
+        result = element.renderObject;
       } else {
         element.visitChildren(visit);
       }
@@ -3844,6 +3843,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// After this function is called, the element will not be incorporated into
   /// the tree again.
+  ///
+  /// Any resources this element holds should be released at this point. For
+  /// example, [RenderObjectElement.unmount] calls [RenderObject.dispose] and
+  /// nulls out its reference to the render object.
   ///
   /// See the lifecycle documentation for [Element] for additional information.
   ///
@@ -5430,7 +5433,11 @@ abstract class RenderObjectElement extends Element {
   /// If this element has been [unmount]ed, this getter will throw.
   @override
   RenderObject get renderObject {
+<<<<<<< HEAD
     assert(_renderObject != null, 'Object disposed');
+=======
+    assert(_renderObject != null, '$runtimeType unmounted');
+>>>>>>> disp_ro
     return _renderObject!;
   }
   RenderObject? _renderObject;

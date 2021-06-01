@@ -1178,6 +1178,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : assert(transform != null),
        super(key: key, child: child);
@@ -1215,6 +1216,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment = Alignment.center,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.rotationZ(angle),
        super(key: key, child: child);
@@ -1242,6 +1244,7 @@ class Transform extends SingleChildRenderObjectWidget {
     Key? key,
     required Offset offset,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.translationValues(offset.dx, offset.dy, 0.0),
        origin = null,
@@ -1283,6 +1286,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment = Alignment.center,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.diagonal3Values(scale, scale, 1.0),
        super(key: key, child: child);
@@ -1314,6 +1318,15 @@ class Transform extends SingleChildRenderObjectWidget {
   /// Whether to apply the transformation when performing hit tests.
   final bool transformHitTests;
 
+  /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@template flutter.widgets.Transform.optional.FilterQuality}
+  /// The transform will be applied by re-rendering the child if [filterQuality] is null,
+  /// otherwise it controls the quality of an [ImageFilter.matrix] applied to a bitmap
+  /// rendering of the child.
+  /// {@endtemplate}
+  final FilterQuality? filterQuality;
+
   @override
   RenderTransform createRenderObject(BuildContext context) {
     return RenderTransform(
@@ -1322,6 +1335,7 @@ class Transform extends SingleChildRenderObjectWidget {
       alignment: alignment,
       textDirection: Directionality.maybeOf(context),
       transformHitTests: transformHitTests,
+      filterQuality: filterQuality,
     );
   }
 
@@ -1332,7 +1346,8 @@ class Transform extends SingleChildRenderObjectWidget {
       ..origin = origin
       ..alignment = alignment
       ..textDirection = Directionality.maybeOf(context)
-      ..transformHitTests = transformHitTests;
+      ..transformHitTests = transformHitTests
+      ..filterQuality = filterQuality;
   }
 }
 
@@ -6206,6 +6221,10 @@ class DefaultAssetBundle extends InheritedWidget {
 /// A given render object can be placed at most once in the widget tree. This
 /// widget enforces that restriction by keying itself using a [GlobalObjectKey]
 /// for the given render object.
+///
+/// This widget will call [RenderObject.dispose] on the [renderBox] when it is
+/// unmounted. If any children have been added to the [renderBox], they must
+/// be disposed in the [onUnmount callback].
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// Creates an adapter for placing a specific [RenderBox] in the widget tree.
   ///
@@ -6213,6 +6232,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   WidgetToRenderBoxAdapter({
     required this.renderBox,
     this.onBuild,
+    this.onUnmount,
   }) : assert(renderBox != null),
        // WidgetToRenderBoxAdapter objects are keyed to their render box. This
        // prevents the widget being used in the widget hierarchy in two different
@@ -6229,12 +6249,25 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// tree will be dirty.
   final VoidCallback? onBuild;
 
+  /// Called when it is safe to dispose of the render object and its
+  /// descendants.
+  ///
+  /// Typically, this should dispose of any children attached to the
+  /// [renderBox], but not the [renderBox] itself.
+  final VoidCallback? onUnmount;
+
   @override
   RenderBox createRenderObject(BuildContext context) => renderBox;
 
   @override
   void updateRenderObject(BuildContext context, RenderBox renderObject) {
     onBuild?.call();
+  }
+
+  @override
+  void didUnmountRenderObject(RenderObject renderObject) {
+    assert(renderObject == renderBox);
+    onUnmount?.call();
   }
 }
 

@@ -153,7 +153,7 @@ void main() {
     expect(renderObject.toStringShort(), contains('DISPOSED'));
   });
 
-  test('RenderObject.dispose clears the layer on repaint boundaries', () {
+  test('RenderObject.dispose null the layer on repaint boundaries', () {
     final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
     // Force a layer to get set.
     renderObject.isRepaintBoundary = true;
@@ -165,17 +165,16 @@ void main() {
     expect(renderObject.debugLayer, null);
   });
 
-  test('RenderObject.dispose does not clear the layer on non-repaint boundaries', () {
+  test('RenderObject.dispose nulls the layer on non-repaint boundaries', () {
     final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
     // Force a layer to get set.
     renderObject.isRepaintBoundary = true;
     PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
-    final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
 
     // Dispose with repaint boundary being false.
     renderObject.isRepaintBoundary = false;
     renderObject.dispose();
-    expect(renderObject.debugLayer, layer);
+    expect(renderObject.debugLayer, null);
   });
 }
 

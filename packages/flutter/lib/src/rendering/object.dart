@@ -1115,6 +1115,19 @@ class PipelineOwner {
 /// The [RenderBox] subclass introduces the opinion that the layout
 /// system uses Cartesian coordinates.
 ///
+/// ## Lifecycle
+///
+/// A [RenderObject] must [dispose] when it is no longer needed. The creator
+/// of the object is responsible for disposing of it. Typically, the creator is
+/// a [RenderObjectElement], and that element will dispose the object it creates
+/// when it is unmounted.
+///
+/// [RenderObject]s are responsible for cleaning up any expensive resources
+/// they hold when [dispose] is called, such as [Picture] or [Image] objects.
+/// This includes any [Layer]s that the render object has directly created. By
+/// default, the base implementation of dispose will dispose of the [layer], and
+/// implementations must dispose of any other layer(s) it directly creates.
+///
 /// ## Writing a RenderObject subclass
 ///
 /// In most cases, subclassing [RenderObject] itself is overkill, and
@@ -1250,13 +1263,21 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Release any resources held by this render object.
   ///
-  /// If this render object has created any children directly, it should dispose
-  /// of those children in this method as well. However, it should not
-  /// dispose of children that were created by some other object, such as
-  /// a [RenderObjectElement].
+  /// The object that creates a RenderObject is in charge of disposing it.
+  /// If this render object has created any children directly, it must dispose
+  /// of those children in this method as well. It must not dispose of any
+  /// children that were created by some other object, such as
+  /// a [RenderObjectElement]. Those children will be disposed when that
+  /// element unmounts, which may be delayed if the element is moved to another
+  /// part of the tree.
   ///
   /// If [isRepaintBoundary] returns true, the layer tree rooted at this
   /// object's layer will also dispose.
+  ///
+  /// Implementations of this method must end with a call to the inherited
+  /// method, as in `super.dispose()`.
+  ///
+  /// The object is no longer usable after calling dispose.
   @mustCallSuper
   void dispose() {
     assert(!_debugDisposed);
@@ -1266,7 +1287,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     _disposalHandle = null;
     assert(() {
       visitChildren((RenderObject child) {
-        assert(child._debugDisposed);
+        assert(
+          child.debugDisposed!,
+          '${child.runtimeType} (child of $runtimeType) must be disposed before calling super.dispose().',
+        );
       });
       _debugDisposed = true;
       return true;
@@ -1448,6 +1472,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   @override
   void attach(PipelineOwner owner) {
+    assert(!_debugDisposed);
     super.attach(owner);
     // If the node was dirtied in some way while unattached, make sure to add
     // it to the appropriate dirty list now that an owner is available
@@ -1659,6 +1684,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// See [RenderView] for an example of how this function is used.
   void scheduleInitialLayout() {
+    assert(!_debugDisposed);
     assert(attached);
     assert(parent is! RenderObject);
     assert(!owner!._debugDoingLayout);
@@ -1728,6 +1754,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// work to update its layout information.
   @pragma('vm:notify-debugger-on-exception')
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
+    assert(!_debugDisposed);
     if (!kReleaseMode && debugProfileLayoutsEnabled)
       Timeline.startSync('$runtimeType',  arguments: timelineArgumentsIndicatingLandmarkEvent);
 
@@ -2089,6 +2116,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// it cannot be the case that _only_ the compositing bits changed,
   /// something else will have scheduled a frame for us.
   void markNeedsCompositingBitsUpdate() {
+    assert(!_debugDisposed);
     if (_needsCompositingBitsUpdate)
       return;
     _needsCompositingBitsUpdate = true;
@@ -2187,6 +2215,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///    layer, thus limiting the number of nodes that [markNeedsPaint] must mark
   ///    dirty.
   void markNeedsPaint() {
+    assert(!_debugDisposed);
     assert(owner == null || !owner!.debugDoingPaint);
     if (_needsPaint)
       return;
@@ -2271,6 +2300,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// This might be called if, e.g., the device pixel ratio changed.
   void replaceRootLayer(OffsetLayer rootLayer) {
+    assert(!_debugDisposed);
     assert(rootLayer.attached);
     assert(attached);
     assert(parent is! RenderObject);
@@ -2511,6 +2541,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void scheduleInitialSemantics() {
+    assert(!_debugDisposed);
     assert(attached);
     assert(parent is! RenderObject);
     assert(!owner!._debugDoingSemantics);
@@ -2633,6 +2664,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [RenderObject] as annotated by [describeSemanticsConfiguration] changes in
   /// any way to update the semantics tree.
   void markNeedsSemanticsUpdate() {
+    assert(!_debugDisposed);
     assert(!attached || !owner!._debugDoingSemantics);
     if (!attached || owner!._semanticsOwner == null) {
       _cachedSemanticsConfiguration = null;
@@ -2878,6 +2910,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @override
   String toStringShort() {
     String header = describeIdentity(this);
+    if (_debugDisposed) {
+      header += ' DISPOSED';
+      return header;
+    }
     if (_relayoutBoundary != null && _relayoutBoundary != this) {
       int count = 1;
       RenderObject? target = parent as RenderObject?;
@@ -3265,6 +3301,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       }
     }
   }
+
   /// Insert child into this render object's child list after the given child.
   ///
   /// If `after` is null, then this inserts the child at the start of the list,

@@ -51,7 +51,7 @@ Directory get localFlutterRoot {
   // If a test
   if (platform.script.scheme == 'data') {
     final RegExp pattern = RegExp(
-      r'(file:\/\/[^"]*[/\\]dev\/tools[/\\][^"]+\.dart)',
+      r'(file:\/\/[^"]*[/\\]dev\/conductor[/\\][^"]+\.dart)',
       multiLine: true,
     );
     final Match? match =

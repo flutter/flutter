@@ -125,7 +125,7 @@ class FlutterDevice {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
-        initializeFromDill: getDefaultCachedKernelPath(
+        initializeFromDill: buildInfo.initializeFromDill ?? getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
@@ -168,7 +168,7 @@ class FlutterDevice {
         targetModel: targetModel,
         dartDefines: buildInfo.dartDefines,
         extraFrontEndOptions: extraFrontEndOptions,
-        initializeFromDill: getDefaultCachedKernelPath(
+        initializeFromDill: buildInfo.initializeFromDill ?? getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
@@ -1070,7 +1070,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     String dillOutputPath,
     this.machine = false,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
-  }) : mainPath = globals.fs.path.absolute(target),
+  }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
