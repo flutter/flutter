@@ -13,11 +13,11 @@ Future<void> main() async {
     print('IntegrationTestWidgetsFlutterBinding test results: ${jsonEncode(binding.results)}');
   });
 
-  testWidgets('passing test 1', (WidgetTester tester) async {
-    expect(true, true);
+  testWidgets('failing test', (WidgetTester tester) async {
+    expect(true, false);
   });
 
-  testWidgets('passing test 2', (WidgetTester tester) async {
+  testWidgets('passing test', (WidgetTester tester) async {
     expect(true, true);
   });
 }

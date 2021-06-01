@@ -294,5 +294,8 @@ abstract class IntegrationTestResults {
   Map<String, dynamic>? get reportData;
 
   /// Whether all the test methods completed successfully.
+  ///
+  /// Completes when the tests have finished. The boolean value will be true if
+  /// all tests have passed, and false otherwise.
   Completer<bool> get allTestsPassed;
 }
