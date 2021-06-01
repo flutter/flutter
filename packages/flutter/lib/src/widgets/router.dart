@@ -510,26 +510,27 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     _routeInformationReportingTaskScheduled = false;
 
     if (_routeInformation.value != null) {
-      final RouteInformation routeInformation = _routeInformation.value!;
+      final RouteInformation oldRouteInformation = widget.routeInformationProvider!.value;
+      final RouteInformation currentRouteInformation = _routeInformation.value!;
       switch (_currentIntentionToReport) {
         case _IntentionToReportRouteInformation.none:
           assert(false, '_reportRouteInformation must not be called with _IntentionToReportRouteInformation.none');
           return;
         case _IntentionToReportRouteInformation.ignore:
-          if (widget.routeInformationProvider!.value.location != routeInformation.location ||
-              widget.routeInformationProvider!.value.state != routeInformation.state) {
-            widget.routeInformationProvider!.routerUpdatesRouteInformation(routeInformation);
+          if (oldRouteInformation.location != currentRouteInformation.location ||
+              oldRouteInformation.state != currentRouteInformation.state) {
+            widget.routeInformationProvider!.routerUpdatesRouteInformation(currentRouteInformation);
           }
           break;
         case _IntentionToReportRouteInformation.maybe:
-          if (widget.routeInformationProvider!.value.location != routeInformation.location) {
-            widget.routeInformationProvider!.routerReportsNewRouteInformation(routeInformation);
-          } else if (widget.routeInformationProvider!.value.state != routeInformation.state){
-            widget.routeInformationProvider!.routerUpdatesRouteInformation(routeInformation);
+          if (oldRouteInformation.location != currentRouteInformation.location) {
+            widget.routeInformationProvider!.routerReportsNewRouteInformation(currentRouteInformation);
+          } else if (oldRouteInformation.state != currentRouteInformation.state){
+            widget.routeInformationProvider!.routerUpdatesRouteInformation(currentRouteInformation);
           }
           break;
         case _IntentionToReportRouteInformation.must:
-          widget.routeInformationProvider!.routerReportsNewRouteInformation(routeInformation);
+          widget.routeInformationProvider!.routerReportsNewRouteInformation(currentRouteInformation);
           break;
       }
     }
