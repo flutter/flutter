@@ -1,4 +1,4 @@
-Signature: 21de87104647f604a0839982183970c1
+Signature: b7c955be883c4bf500c5e008aa94a70f
 
 UNUSED LICENSES:
 
@@ -5195,8 +5195,8 @@ FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.cpp
 FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStencilPathShader.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStencilPathShader.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellationShader.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellationShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.cpp
@@ -5518,9 +5518,6 @@ FILE: ../../../third_party/skia/gm/gpu_blur_utils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.h
 FILE: ../../../third_party/skia/src/gpu/GrVx.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrFillPathShader.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrFillPathShader.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeHardwareTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeHardwareTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeInstancedShaderImpl.cpp
@@ -5531,6 +5528,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellationShaderImpl.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellationShaderImpl.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationShader.h
 FILE: ../../../third_party/skia/src/opts/SkVM_opts.h
 FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLModifiersPool.h
