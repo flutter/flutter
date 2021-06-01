@@ -3799,6 +3799,53 @@ void main() {
     composingRect = editable.getRectForComposingRange(const TextRange(start: 7, end: 8));
     expect(composingRect, null);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+  test('can compute IntrinsicWidth for WidgetSpans', () {
+    // Regression test for https://github.com/flutter/flutter/issues/59316
+    const double screenWidth = 1000.0;
+    const double fixedHeight = 1000.0;
+    const String sentence = 'one two';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 3),
+        );
+    List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+    ];
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: TextSpan(
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+        children: <InlineSpan>[
+          TextSpan(text: 'test'),
+          WidgetSpan(child: Text('a')),
+        ],
+      ),
+      selection: const TextSelection.collapsed(offset: 3),
+      maxLines: 2,
+      minLines: 2,
+      textScaleFactor: 2.0,
+      children: renderBoxes,
+    );
+    layout(editable, constraints: const BoxConstraints(maxWidth: screenWidth));
+    editable.hasFocus = true;
+    final double maxIntrinsicWidth = editable.computeMaxIntrinsicWidth(fixedHeight);
+    pumpFrame();
+
+    expect(maxIntrinsicWidth, 278);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 }
 
 class _TestRenderEditable extends RenderEditable {
