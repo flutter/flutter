@@ -43,3 +43,7 @@ impeller_component("compositor") {
     "../shader_glue",
   ]
 }
+
+executable("compositor_unittests") {
+  sources = [ "buffer_unittests.cc" ]
+}
