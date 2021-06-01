@@ -65,10 +65,10 @@ void _setTestMode(_TestMode mode) {
   bool useCanvasText; // null means do not force DOM or canvas, works for CanvasKit
   switch (mode) {
     case _TestMode.useDomTextLayout:
-      useCanvasText = true;
+      useCanvasText = false;
       break;
     case _TestMode.useCanvasTextLayout:
-      useCanvasText = false;
+      useCanvasText = true;
       break;
     default:
       // Keep as null.
