@@ -109,7 +109,7 @@ abstract class JsUrlStrategy {
   /// Examples:
   ///
   /// * `go(-2)` moves back 2 steps in history.
-  /// * `go(3)` moves forward 3 steps in hisotry.
+  /// * `go(3)` moves forward 3 steps in history.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
   external Future<void> go(int count);

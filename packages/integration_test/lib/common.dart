@@ -211,7 +211,7 @@ class DriverTestMessage {
 /// These commands are either commands that WebDriver can execute or used
 /// for the communication between `integration_test` and the driver test.
 enum WebDriverCommandType {
-  /// Acknowlegement for the previously sent message.
+  /// Acknowledgement for the previously sent message.
   ack,
 
   /// No further WebDriver commands is requested by the app-side tests.
