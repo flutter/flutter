@@ -30,6 +30,7 @@ import io.flutter.embedding.engine.systemchannels.KeyEventChannelTest;
 import io.flutter.embedding.engine.systemchannels.PlatformChannelTest;
 import io.flutter.embedding.engine.systemchannels.RestorationChannelTest;
 import io.flutter.external.FlutterLaunchTests;
+import io.flutter.plugin.common.BinaryCodecTest;
 import io.flutter.plugin.common.StandardMessageCodecTest;
 import io.flutter.plugin.common.StandardMethodCodecTest;
 import io.flutter.plugin.editing.InputConnectionAdaptorTest;
@@ -53,6 +54,7 @@ import test.io.flutter.embedding.engine.PluginComponentTest;
   AccessibilityBridgeTest.class,
   AndroidKeyProcessorTest.class,
   ApplicationInfoLoaderTest.class,
+  BinaryCodecTest.class,
   DartExecutorTest.class,
   DartMessengerTest.class,
   FlutterActivityAndFragmentDelegateTest.class,
