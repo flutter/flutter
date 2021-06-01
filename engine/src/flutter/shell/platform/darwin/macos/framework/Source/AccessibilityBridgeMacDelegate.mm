@@ -6,6 +6,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMac.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -14,7 +15,6 @@ namespace flutter {
 inline constexpr int32_t kRootNode = 0;
 
 // Native mac notifications fired. These notifications are not publicly documented.
-// We have to define them ourselves.
 static NSString* const AccessibilityLoadCompleteNotification = @"AXLoadComplete";
 static NSString* const AccessibilityInvalidStatusChangedNotification = @"AXInvalidStatusChanged";
 static NSString* const AccessibilityLiveRegionCreatedNotification = @"AXLiveRegionCreated";
@@ -22,13 +22,15 @@ static NSString* const AccessibilityLiveRegionChangedNotification = @"AXLiveRegi
 static NSString* const AccessibilityExpandedChanged = @"AXExpandedChanged";
 static NSString* const AccessibilityMenuItemSelectedNotification = @"AXMenuItemSelected";
 
-AccessibilityBridgeMacDelegate::AccessibilityBridgeMacDelegate(__weak FlutterEngine* flutter_engine)
-    : flutter_engine_(flutter_engine) {}
+AccessibilityBridgeMacDelegate::AccessibilityBridgeMacDelegate(
+    __weak FlutterEngine* flutter_engine,
+    __weak FlutterViewController* view_controller)
+    : flutter_engine_(flutter_engine), view_controller_(view_controller) {}
 
 void AccessibilityBridgeMacDelegate::OnAccessibilityEvent(
     ui::AXEventGenerator::TargetedEvent targeted_event) {
   if (!flutter_engine_.viewController.viewLoaded || !flutter_engine_.viewController.view.window) {
-    // We don't need to send accessibility events if the there is no view or window.
+    // Don't need to send accessibility events if the there is no view or window.
     return;
   }
   ui::AXNode* ax_node = targeted_event.node;
@@ -66,8 +68,8 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
             .user_info = nil,
         });
       } else if (ax_node.data().role == ax::mojom::Role::kTextFieldWithComboBox) {
-        // Even though the selected item in the combo box has changed, we don't
-        // want to post a focus change because this will take the focus out of
+        // Even though the selected item in the combo box has changed, don't
+        // post a focus change because this will take the focus out of
         // the combo box where the user might be typing.
         events.push_back({
             .name = NSAccessibilitySelectedChildrenChangedNotification,
@@ -75,7 +77,7 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
             .user_info = nil,
         });
       }
-      // In all other cases we should post
+      // In all other cases, this delegate should post
       // |NSAccessibilityFocusedUIElementChangedNotification|, but this is
       // handled elsewhere.
       break;
@@ -121,6 +123,17 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
       }
       break;
     case ui::AXEventGenerator::Event::DOCUMENT_SELECTION_CHANGED: {
+      id focused = mac_platform_node_delegate->GetFocus();
+      if ([focused isKindOfClass:[FlutterTextField class]]) {
+        // If it is a text field, the selection notifications are handled by
+        // the FlutterTextField directly. Only need to make sure it is the
+        // first responder.
+        FlutterTextField* native_text_field = (FlutterTextField*)focused;
+        if (native_text_field == mac_platform_node_delegate->GetFocus()) {
+          [native_text_field becomeFirstResponder];
+        }
+        break;
+      }
       // This event always fires at root
       events.push_back({
           .name = NSAccessibilitySelectedTextChangedNotification,
@@ -152,7 +165,19 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
           .user_info = nil,
       });
       break;
-    case ui::AXEventGenerator::Event::VALUE_CHANGED:
+    case ui::AXEventGenerator::Event::VALUE_CHANGED: {
+      if (ax_node.data().role == ax::mojom::Role::kTextField) {
+        // If it is a text field, the value change notifications are handled by
+        // the FlutterTextField directly. Only need to make sure it is the
+        // first responder.
+        FlutterTextField* native_text_field =
+            (FlutterTextField*)mac_platform_node_delegate->GetNativeViewAccessible();
+        id focused = mac_platform_node_delegate->GetFocus();
+        if (!focused || native_text_field == focused) {
+          [native_text_field becomeFirstResponder];
+        }
+        break;
+      }
       events.push_back({
           .name = NSAccessibilityValueChangedNotification,
           .target = native_node,
@@ -170,6 +195,7 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
         }
       }
       break;
+    }
     case ui::AXEventGenerator::Event::LIVE_REGION_CREATED:
       events.push_back({
           .name = AccessibilityLiveRegionCreatedNotification,
@@ -183,7 +209,7 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
           .target = native_node,
           .user_info = nil,
       });
-      // Voiceover requires a live region changed notification to actually
+      // VoiceOver requires a live region changed notification to actually
       // announce the live region.
       auto live_region_events =
           MacOSEventsFromAXEvent(ui::AXEventGenerator::Event::LIVE_REGION_CHANGED, ax_node);
@@ -347,9 +373,9 @@ void AccessibilityBridgeMacDelegate::DispatchAccessibilityAction(ui::AXNode::AXI
   [flutter_engine_ dispatchSemanticsAction:action toTarget:target withData:std::move(data)];
 }
 
-std::unique_ptr<FlutterPlatformNodeDelegate>
+std::shared_ptr<FlutterPlatformNodeDelegate>
 AccessibilityBridgeMacDelegate::CreateFlutterPlatformNodeDelegate() {
-  return std::make_unique<FlutterPlatformNodeDelegateMac>(flutter_engine_);
+  return std::make_shared<FlutterPlatformNodeDelegateMac>(flutter_engine_, view_controller_);
 }
 
 // Private method

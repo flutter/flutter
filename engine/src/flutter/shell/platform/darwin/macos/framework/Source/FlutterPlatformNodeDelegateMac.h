@@ -19,8 +19,12 @@ namespace flutter {
 /// AXPlatformNodeMac to manage the macOS-specific accessibility objects.
 class FlutterPlatformNodeDelegateMac : public FlutterPlatformNodeDelegate {
  public:
-  explicit FlutterPlatformNodeDelegateMac(__weak FlutterEngine* engine);
+  explicit FlutterPlatformNodeDelegateMac(
+      __weak FlutterEngine* engine,
+      __weak FlutterViewController* view_controller);
   virtual ~FlutterPlatformNodeDelegateMac();
+
+  void Init(std::weak_ptr<OwnerBridge> bridge, ui::AXNode* node) override;
 
   //---------------------------------------------------------------------------
   /// @brief      Gets the live region text of this node in UTF-8 format. This
@@ -46,6 +50,7 @@ class FlutterPlatformNodeDelegateMac : public FlutterPlatformNodeDelegate {
  private:
   ui::AXPlatformNode* ax_platform_node_;
   __weak FlutterEngine* engine_;
+  __weak FlutterViewController* view_controller_;
 
   gfx::RectF ConvertBoundsFromLocalToScreen(
       const gfx::RectF& local_bounds) const;

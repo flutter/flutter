@@ -27,8 +27,8 @@ class FlutterGLCompositor : public FlutterCompositor {
   // Creates a BackingStore and saves updates the backing_store_out
   // data with the new BackingStore data.
   // If the backing store is being requested for the first time
-  // for a given frame, we do not create a new backing store but
-  // rather return the backing store associated with the
+  // for a given frame, this compositor does not create a new backing
+  // store but rather returns the backing store associated with the
   // FlutterView's FlutterSurfaceManager.
   //
   // Any additional state allocated for the backing store and

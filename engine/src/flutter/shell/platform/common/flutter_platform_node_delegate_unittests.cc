@@ -174,5 +174,51 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateOffScreenBoundsCorrectly) {
   EXPECT_EQ(result, ui::AXOffscreenResult::kOffscreen);
 }
 
+TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
+  std::shared_ptr<AccessibilityBridge> bridge =
+      std::make_shared<AccessibilityBridge>(
+          std::make_unique<TestAccessibilityBridgeDelegate>());
+  FlutterSemanticsNode root;
+  root.id = 0;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.child_count = 1;
+  int32_t children[] = {1};
+  root.children_in_traversal_order = children;
+  root.custom_accessibility_actions_count = 0;
+  root.rect = {0, 0, 100, 100};  // LTRB
+  root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+
+  FlutterSemanticsNode child1;
+  child1.id = 1;
+  child1.label = "child 1";
+  child1.hint = "";
+  child1.value = "";
+  child1.increased_value = "";
+  child1.decreased_value = "";
+  child1.child_count = 0;
+  child1.custom_accessibility_actions_count = 0;
+  child1.rect = {0, 0, 50, 50};  // LTRB
+  child1.transform = {0.5, 0, 0, 0, 0.5, 0, 0, 0, 1};
+  bridge->AddFlutterSemanticsNodeUpdate(&child1);
+
+  bridge->CommitUpdates();
+  auto child1_node = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  auto owner_bridge = child1_node->GetOwnerBridge().lock();
+
+  bool result;
+  gfx::RectF bounds = owner_bridge->RelativeToGlobalBounds(
+      child1_node->GetAXNode(), result, true);
+  EXPECT_EQ(bounds.x(), 0);
+  EXPECT_EQ(bounds.y(), 0);
+  EXPECT_EQ(bounds.width(), 25);
+  EXPECT_EQ(bounds.height(), 25);
+  EXPECT_EQ(result, false);
+}
+
 }  // namespace testing
 }  // namespace flutter
