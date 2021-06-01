@@ -432,7 +432,7 @@ const double _kDefaultFontSize = 14.0;
 ///  * The default font-family for `iOS` is `.SF UI Display`/`.SF UI Text`.
 ///  * The default font-family for `MacOS` is `.AppleSystemUIFont`.
 ///  * The default font-family for `Windows` is `Segoe UI`.
-// Implementation of the default font-family(depending on the platform) is done in /packages/flutter/lib/src/material/typography.dart  
+// Implementation of the default font-family(depending on the platform) is done in /packages/flutter/lib/src/material/typography.dart
 ///
 /// Since Flutter's font discovery for default fonts depends on the fonts present
 /// on the device, it is not safe to assume all default fonts will be available or
