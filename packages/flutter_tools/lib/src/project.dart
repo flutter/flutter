@@ -120,24 +120,40 @@ class FlutterProject {
   /// part of iOS product bundle identifier, Android application ID, or
   /// Gradle group ID.
   Future<Set<String>> get organizationNames async {
-    final List<String> candidates = <String>[
+    final List<String> candidates = <String>[];
+
+    if (ios.existsSync()) {
       // Don't require iOS build info, this method is only
       // used during create as best-effort, use the
       // default target bundle identifier.
-      if (ios.existsSync())
-        await ios.productBundleIdentifier(null),
-      if (android.existsSync()) ...<String>[
-        android.applicationId,
-        android.group,
-      ],
-      if (example.android.existsSync())
-        example.android.applicationId,
-      if (example.ios.existsSync())
-        await example.ios.productBundleIdentifier(null),
-    ];
-    return Set<String>.of(candidates
-        .map<String>(_organizationNameFromPackageName)
-        .where((String name) => name != null));
+      final String bundleIdentifier = await ios.productBundleIdentifier(null);
+      if (bundleIdentifier != null) {
+        candidates.add(bundleIdentifier);
+      }
+    }
+    if (android.existsSync()) {
+      final String applicationId = android.applicationId;
+      final String group = android.group;
+      candidates.addAll(<String>[
+        if (applicationId != null)
+          applicationId,
+        if (group != null)
+          group,
+      ]);
+    }
+    if (example.android.existsSync()) {
+      final String applicationId = example.android.applicationId;
+      if (applicationId != null) {
+        candidates.add(applicationId);
+      }
+    }
+    if (example.ios.existsSync()) {
+      final String bundleIdentifier = await example.ios.productBundleIdentifier(null);
+      if (bundleIdentifier != null) {
+        candidates.add(bundleIdentifier);
+      }
+    }
+    return Set<String>.of(candidates.map<String>(_organizationNameFromPackageName).whereType<String>());
   }
 
   String _organizationNameFromPackageName(String packageName) {
@@ -334,10 +350,14 @@ class FlutterProject {
 
   /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
   String getVersionInfo()  {
+    final String buildName = manifest.buildName;
+    final String buildNumber = manifest.buildNumber;
     final Map<String, String> versionFileJson = <String, String>{
       'app_name': manifest.appName,
-      'version': manifest.buildName,
-      'build_number': manifest.buildNumber
+      if (buildName != null)
+        'version': buildName,
+      if (buildNumber != null)
+        'build_number': buildNumber,
     };
     return jsonEncode(versionFileJson);
   }
@@ -613,25 +633,33 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       scheme,
     );
     final XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(environmentType: environmentType, scheme: scheme, configuration: configuration);
-    return _buildSettingsByBuildContext[buildContext] ??= await _xcodeProjectBuildSettings(buildContext);
+    if (_buildSettingsByBuildContext[buildContext] == null) {
+      final Map<String, String> calculatedBuildSettings = await _xcodeProjectBuildSettings(buildContext);
+      if (calculatedBuildSettings != null) {
+        _buildSettingsByBuildContext[buildContext] = calculatedBuildSettings;
+      }
+    }
+    return _buildSettingsByBuildContext[buildContext];
   }
 
   final Map<XcodeProjectBuildContext, Map<String, String>> _buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
 
   Future<XcodeProjectInfo> projectInfo() async {
-    if (!xcodeProject.existsSync() || !globals.xcodeProjectInterpreter.isInstalled) {
+    final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
+    if (!xcodeProject.existsSync() || xcodeProjectInterpreter == null || !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    return _projectInfo ??= await globals.xcodeProjectInterpreter.getInfo(hostAppRoot.path);
+    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
   }
   XcodeProjectInfo _projectInfo;
 
   Future<Map<String, String>> _xcodeProjectBuildSettings(XcodeProjectBuildContext buildContext) async {
-    if (!globals.xcodeProjectInterpreter.isInstalled) {
+    final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
+    if (xcodeProjectInterpreter == null || !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
 
-    final Map<String, String> buildSettings = await globals.xcodeProjectInterpreter.getBuildSettings(
+    final Map<String, String> buildSettings = await xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
       buildContext: buildContext,
     );
@@ -791,12 +819,13 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
     );
+    final String iosBundleIdentifier = parent.manifest.iosBundleIdentifier ?? 'com.example.${parent.manifest.appName}';
     template.render(
       target,
       <String, Object>{
         'ios': true,
         'projectName': parent.manifest.appName,
-        'iosIdentifier': parent.manifest.iosBundleIdentifier,
+        'iosIdentifier': iosBundleIdentifier,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,
@@ -975,12 +1004,13 @@ to migrate your project.
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
     );
+    final String androidIdentifier = parent.manifest.androidPackage ?? 'com.example.${parent.manifest.appName}';
     template.render(
       target,
       <String, Object>{
         'android': true,
         'projectName': parent.manifest.appName,
-        'androidIdentifier': parent.manifest.androidPackage,
+        'androidIdentifier': androidIdentifier,
         'androidX': usesAndroidX,
       },
       printStatusWhenWriting: false,
