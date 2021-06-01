@@ -24,6 +24,10 @@ FrameTimingsRecorder::FrameTimingsRecorder()
     : frame_number_(frame_number_gen_++),
       frame_number_trace_arg_val_(ToString(frame_number_)) {}
 
+FrameTimingsRecorder::FrameTimingsRecorder(uint64_t frame_number)
+    : frame_number_(frame_number),
+      frame_number_trace_arg_val_(ToString(frame_number_)) {}
+
 FrameTimingsRecorder::~FrameTimingsRecorder() = default;
 
 fml::TimePoint FrameTimingsRecorder::GetVsyncStartTime() const {
@@ -117,7 +121,7 @@ std::unique_ptr<FrameTimingsRecorder> FrameTimingsRecorder::CloneUntil(
     State state) {
   std::scoped_lock state_lock(state_mutex_);
   std::unique_ptr<FrameTimingsRecorder> recorder =
-      std::make_unique<FrameTimingsRecorder>();
+      std::make_unique<FrameTimingsRecorder>(frame_number_);
   recorder->state_ = state;
 
   if (state >= State::kVsync) {
