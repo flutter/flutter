@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -12,7 +13,7 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
 import 'overlay.dart';
-import 'text_editing_intents.dart';
+import 'shortcuts.dart';
 
 /// The type of the [RawAutocomplete] callback which computes the list of
 /// optional completions for the widget's field based on the text the user has
@@ -729,9 +730,16 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
   late final Map<Type, Action<Intent>> _actionMap;
+  late final _AutocompleteCallbackAction<AutocompletePreviousOptionIntent> _previousOptionAction;
+  late final _AutocompleteCallbackAction<AutocompleteNextOptionIntent> _nextOptionAction;
   Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
   final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
+
+  static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowUp): AutocompletePreviousOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
+  };
 
   // The OverlayEntry containing the options.
   OverlayEntry? _floatingOptions;
@@ -786,17 +794,27 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _highlightedOptionIndex.value = _options.isEmpty ? 0 : newIndex % _options.length;
   }
 
-  void _highlightPreviousOption(MoveSelectionUpTextIntent intent) {
+  void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {
     _updateHighlight(_highlightedOptionIndex.value - 1);
   }
 
-  void _highlightNextOption(MoveSelectionDownTextIntent intent) {
+  void _highlightNextOption(AutocompleteNextOptionIntent intent) {
     _updateHighlight(_highlightedOptionIndex.value + 1);
+  }
+
+  void _setActionsEnabled(bool enabled) {
+    // The enabled state determines whether the action will consume the
+    // key shortcut or let it continue on to the underlying text field.
+    // They should only be enabled when the options are showing so they
+    // can be used to navigate them.
+    _previousOptionAction.enabled = enabled;
+    _nextOptionAction.enabled = enabled;
   }
 
   // Hide or show the options overlay, if needed.
   void _updateOverlay() {
     if (_shouldShowOptions) {
+      _setActionsEnabled(true);
       _floatingOptions?.remove();
       _floatingOptions = OverlayEntry(
         builder: (BuildContext context) {
@@ -816,9 +834,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         },
       );
       Overlay.of(context, rootOverlay: true)!.insert(_floatingOptions!);
-    } else if (_floatingOptions != null) {
-      _floatingOptions!.remove();
-      _floatingOptions = null;
+    } else {
+      _setActionsEnabled(false);
+      if (_floatingOptions != null) {
+        _floatingOptions!.remove();
+        _floatingOptions = null;
+      }
     }
   }
 
@@ -869,9 +890,11 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _textEditingController.addListener(_onChangedField);
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onChangedFocus);
-    _actionMap = <Type, Action<Intent>>{
-      MoveSelectionUpTextIntent: CallbackAction<MoveSelectionUpTextIntent>(onInvoke: _highlightPreviousOption),
-      MoveSelectionDownTextIntent: CallbackAction<MoveSelectionDownTextIntent>(onInvoke: _highlightNextOption),
+    _previousOptionAction = _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(onInvoke: _highlightPreviousOption);
+    _nextOptionAction = _AutocompleteCallbackAction<AutocompleteNextOptionIntent>(onInvoke: _highlightNextOption);
+    _actionMap = <Type, Action<Intent>> {
+      AutocompletePreviousOptionIntent: _previousOptionAction,
+      AutocompleteNextOptionIntent: _nextOptionAction,
     };
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _updateOverlay();
@@ -910,22 +933,56 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   Widget build(BuildContext context) {
     return Container(
       key: _fieldKey,
-      child: Actions(
-        actions: _actionMap,
-        child: CompositedTransformTarget(
-          link: _optionsLayerLink,
-          child: widget.fieldViewBuilder == null
-            ? const SizedBox.shrink()
-            : widget.fieldViewBuilder!(
-                context,
-                _textEditingController,
-                _focusNode,
-                _onFieldSubmitted,
-              ),
+      child: Shortcuts(
+        shortcuts: _shortcuts,
+        child: Actions(
+          actions: _actionMap,
+          child: CompositedTransformTarget(
+            link: _optionsLayerLink,
+            child: widget.fieldViewBuilder == null
+              ? const SizedBox.shrink()
+              : widget.fieldViewBuilder!(
+                  context,
+                  _textEditingController,
+                  _focusNode,
+                  _onFieldSubmitted,
+                ),
+          ),
         ),
       ),
     );
   }
+}
+
+class _AutocompleteCallbackAction<T extends Intent> extends CallbackAction<T> {
+  _AutocompleteCallbackAction({
+    required OnInvokeCallback<T> onInvoke,
+    this.enabled = true,
+  }) : super(onInvoke: onInvoke);
+
+  bool enabled;
+
+  @override
+  bool isEnabled(covariant T intent) => enabled;
+
+  @override
+  bool consumesKey(covariant T intent) => enabled;
+}
+
+/// An [Intent] to highlight the previous option in the autocomplete list.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class AutocompletePreviousOptionIntent extends Intent {
+  /// Creates an instance of AutocompletePreviousOptionIntent.
+  const AutocompletePreviousOptionIntent();
+}
+
+/// An [Intent] to highlight the next option in the autocomplete list.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class AutocompleteNextOptionIntent extends Intent {
+  /// Creates an instance of AutocompleteNextOptionIntent.
+  const AutocompleteNextOptionIntent();
 }
 
 /// An inherited widget used to indicate which autocomplete option should be
