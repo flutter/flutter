@@ -391,7 +391,7 @@ class ToolbarOptions {
 /// [RenderEditable.selectWord], etc. programmatically.
 ///
 /// {@template flutter.widgets.editableText.showCaretOnScreen}
-/// ## Keep the caret visisble when focused
+/// ## Keep the caret visible when focused
 ///
 /// When focused, this widget will make attempts to keep the text area and its
 /// caret (even when [showCursor] is `false`) visible, on these occasions:
