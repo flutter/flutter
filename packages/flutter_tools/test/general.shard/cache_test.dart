@@ -192,9 +192,9 @@ void main() {
     });
 
     testWithoutContext('should not be up to date, if some cached artifact is not', () async {
-      final CachedArtifact artifact1 = MockCachedArtifact()
+      final CachedArtifact artifact1 = FakeCachedArtifact()
         ..upToDate = true;
-      final CachedArtifact artifact2 = MockCachedArtifact()
+      final CachedArtifact artifact2 = FakeCachedArtifact()
         ..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -208,9 +208,9 @@ void main() {
     });
 
     testWithoutContext('should be up to date, if all cached artifacts are', () async {
-      final MockCachedArtifact artifact1 = MockCachedArtifact()
+      final FakeCachedArtifact artifact1 = FakeCachedArtifact()
         ..upToDate = true;
-      final MockCachedArtifact artifact2 = MockCachedArtifact()
+      final FakeCachedArtifact artifact2 = FakeCachedArtifact()
         ..upToDate = true;
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Cache cache = Cache.test(
@@ -223,9 +223,9 @@ void main() {
     });
 
     testWithoutContext('should update cached artifacts which are not up to date', () async {
-      final MockCachedArtifact artifact1 = MockCachedArtifact()
+      final FakeCachedArtifact artifact1 = FakeCachedArtifact()
         ..upToDate = true;
-      final MockCachedArtifact artifact2 = MockCachedArtifact()
+      final FakeCachedArtifact artifact2 = FakeCachedArtifact()
         ..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -269,9 +269,9 @@ void main() {
 
     testWithoutContext('failed storage.googleapis.com download shows China warning', () async {
       final InternetAddress address = (await InternetAddress.lookup('storage.googleapis.com')).first;
-      final MockCachedArtifact artifact1 = MockCachedArtifact()
+      final FakeCachedArtifact artifact1 = FakeCachedArtifact()
         ..upToDate = false;
-      final MockCachedArtifact artifact2 = MockCachedArtifact()
+      final FakeCachedArtifact artifact2 = FakeCachedArtifact()
         ..upToDate = false
         ..updateException = SocketException(
         'Connection reset by peer',
@@ -968,7 +968,7 @@ class FakeDownloadedArtifact extends CachedArtifact {
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
 }
 
-class MockCachedArtifact extends Fake implements CachedArtifact {
+class FakeCachedArtifact extends Fake implements CachedArtifact {
   bool upToDate = false;
   bool didUpdate = false;
   Exception updateException;
