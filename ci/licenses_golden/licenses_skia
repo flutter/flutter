@@ -1,4 +1,4 @@
-Signature: b7c955be883c4bf500c5e008aa94a70f
+Signature: 18847a57f37a928548a0b81f62dc8435
 
 UNUSED LICENSES:
 
@@ -5195,10 +5195,10 @@ FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.cpp
 FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellationShader.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellationShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrPathTessellationShader.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrPathTessellationShader.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.cpp
@@ -5520,15 +5520,13 @@ FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.h
 FILE: ../../../third_party/skia/src/gpu/GrVx.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeHardwareTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeHardwareTessellator.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeInstancedShaderImpl.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeInstancedShaderImpl.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeShader.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateOp.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellationShaderImpl.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellationShaderImpl.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationShader.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrStrokeTessellationShader.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrStrokeTessellationShader.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrStrokeTessellationShader_HardwareImpl.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrStrokeTessellationShader_InstancedImpl.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrTessellationShader.h
 FILE: ../../../third_party/skia/src/opts/SkVM_opts.h
 FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLModifiersPool.h
