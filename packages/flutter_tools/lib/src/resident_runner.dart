@@ -1812,7 +1812,7 @@ abstract class DevtoolsLauncher {
 
   Future<void> close();
 
-  /// When measuring devtools memory via addtional arguments, the launch process
+  /// When measuring devtools memory via additional arguments, the launch process
   /// will technically never complete.
   ///
   /// Us this as an indicator that the process has started.
