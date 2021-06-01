@@ -1056,12 +1056,12 @@ void main() {
 
     await tester.pump();
 
-    String editText = findRenderEditable(tester).text!.text!;
+    String editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), newChar);
 
     await tester.pump(const Duration(seconds: 2));
 
-    editText = findRenderEditable(tester).text!.text!;
+    editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), '\u2022');
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
@@ -1096,7 +1096,7 @@ void main() {
 
     await tester.pump();
 
-    final String editText = findRenderEditable(tester).text!.text!;
+    final String editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), '\u2022');
   }, variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.macOS,

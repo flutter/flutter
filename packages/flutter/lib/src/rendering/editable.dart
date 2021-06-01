@@ -2318,7 +2318,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   /// The text to display.
-  InlineSpan? get text => _textPainter.text as InlineSpan?;
+  InlineSpan? get text => _textPainter.text;
   final TextPainter _textPainter;
   set text(InlineSpan? value) {
     if (_textPainter.text == value)

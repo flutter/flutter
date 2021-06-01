@@ -3766,7 +3766,7 @@ void main() {
         onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
-        text: TextSpan(
+        text: const TextSpan(
           style: TextStyle(
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
@@ -3825,7 +3825,7 @@ void main() {
         onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
-        text: TextSpan(
+        text: const TextSpan(
           style: TextStyle(
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
