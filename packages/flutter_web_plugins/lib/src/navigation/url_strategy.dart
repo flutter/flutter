@@ -63,7 +63,7 @@ abstract class UrlStrategy {
   /// Examples:
   ///
   /// * `go(-2)` moves back 2 steps in history.
-  /// * `go(3)` moves forward 3 steps in hisotry.
+  /// * `go(3)` moves forward 3 steps in history.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
   Future<void> go(int count);
@@ -260,7 +260,7 @@ abstract class PlatformLocation {
   /// Examples:
   ///
   /// * `go(-2)` moves back 2 steps in history.
-  /// * `go(3)` moves forward 3 steps in hisotry.
+  /// * `go(3)` moves forward 3 steps in history.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
   void go(int count);

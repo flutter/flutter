@@ -165,7 +165,7 @@ void main([List<String> args = const <String>[]]) {
       // Wait for the first frame to be rasterized.
       await driver.waitUntilFirstFrameRasterized();
       if (withSemantics) {
-        print('Enabeling semantics...');
+        print('Enabling semantics...');
         await driver.setSemantics(true);
       }
 
