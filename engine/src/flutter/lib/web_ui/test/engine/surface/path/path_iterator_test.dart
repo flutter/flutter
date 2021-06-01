@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/html/path/path_utils.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
