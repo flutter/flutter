@@ -619,12 +619,8 @@ void main() {
     expect(editableText.controller.selection.extentOffset, 7);
 
     // Tapping elsewhere immediately collapses and moves the cursor.
-    debugPrintHitTestResults = true;
-    debugPrintGestureArenaDiagnostics = true;
     await tester.tapAt(textOffsetToPosition(tester, 9));
     await tester.pump();
-    debugPrintHitTestResults = false;
-    debugPrintGestureArenaDiagnostics = false;
 
     expect(editableText.controller.selection.isCollapsed, true);
     expect(editableText.controller.selection.baseOffset, 9);
@@ -655,6 +651,7 @@ void main() {
 
     // The handle should still be fully opaque.
     expect(handle.opacity.value, equals(1.0));
+    await gesture.up();
   });
 
   testWidgets('Mouse long press is just like a tap', (WidgetTester tester) async {

@@ -55,37 +55,61 @@ class _ContextGestureRecognizerFactoryWithFunctions<T extends GestureRecognizer>
   }
 }
 
-class TextEditingGestures extends InheritedWidget {
+class _InheritedTextEditingGestures extends InheritedWidget {
+  const _InheritedTextEditingGestures({
+    Key? key,
+    required this.state,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  final _TextEditingGesturesState state;
+
+  @override
+  bool updateShouldNotify(_InheritedTextEditingGestures oldWidget) => oldWidget.state != state;
+}
+
+class TextEditingGestures extends StatefulWidget {
   const TextEditingGestures({
     Key? key,
     this.gestures = const <Type, ContextGestureRecognizerFactory>{},
     this.inherit = false,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required this.child,
+  }) : super(key: key);
 
   TextEditingGestures.platformDefaults({
     Key? key,
     required Widget child,
-  }) : this(key: key, gestures: _getPlatformDefaults, child: child);
+  }) : this(key: key, gestures: _getPlatformDefaults(), child: child);
 
   final Map<Type, ContextGestureRecognizerFactory> gestures;
   final bool inherit;
+  final Widget child;
 
-  // context: The BuildContext that will be used as the new start point for
-  // looking up gestures.
-  // dependent: The first 'context'
-  void _addInheritedGesturesToMap(Map<Type, ContextGestureRecognizerFactory> map, BuildContext context, BuildContext dependent) {
-    final InheritedElement? ancestor = context.getElementForInheritedWidgetOfExactType<TextEditingGestures>();
-    if (!inherit || ancestor == null) {
+  void _addInheritedGesturesToMap(Map<Type, ContextGestureRecognizerFactory> map, BuildContext context) {
+    if (!inherit) {
+      map.addAll(gestures);
+      return;
+    }
+
+    final _InheritedTextEditingGestures? inheritedWidget = context.dependOnInheritedWidgetOfExactType<_InheritedTextEditingGestures>();
+    if (inheritedWidget == null) {
       map.addAll(gestures);
       return;
     }
 
     // This probably doesn't work. Multiple dependencies with the same widget type?
-    dependent.dependOnInheritedElement(ancestor);
-    final TextEditingGestures ancestorWidget = ancestor.widget as TextEditingGestures;
-    ancestorWidget._addInheritedGesturesToMap(map, ancestor, dependent);
+    inheritedWidget.state.widget._addInheritedGesturesToMap(map, inheritedWidget.state.context);
     map.addAll(gestures);
+  }
+
+  static Map<Type, ContextGestureRecognizerFactory>? maybeOf(BuildContext context) {
+    final _InheritedTextEditingGestures? widget = context.dependOnInheritedWidgetOfExactType<_InheritedTextEditingGestures>();
+    if (widget == null || !widget.state.widget.inherit) {
+      return widget?.state.widget.gestures;
+    }
+    final Map<Type, ContextGestureRecognizerFactory> map = <Type, ContextGestureRecognizerFactory>{};
+    widget.state.widget._addInheritedGesturesToMap(map, context);
+    return map;
   }
 
   // TODO(LongCatIsLooong): Document provenance for each platform device kind.
@@ -188,7 +212,7 @@ class TextEditingGestures extends InheritedWidget {
       recognizer
         ..onTapDown = (TapDownDetails details, int tapDownCount) {
           // Only handle double taps here.
-          if (tapDownCount != 2) {
+          if (tapDownCount % 2 != 0) {
             return;
           }
           Actions.invoke(
@@ -206,7 +230,7 @@ class TextEditingGestures extends InheritedWidget {
           ));
         }
         ..onTapUp = (TapUpDetails details, int tapDownCount) {
-          if (tapDownCount != 1) {
+          if (tapDownCount %2 != 1) {
             return;
           }
           Actions.maybeInvoke(context, SelectionToolbarControlIntent.hide);
@@ -230,7 +254,7 @@ class TextEditingGestures extends InheritedWidget {
     initializer: (TextEditingTapGestureRecognizer recognizer, BuildContext context) {
       recognizer
         ..onTapDown = (TapDownDetails details, int tapDownCount) {
-          if (tapDownCount != 2) {
+          if (tapDownCount % 2 != 0) {
             return;
           }
           Actions.invoke(
@@ -248,7 +272,7 @@ class TextEditingGestures extends InheritedWidget {
           ));
         }
         ..onTapUp = (TapUpDetails details, int tapDownCount) {
-          if (tapDownCount != 1) {
+          if (tapDownCount % 2 != 1) {
             return;
           }
           Actions.maybeInvoke(context, SelectionToolbarControlIntent.hide);
@@ -326,17 +350,7 @@ class TextEditingGestures extends InheritedWidget {
     },
   );
 
-  static Map<Type, ContextGestureRecognizerFactory>? maybeOf(BuildContext context) {
-    final TextEditingGestures? widget = context.dependOnInheritedWidgetOfExactType<TextEditingGestures>();
-    if (widget == null || !widget.inherit) {
-      return widget?.gestures;
-    }
-    final Map<Type, ContextGestureRecognizerFactory> map = <Type, ContextGestureRecognizerFactory>{};
-    widget._addInheritedGesturesToMap(map, context, context);
-    return map;
-  }
-
-  static final Map<Type, ContextGestureRecognizerFactory> _getPlatformDefaults = (){
+  static Map<Type, ContextGestureRecognizerFactory> _getPlatformDefaults() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
       case TargetPlatform.iOS:
@@ -359,12 +373,19 @@ class TextEditingGestures extends InheritedWidget {
           ForcePressGestureRecognizer: forcePressRecognizer,
         };
     }
-  }();
+  }
 
   @override
-  bool updateShouldNotify(TextEditingGestures oldWidget) {
-    return oldWidget.gestures != gestures
-        || oldWidget.inherit != inherit;
+  State<StatefulWidget> createState() => _TextEditingGesturesState();
+}
+
+class _TextEditingGesturesState extends State<TextEditingGestures> {
+  @override
+  Widget build(BuildContext context) {
+    return _InheritedTextEditingGestures(
+      child: widget.child,
+      state: this,
+    );
   }
 }
 

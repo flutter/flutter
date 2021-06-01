@@ -12,6 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/widgets/text_selection_gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition;
@@ -78,22 +79,24 @@ Widget overlay({ required Widget child }) {
 }
 
 Widget overlayWithEntry(OverlayEntry entry) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate<dynamic>>[
-      WidgetsLocalizationsDelegate(),
-      MaterialLocalizationsDelegate(),
-    ],
-    child: DefaultTextEditingShortcuts(
-      child: DefaultTextEditingActions(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(size: Size(800.0, 600.0)),
-            child: Overlay(
-              initialEntries: <OverlayEntry>[
-                entry,
-              ],
+  return TextEditingGestures.platformDefaults(
+    child: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        WidgetsLocalizationsDelegate(),
+        MaterialLocalizationsDelegate(),
+      ],
+      child: DefaultTextEditingShortcuts(
+        child: DefaultTextEditingActions(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(size: Size(800.0, 600.0)),
+              child: Overlay(
+                initialEntries: <OverlayEntry>[
+                  entry,
+                ],
+              ),
             ),
           ),
         ),
@@ -618,7 +621,7 @@ void main() {
       actualOldValue,
       const TextEditingValue(
         text: '123',
-        selection: TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
+        selection: TextSelection.collapsed(offset: 3),
       ),
     );
     expect(
@@ -699,28 +702,12 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+    final Rect textArea = tester.getRect(find.byType(EditableText));
 
-    // This tap just puts the cursor somewhere different than where the double
-    // tap will occur to test that the double tap moves the existing cursor first.
-    await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
-    await tester.pump(const Duration(milliseconds: 500));
-
-    await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+    await tester.tapAt(textArea.center);
     await tester.pump(const Duration(milliseconds: 50));
-    // First tap moved the cursor.
-    expect(
-      controller.selection,
-      const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
-    );
-    await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+    await tester.tapAt(textArea.center);
     await tester.pump();
-
-    // Second tap selects the word around the cursor.
-    expect(
-      controller.selection,
-      const TextSelection(baseOffset: 8, extentOffset: 12),
-    );
 
     // Selected text shows 'Copy', and not 'Paste', 'Cut', 'Select All'.
     expect(find.text('Paste'), findsNothing);
@@ -750,7 +737,6 @@ void main() {
                 child: Column(
                   children: <Widget>[
                     TextField(
-                      key: const Key('field0'),
                       controller: controller,
                       style: const TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
@@ -767,11 +753,13 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
+    final Rect textArea = tester.getRect(find.byType(EditableText));
 
-    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textfieldStart + const Offset(100.0, 107.0));
+    final TestGesture longPress = await tester.startGesture(textArea.topLeft);
+    await tester.pump(kLongPressTimeout);
+    await longPress.moveTo(textArea.bottomRight);
+    await tester.pump();
+    await longPress.up();
     await tester.pump(const Duration(milliseconds: 300));
 
     await expectLater(
@@ -798,7 +786,6 @@ void main() {
                 child: Column(
                   children: <Widget>[
                     TextField(
-                      key: const Key('field0'),
                       controller: controller,
                       style: const TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
@@ -814,12 +801,13 @@ void main() {
         ),
       ),
     );
+    final Rect textArea = tester.getRect(find.byType(EditableText));
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
-
-    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textfieldStart + const Offset(100.0, 107.0));
+    final TestGesture longPress = await tester.startGesture(textArea.topLeft);
+    await tester.pump(kLongPressTimeout);
+    await longPress.moveTo(textArea.bottomRight);
+    await tester.pump();
+    await longPress.up();
     await tester.pump(const Duration(milliseconds: 300));
 
     await expectLater(
@@ -847,12 +835,12 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+      final Rect textArea = tester.getRect(find.byType(EditableText));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(textArea.center);
       await tester.pump(const Duration(milliseconds: 50));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(textArea.center);
       await tester.pump();
 
       // Selected text shows 'Copy', and not 'Paste', 'Cut', 'Select all'.
@@ -1474,8 +1462,7 @@ void main() {
     await tester.longPressAt(dPos);
     await tester.pumpAndSettle();
     final EditableTextState state = tester.state(find.byType(EditableText));
-    TextSelection currentOverlaySelection =
-        state.selectionOverlay!.value.selection;
+    TextSelection currentOverlaySelection = state.selectionOverlay!.value.selection;
     expect(currentOverlaySelection.baseOffset, 0);
     expect(currentOverlaySelection.extentOffset, 8);
 
@@ -8761,7 +8748,7 @@ void main() {
       );
 
       // Tap to trigger the text field.
-      await tester.longPress(find.byType(TextField));
+      await tester.longPress(find.byType(EditableText));
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
@@ -8784,9 +8771,9 @@ void main() {
     );
 
     // Double tap to trigger the text field.
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(EditableText));
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(EditableText));
     await tester.pump();
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
@@ -8808,9 +8795,9 @@ void main() {
       );
 
       // Double tap to trigger the text field.
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(EditableText));
       await tester.pump(const Duration(milliseconds: 50));
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(EditableText));
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
@@ -9389,12 +9376,12 @@ void main() {
         return null;
       });
 
-    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+    final Rect textArea = tester.getRect(find.byType(EditableText));
 
     // Double tap like when showing the text selection menu on Android/iOS.
-    await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+    await tester.tapAt(textArea.center);
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+    await tester.tapAt(textArea.center);
     await tester.pump();
 
     if (kIsWeb) {

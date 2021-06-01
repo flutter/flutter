@@ -2645,92 +2645,91 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // ---------- Text Editing Actions ----------
 
-  late final Action<SelectTextAtPositionIntent> _selectPostionAt = TextEditingCallbackAction<SelectTextAtPositionIntent>(
-    (SelectTextAtPositionIntent intent) {
-      switch (intent.textBoundaryType) {
-        case TextBoundary.character:
-          renderEditable.selectPositionAt(
-            from: intent.fromPosition,
-            to: intent.toPosition,
-            cause: intent.cause,
-          );
-          return;
-        case TextBoundary.word:
-          renderEditable.selectWordsInRange(
-            from: intent.fromPosition,
-            to: intent.toPosition,
-            cause: intent.cause,
-          );
-          return;
-        case TextBoundary.line:
-          assert(false);
-      }
-    },
+  void selectPositionAt(SelectTextAtPositionIntent intent) {
+    switch (intent.textBoundaryType) {
+      case TextBoundary.character:
+        renderEditable.selectPositionAt(
+          from: intent.fromPosition,
+          to: intent.toPosition,
+          cause: intent.cause,
+        );
+        return;
+      case TextBoundary.word:
+        renderEditable.selectWordsInRange(
+          from: intent.fromPosition,
+          to: intent.toPosition,
+          cause: intent.cause,
+        );
+        return;
+      case TextBoundary.line:
+        assert(false);
+    }
+  }
+  late final Action<SelectTextAtPositionIntent> _selectPostionAtAction = TextEditingCallbackAction<SelectTextAtPositionIntent>(
+    selectPositionAt,
     enabledPredicate: (SelectTextAtPositionIntent intent) => widget.selectionEnabled,
   );
 
-  late final Action<SelectWordEdgeIntent> _selectWordEdge = TextEditingCallbackAction<SelectWordEdgeIntent>(
-    (SelectWordEdgeIntent intent) {
-      final TextPosition textPosition = renderEditable.getTextPositionForOffset(intent.globalPosition);
-      final TextRange word = renderEditable.getTextBoundaryAtTextPosition(
-        textPosition,
-        boundaryType: TextBoundary.word,
-      );
-      final TextSelection newSelection = textPosition.offset - word.start <= 1
-        ? TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream)
-        : TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
-      _handleSelectionChanged(newSelection, intent.cause);
-      _scheduleShowCaretOnScreen();
-    },
+  void selectWordEdge(SelectWordEdgeIntent intent) {
+    final TextPosition textPosition = renderEditable.getTextPositionForOffset(intent.globalPosition);
+    final TextRange word = renderEditable.getTextBoundaryAtTextPosition(
+      textPosition,
+      boundaryType: TextBoundary.word,
+    );
+    final TextSelection newSelection = textPosition.offset - word.start <= 1
+      ? TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream)
+      : TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
+    _handleSelectionChanged(newSelection, intent.cause);
+    _scheduleShowCaretOnScreen();
+  }
+
+  late final Action<SelectWordEdgeIntent> _selectWordEdgeAction = TextEditingCallbackAction<SelectWordEdgeIntent>(
+    selectWordEdge,
     enabledPredicate: (SelectWordEdgeIntent intent) => widget.selectionEnabled,
   );
 
-  late final Action<ExtendSelectionToPointIntent> _extendSelection = TextEditingCallbackAction<ExtendSelectionToPointIntent>(
-    (ExtendSelectionToPointIntent intent) {
-      final TextPosition extent = renderEditable.getTextPositionForOffset(intent.toPosition);
-      final TextSelection currentSelection = _value.selection;
-      assert(currentSelection.isValid);
-      final TextRange range = renderEditable.getTextBoundaryAtTextPosition(
-        extent,
-        boundaryType: intent.textBoundaryType,
-      );
+  void extendSelection(ExtendSelectionToPointIntent intent) {
+    final TextPosition extent = renderEditable.getTextPositionForOffset(intent.toPosition);
+    final TextSelection currentSelection = _value.selection;
+    assert(currentSelection.isValid);
+    final TextRange range = renderEditable.getTextBoundaryAtTextPosition(
+      extent,
+      boundaryType: intent.textBoundaryType,
+    );
 
-      final TextSelection newSelection;
-      switch (intent.textBoundaryType) {
-        case TextBoundary.character:
+    final TextSelection newSelection;
+    switch (intent.textBoundaryType) {
+      case TextBoundary.character:
+        newSelection = currentSelection.copyWith(
+          // Be conservative about the selected range. Feel free to tweak.
+          extentOffset: currentSelection.baseOffset.clamp(range.start, range.end),
+        );
+        break;
+      case TextBoundary.word:
+      case TextBoundary.line:
+        if (range.start > currentSelection.baseOffset) {
           newSelection = currentSelection.copyWith(
-            // Be conservative about the selected range. Feel free to tweak.
-            extentOffset: currentSelection.baseOffset.clamp(range.start, range.end),
+            extentOffset: range.end,
           );
-          break;
-        case TextBoundary.word:
-        case TextBoundary.line:
-          if (range.start > currentSelection.baseOffset) {
-            newSelection = currentSelection.copyWith(
-              extentOffset: range.end,
-            );
-          } else if (range.end < currentSelection.baseOffset) {
-            newSelection = currentSelection.copyWith(
-              extentOffset: range.start,
-            );
-          } else {
-            newSelection = currentSelection.copyWith(
-              baseOffset: range.start,
-              extentOffset: range.end,
-              isDirectional: false,
-            );
-          }
-          break;
-      }
-      _handleSelectionChanged(newSelection, intent.cause);
-      _scheduleShowCaretOnScreen();
-    },
+        } else if (range.end < currentSelection.baseOffset) {
+          newSelection = currentSelection.copyWith(
+            extentOffset: range.start,
+          );
+        } else {
+          newSelection = currentSelection.copyWith(
+            baseOffset: range.start,
+            extentOffset: range.end,
+            isDirectional: false,
+          );
+        }
+        break;
+    }
+    _handleSelectionChanged(newSelection, intent.cause);
+    _scheduleShowCaretOnScreen();
+  }
+  late final Action<ExtendSelectionToPointIntent> _extendSelectionAction = TextEditingCallbackAction<ExtendSelectionToPointIntent>(
+    extendSelection,
     enabledPredicate: (ExtendSelectionToPointIntent intent) => widget.selectionEnabled && _value.selection.isValid,
-  );
-
-  late final Action<KeyboardControlIntent> _controlKeyboard = TextEditingCallbackAction<KeyboardControlIntent>(
-    (KeyboardControlIntent intent) => requestKeyboard(),
-    enabledPredicate: (KeyboardControlIntent intent) => !widget.readOnly,
   );
 
   @override
@@ -2742,83 +2741,80 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextSelectionControls? controls = widget.selectionControls;
     return Actions(
       actions: <Type, Action<Intent>>{
-        SelectTextAtPositionIntent: _selectPostionAt,
-        SelectWordEdgeIntent: _selectWordEdge,
-        ExtendSelectionToPointIntent: _extendSelection,
-        KeyboardControlIntent: _controlKeyboard,
+        //SelectTextAtPositionIntent: selectPostionAtAction,
+        //SelectWordEdgeIntent: selectWordEdgeAction,
+        //ExtendSelectionToPointIntent: extendSelectionAction,
       },
       child: MouseRegion(
         cursor: widget.mouseCursor ?? SystemMouseCursors.text,
-        child: _TextEditingGestureDetector(
-          child: Scrollable(
-            excludeFromSemantics: true,
-            axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-            controller: _scrollController,
-            physics: widget.scrollPhysics,
-            dragStartBehavior: widget.dragStartBehavior,
-            restorationId: widget.restorationId,
-            scrollBehavior: widget.scrollBehavior ??
-                // Remove scrollbars if only single line
-                (_isMultiline ? null : ScrollConfiguration.of(context).copyWith(scrollbars: false)),
-            viewportBuilder: (BuildContext context, ViewportOffset offset) {
-              return CompositedTransformTarget(
-                link: _toolbarLayerLink,
-                child: Semantics(
-                  onCopy: _semanticsOnCopy(controls),
-                  onCut: _semanticsOnCut(controls),
-                  onPaste: _semanticsOnPaste(controls),
-                  child: _Editable(
-                    key: _editableKey,
-                    startHandleLayerLink: _startHandleLayerLink,
-                    endHandleLayerLink: _endHandleLayerLink,
-                    textSpan: buildTextSpan(),
-                    value: _value,
-                    cursorColor: _cursorColor,
-                    backgroundCursorColor: widget.backgroundCursorColor,
-                    showCursor: EditableText.debugDeterministicCursor
-                        ? ValueNotifier<bool>(widget.showCursor)
-                        : _cursorVisibilityNotifier,
-                    forceLine: widget.forceLine,
-                    readOnly: widget.readOnly,
-                    hasFocus: _hasFocus,
-                    maxLines: widget.maxLines,
-                    minLines: widget.minLines,
-                    expands: widget.expands,
-                    strutStyle: widget.strutStyle,
-                    selectionColor: widget.selectionColor,
-                    textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-                    textAlign: widget.textAlign,
-                    textDirection: _textDirection,
-                    locale: widget.locale,
-                    textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
-                    textWidthBasis: widget.textWidthBasis,
-                    obscuringCharacter: widget.obscuringCharacter,
-                    obscureText: widget.obscureText,
-                    autocorrect: widget.autocorrect,
-                    smartDashesType: widget.smartDashesType,
-                    smartQuotesType: widget.smartQuotesType,
-                    enableSuggestions: widget.enableSuggestions,
-                    offset: offset,
-                    onCaretChanged: _handleCaretChanged,
-                    rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                    cursorWidth: widget.cursorWidth,
-                    cursorHeight: widget.cursorHeight,
-                    cursorRadius: widget.cursorRadius,
-                    cursorOffset: widget.cursorOffset ?? Offset.zero,
-                    selectionHeightStyle: widget.selectionHeightStyle,
-                    selectionWidthStyle: widget.selectionWidthStyle,
-                    paintCursorAboveText: widget.paintCursorAboveText,
-                    enableInteractiveSelection: widget.enableInteractiveSelection,
-                    textSelectionDelegate: this,
-                    devicePixelRatio: _devicePixelRatio,
-                    promptRectRange: _currentPromptRectRange,
-                    promptRectColor: widget.autocorrectionTextRectColor,
-                    clipBehavior: widget.clipBehavior,
-                  ),
+        child: Scrollable(
+          excludeFromSemantics: true,
+          axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+          controller: _scrollController,
+          physics: widget.scrollPhysics,
+          dragStartBehavior: widget.dragStartBehavior,
+          restorationId: widget.restorationId,
+          scrollBehavior: widget.scrollBehavior ??
+              // Remove scrollbars if only single line
+              (_isMultiline ? null : ScrollConfiguration.of(context).copyWith(scrollbars: false)),
+          viewportBuilder: (BuildContext context, ViewportOffset offset) {
+            return CompositedTransformTarget(
+              link: _toolbarLayerLink,
+              child: Semantics(
+                onCopy: _semanticsOnCopy(controls),
+                onCut: _semanticsOnCut(controls),
+                onPaste: _semanticsOnPaste(controls),
+                child: _Editable(
+                  key: _editableKey,
+                  startHandleLayerLink: _startHandleLayerLink,
+                  endHandleLayerLink: _endHandleLayerLink,
+                  textSpan: buildTextSpan(),
+                  value: _value,
+                  cursorColor: _cursorColor,
+                  backgroundCursorColor: widget.backgroundCursorColor,
+                  showCursor: EditableText.debugDeterministicCursor
+                      ? ValueNotifier<bool>(widget.showCursor)
+                      : _cursorVisibilityNotifier,
+                  forceLine: widget.forceLine,
+                  readOnly: widget.readOnly,
+                  hasFocus: _hasFocus,
+                  maxLines: widget.maxLines,
+                  minLines: widget.minLines,
+                  expands: widget.expands,
+                  strutStyle: widget.strutStyle,
+                  selectionColor: widget.selectionColor,
+                  textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+                  textAlign: widget.textAlign,
+                  textDirection: _textDirection,
+                  locale: widget.locale,
+                  textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+                  textWidthBasis: widget.textWidthBasis,
+                  obscuringCharacter: widget.obscuringCharacter,
+                  obscureText: widget.obscureText,
+                  autocorrect: widget.autocorrect,
+                  smartDashesType: widget.smartDashesType,
+                  smartQuotesType: widget.smartQuotesType,
+                  enableSuggestions: widget.enableSuggestions,
+                  offset: offset,
+                  onCaretChanged: _handleCaretChanged,
+                  rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                  cursorWidth: widget.cursorWidth,
+                  cursorHeight: widget.cursorHeight,
+                  cursorRadius: widget.cursorRadius,
+                  cursorOffset: widget.cursorOffset ?? Offset.zero,
+                  selectionHeightStyle: widget.selectionHeightStyle,
+                  selectionWidthStyle: widget.selectionWidthStyle,
+                  paintCursorAboveText: widget.paintCursorAboveText,
+                  enableInteractiveSelection: widget.enableInteractiveSelection,
+                  textSelectionDelegate: this,
+                  devicePixelRatio: _devicePixelRatio,
+                  promptRectRange: _currentPromptRectRange,
+                  promptRectColor: widget.autocorrectionTextRectColor,
+                  clipBehavior: widget.clipBehavior,
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -2852,8 +2848,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 }
 
-class _TextEditingGestureDetector extends StatefulWidget {
-  const _TextEditingGestureDetector({
+class TextEditingGestureDetector extends StatefulWidget {
+  const TextEditingGestureDetector({
     Key? key,
     required this.child,
   }) : super(key: key);
@@ -2864,7 +2860,7 @@ class _TextEditingGestureDetector extends StatefulWidget {
   _TextEditingGestureDetectorState createState() => _TextEditingGestureDetectorState();
 }
 
-class _TextEditingGestureDetectorState extends State<_TextEditingGestureDetector> {
+class _TextEditingGestureDetectorState extends State<TextEditingGestureDetector> {
   final Map<Type, GestureRecognizer> recognizers = <Type, GestureRecognizer>{};
 
   static GestureRecognizer _updateRecognizer(

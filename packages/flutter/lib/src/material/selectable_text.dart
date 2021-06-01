@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/text_selection_gestures.dart';
 
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
@@ -557,6 +558,74 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   @override
   bool get wantKeepAlive => true;
 
+  static final ContextGestureRecognizerFactory<LongPressGestureRecognizer> _longPressRecognizer = ContextGestureRecognizerFactory<LongPressGestureRecognizer>.withFunctions(
+    constructor: (BuildContext context) => LongPressGestureRecognizer(
+      debugOwner: context,
+      supportedDevices: <PointerDeviceKind>{
+        PointerDeviceKind.unknown,
+        PointerDeviceKind.touch,
+      },
+    ),
+    initializer: (LongPressGestureRecognizer recognizer, BuildContext context) {
+      recognizer
+        ..onLongPressStart = (LongPressStartDetails details) {
+          Actions.invoke(
+            context,
+            SelectTextAtPositionIntent(
+              fromPosition: details.globalPosition,
+              textBoundaryType: TextBoundary.word,
+              cause: SelectionChangedCause.longPress,
+            ),
+          );
+          Feedback.forLongPress(context);
+          Actions.maybeInvoke(context, SelectionToolbarControlIntent.show);
+        }
+        ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+          Actions.invoke(
+            context,
+            ExtendSelectionToPointIntent(
+              toPosition: details.globalPosition,
+              cause: SelectionChangedCause.longPress,
+            ),
+          );
+        }
+        ..onLongPressEnd = (LongPressEndDetails details) {
+          Actions.maybeInvoke(context, const SelectionHandleControlIntent(
+            deviceKind: PointerDeviceKind.touch,
+            cause: SelectionChangedCause.longPress,
+          ));
+        };
+    },
+  );
+
+  static final ContextGestureRecognizerFactory<LongPressGestureRecognizer> _iOSMacOSlongPressRecognizer = ContextGestureRecognizerFactory<LongPressGestureRecognizer>.withFunctions(
+    constructor: (BuildContext context) => LongPressGestureRecognizer(debugOwner: context),
+    initializer: (LongPressGestureRecognizer recognizer, BuildContext context) {
+      recognizer
+        ..onLongPressStart = (LongPressStartDetails details) {
+          Actions.invoke(
+            context,
+            SelectTextAtPositionIntent(
+              fromPosition: details.globalPosition,
+              textBoundaryType: TextBoundary.word,
+              cause: SelectionChangedCause.longPress,
+            ),
+          );
+          Actions.maybeInvoke(context, SelectionToolbarControlIntent.show);
+        }
+        ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+          Actions.invoke(
+            context,
+            SelectTextAtPositionIntent(
+              fromPosition: details.globalPosition,
+              textBoundaryType: TextBoundary.word,
+              cause: SelectionChangedCause.longPress,
+            ),
+          );
+        };
+    },
+  );
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
@@ -582,6 +651,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     Color? cursorColor = widget.cursorColor;
     final Color selectionColor;
     Radius? cursorRadius = widget.cursorRadius;
+    final ContextGestureRecognizerFactory<LongPressGestureRecognizer> longPressRecognizer;
 
     switch (theme.platform) {
       case TargetPlatform.iOS:
@@ -594,6 +664,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        longPressRecognizer = _iOSMacOSlongPressRecognizer;
         break;
 
       case TargetPlatform.macOS:
@@ -606,6 +677,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        longPressRecognizer = _iOSMacOSlongPressRecognizer;
         break;
 
       case TargetPlatform.android:
@@ -616,6 +688,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         cursorOpacityAnimates = false;
         cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        longPressRecognizer = _longPressRecognizer;
         break;
 
       case TargetPlatform.linux:
@@ -626,6 +699,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         cursorOpacityAnimates = false;
         cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        longPressRecognizer = _longPressRecognizer;
         break;
     }
 
@@ -674,33 +748,55 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       ),
     );
 
-    return Actions(
-      actions: <Type, Action<Intent>> {
-        SelectionToolbarControlIntent: TextEditingCallbackAction<SelectionToolbarControlIntent>(
-          (SelectionToolbarControlIntent intent) {
-            if (!intent.showSelectionToolbar) {
-              _editableText!.hideToolbar();
-            } else {
-              _editableText!.showToolbar(intent.toolbarLocation);
-            }
-          },
-          enabledPredicate: (SelectionToolbarControlIntent intent) => widget.selectionEnabled,
-        ),
-        SelectionHandleControlIntent: TextEditingCallbackAction<SelectionHandleControlIntent>(
-          (SelectionHandleControlIntent intent) {
-            final bool willShowSelectionHandles = _shouldShowSelectionHandles(intent);
-            if (willShowSelectionHandles != _showSelectionHandles) {
-              setState(() {
-                _showSelectionHandles = willShowSelectionHandles;
-              });
-            }
-          },
-          enabledPredicate: (SelectionHandleControlIntent intent) => widget.selectionEnabled,
-        ),
+    final VoidCallback? onTap = widget.onTap;
+    return TextEditingGestures(
+      inherit: true,
+      gestures: <Type, ContextGestureRecognizerFactory<LongPressGestureRecognizer>>{
+        LongPressGestureRecognizer: longPressRecognizer,
       },
-      child: Semantics(
-        onLongPress: _effectiveFocusNode.requestFocus,
-        child: child,
+      child: Actions(
+        actions: <Type, Action<Intent>> {
+          SelectTextAtPositionIntent: TextEditingCallbackAction<SelectTextAtPositionIntent>(
+            (SelectTextAtPositionIntent intent) => _editableText!.selectPositionAt(intent),
+            enabledPredicate: (SelectTextAtPositionIntent intent) => widget.selectionEnabled,
+          ),
+          SelectWordEdgeIntent: TextEditingCallbackAction<SelectWordEdgeIntent>(
+            (SelectWordEdgeIntent intent) => _editableText!.selectWordEdge(intent),
+            enabledPredicate: (SelectWordEdgeIntent intent) => widget.selectionEnabled,
+          ),
+          ExtendSelectionToPointIntent: TextEditingCallbackAction<ExtendSelectionToPointIntent>(
+            (ExtendSelectionToPointIntent intent) => _editableText!.extendSelection(intent),
+            enabledPredicate: (ExtendSelectionToPointIntent intent) => widget.selectionEnabled && _controller.value.selection.isValid,
+          ),
+          SelectionToolbarControlIntent: TextEditingCallbackAction<SelectionToolbarControlIntent>(
+            (SelectionToolbarControlIntent intent) {
+              if (!intent.showSelectionToolbar) {
+                _editableText!.hideToolbar();
+              } else {
+                _editableText!.showToolbar(intent.toolbarLocation);
+              }
+            },
+            enabledPredicate: (SelectionToolbarControlIntent intent) => widget.selectionEnabled,
+          ),
+          SelectionHandleControlIntent: TextEditingCallbackAction<SelectionHandleControlIntent>(
+            (SelectionHandleControlIntent intent) {
+              final bool willShowSelectionHandles = _shouldShowSelectionHandles(intent);
+              if (willShowSelectionHandles != _showSelectionHandles) {
+                setState(() {
+                  _showSelectionHandles = willShowSelectionHandles;
+                });
+              }
+            },
+            enabledPredicate: (SelectionHandleControlIntent intent) => widget.selectionEnabled,
+          ),
+          if (onTap != null) InvokeTextEditingComponentOnTapCallbackIntent: TextEditingCallbackAction<InvokeTextEditingComponentOnTapCallbackIntent>(
+            (InvokeTextEditingComponentOnTapCallbackIntent intent) => onTap(),
+          ),
+        },
+        child: Semantics(
+          onLongPress: _effectiveFocusNode.requestFocus,
+          child: TextEditingGestureDetector(child: child),
+        ),
       ),
     );
   }

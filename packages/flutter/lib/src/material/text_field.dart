@@ -1299,9 +1299,21 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
-    final VoidCallback? onTap = widget.onTap;
+    final VoidCallback? onTap = _isEnabled ? widget.onTap : null;
     return Actions(
       actions: <Type, Action<Intent>> {
+        SelectTextAtPositionIntent: TextEditingCallbackAction<SelectTextAtPositionIntent>(
+          (SelectTextAtPositionIntent intent) => _editableText!.selectPositionAt(intent),
+          enabledPredicate: (SelectTextAtPositionIntent intent) => widget.selectionEnabled,
+        ),
+        SelectWordEdgeIntent: TextEditingCallbackAction<SelectWordEdgeIntent>(
+          (SelectWordEdgeIntent intent) => _editableText!.selectWordEdge(intent),
+          enabledPredicate: (SelectWordEdgeIntent intent) => widget.selectionEnabled,
+        ),
+        ExtendSelectionToPointIntent: TextEditingCallbackAction<ExtendSelectionToPointIntent>(
+          (ExtendSelectionToPointIntent intent) => _editableText!.extendSelection(intent),
+          enabledPredicate: (ExtendSelectionToPointIntent intent) => widget.selectionEnabled && _effectiveController.value.selection.isValid,
+        ),
         SelectionToolbarControlIntent: TextEditingCallbackAction<SelectionToolbarControlIntent>(
           (SelectionToolbarControlIntent intent) {
             if (!intent.showSelectionToolbar) {
@@ -1322,6 +1334,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             }
           },
           enabledPredicate: (SelectionHandleControlIntent intent) => widget.selectionEnabled,
+        ),
+        KeyboardControlIntent: TextEditingCallbackAction<KeyboardControlIntent>(
+          (KeyboardControlIntent intent) { _requestKeyboard(); },
         ),
         if (onTap != null) InvokeTextEditingComponentOnTapCallbackIntent: TextEditingCallbackAction<InvokeTextEditingComponentOnTapCallbackIntent>(
           (InvokeTextEditingComponentOnTapCallbackIntent intent) => onTap(),
@@ -1348,7 +1363,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 child: child,
               );
             },
-            child: child
+            child: TextEditingGestureDetector(child: child),
           ),
         ),
       ),
