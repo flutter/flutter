@@ -19,6 +19,7 @@ import '../cache.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
+import 'android_sdk.dart';
 
 const String _defaultGradleVersion = '6.7';
 
@@ -133,8 +134,13 @@ bool _isWithinVersionRange(
   assert(min != null);
   assert(max != null);
   final Version parsedTargetVersion = Version.parse(targetVersion);
-  return parsedTargetVersion >= Version.parse(min) &&
-         parsedTargetVersion <= Version.parse(max);
+  final Version minVersion = Version.parse(min);
+  final Version maxVersion = Version.parse(max);
+  return minVersion != null &&
+      maxVersion != null &&
+      parsedTargetVersion != null &&
+      parsedTargetVersion >= minVersion &&
+      parsedTargetVersion <= maxVersion;
 }
 
 /// Returns the Gradle version that is required by the given Android Gradle plugin version
@@ -217,8 +223,9 @@ void updateLocalProperties({
     changed = true;
   }
 
-  if (globals.androidSdk != null) {
-    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(globals.androidSdk.directory.path));
+  final AndroidSdk androidSdk = globals.androidSdk;
+  if (androidSdk != null) {
+    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(androidSdk.directory.path));
   }
 
   changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot));
@@ -248,8 +255,9 @@ void updateLocalProperties({
 /// Writes the path to the Android SDK, if known.
 void writeLocalProperties(File properties) {
   final SettingsFile settings = SettingsFile();
-  if (globals.androidSdk != null) {
-    settings.values['sdk.dir'] = globals.fsUtils.escapePath(globals.androidSdk.directory.path);
+  final AndroidSdk androidSdk = globals.androidSdk;
+  if (androidSdk != null) {
+    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory.path);
   }
   settings.writeContents(properties);
 }
