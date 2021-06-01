@@ -5794,7 +5794,7 @@ abstract class RenderObjectElement extends Element {
       'RenderObjectElement: $renderObject',
     );
     oldWidget.didUnmountRenderObject(renderObject);
-    _renderObject?.dispose();
+    _renderObject!.dispose();
     _renderObject = null;
   }
 
