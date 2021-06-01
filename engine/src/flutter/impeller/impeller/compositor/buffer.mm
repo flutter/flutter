@@ -27,9 +27,12 @@ HostBuffer::~HostBuffer() {
 }
 
 std::shared_ptr<BufferView> HostBuffer::Emplace(size_t length) {
+  auto old_length = length_;
   if (!Truncate(length_ + length)) {
     return nullptr;
   }
+  return std::shared_ptr<BufferView>(
+      new BufferView(shared_from_this(), Range{old_length, length}));
 }
 
 bool HostBuffer::Truncate(size_t length) {
