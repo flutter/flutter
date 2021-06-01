@@ -5966,7 +5966,7 @@ class RawImage extends LeafRenderObjectWidget {
   /// If non-null, the value from the [Animation] is multiplied with the opacity
   /// of each image pixel before painting onto the canvas.
   ///
-  /// This is more efficient that using [FadeTransition] to change the opacity
+  /// This is more efficient than using [FadeTransition] to change the opacity
   /// of an image.
   final Animation<double>? opacity;
 

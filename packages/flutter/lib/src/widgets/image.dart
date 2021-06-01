@@ -930,8 +930,15 @@ class Image extends StatefulWidget {
   /// If non-null, the value from the [Animation] is multiplied with the opacity
   /// of each image pixel before painting onto the canvas.
   ///
-  /// This is more efficient that using [FadeTransition] to change the opacity
-  /// of an image.
+  /// This is more efficient than using [FadeTransition] to change the opacity
+  /// of an image, since this avoids creating a new composited layer. Composited
+  /// layers may double memory usage as the image is painted onto an offscreen
+  /// render target.
+  ///
+  /// See also:
+  ///
+  ///  * [AlwaysStoppedAnimation], which allows you to create an [Animation]
+  ///    from a single opacity value.
   final Animation<double>? opacity;
 
   /// The rendering quality of the image.
