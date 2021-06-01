@@ -46,7 +46,8 @@ void main() {
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
     await tester.tap(find.byTooltip('Search'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     delegate.query = 'Foo';
 
