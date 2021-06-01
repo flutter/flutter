@@ -3811,7 +3811,7 @@ void main() {
             text: 'test',
             selection: TextSelection.collapsed(offset: 3),
           );
-      List<RenderBox> renderBoxes = <RenderBox>[
+      final List<RenderBox> renderBoxes = <RenderBox>[
         RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
       ];
       final ViewportOffset viewportOffset = ViewportOffset.zero();
