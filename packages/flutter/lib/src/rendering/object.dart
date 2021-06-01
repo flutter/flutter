@@ -1120,9 +1120,9 @@ class PipelineOwner {
 ///
 /// [RenderObject]s are responsible for cleaning up any expensive resources
 /// they hold when [dispose] is called, such as [Picture] or [Image] objects.
-/// They must _only_ dispose of their [layer] object if [isRepaintBoundary] is
-/// true. Otherwise, they may be disposing of a layer that is needed by their
-/// parent for repainting.
+/// This includes any [Layer]s that the render object has directly created. By
+/// default, the base implementation of dispose will dispose of the [layer], and
+/// implementations must dispose of any other layer(s) it directly creates.
 ///
 /// ## Writing a RenderObject subclass
 ///
