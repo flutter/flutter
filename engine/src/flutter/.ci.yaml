@@ -38,6 +38,10 @@ targets:
     builder: Linux Host Engine
     scheduler: luci
 
+  - name: Linux Unopt
+    builder: Linux Unopt
+    scheduler: luci
+
   - name: Linux Arm Host Engine
     builder: Linux Arm Host Engine
     scheduler: luci
@@ -78,6 +82,10 @@ targets:
     builder: Mac Host Engine
     scheduler: luci
 
+  - name: Mac Unopt
+    builder: Mac Unopt
+    scheduler: luci
+
   - name: Mac iOS Engine
     builder: Mac iOS Engine
     scheduler: luci
@@ -100,6 +108,10 @@ targets:
 
   - name: Windows Host Engine
     builder: Windows Host Engine
+    scheduler: luci
+
+  - name: Windows Unopt
+    builder: Windows Unopt
     scheduler: luci
 
   - name: Windows UWP Engine
