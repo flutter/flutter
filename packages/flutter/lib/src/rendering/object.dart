@@ -1120,9 +1120,9 @@ class PipelineOwner {
 ///
 /// [RenderObject]s are responsible for cleaning up any expensive resources
 /// they hold when [dispose] is called, such as [Picture] or [Image] objects.
-/// This includes any [Layer]s that the render object has directly created. By
-/// default, the base implementation of dispose will dispose of the [layer], and
-/// implementations must dispose of any other layer(s) it directly creates.
+/// This includes any [Layer]s that the render object has directly created. The
+/// base implementation of dispose will nullify the [layer] property. Subclasses
+/// must also nullify any other layer(s) it directly creates.
 ///
 /// ## Writing a RenderObject subclass
 ///
@@ -1266,9 +1266,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// a [RenderObjectElement]. Those children will be disposed when that
   /// element unmounts, which may be delayed if the element is moved to another
   /// part of the tree.
-  ///
-  /// If [isRepaintBoundary] returns true, the layer tree rooted at this
-  /// object's layer will also dispose.
   ///
   /// Implementations of this method must end with a call to the inherited
   /// method, as in `super.dispose()`.
