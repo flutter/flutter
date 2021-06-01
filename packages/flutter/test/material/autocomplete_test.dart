@@ -336,8 +336,8 @@ void main() {
     final Finder listFinder = find.byType(ListView);
     expect(listFinder, findsNothing);
 
-    /// entering `a` returns 9 items(height > `maxOptionsheight`) from the kOptions
-    /// so height gets restricted to `maxOptionsheight =250`
+    /// entering `a` returns 9 items(height > `maxOptionsHeight`) from the kOptions
+    /// so height gets restricted to `maxOptionsHeight =250`
     final double nineItemsHeight = await _getDefaultOptionsHeight(tester, 'a');
     expect(nineItemsHeight, equals(maxOptionsHeight));
 
