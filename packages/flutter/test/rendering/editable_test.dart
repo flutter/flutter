@@ -3742,6 +3742,63 @@ void main() {
     composingRect = editable.getRectForComposingRange(const TextRange(start: 9, end: 10))!;
     expect(composingRect, const Rect.fromLTRB(34.0, 14.0, 48.0, 28.0));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+  test('able to render WidgetSpans nested spans', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 3),
+        );
+    final List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: 'a'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
+    ];
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: TextSpan(
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+        children: <InlineSpan>[
+          TextSpan(text: 'test'),
+          WidgetSpan(child: Text('a')),
+          TextSpan(children: <InlineSpan>[
+              WidgetSpan(child: Text('b')),
+              WidgetSpan(child: Text('c')),
+            ],
+          ),
+        ],
+      ),
+      selection: const TextSelection.collapsed(offset: 3),
+      maxLines: 2,
+      minLines: 2,
+      children: renderBoxes,
+    );
+
+    // Force a line wrap
+    layout(editable, constraints: const BoxConstraints(maxWidth: 75));
+    editable.hasFocus = true;
+    pumpFrame();
+
+    Rect? composingRect = editable.getRectForComposingRange(const TextRange(start: 4, end: 5));
+    expect(composingRect, const Rect.fromLTRB(40.0, 0.0, 54.0, 14.0));
+    composingRect = editable.getRectForComposingRange(const TextRange(start: 5, end: 6));
+    expect(composingRect, const Rect.fromLTRB(54.0, 0.0, 68.0, 14.0));
+    composingRect = editable.getRectForComposingRange(const TextRange(start: 6, end: 7));
+    expect(composingRect, const Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
+    composingRect = editable.getRectForComposingRange(const TextRange(start: 7, end: 8));
+    expect(composingRect, null);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 }
 
 class _TestRenderEditable extends RenderEditable {

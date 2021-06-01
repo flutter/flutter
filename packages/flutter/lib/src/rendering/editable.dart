@@ -327,7 +327,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _placeholderSpans = <PlaceholderSpan>[];
     span?.visitChildren((InlineSpan span) {
       if (span is PlaceholderSpan) {
-        assert(span.range != null);
         _placeholderSpans.add(span);
       }
       return true;
@@ -755,19 +754,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (index == 0) {
       return 0;
     }
-    // print('previous char $placeholderSpans');
-    // if (placeholderSpans != null && placeholderSpans.isNotEmpty) {
-    //   for (final PlaceholderSpan span in placeholderSpans) {
-    //     if (span.range == null) {
-    //       continue;
-    //     }
-    //     print('Checking: $index ${span.range}');
-    //     if (index > span.range!.start && index <= span.range!.end) {
-    //       print('In placeholder delete $index ${span.range}');
-    //       return span.range!.start;
-    //     }
-    //   }
-    // }
 
     int count = 0;
     int? lastNonWhitespace;
@@ -3333,7 +3319,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // Hit test text spans.
     bool hitText = false;
     final Offset effectivePosition = position - _paintOffset;
-    final TextPosition textPosition = _textPainter.getPositionForOffset(position);
+    final TextPosition textPosition = _textPainter.getPositionForOffset(effectivePosition);
     final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
     if (span != null && span is HitTestTarget) {
       result.add(HitTestEntry(span as HitTestTarget));
@@ -3683,7 +3669,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
         baselineOffset: baselineOffset,
-        range: _placeholderSpans[childIndex].range ?? TextRange.empty,
       );
       child = childAfter(child);
       childIndex += 1;
