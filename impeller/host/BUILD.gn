@@ -2,8 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/common/config.gni")
-import("//flutter/impeller/tools/metal/metal_library.gni")
+import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
 metal_library("impeller_host_shaders") {
@@ -47,7 +46,7 @@ executable("host") {
   deps = [
     ":impeller_host_fixtures",
     ":impeller_host_shaders",
+    "../primitives",
     "//flutter/fml",
-    "//flutter/impeller/impeller/primitives",
   ]
 }

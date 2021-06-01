@@ -2,9 +2,28 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+config("impeller_public_config") {
+  include_dirs = [ ".." ]
+}
+
 group("impeller") {
   deps = [
+    "compiler",
+    "compositor",
+    "entity",
+    "geometry",
     "host",
-    "impeller",
+    "image",
+    "primitives",
+    "shader_glue",
+  ]
+}
+
+group("unittests") {
+  testonly = true
+
+  deps = [
+    "compiler:compiler_unittests",
+    "compositor:compositor_unittests",
   ]
 }
