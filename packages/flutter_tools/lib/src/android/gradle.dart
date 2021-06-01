@@ -190,7 +190,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     @required FlutterProject project,
     @required Set<AndroidBuildInfo> androidBuildInfo,
     @required String target,
-    @required String outputDirectoryPath,
+    String outputDirectoryPath,
     @required String buildNumber,
   }) async {
     Directory outputDirectory =
@@ -361,7 +361,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (target != null) {
       command.add('-Ptarget=$target');
     }
-    if (project.manifest.deferredComponents != null) {
+    final List<DeferredComponent> deferredComponents = project.manifest.deferredComponents;
+    if (deferredComponents != null) {
       if (deferredComponentsEnabled) {
         command.add('-Pdeferred-components=true');
         androidBuildInfo.buildInfo.dartDefines.add('validate-deferred-components=$validateDeferredComponents');
@@ -369,7 +370,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       // Pass in deferred components regardless of building split aot to satisfy
       // android dynamic features registry in build.gradle.
       final List<String> componentNames = <String>[];
-      for (final DeferredComponent component in project.manifest.deferredComponents) {
+      for (final DeferredComponent component in deferredComponents) {
         componentNames.add(component.name);
       }
       if (componentNames.isNotEmpty) {
@@ -756,7 +757,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   Future<void> buildPluginsAsAar(
     FlutterProject flutterProject,
     AndroidBuildInfo androidBuildInfo, {
-    Directory buildDirectory,
+    @required Directory buildDirectory,
   }) async {
     final File flutterPluginFile = flutterProject.flutterPluginsFile;
     if (!flutterPluginFile.existsSync()) {
@@ -806,14 +807,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
 /// Prints how to consume the AAR from a host app.
 void printHowToConsumeAar({
   @required Set<String> buildModes,
-  @required String androidPackage,
+  String androidPackage = 'unknown',
   @required Directory repoDirectory,
   @required Logger logger,
   @required FileSystem fileSystem,
   String buildNumber,
 }) {
   assert(buildModes != null && buildModes.isNotEmpty);
-  assert(androidPackage != null);
   assert(repoDirectory != null);
   buildNumber ??= '1.0';
 
@@ -919,10 +919,11 @@ Iterable<String> findApkFilesModule(
     if (apkFile.existsSync()) {
       return <File>[apkFile];
     }
-    if (buildInfo.flavor != null) {
+    final String flavor = buildInfo.flavor;
+    if (flavor != null) {
       // Android Studio Gradle plugin v3 adds flavor to path.
       apkFile = apkDirectory
-        .childDirectory(buildInfo.flavor)
+        .childDirectory(flavor)
         .childDirectory(modeName)
         .childFile(apkFileName);
       if (apkFile.existsSync()) {

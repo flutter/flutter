@@ -271,7 +271,7 @@ $factoryDeclaration
     if (languageToLocales[language].length == 1) {
       output.writeln('''
     case '$language':
-      return $generatedClassPrefix${(languageToLocales[language][0]).camelCase()}($factoryArguments);''');
+      return $generatedClassPrefix${languageToLocales[language][0].camelCase()}($factoryArguments);''');
     } else if (!languageToScriptCodes.containsKey(language)) { // Does not distinguish between scripts. Switch on countryCode directly.
       output.writeln('''
     case '$language': {

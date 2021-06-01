@@ -433,7 +433,7 @@ class ScrollDragController implements Drag {
   String toString() => describeIdentity(this);
 }
 
-/// The activity a scroll view performs when a the user drags their finger
+/// The activity a scroll view performs when the user drags their finger
 /// across the screen.
 ///
 /// See also:

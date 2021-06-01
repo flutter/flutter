@@ -268,7 +268,7 @@ abstract class Emulator {
         && other.id == id;
   }
 
-  Future<void> launch();
+  Future<void> launch({bool coldBoot});
 
   @override
   String toString() => name;

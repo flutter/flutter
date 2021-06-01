@@ -88,7 +88,7 @@ abstract class SliverPersistentHeaderDelegate {
   /// Defaults to null.
   OverScrollHeaderStretchConfiguration? get stretchConfiguration => null;
 
-  /// Specifies how floating headers and pinned pinned headers should behave in
+  /// Specifies how floating headers and pinned headers should behave in
   /// response to [RenderObject.showOnScreen] calls.
   ///
   /// Defaults to null.

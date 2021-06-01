@@ -32,7 +32,7 @@ class MockClipboard {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
@@ -524,7 +524,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/34847.
-  testWidgets('didChange resets the text field\'s value to empty when passed null', (WidgetTester tester) async {
+  testWidgets("didChange resets the text field's value to empty when passed null", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -549,7 +549,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/34847.
-  testWidgets('reset resets the text field\'s value to empty when intialValue is null', (WidgetTester tester) async {
+  testWidgets("reset resets the text field's value to empty when intialValue is null", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

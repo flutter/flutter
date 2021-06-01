@@ -68,32 +68,22 @@ class HotEvent extends UsageEvent {
 
   @override
   void send() {
-    final Map<String, String> parameters = _useCdKeys(<CustomDimensions, String>{
-      CustomDimensions.hotEventTargetPlatform: targetPlatform,
-      CustomDimensions.hotEventSdkName: sdkName,
-      CustomDimensions.hotEventEmulator: emulator.toString(),
-      CustomDimensions.hotEventFullRestart: fullRestart.toString(),
-      if (reason != null)
-        CustomDimensions.hotEventReason: reason!,
-      if (finalLibraryCount != null)
-        CustomDimensions.hotEventFinalLibraryCount: finalLibraryCount.toString(),
-      if (syncedLibraryCount != null)
-        CustomDimensions.hotEventSyncedLibraryCount: syncedLibraryCount.toString(),
-      if (syncedClassesCount != null)
-        CustomDimensions.hotEventSyncedClassesCount: syncedClassesCount.toString(),
-      if (syncedProceduresCount != null)
-        CustomDimensions.hotEventSyncedProceduresCount: syncedProceduresCount.toString(),
-      if (syncedBytes != null)
-        CustomDimensions.hotEventSyncedBytes: syncedBytes.toString(),
-      if (invalidatedSourcesCount != null)
-        CustomDimensions.hotEventInvalidatedSourcesCount: invalidatedSourcesCount.toString(),
-      if (transferTimeInMs != null)
-        CustomDimensions.hotEventTransferTimeInMs: transferTimeInMs.toString(),
-      if (overallTimeInMs != null)
-        CustomDimensions.hotEventOverallTimeInMs: overallTimeInMs.toString(),
-      if (fastReassemble != null)
-        CustomDimensions.fastReassemble: fastReassemble.toString(),
-    });
+    final CustomDimensions parameters = CustomDimensions(
+      hotEventTargetPlatform: targetPlatform,
+      hotEventSdkName: sdkName,
+      hotEventEmulator: emulator,
+      hotEventFullRestart: fullRestart,
+      hotEventReason: reason,
+      hotEventFinalLibraryCount: finalLibraryCount,
+      hotEventSyncedLibraryCount: syncedLibraryCount,
+      hotEventSyncedClassesCount: syncedClassesCount,
+      hotEventSyncedProceduresCount: syncedProceduresCount,
+      hotEventSyncedBytes: syncedBytes,
+      hotEventInvalidatedSourcesCount: invalidatedSourcesCount,
+      hotEventTransferTimeInMs: transferTimeInMs,
+      hotEventOverallTimeInMs: overallTimeInMs,
+      fastReassemble: fastReassemble,
+    );
     flutterUsage.sendEvent(category, parameter, parameters: parameters);
   }
 }
@@ -169,14 +159,11 @@ class BuildEvent extends UsageEvent {
 
   @override
   void send() {
-    final Map<String, String> parameters = _useCdKeys(<CustomDimensions, String>{
-      if (_command != null)
-        CustomDimensions.buildEventCommand: _command!,
-      if (_settings != null)
-        CustomDimensions.buildEventSettings: _settings!,
-      if (_eventError != null)
-        CustomDimensions.buildEventError: _eventError!,
-    });
+    final CustomDimensions parameters = CustomDimensions(
+      buildEventCommand: _command,
+      buildEventSettings: _settings,
+      buildEventError: _eventError,
+    );
     flutterUsage.sendEvent(
       category,
       parameter,
@@ -290,10 +277,10 @@ class NullSafetyAnalysisEvent implements UsageEvent {
       }
     }
     flutterUsage.sendEvent(kNullSafetyCategory, 'runtime-mode', label: nullSafetyMode.toString());
-    flutterUsage.sendEvent(kNullSafetyCategory, 'stats', parameters: <String, String>{
-      cdKey(CustomDimensions.nullSafeMigratedLibraries): migrated.toString(),
-      cdKey(CustomDimensions.nullSafeTotalLibraries): packageConfig.packages.length.toString(),
-    });
+    flutterUsage.sendEvent(kNullSafetyCategory, 'stats', parameters: CustomDimensions(
+      nullSafeMigratedLibraries: migrated,
+      nullSafeTotalLibraries: packageConfig.packages.length,
+    ));
     if (languageVersion != null) {
       final String formattedVersion = '${languageVersion.major}.${languageVersion.minor}';
       flutterUsage.sendEvent(kNullSafetyCategory, 'language-version', label: formattedVersion);

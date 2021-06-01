@@ -2778,7 +2778,7 @@ void main() {
   });
 
   group('Tab overlayColor affects ink response', () {
-    testWidgets('Tab\'s ink well changes color on hover with Tab overlayColor', (WidgetTester tester) async {
+    testWidgets("Tab's ink well changes color on hover with Tab overlayColor", (WidgetTester tester) async {
       await tester.pumpWidget(
         boilerplate(
           child: DefaultTabController(
@@ -2810,7 +2810,7 @@ void main() {
     });
 
     testWidgets(
-      'Tab\'s ink response splashColor matches resolved Tab overlayColor for MaterialState.pressed',
+      "Tab's ink response splashColor matches resolved Tab overlayColor for MaterialState.pressed",
       (WidgetTester tester) async {
         const Color splashColor = Color(0xf00fffff);
         await tester.pumpWidget(
@@ -3430,7 +3430,7 @@ void main() {
     // because we tried to send a notification on dispose.
   });
 
-  testWidgets('TabController\'s animation value should be in sync with TabBarView\'s scroll value when user interrupts ballistic scroll', (WidgetTester tester) async {
+  testWidgets("TabController's animation value should be in sync with TabBarView's scroll value when user interrupts ballistic scroll", (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,
@@ -3520,7 +3520,7 @@ void main() {
     expect(log, <String>['init: 0', 'init: 3', 'dispose: 0']);
   });
 
-  testWidgets('TabController\'s animation value should be updated when TabController\'s index >= tabs\'s length', (WidgetTester tester) async {
+  testWidgets("TabController's animation value should be updated when TabController's index >= tabs's length", (WidgetTester tester) async {
     // This is a regression test for the issue brought up here
     // https://github.com/flutter/flutter/issues/79226
 

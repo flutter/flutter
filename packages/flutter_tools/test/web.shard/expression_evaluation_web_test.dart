@@ -191,7 +191,7 @@ Future<void> checkStaticScope(FlutterTestDriver flutter) async {
 
 Future<void> evaluateErrorExpressions(FlutterTestDriver flutter) async {
   final ObjRef res = await flutter.evaluateInFrame('typo');
-  expectError(res, 'CompilationError: Getter not found: \'typo\'.\ntypo\n^^^^');
+  expectError(res, "CompilationError: Getter not found: 'typo'.\ntypo\n^^^^");
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
