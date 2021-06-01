@@ -345,6 +345,42 @@ void testMain() async {
     await _checkScreenshot(canvas, 'linear_gradient_rect_shifted');
   });
 
+  /// Regression test for https://github.com/flutter/flutter/issues/82748.
+  test('Paints gradient with gradient stop outside range', () async {
+    final RecordingCanvas canvas =
+    RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    canvas.save();
+
+    final Paint borderPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = Color(0xFF000000);
+
+    List<Color> colors = <Color>[
+      Color(0xFF000000),
+      Color(0xFFFF3C38)];
+    List<double> stops = <double>[0.0, 10.0];
+
+    EngineGradient linearGradient = GradientLinear(Offset(50, 50),
+        Offset(200,130),
+        colors, stops, TileMode.clamp,
+        Matrix4.identity().storage);
+
+    const double kBoxWidth = 150;
+    const double kBoxHeight = 80;
+    // Gradient with default center.
+    Rect rectBounds = Rect.fromLTWH(10, 20, kBoxWidth, kBoxHeight);
+    canvas.drawRect(rectBounds,
+        Paint()..shader = engineLinearGradientToShader(linearGradient, rectBounds));
+    canvas.drawRect(rectBounds, borderPaint);
+    canvas.restore();
+
+    final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
+        RenderStrategy());
+    canvas.endRecording();
+    canvas.apply(engineCanvas, screenRect);
+  });
+
   test('Paints clamped, rotated and shifted linear gradient', () async {
     final RecordingCanvas canvas =
     RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));

@@ -387,8 +387,9 @@ void _addColorStopsToCanvasGradient(html.CanvasGradient gradient,
     gradient.addColorStop(1 - offset, colorToCssString(colors[1])!);
   } else {
     for (int i = 0; i < colors.length; i++) {
+      final double colorStop = colorStops[i].clamp(0.0, 1.0);
       gradient.addColorStop(
-          colorStops[i] * scale + offset, colorToCssString(colors[i])!);
+          colorStop * scale + offset, colorToCssString(colors[i])!);
     }
   }
   if (isDecal) {
