@@ -19,6 +19,7 @@
 - (bool)testKeyEventsArePropagatedIfNotHandled;
 - (bool)testKeyEventsAreNotPropagatedIfHandled;
 - (bool)testFlagsChangedEventsArePropagatedIfNotHandled;
+- (bool)testPerformKeyEquivalentSynthesizesKeyUp;
 
 + (void)respondFalseForSendEvent:(const FlutterKeyEvent&)event
                         callback:(nullable FlutterKeyEventCallback)callback
@@ -28,6 +29,15 @@
 namespace flutter::testing {
 
 namespace {
+
+// Allocates and returns an engine configured for the test fixture resource configuration.
+FlutterEngine* CreateTestEngine() {
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  return [[FlutterEngine alloc] initWithName:@"test" project:project allowHeadlessExecution:true];
+}
 
 NSResponder* mockResponder() {
   NSResponder* mock = OCMStrictClassMock([NSResponder class]);
@@ -77,6 +87,59 @@ TEST(FlutterViewController, HasStringsWhenPasteboardFull) {
   EXPECT_TRUE(value);
 }
 
+TEST(FlutterViewController, HasViewThatHidesOtherViewsInAccessibility) {
+  FlutterViewController* viewControllerMock = CreateMockViewController(nil);
+
+  [viewControllerMock loadView];
+  auto subViews = [viewControllerMock.view subviews];
+
+  EXPECT_EQ([subViews count], 1u);
+  EXPECT_EQ(subViews[0], viewControllerMock.flutterView);
+
+  NSTextField* textField = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 1, 1)];
+  [viewControllerMock.view addSubview:textField];
+
+  subViews = [viewControllerMock.view subviews];
+  EXPECT_EQ([subViews count], 2u);
+
+  auto accessibilityChildren = viewControllerMock.view.accessibilityChildren;
+  // The accessibilityChildren should only contains the FlutterView.
+  EXPECT_EQ([accessibilityChildren count], 1u);
+  EXPECT_EQ(accessibilityChildren[0], viewControllerMock.flutterView);
+}
+
+TEST(FlutterViewController, SetsFlutterViewFirstResponderWhenAccessibilityDisabled) {
+  FlutterEngine* engine = CreateTestEngine();
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
+  [viewController loadView];
+  [engine setViewController:viewController];
+  // Creates a NSWindow so that sub view can be first responder.
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSBorderlessWindowMask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+  // Attaches FlutterTextInputPlugin to the view;
+  [viewController.view addSubview:viewController.textInputPlugin];
+  // Makes sure the textInputPlugin can be the first responder.
+  EXPECT_TRUE([window makeFirstResponder:viewController.textInputPlugin]);
+  EXPECT_EQ([window firstResponder], viewController.textInputPlugin);
+  // Sends a notification to turn off the accessibility.
+  NSDictionary* userInfo = @{
+    @"AXEnhancedUserInterface" : @(NO),
+  };
+  NSNotification* accessibilityOff = [NSNotification notificationWithName:@""
+                                                                   object:nil
+                                                                 userInfo:userInfo];
+  [viewController onAccessibilityStatusChanged:accessibilityOff];
+  // FlutterView becomes the first responder.
+  EXPECT_EQ([window firstResponder], viewController.flutterView);
+}
+
 TEST(FlutterViewControllerTest, TestKeyEventsAreSentToFramework) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testKeyEventsAreSentToFramework]);
 }
@@ -92,6 +155,10 @@ TEST(FlutterViewControllerTest, TestKeyEventsAreNotPropagatedIfHandled) {
 TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled) {
   ASSERT_TRUE(
       [[FlutterViewControllerTestObjC alloc] testFlagsChangedEventsArePropagatedIfNotHandled]);
+}
+
+TEST(FlutterViewControllerTest, TestPerformKeyEquivalentSynthesizesKeyUp) {
+  ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testPerformKeyEquivalentSynthesizesKeyUp]);
 }
 
 }  // namespace flutter::testing
@@ -292,6 +359,86 @@ TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled)
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
         [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
                                    message:encodedKeyEvent
+                               binaryReply:[OCMArg any]]);
+  } @catch (...) {
+    return false;
+  }
+  return true;
+}
+
+- (bool)testPerformKeyEquivalentSynthesizesKeyUp {
+  id engineMock = OCMClassMock([FlutterEngine class]);
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+                                                  callback:nil
+                                                  userData:nil])
+      .andCall([FlutterViewControllerTestObjC class],
+               @selector(respondFalseForSendEvent:callback:userData:));
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  id responderMock = flutter::testing::mockResponder();
+  viewController.nextResponder = responderMock;
+  NSDictionary* expectedKeyDownEvent = @{
+    @"keymap" : @"macos",
+    @"type" : @"keydown",
+    @"keyCode" : @(65),
+    @"modifiers" : @(538968064),
+    @"characters" : @".",
+    @"charactersIgnoringModifiers" : @".",
+  };
+  NSData* encodedKeyDownEvent =
+      [[FlutterJSONMessageCodec sharedInstance] encode:expectedKeyDownEvent];
+  NSDictionary* expectedKeyUpEvent = @{
+    @"keymap" : @"macos",
+    @"type" : @"keyup",
+    @"keyCode" : @(65),
+    @"modifiers" : @(538968064),
+    @"characters" : @".",
+    @"charactersIgnoringModifiers" : @".",
+  };
+  NSData* encodedKeyUpEvent = [[FlutterJSONMessageCodec sharedInstance] encode:expectedKeyUpEvent];
+  CGEventRef cgEvent = CGEventCreateKeyboardEvent(NULL, 65, TRUE);
+  NSEvent* event = [NSEvent eventWithCGEvent:cgEvent];
+  OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
+      [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
+                                 message:encodedKeyDownEvent
+                             binaryReply:[OCMArg any]])
+      .andDo((^(NSInvocation* invocation) {
+        FlutterBinaryReply handler;
+        [invocation getArgument:&handler atIndex:4];
+        NSDictionary* reply = @{
+          @"handled" : @(true),
+        };
+        NSData* encodedReply = [[FlutterJSONMessageCodec sharedInstance] encode:reply];
+        handler(encodedReply);
+      }));
+  OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
+      [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
+                                 message:encodedKeyUpEvent
+                             binaryReply:[OCMArg any]])
+      .andDo((^(NSInvocation* invocation) {
+        FlutterBinaryReply handler;
+        [invocation getArgument:&handler atIndex:4];
+        NSDictionary* reply = @{
+          @"handled" : @(true),
+        };
+        NSData* encodedReply = [[FlutterJSONMessageCodec sharedInstance] encode:reply];
+        handler(encodedReply);
+      }));
+  [viewController viewWillAppear];  // Initializes the event channel.
+  [viewController performKeyEquivalent:event];
+  @try {
+    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
+        [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
+                                   message:encodedKeyDownEvent
+                               binaryReply:[OCMArg any]]);
+    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
+        [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
+                                   message:encodedKeyUpEvent
                                binaryReply:[OCMArg any]]);
   } @catch (...) {
     return false;

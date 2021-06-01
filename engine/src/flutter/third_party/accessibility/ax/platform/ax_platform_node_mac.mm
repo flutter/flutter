@@ -704,18 +704,13 @@ bool AlsoUseShowMenuActionForDefaultAction(const ui::AXNodeData& data) {
 }
 
 - (NSValue*)AXSelectedTextRangeInternal {
-  // Selection might not be supported. Return (NSRange){0,0} in that case.
-  int start = 0, end = 0;
-  if (_node->IsPlainTextField()) {
-    start = _node->GetIntAttribute(ax::mojom::IntAttribute::kTextSelStart);
-    end = _node->GetIntAttribute(ax::mojom::IntAttribute::kTextSelEnd);
-  }
+  int start = _node->GetIntAttribute(ax::mojom::IntAttribute::kTextSelStart);
+  int end = _node->GetIntAttribute(ax::mojom::IntAttribute::kTextSelEnd);
   NSAssert((start >= 0 && end >= 0) || (start == -1 && end == -1), @"selection is invalid");
 
   if (start == -1 && end == -1) {
     return [NSValue valueWithRange:{NSNotFound, 0}];
   }
-
   // NSRange cannot represent the direction the text was selected in.
   return [NSValue valueWithRange:{static_cast<NSUInteger>(std::min(start, end)),
                                   static_cast<NSUInteger>(abs(end - start))}];

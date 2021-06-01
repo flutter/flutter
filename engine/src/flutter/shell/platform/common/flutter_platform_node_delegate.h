@@ -39,6 +39,19 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
    public:
     virtual ~OwnerBridge() = default;
 
+    //---------------------------------------------------------------------------
+    /// @brief      Gets the rectangular bounds of the ax node relative to
+    ///             global coordinate
+    ///
+    /// @param[in]  node        The ax node to look up.
+    /// @param[in]  offscreen   the bool reference to hold the result whether
+    ///                         the ax node is outside of its ancestors' bounds.
+    /// @param[in]  clip_bounds whether to clip the result if the ax node cannot
+    ///                         be fully contained in its ancestors' bounds.
+    virtual gfx::RectF RelativeToGlobalBounds(const ui::AXNode* node,
+                                              bool& offscreen,
+                                              bool clip_bounds) = 0;
+
    protected:
     friend class FlutterPlatformNodeDelegate;
 
@@ -78,19 +91,6 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
     ///
     /// @param[in]  node_id     The id of the focused node.
     virtual void SetLastFocusedId(AccessibilityNodeId node_id) = 0;
-
-    //---------------------------------------------------------------------------
-    /// @brief      Gets the rectangular bounds of the ax node relative to
-    ///             global coordinate
-    ///
-    /// @param[in]  node        The ax node to look up.
-    /// @param[in]  offscreen   the bool reference to hold the result whether
-    ///                         the ax node is outside of its ancestors' bounds.
-    /// @param[in]  clip_bounds whether to clip the result if the ax node cannot
-    ///                         be fully contained in its ancestors' bounds.
-    virtual gfx::RectF RelativeToGlobalBounds(const ui::AXNode* node,
-                                              bool& offscreen,
-                                              bool clip_bounds) = 0;
   };
 
   FlutterPlatformNodeDelegate();
@@ -129,10 +129,17 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
   ///             Subclasses must call super.
   virtual void Init(std::weak_ptr<OwnerBridge> bridge, ui::AXNode* node);
 
- protected:
   //------------------------------------------------------------------------------
-  /// @brief      Gets the underlying ax node for this accessibility node.
+  /// @brief      Gets the underlying ax node for this platform node delegate.
   ui::AXNode* GetAXNode() const;
+
+  //------------------------------------------------------------------------------
+  /// @brief      Gets the owner of this platform node delegate. This is useful
+  ///             when you want to get the information about surrounding nodes
+  ///             of this platform node delegate, e.g. the global rect of this
+  ///             platform node delegate. This pointer is only safe in the
+  ///             platform thread.
+  std::weak_ptr<OwnerBridge> GetOwnerBridge() const;
 
  private:
   ui::AXNode* ax_node_;

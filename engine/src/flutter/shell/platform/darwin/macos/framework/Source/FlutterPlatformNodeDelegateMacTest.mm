@@ -3,13 +3,16 @@
 // found in the LICENSE file.
 #include "flutter/testing/testing.h"
 
-#include "flutter/shell/platform/common/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMacDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMac.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
+
+#include "flutter/shell/platform/common/accessibility_bridge.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/third_party/accessibility/ax/ax_action_data.h"
 
@@ -206,6 +209,86 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
 
   [engine setViewController:nil];
   [engine shutDownEngine];
+}
+
+TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
+  FlutterEngine* engine = CreateTestEngine();
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
+  [viewController loadView];
+  [engine setViewController:viewController];
+  viewController.textInputPlugin.string = @"textfield";
+  // Creates a NSWindow so that the native text field can become first responder.
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSBorderlessWindowMask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+  engine.semanticsEnabled = YES;
+
+  auto bridge = engine.accessibilityBridge.lock();
+  // Initialize ax node data.
+  FlutterSemanticsNode root;
+  root.id = 0;
+  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.actions = static_cast<FlutterSemanticsAction>(0);
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.child_count = 1;
+  int32_t children[] = {1};
+  root.children_in_traversal_order = children;
+  root.custom_accessibility_actions_count = 0;
+  root.rect = {0, 0, 100, 100};  // LTRB
+  root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+
+  double rectSize = 50;
+  double transformFactor = 0.5;
+
+  FlutterSemanticsNode child1;
+  child1.id = 1;
+  child1.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
+  child1.actions = static_cast<FlutterSemanticsAction>(0);
+  child1.label = "";
+  child1.hint = "";
+  child1.value = "textfield";
+  child1.increased_value = "";
+  child1.decreased_value = "";
+  child1.text_selection_base = -1;
+  child1.text_selection_extent = -1;
+  child1.child_count = 0;
+  child1.custom_accessibility_actions_count = 0;
+  child1.rect = {0, 0, rectSize, rectSize};  // LTRB
+  child1.transform = {transformFactor, 0, 0, 0, transformFactor, 0, 0, 0, 1};
+  bridge->AddFlutterSemanticsNodeUpdate(&child1);
+
+  bridge->CommitUpdates();
+
+  auto child_platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  // Verify the accessibility attribute matches.
+  id native_accessibility = child_platform_node_delegate->GetNativeViewAccessible();
+  EXPECT_EQ([native_accessibility isKindOfClass:[FlutterTextField class]], YES);
+  FlutterTextField* native_text_field = (FlutterTextField*)native_accessibility;
+
+  NSView* view = viewController.flutterView;
+  CGRect scaledBounds = [view convertRectToBacking:view.bounds];
+  CGSize scaledSize = scaledBounds.size;
+  double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
+
+  double expectedFrameSize = rectSize * transformFactor / pixelRatio;
+  EXPECT_EQ(NSEqualRects(native_text_field.frame, NSMakeRect(0, 600 - expectedFrameSize,
+                                                             expectedFrameSize, expectedFrameSize)),
+            YES);
+  // The text of TextInputPlugin only starts syncing editing state to the
+  // native text field when it becomes the first responder.
+  [native_text_field becomeFirstResponder];
+  EXPECT_EQ([native_text_field.stringValue isEqualToString:@"textfield"], YES);
 }
 
 }  // flutter::testing

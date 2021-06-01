@@ -106,10 +106,10 @@ class AX_EXPORT AXPlatformNode {
   std::string SubtreeToString();
 
   friend std::ostream& operator<<(std::ostream& stream, AXPlatformNode& node);
+  virtual ~AXPlatformNode();
 
  protected:
   AXPlatformNode();
-  virtual ~AXPlatformNode();
 
  private:
   static std::vector<AXModeObserver*> ax_mode_observers_;

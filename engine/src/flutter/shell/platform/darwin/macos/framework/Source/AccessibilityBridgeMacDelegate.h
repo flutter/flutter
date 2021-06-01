@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 
 @class FlutterEngine;
+@class FlutterViewController;
 
 namespace flutter {
 
@@ -20,8 +21,10 @@ class AccessibilityBridgeMacDelegate : public AccessibilityBridge::Accessibility
  public:
   //---------------------------------------------------------------------------
   /// @brief      Creates an AccessibilityBridgeMacDelegate.
-  /// @param[in]  flutterEngine     The weak reference to the FlutterEngine.
-  explicit AccessibilityBridgeMacDelegate(__weak FlutterEngine* flutter_engine);
+  /// @param[in]  flutter_engine     The weak reference to the FlutterEngine.
+  /// @param[in]  view_controller    The weak reference to the FlutterViewController.
+  explicit AccessibilityBridgeMacDelegate(__weak FlutterEngine* flutter_engine,
+                                          __weak FlutterViewController* view_controller);
   virtual ~AccessibilityBridgeMacDelegate() = default;
 
   // |AccessibilityBridge::AccessibilityBridgeDelegate|
@@ -33,7 +36,7 @@ class AccessibilityBridgeMacDelegate : public AccessibilityBridge::Accessibility
                                    fml::MallocMapping data) override;
 
   // |AccessibilityBridge::AccessibilityBridgeDelegate|
-  std::unique_ptr<FlutterPlatformNodeDelegate> CreateFlutterPlatformNodeDelegate() override;
+  std::shared_ptr<FlutterPlatformNodeDelegate> CreateFlutterPlatformNodeDelegate() override;
 
  private:
   /// A wrapper structure to wraps macOS native accessibility events.
@@ -64,7 +67,7 @@ class AccessibilityBridgeMacDelegate : public AccessibilityBridge::Accessibility
 
   //---------------------------------------------------------------------------
   /// @brief      Whether the given event is in current pending events.
-  /// @param[in]  event_type        The event you would like to look up.
+  /// @param[in]  event_type        The event to look up.
   bool HasPendingEvent(ui::AXEventGenerator::Event event) const;
 
   //---------------------------------------------------------------------------
@@ -76,6 +79,7 @@ class AccessibilityBridgeMacDelegate : public AccessibilityBridge::Accessibility
                                                            const ui::AXNode& ax_node) const;
 
   __weak FlutterEngine* flutter_engine_;
+  __weak FlutterViewController* view_controller_;
 };
 
 }  // namespace flutter

@@ -97,7 +97,7 @@ class AccessibilityBridge
     ///             by accessibility bridge whenever a new AXNode is created in
     ///             AXTree. Each platform needs to implement this method in
     ///             order to inject its subclass into the accessibility bridge.
-    virtual std::unique_ptr<FlutterPlatformNodeDelegate>
+    virtual std::shared_ptr<FlutterPlatformNodeDelegate>
     CreateFlutterPlatformNodeDelegate() = 0;
   };
   //-----------------------------------------------------------------------------
@@ -162,6 +162,11 @@ class AccessibilityBridge
   ///             case one may decide to handle an event differently based on
   ///             all pending events.
   const std::vector<ui::AXEventGenerator::TargetedEvent> GetPendingEvents();
+
+  //------------------------------------------------------------------------------
+  /// @brief      Update the AccessibilityBridgeDelegate stored in the
+  ///             accessibility bridge to a new one.
+  void UpdateDelegate(std::unique_ptr<AccessibilityBridgeDelegate> delegate);
 
  private:
   // See FlutterSemanticsNode in embedder.h

@@ -155,6 +155,66 @@ TEST(AccessibilityBridgeTest, canFireChildrenChangedCorrectly) {
             actual_event.end());
 }
 
+TEST(AccessibilityBridgeTest, canUpdateDelegate) {
+  std::shared_ptr<AccessibilityBridge> bridge =
+      std::make_shared<AccessibilityBridge>(
+          std::make_unique<TestAccessibilityBridgeDelegate>());
+  FlutterSemanticsNode root;
+  root.id = 0;
+  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.actions = static_cast<FlutterSemanticsAction>(0);
+  root.text_selection_base = -1;
+  root.text_selection_extent = -1;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.child_count = 1;
+  int32_t children[] = {1};
+  root.children_in_traversal_order = children;
+  root.custom_accessibility_actions_count = 0;
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+
+  FlutterSemanticsNode child1;
+  child1.id = 1;
+  child1.flags = static_cast<FlutterSemanticsFlag>(0);
+  child1.actions = static_cast<FlutterSemanticsAction>(0);
+  child1.text_selection_base = -1;
+  child1.text_selection_extent = -1;
+  child1.label = "child 1";
+  child1.hint = "";
+  child1.value = "";
+  child1.increased_value = "";
+  child1.decreased_value = "";
+  child1.child_count = 0;
+  child1.custom_accessibility_actions_count = 0;
+  bridge->AddFlutterSemanticsNodeUpdate(&child1);
+
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0);
+  auto child1_node = bridge->GetFlutterPlatformNodeDelegateFromID(1);
+  EXPECT_FALSE(root_node.expired());
+  EXPECT_FALSE(child1_node.expired());
+  // Update Delegate
+  bridge->UpdateDelegate(std::make_unique<TestAccessibilityBridgeDelegate>());
+
+  // Old tree is destroyed.
+  EXPECT_TRUE(root_node.expired());
+  EXPECT_TRUE(child1_node.expired());
+
+  // New tree still has the data.
+  auto new_root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  auto new_child1_node = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  EXPECT_EQ(new_root_node->GetChildCount(), 1);
+  EXPECT_EQ(new_root_node->GetData().child_ids[0], 1);
+  EXPECT_EQ(new_root_node->GetName(), "root");
+
+  EXPECT_EQ(new_child1_node->GetChildCount(), 0);
+  EXPECT_EQ(new_child1_node->GetName(), "child 1");
+}
+
 TEST(AccessibilityBridgeTest, canHandleSelectionChangeCorrectly) {
   TestAccessibilityBridgeDelegate* delegate =
       new TestAccessibilityBridgeDelegate();
@@ -198,6 +258,35 @@ TEST(AccessibilityBridgeTest, canHandleSelectionChangeCorrectly) {
             ui::AXEventGenerator::Event::DOCUMENT_SELECTION_CHANGED);
   EXPECT_EQ(delegate->accessibilitiy_events[1].event_params.event,
             ui::AXEventGenerator::Event::OTHER_ATTRIBUTE_CHANGED);
+}
+
+TEST(AccessibilityBridgeTest, doesNotAssignEditableRootToSelectableText) {
+  std::shared_ptr<AccessibilityBridge> bridge =
+      std::make_shared<AccessibilityBridge>(
+          std::make_unique<TestAccessibilityBridgeDelegate>());
+  FlutterSemanticsNode root;
+  root.id = 0;
+  root.flags = static_cast<FlutterSemanticsFlag>(
+      FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
+      FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly);
+  root.actions = static_cast<FlutterSemanticsAction>(0);
+  root.text_selection_base = -1;
+  root.text_selection_extent = -1;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.child_count = 0;
+  root.custom_accessibility_actions_count = 0;
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+
+  EXPECT_FALSE(root_node->GetData().GetBoolAttribute(
+      ax::mojom::BoolAttribute::kEditableRoot));
 }
 
 }  // namespace testing

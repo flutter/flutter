@@ -46,7 +46,7 @@
 }
 
 - (void)handleEvent:(nonnull NSEvent*)event {
-  // Be sure to add a handling method in propagateKeyEvent if you allow more
+  // Be sure to add a handling method in propagateKeyEvent when allowing more
   // event types here.
   if (event.type != NSEventTypeKeyDown && event.type != NSEventTypeKeyUp &&
       event.type != NSEventTypeFlagsChanged) {

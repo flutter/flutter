@@ -107,4 +107,9 @@ gfx::Rect FlutterPlatformNodeDelegate::GetBoundsRect(
   return gfx::ToEnclosingRect(bounds);
 }
 
+std::weak_ptr<FlutterPlatformNodeDelegate::OwnerBridge>
+FlutterPlatformNodeDelegate::GetOwnerBridge() const {
+  return bridge_;
+}
+
 }  // namespace flutter

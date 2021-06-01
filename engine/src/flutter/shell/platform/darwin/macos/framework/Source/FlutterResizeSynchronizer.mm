@@ -17,8 +17,8 @@
   // Used to block [requestCommit].
   std::condition_variable _condBlockRequestCommit;
 
-  // Whether a frame was received; We don't block platform thread during resize
-  // until we know that framework is running and producing frames
+  // Whether a frame was received; the synchronizer doesn't block platform thread during resize
+  // until it knows that framework is running and producing frames
   BOOL _receivedFirstFrame;
 
   // If NO, requestCommit calls are ignored until shouldEnsureSurfaceForSize is called with

@@ -30,7 +30,7 @@
  * Flow during window resize
  *
  * 1. Platform thread calls [synchronizer beginResize:notify:]
- *    This will hold the platform thread until we're ready to display contents.
+ *    This will hold the platform thread until the raster thread is ready to display contents.
  * 2. Raster thread calls [synchronizer shouldEnsureSurfaceForSize:] with target size
  *    This will return false for any size other than target size
  * 3. Raster thread calls [synchronizer requestCommit]
@@ -45,8 +45,8 @@
  *    This will invoke [delegate flush:] on raster thread and
  *    [delegate commit:] on platform thread. The requestCommit call will be blocked
  *    until this is done. This is necessary to ensure that rasterizer won't start
- *    rasterizing next frame before we flipped the surface, which must be performed
- *    on platform thread
+ *    rasterizing next frame before the FlutterSurfaceManager flipped the surface,
+ *    which must be performed on platform thread.
  */
 @interface FlutterResizeSynchronizer : NSObject
 

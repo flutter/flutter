@@ -5,6 +5,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeySecondaryResponder.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 
 @interface FlutterViewController ()
@@ -16,6 +17,11 @@
  * This just returns the NSPasteboard so that it can be mocked in the tests.
  */
 @property(nonatomic, readonly, nonnull) NSPasteboard* pasteboard;
+
+/**
+ * The text input plugin that handles text editing state for text fields.
+ */
+@property(nonatomic, readonly, nonnull) FlutterTextInputPlugin* textInputPlugin;
 
 /**
  * Initializes this FlutterViewController with the specified `FlutterEngine`.
@@ -30,5 +36,9 @@
                                nibName:(nullable NSString*)nibName
                                 bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
 
-#pragma mark - Private interface declaration.
+@end
+
+// Private methods made visible for testing
+@interface FlutterViewController (TestMethods)
+- (void)onAccessibilityStatusChanged:(nonnull NSNotification*)notification;
 @end

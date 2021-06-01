@@ -111,6 +111,22 @@ AccessibilityBridge::GetPendingEvents() {
   return result;
 }
 
+void AccessibilityBridge::UpdateDelegate(
+    std::unique_ptr<AccessibilityBridgeDelegate> delegate) {
+  delegate_ = std::move(delegate);
+  // Recreate FlutterPlatformNodeDelegates since they may contain stale state
+  // from the previous AccessibilityBridgeDelegate.
+  for (const auto& [node_id, old_platform_node_delegate] : id_wrapper_map_) {
+    std::shared_ptr<FlutterPlatformNodeDelegate> platform_node_delegate =
+        delegate_->CreateFlutterPlatformNodeDelegate();
+    platform_node_delegate->Init(
+        std::static_pointer_cast<FlutterPlatformNodeDelegate::OwnerBridge>(
+            shared_from_this()),
+        old_platform_node_delegate->GetAXNode());
+    id_wrapper_map_[node_id] = platform_node_delegate;
+  }
+}
+
 void AccessibilityBridge::OnNodeWillBeDeleted(ui::AXTree* tree,
                                               ui::AXNode* node) {}
 
@@ -329,7 +345,7 @@ void AccessibilityBridge::SetBooleanAttributesFromFlutterUpdate(
   node_data.AddBoolAttribute(
       ax::mojom::BoolAttribute::kEditableRoot,
       flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField &&
-          (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly) > 0);
+          (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly) == 0);
 }
 
 void AccessibilityBridge::SetIntAttributesFromFlutterUpdate(

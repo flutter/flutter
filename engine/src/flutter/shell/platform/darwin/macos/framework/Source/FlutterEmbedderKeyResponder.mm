@@ -198,10 +198,10 @@ const char* getEventString(NSString* characters) {
     // which is used for the "Apple logo" character (Option-Shift-K on a US
     // keyboard.)
     //
-    // We hereby assume that non-printable function keys are defined from
+    // Assume that non-printable function keys are defined from
     // 0xF700 upwards, and printable private keys are defined from 0xF8FF
-    // downwards. We want to keep the printable private keys, therefore we only
-    // filter out 0xF700-0xF7FF.
+    // downwards. This function filters out 0xF700-0xF7FF in order to keep
+    // the printable private keys.
     return nullptr;
   }
   return [characters UTF8String];
@@ -215,8 +215,8 @@ const char* getEventString(NSString* characters) {
  * The embedder functions only accept C-functions as callbacks, as well as an
  * arbitrary user_data. In order to send an instance method of
  * |FlutterEmbedderKeyResponder.handleResponse| to the engine's |SendKeyEvent|,
- * we wrap the invocation into a C-function |HandleResponse| and invocation
- * context |FlutterKeyPendingResponse|.
+ * the embedder wraps the invocation into a C-function |HandleResponse| and
+ * invocation context |FlutterKeyPendingResponse|.
  *
  * When this object is sent to the engine's |SendKeyEvent| as |user_data|, it
  * must be attached with |__bridge_retained|. When this object is parsed
@@ -544,7 +544,8 @@ const char* getEventString(NSString* characters) {
   // MacOS sends a down *or* an up when CapsLock is tapped, alternatively on
   // even taps and odd taps. A CapsLock down or CapsLock up should always be
   // converted to a down *and* an up, and the up should always be a synthesized
-  // event, since we will never know when the button is released.
+  // event, since the FlutterEmbedderKeyResponder will never know when the
+  // button is released.
   FlutterKeyEvent flutterEvent = {
       .struct_size = sizeof(FlutterKeyEvent),
       .timestamp = GetFlutterTimestampFrom(timestamp),
