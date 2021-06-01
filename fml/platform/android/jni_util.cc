@@ -132,14 +132,33 @@ ScopedJavaLocalRef<jobjectArray> VectorToStringArray(
   ScopedJavaLocalRef<jclass> string_clazz(env,
                                           env->FindClass("java/lang/String"));
   FML_DCHECK(!string_clazz.is_null());
-  jobjectArray joa =
+  jobjectArray java_array =
       env->NewObjectArray(vector.size(), string_clazz.obj(), NULL);
   ASSERT_NO_EXCEPTION();
   for (size_t i = 0; i < vector.size(); ++i) {
     ScopedJavaLocalRef<jstring> item = StringToJavaString(env, vector[i]);
-    env->SetObjectArrayElement(joa, i, item.obj());
+    env->SetObjectArrayElement(java_array, i, item.obj());
   }
-  return ScopedJavaLocalRef<jobjectArray>(env, joa);
+  return ScopedJavaLocalRef<jobjectArray>(env, java_array);
+}
+
+ScopedJavaLocalRef<jobjectArray> VectorToBufferArray(
+    JNIEnv* env,
+    const std::vector<std::vector<uint8_t>>& vector) {
+  FML_DCHECK(env);
+  ScopedJavaLocalRef<jclass> byte_buffer_clazz(
+      env, env->FindClass("java/nio/ByteBuffer"));
+  FML_DCHECK(!byte_buffer_clazz.is_null());
+  jobjectArray java_array =
+      env->NewObjectArray(vector.size(), byte_buffer_clazz.obj(), NULL);
+  ASSERT_NO_EXCEPTION();
+  for (size_t i = 0; i < vector.size(); ++i) {
+    ScopedJavaLocalRef<jobject> item(
+        env,
+        env->NewDirectByteBuffer((void*)(vector[i].data()), vector[i].size()));
+    env->SetObjectArrayElement(java_array, i, item.obj());
+  }
+  return ScopedJavaLocalRef<jobjectArray>(env, java_array);
 }
 
 bool HasException(JNIEnv* env) {

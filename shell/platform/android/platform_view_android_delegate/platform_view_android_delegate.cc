@@ -6,6 +6,35 @@
 
 namespace flutter {
 
+void putStringAttributesIntoBuffer(
+    const StringAttributes& attributes,
+    int32_t* buffer_int32,
+    size_t& position,
+    std::vector<std::vector<uint8_t>>& string_attribute_args) {
+  if (attributes.empty()) {
+    buffer_int32[position++] = -1;
+    return;
+  }
+  buffer_int32[position++] = attributes.size();
+  for (const auto& attribute : attributes) {
+    buffer_int32[position++] = attribute->start;
+    buffer_int32[position++] = attribute->end;
+    buffer_int32[position++] = static_cast<int32_t>(attribute->type);
+    switch (attribute->type) {
+      case StringAttributeType::kSpellOut:
+        buffer_int32[position++] = -1;
+        break;
+      case StringAttributeType::kLocale:
+        buffer_int32[position++] = string_attribute_args.size();
+        std::shared_ptr<LocaleStringAttribute> locale_attribute =
+            std::static_pointer_cast<LocaleStringAttribute>(attribute);
+        string_attribute_args.push_back(
+            {locale_attribute->locale.begin(), locale_attribute->locale.end()});
+        break;
+    }
+  }
+}
+
 PlatformViewAndroidDelegate::PlatformViewAndroidDelegate(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
     : jni_facade_(jni_facade){};
@@ -13,9 +42,11 @@ PlatformViewAndroidDelegate::PlatformViewAndroidDelegate(
 void PlatformViewAndroidDelegate::UpdateSemantics(
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
-  constexpr size_t kBytesPerNode = 41 * sizeof(int32_t);
+  constexpr size_t kBytesPerNode = 46 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
+  constexpr size_t kBytesPerCustomAction = sizeof(int32_t);
   constexpr size_t kBytesPerAction = 4 * sizeof(int32_t);
+  constexpr size_t kBytesPerStringAttribute = 4 * sizeof(int32_t);
 
   {
     size_t num_bytes = 0;
@@ -24,8 +55,18 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       num_bytes +=
           value.second.childrenInTraversalOrder.size() * kBytesPerChild;
       num_bytes += value.second.childrenInHitTestOrder.size() * kBytesPerChild;
+      num_bytes += value.second.customAccessibilityActions.size() *
+                   kBytesPerCustomAction;
       num_bytes +=
-          value.second.customAccessibilityActions.size() * kBytesPerChild;
+          value.second.labelAttributes.size() * kBytesPerStringAttribute;
+      num_bytes +=
+          value.second.valueAttributes.size() * kBytesPerStringAttribute;
+      num_bytes += value.second.increasedValueAttributes.size() *
+                   kBytesPerStringAttribute;
+      num_bytes += value.second.decreasedValueAttributes.size() *
+                   kBytesPerStringAttribute;
+      num_bytes +=
+          value.second.hintAttributes.size() * kBytesPerStringAttribute;
     }
     // The encoding defined here is used in:
     //
@@ -40,6 +81,7 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
     float* buffer_float32 = reinterpret_cast<float*>(&buffer[0]);
 
     std::vector<std::string> strings;
+    std::vector<std::vector<uint8_t>> string_attribute_args;
     size_t position = 0;
     for (const auto& value : update) {
       // If you edit this code, make sure you update kBytesPerNode
@@ -65,30 +107,47 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
         buffer_int32[position++] = strings.size();
         strings.push_back(node.label);
       }
+
+      putStringAttributesIntoBuffer(node.labelAttributes, buffer_int32,
+                                    position, string_attribute_args);
       if (node.value.empty()) {
         buffer_int32[position++] = -1;
       } else {
         buffer_int32[position++] = strings.size();
         strings.push_back(node.value);
       }
+
+      putStringAttributesIntoBuffer(node.valueAttributes, buffer_int32,
+                                    position, string_attribute_args);
       if (node.increasedValue.empty()) {
         buffer_int32[position++] = -1;
       } else {
         buffer_int32[position++] = strings.size();
         strings.push_back(node.increasedValue);
       }
+
+      putStringAttributesIntoBuffer(node.increasedValueAttributes, buffer_int32,
+                                    position, string_attribute_args);
       if (node.decreasedValue.empty()) {
         buffer_int32[position++] = -1;
       } else {
         buffer_int32[position++] = strings.size();
         strings.push_back(node.decreasedValue);
       }
+
+      putStringAttributesIntoBuffer(node.decreasedValueAttributes, buffer_int32,
+                                    position, string_attribute_args);
+
       if (node.hint.empty()) {
         buffer_int32[position++] = -1;
       } else {
         buffer_int32[position++] = strings.size();
         strings.push_back(node.hint);
       }
+
+      putStringAttributesIntoBuffer(node.hintAttributes, buffer_int32, position,
+                                    string_attribute_args);
+
       buffer_int32[position++] = node.textDirection;
       buffer_float32[position++] = node.rect.left();
       buffer_float32[position++] = node.rect.top();
@@ -149,7 +208,8 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
     }
 
     if (buffer.size() > 0) {
-      jni_facade_->FlutterViewUpdateSemantics(buffer, strings);
+      jni_facade_->FlutterViewUpdateSemantics(buffer, strings,
+                                              string_attribute_args);
     }
   }
 }
