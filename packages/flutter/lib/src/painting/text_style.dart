@@ -426,13 +426,13 @@ const double _kDefaultFontSize = 14.0;
 ///
 /// ### Inconsistent platform fonts
 ///
-/// By default, fonts differ depending on the platform. 
+/// By default, fonts differ depending on the platform.
 ///
 ///  * Default font-family for `Android`,`Fuchsia` and `Linux` is `Roboto`.
 ///  * Default font-family for `iOS` is `.SF UI Display`/`.SF UI Text`.
 ///  * Default font-family for `MacOS` is `.AppleSystemUIFont`.
 ///  * Default font-family for `Windows` is `Segoe UI`.
-/// 
+///
 /// Since Flutter's font discovery for default fonts depends on the fonts present
 /// on the device, it is not safe to assume all default fonts will be available or
 /// consistent across devices.
