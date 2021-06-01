@@ -95,14 +95,14 @@ TEST(FrameTimingsRecorderTest, RecordersHaveUniqueFrameNumbers) {
   ASSERT_TRUE(recorder2->GetFrameNumber() > recorder1->GetFrameNumber());
 }
 
-TEST(FrameTimingsRecorderTest, ClonedHasUniqueFrameNumber) {
+TEST(FrameTimingsRecorderTest, ClonedHasSameFrameNumber) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
 
   const auto now = fml::TimePoint::Now();
   recorder->RecordVsync(now, now);
 
   auto cloned = recorder->CloneUntil(FrameTimingsRecorder::State::kVsync);
-  ASSERT_NE(recorder->GetFrameNumber(), cloned->GetFrameNumber());
+  ASSERT_EQ(recorder->GetFrameNumber(), cloned->GetFrameNumber());
 }
 
 TEST(FrameTimingsRecorderTest, FrameNumberTraceArgIsValid) {

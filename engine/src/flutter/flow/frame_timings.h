@@ -39,6 +39,9 @@ class FrameTimingsRecorder {
   /// Default constructor, initializes the recorder with State::kUninitialized.
   FrameTimingsRecorder();
 
+  /// Constructor with a pre-populated frame number.
+  FrameTimingsRecorder(uint64_t frame_number);
+
   ~FrameTimingsRecorder();
 
   /// Timestamp of the vsync signal.
