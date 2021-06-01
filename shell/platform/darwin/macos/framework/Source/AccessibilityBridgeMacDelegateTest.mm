@@ -13,8 +13,9 @@ namespace {
 
 class AccessibilityBridgeMacDelegateSpy : public AccessibilityBridgeMacDelegate {
  public:
-  AccessibilityBridgeMacDelegateSpy(__weak FlutterEngine* flutter_engine)
-      : AccessibilityBridgeMacDelegate(flutter_engine) {}
+  AccessibilityBridgeMacDelegateSpy(__weak FlutterEngine* flutter_engine,
+                                    __weak FlutterViewController* view_controller)
+      : AccessibilityBridgeMacDelegate(flutter_engine, view_controller) {}
 
   std::unordered_map<std::string, gfx::NativeViewAccessible> actual_notifications;
 
@@ -73,7 +74,7 @@ TEST(AccessibilityBridgeMacDelegateTest,
   bridge->CommitUpdates();
   auto platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
 
-  AccessibilityBridgeMacDelegateSpy spy(engine);
+  AccessibilityBridgeMacDelegateSpy spy(engine, viewController);
 
   // Creates a targeted event.
   ui::AXTree tree;
@@ -96,6 +97,13 @@ TEST(AccessibilityBridgeMacDelegateTest,
 
 TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificationWhenHeadless) {
   FlutterEngine* engine = CreateTestEngine();
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
+  [viewController loadView];
+  [engine setViewController:viewController];
   // Setting up bridge so that the AccessibilityBridgeMacDelegateSpy
   // can query semantics information from.
   engine.semanticsEnabled = YES;
@@ -118,7 +126,7 @@ TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificat
   bridge->CommitUpdates();
   auto platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
 
-  AccessibilityBridgeMacDelegateSpy spy(engine);
+  AccessibilityBridgeMacDelegateSpy spy(engine, viewController);
 
   // Creates a targeted event.
   ui::AXTree tree;
@@ -171,7 +179,7 @@ TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificat
   bridge->CommitUpdates();
   auto platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
 
-  AccessibilityBridgeMacDelegateSpy spy(engine);
+  AccessibilityBridgeMacDelegateSpy spy(engine, viewController);
 
   // Creates a targeted event.
   ui::AXTree tree;
