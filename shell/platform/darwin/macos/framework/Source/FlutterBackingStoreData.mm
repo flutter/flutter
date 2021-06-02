@@ -11,9 +11,11 @@
 
 @implementation FlutterBackingStoreData
 
-- (nullable instancetype)initWithFbProvider:(nonnull FlutterFrameBufferProvider*)fbProvider
-                            ioSurfaceHolder:(nonnull FlutterIOSurfaceHolder*)ioSurfaceHolder {
+- (nullable instancetype)initWithLayerId:(size_t)layerId
+                              fbProvider:(nonnull FlutterFrameBufferProvider*)fbProvider
+                         ioSurfaceHolder:(nonnull FlutterIOSurfaceHolder*)ioSurfaceHolder {
   if (self = [super init]) {
+    _layerId = layerId;
     _frameBufferProvider = fbProvider;
     _ioSurfaceHolder = ioSurfaceHolder;
   }
