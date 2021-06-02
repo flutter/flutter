@@ -918,12 +918,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // tests.
     // ignore: invalid_use_of_visible_for_testing_member
     RawKeyboard.instance.clearKeysPressed();
-    assert(!RendererBinding.instance!.mouseTracker.mouseIsConnected,
+    assert(!RendererBinding.instance.mouseTracker.mouseIsConnected,
         'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
         'test has not removed the mouse pointer which it added. Call removePointer on the '
         'active mouse gesture to remove the mouse pointer.');
     // ignore: invalid_use_of_visible_for_testing_member
-    RendererBinding.instance!.initMouseTracker();
+    RendererBinding.instance.initMouseTracker();
   }
 }
 
@@ -967,7 +967,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   static AutomatedTestWidgetsFlutterBinding ensureInitialized() {
     if (AutomatedTestWidgetsFlutterBinding._instance == null)
       AutomatedTestWidgetsFlutterBinding();
-    return AutomatedTestWidgetsFlutterBinding.instance!;
+    return AutomatedTestWidgetsFlutterBinding.instance;
   }
 
   FakeAsync? _currentFakeAsync; // set in runTest; cleared in postTest
@@ -1459,7 +1459,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   static LiveTestWidgetsFlutterBinding ensureInitialized() {
     if (LiveTestWidgetsFlutterBinding._instance == null)
       LiveTestWidgetsFlutterBinding();
-    return LiveTestWidgetsFlutterBinding.instance!;
+    return LiveTestWidgetsFlutterBinding.instance;
   }
 
   @override

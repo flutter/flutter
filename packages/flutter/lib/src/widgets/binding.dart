@@ -493,7 +493,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           },
       );
 
-      WidgetInspectorService.instance!.initServiceExtensions(registerServiceExtension);
+      WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;
     }());
@@ -862,14 +862,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
-        SchedulerBinding.instance!.removeTimingsCallback(firstFrameCallback!);
+        SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback!);
         firstFrameCallback = null;
         _firstFrameCompleter.complete();
       };
       // Callback is only invoked when FlutterView.render is called. When
       // sendFramesToEngine is set to false during the frame, it will not be
       // called and we need to remove the callback (see below).
-      SchedulerBinding.instance!.addTimingsCallback(firstFrameCallback!);
+      SchedulerBinding.instance.addTimingsCallback(firstFrameCallback!);
     }
 
     try {
@@ -893,7 +893,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       // This frame is deferred and not the first frame sent to the engine that
       // should be reported.
       _needToReportFirstFrame = true;
-      SchedulerBinding.instance!.removeTimingsCallback(firstFrameCallback!);
+      SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback!);
     }
   }
 
@@ -938,7 +938,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       child: rootWidget,
     ).attachToRenderTree(buildOwner!, renderViewElement as RenderObjectToWidgetElement<RenderBox>?);
     if (isBootstrapFrame) {
-      SchedulerBinding.instance!.ensureVisualUpdate();
+      SchedulerBinding.instance.ensureVisualUpdate();
     }
   }
 
@@ -951,7 +951,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   Future<void> performReassemble() {
     assert(() {
-      WidgetInspectorService.instance!.performReassemble();
+      WidgetInspectorService.instance.performReassemble();
       return true;
     }());
 
@@ -1035,9 +1035,9 @@ void runApp(Widget app) {
 String _debugDumpAppString() {
   const String mode = kDebugMode ? 'DEBUG MODE' : kReleaseMode ? 'RELEASE MODE' : 'PROFILE MODE';
   final StringBuffer buffer = StringBuffer();
-  buffer.writeln('${WidgetsBinding.instance!.runtimeType} - $mode');
-  if (WidgetsBinding.instance!.renderViewElement != null) {
-    buffer.writeln(WidgetsBinding.instance!.renderViewElement!.toStringDeep());
+  buffer.writeln('${WidgetsBinding.instance.runtimeType} - $mode');
+  if (WidgetsBinding.instance.renderViewElement != null) {
+    buffer.writeln(WidgetsBinding.instance.renderViewElement!.toStringDeep());
   } else {
     buffer.writeln('<no tree currently mounted>');
   }
@@ -1255,6 +1255,6 @@ class WidgetsFlutterBinding extends BindingBase with GestureBinding, SchedulerBi
   static WidgetsBinding ensureInitialized() {
     if (WidgetsBinding._instance == null)
       WidgetsFlutterBinding();
-    return WidgetsBinding.instance!;
+    return WidgetsBinding.instance;
   }
 }

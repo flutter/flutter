@@ -213,7 +213,7 @@ class TestGestureRecognizer extends GestureRecognizer {
 class IndefiniteGestureRecognizer extends GestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    GestureBinding.instance!.gestureArena.add(event.pointer, this);
+    GestureBinding.instance.gestureArena.add(event.pointer, this);
   }
 
   @override

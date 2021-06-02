@@ -67,7 +67,7 @@ class MatchesGoldenFile extends AsyncMatcher {
 
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String?>(() async {
       final ui.Image? image = await imageFuture;
       if (image == null) {

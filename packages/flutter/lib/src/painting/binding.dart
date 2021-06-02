@@ -179,4 +179,4 @@ class _SystemFontsNotifier extends Listenable {
 ///
 /// The image cache is created during startup by the [PaintingBinding]'s
 /// [PaintingBinding.createImageCache] method.
-ImageCache get imageCache => PaintingBinding.instance!.imageCache!;
+ImageCache get imageCache => PaintingBinding.instance.imageCache;

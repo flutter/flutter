@@ -118,7 +118,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerServiceExtension(
         name: 'debugDumpLayerTree',
         callback: (Map<String, String> parameters) async {
-          final String data = RendererBinding.instance?.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.';
+          final String data = RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.';
           return <String, Object>{
             'data': data,
           };
@@ -132,7 +132,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerServiceExtension(
         name: 'debugDumpRenderTree',
         callback: (Map<String, String> parameters) async {
-          final String data = RendererBinding.instance?.renderView.toStringDeep() ?? 'Render tree unavailable.';
+          final String data = RendererBinding.instance.renderView.toStringDeep();
           return <String, Object>{
             'data': data,
           };
@@ -142,7 +142,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerServiceExtension(
         name: 'debugDumpSemanticsTreeInTraversalOrder',
         callback: (Map<String, String> parameters) async {
-          final String data = RendererBinding.instance?.renderView.debugSemantics
+          final String data = RendererBinding.instance.renderView.debugSemantics
             ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder) ?? 'Semantics not collected.';
           return <String, Object>{
             'data': data,
@@ -153,7 +153,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerServiceExtension(
         name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
         callback: (Map<String, String> parameters) async {
-          final String data = RendererBinding.instance?.renderView.debugSemantics
+          final String data = RendererBinding.instance.renderView.debugSemantics
             ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest) ?? 'Semantics not collected.';
           return <String, Object>{
             'data': data,
@@ -342,7 +342,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       _debugMouseTrackerUpdateScheduled = true;
       return true;
     }());
-    SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       assert(_debugMouseTrackerUpdateScheduled);
       assert(() {
         _debugMouseTrackerUpdateScheduled = false;
@@ -505,19 +505,19 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       child.markNeedsPaint();
       child.visitChildren(visitor);
     };
-    instance?.renderView.visitChildren(visitor);
+    instance.renderView.visitChildren(visitor);
     return endOfFrame;
   }
 }
 
 /// Prints a textual representation of the entire render tree.
 void debugDumpRenderTree() {
-  debugPrint(RendererBinding.instance?.renderView.toStringDeep());
+  debugPrint(RendererBinding.instance.renderView.toStringDeep());
 }
 
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
-  debugPrint(RendererBinding.instance?.renderView.debugLayer?.toStringDeep());
+  debugPrint(RendererBinding.instance.renderView.debugLayer?.toStringDeep());
 }
 
 /// Prints a textual representation of the entire semantics tree.
@@ -527,7 +527,7 @@ void debugDumpLayerTree() {
 /// The order in which the children of a [SemanticsNode] will be printed is
 /// controlled by the [childOrder] parameter.
 void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
-  debugPrint(RendererBinding.instance?.renderView.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
+  debugPrint(RendererBinding.instance.renderView.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework

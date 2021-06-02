@@ -43,7 +43,7 @@ void mockFlutterAssets() {
   /// platform messages.
   SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
 
-  ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+  ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
     assert(message != null);
     String key = utf8.decode(message!.buffer.asUint8List());
     File asset = File(path.join(assetFolderPath, key));

@@ -155,7 +155,7 @@ void main() {
     await tester.pumpWidget(buildSwitch());
     await _pointGestureToSwitch(tester);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(_getSwitchMaterial(tester), paints..circle(color: hoverOverlayColor));
 
     // Switch with focus.
@@ -276,7 +276,7 @@ void main() {
     await tester.pumpWidget(buildSwitch());
     await _pointGestureToSwitch(tester);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(_getSwitchMaterial(tester), paints..circle(color: hoverColor));
 
     // Switch with focus.

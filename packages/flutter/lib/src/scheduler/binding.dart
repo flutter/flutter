@@ -27,7 +27,7 @@ set timeDilation(double value) {
     return;
   // We need to resetEpoch first so that we capture start of the epoch with the
   // current time dilation.
-  SchedulerBinding.instance?.resetEpoch();
+  SchedulerBinding.instance.resetEpoch();
   _timeDilation = value;
 }
 
