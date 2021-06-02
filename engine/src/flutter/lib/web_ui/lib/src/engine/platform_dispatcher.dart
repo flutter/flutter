@@ -452,11 +452,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       case 'flutter/platform_views':
         _platformViewMessageHandler ??= PlatformViewMessageHandler(
-            contentManager: platformViewManager,
-            contentHandler: (html.Element content) {
-              domRenderer.glassPaneElement!.append(content);
-            }
-          );
+          contentManager: platformViewManager,
+          contentHandler: (html.Element content) {
+            domRenderer.glassPaneElement!.append(content);
+          },
+        );
         _platformViewMessageHandler!.handlePlatformViewCall(data, callback!);
         return;
 
@@ -923,8 +923,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   String? _defaultRouteName;
 
   @visibleForTesting
-  late Rasterizer? rasterizer =
-      useCanvasKit ? Rasterizer(Surface(HtmlViewEmbedder())) : null;
+  late Rasterizer? rasterizer = useCanvasKit ? Rasterizer() : null;
 
   /// In Flutter, platform messages are exchanged between threads so the
   /// messages and responses have to be exchanged asynchronously. We simulate

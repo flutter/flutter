@@ -6,19 +6,18 @@ import 'package:ui/src/engine.dart' show frameReferences;
 import 'package:ui/ui.dart' as ui;
 
 import 'canvas.dart';
+import 'embedded_views.dart';
 import 'layer_tree.dart';
 import 'surface.dart';
+import 'surface_factory.dart';
 
 /// A class that can rasterize [LayerTree]s into a given [Surface].
 class Rasterizer {
-  final Surface surface;
   final CompositorContext context = CompositorContext();
   final List<ui.VoidCallback> _postFrameCallbacks = <ui.VoidCallback>[];
 
-  Rasterizer(this.surface);
-
   void setSkiaResourceCacheMaxBytes(int bytes) =>
-      surface.setSkiaResourceCacheMaxBytes(bytes);
+      SurfaceFactory.instance.baseSurface.setSkiaResourceCacheMaxBytes(bytes);
 
   /// Creates a new frame from this rasterizer's surface, draws the given
   /// [LayerTree] into it, and then submits the frame.
@@ -29,16 +28,17 @@ class Rasterizer {
         return;
       }
 
-      final SurfaceFrame frame = surface.acquireFrame(layerTree.frameSize);
-      surface.viewEmbedder.frameSize = layerTree.frameSize;
+      final SurfaceFrame frame =
+          SurfaceFactory.instance.baseSurface.acquireFrame(layerTree.frameSize);
+      HtmlViewEmbedder.instance.frameSize = layerTree.frameSize;
       final CkCanvas canvas = frame.skiaCanvas;
       final Frame compositorFrame =
-          context.acquireFrame(canvas, surface.viewEmbedder);
+          context.acquireFrame(canvas, HtmlViewEmbedder.instance);
 
       compositorFrame.raster(layerTree, ignoreRasterCache: true);
-      surface.addToScene();
+      SurfaceFactory.instance.baseSurface.addToScene();
       frame.submit();
-      surface.viewEmbedder.submitFrame();
+      HtmlViewEmbedder.instance.submitFrame();
     } finally {
       _runPostFrameCallbacks();
     }

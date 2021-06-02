@@ -204,8 +204,9 @@ export 'engine/canvaskit/shader.dart';
 
 export 'engine/canvaskit/skia_object_cache.dart';
 
-import 'engine/canvaskit/surface.dart';
 export 'engine/canvaskit/surface.dart';
+
+export 'engine/canvaskit/surface_factory.dart';
 
 export 'engine/canvaskit/text.dart';
 

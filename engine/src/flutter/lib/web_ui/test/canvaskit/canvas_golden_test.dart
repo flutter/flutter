@@ -127,7 +127,7 @@ void testMain() {
             psl.preroll(
               PrerollContext(
                 RasterCache(),
-                HtmlViewEmbedder(),
+                HtmlViewEmbedder.instance,
               ),
               Matrix4.identity(),
             );
@@ -218,7 +218,7 @@ void testMain() {
       buildTestScene(paintShadowBounds: false).rootLayer.preroll(
             PrerollContext(
               RasterCache(),
-              HtmlViewEmbedder(),
+              HtmlViewEmbedder.instance,
             ),
             Matrix4.identity(),
           );
@@ -676,9 +676,9 @@ void testMain() {
       await testSampleText(
         'chinese',
         '也称乱数假文或者哑元文本， '
-        '是印刷及排版领域所常用的虚拟文字。'
-        '由于曾经一台匿名的打印机刻意打乱了'
-        '一盒印刷字体从而造出一本字体样品书',
+            '是印刷及排版领域所常用的虚拟文字。'
+            '由于曾经一台匿名的打印机刻意打乱了'
+            '一盒印刷字体从而造出一本字体样品书',
       );
     });
 
@@ -768,17 +768,17 @@ void testMain() {
       await testSampleText(
         'multilingual',
         '也称乱数假文或者哑元文本， 是印刷及排版领域所常用的虚拟文字。 '
-        'տպագրության և տպագրական արդյունաբերության համար '
-        'është një tekst shabllon i industrisë së printimit '
-        ' زمن طويل وهي أن المحتوى المقروء لصفحة ما سيلهي '
-        'е елементарен примерен текст използван в печатарската '
-        'és un text de farciment usat per la indústria de la '
-        'Lorem Ipsum is simply dummy text of the printing '
-        'είναι απλά ένα κείμενο χωρίς νόημα για τους επαγγελματίες '
-        ' זוהי עובדה מבוססת שדעתו של הקורא תהיה מוסחת על ידי טקטס קריא '
-        'छपाई और अक्षर योजन उद्योग का एक साधारण डमी पाठ है सन '
-        'คือ เนื้อหาจำลองแบบเรียบๆ ที่ใช้กันในธุรกิจงานพิมพ์หรืองานเรียงพิมพ์ '
-        'საბეჭდი და ტიპოგრაფიული ინდუსტრიის უშინაარსო ტექსტია ',
+            'տպագրության և տպագրական արդյունաբերության համար '
+            'është një tekst shabllon i industrisë së printimit '
+            ' زمن طويل وهي أن المحتوى المقروء لصفحة ما سيلهي '
+            'е елементарен примерен текст използван в печатарската '
+            'és un text de farciment usat per la indústria de la '
+            'Lorem Ipsum is simply dummy text of the printing '
+            'είναι απλά ένα κείμενο χωρίς νόημα για τους επαγγελματίες '
+            ' זוהי עובדה מבוססת שדעתו של הקורא תהיה מוסחת על ידי טקטס קריא '
+            'छपाई और अक्षर योजन उद्योग का एक साधारण डमी पाठ है सन '
+            'คือ เนื้อหาจำลองแบบเรียบๆ ที่ใช้กันในธุรกิจงานพิมพ์หรืองานเรียงพิมพ์ '
+            'საბეჭდი და ტიპოგრაფიული ინდუსტრიის უშინაარსო ტექსტია ',
       );
     });
     // TODO: https://github.com/flutter/flutter/issues/60040
