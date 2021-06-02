@@ -25,9 +25,19 @@ declare_args() {
 }
 
 declare_args() {
-  # Xcode is required if using bitcode, and Xcode builds cannot use goma.
-  # TODO(dnfield): We shouldn't need Xcode for bitcode_marker builds, but we do
-  # until libpng and dart have explicitly added LLVM asm sections to their
-  # assembly sources. https://github.com/flutter/flutter/issues/39281
-  use_xcode = enable_bitcode
+  # The version of Xcode used to archive a release application with embedded
+  # bitcode must be greater than or equal to the version of the toolchain
+  # that created the bitcode in Flutter.framework. This means that when we build
+  # the framework with embedded bitcode, we must use the Xcode toolchain and
+  # its version must be less than or equal to what we expect our developers to be using.
+  # Unfortunately, using the Xcode toolchain is not compatible with GOMA.
+  #
+  # The failure mode for this arises when a developer attempts to archive an application
+  # for publication to the store with embedded bitcode.
+  #
+  # Since we do not support publishing debug or profile builds, we use 
+  # bitcode_marker which is intrinsically faster to build and does not introduce
+  # compatibility concerns between toolchains, meaning we can use
+  # a GOMA enabled Clang.
+  use_xcode = enable_bitcode && !bitcode_marker
 }
