@@ -16,7 +16,7 @@ import 'overlay.dart';
 import 'shortcuts.dart';
 
 /// The type of the [RawAutocomplete] callback which computes the list of
-/// optional completions for the widget's field based on the text the user has
+/// optional completions for the widget's field, based on the text the user has
 /// entered so far.
 ///
 /// See also:
@@ -641,13 +641,13 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// [CompositedTransformFollower] inside of an [Overlay], not at the same
   /// place in the widget tree as [RawAutocomplete].
   ///
-  /// In order to track what item is highlighted from keyboard navigation, the
+  /// In order to track which item is highlighted by keyboard navigation, the
   /// resulting options will be wrapped in an inherited
   /// [AutocompleteHighlightedOption] widget.
-  /// In the build method of this callback, the index of the highlighted
-  /// option can be obtained from [AutocompleteHighlightedOption.of] to
-  /// display the given option with some visual highlight to indicate it will
-  /// be the option selected from the keyboard.
+  /// Inside this callback, the index of the highlighted option can be obtained
+  /// from [AutocompleteHighlightedOption.of] to display the highlighted option
+  /// with a visual highlight to indicate it will be the option selected from
+  /// the keyboard.
   ///
   /// {@endtemplate}
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
@@ -805,7 +805,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void _setActionsEnabled(bool enabled) {
     // The enabled state determines whether the action will consume the
     // key shortcut or let it continue on to the underlying text field.
-    // They should only be enabled when the options are showing so they
+    // They should only be enabled when the options are showing so shortcuts
     // can be used to navigate them.
     _previousOptionAction.enabled = enabled;
     _nextOptionAction.enabled = enabled;
@@ -813,8 +813,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   // Hide or show the options overlay, if needed.
   void _updateOverlay() {
+    _setActionsEnabled(_shouldShowOptions);
     if (_shouldShowOptions) {
-      _setActionsEnabled(true);
       _floatingOptions?.remove();
       _floatingOptions = OverlayEntry(
         builder: (BuildContext context) {
@@ -834,12 +834,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         },
       );
       Overlay.of(context, rootOverlay: true)!.insert(_floatingOptions!);
-    } else {
-      _setActionsEnabled(false);
-      if (_floatingOptions != null) {
-        _floatingOptions!.remove();
-        _floatingOptions = null;
-      }
+    } else if (_floatingOptions != null) {
+      _floatingOptions!.remove();
+      _floatingOptions = null;
     }
   }
 

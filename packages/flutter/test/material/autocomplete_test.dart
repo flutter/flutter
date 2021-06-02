@@ -339,18 +339,18 @@ void main() {
     final Finder listFinder = find.byType(ListView);
     expect(listFinder, findsNothing);
 
-    /// entering `a` returns 9 items(height > `maxOptionsHeight`) from the kOptions
-    /// so height gets restricted to `maxOptionsHeight =250`
+    // Entering `a` returns 9 items(height > `maxOptionsHeight`) from the kOptions
+    // so height gets restricted to `maxOptionsHeight =250`.
     final double nineItemsHeight = await _getDefaultOptionsHeight(tester, 'a');
     expect(nineItemsHeight, equals(maxOptionsHeight));
 
-    /// returns 2 Items (height < `maxOptionsHeight`)
-    /// so options height shrinks to 2 Items combined height
+    // Returns 2 Items (height < `maxOptionsHeight`)
+    // so options height shrinks to 2 Items combined height.
     final double twoItemsHeight = await _getDefaultOptionsHeight(tester, 'el');
     expect(twoItemsHeight, lessThan(maxOptionsHeight));
 
-    /// returns 1 item (height < `maxOptionsHeight`) from `kOptions`
-    /// so options height shrinks to 1 items height
+    // Returns 1 item (height < `maxOptionsHeight`) from `kOptions`
+    // so options height shrinks to 1 items height.
     final double oneItemsHeight = await _getDefaultOptionsHeight(tester, 'elep');
     expect(oneItemsHeight, lessThan(twoItemsHeight));
   });
@@ -405,7 +405,7 @@ void main() {
   testWidgets('keyboard navigation of the options properly highlights the option', (WidgetTester tester) async {
 
     void checkOptionHighlight(String label, Color? color) {
-      final RenderBox renderBox = tester.renderObject(find.ancestor(matching: find.byType(Container), of: find.text(label)));
+      final RenderBox renderBox = tester.renderObject<RenderBox>(find.ancestor(matching: find.byType(Container), of: find.text(label)));
       if (color != null) {
         // Check to see that the container is painted with the highlighted background color.
         expect(renderBox, paints..rect(color: color));
