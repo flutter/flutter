@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 void main() {
   final _MockLiveTestWidgetsFlutterBinding binding = _MockLiveTestWidgetsFlutterBinding();
 
@@ -60,6 +59,19 @@ Some possible finders for the widgets at Offset(400.0, 300.0):
   find.widgetWithText(PageStorage, 'Test')
   find.widgetWithText(Offstage, 'Test')
 '''.trim().split('\n')));
+    printedMessages.clear();
+
+    await binding.collectDebugPrints(printedMessages, () async {
+      await tester.tapAt(const Offset(1, 1));
+    });
+    expect(printedMessages, equals('''
+Some possible finders for the widgets at Offset(1.0, 1.0):
+  find.byType(MouseRegion)
+  find.byType(ExcludeSemantics)
+  find.byType(BlockSemantics)
+  find.byType(ModalBarrier)
+  find.byType(Overlay)
+'''.trim().split('\n')));
   });
 }
 
@@ -71,11 +83,12 @@ class _MockLiveTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding {
 
   @override
   DebugPrintCallback get debugPrintOverride {
-    return _storeDebugPrints == null ?
-      super.debugPrintOverride :
-      ((String? message, { int? wrapWidth }) => _storeDebugPrints!.add(message));
+    return _storeDebugPrints == null
+        ? super.debugPrintOverride
+        : ((String? message, { int? wrapWidth }) => _storeDebugPrints!.add(message));
   }
 
+  // Execute `task` while redirecting [debugPrint] to appending to `store`.
   Future<void> collectDebugPrints(List<String?>? store, AsyncValueGetter<void> task) async {
     _storeDebugPrints = store;
     try {
