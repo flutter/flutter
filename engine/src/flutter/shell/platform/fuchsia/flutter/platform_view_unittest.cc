@@ -230,6 +230,11 @@ class PlatformViewBuilder {
     return *this;
   }
 
+  PlatformViewBuilder& SetShaderWarmupCallback(OnShaderWarmup callback) {
+    on_shader_warmup_callback_ = std::move(callback);
+    return *this;
+  }
+
   PlatformViewBuilder& SetSessionListenerRequest(
       fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener> request) {
     session_listener_request_ = std::move(request);
@@ -270,8 +275,9 @@ class PlatformViewBuilder {
         std::move(on_destroy_view_callback_),
         std::move(on_create_surface_callback_),
         std::move(on_semantics_node_update_callback_),
-        std::move(on_request_announce_callback_), view_embedder_,
-        [](auto...) {}, [](auto...) {});
+        std::move(on_request_announce_callback_),
+        std::move(on_shader_warmup_callback_), view_embedder_, [](auto...) {},
+        [](auto...) {});
   }
 
  private:
@@ -302,6 +308,7 @@ class PlatformViewBuilder {
   OnCreateSurface on_create_surface_callback_{nullptr};
   OnSemanticsNodeUpdate on_semantics_node_update_callback_{nullptr};
   OnRequestAnnounce on_request_announce_callback_{nullptr};
+  OnShaderWarmup on_shader_warmup_callback_{nullptr};
   std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder_{nullptr};
   fml::TimeDelta vsync_offset_{fml::TimeDelta::Zero()};
 };
@@ -1171,6 +1178,90 @@ TEST_F(PlatformViewTests, OnKeyEvent) {
     EXPECT_EQ(event.expected_platform_message, message);
     EXPECT_EQ(key_event_status, event.expected_key_event_status);
   }
+}
+
+// Makes sure that OnKeyEvent is dispatched as a platform message.
+TEST_F(PlatformViewTests, OnShaderWarmup) {
+  sys::testing::ServiceDirectoryProvider services_provider(dispatcher());
+  MockPlatformViewDelegate delegate;
+  flutter::TaskRunners task_runners =
+      flutter::TaskRunners("test_runners", nullptr, nullptr, nullptr, nullptr);
+
+  uint64_t width = 200;
+  uint64_t height = 100;
+  std::vector<std::string> shaders = {"foo.skp", "bar.skp", "baz.skp"};
+
+  OnShaderWarmup on_shader_warmup =
+      [&](const std::vector<std::string>& shaders_in,
+          std::function<void(uint32_t)> completion_callback, uint64_t width_in,
+          uint64_t height_in) {
+        ASSERT_EQ(shaders.size(), shaders_in.size());
+        for (size_t i = 0; i < shaders_in.size(); i++) {
+          ASSERT_EQ(shaders[i], shaders_in[i]);
+        }
+        ASSERT_EQ(width, width_in);
+        ASSERT_EQ(height, height_in);
+
+        completion_callback(shaders_in.size());
+      };
+
+  flutter_runner::PlatformView platform_view =
+      PlatformViewBuilder(delegate, std::move(task_runners),
+                          services_provider.service_directory())
+          .SetShaderWarmupCallback(on_shader_warmup)
+          .Build();
+
+  std::ostringstream shaders_array_ostream;
+  shaders_array_ostream << "[ ";
+  for (auto it = shaders.begin(); it != shaders.end(); ++it) {
+    shaders_array_ostream << "\"" << *it << "\"";
+    if (std::next(it) != shaders.end()) {
+      shaders_array_ostream << ", ";
+    }
+  }
+  shaders_array_ostream << "]";
+
+  std::string shaders_array_string = shaders_array_ostream.str();
+
+  // Create initial view for testing.
+  std::ostringstream warmup_shaders_ostream;
+  warmup_shaders_ostream << "{"
+                         << "  \"method\":\"WarmupSkps\","
+                         << "  \"args\":{"
+                         << "    \"shaders\":" << shaders_array_string << ","
+                         << "    \"width\":" << width << ","
+                         << "    \"height\":" << height << "  }"
+                         << "}\n";
+  std::string warmup_shaders_string = warmup_shaders_ostream.str();
+
+  class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
+   public:
+    TestPlatformMessageResponse() {}
+    void Complete(std::unique_ptr<fml::Mapping> data) override {
+      result_string = std::string(
+          reinterpret_cast<const char*>(data->GetMapping()), data->GetSize());
+      is_complete_ = true;
+    }
+    void CompleteEmpty() override { is_complete_ = true; }
+    std::string result_string;
+    FML_DISALLOW_COPY_AND_ASSIGN(TestPlatformMessageResponse);
+  };
+
+  fml::RefPtr<TestPlatformMessageResponse> response(
+      new TestPlatformMessageResponse);
+  static_cast<flutter::PlatformView*>(&platform_view)
+      ->HandlePlatformMessage(std::make_unique<flutter::PlatformMessage>(
+          "fuchsia/shader_warmup",
+          fml::MallocMapping::Copy(warmup_shaders_string.c_str(),
+                                   warmup_shaders_string.size()),
+          response));
+  RunLoopUntilIdle();
+  ASSERT_TRUE(response->is_complete());
+
+  std::ostringstream expected_result_ostream;
+  expected_result_ostream << "[" << shaders.size() << "]";
+  std::string expected_result_string = expected_result_ostream.str();
+  EXPECT_EQ(expected_result_string, response->result_string);
 }
 
 }  // namespace flutter_runner::testing

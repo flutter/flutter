@@ -97,9 +97,15 @@ class Engine final {
 
   fml::WeakPtrFactory<Engine> weak_factory_;
 
-  static void WarmupSkps(fml::BasicTaskRunner* concurrent_task_runner,
-                         fml::BasicTaskRunner* raster_task_runner,
-                         VulkanSurfaceProducer& surface_producer);
+  static void WarmupSkps(
+      fml::BasicTaskRunner* concurrent_task_runner,
+      fml::BasicTaskRunner* raster_task_runner,
+      VulkanSurfaceProducer& surface_producer,
+      uint64_t width,
+      uint64_t height,
+      std::shared_ptr<flutter::AssetManager> asset_manager,
+      std::optional<const std::vector<std::string>> skp_names,
+      std::optional<std::function<void(uint32_t)>> completion_callback);
 
   void OnMainIsolateStart();
 

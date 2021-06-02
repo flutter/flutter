@@ -266,8 +266,8 @@ Engine::Engine(Delegate& delegate,
   // Setup the callback that will instantiate the platform view.
   flutter::Shell::CreateCallback<flutter::PlatformView>
       on_create_platform_view = fml::MakeCopyable(
-          [debug_label = thread_label_, view_ref = std::move(platform_view_ref),
-           runner_services,
+          [this, debug_label = thread_label_,
+           view_ref = std::move(platform_view_ref), runner_services,
            parent_environment_service_provider =
                std::move(parent_environment_service_provider),
            session_listener_request = std::move(session_listener_request),
@@ -293,7 +293,41 @@ Engine::Engine(Delegate& delegate,
            await_vsync_for_secondary_callback_callback =
                [this](FireCallbackCallback cb) {
                  session_connection_->AwaitVsyncForSecondaryCallback(cb);
-               }](flutter::Shell& shell) mutable {
+               },
+           product_config](flutter::Shell& shell) mutable {
+            OnShaderWarmup on_shader_warmup = nullptr;
+            if (product_config.enable_shader_warmup()) {
+              FML_DCHECK(surface_producer_);
+              if (product_config.enable_shader_warmup_dart_hooks()) {
+                on_shader_warmup =
+                    [this, &shell](
+                        const std::vector<std::string>& skp_names,
+                        std::function<void(uint32_t)> completion_callback,
+                        uint64_t width, uint64_t height) {
+                      WarmupSkps(
+                          shell.GetDartVM()
+                              ->GetConcurrentMessageLoop()
+                              ->GetTaskRunner()
+                              .get(),
+                          shell.GetTaskRunners().GetRasterTaskRunner().get(),
+                          surface_producer_.value(), width, height,
+                          flutter::PersistentCache::GetCacheForProcess()
+                              ->asset_manager(),
+                          skp_names, completion_callback);
+                    };
+              } else {
+                WarmupSkps(shell.GetDartVM()
+                               ->GetConcurrentMessageLoop()
+                               ->GetTaskRunner()
+                               .get(),
+                           shell.GetTaskRunners().GetRasterTaskRunner().get(),
+                           surface_producer_.value(), 1024, 600,
+                           flutter::PersistentCache::GetCacheForProcess()
+                               ->asset_manager(),
+                           std::nullopt, std::nullopt);
+              }
+            }
+
             return std::make_unique<flutter_runner::PlatformView>(
                 shell,                   // delegate
                 debug_label,             // debug label
@@ -313,7 +347,8 @@ Engine::Engine(Delegate& delegate,
                 std::move(on_destroy_view_callback),
                 std::move(on_create_surface_callback),
                 std::move(on_semantics_node_update_callback),
-                std::move(on_request_announce_callback), external_view_embedder,
+                std::move(on_request_announce_callback),
+                std::move(on_shader_warmup), external_view_embedder,
                 // Callbacks for VsyncWaiter to call into SessionConnection.
                 await_vsync_callback,
                 await_vsync_for_secondary_callback_callback);
@@ -322,21 +357,11 @@ Engine::Engine(Delegate& delegate,
   // Setup the callback that will instantiate the rasterizer.
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer;
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
-  on_create_rasterizer = [this, &product_config](flutter::Shell& shell) {
+  on_create_rasterizer = [this](flutter::Shell& shell) {
     if (use_legacy_renderer_) {
       FML_DCHECK(session_connection_);
       FML_DCHECK(surface_producer_);
       FML_DCHECK(legacy_external_view_embedder_);
-
-      if (product_config.enable_shader_warmup()) {
-        FML_DCHECK(surface_producer_);
-        WarmupSkps(shell.GetDartVM()
-                       ->GetConcurrentMessageLoop()
-                       ->GetTaskRunner()
-                       .get(),
-                   shell.GetTaskRunners().GetRasterTaskRunner().get(),
-                   surface_producer_.value());
-      }
 
       auto compositor_context =
           std::make_unique<flutter_runner::CompositorContext>(
@@ -345,27 +370,11 @@ Engine::Engine(Delegate& delegate,
       return std::make_unique<flutter::Rasterizer>(
           shell, std::move(compositor_context));
     } else {
-      if (product_config.enable_shader_warmup()) {
-        FML_DCHECK(surface_producer_);
-        WarmupSkps(shell.GetDartVM()
-                       ->GetConcurrentMessageLoop()
-                       ->GetTaskRunner()
-                       .get(),
-                   shell.GetTaskRunners().GetRasterTaskRunner().get(),
-                   surface_producer_.value());
-      }
       return std::make_unique<flutter::Rasterizer>(shell);
     }
   };
 #else
-  on_create_rasterizer = [this, &product_config](flutter::Shell& shell) {
-    if (product_config.enable_shader_warmup()) {
-      FML_DCHECK(surface_producer_);
-      WarmupSkps(
-          shell.GetDartVM()->GetConcurrentMessageLoop()->GetTaskRunner().get(),
-          shell.GetTaskRunners().GetRasterTaskRunner().get(),
-          surface_producer_.value());
-    }
+  on_create_rasterizer = [this](flutter::Shell& shell) {
     return std::make_unique<flutter::Rasterizer>(shell);
   };
 #endif
@@ -734,10 +743,17 @@ void Engine::WriteProfileToTrace() const {
 }
 #endif  // !defined(DART_PRODUCT)
 
-void Engine::WarmupSkps(fml::BasicTaskRunner* concurrent_task_runner,
-                        fml::BasicTaskRunner* raster_task_runner,
-                        VulkanSurfaceProducer& surface_producer) {
-  SkISize size = SkISize::Make(1024, 600);
+void Engine::WarmupSkps(
+    fml::BasicTaskRunner* concurrent_task_runner,
+    fml::BasicTaskRunner* raster_task_runner,
+    VulkanSurfaceProducer& surface_producer,
+    uint64_t width,
+    uint64_t height,
+    std::shared_ptr<flutter::AssetManager> asset_manager,
+    std::optional<const std::vector<std::string>> skp_names,
+    std::optional<std::function<void(uint32_t)>> completion_callback) {
+  SkISize size = SkISize::Make(width, height);
+
   // We use a raw pointer here because we want to keep this alive until all gpu
   // work is done and the callbacks skia takes for this are function pointers
   // so we are unable to use a lambda that captures the smart pointer.
@@ -751,11 +767,22 @@ void Engine::WarmupSkps(fml::BasicTaskRunner* concurrent_task_runner,
   // tell concurrent task runner to deserialize all skps available from
   // the asset manager
   concurrent_task_runner->PostTask([raster_task_runner, skp_warmup_surface,
-                                    &surface_producer]() {
+                                    &surface_producer, asset_manager, skp_names,
+                                    completion_callback]() {
     TRACE_DURATION("flutter", "DeserializeSkps");
-    std::vector<std::unique_ptr<fml::Mapping>> skp_mappings =
-        flutter::PersistentCache::GetCacheForProcess()
-            ->GetSkpsFromAssetManager();
+    std::vector<std::unique_ptr<fml::Mapping>> skp_mappings;
+    if (skp_names) {
+      for (auto& skp_name : skp_names.value()) {
+        auto skp_mapping = asset_manager->GetAsMapping(skp_name);
+        if (skp_mapping) {
+          skp_mappings.push_back(std::move(skp_mapping));
+        } else {
+          FML_LOG(ERROR) << "Failed to get mapping for " << skp_name;
+        }
+      }
+    } else {
+      skp_mappings = asset_manager->GetAsMappings(".*\\.skp$", "shaders");
+    }
 
     size_t total_size = 0;
     for (auto& mapping : skp_mappings) {
@@ -783,7 +810,7 @@ void Engine::WarmupSkps(fml::BasicTaskRunner* concurrent_task_runner,
       // Tell raster task runner to warmup have the compositor
       // context warm up the newly deserialized picture
       raster_task_runner->PostTask([skp_warmup_surface, picture,
-                                    &surface_producer, i,
+                                    &surface_producer, completion_callback, i,
                                     count = skp_mappings.size()] {
         TRACE_DURATION("flutter", "WarmupSkp");
         skp_warmup_surface->GetSkiaSurface()->getCanvas()->drawPicture(picture);
@@ -793,7 +820,7 @@ void Engine::WarmupSkps(fml::BasicTaskRunner* concurrent_task_runner,
           surface_producer.gr_context()->flushAndSubmit();
         } else {
           // For the last skp we provide a callback that frees the warmup
-          // surface
+          // surface and calls the completion callback
           struct GrFlushInfo flush_info;
           flush_info.fFinishedContext = skp_warmup_surface;
           flush_info.fFinishedProc = [](void* skp_warmup_surface) {
@@ -802,6 +829,14 @@ void Engine::WarmupSkps(fml::BasicTaskRunner* concurrent_task_runner,
 
           surface_producer.gr_context()->flush(flush_info);
           surface_producer.gr_context()->submit();
+
+          // We call this here instead of inside fFinishedProc above because
+          // we want to unblock the dart animation code as soon as the raster
+          // thread is free to enque work, rather than waiting for the GPU work
+          // itself to finish.
+          if (completion_callback) {
+            completion_callback.value()(count);
+          }
         }
       });
       i++;

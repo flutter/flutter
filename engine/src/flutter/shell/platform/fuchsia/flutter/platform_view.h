@@ -38,6 +38,13 @@ using OnCreateSurface = fit::function<std::unique_ptr<flutter::Surface>()>;
 using OnSemanticsNodeUpdate =
     fit::function<void(flutter::SemanticsNodeUpdates, float)>;
 using OnRequestAnnounce = fit::function<void(std::string)>;
+// we use an std::function here because the fit::funtion causes problems with
+// std:bind since HandleFuchsiaShaderWarmupChannelPlatformMessage takes one of
+// these as its first argument.
+using OnShaderWarmup = std::function<void(const std::vector<std::string>&,
+                                          std::function<void(uint32_t)>,
+                                          uint64_t,
+                                          uint64_t)>;
 
 // PlatformView is the per-engine component residing on the platform thread that
 // is responsible for all platform specific integrations -- particularly
@@ -76,6 +83,7 @@ class PlatformView final : public flutter::PlatformView,
                OnCreateSurface on_create_surface_callback,
                OnSemanticsNodeUpdate on_semantics_node_update_callback,
                OnRequestAnnounce on_request_announce_callback,
+               OnShaderWarmup on_shader_warmup,
                std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder,
                AwaitVsyncCallback await_vsync_callback,
                AwaitVsyncForSecondaryCallbackCallback
@@ -166,6 +174,11 @@ class PlatformView final : public flutter::PlatformView,
   void HandleFlutterPlatformViewsChannelPlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message);
 
+  // Channel handler for kFuchsiaShaderWarmupChannel.
+  static void HandleFuchsiaShaderWarmupChannelPlatformMessage(
+      OnShaderWarmup on_shader_warmup,
+      std::unique_ptr<flutter::PlatformMessage> message);
+
   const std::string debug_label_;
   // TODO(MI4-2490): remove once ViewRefControl is passed to Scenic and kept
   // alive there
@@ -194,6 +207,7 @@ class PlatformView final : public flutter::PlatformView,
   OnSemanticsNodeUpdate on_semantics_node_update_callback_;
   OnRequestAnnounce on_request_announce_callback_;
 
+  OnShaderWarmup on_shader_warmup_;
   std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder_;
 
   int current_text_input_client_ = 0;
@@ -214,7 +228,7 @@ class PlatformView final : public flutter::PlatformView,
 
   std::set<int> down_pointers_;
   std::map<std::string /* channel */,
-           fit::function<void(
+           std::function<void(
                std::unique_ptr<
                    flutter::PlatformMessage> /* message */)> /* handler */>
       platform_message_handlers_;
