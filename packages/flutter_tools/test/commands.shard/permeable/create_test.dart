@@ -2182,15 +2182,14 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(command);
     final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
     final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
+    final String relativeExamplePath = globals.fs.path.normalize(globals.fs.path.join(relativePluginPath, 'example/lib/main.dart'));
 
     await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platforms=android', projectDir.path]);
-    expect(logger.statusText, isNot(contains('Your example app code in $relativePluginPath\n')));
-
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
     await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platforms=ios', projectDir.path]);
-    expect(logger.statusText, isNot(contains('Your example app code in $relativePluginPath\n')));
-
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
-    expect(logger.statusText, isNot(contains('Your example app code in $relativePluginPath\n')));
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
   }, overrides: <Type, Generator> {
     Logger: () => logger,
   });
