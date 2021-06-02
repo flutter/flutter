@@ -69,21 +69,12 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   BuildIOSArchiveCommand({@required bool verboseHelp})
       : super(verboseHelp: verboseHelp) {
-    argParser
-      ..addOption(
-        'export-options-plist',
-        valueHelp: 'ExportOptions.plist',
-        // TODO(jmagman): Update help text with link to Flutter docs.
-        help:
-        'Optionally export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
-      )..addFlag(
-      'allow-provisioning-updates',
-      defaultsTo: false,
-      help: 'Allow xcodebuild to communicate with the Apple Developer website. For automatically signed targets, xcodebuild will create and update profiles, app IDs, and certificates. For manually signed targets, xcodebuild will download missing or updated provisioning profiles. Requires a developer account to have been added in Xcode Accounts preference pane.',
-    )..addFlag(
-      'allow-provisioning-device-registration',
-      defaultsTo: false,
-      help: 'Allow xcodebuild to register your destination device on the developer portal if necessary. This flag only takes effect if "--allow-provisioning-updates" is also passed.',
+    argParser.addOption(
+      'export-options-plist',
+      valueHelp: 'ExportOptions.plist',
+      // TODO(jmagman): Update help text with link to Flutter docs.
+      help:
+          'Optionally export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
     );
   }
 
@@ -109,12 +100,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final bool shouldCodesign = true;
 
   String get exportOptionsPlist => stringArg('export-options-plist');
-
-  bool get allowProvisioningDeviceRegistration =>
-      boolArg('allow-provisioning-device-registration');
-
-  bool get allowProvisioningUpdates =>
-      boolArg('allow-provisioning-updates');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
@@ -161,10 +146,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           ...globals.xcode.xcrunCommand(),
           'xcodebuild',
           '-exportArchive',
-          if(allowProvisioningDeviceRegistration)
-            '-allowProvisioningDeviceRegistration',
-          if(allowProvisioningUpdates)
-            '-allowProvisioningUpdates',
+          if (shouldCodesign) '-allowProvisioningDeviceRegistration',
+          if (shouldCodesign) '-allowProvisioningUpdates',
           '-archivePath',
           globals.fs.path.absolute(app.archiveBundleOutputPath),
           '-exportPath',
