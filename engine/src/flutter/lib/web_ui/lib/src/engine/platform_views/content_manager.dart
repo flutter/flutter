@@ -11,6 +11,7 @@ typedef ParameterizedPlatformViewFactory = html.Element Function(
   int viewId, {
   Object? params,
 });
+
 /// A function which takes a unique `id` and creates an HTML element.
 ///
 /// This is made available to end-users through dart:ui in web.
@@ -151,5 +152,18 @@ class PlatformViewManager {
 
       content.style.width = '100%';
     }
+  }
+
+  /// Clears the state. Used in tests.
+  ///
+  /// Returns the set of know view ids, so they can be cleaned up.
+  Set<int> debugClear() {
+    final Set<int> result = _contents.keys.toSet();
+    for (int viewId in result) {
+      clearPlatformView(viewId);
+    }
+    _factories.clear();
+    _contents.clear();
+    return result;
   }
 }

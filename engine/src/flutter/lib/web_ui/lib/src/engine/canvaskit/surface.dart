@@ -11,8 +11,8 @@ import '../browser_detection.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
-import 'embedded_views.dart';
 import 'initialization.dart';
+import 'surface_factory.dart';
 import 'util.dart';
 
 typedef SubmitCallback = bool Function(SurfaceFrame, CkCanvas);
@@ -45,7 +45,7 @@ class SurfaceFrame {
 /// successive frames if they are the same size. Otherwise, a new [CkSurface] is
 /// created.
 class Surface {
-  Surface(this.viewEmbedder);
+  Surface();
 
   CkSurface? _surface;
 
@@ -54,6 +54,24 @@ class Surface {
   /// goes dormant and loses the GL context.
   bool _forceNewContext = true;
   bool get debugForceNewContext => _forceNewContext;
+
+  bool _contextLost = false;
+  bool get debugContextLost => _contextLost;
+
+  /// A cached copy of the most recently created `webglcontextlost` listener.
+  ///
+  /// We must cache this function because each time we access the tear-off it
+  /// creates a new object, meaning we won't be able to remove this listener
+  /// later.
+  void Function(html.Event)? _cachedContextLostListener;
+
+  /// A cached copy of the most recently created `webglcontextrestored`
+  /// listener.
+  ///
+  /// We must cache this function because each time we access the tear-off it
+  /// creates a new object, meaning we won't be able to remove this listener
+  /// later.
+  void Function(html.Event)? _cachedContextRestoredListener;
 
   SkGrContext? _grContext;
   int? _skiaCacheBytes;
@@ -87,10 +105,6 @@ class Surface {
   }
 
   bool _addedToScene = false;
-
-  /// The default view embedder. Coordinates embedding platform views and
-  /// overlaying subsequent draw operations on top.
-  final HtmlViewEmbedder viewEmbedder;
 
   /// Acquire a frame of the given [size] containing a drawable canvas.
   ///
@@ -171,12 +185,51 @@ class Surface {
       ..height = '${logicalHeight}px';
   }
 
+  void _contextRestoredListener(html.Event event) {
+    assert(
+        _contextLost,
+        'Received "webglcontextrestored" event but never received '
+        'a "webglcontextlost" event.');
+    _contextLost = false;
+    // Force the framework to rerender the frame.
+    EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  void _contextLostListener(html.Event event) {
+    assert(event.target == this.htmlCanvas,
+        'Received a context lost event for a disposed canvas');
+    final SurfaceFactory factory = SurfaceFactory.instance;
+    _contextLost = true;
+    if (factory.isLive(this)) {
+      _forceNewContext = true;
+      event.preventDefault();
+    } else {
+      dispose();
+    }
+  }
+
   /// This function is expensive.
   ///
   /// It's better to reuse surface if possible.
   CkSurface _createNewSurface(ui.Size physicalSize) {
     // Clear the container, if it's not empty. We're going to create a new <canvas>.
-    this.htmlCanvas?.remove();
+    if (this.htmlCanvas != null) {
+      this.htmlCanvas!.removeEventListener(
+            'webglcontextrestored',
+            _cachedContextRestoredListener,
+            false,
+          );
+      this.htmlCanvas!.removeEventListener(
+            'webglcontextlost',
+            _cachedContextLostListener,
+            false,
+          );
+      this.htmlCanvas!.remove();
+      _cachedContextRestoredListener = null;
+      _cachedContextLostListener = null;
+    }
 
     // If `physicalSize` is not precise, use a slightly bigger canvas. This way
     // we ensure that the rendred picture covers the entire browser window.
@@ -196,15 +249,20 @@ class Surface {
     // notification. When we receive this notification we force a new context.
     //
     // See also: https://www.khronos.org/webgl/wiki/HandlingContextLost
-    htmlCanvas.addEventListener('webglcontextlost', (event) {
-      print('Flutter: restoring WebGL context.');
-      _forceNewContext = true;
-      // Force the framework to rerender the frame.
-      EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
-      event.stopPropagation();
-      event.preventDefault();
-    }, false);
+    _cachedContextRestoredListener = _contextRestoredListener;
+    _cachedContextLostListener = _contextLostListener;
+    htmlCanvas.addEventListener(
+      'webglcontextlost',
+      _cachedContextLostListener,
+      false,
+    );
+    htmlCanvas.addEventListener(
+      'webglcontextrestored',
+      _cachedContextRestoredListener,
+      false,
+    );
     _forceNewContext = false;
+    _contextLost = false;
 
     htmlElement.append(htmlCanvas);
 
@@ -282,6 +340,12 @@ class Surface {
   }
 
   void dispose() {
+    htmlCanvas?.removeEventListener(
+        'webglcontextlost', _cachedContextLostListener, false);
+    htmlCanvas?.removeEventListener(
+        'webglcontextrestored', _cachedContextRestoredListener, false);
+    _cachedContextLostListener = null;
+    _cachedContextRestoredListener = null;
     htmlElement.remove();
     _surface?.dispose();
   }
@@ -296,6 +360,7 @@ class CkSurface {
   CkSurface(this._surface, this._grContext, this._glContext);
 
   CkCanvas getCanvas() {
+    assert(!_isDisposed, 'Attempting to use the canvas of a disposed surface');
     return CkCanvas(_surface.getCanvas());
   }
 
