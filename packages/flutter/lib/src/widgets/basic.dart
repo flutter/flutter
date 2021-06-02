@@ -6223,8 +6223,9 @@ class DefaultAssetBundle extends InheritedWidget {
 /// for the given render object.
 ///
 /// This widget will call [RenderObject.dispose] on the [renderBox] when it is
-/// unmounted. If any children have been added to the [renderBox], they must
-/// be disposed in the [onUnmount] callback.
+/// unmounted. After that point, the [renderBox] will be unusable. If any
+/// children have been added to the [renderBox], they must be disposed in the
+/// [onUnmount] callback.
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// Creates an adapter for placing a specific [RenderBox] in the widget tree.
   ///
