@@ -46,21 +46,6 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
     return scanCodeMap.toString().trimRight();
   }
 
-  Iterable<PhysicalKeyEntry> get _functionKeyData {
-    final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
-    return keyData.entries.where((PhysicalKeyEntry entry) {
-      return functionKeyRe.hasMatch(entry.constantName);
-    });
-  }
-
-  String get _functionKeys {
-    final StringBuffer result = StringBuffer();
-    for (final PhysicalKeyEntry entry in _functionKeyData) {
-      result.writeln('  ${toHex(entry.iOSScanCode)},  // ${entry.constantName}');
-    }
-    return result.toString().trimRight();
-  }
-
   String get _keyCodeToLogicalMap {
     final StringBuffer result = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.entries) {
@@ -132,7 +117,6 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
       'MASK_CONSTANTS': _maskConstants,
       'IOS_SCAN_CODE_MAP': _scanCodeMap,
       'IOS_KEYCODE_LOGICAL_MAP': _keyCodeToLogicalMap,
-      'IOS_FUNCTION_KEY_SET': _functionKeys,
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
       'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,
