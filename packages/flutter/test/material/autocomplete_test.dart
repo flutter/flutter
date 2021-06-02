@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 class User {
   const User({
@@ -336,18 +339,18 @@ void main() {
     final Finder listFinder = find.byType(ListView);
     expect(listFinder, findsNothing);
 
-    /// entering `a` returns 9 items(height > `maxOptionsHeight`) from the kOptions
-    /// so height gets restricted to `maxOptionsHeight =250`
+    // Entering `a` returns 9 items(height > `maxOptionsHeight`) from the kOptions
+    // so height gets restricted to `maxOptionsHeight =250`.
     final double nineItemsHeight = await _getDefaultOptionsHeight(tester, 'a');
     expect(nineItemsHeight, equals(maxOptionsHeight));
 
-    /// returns 2 Items (height < `maxOptionsHeight`)
-    /// so options height shrinks to 2 Items combined height
+    // Returns 2 Items (height < `maxOptionsHeight`)
+    // so options height shrinks to 2 Items combined height.
     final double twoItemsHeight = await _getDefaultOptionsHeight(tester, 'el');
     expect(twoItemsHeight, lessThan(maxOptionsHeight));
 
-    /// returns 1 item (height < `maxOptionsHeight`) from `kOptions`
-    /// so options height shrinks to 1 items height
+    // Returns 1 item (height < `maxOptionsHeight`) from `kOptions`
+    // so options height shrinks to 1 items height.
     final double oneItemsHeight = await _getDefaultOptionsHeight(tester, 'elep');
     expect(oneItemsHeight, lessThan(twoItemsHeight));
   });
@@ -397,5 +400,57 @@ void main() {
     final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
     expect(field.controller!.text, 'lemur');
     expect(lastSelection, 'lemur');
+  });
+
+  testWidgets('keyboard navigation of the options properly highlights the option', (WidgetTester tester) async {
+
+    void checkOptionHighlight(String label, Color? color) {
+      final RenderBox renderBox = tester.renderObject<RenderBox>(find.ancestor(matching: find.byType(Container), of: find.text(label)));
+      if (color != null) {
+        // Check to see that the container is painted with the highlighted background color.
+        expect(renderBox, paints..rect(color: color));
+      } else {
+        // There should only be a paragraph painted.
+        expect(renderBox, paintsExactlyCountTimes(const Symbol('drawRect'), 0));
+        expect(renderBox, paints..paragraph());
+      }
+    }
+
+    const Color highlightColor = Color(0xFF112233);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(
+          focusColor: highlightColor,
+        ),
+        home: Scaffold(
+          body: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextFormField));
+    await tester.enterText(find.byType(TextFormField), 'el');
+    await tester.pump();
+    expect(find.byType(ListView), findsOneWidget);
+    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    expect(list.semanticChildCount, 2);
+
+    // Initially the first option should be highlighted
+    checkOptionHighlight('chameleon', highlightColor);
+    checkOptionHighlight('elephant', null);
+
+    // Move the selection down
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+
+    // Highlight should be moved to the second item
+    checkOptionHighlight('chameleon', null);
+    checkOptionHighlight('elephant', highlightColor);
   });
 }
