@@ -4,8 +4,7 @@
 
 part of engine;
 
-/// Renders picture to a CanvasElement by allocating and caching 0 or more
-/// canvas(s) for [BitmapCanvas].
+/// Allocates and caches 0 or more canvas(s) for [BitmapCanvas].
 ///
 /// [BitmapCanvas] signals allocation of first canvas using allocateCanvas.
 /// When a painting command such as drawImage or drawParagraph requires
@@ -913,29 +912,15 @@ class ContextStateHandle {
     strokeJoin = paint.strokeJoin;
 
     if (paint.shader != null) {
-      if (paint.shader is EngineGradient) {
-        final EngineGradient engineShader = paint.shader as EngineGradient;
-        final Object paintStyle =
-            engineShader.createPaintStyle(_canvasPool.context, shaderBounds,
-                density);
-        fillStyle = paintStyle;
-        strokeStyle = paintStyle;
-        _shaderBounds = shaderBounds;
-        // Align pattern origin to destination.
-        context.translate(shaderBounds!.left, shaderBounds.top);
-      } else if (paint.shader is EngineImageShader) {
-        final EngineImageShader imageShader = paint.shader as EngineImageShader;
-        final Object paintStyle =
-            imageShader.createPaintStyle(_canvasPool.context, shaderBounds,
-                density);
-        fillStyle = paintStyle;
-        strokeStyle = paintStyle;
-        if (imageShader.requiresTileOffset) {
-          _shaderBounds = shaderBounds;
-          // Align pattern origin to destination.
-          context.translate(shaderBounds!.left, shaderBounds.top);
-        }
-      }
+      final EngineGradient engineShader = paint.shader as EngineGradient;
+      final Object paintStyle =
+          engineShader.createPaintStyle(_canvasPool.context, shaderBounds,
+              density);
+      fillStyle = paintStyle;
+      strokeStyle = paintStyle;
+      _shaderBounds = shaderBounds;
+      // Align pattern origin to destination.
+      context.translate(shaderBounds!.left, shaderBounds.top);
     } else if (paint.color != null) {
       final String? colorString = colorToCssString(paint.color);
       fillStyle = colorString;
