@@ -90,13 +90,6 @@ class SectorAppState extends State<SectorApp> {
     });
   }
 
-  void recursivelyDisposeChildren(RenderObject parent) {
-    parent.visitChildren((RenderObject child) {
-      recursivelyDisposeChildren(child);
-      child.dispose();
-    });
-  }
-
   Widget buildBody() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -114,12 +107,7 @@ class SectorAppState extends State<SectorApp> {
                       Container(
                         padding: const EdgeInsets.all(4.0),
                         margin: const EdgeInsets.only(right: 10.0),
-                        child: WidgetToRenderBoxAdapter(
-                          renderBox: sectorAddIcon,
-                          onUnmount: () {
-                            recursivelyDisposeChildren(sectorAddIcon);
-                          },
-                        ),
+                        child: WidgetToRenderBoxAdapter(renderBox: sectorAddIcon),
                       ),
                       const Text('ADD SECTOR'),
                     ],
@@ -134,12 +122,7 @@ class SectorAppState extends State<SectorApp> {
                       Container(
                         padding: const EdgeInsets.all(4.0),
                         margin: const EdgeInsets.only(right: 10.0),
-                        child: WidgetToRenderBoxAdapter(
-                          renderBox: sectorRemoveIcon,
-                          onUnmount: () {
-                            recursivelyDisposeChildren(sectorRemoveIcon);
-                          },
-                        ),
+                        child: WidgetToRenderBoxAdapter(renderBox: sectorRemoveIcon),
                       ),
                       const Text('REMOVE SECTOR'),
                     ],
@@ -159,9 +142,6 @@ class SectorAppState extends State<SectorApp> {
             child: WidgetToRenderBoxAdapter(
               renderBox: sectors,
               onBuild: doUpdates,
-              onUnmount: () {
-                recursivelyDisposeChildren(sectors);
-              },
             ),
           ),
         ),

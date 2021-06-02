@@ -3152,6 +3152,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
+
   /// The number of times that this render object repainted at the same time as
   /// its parent. Repaint boundaries are only useful when the parent and child
   /// paint at different times. When both paint at the same time, the repaint
