@@ -23,6 +23,7 @@ import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
+import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
@@ -33,6 +34,7 @@ import 'reporting/reporting.dart';
 import 'version.dart';
 
 Artifacts? get artifacts => context.get<Artifacts>();
+BuildSystem? get buildSystem => context.get<BuildSystem>();
 Cache get cache => context.get<Cache>()!;
 Config get config => context.get<Config>()!;
 HttpClientFactory? get httpClientFactory => context.get<HttpClientFactory>();
