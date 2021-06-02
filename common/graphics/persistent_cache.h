@@ -95,6 +95,9 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   /// Set the asset manager from which PersistentCache can load SkLSs. A nullptr
   /// can be provided to clear the asset manager.
   static void SetAssetManager(std::shared_ptr<AssetManager> value);
+  static std::shared_ptr<AssetManager> asset_manager() {
+    return asset_manager_;
+  }
 
   static bool cache_sksl() { return cache_sksl_; }
 
