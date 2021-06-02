@@ -62,6 +62,7 @@ Scene::Scene(std::shared_ptr<flutter::Layer> rootLayer,
 Scene::~Scene() {}
 
 void Scene::dispose() {
+  layer_tree_.reset();
   ClearDartWrapper();
 }
 

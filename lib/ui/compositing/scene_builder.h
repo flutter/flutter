@@ -132,6 +132,10 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
 
   void build(Dart_Handle scene_handle);
 
+  const std::vector<std::shared_ptr<ContainerLayer>>& layer_stack() {
+    return layer_stack_;
+  }
+
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:

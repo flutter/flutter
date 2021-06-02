@@ -157,7 +157,7 @@ source_set("ui") {
       "compositing/scene_host.h",
     ]
 
-    deps += [
+    public_deps += [
       "$fuchsia_sdk_root/pkg:async-cpp",
       "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
       "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
@@ -199,6 +199,7 @@ if (enable_unittests) {
     public_configs = [ "//flutter:export_dynamic_symbols" ]
 
     sources = [
+      "compositing/scene_builder_unittests.cc",
       "painting/image_dispose_unittests.cc",
       "painting/image_encoding_unittests.cc",
       "painting/image_generator_registry_unittests.cc",

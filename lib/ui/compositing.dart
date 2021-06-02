@@ -57,9 +57,19 @@ class Scene extends NativeFieldWrapperClass2 {
 // passed as `oldLayer` to `pushTransform`. This is achieved by having one
 // concrete subclass of this class per push method.
 abstract class _EngineLayerWrapper implements EngineLayer {
-  _EngineLayerWrapper._(this._nativeLayer);
+  _EngineLayerWrapper._(EngineLayer nativeLayer) : _nativeLayer = nativeLayer;
 
-  EngineLayer _nativeLayer;
+  EngineLayer? _nativeLayer;
+
+  @override
+  void dispose() {
+    assert(_nativeLayer != null, 'Object disposed');
+    _nativeLayer!.dispose();
+    assert(() {
+      _nativeLayer = null;
+      return true;
+    }());
+  }
 
   // Children of this layer.
   //
@@ -230,6 +240,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
       if (layer == null) {
         return true;
       }
+      assert(layer._nativeLayer != null, 'Object disposed');
       layer._debugCheckNotUsedAsOldLayer();
       assert(_debugCheckUsedOnce(layer, 'oldLayer in $methodName'));
       layer._debugWasUsedAsOldLayer = true;
@@ -638,6 +649,8 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
     assert(() {
       final _EngineLayerWrapper layer = retainedLayer as _EngineLayerWrapper;
 
+      assert(layer._nativeLayer != null);
+
       void recursivelyCheckChildrenUsedOnce(_EngineLayerWrapper parentLayer) {
         _debugCheckUsedOnce(parentLayer, 'retained layer');
         parentLayer._debugCheckNotUsedAsOldLayer();
@@ -655,7 +668,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
     }());
 
     final _EngineLayerWrapper wrapper = retainedLayer as _EngineLayerWrapper;
-    _addRetained(wrapper._nativeLayer);
+    _addRetained(wrapper._nativeLayer!);
   }
 
   void _addRetained(EngineLayer retainedLayer) native 'SceneBuilder_addRetained';

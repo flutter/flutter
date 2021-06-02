@@ -313,6 +313,7 @@ FILE: ../../../flutter/lib/ui/compositing/scene.cc
 FILE: ../../../flutter/lib/ui/compositing/scene.h
 FILE: ../../../flutter/lib/ui/compositing/scene_builder.cc
 FILE: ../../../flutter/lib/ui/compositing/scene_builder.h
+FILE: ../../../flutter/lib/ui/compositing/scene_builder_unittests.cc
 FILE: ../../../flutter/lib/ui/compositing/scene_host.cc
 FILE: ../../../flutter/lib/ui/compositing/scene_host.h
 FILE: ../../../flutter/lib/ui/dart_runtime_hooks.cc

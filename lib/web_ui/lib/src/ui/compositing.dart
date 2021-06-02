@@ -141,7 +141,9 @@ abstract class SceneBuilder {
   );
 }
 
-class EngineLayer {}
+class EngineLayer {
+  void dispose() {}
+}
 
 class SceneHost {
   SceneHost(
