@@ -97,7 +97,7 @@ void main() {
     );
 
     final List<PointerEvent> pointerRouterEvents = <PointerEvent>[];
-    GestureBinding.instance!.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
 
     final List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = events.add;

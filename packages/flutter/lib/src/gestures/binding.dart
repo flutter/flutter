@@ -73,7 +73,7 @@ class _Resampler {
   // Add `event` for resampling or dispatch it directly if
   // not a touch event.
   void addOrDispatch(PointerEvent event) {
-    final SchedulerBinding? scheduler = SchedulerBinding.instance;
+    final SchedulerBinding scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
     // Add touch event to resampler or dispatch pointer event directly.
     if (event.kind == PointerDeviceKind.touch) {
@@ -97,7 +97,7 @@ class _Resampler {
   //
   // The `samplingClock` is the clock used to determine frame time age.
   void sample(Duration samplingOffset, SamplingClock clock) {
-    final SchedulerBinding? scheduler = SchedulerBinding.instance;
+    final SchedulerBinding scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
 
     // Initialize `_frameTime` if needed. This will be used for periodic
@@ -157,7 +157,7 @@ class _Resampler {
       // Add a post frame callback as this avoids producing unnecessary
       // frames but ensures that sampling phase is adjusted to frame
       // time when frames are produced.
-      scheduler?.addPostFrameCallback((_) {
+      scheduler.addPostFrameCallback((_) {
         _frameCallbackScheduled = false;
         // We use `currentSystemFrameTimeStamp` here as it's critical that
         // sample time is in the same clock as the event time stamps, and
