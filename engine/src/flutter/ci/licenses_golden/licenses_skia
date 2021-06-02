@@ -1,4 +1,4 @@
-Signature: 406cc20dd4046feacac50c2dffade74e
+Signature: c553ee687fddf1499d6c92c9ddf44fa5
 
 UNUSED LICENSES:
 
@@ -3945,8 +3945,6 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrMiddleOutPolygonTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrMidpointContourParser.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIndirectTessellator.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIndirectTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIterator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrVectorXform.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTControl.cpp
@@ -5266,6 +5264,7 @@ FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.h
+FILE: ../../../third_party/skia/src/gpu/SkBaseGpuDevice.cpp
 FILE: ../../../third_party/skia/src/gpu/SkBaseGpuDevice.h
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice_nga.cpp
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice_nga.h
