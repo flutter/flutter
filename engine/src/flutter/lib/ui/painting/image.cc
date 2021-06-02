@@ -44,6 +44,8 @@ Dart_Handle CanvasImage::toByteData(int format, Dart_Handle callback) {
 }
 
 void CanvasImage::dispose() {
+  // TODO(dnfield): Remove the hint freed delegate once Picture disposal is in
+  // the framework https://github.com/flutter/flutter/issues/81514
   auto hint_freed_delegate = UIDartState::Current()->GetHintFreedDelegate();
   if (hint_freed_delegate) {
     hint_freed_delegate->HintFreed(GetAllocationSize());

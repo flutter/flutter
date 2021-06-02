@@ -32,6 +32,8 @@ class EngineLayer : public RefCountedDartWrappable<EngineLayer> {
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
+  void dispose();
+
   std::shared_ptr<flutter::ContainerLayer> Layer() const { return layer_; }
 
  private:

@@ -37,6 +37,10 @@ abstract class Layer implements ui.EngineLayer {
 
   /// Paint this layer into the scene.
   void paint(PaintContext paintContext);
+
+  // TODO(dnfield): Implement ui.EngineLayer.dispose for CanvasKit.
+  // https://github.com/flutter/flutter/issues/82878
+  void dispose() {}
 }
 
 /// A context shared by all layers during the preroll pass.
@@ -180,6 +184,9 @@ class BackdropFilterEngineLayer extends ContainerLayer
     paintChildren(context);
     context.internalNodesCanvas.restore();
   }
+
+  // TODO(dnfield): dispose of the _filter
+  // https://github.com/flutter/flutter/issues/82832
 }
 
 /// A layer that clips its child layers by a given [Path].
@@ -397,6 +404,9 @@ class ImageFilterEngineLayer extends ContainerLayer
     paintChildren(paintContext);
     paintContext.internalNodesCanvas.restore();
   }
+
+  // TODO(dnfield): dispose of the _filter
+  // https://github.com/flutter/flutter/issues/82832
 }
 
 class ShaderMaskEngineLayer extends ContainerLayer
