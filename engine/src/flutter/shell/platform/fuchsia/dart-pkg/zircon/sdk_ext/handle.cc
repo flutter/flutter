@@ -60,6 +60,7 @@ zx_handle_t Handle::ReleaseHandle() {
 
   zx_handle_t handle = handle_;
   handle_ = ZX_HANDLE_INVALID;
+  cached_koid_ = std::nullopt;
   while (waiters_.size()) {
     // HandleWaiter::Cancel calls Handle::ReleaseWaiter which removes the
     // HandleWaiter from waiters_.
