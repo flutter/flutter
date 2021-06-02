@@ -53,10 +53,11 @@ TEST_F(CompilerTest, CanCompileSample) {
   constexpr const char* kShaderFixtureName = "sample.vert";
   auto fixture = flutter::testing::OpenFixtureAsMapping(kShaderFixtureName);
   ASSERT_NE(fixture->GetMapping(), nullptr);
-  Compiler::SourceOptions options(kShaderFixtureName);
-  options.working_directory = std::make_shared<fml::UniqueFD>(
+  Compiler::SourceOptions compiler_options(kShaderFixtureName);
+  compiler_options.working_directory = std::make_shared<fml::UniqueFD>(
       flutter::testing::OpenFixturesDirectory());
-  Compiler compiler(*fixture.get(), options);
+  Reflector::Options reflector_options;
+  Compiler compiler(*fixture.get(), compiler_options, reflector_options);
   if (!compiler.IsValid()) {
     FML_LOG(ERROR) << compiler.GetErrorMessages();
   }
