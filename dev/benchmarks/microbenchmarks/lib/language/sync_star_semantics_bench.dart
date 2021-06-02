@@ -92,8 +92,9 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<Inlin
     } else {
       workingText += info.text;
       workingLabel ??= '';
-      if (info.semanticsLabel != null) {
-        workingLabel += info.semanticsLabel!;
+      final String? infoSemanticsLabel = info.semanticsLabel;
+      if (infoSemanticsLabel != null) {
+        workingLabel += infoSemanticsLabel;
       } else {
         workingLabel += info.text;
       }
@@ -121,8 +122,9 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpa
     } else {
       workingText += info.text;
       workingLabel ??= '';
-      if (info.semanticsLabel != null) {
-        workingLabel += info.semanticsLabel!;
+      final String? infoSemanticsLabel = info.semanticsLabel;
+      if (infoSemanticsLabel != null) {
+        workingLabel += infoSemanticsLabel;
       } else {
         workingLabel += info.text;
       }
