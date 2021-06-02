@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "flutter/shell/platform/common/accessibility_bridge.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 
 @interface FlutterEngine ()

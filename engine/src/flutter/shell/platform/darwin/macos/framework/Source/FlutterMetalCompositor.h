@@ -12,8 +12,7 @@ namespace flutter {
 
 class FlutterMetalCompositor : public FlutterCompositor {
  public:
-  explicit FlutterMetalCompositor(FlutterViewController* view_controller,
-                                  id<MTLDevice> mtl_device);
+  explicit FlutterMetalCompositor(FlutterViewController* view_controller);
 
   virtual ~FlutterMetalCompositor() = default;
 
@@ -40,9 +39,6 @@ class FlutterMetalCompositor : public FlutterCompositor {
   // Composites the provided FlutterLayer objects and presents the composited
   // frame to the FlutterView(s).
   bool Present(const FlutterLayer** layers, size_t layers_count) override;
-
- private:
-  const id<MTLDevice> mtl_device_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterMetalCompositor);
 };
