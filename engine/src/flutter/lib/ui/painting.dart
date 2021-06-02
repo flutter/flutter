@@ -3484,6 +3484,9 @@ enum TileMode {
   ///
   /// An image filter will substitute transparent black for any sample it must read from
   /// outside its source image.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_decal_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_decal_radial.png)
   decal,
 }
 
