@@ -114,7 +114,7 @@ class CyclicDiagnostic extends DiagnosticableTree {
   final String name;
 
   @override
-  String toStringShort() => '${objectRuntimeType(this, 'CyclicDiagnistic')}-$name';
+  String toStringShort() => '${objectRuntimeType(this, 'CyclicDiagnostic')}-$name';
 
   // We have to override toString to avoid the toString call itself triggering a
   // stack overflow.
@@ -1659,6 +1659,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(alternateChildJson['valueId'], equals(childJson['valueId']));
       alternateChildrenJson = (await service.testExtension('getChildrenSummaryTree', <String, String>{'arg': childJson['objectId']! as String, 'objectGroup': group}))! as List<Object?>;
       expect(alternateChildrenJson.length , equals(0));
+      // Tests are failing when this typo is fixed.
       expect(childJson['chidlren'], isNull);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 

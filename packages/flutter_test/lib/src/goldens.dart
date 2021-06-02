@@ -204,7 +204,7 @@ abstract class WebGoldenComparator {
 /// When using `flutter test --platform=chrome`, a comparator implemented by
 /// [DefaultWebGoldenComparator] is used if no other comparator is specified. It
 /// will send a request to the test server, which uses [goldenFileComparator]
-/// for golden file compatison.
+/// for golden file comparison.
 ///
 /// When using `flutter test --update-goldens`, the [DefaultWebGoldenComparator]
 /// updates the files on disk to match the rendering.

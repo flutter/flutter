@@ -19,7 +19,7 @@ void loadDateIntlDataIfNotLoaded() {
     // TODO(garyq): Add support for scriptCodes. Do not strip scriptCode from string.
 
     // Keeps track of initialized locales. This can only happen if a locale
-    // with a stripped scriptCode has already been initialzed. The set of
+    // with a stripped scriptCode has already been initialized. The set of
     // initialized locales should be removed when scriptCode stripping is
     // removed.
     final Set<String> initializedLocales = <String>{};

@@ -466,7 +466,7 @@ TaskFunction createFramePolicyIntegrationTest() {
       ) as Map<String, dynamic>;
       final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
       final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
-      final Map<String, dynamic> dataFormated = <String, dynamic>{
+      final Map<String, dynamic> dataFormatted = <String, dynamic>{
         'average_delay_fullyLive_millis':
           fullLiveData['average_delay_millis'],
         'average_delay_benchmarkLive_millis':
@@ -478,8 +478,8 @@ TaskFunction createFramePolicyIntegrationTest() {
       };
 
       return TaskResult.success(
-        dataFormated,
-        benchmarkScoreKeys: dataFormated.keys.toList(),
+        dataFormatted,
+        benchmarkScoreKeys: dataFormatted.keys.toList(),
       );
     });
   };

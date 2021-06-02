@@ -623,7 +623,7 @@ class _TabBarScrollController extends ScrollController {
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_material_ticker}
-/// [TabBar] can also be implmented by using a [TabController] which provides more options
+/// [TabBar] can also be implemented by using a [TabController] which provides more options
 /// to control the behavior of the [TabBar] and [TabBarView]. This can be used instead of
 /// a [DefaultTabController], demonstrated below.
 ///

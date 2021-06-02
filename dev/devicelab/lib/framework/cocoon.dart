@@ -73,7 +73,7 @@ class Cocoon {
   /// Flutter infrastructure's workflow is:
   /// 1. Run DeviceLab test, writing results to a known path
   /// 2. Request service account token from luci auth (valid for at least 3 minutes)
-  /// 3. Upload results from (1) to Cocooon
+  /// 3. Upload results from (1) to Cocoon
   Future<void> sendResultsPath(String resultsPath) async {
     final File resultFile = fs.file(resultsPath);
     final Map<String, dynamic> resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;

@@ -293,7 +293,7 @@ void main() {
 
   testWidgets(
     'When isAlwaysShown is true, '
-    'must pass a controller or find PrimarySCrollController that is attached to a scroll view',
+    'must pass a controller or find PrimaryScrollController that is attached to a scroll view',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       Widget viewWithScroll() {

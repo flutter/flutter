@@ -50,7 +50,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 /// Manages interaction with the tool injection and runner system.
 ///
 /// The Testbed automatically injects reasonable defaults through the context
-/// DI system such as a [BufferLogger] and a [MemoryFileSytem].
+/// DI system such as a [BufferLogger] and a [MemoryFileSystem].
 ///
 /// Example:
 ///

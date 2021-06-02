@@ -35,7 +35,7 @@ void main() {
     'koala',
     'lemur',
     'mouse',
-    'northern white rhinocerous',
+    'northern white rhinoceros',
   ];
 
   const List<User> kOptionsUsers = <User>[
@@ -100,7 +100,7 @@ void main() {
     expect(find.byType(ListView), findsOneWidget);
     list = find.byType(ListView).evaluate().first.widget as ListView;
     // 'chameleon', 'elephant', 'goose', 'lemur', 'mouse', and
-    // 'northern white rhinocerous' are displayed.
+    // 'northern white rhinoceros' are displayed.
     expect(list.semanticChildCount, 6);
   });
 
@@ -336,8 +336,8 @@ void main() {
     final Finder listFinder = find.byType(ListView);
     expect(listFinder, findsNothing);
 
-    /// entering `a` returns 9 items(height > `maxOptionsheight`) from the kOptions
-    /// so height gets restricted to `maxOptionsheight =250`
+    /// entering `a` returns 9 items(height > `maxOptionsHeight`) from the kOptions
+    /// so height gets restricted to `maxOptionsHeight =250`
     final double nineItemsHeight = await _getDefaultOptionsHeight(tester, 'a');
     expect(nineItemsHeight, equals(maxOptionsHeight));
 

@@ -227,7 +227,7 @@ void main() {
 
   testWithoutContext('Automatically cleans old outputs when build graph changes', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    final TestTarget testTarget = TestTarget((Environment envionment) async {
+    final TestTarget testTarget = TestTarget((Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -238,7 +238,7 @@ void main() {
 
     expect(environment.buildDir.childFile('foo.out'), exists);
 
-    final TestTarget testTarget2 = TestTarget((Environment envionment) async {
+    final TestTarget testTarget2 = TestTarget((Environment environment) async {
       environment.buildDir.childFile('bar.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -250,7 +250,7 @@ void main() {
     expect(environment.buildDir.childFile('foo.out'), isNot(exists));
   });
 
-  testWithoutContext('Does not crash when filesytem and cache are out of sync', () async {
+  testWithoutContext('Does not crash when filesystem and cache are out of sync', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     final TestTarget testWithoutContextTarget = TestTarget((Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
@@ -278,7 +278,7 @@ void main() {
 
   testWithoutContext('Reruns build if stamp is corrupted', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    final TestTarget testWithoutContextTarget = TestTarget((Environment envionment) async {
+    final TestTarget testWithoutContextTarget = TestTarget((Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -566,7 +566,7 @@ void main() {
       logger: BufferLogger.test(),
       fileSystem: fileSystem,
     );
-    final Environment testEnvironmentProfle = Environment.test(
+    final Environment testEnvironmentProfile = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('output'),
       defines: <String, String>{
@@ -590,11 +590,11 @@ void main() {
     // Verify debug output was created
     expect(fileSystem.file('output/debug'), exists);
 
-    await buildSystem.build(releaseTarget, testEnvironmentProfle);
+    await buildSystem.build(releaseTarget, testEnvironmentProfile);
 
     // Last build config is updated properly
-    expect(testEnvironmentProfle.outputDir.childFile('.last_build_id'), exists);
-    expect(testEnvironmentProfle.outputDir.childFile('.last_build_id').readAsStringSync(),
+    expect(testEnvironmentProfile.outputDir.childFile('.last_build_id'), exists);
+    expect(testEnvironmentProfile.outputDir.childFile('.last_build_id').readAsStringSync(),
       'c20b3747fb2aa148cc4fd39bfbbd894f');
 
     // Verify debug output removeds
