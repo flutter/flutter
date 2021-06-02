@@ -10,6 +10,37 @@ import 'dart:ui';
 void main() {}
 
 @pragma('vm:entry-point')
+void validateSceneBuilderAndScene() {
+  final SceneBuilder builder = SceneBuilder();
+  builder.pushOffset(10, 10);
+  _validateBuilderHasLayers(builder);
+  final Scene scene = builder.build();
+  _validateBuilderHasNoLayers();
+  _captureScene(scene);
+  scene.dispose();
+  _validateSceneHasNoLayers();
+}
+_validateBuilderHasLayers(SceneBuilder builder) native 'ValidateBuilderHasLayers';
+_validateBuilderHasNoLayers() native 'ValidateBuilderHasNoLayers';
+_captureScene(Scene scene) native 'CaptureScene';
+_validateSceneHasNoLayers() native 'ValidateSceneHasNoLayers';
+
+@pragma('vm:entry-point')
+void validateEngineLayerDispose() {
+  final SceneBuilder builder = SceneBuilder();
+  final EngineLayer layer = builder.pushOffset(10, 10);
+  _captureRootLayer(builder);
+  final Scene scene = builder.build();
+  scene.dispose();
+  _validateLayerTreeCounts();
+  layer.dispose();
+  _validateEngineLayerDispose();
+}
+_captureRootLayer(SceneBuilder sceneBuilder) native 'CaptureRootLayer';
+_validateLayerTreeCounts() native 'ValidateLayerTreeCounts';
+_validateEngineLayerDispose() native 'ValidateEngineLayerDispose';
+
+@pragma('vm:entry-point')
 Future<void> createSingleFrameCodec() async {
   final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(Uint8List.fromList(List<int>.filled(4, 100)));
   final ImageDescriptor descriptor = ImageDescriptor.raw(
