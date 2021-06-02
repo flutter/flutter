@@ -14,10 +14,6 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/testing/testing.h"
 
-@interface FlutterEngineTestObjC : NSObject
-- (bool)testCompositor;
-@end
-
 namespace flutter::testing {
 
 namespace {
@@ -334,49 +330,4 @@ TEST(FlutterEngine, ResetsAccessibilityBridgeWhenSetsNewViewController) {
   [engine shutDownEngine];
 }
 
-TEST(FlutterEngine, Compositor) {
-  ASSERT_TRUE([[FlutterEngineTestObjC alloc] testCompositor]);
-}
-
 }  // namespace flutter::testing
-
-@implementation FlutterEngineTestObjC
-
-- (bool)testCompositor {
-  NSString* fixtures = @(flutter::testing::GetFixturesPath());
-  FlutterDartProject* project = [[FlutterDartProject alloc]
-      initWithAssetsPath:fixtures
-             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
-  id engine = [[FlutterEngine alloc] initWithName:@"test" project:project];
-
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
-  [viewController loadView];
-  viewController.flutterView.frame = CGRectMake(0, 0, 800, 600);
-  [engine setViewController:viewController];
-
-  EXPECT_TRUE([engine runWithEntrypoint:@"can_composite_platform_views"]);
-
-  id mockFlutterView = OCMPartialMock(viewController.flutterView);
-  OCMExpect([mockFlutterView present]);
-
-  @try {
-    OCMVerifyAllWithDelay(  // NOLINT(google-objc-avoid-throwing-exception)
-        mockFlutterView, 5);
-  } @catch (...) {
-    return false;
-  }
-
-  CALayer* rootLayer = viewController.flutterView.layer;
-
-  // There are three layers total - the root layer and two sublayers.
-  // This test will need to be updated when PlatformViews are supported, as
-  // there are two PlatformView layers in this test.
-  EXPECT_EQ(rootLayer.sublayers.count, 2u);
-
-  // TODO(gw280): add support for screenshot tests in this test harness
-
-  [engine shutDownEngine];
-  return true;
-}
-
-@end
