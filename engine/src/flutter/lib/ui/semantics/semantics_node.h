@@ -13,8 +13,6 @@
 #include "third_party/skia/include/core/SkM44.h"
 #include "third_party/skia/include/core/SkRect.h"
 
-#include "flutter/lib/ui/semantics/string_attribute.h"
-
 namespace flutter {
 
 // Must match the SemanticsAction enum in semantics.dart and in each of the
@@ -117,15 +115,10 @@ struct SemanticsNode {
   double elevation = 0.0;
   double thickness = 0.0;
   std::string label;
-  StringAttributes labelAttributes;
   std::string hint;
-  StringAttributes hintAttributes;
   std::string value;
-  StringAttributes valueAttributes;
   std::string increasedValue;
-  StringAttributes increasedValueAttributes;
   std::string decreasedValue;
-  StringAttributes decreasedValueAttributes;
   int32_t textDirection = 0;  // 0=unknown, 1=rtl, 2=ltr
 
   SkRect rect = SkRect::MakeEmpty();  // Local space, relative to parent.

@@ -144,27 +144,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   [super dealloc];
 }
 
-#pragma mark - Semantic object property accesser
-
-- (void)setChildren:(NSArray<SemanticsObject*>*)children {
-  for (SemanticsObject* child in _children) {
-    [child privateSetParent:nil];
-  }
-  [_children release];
-  _children = [[NSMutableArray alloc] initWithArray:children];
-  for (SemanticsObject* child in _children) {
-    [child privateSetParent:self];
-  }
-}
-
-- (BOOL)hasChildren {
-  if (_node.IsPlatformViewNode()) {
-    return YES;
-  }
-  return [self.children count] != 0;
-}
-
-#pragma mark - Semantic object method
+#pragma mark - Semantic object methods
 
 - (BOOL)isAccessibilityBridgeAlive {
   return [self bridge].get() != nil;
@@ -208,68 +188,33 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   return [self node].label != node->label;
 }
 
-- (void)replaceChildAtIndex:(NSInteger)index withChild:(SemanticsObject*)child {
-  SemanticsObject* oldChild = _children[index];
-  [oldChild privateSetParent:nil];
-  [child privateSetParent:self];
-  [_children replaceObjectAtIndex:index withObject:child];
-}
-
-- (NSString*)routeName {
-  // Returns the first non-null and non-empty semantic label of a child
-  // with an NamesRoute flag. Otherwise returns nil.
-  if ([self node].HasFlag(flutter::SemanticsFlags::kNamesRoute)) {
-    NSString* newName = [self accessibilityLabel];
-    if (newName != nil && [newName length] > 0) {
-      return newName;
-    }
+- (BOOL)hasChildren {
+  if (_node.IsPlatformViewNode()) {
+    return YES;
   }
-  if ([self hasChildren]) {
-    for (SemanticsObject* child in self.children) {
-      NSString* newName = [child routeName];
-      if (newName != nil && [newName length] > 0) {
-        return newName;
-      }
-    }
-  }
-  return nil;
+  return [self.children count] != 0;
 }
-
-#pragma mark - Semantic object private method
 
 - (void)privateSetParent:(SemanticsObject*)parent {
   _parent = parent;
 }
 
-- (NSAttributedString*)createAttributedStringFromString:(NSString*)string
-                                         withAttributes:
-                                             (const flutter::StringAttributes&)attributes {
-  NSMutableAttributedString* attributedString =
-      [[NSMutableAttributedString alloc] initWithString:string];
-  for (const auto& attribute : attributes) {
-    NSRange range = NSMakeRange(attribute->start, attribute->end - attribute->start);
-    switch (attribute->type) {
-      case flutter::StringAttributeType::kLocale: {
-        std::shared_ptr<flutter::LocaleStringAttribute> locale_attribute =
-            std::static_pointer_cast<flutter::LocaleStringAttribute>(attribute);
-        NSDictionary* attributeDict = @{
-          UIAccessibilitySpeechAttributeLanguage : @(locale_attribute->locale.data()),
-        };
-        [attributedString setAttributes:attributeDict range:range];
-        break;
-      }
-      case flutter::StringAttributeType::kSpellOut: {
-        if (@available(iOS 13.0, *)) {
-          NSDictionary* attributeDict = @{
-            UIAccessibilitySpeechAttributeSpellOut : @YES,
-          };
-          [attributedString setAttributes:attributeDict range:range];
-        }
-        break;
-      }
-    }
+- (void)setChildren:(NSArray<SemanticsObject*>*)children {
+  for (SemanticsObject* child in _children) {
+    [child privateSetParent:nil];
   }
-  return attributedString;
+  [_children release];
+  _children = [[NSMutableArray alloc] initWithArray:children];
+  for (SemanticsObject* child in _children) {
+    [child privateSetParent:self];
+  }
+}
+
+- (void)replaceChildAtIndex:(NSInteger)index withChild:(SemanticsObject*)child {
+  SemanticsObject* oldChild = _children[index];
+  [oldChild privateSetParent:nil];
+  [child privateSetParent:self];
+  [_children replaceObjectAtIndex:index withObject:child];
 }
 
 #pragma mark - UIAccessibility overrides
@@ -326,6 +271,26 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   return YES;
 }
 
+- (NSString*)routeName {
+  // Returns the first non-null and non-empty semantic label of a child
+  // with an NamesRoute flag. Otherwise returns nil.
+  if ([self node].HasFlag(flutter::SemanticsFlags::kNamesRoute)) {
+    NSString* newName = [self accessibilityLabel];
+    if (newName != nil && [newName length] > 0) {
+      return newName;
+    }
+  }
+  if ([self hasChildren]) {
+    for (SemanticsObject* child in self.children) {
+      NSString* newName = [child routeName];
+      if (newName != nil && [newName length] > 0) {
+        return newName;
+      }
+    }
+  }
+  return nil;
+}
+
 - (NSString*)accessibilityLabel {
   if (![self isAccessibilityBridgeAlive])
     return nil;
@@ -335,13 +300,6 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   return @([self node].label.data());
 }
 
-- (NSAttributedString*)accessibilityAttributedLabel {
-  NSString* label = [self accessibilityLabel];
-  if (label.length == 0)
-    return nil;
-  return [self createAttributedStringFromString:label withAttributes:[self node].labelAttributes];
-}
-
 - (NSString*)accessibilityHint {
   if (![self isAccessibilityBridgeAlive])
     return nil;
@@ -349,13 +307,6 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   if ([self node].hint.empty())
     return nil;
   return @([self node].hint.data());
-}
-
-- (NSAttributedString*)accessibilityAttributedHint {
-  NSString* hint = [self accessibilityHint];
-  if (hint.length == 0)
-    return nil;
-  return [self createAttributedStringFromString:hint withAttributes:[self node].hintAttributes];
 }
 
 - (NSString*)accessibilityValue {
@@ -378,13 +329,6 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   }
 
   return nil;
-}
-
-- (NSAttributedString*)accessibilityAttributedValue {
-  NSString* value = [self accessibilityValue];
-  if (value.length == 0)
-    return nil;
-  return [self createAttributedStringFromString:value withAttributes:[self node].valueAttributes];
 }
 
 - (CGRect)accessibilityFrame {

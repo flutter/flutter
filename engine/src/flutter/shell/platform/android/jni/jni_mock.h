@@ -29,9 +29,7 @@ class JNIMock final : public PlatformViewAndroidJNI {
 
   MOCK_METHOD(void,
               FlutterViewUpdateSemantics,
-              (std::vector<uint8_t> buffer,
-               std::vector<std::string> strings,
-               std::vector<std::vector<uint8_t>> string_attribute_args),
+              (std::vector<uint8_t> buffer, std::vector<std::string> strings),
               (override));
 
   MOCK_METHOD(void,

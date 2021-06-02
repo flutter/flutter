@@ -844,9 +844,9 @@ bool RegisterApi(JNIEnv* env) {
     return false;
   }
 
-  g_update_semantics_method = env->GetMethodID(
-      g_flutter_jni_class->obj(), "updateSemantics",
-      "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V");
+  g_update_semantics_method =
+      env->GetMethodID(g_flutter_jni_class->obj(), "updateSemantics",
+                       "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V");
 
   if (g_update_semantics_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate updateSemantics method";
@@ -1155,8 +1155,7 @@ void PlatformViewAndroidJNIImpl::FlutterViewHandlePlatformMessageResponse(
 
 void PlatformViewAndroidJNIImpl::FlutterViewUpdateSemantics(
     std::vector<uint8_t> buffer,
-    std::vector<std::string> strings,
-    std::vector<std::vector<uint8_t>> string_attribute_args) {
+    std::vector<std::string> strings) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   auto java_object = java_object_.get(env);
@@ -1168,12 +1167,9 @@ void PlatformViewAndroidJNIImpl::FlutterViewUpdateSemantics(
       env, env->NewDirectByteBuffer(buffer.data(), buffer.size()));
   fml::jni::ScopedJavaLocalRef<jobjectArray> jstrings =
       fml::jni::VectorToStringArray(env, strings);
-  fml::jni::ScopedJavaLocalRef<jobjectArray> jstring_attribute_args =
-      fml::jni::VectorToBufferArray(env, string_attribute_args);
 
   env->CallVoidMethod(java_object.obj(), g_update_semantics_method,
-                      direct_buffer.obj(), jstrings.obj(),
-                      jstring_attribute_args.obj());
+                      direct_buffer.obj(), jstrings.obj());
 
   FML_CHECK(CheckException(env));
 }

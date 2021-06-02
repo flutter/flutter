@@ -28,10 +28,8 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
       int responseId,
       std::unique_ptr<fml::Mapping> data) override;
 
-  void FlutterViewUpdateSemantics(
-      std::vector<uint8_t> buffer,
-      std::vector<std::string> strings,
-      std::vector<std::vector<uint8_t>> string_attribute_args) override;
+  void FlutterViewUpdateSemantics(std::vector<uint8_t> buffer,
+                                  std::vector<std::string> strings) override;
 
   void FlutterViewUpdateCustomAccessibilityActions(
       std::vector<uint8_t> actions_buffer,

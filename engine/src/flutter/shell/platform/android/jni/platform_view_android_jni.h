@@ -56,10 +56,8 @@ class PlatformViewAndroidJNI {
   ///
   /// @note       Must be called from the platform thread.
   ///
-  virtual void FlutterViewUpdateSemantics(
-      std::vector<uint8_t> buffer,
-      std::vector<std::string> strings,
-      std::vector<std::vector<uint8_t>> string_attribute_args) = 0;
+  virtual void FlutterViewUpdateSemantics(std::vector<uint8_t> buffer,
+                                          std::vector<std::string> strings) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Sends new custom accessibility events.

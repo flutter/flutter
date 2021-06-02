@@ -15,10 +15,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.text.SpannableString;
-import android.text.TextUtils;
-import android.text.style.LocaleSpan;
-import android.text.style.TtsSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
@@ -37,7 +33,6 @@ import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
 import io.flutter.util.Predicate;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -277,13 +272,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
         /** Flutter's semantics tree has changed. Update our Android-side cache. */
         @Override
-        public void updateSemantics(
-            ByteBuffer buffer, String[] strings, ByteBuffer[] stringAttributeArgs) {
+        public void updateSemantics(ByteBuffer buffer, String[] strings) {
           buffer.order(ByteOrder.LITTLE_ENDIAN);
-          for (ByteBuffer args : stringAttributeArgs) {
-            args.order(ByteOrder.LITTLE_ENDIAN);
-          }
-          AccessibilityBridge.this.updateSemantics(buffer, strings, stringAttributeArgs);
+          AccessibilityBridge.this.updateSemantics(buffer, strings);
         }
       };
 
@@ -819,10 +810,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (semanticsNode.hasFlag(Flag.IS_TEXT_FIELD)) {
       result.setText(semanticsNode.getValueLabelHint());
     } else if (!semanticsNode.hasFlag(Flag.SCOPES_ROUTE)) {
-      CharSequence content = semanticsNode.getValueLabelHint();
-      if (content != null) {
-        result.setContentDescription(content);
-      }
+      result.setContentDescription(semanticsNode.getValueLabelHint());
     }
 
     boolean hasCheckedState = semanticsNode.hasFlag(Flag.HAS_CHECKED_STATE);
@@ -963,7 +951,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.SCROLL_LEFT);
           } else if (semanticsNode.hasAction(Action.INCREASE)) {
             semanticsNode.value = semanticsNode.increasedValue;
-            semanticsNode.valueAttributes = semanticsNode.increasedValueAttributes;
             // Event causes Android to read out the updated value.
             sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_SELECTED);
             accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.INCREASE);
@@ -981,7 +968,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.SCROLL_RIGHT);
           } else if (semanticsNode.hasAction(Action.DECREASE)) {
             semanticsNode.value = semanticsNode.decreasedValue;
-            semanticsNode.valueAttributes = semanticsNode.decreasedValueAttributes;
             // Event causes Android to read out the updated value.
             sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_SELECTED);
             accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.DECREASE);
@@ -1473,15 +1459,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * buffer is encoded by PlatformViewAndroid::UpdateSemantics, and the decode logic must be kept in
    * sync with that method's encoding logic.
    */
-  void updateSemantics(
-      @NonNull ByteBuffer buffer,
-      @NonNull String[] strings,
-      @NonNull ByteBuffer[] stringAttributeArgs) {
+  void updateSemantics(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
     ArrayList<SemanticsNode> updated = new ArrayList<>();
     while (buffer.hasRemaining()) {
       int id = buffer.getInt();
       SemanticsNode semanticsNode = getOrCreateSemanticsNode(id);
-      semanticsNode.updateWith(buffer, strings, stringAttributeArgs);
+      semanticsNode.updateWith(buffer, strings);
       if (semanticsNode.hasFlag(Flag.IS_HIDDEN)) {
         continue;
       }
@@ -2056,29 +2039,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private String hint;
   }
 
-  // When adding a new StringAttributeType, the classes in these file must be
-  // updated as well.
-  //  * engine/src/flutter/lib/ui/semantics.dart
-  //  * engine/src/flutter/lib/web_ui/lib/src/ui/semantics.dart
-  //  * engine/src/flutter/lib/ui/semantics/string_attribute.h
-
-  private enum StringAttributeType {
-    SPELLOUT,
-    LOCALE,
-  }
-
-  private static class StringAttribute {
-    int start;
-    int end;
-    StringAttributeType type;
-  }
-
-  private static class SpellOutStringAttribute extends StringAttribute {}
-
-  private static class LocaleStringAttribute extends StringAttribute {
-    String locale;
-  }
-
   /**
    * Flutter {@code SemanticsNode} represented in Java/Android.
    *
@@ -2115,15 +2075,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private float scrollExtentMax;
     private float scrollExtentMin;
     private String label;
-    private List<StringAttribute> labelAttributes;
     private String value;
-    private List<StringAttribute> valueAttributes;
     private String increasedValue;
-    private List<StringAttribute> increasedValueAttributes;
     private String decreasedValue;
-    private List<StringAttribute> decreasedValueAttributes;
     private String hint;
-    private List<StringAttribute> hintAttributes;
 
     // The id of the sibling node that is before this node in traversal
     // order.
@@ -2274,10 +2229,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
     }
 
-    private void updateWith(
-        @NonNull ByteBuffer buffer,
-        @NonNull String[] strings,
-        @NonNull ByteBuffer[] stringAttributeArgs) {
+    private void updateWith(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
       hadPreviousConfig = true;
       previousValue = value;
       previousLabel = label;
@@ -2305,27 +2257,17 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       int stringIndex = buffer.getInt();
       label = stringIndex == -1 ? null : strings[stringIndex];
 
-      labelAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);
-
       stringIndex = buffer.getInt();
       value = stringIndex == -1 ? null : strings[stringIndex];
-
-      valueAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);
 
       stringIndex = buffer.getInt();
       increasedValue = stringIndex == -1 ? null : strings[stringIndex];
 
-      increasedValueAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);
-
       stringIndex = buffer.getInt();
       decreasedValue = stringIndex == -1 ? null : strings[stringIndex];
 
-      decreasedValueAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);
-
       stringIndex = buffer.getInt();
       hint = stringIndex == -1 ? null : strings[stringIndex];
-
-      hintAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);
 
       textDirection = TextDirection.fromInt(buffer.getInt());
 
@@ -2383,48 +2325,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           customAccessibilityActions.add(action);
         }
       }
-    }
-
-    private List<StringAttribute> getStringAttributesFromBuffer(
-        @NonNull ByteBuffer buffer, @NonNull ByteBuffer[] stringAttributeArgs) {
-      final int attributesCount = buffer.getInt();
-      if (attributesCount == -1) {
-        return null;
-      }
-      final List<StringAttribute> result = new ArrayList<>(attributesCount);
-      for (int i = 0; i < attributesCount; ++i) {
-        final int start = buffer.getInt();
-        final int end = buffer.getInt();
-        final StringAttributeType type = StringAttributeType.values()[buffer.getInt()];
-        switch (type) {
-          case SPELLOUT:
-            {
-              // Pops the -1 size.
-              buffer.getInt();
-              SpellOutStringAttribute attribute = new SpellOutStringAttribute();
-              attribute.start = start;
-              attribute.end = end;
-              attribute.type = type;
-              result.add(attribute);
-              break;
-            }
-          case LOCALE:
-            {
-              final int argsIndex = buffer.getInt();
-              final ByteBuffer args = stringAttributeArgs[argsIndex];
-              LocaleStringAttribute attribute = new LocaleStringAttribute();
-              attribute.start = start;
-              attribute.end = end;
-              attribute.type = type;
-              attribute.locale = Charset.forName("UTF-8").decode(args).toString();
-              result.add(attribute);
-              break;
-            }
-          default:
-            break;
-        }
-      }
-      return result;
     }
 
     private void ensureInverseTransform() {
@@ -2603,59 +2503,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return Math.max(a, Math.max(b, Math.max(c, d)));
     }
 
-    private CharSequence getValueLabelHint() {
-      CharSequence[] array;
-      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-        array = new CharSequence[] {value, label, hint};
-      } else {
-        array =
-            new CharSequence[] {
-              createSpannableString(value, valueAttributes),
-              createSpannableString(label, labelAttributes),
-              createSpannableString(hint, hintAttributes),
-            };
-      }
-      CharSequence result = null;
-      for (CharSequence word : array) {
+    private String getValueLabelHint() {
+      StringBuilder sb = new StringBuilder();
+      String[] array = {value, label, hint};
+      for (String word : array) {
         if (word != null && word.length() > 0) {
-          if (result == null || result.length() == 0) {
-            result = word;
-          } else {
-            result = TextUtils.concat(result, ", ", word);
-          }
+          if (sb.length() > 0) sb.append(", ");
+          sb.append(word);
         }
       }
-      return result;
-    }
-
-    @TargetApi(21)
-    @RequiresApi(21)
-    private SpannableString createSpannableString(String string, List<StringAttribute> attributes) {
-      if (string == null) {
-        return null;
-      }
-      final SpannableString spannableString = new SpannableString(string);
-      if (attributes != null) {
-        for (StringAttribute attribute : attributes) {
-          switch (attribute.type) {
-            case SPELLOUT:
-              {
-                final TtsSpan ttsSpan = new TtsSpan.Builder(TtsSpan.TYPE_VERBATIM).build();
-                spannableString.setSpan(ttsSpan, attribute.start, attribute.end, 0);
-                break;
-              }
-            case LOCALE:
-              {
-                LocaleStringAttribute localeAttribute = (LocaleStringAttribute) attribute;
-                Locale locale = Locale.forLanguageTag(localeAttribute.locale);
-                final LocaleSpan localeSpan = new LocaleSpan(locale);
-                spannableString.setSpan(localeSpan, attribute.start, attribute.end, 0);
-                break;
-              }
-          }
-        }
-      }
-      return spannableString;
+      return sb.length() > 0 ? sb.toString() : null;
     }
   }
 
