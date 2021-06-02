@@ -461,6 +461,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _handleLongPress() {
+    _longPressActivated = true;
     final bool tooltipCreated = ensureTooltipVisible();
     if (tooltipCreated)
       Feedback.forLongPress(context);
@@ -523,6 +524,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         child: result,
       );
     }
+
     return result;
   }
 }
