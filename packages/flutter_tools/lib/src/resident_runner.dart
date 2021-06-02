@@ -344,6 +344,7 @@ class FlutterDevice {
   Future<void> exitApps({
     @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
   }) async {
+    // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/83127
     // When updating `flutter attach` to support running without a device,
     // this will need to be changed to fall back to io exit.
     return device.stopApp(package, userIdentifier: userIdentifier);
