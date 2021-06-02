@@ -26,6 +26,8 @@ impeller_component("compositor") {
     "pipeline_library.mm",
     "range.cc",
     "range.h",
+    "render_pass.h",
+    "render_pass.mm",
     "renderer.h",
     "renderer.mm",
     "shader_function.h",
@@ -34,6 +36,8 @@ impeller_component("compositor") {
     "shader_library.mm",
     "surface.h",
     "surface.mm",
+    "texture.h",
+    "texture.mm",
     "vertex_descriptor.h",
     "vertex_descriptor.mm",
   ]
@@ -44,6 +48,10 @@ impeller_component("compositor") {
   ]
 }
 
-executable("compositor_unittests") {
-  sources = [ "buffer_unittests.cc" ]
+source_set("compositor_unittests") {
+  testonly = true
+
+  sources = []
+
+  deps = [ "//flutter/testing:testing_lib" ]
 }

@@ -48,7 +48,7 @@ test_fixtures("compiler_test_fixtures") {
   ]
 }
 
-executable("compiler_unittests") {
+source_set("compiler_unittests") {
   testonly = true
 
   output_name = "impellerc_unittests"
@@ -58,6 +58,6 @@ executable("compiler_unittests") {
   deps = [
     ":compiler_lib",
     ":compiler_test_fixtures",
-    "//flutter/testing",
+    "//flutter/testing:testing_lib",
   ]
 }
