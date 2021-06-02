@@ -18,4 +18,41 @@ void FlutterCompositor::SetPresentCallback(
   present_callback_ = present_callback;
 }
 
+void FlutterCompositor::StartFrame() {
+  // First remove all CALayers from the superlayer.
+  for (auto layer : active_ca_layers_) {
+    [layer removeFromSuperlayer];
+  }
+
+  // Reset active layers.
+  active_ca_layers_.clear();
+  SetFrameStatus(FrameStatus::kStarted);
+}
+
+bool FlutterCompositor::EndFrame() {
+  bool status = present_callback_();
+  SetFrameStatus(FrameStatus::kEnded);
+  return status;
+}
+
+void FlutterCompositor::SetFrameStatus(FlutterCompositor::FrameStatus frame_status) {
+  frame_status_ = frame_status;
+}
+
+FlutterCompositor::FrameStatus FlutterCompositor::GetFrameStatus() {
+  return frame_status_;
+}
+
+void FlutterCompositor::InsertCALayerForIOSurface(const IOSurfaceRef& io_surface,
+                                                  CATransform3D transform) {
+  // FlutterCompositor manages the lifecycle of CALayers.
+  CALayer* content_layer = [[CALayer alloc] init];
+  content_layer.transform = transform;
+  content_layer.frame = view_controller_.flutterView.layer.bounds;
+  [content_layer setContents:(__bridge id)io_surface];
+  [view_controller_.flutterView.layer addSublayer:content_layer];
+
+  active_ca_layers_.push_back(content_layer);
+}
+
 }  // namespace flutter
