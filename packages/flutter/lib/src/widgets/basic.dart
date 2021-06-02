@@ -6232,6 +6232,11 @@ class DefaultAssetBundle extends InheritedWidget {
 /// A given render object can be placed at most once in the widget tree. This
 /// widget enforces that restriction by keying itself using a [GlobalObjectKey]
 /// for the given render object.
+///
+/// This widget will call [RenderObject.dispose] on the [renderBox] when it is
+/// unmounted. After that point, the [renderBox] will be unusable. If any
+/// children have been added to the [renderBox], they must be disposed in the
+/// [onUnmount] callback.
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// Creates an adapter for placing a specific [RenderBox] in the widget tree.
   ///
@@ -6239,6 +6244,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   WidgetToRenderBoxAdapter({
     required this.renderBox,
     this.onBuild,
+    this.onUnmount,
   }) : assert(renderBox != null),
        // WidgetToRenderBoxAdapter objects are keyed to their render box. This
        // prevents the widget being used in the widget hierarchy in two different
@@ -6247,6 +6253,9 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
        super(key: GlobalObjectKey(renderBox));
 
   /// The render box to place in the widget tree.
+  ///
+  /// This widget takes ownership of the render object. When it is unmounted,
+  /// it also calls [RenderObject.dispose].
   final RenderBox renderBox;
 
   /// Called when it is safe to update the render box and its descendants. If
@@ -6255,12 +6264,37 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// tree will be dirty.
   final VoidCallback? onBuild;
 
+  /// Called when it is safe to dispose of children that were manually added to
+  /// the [renderBox].
+  ///
+  /// Do not dispose the [renderBox] itself, as it will be disposed by the
+  /// framework automatically. However, during that process the framework will
+  /// check that all children of the [renderBox] have also been disposed.
+  /// Typically, child [RenderObject]s are disposed by corresponding [Element]s
+  /// when they are unmounted. However, child render objects that were manually
+  /// added do not have corresponding [Element]s to manage their lifecycle, and
+  /// need to be manually disposed here.
+  ///
+  /// See also:
+  ///
+  ///   * [RenderObjectElement.unmount], which invokes this callback before
+  ///     disposing of its render object.
+  ///   * [RenderObject.dispose], which instructs a render object to release
+  ///     any resources it may be holding.
+  final VoidCallback? onUnmount;
+
   @override
   RenderBox createRenderObject(BuildContext context) => renderBox;
 
   @override
   void updateRenderObject(BuildContext context, RenderBox renderObject) {
     onBuild?.call();
+  }
+
+  @override
+  void didUnmountRenderObject(RenderObject renderObject) {
+    assert(renderObject == renderBox);
+    onUnmount?.call();
   }
 }
 
