@@ -337,7 +337,7 @@ abstract class BindingBase {
             ErrorDescription('An instance of $T is non-null, but the BindingBase() constructor has not yet been called.'),
             ErrorHint(
               'This could also happen if some code was invoked that used the binding while the binding was initializing, '
-              'for example if the binding\'s constructor itself invokes a callback. Bindings should not invoke callbacks '
+              "for example if the binding's constructor itself invokes a callback. Bindings should not invoke callbacks "
               'before "initInstances" has completed.'
             ),
           ]);

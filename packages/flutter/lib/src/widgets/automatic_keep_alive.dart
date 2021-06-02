@@ -89,7 +89,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         // If the child doesn't exist yet, we got called during the very first
         // build of this subtree. Wait until the end of the frame to update
         // the child when the child is guaranteed to be present.
-        SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
           if (!mounted) {
             return;
           }
@@ -155,7 +155,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
       }());
       _handles!.remove(handle);
       if (_handles!.isEmpty) {
-        if (SchedulerBinding.instance!.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {
+        if (SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {
           // Build/layout haven't started yet so let's just schedule this for
           // the next frame.
           setState(() { _keepingAlive = false; });

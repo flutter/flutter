@@ -130,7 +130,7 @@ void testWidgets(
 }) {
   assert(variant != null);
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
   for (final dynamic value in variant.values) {
     final String variationDescription = variant.describeValue(value);
@@ -404,7 +404,7 @@ Future<void> benchmarkWidgets(
     print(kDebugWarning);
     return true;
   }());
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
   SemanticsHandle? semanticsHandle;

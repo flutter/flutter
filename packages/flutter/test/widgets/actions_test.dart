@@ -477,7 +477,7 @@ void main() {
       addTearDown(gesture.removePointer);
       await tester.pump();
 
-      expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
       // Test default
       await tester.pumpWidget(
@@ -491,7 +491,7 @@ void main() {
         ),
       );
 
-      expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
     });
     testWidgets('Actions.invoke returns the value of Action.invoke', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
