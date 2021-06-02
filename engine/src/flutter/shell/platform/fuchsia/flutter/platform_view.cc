@@ -37,6 +37,7 @@ static constexpr char kTextInputChannel[] = "flutter/textinput";
 static constexpr char kKeyEventChannel[] = "flutter/keyevent";
 static constexpr char kAccessibilityChannel[] = "flutter/accessibility";
 static constexpr char kFlutterPlatformViewsChannel[] = "flutter/platform_views";
+static constexpr char kFuchsiaShaderWarmupChannel[] = "fuchsia/shader_warmup";
 
 // FL(77): Terminate engine if Fuchsia system FIDL connections have error.
 template <class T>
@@ -74,6 +75,7 @@ PlatformView::PlatformView(
     OnCreateSurface on_create_surface_callback,
     OnSemanticsNodeUpdate on_semantics_node_update_callback,
     OnRequestAnnounce on_request_announce_callback,
+    OnShaderWarmup on_shader_warmup,
     std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder,
     AwaitVsyncCallback await_vsync_callback,
     AwaitVsyncForSecondaryCallbackCallback
@@ -93,6 +95,7 @@ PlatformView::PlatformView(
       on_semantics_node_update_callback_(
           std::move(on_semantics_node_update_callback)),
       on_request_announce_callback_(std::move(on_request_announce_callback)),
+      on_shader_warmup_(std::move(on_shader_warmup)),
       external_view_embedder_(external_view_embedder),
       ime_client_(this),
       keyboard_listener_binding_(this, std::move(keyboard_listener_request)),
@@ -135,6 +138,9 @@ void PlatformView::RegisterPlatformMessageHandlers() {
   platform_message_handlers_[kFlutterPlatformViewsChannel] =
       std::bind(&PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage,
                 this, std::placeholders::_1);
+  platform_message_handlers_[kFuchsiaShaderWarmupChannel] =
+      std::bind(&HandleFuchsiaShaderWarmupChannelPlatformMessage,
+                on_shader_warmup_, std::placeholders::_1);
 }
 
 // |fuchsia::ui::input::InputMethodEditorClient|
@@ -1131,6 +1137,84 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     FML_DLOG(ERROR) << "Unknown " << message->channel() << " method "
                     << method->value.GetString();
   }
+}
+
+void PlatformView::HandleFuchsiaShaderWarmupChannelPlatformMessage(
+    OnShaderWarmup on_shader_warmup,
+    std::unique_ptr<flutter::PlatformMessage> message) {
+  FML_DCHECK(message->channel() == kFuchsiaShaderWarmupChannel);
+
+  if (!on_shader_warmup) {
+    FML_LOG(ERROR) << "No shader warmup callback set!";
+    std::string result = "[0]";
+    message->response()->Complete(
+        std::make_unique<fml::DataMapping>(std::vector<uint8_t>(
+            (const uint8_t*)result.c_str(),
+            (const uint8_t*)result.c_str() + result.length())));
+    return;
+  }
+
+  const auto& data = message->data();
+  rapidjson::Document document;
+  document.Parse(reinterpret_cast<const char*>(data.GetMapping()),
+                 data.GetSize());
+  if (document.HasParseError() || !document.IsObject()) {
+    FML_LOG(ERROR) << "Could not parse document";
+    return;
+  }
+  auto root = document.GetObject();
+  auto method = root.FindMember("method");
+  if (method == root.MemberEnd() || !method->value.IsString() ||
+      method->value != "WarmupSkps") {
+    FML_LOG(ERROR) << "Invalid method name";
+    return;
+  }
+
+  auto args_it = root.FindMember("args");
+  if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
+    FML_LOG(ERROR) << "No arguments found.";
+    return;
+  }
+
+  auto shaders_it = root["args"].FindMember("shaders");
+  if (shaders_it == root["args"].MemberEnd() || !shaders_it->value.IsArray()) {
+    FML_LOG(ERROR) << "No shaders found.";
+    return;
+  }
+
+  auto width_it = root["args"].FindMember("width");
+  auto height_it = root["args"].FindMember("height");
+  if (width_it == root["args"].MemberEnd() || !width_it->value.IsNumber()) {
+    FML_LOG(ERROR) << "Invalid width";
+    return;
+  }
+  if (height_it == root["args"].MemberEnd() || !height_it->value.IsNumber()) {
+    FML_LOG(ERROR) << "Invalid height";
+    return;
+  }
+  auto width = width_it->value.GetUint64();
+  auto height = height_it->value.GetUint64();
+
+  std::vector<std::string> skp_paths;
+  const auto& shaders = shaders_it->value;
+  for (rapidjson::Value::ConstValueIterator itr = shaders.Begin();
+       itr != shaders.End(); ++itr) {
+    skp_paths.push_back((*itr).GetString());
+  }
+
+  auto completion_callback = [response =
+                                  message->response()](uint num_successes) {
+    std::ostringstream result_stream;
+    result_stream << "[" << num_successes << "]";
+
+    std::string result(result_stream.str());
+
+    response->Complete(std::make_unique<fml::DataMapping>(std::vector<uint8_t>(
+        (const uint8_t*)result.c_str(),
+        (const uint8_t*)result.c_str() + result.length())));
+  };
+
+  on_shader_warmup(skp_paths, completion_callback, width, height);
 }
 
 }  // namespace flutter_runner
