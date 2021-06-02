@@ -144,38 +144,6 @@ void main() {
       return context.pushOpacity(offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
     });
   });
-
-  test('RenderObject.dispose sets debugDisposed to true', () {
-    final TestRenderObject renderObject = TestRenderObject();
-    expect(renderObject.debugDisposed, false);
-    renderObject.dispose();
-    expect(renderObject.debugDisposed, true);
-    expect(renderObject.toStringShort(), contains('DISPOSED'));
-  });
-
-  test('RenderObject.dispose null the layer on repaint boundaries', () {
-    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
-    // Force a layer to get set.
-    renderObject.isRepaintBoundary = true;
-    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
-    expect(renderObject.debugLayer, isA<OffsetLayer>());
-
-    // Dispose with repaint boundary still being true.
-    renderObject.dispose();
-    expect(renderObject.debugLayer, null);
-  });
-
-  test('RenderObject.dispose nulls the layer on non-repaint boundaries', () {
-    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
-    // Force a layer to get set.
-    renderObject.isRepaintBoundary = true;
-    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
-
-    // Dispose with repaint boundary being false.
-    renderObject.isRepaintBoundary = false;
-    renderObject.dispose();
-    expect(renderObject.debugLayer, null);
-  });
 }
 
 // Tests the create-update cycle by pumping two frames. The first frame has no
@@ -220,19 +188,12 @@ class _TestCustomLayerBox extends RenderBox {
 class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> { }
 
 class TestRenderObject extends RenderObject {
-  TestRenderObject({this.allowPaintBounds = false});
-
-  final bool allowPaintBounds;
-
-  @override
-  bool isRepaintBoundary = false;
-
   @override
   void debugAssertDoesMeetConstraints() { }
 
   @override
   Rect get paintBounds {
-    assert(allowPaintBounds); // For some tests, this should not get called.
+    assert(false); // The test shouldn't call this.
     return Rect.zero;
   }
 
