@@ -43,6 +43,17 @@ enum class BlendOperation {
   kMax,
 };
 
+enum class LoadAction {
+  kDontCare,
+  kLoad,
+  kClear,
+};
+
+enum class StoreAction {
+  kDontCare,
+  kStore,
+};
+
 enum class ColorWriteMask : uint64_t {
   kNone = 0,
   kRed = 1 << 0,

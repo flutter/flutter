@@ -19,11 +19,12 @@ group("impeller") {
   ]
 }
 
-group("unittests") {
+executable("impeller_unittests") {
   testonly = true
 
   deps = [
     "compiler:compiler_unittests",
     "compositor:compositor_unittests",
+    "//flutter/testing",
   ]
 }
