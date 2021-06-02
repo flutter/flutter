@@ -1,4 +1,4 @@
-Signature: 18847a57f37a928548a0b81f62dc8435
+Signature: fb13a1ad28885bbf90f727287827c947
 
 UNUSED LICENSES:
 
@@ -5199,6 +5199,8 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.cp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrPathTessellationShader.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrPathTessellationShader.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrPathTessellationShader_Hardware.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrPathTessellationShader_MiddleOut.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.cpp
