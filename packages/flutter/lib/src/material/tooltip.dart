@@ -57,7 +57,7 @@ import 'tooltip_theme.dart';
 /// above the widget.
 /// `textStyle` has been used to set the font size of the 'message'.
 /// `showDuration` accepts a Duration to continue showing the message after the long
-/// press has been released or the mouse pointer exit the child widget.
+/// press has been released or the mouse pointer exits the child widget.
 /// `waitDuration` accepts a Duration for which a mouse pointer has to hover over the child
 /// widget before the tooltip is shown.
 ///
@@ -205,7 +205,7 @@ class Tooltip extends StatefulWidget {
 
   /// Dismiss the most recently shown tooltip.
   ///
-  /// This method returns true if it successfully dismiss a tooltip. It returns
+  /// This method returns true if it successfully dismisses a tooltip. It returns
   /// false if there is no tooltip shown on the screen.
   static bool dismissToolTip() {
     if (_openedToolTips.isNotEmpty) {
