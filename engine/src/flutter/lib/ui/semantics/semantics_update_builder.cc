@@ -13,14 +13,6 @@
 
 namespace flutter {
 
-void pushStringAttributes(
-    StringAttributes& destination,
-    const std::vector<NativeStringAttribute*>& native_attributes) {
-  for (const auto& native_attribute : native_attributes) {
-    destination.push_back(native_attribute->GetAttribute());
-  }
-}
-
 static void SemanticsUpdateBuilder_constructor(Dart_NativeArguments args) {
   UIDartState::ThrowIfUIOperationsProhibited();
   DartCallConstructor(&SemanticsUpdateBuilder::create, args);
@@ -67,15 +59,10 @@ void SemanticsUpdateBuilder::updateNode(
     double elevation,
     double thickness,
     std::string label,
-    std::vector<NativeStringAttribute*> labelAttributes,
-    std::string value,
-    std::vector<NativeStringAttribute*> valueAttributes,
-    std::string increasedValue,
-    std::vector<NativeStringAttribute*> increasedValueAttributes,
-    std::string decreasedValue,
-    std::vector<NativeStringAttribute*> decreasedValueAttributes,
     std::string hint,
-    std::vector<NativeStringAttribute*> hintAttributes,
+    std::string value,
+    std::string increasedValue,
+    std::string decreasedValue,
     int textDirection,
     const tonic::Float64List& transform,
     const tonic::Int32List& childrenInTraversalOrder,
@@ -105,15 +92,10 @@ void SemanticsUpdateBuilder::updateNode(
   node.elevation = elevation;
   node.thickness = thickness;
   node.label = label;
-  pushStringAttributes(node.labelAttributes, labelAttributes);
-  node.value = value;
-  pushStringAttributes(node.valueAttributes, valueAttributes);
-  node.increasedValue = increasedValue;
-  pushStringAttributes(node.increasedValueAttributes, increasedValueAttributes);
-  node.decreasedValue = decreasedValue;
-  pushStringAttributes(node.decreasedValueAttributes, decreasedValueAttributes);
   node.hint = hint;
-  pushStringAttributes(node.hintAttributes, hintAttributes);
+  node.value = value;
+  node.increasedValue = increasedValue;
+  node.decreasedValue = decreasedValue;
   node.textDirection = textDirection;
   SkScalar scalarTransform[16];
   for (int i = 0; i < 16; ++i) {
