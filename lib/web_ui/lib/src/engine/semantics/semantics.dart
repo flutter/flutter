@@ -57,15 +57,10 @@ class SemanticsNodeUpdate {
     required this.scrollExtentMin,
     required this.rect,
     required this.label,
-    this.labelAttributes,
     required this.hint,
-    this.hintAttributes,
     required this.value,
-    this.valueAttributes,
     required this.increasedValue,
-    this.increasedValueAttributes,
     required this.decreasedValue,
-    this.decreasedValueAttributes,
     this.textDirection,
     required this.transform,
     required this.elevation,
@@ -121,31 +116,16 @@ class SemanticsNodeUpdate {
   final String label;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<ui.StringAttribute>? labelAttributes;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String hint;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<ui.StringAttribute>? hintAttributes;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String value;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<ui.StringAttribute>? valueAttributes;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String increasedValue;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<ui.StringAttribute>? increasedValueAttributes;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String decreasedValue;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<ui.StringAttribute>? decreasedValueAttributes;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.TextDirection? textDirection;
@@ -421,10 +401,6 @@ class SemanticsObject {
   String? get label => _label;
   String? _label;
 
-  /// See [ui.SemanticsUpdateBuilder.updateNode]
-  List<ui.StringAttribute>? get labelAttributes => _labelAttributes;
-  List<ui.StringAttribute>? _labelAttributes;
-
   /// Whether this object contains a non-empty label.
   bool get hasLabel => _label != null && _label!.isNotEmpty;
 
@@ -441,10 +417,6 @@ class SemanticsObject {
   String? get hint => _hint;
   String? _hint;
 
-  /// See [ui.SemanticsUpdateBuilder.updateNode]
-  List<ui.StringAttribute>? get hintAttributes => _hintAttributes;
-  List<ui.StringAttribute>? _hintAttributes;
-
   static const int _hintIndex = 1 << 11;
 
   /// Whether the [hint] field has been updated but has not been
@@ -457,10 +429,6 @@ class SemanticsObject {
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   String? get value => _value;
   String? _value;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode]
-  List<ui.StringAttribute>? get valueAttributes => _valueAttributes;
-  List<ui.StringAttribute>? _valueAttributes;
 
   /// Whether this object contains a non-empty value.
   bool get hasValue => _value != null && _value!.isNotEmpty;
@@ -478,10 +446,6 @@ class SemanticsObject {
   String? get increasedValue => _increasedValue;
   String? _increasedValue;
 
-  /// See [ui.SemanticsUpdateBuilder.updateNode]
-  List<ui.StringAttribute>? get increasedValueAttributes => _increasedValueAttributes;
-  List<ui.StringAttribute>? _increasedValueAttributes;
-
   static const int _increasedValueIndex = 1 << 13;
 
   /// Whether the [increasedValue] field has been updated but has not been
@@ -494,10 +458,6 @@ class SemanticsObject {
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   String? get decreasedValue => _decreasedValue;
   String? _decreasedValue;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode]
-  List<ui.StringAttribute>? get decreasedValueAttributes => _decreasedValueAttributes;
-  List<ui.StringAttribute>? _decreasedValueAttributes;
 
   static const int _decreasedValueIndex = 1 << 14;
 
@@ -692,18 +652,8 @@ class SemanticsObject {
       _markValueDirty();
     }
 
-    if (_valueAttributes != update.valueAttributes) {
-      _valueAttributes = update.valueAttributes;
-      _markValueDirty();
-    }
-
     if (_label != update.label) {
       _label = update.label;
-      _markLabelDirty();
-    }
-
-    if (_labelAttributes != update.labelAttributes) {
-      _labelAttributes = update.labelAttributes;
       _markLabelDirty();
     }
 
@@ -762,28 +712,13 @@ class SemanticsObject {
       _markHintDirty();
     }
 
-    if (_hintAttributes != update.hintAttributes) {
-      _hintAttributes = update.hintAttributes;
-      _markHintDirty();
-    }
-
     if (_increasedValue != update.increasedValue) {
       _increasedValue = update.increasedValue;
       _markIncreasedValueDirty();
     }
 
-    if (_increasedValueAttributes != update.increasedValueAttributes) {
-      _increasedValueAttributes = update.increasedValueAttributes;
-      _markIncreasedValueDirty();
-    }
-
     if (_decreasedValue != update.decreasedValue) {
       _decreasedValue = update.decreasedValue;
-      _markDecreasedValueDirty();
-    }
-
-    if (_decreasedValueAttributes != update.decreasedValueAttributes) {
-      _decreasedValueAttributes = update.decreasedValueAttributes;
       _markDecreasedValueDirty();
     }
 

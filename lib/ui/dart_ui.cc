@@ -26,7 +26,6 @@
 #include "flutter/lib/ui/painting/vertices.h"
 #include "flutter/lib/ui/semantics/semantics_update.h"
 #include "flutter/lib/ui/semantics/semantics_update_builder.h"
-#include "flutter/lib/ui/semantics/string_attribute.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/text/paragraph.h"
 #include "flutter/lib/ui/text/paragraph_builder.h"
@@ -75,7 +74,6 @@ void DartUI::InitForGlobal() {
     ImageShader::RegisterNatives(g_natives);
     ImmutableBuffer::RegisterNatives(g_natives);
     IsolateNameServerNatives::RegisterNatives(g_natives);
-    NativeStringAttribute::RegisterNatives(g_natives);
     Paragraph::RegisterNatives(g_natives);
     ParagraphBuilder::RegisterNatives(g_natives);
     Picture::RegisterNatives(g_natives);

@@ -24,9 +24,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.text.SpannedString;
-import android.text.style.LocaleSpan;
-import android.text.style.TtsSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
@@ -36,7 +33,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -58,10 +54,11 @@ public class AccessibilityBridgeTest {
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
     testSemanticsNode.label = "Hello, World";
     TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
 
-    assertEquals(nodeInfo.getContentDescription().toString(), "Hello, World");
+    assertEquals(nodeInfo.getContentDescription(), "Hello, World");
     assertEquals(nodeInfo.getText(), null);
   }
 
@@ -73,11 +70,12 @@ public class AccessibilityBridgeTest {
     testSemanticsNode.label = "Hello, World";
     testSemanticsNode.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
     TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
 
     assertEquals(nodeInfo.getContentDescription(), null);
-    assertEquals(nodeInfo.getText().toString(), "Hello, World");
+    assertEquals(nodeInfo.getText(), "Hello, World");
   }
 
   @Test
@@ -106,7 +104,7 @@ public class AccessibilityBridgeTest {
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
     TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
 
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
 
     Rect outBoundsInScreen = new Rect();
@@ -124,7 +122,7 @@ public class AccessibilityBridgeTest {
     testSemanticsNode.addFlag(AccessibilityBridge.Flag.SCOPES_ROUTE);
     TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
 
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
 
     assertEquals(nodeInfo.getContentDescription(), null);
@@ -150,7 +148,7 @@ public class AccessibilityBridgeTest {
     platformView.platformViewId = 42;
     root.children.add(platformView);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
 
     // Set a11y focus to platform view.
     View mockView = mock(View.class);
@@ -170,7 +168,7 @@ public class AccessibilityBridgeTest {
     when(mockManager.isEnabled()).thenReturn(true);
     ViewParent mockParent = mock(ViewParent.class);
     when(mockRootView.getParent()).thenReturn(mockParent);
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
 
     // Check that unfocus event was sent.
     ArgumentCaptor<AccessibilityEvent> eventCaptor =
@@ -204,7 +202,7 @@ public class AccessibilityBridgeTest {
     node1.label = "node1";
     root.children.add(node1);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
 
     ArgumentCaptor<AccessibilityEvent> eventCaptor =
         ArgumentCaptor.forClass(AccessibilityEvent.class);
@@ -231,7 +229,7 @@ public class AccessibilityBridgeTest {
     new_node2.label = "new_node2";
     new_node1.children.add(new_node2);
     testSemanticsUpdate = new_root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
 
     eventCaptor = ArgumentCaptor.forClass(AccessibilityEvent.class);
     verify(mockParent, times(4))
@@ -268,7 +266,7 @@ public class AccessibilityBridgeTest {
     node2.label = "node2";
     root.children.add(node2);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
 
     AccessibilityBridge spyAccessibilityBridge = spy(accessibilityBridge);
     AccessibilityNodeInfo mockNodeInfo2 = mock(AccessibilityNodeInfo.class);
@@ -317,7 +315,7 @@ public class AccessibilityBridgeTest {
     child.right = 20;
     root.children.add(child);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
 
     ArgumentCaptor<AccessibilityEvent> eventCaptor =
         ArgumentCaptor.forClass(AccessibilityEvent.class);
@@ -372,7 +370,7 @@ public class AccessibilityBridgeTest {
     node2.label = "node2";
     node1.children.add(node2);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
 
     ArgumentCaptor<AccessibilityEvent> eventCaptor =
         ArgumentCaptor.forClass(AccessibilityEvent.class);
@@ -397,7 +395,7 @@ public class AccessibilityBridgeTest {
     new_node2.label = "new_node2";
     new_node1.children.add(new_node2);
     testSemanticsUpdate = new_root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
 
     eventCaptor = ArgumentCaptor.forClass(AccessibilityEvent.class);
     verify(mockParent, times(4))
@@ -439,7 +437,7 @@ public class AccessibilityBridgeTest {
     node1.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
     root.children.add(node1);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     Bundle bundle = new Bundle();
     String expectedText = "some string";
     bundle.putString(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, expectedText);
@@ -478,79 +476,13 @@ public class AccessibilityBridgeTest {
     node1.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
     root.children.add(node1);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     Bundle bundle = new Bundle();
     String expectedText = "some string";
     bundle.putString(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, expectedText);
     accessibilityBridge.performAction(1, AccessibilityNodeInfo.ACTION_SET_TEXT, bundle);
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(1);
-    assertEquals(nodeInfo.getText().toString(), expectedText);
-  }
-
-  @TargetApi(21)
-  @Test
-  public void itBuildsAttributedString() {
-    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
-    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
-    AccessibilityManager mockManager = mock(AccessibilityManager.class);
-    View mockRootView = mock(View.class);
-    Context context = mock(Context.class);
-    when(mockRootView.getContext()).thenReturn(context);
-    when(context.getPackageName()).thenReturn("test");
-    AccessibilityBridge accessibilityBridge =
-        setUpBridge(
-            /*rootAccessibilityView=*/ mockRootView,
-            /*accessibilityChannel=*/ mockChannel,
-            /*accessibilityManager=*/ mockManager,
-            /*contentResolver=*/ null,
-            /*accessibilityViewEmbedder=*/ mockViewEmbedder,
-            /*platformViewsAccessibilityDelegate=*/ null);
-
-    ViewParent mockParent = mock(ViewParent.class);
-    when(mockRootView.getParent()).thenReturn(mockParent);
-    when(mockManager.isEnabled()).thenReturn(true);
-
-    TestSemanticsNode root = new TestSemanticsNode();
-    root.id = 0;
-    root.label = "label";
-    TestStringAttribute attribute = new TestStringAttributeSpellOut();
-    attribute.start = 1;
-    attribute.end = 2;
-    attribute.type = TestStringAttributeType.SPELLOUT;
-    root.labelAttributes =
-        new ArrayList<TestStringAttribute>() {
-          {
-            add(attribute);
-          }
-        };
-    root.value = "value";
-    TestStringAttributeLocale localeAttribute = new TestStringAttributeLocale();
-    localeAttribute.start = 1;
-    localeAttribute.end = 2;
-    localeAttribute.type = TestStringAttributeType.LOCALE;
-    localeAttribute.locale = "es-MX";
-    root.valueAttributes =
-        new ArrayList<TestStringAttribute>() {
-          {
-            add(localeAttribute);
-          }
-        };
-
-    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-    SpannedString actual = (SpannedString) nodeInfo.getContentDescription();
-    assertEquals(actual.toString(), "value, label");
-    Object[] objectSpans = actual.getSpans(0, actual.length(), Object.class);
-    assertEquals(objectSpans.length, 2);
-    LocaleSpan localeSpan = (LocaleSpan) objectSpans[0];
-    assertEquals(localeSpan.getLocale().toLanguageTag(), "es-MX");
-    assertEquals(actual.getSpanStart(localeSpan), 1);
-    assertEquals(actual.getSpanEnd(localeSpan), 2);
-    TtsSpan spellOutSpan = (TtsSpan) objectSpans[1];
-    assertEquals(spellOutSpan.getType(), TtsSpan.TYPE_VERBATIM);
-    assertEquals(actual.getSpanStart(spellOutSpan), 8);
-    assertEquals(actual.getSpanEnd(spellOutSpan), 9);
+    assertEquals(nodeInfo.getText(), expectedText);
   }
 
   @TargetApi(21)
@@ -584,7 +516,7 @@ public class AccessibilityBridgeTest {
     node1.addAction(AccessibilityBridge.Action.SET_TEXT);
     root.children.add(node1);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(1);
     List<AccessibilityNodeInfo.AccessibilityAction> actions = nodeInfo.getActionList();
     assertTrue(actions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_TEXT));
@@ -622,7 +554,7 @@ public class AccessibilityBridgeTest {
     node1.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
     root.children.add(node1);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     Bundle bundle = new Bundle();
     int expectedStart = 1;
     int expectedEnd = 3;
@@ -666,7 +598,7 @@ public class AccessibilityBridgeTest {
     node1.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
     root.children.add(node1);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     Bundle bundle = new Bundle();
     bundle.putInt(
         AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT,
@@ -724,7 +656,7 @@ public class AccessibilityBridgeTest {
     node1.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
     root.children.add(node1);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     Bundle bundle = new Bundle();
     bundle.putInt(
         AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT,
@@ -783,7 +715,7 @@ public class AccessibilityBridgeTest {
     node1.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
     root.children.add(node1);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     Bundle bundle = new Bundle();
     bundle.putInt(
         AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT,
@@ -841,7 +773,7 @@ public class AccessibilityBridgeTest {
     node1.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
     root.children.add(node1);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
     Bundle bundle = new Bundle();
     bundle.putInt(
         AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT,
@@ -887,7 +819,7 @@ public class AccessibilityBridgeTest {
     scopeRoute.addFlag(AccessibilityBridge.Flag.SCOPES_ROUTE);
     root.children.add(scopeRoute);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
 
     ArgumentCaptor<AccessibilityEvent> eventCaptor =
         ArgumentCaptor.forClass(AccessibilityEvent.class);
@@ -920,7 +852,7 @@ public class AccessibilityBridgeTest {
     platformView.platformViewId = 42;
     root.children.add(platformView);
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
 
     // Pass an out of bounds MotionEvent.
     accessibilityBridge.onAccessibilityHoverEvent(MotionEvent.obtain(1, 1, 1, -10, -10, 0));
@@ -952,10 +884,12 @@ public class AccessibilityBridgeTest {
     root.addChild(platformView);
 
     TestSemanticsUpdate testSemanticsRootUpdate = root.toUpdate();
-    testSemanticsRootUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(
+        testSemanticsRootUpdate.buffer, testSemanticsRootUpdate.strings);
 
     TestSemanticsUpdate testSemanticsPlatformViewUpdate = platformView.toUpdate();
-    testSemanticsPlatformViewUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(
+        testSemanticsPlatformViewUpdate.buffer, testSemanticsPlatformViewUpdate.strings);
 
     View embeddedView = mock(View.class);
     when(accessibilityDelegate.getPlatformViewById(1)).thenReturn(embeddedView);
@@ -1000,7 +934,8 @@ public class AccessibilityBridgeTest {
     when(accessibilityDelegate.usesVirtualDisplay(1)).thenReturn(false);
 
     TestSemanticsUpdate testSemanticsRootUpdate = root.toUpdate();
-    testSemanticsRootUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(
+        testSemanticsRootUpdate.buffer, testSemanticsRootUpdate.strings);
 
     verify(embeddedView).setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
   }
@@ -1035,13 +970,17 @@ public class AccessibilityBridgeTest {
     when(accessibilityDelegate.usesVirtualDisplay(1)).thenReturn(false);
 
     TestSemanticsUpdate testSemanticsRootWithPlatformViewUpdate = rootWithPlatformView.toUpdate();
-    testSemanticsRootWithPlatformViewUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(
+        testSemanticsRootWithPlatformViewUpdate.buffer,
+        testSemanticsRootWithPlatformViewUpdate.strings);
 
     TestSemanticsNode rootWithoutPlatformView = new TestSemanticsNode();
     rootWithoutPlatformView.id = 0;
     TestSemanticsUpdate testSemanticsRootWithoutPlatformViewUpdate =
         rootWithoutPlatformView.toUpdate();
-    testSemanticsRootWithoutPlatformViewUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(
+        testSemanticsRootWithoutPlatformViewUpdate.buffer,
+        testSemanticsRootWithoutPlatformViewUpdate.strings);
 
     verify(embeddedView)
         .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
@@ -1065,7 +1004,7 @@ public class AccessibilityBridgeTest {
     platformView.platformViewId = 1;
 
     TestSemanticsUpdate testSemanticsUpdate = platformView.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
 
     View embeddedView = mock(View.class);
     when(accessibilityDelegate.getPlatformViewById(1)).thenReturn(embeddedView);
@@ -1152,46 +1091,13 @@ public class AccessibilityBridgeTest {
 
   /// The encoding for semantics is described in platform_view_android.cc
   class TestSemanticsUpdate {
-    TestSemanticsUpdate(ByteBuffer buffer, String[] strings, ByteBuffer[] stringAttributeArgs) {
+    TestSemanticsUpdate(ByteBuffer buffer, String[] strings) {
       this.buffer = buffer;
       this.strings = strings;
-      this.stringAttributeArgs = stringAttributeArgs;
-    }
-
-    void sendUpdateToBridge(AccessibilityBridge bridge) {
-      bridge.updateSemantics(buffer, strings, stringAttributeArgs);
     }
 
     final ByteBuffer buffer;
     final String[] strings;
-    final ByteBuffer[] stringAttributeArgs;
-  }
-
-  enum TestStringAttributeType {
-    SPELLOUT(0),
-    LOCALE(1);
-
-    private final int value;
-
-    private TestStringAttributeType(int value) {
-      this.value = value;
-    }
-
-    public int getValue() {
-      return value;
-    }
-  }
-
-  class TestStringAttribute {
-    int start;
-    int end;
-    TestStringAttributeType type;
-  }
-
-  class TestStringAttributeSpellOut extends TestStringAttribute {}
-
-  class TestStringAttributeLocale extends TestStringAttribute {
-    String locale;
   }
 
   class TestSemanticsNode {
@@ -1221,15 +1127,10 @@ public class AccessibilityBridgeTest {
     float scrollExtentMax = 0.0f;
     float scrollExtentMin = 0.0f;
     String label = null;
-    List<TestStringAttribute> labelAttributes;
     String value = null;
-    List<TestStringAttribute> valueAttributes;
     String increasedValue = null;
-    List<TestStringAttribute> increasedValueAttributes;
     String decreasedValue = null;
-    List<TestStringAttribute> decreasedValueAttributes;
     String hint = null;
-    List<TestStringAttribute> hintAttributes;
     int textDirection = 0;
     float left = 0.0f;
     float top = 0.0f;
@@ -1245,17 +1146,12 @@ public class AccessibilityBridgeTest {
     TestSemanticsUpdate toUpdate() {
       ArrayList<String> strings = new ArrayList<String>();
       ByteBuffer bytes = ByteBuffer.allocate(1000);
-      ArrayList<ByteBuffer> stringAttributeArgs = new ArrayList<ByteBuffer>();
-      addToBuffer(bytes, strings, stringAttributeArgs);
+      addToBuffer(bytes, strings);
       bytes.flip();
-      return new TestSemanticsUpdate(
-          bytes,
-          strings.toArray(new String[strings.size()]),
-          stringAttributeArgs.toArray(new ByteBuffer[stringAttributeArgs.size()]));
+      return new TestSemanticsUpdate(bytes, strings.toArray(new String[strings.size()]));
     }
 
-    protected void addToBuffer(
-        ByteBuffer bytes, ArrayList<String> strings, ArrayList<ByteBuffer> stringAttributeArgs) {
+    protected void addToBuffer(ByteBuffer bytes, ArrayList<String> strings) {
       bytes.putInt(id);
       bytes.putInt(flags);
       bytes.putInt(actions);
@@ -1269,11 +1165,11 @@ public class AccessibilityBridgeTest {
       bytes.putFloat(scrollPosition);
       bytes.putFloat(scrollExtentMax);
       bytes.putFloat(scrollExtentMin);
-      updateString(label, labelAttributes, bytes, strings, stringAttributeArgs);
-      updateString(value, valueAttributes, bytes, strings, stringAttributeArgs);
-      updateString(increasedValue, increasedValueAttributes, bytes, strings, stringAttributeArgs);
-      updateString(decreasedValue, decreasedValueAttributes, bytes, strings, stringAttributeArgs);
-      updateString(hint, hintAttributes, bytes, strings, stringAttributeArgs);
+      updateString(label, bytes, strings);
+      updateString(value, bytes, strings);
+      updateString(increasedValue, bytes, strings);
+      updateString(decreasedValue, bytes, strings);
+      updateString(hint, bytes, strings);
       bytes.putInt(textDirection);
       bytes.putFloat(left);
       bytes.putFloat(top);
@@ -1296,43 +1192,17 @@ public class AccessibilityBridgeTest {
       bytes.putInt(0);
       // child nodes
       for (TestSemanticsNode node : children) {
-        node.addToBuffer(bytes, strings, stringAttributeArgs);
+        node.addToBuffer(bytes, strings);
       }
     }
   }
 
-  static void updateString(
-      String value,
-      List<TestStringAttribute> attributes,
-      ByteBuffer bytes,
-      ArrayList<String> strings,
-      ArrayList<ByteBuffer> stringAttributeArgs) {
+  static void updateString(String value, ByteBuffer bytes, ArrayList<String> strings) {
     if (value == null) {
       bytes.putInt(-1);
     } else {
       strings.add(value);
       bytes.putInt(strings.size() - 1);
-    }
-    // attributes
-    if (attributes == null || attributes.isEmpty()) {
-      bytes.putInt(-1);
-      return;
-    }
-    bytes.putInt(attributes.size());
-    for (TestStringAttribute attribute : attributes) {
-      bytes.putInt(attribute.start);
-      bytes.putInt(attribute.end);
-      bytes.putInt(attribute.type.getValue());
-      switch (attribute.type) {
-        case SPELLOUT:
-          bytes.putInt(-1);
-          break;
-        case LOCALE:
-          bytes.putInt(stringAttributeArgs.size());
-          TestStringAttributeLocale localeAttribute = (TestStringAttributeLocale) attribute;
-          stringAttributeArgs.add(Charset.forName("UTF-8").encode(localeAttribute.locale));
-          break;
-      }
     }
   }
 }

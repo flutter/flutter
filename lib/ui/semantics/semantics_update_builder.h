@@ -5,9 +5,6 @@
 #ifndef FLUTTER_LIB_UI_SEMANTICS_SEMANTICS_UPDATE_BUILDER_H_
 #define FLUTTER_LIB_UI_SEMANTICS_SEMANTICS_UPDATE_BUILDER_H_
 
-#include <any>
-#include <list>
-
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/semantics/semantics_update.h"
 #include "third_party/tonic/typed_data/typed_list.h"
@@ -46,15 +43,10 @@ class SemanticsUpdateBuilder
                   double elevation,
                   double thickness,
                   std::string label,
-                  std::vector<NativeStringAttribute*> labelAttributes,
-                  std::string value,
-                  std::vector<NativeStringAttribute*> valueAttributes,
-                  std::string increasedValue,
-                  std::vector<NativeStringAttribute*> increasedValueAttributes,
-                  std::string decreasedValue,
-                  std::vector<NativeStringAttribute*> decreasedValueAttributes,
                   std::string hint,
-                  std::vector<NativeStringAttribute*> hintAttributes,
+                  std::string value,
+                  std::string increasedValue,
+                  std::string decreasedValue,
                   int textDirection,
                   const tonic::Float64List& transform,
                   const tonic::Int32List& childrenInTraversalOrder,
@@ -72,6 +64,7 @@ class SemanticsUpdateBuilder
 
  private:
   explicit SemanticsUpdateBuilder();
+
   SemanticsNodeUpdates nodes_;
   CustomAccessibilityActionUpdates actions_;
 };
