@@ -759,6 +759,8 @@ void main() {
 
       expect(flutterErrorDetails.exception, isA<AssertionError>());
       expect((flutterErrorDetails.exception as AssertionError).message, 'A Timer is still pending even after the widget tree was disposed.');
+      expect(binding.inTest, true);
+      binding.postTest();
     });
   });
 }
