@@ -40,6 +40,7 @@ void main() {
       const Duration(milliseconds: 100),
     );
 
+    // This test verifies deprecated methods.
     final Widget display = await builder.display(); // ignore: deprecated_member_use
     await tester.binding.setSurfaceSize(builder.sheetSize()); // ignore: deprecated_member_use
     await tester.pumpWidget(display);
@@ -57,6 +58,7 @@ void main() {
       const Duration(milliseconds: 200),
     );
 
+    // This test verifies deprecated methods.
     final Widget display = await builder.display(); // ignore: deprecated_member_use
     await tester.binding.setSurfaceSize(builder.sheetSize(maxWidth: 80)); // ignore: deprecated_member_use
     await tester.pumpWidget(display);

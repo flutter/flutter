@@ -774,14 +774,8 @@ void main() {
       ),
     ), const Duration(seconds: 2));
 
-    final ui.Image image = await animationSheet.collate(20);
-    // The deprecated `sheetSize` is used only for the migration from
-    // `AnimationSheetBuilder.display` to `collate`.
-    // ignore: deprecated_member_use
-    await tester.binding.setSurfaceSize(animationSheet.sheetSize());
-    await tester.pumpWidget(RawImage(image: image, filterQuality: FilterQuality.none));
     await expectLater(
-      find.byType(RawImage),
+      await animationSheet.collate(20),
       matchesGoldenFile('material.circular_progress_indicator.indeterminate.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
