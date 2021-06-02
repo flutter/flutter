@@ -6,7 +6,6 @@
 
 import 'android/gradle_utils.dart';
 import 'base/context.dart';
-import 'build_system/build_system.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'fuchsia/fuchsia_sdk.dart';
@@ -21,7 +20,6 @@ import 'runner/local_engine.dart';
 
 export 'globals_null_migrated.dart';
 
-BuildSystem get buildSystem => context.get<BuildSystem>();
 CrashReporter get crashReporter => context.get<CrashReporter>();
 Doctor get doctor => context.get<Doctor>();
 DeviceManager get deviceManager => context.get<DeviceManager>();
