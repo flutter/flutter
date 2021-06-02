@@ -218,6 +218,112 @@ void main() {
     );
 
     expect(plugin.platforms, <String, PluginPlatform>{});
+    expect(plugin.defaultPackagePlatforms, <String, String>{
+      'linux': 'sample_package_linux',
+      'macos': 'sample_package_macos',
+      'windows': 'sample_package_windows',
+    });
+    expect(plugin.pluginDartClassPlatforms, <String, String>{});
+  });
+
+  testWithoutContext('Desktop plugin parsing allows a dartPluginClass field', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' linux:\n'
+      '  dartPluginClass: LinuxClass\n'
+      ' macos:\n'
+      '  dartPluginClass: MacOSClass\n'
+      ' windows:\n'
+      '  dartPluginClass: WindowsClass\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      const <String>[],
+      fileSystem: fileSystem,
+    );
+
+    expect(plugin.pluginDartClassPlatforms, <String, String>{
+      'linux': 'LinuxClass',
+      'macos': 'MacOSClass',
+      'windows': 'WindowsClass',
+    });
+  });
+
+  testWithoutContext('Windows allows supported mode lists', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' windows:\n'
+      '  pluginClass: WinSamplePlugin\n'
+      '  supportedVariants:\n'
+      '    - win32\n'
+      '    - uwp\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      const <String>[],
+      fileSystem: fileSystem,
+    );
+
+    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>[
+      PluginPlatformVariant.win32,
+      PluginPlatformVariant.winuwp,
+    ]);
+  });
+
+  testWithoutContext('Windows assumes win32 when no variants are given', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' windows:\n'
+      '  pluginClass: WinSamplePlugin\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      const <String>[],
+      fileSystem: fileSystem,
+    );
+
+    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>[
+      PluginPlatformVariant.win32,
+    ]);
+  });
+
+  testWithoutContext('Windows ignores unknown variants', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' windows:\n'
+      '  pluginClass: WinSamplePlugin\n'
+      '  supportedVariants:\n'
+      '    - not_yet_invented_variant\n'
+      '    - uwp\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      const <String>[],
+      fileSystem: fileSystem,
+    );
+
+    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>{
+      PluginPlatformVariant.winuwp,
+    });
   });
 
   testWithoutContext('Plugin parsing throws a fatal error on an empty plugin', () {

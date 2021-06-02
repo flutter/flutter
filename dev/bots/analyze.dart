@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
@@ -11,6 +12,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+import 'allowlist.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -75,6 +77,11 @@ Future<void> run(List<String> arguments) async {
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
     workingDirectory: flutterRoot,
   );
+
+  /// Ensure that no new dependencies have been accidentally
+  /// added to core packages.
+  print('$clock Package Allowlist...');
+  await _checkConsumerDependencies();
 
   // Analyze all the Dart code in the repo.
   print('$clock Dart analysis...');
@@ -236,8 +243,8 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, '#!/usr/bin/env bash\n' + _generateLicense('# '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, '@ECHO off\n' + _generateLicense('REM '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, '#!/usr/bin/env bash\n${_generateLicense('# ')}');
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, '@ECHO off\n${_generateLicense('REM ')}');
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!DOCTYPE HTML>\n<!-- ${_generateLicense('')} -->', trailingBlank: false);
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->');
@@ -245,7 +252,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
 
 Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String extension, int minimumMatches, String license, { bool trailingBlank = true }) async {
   assert(!license.endsWith('\n'));
-  final String licensePattern = license + '\n' + (trailingBlank ? '\n' : '');
+  final String licensePattern = '$license\n${trailingBlank ? '\n' : ''}';
   final List<String> errors = <String>[];
   await for (final File file in _allFiles(workingDirectory, extension, minimumMatches: minimumMatches)) {
     final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
@@ -310,13 +317,13 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
     .map<String>((Directory entity) => path.basename(entity.path))
     .toList()..sort();
   if (!_listEquals<String>(packages, directories)) {
-    errors.add(
-      'flutter/lib/*.dart does not match flutter/lib/src/*/:\n'
-      'These are the exported packages:\n' +
-      packages.map<String>((String path) => '  lib/$path.dart').join('\n') +
-      'These are the directories:\n' +
-      directories.map<String>((String path) => '  lib/src/$path/').join('\n')
-    );
+    errors.add(<String>[
+      'flutter/lib/*.dart does not match flutter/lib/src/*/:',
+      'These are the exported packages:',
+      ...packages.map<String>((String path) => '  lib/$path.dart'),
+      'These are the directories:',
+      ...directories.map<String>((String path) => '  lib/src/$path/')
+    ].join('\n'));
   }
   // Verify that the imports are well-ordered.
   final Map<String, Set<String>> dependencyMap = <String, Set<String>>{};
@@ -340,7 +347,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
         continue;
       // Sanity check before performing _deepSearch, to ensure there's no rogue
       // dependencies.
-      final String validFilenames = dependencyMap.keys.map((String name) => name + '.dart').join(', ');
+      final String validFilenames = dependencyMap.keys.map((String name) => '$name.dart').join(', ');
       errors.add(
         '$key imported package:flutter/$dependency.dart '
         'which is not one of the valid exports { $validFilenames }.\n'
@@ -352,10 +359,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   for (final String package in dependencyMap.keys) {
     final List<String> loop = _deepSearch<String>(dependencyMap, package);
     if (loop != null) {
-      errors.add(
-        '${yellow}Dependency loop:$reset ' +
-        loop.join(' depends on ')
-      );
+      errors.add('${yellow}Dependency loop:$reset ${loop.join(' depends on ')}');
     }
   }
   // Fail if any errors
@@ -1129,12 +1133,68 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   return result;
 }
 
+Future<void> _checkConsumerDependencies() async {
+  final ProcessResult result = await Process.run(flutter, <String>[
+    'update-packages',
+    '--transitive-closure',
+    '--consumer-only',
+  ]);
+  if (result.exitCode != 0) {
+    print(result.stdout);
+    print(result.stderr);
+    exit(result.exitCode);
+  }
+  final Set<String> dependencySet = <String>{};
+  for (final String line in result.stdout.toString().split('\n')) {
+    if (!line.contains('->')) {
+      continue;
+    }
+    final List<String> parts = line.split('->');
+    final String name = parts[0].trim();
+    dependencySet.add(name);
+  }
+  final List<String> dependencies = dependencySet.toList()
+    ..sort();
+  final List<String> disallowed = <String>[];
+  final StreamController<Digest> controller = StreamController<Digest>();
+  final ByteConversionSink hasher = sha256.startChunkedConversion(controller.sink);
+  for (final String dependency in dependencies) {
+    hasher.add(utf8.encode(dependency));
+    if (!kCorePackageAllowList.contains(dependency)) {
+      disallowed.add(dependency);
+    }
+  }
+  hasher.close();
+  final Digest digest = await controller.stream.last;
+  final String signature = base64.encode(digest.bytes);
+
+  // Do not change this signature without following the directions in
+  // dev/bots/allowlist.dart
+  const String kExpected = 'nkO7DCjvSMB6VKyw+V9MU46m3xFEk/oYSbmgAWqvbXE=';
+
+  if (disallowed.isNotEmpty) {
+    exitWithError(<String>[
+      'Warning: transitive closure contained non-allowlisted packages:',
+      '${disallowed..join(', ')}',
+      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
+    ]);
+  }
+
+  if (signature != kExpected) {
+    exitWithError(<String>[
+      'Warning: transitive closure sha256 does not match expected signature.',
+      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
+      '$signature != $kExpected',
+    ]);
+  }
+}
+
 Future<void> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
 }) async {
   return runCommand(
     flutter,
-    <String>['analyze', '--dartdocs', ...options],
+    <String>['analyze', ...options],
     workingDirectory: workingDirectory,
   );
 }

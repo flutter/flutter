@@ -202,12 +202,8 @@ mixin SchedulerBinding on BindingBase {
     _instance = this;
 
     if (!kReleaseMode) {
-      int frameNumber = 0;
       addTimingsCallback((List<FrameTiming> timings) {
-        for (final FrameTiming frameTiming in timings) {
-          frameNumber += 1;
-          _profileFramePostEvent(frameNumber, frameTiming);
-        }
+        timings.forEach(_profileFramePostEvent);
       });
     }
   }
@@ -451,10 +447,7 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Also returns false if there are no tasks remaining.
   @visibleForTesting
-  // TODO(goderbauer): Add pragma (and enable test in
-  //   break_on_framework_exceptions_test.dart) once debugger breaks on correct
-  //   line, https://github.com/dart-lang/sdk/issues/45684
-  // @pragma('vm:notify-debugger-on-exception')
+  @pragma('vm:notify-debugger-on-exception')
   bool handleEventLoopCallback() {
     if (_taskQueue.isEmpty || locked)
       return false;
@@ -1106,9 +1099,9 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
-  void _profileFramePostEvent(int frameNumber, FrameTiming frameTiming) {
+  void _profileFramePostEvent(FrameTiming frameTiming) {
     postEvent('Flutter.Frame', <String, dynamic>{
-      'number': frameNumber,
+      'number': frameTiming.frameNumber,
       'startTime': frameTiming.timestampInMicroseconds(FramePhase.buildStart),
       'elapsed': frameTiming.totalSpan.inMicroseconds,
       'build': frameTiming.buildDuration.inMicroseconds,

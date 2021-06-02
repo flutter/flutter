@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// Make `n` copies of flutter_gallery.
 
 import 'dart:io';
@@ -190,6 +192,6 @@ int _lineCount(File file) {
 String _comma(int count) {
   final String str = count.toString();
   if (str.length > 3)
-    return str.substring(0, str.length - 3) + ',' + str.substring(str.length - 3);
+    return '${str.substring(0, str.length - 3)},${str.substring(str.length - 3)}';
   return str;
 }

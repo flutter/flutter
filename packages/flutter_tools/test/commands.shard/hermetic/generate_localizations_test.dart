@@ -5,11 +5,10 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../integration.shard/test_data/basic_project.dart';
 import '../../src/common.dart';
@@ -101,7 +100,7 @@ void main() {
         '--header="some header',
         '--header-file="header.txt"',
       ]),
-      throwsA(isA<ToolExit>()),
+      throwsToolExit(),
     );
   });
 

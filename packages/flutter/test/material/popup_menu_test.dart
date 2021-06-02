@@ -5,10 +5,10 @@
 import 'dart:ui' show window, SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -147,8 +147,8 @@ void main() {
               child: Column(
                 children: <Widget>[
                   PopupMenuButton<int>(
-                    child: Text('Tap Me', key: popupButtonKey),
                     enabled: false,
+                    child: Text('Tap Me', key: popupButtonKey),
                     itemBuilder: (BuildContext context) {
                       itemBuilderCalled = true;
                       return <PopupMenuEntry<int>>[
@@ -222,8 +222,8 @@ void main() {
             children: <Widget>[
               PopupMenuButton<int>(
                 key: popupButtonKey,
-                child: Container(key: childKey),
                 enabled: false,
+                child: Container(key: childKey),
                 itemBuilder: (BuildContext context) {
                   itemBuilderCalled = true;
                   return <PopupMenuEntry<int>>[
@@ -264,8 +264,8 @@ void main() {
                 children: <Widget>[
                   PopupMenuButton<int>(
                     key: popupButtonKey,
-                    child: Container(key: childKey),
                     enabled: false,
+                    child: Container(key: childKey),
                     itemBuilder: (BuildContext context) {
                       return <PopupMenuEntry<int>>[
                         const PopupMenuItem<int>(
@@ -287,6 +287,139 @@ void main() {
     await tester.pump();
 
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets('PopupMenuItem onTap callback is called when defined', (WidgetTester tester) async {
+    final List<int> menuItemTapCounters = <int>[0, 0];
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: RepaintBoundary(
+            child: PopupMenuButton<void>(
+              child: const Text('Actions'),
+              itemBuilder: (BuildContext context) => <PopupMenuItem<void>>[
+                PopupMenuItem<void>(
+                  child: const Text('First option'),
+                  onTap: () {
+                    menuItemTapCounters[0] += 1;
+                  },
+                ),
+                PopupMenuItem<void>(
+                  child: const Text('Second option'),
+                  onTap: () {
+                    menuItemTapCounters[1] += 1;
+                  },
+                ),
+                const PopupMenuItem<void>(
+                  child: Text('Option without onTap'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap the first time
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('First option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[1, 0]);
+
+    // Tap the item again
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('First option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 0]);
+
+    // Tap a different item
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Second option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 1]);
+
+    // Tap an item without onTap
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Option without onTap'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 1]);
+  });
+
+  testWidgets('PopupMenuItem can have both onTap and value', (WidgetTester tester) async {
+    final List<int> menuItemTapCounters = <int>[0, 0];
+    String? selected;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: RepaintBoundary(
+            child: PopupMenuButton<String>(
+              child: const Text('Actions'),
+              onSelected: (String value) { selected = value; },
+              itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                PopupMenuItem<String>(
+                  value: 'first',
+                  child: const Text('First option'),
+                  onTap: () {
+                    menuItemTapCounters[0] += 1;
+                  },
+                ),
+                PopupMenuItem<String>(
+                  value: 'second',
+                  child: const Text('Second option'),
+                  onTap: () {
+                    menuItemTapCounters[1] += 1;
+                  },
+                ),
+               const PopupMenuItem<String>(
+                 value: 'third',
+                 child: Text('Option without onTap'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap the first item
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('First option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[1, 0]);
+    expect(selected, 'first');
+
+    // Tap the item again
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('First option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 0]);
+    expect(selected, 'first');
+
+    // Tap a different item
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Second option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 1]);
+    expect(selected, 'second');
+
+    // Tap an item without onTap
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Option without onTap'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 1]);
+    expect(selected, 'third');
   });
 
   testWidgets('PopupMenuItem is only focusable when enabled', (WidgetTester tester) async {
@@ -1156,17 +1289,17 @@ void main() {
               onSelected: (String result) {
                 selectedValue = result;
               },
-              child: const Text('Menu Button'),
               initialValue: '1',
+              child: const Text('Menu Button'),
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
-                  child: Text('1'),
                   value: '1',
+                  child: Text('1'),
                 ),
                 const PopupMenuDivider(),
                 const PopupMenuItem<String>(
-                  child: Text('2'),
                   value: '2',
+                  child: Text('2'),
                 ),
               ],
             ),
@@ -1790,25 +1923,25 @@ void main() {
     final GlobalKey<PopupMenuButtonState<int>> globalKey = GlobalKey();
 
     await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Column(
-              children: <Widget>[
-                PopupMenuButton<int>(
-                  key: globalKey,
-                  itemBuilder: (BuildContext context) {
-                    return <PopupMenuEntry<int>>[
-                      const PopupMenuItem<int>(
-                        value: 1,
-                        child: Text('Tap me please!'),
-                      ),
-                    ];
-                  },
-                ),
-              ],
-            ),
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<int>(
+                key: globalKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+              ),
+            ],
           ),
-        )
+        ),
+      ),
     );
 
     expect(find.text('Tap me please!'), findsNothing);
@@ -2033,8 +2166,8 @@ void main() {
                 ),
               ),
               itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                const PopupMenuItem<int>(child: Text('-1-'), value: 1,),
-                const PopupMenuItem<int>(child: Text('-2-'), value: 2,),
+                const PopupMenuItem<int>(value: 1, child: Text('-1-')),
+                const PopupMenuItem<int>(value: 2, child: Text('-2-')),
               ],
             )],
           ),
@@ -2058,6 +2191,79 @@ void main() {
     expect(popupMenu, Offset(button.dx - 8.0, button.dy + 8.0));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/82874
+  testWidgets('PopupMenu position test when have unsafe area - left/right padding', (WidgetTester tester) async {
+    final GlobalKey buttonKey = GlobalKey();
+    const EdgeInsets padding = EdgeInsets.only(left: 300.0, top: 32.0, right: 310.0, bottom: 64.0);
+    EdgeInsets? mediaQueryPadding;
+
+    Widget buildFrame(double width, double height) {
+      return MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            data: const MediaQueryData(
+              padding: padding,
+            ),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('PopupMenu Test'),
+            actions: <Widget>[PopupMenuButton<int>(
+              child: SizedBox(
+                key: buttonKey,
+                height: height,
+                width: width,
+                child: const ColoredBox(
+                  color: Colors.pink,
+                ),
+              ),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<int>>[
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        mediaQueryPadding = MediaQuery.of(context).padding;
+                        return Text('-1-' * 500); // A long long text string.
+                      },
+                    ),
+                  ),
+                  const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+                ];
+              },
+            )],
+          ),
+          body: const SizedBox.shrink(),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(20.0, 20.0));
+
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    final Offset button = tester.getTopRight(find.byKey(buttonKey));
+    expect(button, Offset(800.0 - padding.right, padding.top)); // The topPadding is 32.0.
+
+    final Offset popupMenuTopRight = tester.getTopRight(find.byType(SingleChildScrollView));
+
+    // The menu should be positioned directly next to the top of the button.
+    // The 8.0 pixels is [_kMenuScreenPadding].
+    expect(popupMenuTopRight, Offset(800.0 - padding.right - 8.0, padding.top + 8.0));
+
+    final Offset popupMenuTopLeft = tester.getTopLeft(find.byType(SingleChildScrollView));
+    expect(popupMenuTopLeft, Offset(padding.left + 8.0, padding.top + 8.0));
+
+    final Offset popupMenuBottomLeft = tester.getBottomLeft(find.byType(SingleChildScrollView));
+    expect(popupMenuBottomLeft, Offset(padding.left + 8.0, 600.0 - padding.bottom - 8.0));
+
+    // The `MediaQueryData.padding` should be removed.
+    expect(mediaQueryPadding, EdgeInsets.zero);
+  });
+
   group('feedback', () {
     late FeedbackTester feedback;
 
@@ -2069,7 +2275,7 @@ void main() {
       feedback.dispose();
     });
 
-    Widget buildFrame({ bool? widgetEnableFeedack, bool? themeEnableFeedback }) {
+    Widget buildFrame({ bool? widgetEnableFeedback, bool? themeEnableFeedback }) {
       return MaterialApp(
         home: Scaffold(
           body: PopupMenuTheme(
@@ -2077,7 +2283,7 @@ void main() {
               enableFeedback: themeEnableFeedback,
             ),
             child: PopupMenuButton<int>(
-              enableFeedback: widgetEnableFeedack,
+              enableFeedback: widgetEnableFeedback,
               child: const Text('Show Menu'),
               itemBuilder: (BuildContext context) {
                 return <PopupMenuItem<int>>[
@@ -2098,7 +2304,7 @@ void main() {
       expect(feedback.hapticCount, 0);
 
       // PopupMenuButton with enabled feedback.
-      await tester.pumpWidget(buildFrame(widgetEnableFeedack: true));
+      await tester.pumpWidget(buildFrame(widgetEnableFeedback: true));
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 1);
@@ -2107,7 +2313,7 @@ void main() {
       await tester.pumpWidget(Container());
 
       // PopupMenuButton with disabled feedback.
-      await tester.pumpWidget(buildFrame(widgetEnableFeedack: false));
+      await tester.pumpWidget(buildFrame(widgetEnableFeedback: false));
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 1);
@@ -2134,7 +2340,7 @@ void main() {
       await tester.pumpWidget(Container());
 
       // PopupMenu enableFeedback property overrides PopupMenuButtonTheme.
-      await tester.pumpWidget(buildFrame(widgetEnableFeedack: false,themeEnableFeedback: true));
+      await tester.pumpWidget(buildFrame(widgetEnableFeedback: false,themeEnableFeedback: true));
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 2);
@@ -2181,7 +2387,7 @@ void main() {
                 onPressed: () {
                   showMenu<void>(
                     context: navigator.currentContext!,
-                    position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+                    position: RelativeRect.fill,
                     items: const <PopupMenuItem<void>>[
                       PopupMenuItem<void>(child: Text('foo')),
                     ],
@@ -2209,6 +2415,71 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('foo'), findsOneWidget);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/80869
+  testWidgets('The menu position test in the scrollable widget', (WidgetTester tester) async {
+    final GlobalKey buttonKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                const SizedBox(height: 100),
+                PopupMenuButton<int>(
+                  child: SizedBox(
+                    key: buttonKey,
+                    height: 10.0,
+                    width: 10.0,
+                    child: const ColoredBox(
+                      color: Colors.pink,
+                    ),
+                  ),
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(value: 1, child: Text('-1-')),
+                    const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+                  ],
+                ),
+                const SizedBox(height: 600),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    Offset button = tester.getTopLeft(find.byKey(buttonKey));
+    expect(button, const Offset(0.0, 100.0));
+
+    Offset popupMenu = tester.getTopLeft(find.byType(SingleChildScrollView).last);
+    // The menu should be positioned directly next to the top of the button.
+    // The 8.0 pixels is [_kMenuScreenPadding].
+    expect(popupMenu, const Offset(8.0, 100.0));
+
+    // Close the menu.
+    await tester.tap(find.byKey(buttonKey), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    // Scroll a little bit.
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -50.0));
+
+    button = tester.getTopLeft(find.byKey(buttonKey));
+    expect(button, const Offset(0.0, 50.0));
+
+    // Open the menu again.
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    popupMenu = tester.getTopLeft(find.byType(SingleChildScrollView).last);
+    // The menu should be positioned directly next to the top of the button.
+    // The 8.0 pixels is [_kMenuScreenPadding].
+    expect(popupMenu, const Offset(8.0, 50.0));
+  });
 }
 
 class TestApp extends StatefulWidget {
@@ -2222,7 +2493,7 @@ class TestApp extends StatefulWidget {
   final Widget? child;
 
   @override
-  _TestAppState createState() => _TestAppState();
+  State<TestApp> createState() => _TestAppState();
 }
 
 class _TestAppState extends State<TestApp> {

@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:intl/date_symbols.dart' as intl;
 import 'package:intl/date_symbol_data_custom.dart' as date_symbol_data_custom;
+import 'package:intl/date_symbols.dart' as intl;
+
 import '../l10n/generated_date_localizations.dart' as date_localizations;
 
 /// Tracks if date i18n data has been loaded.
@@ -18,7 +19,7 @@ void loadDateIntlDataIfNotLoaded() {
     // TODO(garyq): Add support for scriptCodes. Do not strip scriptCode from string.
 
     // Keeps track of initialized locales. This can only happen if a locale
-    // with a stripped scriptCode has already been initialzed. The set of
+    // with a stripped scriptCode has already been initialized. The set of
     // initialized locales should be removed when scriptCode stripping is
     // removed.
     final Set<String> initializedLocales = <String>{};
@@ -34,7 +35,7 @@ void loadDateIntlDataIfNotLoaded() {
         } else if (codes.length == 3) {
           countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
         }
-        locale = codes[0] + (countryCode != null ? '_' + countryCode : '');
+        locale = codes[0] + (countryCode != null ? '_$countryCode' : '');
         if (initializedLocales.contains(locale))
           return;
         initializedLocales.add(locale);

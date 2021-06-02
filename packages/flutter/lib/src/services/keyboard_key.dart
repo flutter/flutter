@@ -38,7 +38,7 @@ abstract class KeyboardKey with Diagnosticable {
 /// As an example, if you wanted to implement an app where the "Q" key "quit"
 /// something, you'd want to look at the logical key to detect this, since you
 /// would like to have it match the key with "Q" on it, instead of always
-/// looking for "the key next next to the TAB key", since on a French keyboard,
+/// looking for "the key next to the TAB key", since on a French keyboard,
 /// the key next to the TAB key has an "A" on it.
 ///
 /// Conversely, if you wanted a game where the key next to the CAPS LOCK (the
@@ -365,77 +365,202 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "None" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey none = LogicalKeyboardKey(0x00100000000);
+  static const LogicalKeyboardKey none = LogicalKeyboardKey(0x00000000000);
 
-  /// Represents the logical "Hyper" key on the keyboard.
+  /// Represents the logical "Space" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey hyper = LogicalKeyboardKey(0x00100000010);
+  static const LogicalKeyboardKey space = LogicalKeyboardKey(0x00000000020);
 
-  /// Represents the logical "Super Key" key on the keyboard.
+  /// Represents the logical "Exclamation" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey superKey = LogicalKeyboardKey(0x00100000011);
+  static const LogicalKeyboardKey exclamation = LogicalKeyboardKey(0x00000000021);
 
-  /// Represents the logical "Fn Lock" key on the keyboard.
+  /// Represents the logical "Quote" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey fnLock = LogicalKeyboardKey(0x00100000013);
+  static const LogicalKeyboardKey quote = LogicalKeyboardKey(0x00000000022);
 
-  /// Represents the logical "Suspend" key on the keyboard.
+  /// Represents the logical "Number Sign" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey suspend = LogicalKeyboardKey(0x00100000014);
+  static const LogicalKeyboardKey numberSign = LogicalKeyboardKey(0x00000000023);
 
-  /// Represents the logical "Resume" key on the keyboard.
+  /// Represents the logical "Dollar" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey resume = LogicalKeyboardKey(0x00100000015);
+  static const LogicalKeyboardKey dollar = LogicalKeyboardKey(0x00000000024);
 
-  /// Represents the logical "Turbo" key on the keyboard.
+  /// Represents the logical "Percent" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey turbo = LogicalKeyboardKey(0x00100000016);
+  static const LogicalKeyboardKey percent = LogicalKeyboardKey(0x00000000025);
 
-  /// Represents the logical "Privacy Screen Toggle" key on the keyboard.
+  /// Represents the logical "Ampersand" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey privacyScreenToggle = LogicalKeyboardKey(0x00100000017);
+  static const LogicalKeyboardKey ampersand = LogicalKeyboardKey(0x00000000026);
 
-  /// Represents the logical "Sleep" key on the keyboard.
+  /// Represents the logical "Quote Single" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey sleep = LogicalKeyboardKey(0x00100010082);
+  static const LogicalKeyboardKey quoteSingle = LogicalKeyboardKey(0x00000000027);
 
-  /// Represents the logical "Wake Up" key on the keyboard.
+  /// Represents the logical "Parenthesis Left" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey wakeUp = LogicalKeyboardKey(0x00100010083);
+  static const LogicalKeyboardKey parenthesisLeft = LogicalKeyboardKey(0x00000000028);
 
-  /// Represents the logical "Display Toggle Int Ext" key on the keyboard.
+  /// Represents the logical "Parenthesis Right" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey displayToggleIntExt = LogicalKeyboardKey(0x001000100b5);
+  static const LogicalKeyboardKey parenthesisRight = LogicalKeyboardKey(0x00000000029);
 
-  /// Represents the logical "Usb Reserved" key on the keyboard.
+  /// Represents the logical "Asterisk" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey usbReserved = LogicalKeyboardKey(0x00100070000);
+  static const LogicalKeyboardKey asterisk = LogicalKeyboardKey(0x0000000002a);
 
-  /// Represents the logical "Usb Error Roll Over" key on the keyboard.
+  /// Represents the logical "Add" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey usbErrorRollOver = LogicalKeyboardKey(0x00100070001);
+  static const LogicalKeyboardKey add = LogicalKeyboardKey(0x0000000002b);
 
-  /// Represents the logical "Usb Post Fail" key on the keyboard.
+  /// Represents the logical "Comma" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey usbPostFail = LogicalKeyboardKey(0x00100070002);
+  static const LogicalKeyboardKey comma = LogicalKeyboardKey(0x0000000002c);
 
-  /// Represents the logical "Usb Error Undefined" key on the keyboard.
+  /// Represents the logical "Minus" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey usbErrorUndefined = LogicalKeyboardKey(0x00100070003);
+  static const LogicalKeyboardKey minus = LogicalKeyboardKey(0x0000000002d);
+
+  /// Represents the logical "Period" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey period = LogicalKeyboardKey(0x0000000002e);
+
+  /// Represents the logical "Slash" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey slash = LogicalKeyboardKey(0x0000000002f);
+
+  /// Represents the logical "Digit 0" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit0 = LogicalKeyboardKey(0x00000000030);
+
+  /// Represents the logical "Digit 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit1 = LogicalKeyboardKey(0x00000000031);
+
+  /// Represents the logical "Digit 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit2 = LogicalKeyboardKey(0x00000000032);
+
+  /// Represents the logical "Digit 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit3 = LogicalKeyboardKey(0x00000000033);
+
+  /// Represents the logical "Digit 4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit4 = LogicalKeyboardKey(0x00000000034);
+
+  /// Represents the logical "Digit 5" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit5 = LogicalKeyboardKey(0x00000000035);
+
+  /// Represents the logical "Digit 6" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit6 = LogicalKeyboardKey(0x00000000036);
+
+  /// Represents the logical "Digit 7" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit7 = LogicalKeyboardKey(0x00000000037);
+
+  /// Represents the logical "Digit 8" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit8 = LogicalKeyboardKey(0x00000000038);
+
+  /// Represents the logical "Digit 9" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit9 = LogicalKeyboardKey(0x00000000039);
+
+  /// Represents the logical "Colon" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey colon = LogicalKeyboardKey(0x0000000003a);
+
+  /// Represents the logical "Semicolon" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey semicolon = LogicalKeyboardKey(0x0000000003b);
+
+  /// Represents the logical "Less" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey less = LogicalKeyboardKey(0x0000000003c);
+
+  /// Represents the logical "Equal" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey equal = LogicalKeyboardKey(0x0000000003d);
+
+  /// Represents the logical "Greater" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey greater = LogicalKeyboardKey(0x0000000003e);
+
+  /// Represents the logical "Question" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey question = LogicalKeyboardKey(0x0000000003f);
+
+  /// Represents the logical "At" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey at = LogicalKeyboardKey(0x00000000040);
+
+  /// Represents the logical "Bracket Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey bracketLeft = LogicalKeyboardKey(0x0000000005b);
+
+  /// Represents the logical "Backslash" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey backslash = LogicalKeyboardKey(0x0000000005c);
+
+  /// Represents the logical "Bracket Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey bracketRight = LogicalKeyboardKey(0x0000000005d);
+
+  /// Represents the logical "Caret" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey caret = LogicalKeyboardKey(0x0000000005e);
+
+  /// Represents the logical "Underscore" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey underscore = LogicalKeyboardKey(0x0000000005f);
+
+  /// Represents the logical "Backquote" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey backquote = LogicalKeyboardKey(0x00000000060);
 
   /// Represents the logical "Key A" key on the keyboard.
   ///
@@ -567,1450 +692,2358 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey keyZ = LogicalKeyboardKey(0x0000000007a);
 
-  /// Represents the logical "Digit 1" key on the keyboard.
+  /// Represents the logical "Brace Left" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit1 = LogicalKeyboardKey(0x00000000031);
+  static const LogicalKeyboardKey braceLeft = LogicalKeyboardKey(0x0000000007b);
 
-  /// Represents the logical "Digit 2" key on the keyboard.
+  /// Represents the logical "Bar" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit2 = LogicalKeyboardKey(0x00000000032);
+  static const LogicalKeyboardKey bar = LogicalKeyboardKey(0x0000000007c);
 
-  /// Represents the logical "Digit 3" key on the keyboard.
+  /// Represents the logical "Brace Right" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit3 = LogicalKeyboardKey(0x00000000033);
+  static const LogicalKeyboardKey braceRight = LogicalKeyboardKey(0x0000000007d);
 
-  /// Represents the logical "Digit 4" key on the keyboard.
+  /// Represents the logical "Tilde" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit4 = LogicalKeyboardKey(0x00000000034);
+  static const LogicalKeyboardKey tilde = LogicalKeyboardKey(0x0000000007e);
 
-  /// Represents the logical "Digit 5" key on the keyboard.
+  /// Represents the logical "Unidentified" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit5 = LogicalKeyboardKey(0x00000000035);
-
-  /// Represents the logical "Digit 6" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit6 = LogicalKeyboardKey(0x00000000036);
-
-  /// Represents the logical "Digit 7" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit7 = LogicalKeyboardKey(0x00000000037);
-
-  /// Represents the logical "Digit 8" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit8 = LogicalKeyboardKey(0x00000000038);
-
-  /// Represents the logical "Digit 9" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit9 = LogicalKeyboardKey(0x00000000039);
-
-  /// Represents the logical "Digit 0" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit0 = LogicalKeyboardKey(0x00000000030);
-
-  /// Represents the logical "Enter" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey enter = LogicalKeyboardKey(0x00100070028);
-
-  /// Represents the logical "Escape" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey escape = LogicalKeyboardKey(0x00100070029);
+  static const LogicalKeyboardKey unidentified = LogicalKeyboardKey(0x01000000001);
 
   /// Represents the logical "Backspace" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey backspace = LogicalKeyboardKey(0x0010007002a);
+  static const LogicalKeyboardKey backspace = LogicalKeyboardKey(0x01000000008);
 
   /// Represents the logical "Tab" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tab = LogicalKeyboardKey(0x0010007002b);
+  static const LogicalKeyboardKey tab = LogicalKeyboardKey(0x01000000009);
 
-  /// Represents the logical "Space" key on the keyboard.
+  /// Represents the logical "Enter" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey space = LogicalKeyboardKey(0x00000000020);
+  static const LogicalKeyboardKey enter = LogicalKeyboardKey(0x0100000000d);
 
-  /// Represents the logical "Minus" key on the keyboard.
+  /// Represents the logical "Escape" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey minus = LogicalKeyboardKey(0x0000000002d);
-
-  /// Represents the logical "Equal" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey equal = LogicalKeyboardKey(0x0000000003d);
-
-  /// Represents the logical "Bracket Left" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey bracketLeft = LogicalKeyboardKey(0x0000000005b);
-
-  /// Represents the logical "Bracket Right" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey bracketRight = LogicalKeyboardKey(0x0000000005d);
-
-  /// Represents the logical "Backslash" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey backslash = LogicalKeyboardKey(0x0000000005c);
-
-  /// Represents the logical "Semicolon" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey semicolon = LogicalKeyboardKey(0x0000000003b);
-
-  /// Represents the logical "Quote" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey quote = LogicalKeyboardKey(0x00000000027);
-
-  /// Represents the logical "Backquote" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey backquote = LogicalKeyboardKey(0x00000000060);
-
-  /// Represents the logical "Comma" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey comma = LogicalKeyboardKey(0x0000000002c);
-
-  /// Represents the logical "Period" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey period = LogicalKeyboardKey(0x0000000002e);
-
-  /// Represents the logical "Slash" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey slash = LogicalKeyboardKey(0x0000000002f);
-
-  /// Represents the logical "Caps Lock" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey capsLock = LogicalKeyboardKey(0x00100070039);
-
-  /// Represents the logical "F1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f1 = LogicalKeyboardKey(0x0010007003a);
-
-  /// Represents the logical "F2" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f2 = LogicalKeyboardKey(0x0010007003b);
-
-  /// Represents the logical "F3" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f3 = LogicalKeyboardKey(0x0010007003c);
-
-  /// Represents the logical "F4" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f4 = LogicalKeyboardKey(0x0010007003d);
-
-  /// Represents the logical "F5" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f5 = LogicalKeyboardKey(0x0010007003e);
-
-  /// Represents the logical "F6" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f6 = LogicalKeyboardKey(0x0010007003f);
-
-  /// Represents the logical "F7" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f7 = LogicalKeyboardKey(0x00100070040);
-
-  /// Represents the logical "F8" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f8 = LogicalKeyboardKey(0x00100070041);
-
-  /// Represents the logical "F9" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f9 = LogicalKeyboardKey(0x00100070042);
-
-  /// Represents the logical "F10" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f10 = LogicalKeyboardKey(0x00100070043);
-
-  /// Represents the logical "F11" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f11 = LogicalKeyboardKey(0x00100070044);
-
-  /// Represents the logical "F12" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f12 = LogicalKeyboardKey(0x00100070045);
-
-  /// Represents the logical "Print Screen" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey printScreen = LogicalKeyboardKey(0x00100070046);
-
-  /// Represents the logical "Scroll Lock" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey scrollLock = LogicalKeyboardKey(0x00100070047);
-
-  /// Represents the logical "Pause" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey pause = LogicalKeyboardKey(0x00100070048);
-
-  /// Represents the logical "Insert" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey insert = LogicalKeyboardKey(0x00100070049);
-
-  /// Represents the logical "Home" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey home = LogicalKeyboardKey(0x0010007004a);
-
-  /// Represents the logical "Page Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey pageUp = LogicalKeyboardKey(0x0010007004b);
+  static const LogicalKeyboardKey escape = LogicalKeyboardKey(0x0100000001b);
 
   /// Represents the logical "Delete" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey delete = LogicalKeyboardKey(0x0010007004c);
+  static const LogicalKeyboardKey delete = LogicalKeyboardKey(0x0100000007f);
 
-  /// Represents the logical "End" key on the keyboard.
+  /// Represents the logical "Accel" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey end = LogicalKeyboardKey(0x0010007004d);
+  static const LogicalKeyboardKey accel = LogicalKeyboardKey(0x01000000101);
 
-  /// Represents the logical "Page Down" key on the keyboard.
+  /// Represents the logical "Alt Graph" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey pageDown = LogicalKeyboardKey(0x0010007004e);
+  static const LogicalKeyboardKey altGraph = LogicalKeyboardKey(0x01000000103);
 
-  /// Represents the logical "Arrow Right" key on the keyboard.
+  /// Represents the logical "Caps Lock" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey arrowRight = LogicalKeyboardKey(0x0010007004f);
-
-  /// Represents the logical "Arrow Left" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey arrowLeft = LogicalKeyboardKey(0x00100070050);
-
-  /// Represents the logical "Arrow Down" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey arrowDown = LogicalKeyboardKey(0x00100070051);
-
-  /// Represents the logical "Arrow Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey arrowUp = LogicalKeyboardKey(0x00100070052);
-
-  /// Represents the logical "Num Lock" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numLock = LogicalKeyboardKey(0x00100070053);
-
-  /// Represents the logical "Numpad Divide" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadDivide = LogicalKeyboardKey(0x00100070054);
-
-  /// Represents the logical "Numpad Multiply" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadMultiply = LogicalKeyboardKey(0x00100070055);
-
-  /// Represents the logical "Numpad Subtract" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadSubtract = LogicalKeyboardKey(0x00100070056);
-
-  /// Represents the logical "Numpad Add" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadAdd = LogicalKeyboardKey(0x00100070057);
-
-  /// Represents the logical "Numpad Enter" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadEnter = LogicalKeyboardKey(0x00100070058);
-
-  /// Represents the logical "Numpad 1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad1 = LogicalKeyboardKey(0x00100070059);
-
-  /// Represents the logical "Numpad 2" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad2 = LogicalKeyboardKey(0x0010007005a);
-
-  /// Represents the logical "Numpad 3" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad3 = LogicalKeyboardKey(0x0010007005b);
-
-  /// Represents the logical "Numpad 4" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad4 = LogicalKeyboardKey(0x0010007005c);
-
-  /// Represents the logical "Numpad 5" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad5 = LogicalKeyboardKey(0x0010007005d);
-
-  /// Represents the logical "Numpad 6" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad6 = LogicalKeyboardKey(0x0010007005e);
-
-  /// Represents the logical "Numpad 7" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad7 = LogicalKeyboardKey(0x0010007005f);
-
-  /// Represents the logical "Numpad 8" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad8 = LogicalKeyboardKey(0x00100070060);
-
-  /// Represents the logical "Numpad 9" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad9 = LogicalKeyboardKey(0x00100070061);
-
-  /// Represents the logical "Numpad 0" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad0 = LogicalKeyboardKey(0x00100070062);
-
-  /// Represents the logical "Numpad Decimal" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadDecimal = LogicalKeyboardKey(0x00100070063);
-
-  /// Represents the logical "Intl Backslash" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey intlBackslash = LogicalKeyboardKey(0x00100070064);
-
-  /// Represents the logical "Context Menu" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey contextMenu = LogicalKeyboardKey(0x00100070065);
-
-  /// Represents the logical "Power" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey power = LogicalKeyboardKey(0x00100070066);
-
-  /// Represents the logical "Numpad Equal" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadEqual = LogicalKeyboardKey(0x00100070067);
-
-  /// Represents the logical "F13" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f13 = LogicalKeyboardKey(0x00100070068);
-
-  /// Represents the logical "F14" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f14 = LogicalKeyboardKey(0x00100070069);
-
-  /// Represents the logical "F15" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f15 = LogicalKeyboardKey(0x0010007006a);
-
-  /// Represents the logical "F16" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f16 = LogicalKeyboardKey(0x0010007006b);
-
-  /// Represents the logical "F17" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f17 = LogicalKeyboardKey(0x0010007006c);
-
-  /// Represents the logical "F18" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f18 = LogicalKeyboardKey(0x0010007006d);
-
-  /// Represents the logical "F19" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f19 = LogicalKeyboardKey(0x0010007006e);
-
-  /// Represents the logical "F20" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f20 = LogicalKeyboardKey(0x0010007006f);
-
-  /// Represents the logical "F21" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f21 = LogicalKeyboardKey(0x00100070070);
-
-  /// Represents the logical "F22" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f22 = LogicalKeyboardKey(0x00100070071);
-
-  /// Represents the logical "F23" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f23 = LogicalKeyboardKey(0x00100070072);
-
-  /// Represents the logical "F24" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey f24 = LogicalKeyboardKey(0x00100070073);
-
-  /// Represents the logical "Open" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey open = LogicalKeyboardKey(0x00100070074);
-
-  /// Represents the logical "Help" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey help = LogicalKeyboardKey(0x00100070075);
-
-  /// Represents the logical "Select" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey select = LogicalKeyboardKey(0x00100070077);
-
-  /// Represents the logical "Again" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey again = LogicalKeyboardKey(0x00100070079);
-
-  /// Represents the logical "Undo" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey undo = LogicalKeyboardKey(0x0010007007a);
-
-  /// Represents the logical "Cut" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey cut = LogicalKeyboardKey(0x0010007007b);
-
-  /// Represents the logical "Copy" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey copy = LogicalKeyboardKey(0x0010007007c);
-
-  /// Represents the logical "Paste" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey paste = LogicalKeyboardKey(0x0010007007d);
-
-  /// Represents the logical "Find" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey find = LogicalKeyboardKey(0x0010007007e);
-
-  /// Represents the logical "Audio Volume Mute" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioVolumeMute = LogicalKeyboardKey(0x0010007007f);
-
-  /// Represents the logical "Audio Volume Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioVolumeUp = LogicalKeyboardKey(0x00100070080);
-
-  /// Represents the logical "Audio Volume Down" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioVolumeDown = LogicalKeyboardKey(0x00100070081);
-
-  /// Represents the logical "Numpad Comma" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadComma = LogicalKeyboardKey(0x00100070085);
-
-  /// Represents the logical "Intl Ro" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey intlRo = LogicalKeyboardKey(0x00100070087);
-
-  /// Represents the logical "Kana Mode" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey kanaMode = LogicalKeyboardKey(0x00100070088);
-
-  /// Represents the logical "Intl Yen" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey intlYen = LogicalKeyboardKey(0x00100070089);
-
-  /// Represents the logical "Convert" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey convert = LogicalKeyboardKey(0x0010007008a);
-
-  /// Represents the logical "Non Convert" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey nonConvert = LogicalKeyboardKey(0x0010007008b);
-
-  /// Represents the logical "Lang 1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lang1 = LogicalKeyboardKey(0x00100070090);
-
-  /// Represents the logical "Lang 2" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lang2 = LogicalKeyboardKey(0x00100070091);
-
-  /// Represents the logical "Lang 3" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lang3 = LogicalKeyboardKey(0x00100070092);
-
-  /// Represents the logical "Lang 4" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lang4 = LogicalKeyboardKey(0x00100070093);
-
-  /// Represents the logical "Lang 5" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lang5 = LogicalKeyboardKey(0x00100070094);
-
-  /// Represents the logical "Abort" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey abort = LogicalKeyboardKey(0x0010007009b);
-
-  /// Represents the logical "Props" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey props = LogicalKeyboardKey(0x001000700a3);
-
-  /// Represents the logical "Numpad Paren Left" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadParenLeft = LogicalKeyboardKey(0x001000700b6);
-
-  /// Represents the logical "Numpad Paren Right" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadParenRight = LogicalKeyboardKey(0x001000700b7);
-
-  /// Represents the logical "Numpad Backspace" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadBackspace = LogicalKeyboardKey(0x001000700bb);
-
-  /// Represents the logical "Numpad Memory Store" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadMemoryStore = LogicalKeyboardKey(0x001000700d0);
-
-  /// Represents the logical "Numpad Memory Recall" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadMemoryRecall = LogicalKeyboardKey(0x001000700d1);
-
-  /// Represents the logical "Numpad Memory Clear" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadMemoryClear = LogicalKeyboardKey(0x001000700d2);
-
-  /// Represents the logical "Numpad Memory Add" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadMemoryAdd = LogicalKeyboardKey(0x001000700d3);
-
-  /// Represents the logical "Numpad Memory Subtract" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadMemorySubtract = LogicalKeyboardKey(0x001000700d4);
-
-  /// Represents the logical "Numpad Sign Change" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadSignChange = LogicalKeyboardKey(0x001000700d7);
-
-  /// Represents the logical "Numpad Clear" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadClear = LogicalKeyboardKey(0x001000700d8);
-
-  /// Represents the logical "Numpad Clear Entry" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadClearEntry = LogicalKeyboardKey(0x001000700d9);
-
-  /// Represents the logical "Control Left" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey controlLeft = LogicalKeyboardKey(0x001000700e0);
-
-  /// Represents the logical "Shift Left" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey shiftLeft = LogicalKeyboardKey(0x001000700e1);
-
-  /// Represents the logical "Alt Left" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey altLeft = LogicalKeyboardKey(0x001000700e2);
-
-  /// Represents the logical "Meta Left" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey metaLeft = LogicalKeyboardKey(0x001000700e3);
-
-  /// Represents the logical "Control Right" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey controlRight = LogicalKeyboardKey(0x001000700e4);
-
-  /// Represents the logical "Shift Right" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey shiftRight = LogicalKeyboardKey(0x001000700e5);
-
-  /// Represents the logical "Alt Right" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey altRight = LogicalKeyboardKey(0x001000700e6);
-
-  /// Represents the logical "Meta Right" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey metaRight = LogicalKeyboardKey(0x001000700e7);
-
-  /// Represents the logical "Info" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey info = LogicalKeyboardKey(0x001000c0060);
-
-  /// Represents the logical "Closed Caption Toggle" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey closedCaptionToggle = LogicalKeyboardKey(0x001000c0061);
-
-  /// Represents the logical "Brightness Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey brightnessUp = LogicalKeyboardKey(0x001000c006f);
-
-  /// Represents the logical "Brightness Down" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey brightnessDown = LogicalKeyboardKey(0x001000c0070);
-
-  /// Represents the logical "Brightness Toggle" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey brightnessToggle = LogicalKeyboardKey(0x001000c0072);
-
-  /// Represents the logical "Brightness Minimum" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey brightnessMinimum = LogicalKeyboardKey(0x001000c0073);
-
-  /// Represents the logical "Brightness Maximum" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey brightnessMaximum = LogicalKeyboardKey(0x001000c0074);
-
-  /// Represents the logical "Brightness Auto" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey brightnessAuto = LogicalKeyboardKey(0x001000c0075);
-
-  /// Represents the logical "Kbd Illum Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey kbdIllumUp = LogicalKeyboardKey(0x001000c0079);
-
-  /// Represents the logical "Kbd Illum Down" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey kbdIllumDown = LogicalKeyboardKey(0x001000c007a);
-
-  /// Represents the logical "Media Last" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaLast = LogicalKeyboardKey(0x001000c0083);
-
-  /// Represents the logical "Launch Phone" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchPhone = LogicalKeyboardKey(0x001000c008c);
-
-  /// Represents the logical "Program Guide" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey programGuide = LogicalKeyboardKey(0x001000c008d);
-
-  /// Represents the logical "Exit" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey exit = LogicalKeyboardKey(0x001000c0094);
-
-  /// Represents the logical "Channel Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey channelUp = LogicalKeyboardKey(0x001000c009c);
-
-  /// Represents the logical "Channel Down" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey channelDown = LogicalKeyboardKey(0x001000c009d);
-
-  /// Represents the logical "Media Play" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaPlay = LogicalKeyboardKey(0x001000c00b0);
-
-  /// Represents the logical "Media Pause" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaPause = LogicalKeyboardKey(0x001000c00b1);
-
-  /// Represents the logical "Media Record" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaRecord = LogicalKeyboardKey(0x001000c00b2);
-
-  /// Represents the logical "Media Fast Forward" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaFastForward = LogicalKeyboardKey(0x001000c00b3);
-
-  /// Represents the logical "Media Rewind" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaRewind = LogicalKeyboardKey(0x001000c00b4);
-
-  /// Represents the logical "Media Track Next" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaTrackNext = LogicalKeyboardKey(0x001000c00b5);
-
-  /// Represents the logical "Media Track Previous" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaTrackPrevious = LogicalKeyboardKey(0x001000c00b6);
-
-  /// Represents the logical "Media Stop" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaStop = LogicalKeyboardKey(0x001000c00b7);
-
-  /// Represents the logical "Eject" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey eject = LogicalKeyboardKey(0x001000c00b8);
-
-  /// Represents the logical "Media Play Pause" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaPlayPause = LogicalKeyboardKey(0x001000c00cd);
-
-  /// Represents the logical "Speech Input Toggle" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey speechInputToggle = LogicalKeyboardKey(0x001000c00cf);
-
-  /// Represents the logical "Bass Boost" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey bassBoost = LogicalKeyboardKey(0x001000c00e5);
-
-  /// Represents the logical "Media Select" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaSelect = LogicalKeyboardKey(0x001000c0183);
-
-  /// Represents the logical "Launch Word Processor" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchWordProcessor = LogicalKeyboardKey(0x001000c0184);
-
-  /// Represents the logical "Launch Spreadsheet" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchSpreadsheet = LogicalKeyboardKey(0x001000c0186);
-
-  /// Represents the logical "Launch Mail" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchMail = LogicalKeyboardKey(0x001000c018a);
-
-  /// Represents the logical "Launch Contacts" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchContacts = LogicalKeyboardKey(0x001000c018d);
-
-  /// Represents the logical "Launch Calendar" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchCalendar = LogicalKeyboardKey(0x001000c018e);
-
-  /// Represents the logical "Launch App2" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchApp2 = LogicalKeyboardKey(0x001000c0192);
-
-  /// Represents the logical "Launch App1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchApp1 = LogicalKeyboardKey(0x001000c0194);
-
-  /// Represents the logical "Launch Internet Browser" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchInternetBrowser = LogicalKeyboardKey(0x001000c0196);
-
-  /// Represents the logical "Log Off" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey logOff = LogicalKeyboardKey(0x001000c019c);
-
-  /// Represents the logical "Lock Screen" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lockScreen = LogicalKeyboardKey(0x001000c019e);
-
-  /// Represents the logical "Launch Control Panel" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchControlPanel = LogicalKeyboardKey(0x001000c019f);
-
-  /// Represents the logical "Select Task" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey selectTask = LogicalKeyboardKey(0x001000c01a2);
-
-  /// Represents the logical "Launch Documents" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchDocuments = LogicalKeyboardKey(0x001000c01a7);
-
-  /// Represents the logical "Spell Check" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey spellCheck = LogicalKeyboardKey(0x001000c01ab);
-
-  /// Represents the logical "Launch Keyboard Layout" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchKeyboardLayout = LogicalKeyboardKey(0x001000c01ae);
-
-  /// Represents the logical "Launch Screen Saver" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchScreenSaver = LogicalKeyboardKey(0x001000c01b1);
-
-  /// Represents the logical "Launch Assistant" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchAssistant = LogicalKeyboardKey(0x001000c01cb);
-
-  /// Represents the logical "Launch Audio Browser" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchAudioBrowser = LogicalKeyboardKey(0x001000c01b7);
-
-  /// Represents the logical "New Key" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey newKey = LogicalKeyboardKey(0x001000c0201);
-
-  /// Represents the logical "Close" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey close = LogicalKeyboardKey(0x001000c0203);
-
-  /// Represents the logical "Save" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey save = LogicalKeyboardKey(0x001000c0207);
-
-  /// Represents the logical "Print" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey print = LogicalKeyboardKey(0x001000c0208);
-
-  /// Represents the logical "Browser Search" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey browserSearch = LogicalKeyboardKey(0x001000c0221);
-
-  /// Represents the logical "Browser Home" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey browserHome = LogicalKeyboardKey(0x001000c0223);
-
-  /// Represents the logical "Browser Back" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey browserBack = LogicalKeyboardKey(0x001000c0224);
-
-  /// Represents the logical "Browser Forward" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey browserForward = LogicalKeyboardKey(0x001000c0225);
-
-  /// Represents the logical "Browser Stop" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey browserStop = LogicalKeyboardKey(0x001000c0226);
-
-  /// Represents the logical "Browser Refresh" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey browserRefresh = LogicalKeyboardKey(0x001000c0227);
-
-  /// Represents the logical "Browser Favorites" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey browserFavorites = LogicalKeyboardKey(0x001000c022a);
-
-  /// Represents the logical "Zoom In" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey zoomIn = LogicalKeyboardKey(0x001000c022d);
-
-  /// Represents the logical "Zoom Out" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey zoomOut = LogicalKeyboardKey(0x001000c022e);
-
-  /// Represents the logical "Zoom Toggle" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey zoomToggle = LogicalKeyboardKey(0x001000c0232);
-
-  /// Represents the logical "Redo" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey redo = LogicalKeyboardKey(0x001000c0279);
-
-  /// Represents the logical "Mail Reply" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mailReply = LogicalKeyboardKey(0x001000c0289);
-
-  /// Represents the logical "Mail Forward" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mailForward = LogicalKeyboardKey(0x001000c028b);
-
-  /// Represents the logical "Mail Send" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mailSend = LogicalKeyboardKey(0x001000c028c);
-
-  /// Represents the logical "Keyboard Layout Select" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyboardLayoutSelect = LogicalKeyboardKey(0x001000c029d);
-
-  /// Represents the logical "Show All Windows" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey showAllWindows = LogicalKeyboardKey(0x001000c029f);
-
-  /// Represents the logical "Game Button 1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton1 = LogicalKeyboardKey(0x0010005ff01);
-
-  /// Represents the logical "Game Button 2" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton2 = LogicalKeyboardKey(0x0010005ff02);
-
-  /// Represents the logical "Game Button 3" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton3 = LogicalKeyboardKey(0x0010005ff03);
-
-  /// Represents the logical "Game Button 4" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton4 = LogicalKeyboardKey(0x0010005ff04);
-
-  /// Represents the logical "Game Button 5" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton5 = LogicalKeyboardKey(0x0010005ff05);
-
-  /// Represents the logical "Game Button 6" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton6 = LogicalKeyboardKey(0x0010005ff06);
-
-  /// Represents the logical "Game Button 7" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton7 = LogicalKeyboardKey(0x0010005ff07);
-
-  /// Represents the logical "Game Button 8" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton8 = LogicalKeyboardKey(0x0010005ff08);
-
-  /// Represents the logical "Game Button 9" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton9 = LogicalKeyboardKey(0x0010005ff09);
-
-  /// Represents the logical "Game Button 10" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton10 = LogicalKeyboardKey(0x0010005ff0a);
-
-  /// Represents the logical "Game Button 11" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton11 = LogicalKeyboardKey(0x0010005ff0b);
-
-  /// Represents the logical "Game Button 12" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton12 = LogicalKeyboardKey(0x0010005ff0c);
-
-  /// Represents the logical "Game Button 13" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton13 = LogicalKeyboardKey(0x0010005ff0d);
-
-  /// Represents the logical "Game Button 14" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton14 = LogicalKeyboardKey(0x0010005ff0e);
-
-  /// Represents the logical "Game Button 15" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton15 = LogicalKeyboardKey(0x0010005ff0f);
-
-  /// Represents the logical "Game Button 16" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButton16 = LogicalKeyboardKey(0x0010005ff10);
-
-  /// Represents the logical "Game Button A" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonA = LogicalKeyboardKey(0x0010005ff11);
-
-  /// Represents the logical "Game Button B" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonB = LogicalKeyboardKey(0x0010005ff12);
-
-  /// Represents the logical "Game Button C" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonC = LogicalKeyboardKey(0x0010005ff13);
-
-  /// Represents the logical "Game Button Left 1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonLeft1 = LogicalKeyboardKey(0x0010005ff14);
-
-  /// Represents the logical "Game Button Left 2" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonLeft2 = LogicalKeyboardKey(0x0010005ff15);
-
-  /// Represents the logical "Game Button Mode" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonMode = LogicalKeyboardKey(0x0010005ff16);
-
-  /// Represents the logical "Game Button Right 1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonRight1 = LogicalKeyboardKey(0x0010005ff17);
-
-  /// Represents the logical "Game Button Right 2" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonRight2 = LogicalKeyboardKey(0x0010005ff18);
-
-  /// Represents the logical "Game Button Select" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonSelect = LogicalKeyboardKey(0x0010005ff19);
-
-  /// Represents the logical "Game Button Start" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonStart = LogicalKeyboardKey(0x0010005ff1a);
-
-  /// Represents the logical "Game Button Thumb Left" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonThumbLeft = LogicalKeyboardKey(0x0010005ff1b);
-
-  /// Represents the logical "Game Button Thumb Right" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonThumbRight = LogicalKeyboardKey(0x0010005ff1c);
-
-  /// Represents the logical "Game Button X" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonX = LogicalKeyboardKey(0x0010005ff1d);
-
-  /// Represents the logical "Game Button Y" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonY = LogicalKeyboardKey(0x0010005ff1e);
-
-  /// Represents the logical "Game Button Z" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonZ = LogicalKeyboardKey(0x0010005ff1f);
+  static const LogicalKeyboardKey capsLock = LogicalKeyboardKey(0x01000000104);
 
   /// Represents the logical "Fn" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey fn = LogicalKeyboardKey(0x00100000012);
+  static const LogicalKeyboardKey fn = LogicalKeyboardKey(0x01000000106);
+
+  /// Represents the logical "Fn Lock" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey fnLock = LogicalKeyboardKey(0x01000000107);
+
+  /// Represents the logical "Hyper" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey hyper = LogicalKeyboardKey(0x01000000108);
+
+  /// Represents the logical "Num Lock" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numLock = LogicalKeyboardKey(0x0100000010a);
+
+  /// Represents the logical "Scroll Lock" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey scrollLock = LogicalKeyboardKey(0x0100000010c);
+
+  /// Represents the logical "Super" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey superKey = LogicalKeyboardKey(0x0100000010e);
+
+  /// Represents the logical "Symbol" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey symbol = LogicalKeyboardKey(0x0100000010f);
+
+  /// Represents the logical "Symbol Lock" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey symbolLock = LogicalKeyboardKey(0x01000000110);
+
+  /// Represents the logical "Shift Level 5" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey shiftLevel5 = LogicalKeyboardKey(0x01000000111);
+
+  /// Represents the logical "Arrow Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey arrowDown = LogicalKeyboardKey(0x01000000301);
+
+  /// Represents the logical "Arrow Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey arrowLeft = LogicalKeyboardKey(0x01000000302);
+
+  /// Represents the logical "Arrow Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey arrowRight = LogicalKeyboardKey(0x01000000303);
+
+  /// Represents the logical "Arrow Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey arrowUp = LogicalKeyboardKey(0x01000000304);
+
+  /// Represents the logical "End" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey end = LogicalKeyboardKey(0x01000000305);
+
+  /// Represents the logical "Home" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey home = LogicalKeyboardKey(0x01000000306);
+
+  /// Represents the logical "Page Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey pageDown = LogicalKeyboardKey(0x01000000307);
+
+  /// Represents the logical "Page Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey pageUp = LogicalKeyboardKey(0x01000000308);
+
+  /// Represents the logical "Clear" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey clear = LogicalKeyboardKey(0x01000000401);
+
+  /// Represents the logical "Copy" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey copy = LogicalKeyboardKey(0x01000000402);
+
+  /// Represents the logical "Cr Sel" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey crSel = LogicalKeyboardKey(0x01000000403);
+
+  /// Represents the logical "Cut" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey cut = LogicalKeyboardKey(0x01000000404);
+
+  /// Represents the logical "Erase Eof" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey eraseEof = LogicalKeyboardKey(0x01000000405);
+
+  /// Represents the logical "Ex Sel" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey exSel = LogicalKeyboardKey(0x01000000406);
+
+  /// Represents the logical "Insert" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey insert = LogicalKeyboardKey(0x01000000407);
+
+  /// Represents the logical "Paste" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey paste = LogicalKeyboardKey(0x01000000408);
+
+  /// Represents the logical "Redo" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey redo = LogicalKeyboardKey(0x01000000409);
+
+  /// Represents the logical "Undo" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey undo = LogicalKeyboardKey(0x0100000040a);
+
+  /// Represents the logical "Accept" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey accept = LogicalKeyboardKey(0x01000000501);
+
+  /// Represents the logical "Again" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey again = LogicalKeyboardKey(0x01000000502);
+
+  /// Represents the logical "Attn" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey attn = LogicalKeyboardKey(0x01000000503);
+
+  /// Represents the logical "Cancel" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey cancel = LogicalKeyboardKey(0x01000000504);
+
+  /// Represents the logical "Context Menu" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey contextMenu = LogicalKeyboardKey(0x01000000505);
+
+  /// Represents the logical "Execute" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey execute = LogicalKeyboardKey(0x01000000506);
+
+  /// Represents the logical "Find" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey find = LogicalKeyboardKey(0x01000000507);
+
+  /// Represents the logical "Help" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey help = LogicalKeyboardKey(0x01000000508);
+
+  /// Represents the logical "Pause" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey pause = LogicalKeyboardKey(0x01000000509);
+
+  /// Represents the logical "Play" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey play = LogicalKeyboardKey(0x0100000050a);
+
+  /// Represents the logical "Props" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey props = LogicalKeyboardKey(0x0100000050b);
+
+  /// Represents the logical "Select" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey select = LogicalKeyboardKey(0x0100000050c);
+
+  /// Represents the logical "Zoom In" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey zoomIn = LogicalKeyboardKey(0x0100000050d);
+
+  /// Represents the logical "Zoom Out" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey zoomOut = LogicalKeyboardKey(0x0100000050e);
+
+  /// Represents the logical "Brightness Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey brightnessDown = LogicalKeyboardKey(0x01000000601);
+
+  /// Represents the logical "Brightness Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey brightnessUp = LogicalKeyboardKey(0x01000000602);
+
+  /// Represents the logical "Camera" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey camera = LogicalKeyboardKey(0x01000000603);
+
+  /// Represents the logical "Eject" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey eject = LogicalKeyboardKey(0x01000000604);
+
+  /// Represents the logical "Log Off" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey logOff = LogicalKeyboardKey(0x01000000605);
+
+  /// Represents the logical "Power" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey power = LogicalKeyboardKey(0x01000000606);
+
+  /// Represents the logical "Power Off" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey powerOff = LogicalKeyboardKey(0x01000000607);
+
+  /// Represents the logical "Print Screen" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey printScreen = LogicalKeyboardKey(0x01000000608);
+
+  /// Represents the logical "Hibernate" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey hibernate = LogicalKeyboardKey(0x01000000609);
+
+  /// Represents the logical "Standby" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey standby = LogicalKeyboardKey(0x0100000060a);
+
+  /// Represents the logical "Wake Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey wakeUp = LogicalKeyboardKey(0x0100000060b);
+
+  /// Represents the logical "All Candidates" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey allCandidates = LogicalKeyboardKey(0x01000000701);
+
+  /// Represents the logical "Alphanumeric" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey alphanumeric = LogicalKeyboardKey(0x01000000702);
+
+  /// Represents the logical "Code Input" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey codeInput = LogicalKeyboardKey(0x01000000703);
+
+  /// Represents the logical "Compose" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey compose = LogicalKeyboardKey(0x01000000704);
+
+  /// Represents the logical "Convert" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey convert = LogicalKeyboardKey(0x01000000705);
+
+  /// Represents the logical "Final Mode" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey finalMode = LogicalKeyboardKey(0x01000000706);
+
+  /// Represents the logical "Group First" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey groupFirst = LogicalKeyboardKey(0x01000000707);
+
+  /// Represents the logical "Group Last" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey groupLast = LogicalKeyboardKey(0x01000000708);
+
+  /// Represents the logical "Group Next" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey groupNext = LogicalKeyboardKey(0x01000000709);
+
+  /// Represents the logical "Group Previous" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey groupPrevious = LogicalKeyboardKey(0x0100000070a);
+
+  /// Represents the logical "Mode Change" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey modeChange = LogicalKeyboardKey(0x0100000070b);
+
+  /// Represents the logical "Next Candidate" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey nextCandidate = LogicalKeyboardKey(0x0100000070c);
+
+  /// Represents the logical "Non Convert" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey nonConvert = LogicalKeyboardKey(0x0100000070d);
+
+  /// Represents the logical "Previous Candidate" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey previousCandidate = LogicalKeyboardKey(0x0100000070e);
+
+  /// Represents the logical "Process" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey process = LogicalKeyboardKey(0x0100000070f);
+
+  /// Represents the logical "Single Candidate" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey singleCandidate = LogicalKeyboardKey(0x01000000710);
+
+  /// Represents the logical "Hangul Mode" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey hangulMode = LogicalKeyboardKey(0x01000000711);
+
+  /// Represents the logical "Hanja Mode" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey hanjaMode = LogicalKeyboardKey(0x01000000712);
+
+  /// Represents the logical "Junja Mode" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey junjaMode = LogicalKeyboardKey(0x01000000713);
+
+  /// Represents the logical "Eisu" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey eisu = LogicalKeyboardKey(0x01000000714);
+
+  /// Represents the logical "Hankaku" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey hankaku = LogicalKeyboardKey(0x01000000715);
+
+  /// Represents the logical "Hiragana" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey hiragana = LogicalKeyboardKey(0x01000000716);
+
+  /// Represents the logical "Hiragana Katakana" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey hiraganaKatakana = LogicalKeyboardKey(0x01000000717);
+
+  /// Represents the logical "Kana Mode" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey kanaMode = LogicalKeyboardKey(0x01000000718);
+
+  /// Represents the logical "Kanji Mode" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey kanjiMode = LogicalKeyboardKey(0x01000000719);
+
+  /// Represents the logical "Katakana" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey katakana = LogicalKeyboardKey(0x0100000071a);
+
+  /// Represents the logical "Romaji" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey romaji = LogicalKeyboardKey(0x0100000071b);
+
+  /// Represents the logical "Zenkaku" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey zenkaku = LogicalKeyboardKey(0x0100000071c);
+
+  /// Represents the logical "Zenkaku Hankaku" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey zenkakuHankaku = LogicalKeyboardKey(0x0100000071d);
+
+  /// Represents the logical "F1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f1 = LogicalKeyboardKey(0x01000000801);
+
+  /// Represents the logical "F2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f2 = LogicalKeyboardKey(0x01000000802);
+
+  /// Represents the logical "F3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f3 = LogicalKeyboardKey(0x01000000803);
+
+  /// Represents the logical "F4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f4 = LogicalKeyboardKey(0x01000000804);
+
+  /// Represents the logical "F5" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f5 = LogicalKeyboardKey(0x01000000805);
+
+  /// Represents the logical "F6" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f6 = LogicalKeyboardKey(0x01000000806);
+
+  /// Represents the logical "F7" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f7 = LogicalKeyboardKey(0x01000000807);
+
+  /// Represents the logical "F8" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f8 = LogicalKeyboardKey(0x01000000808);
+
+  /// Represents the logical "F9" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f9 = LogicalKeyboardKey(0x01000000809);
+
+  /// Represents the logical "F10" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f10 = LogicalKeyboardKey(0x0100000080a);
+
+  /// Represents the logical "F11" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f11 = LogicalKeyboardKey(0x0100000080b);
+
+  /// Represents the logical "F12" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f12 = LogicalKeyboardKey(0x0100000080c);
+
+  /// Represents the logical "F13" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f13 = LogicalKeyboardKey(0x0100000080d);
+
+  /// Represents the logical "F14" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f14 = LogicalKeyboardKey(0x0100000080e);
+
+  /// Represents the logical "F15" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f15 = LogicalKeyboardKey(0x0100000080f);
+
+  /// Represents the logical "F16" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f16 = LogicalKeyboardKey(0x01000000810);
+
+  /// Represents the logical "F17" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f17 = LogicalKeyboardKey(0x01000000811);
+
+  /// Represents the logical "F18" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f18 = LogicalKeyboardKey(0x01000000812);
+
+  /// Represents the logical "F19" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f19 = LogicalKeyboardKey(0x01000000813);
+
+  /// Represents the logical "F20" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f20 = LogicalKeyboardKey(0x01000000814);
+
+  /// Represents the logical "F21" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f21 = LogicalKeyboardKey(0x01000000815);
+
+  /// Represents the logical "F22" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f22 = LogicalKeyboardKey(0x01000000816);
+
+  /// Represents the logical "F23" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f23 = LogicalKeyboardKey(0x01000000817);
+
+  /// Represents the logical "F24" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey f24 = LogicalKeyboardKey(0x01000000818);
+
+  /// Represents the logical "Soft 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey soft1 = LogicalKeyboardKey(0x01000000901);
+
+  /// Represents the logical "Soft 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey soft2 = LogicalKeyboardKey(0x01000000902);
+
+  /// Represents the logical "Soft 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey soft3 = LogicalKeyboardKey(0x01000000903);
+
+  /// Represents the logical "Soft 4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey soft4 = LogicalKeyboardKey(0x01000000904);
+
+  /// Represents the logical "Soft 5" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey soft5 = LogicalKeyboardKey(0x01000000905);
+
+  /// Represents the logical "Soft 6" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey soft6 = LogicalKeyboardKey(0x01000000906);
+
+  /// Represents the logical "Soft 7" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey soft7 = LogicalKeyboardKey(0x01000000907);
+
+  /// Represents the logical "Soft 8" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey soft8 = LogicalKeyboardKey(0x01000000908);
+
+  /// Represents the logical "Close" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey close = LogicalKeyboardKey(0x01000000a01);
+
+  /// Represents the logical "Mail Forward" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mailForward = LogicalKeyboardKey(0x01000000a02);
+
+  /// Represents the logical "Mail Reply" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mailReply = LogicalKeyboardKey(0x01000000a03);
+
+  /// Represents the logical "Mail Send" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mailSend = LogicalKeyboardKey(0x01000000a04);
+
+  /// Represents the logical "Media Play Pause" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaPlayPause = LogicalKeyboardKey(0x01000000a05);
+
+  /// Represents the logical "Media Stop" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaStop = LogicalKeyboardKey(0x01000000a07);
+
+  /// Represents the logical "Media Track Next" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaTrackNext = LogicalKeyboardKey(0x01000000a08);
+
+  /// Represents the logical "Media Track Previous" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaTrackPrevious = LogicalKeyboardKey(0x01000000a09);
+
+  /// Represents the logical "New" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey newKey = LogicalKeyboardKey(0x01000000a0a);
+
+  /// Represents the logical "Open" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey open = LogicalKeyboardKey(0x01000000a0b);
+
+  /// Represents the logical "Print" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey print = LogicalKeyboardKey(0x01000000a0c);
+
+  /// Represents the logical "Save" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey save = LogicalKeyboardKey(0x01000000a0d);
+
+  /// Represents the logical "Spell Check" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey spellCheck = LogicalKeyboardKey(0x01000000a0e);
+
+  /// Represents the logical "Audio Volume Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioVolumeDown = LogicalKeyboardKey(0x01000000a0f);
+
+  /// Represents the logical "Audio Volume Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioVolumeUp = LogicalKeyboardKey(0x01000000a10);
+
+  /// Represents the logical "Audio Volume Mute" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioVolumeMute = LogicalKeyboardKey(0x01000000a11);
+
+  /// Represents the logical "Launch Application 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchApplication2 = LogicalKeyboardKey(0x01000000b01);
+
+  /// Represents the logical "Launch Calendar" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchCalendar = LogicalKeyboardKey(0x01000000b02);
+
+  /// Represents the logical "Launch Mail" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchMail = LogicalKeyboardKey(0x01000000b03);
+
+  /// Represents the logical "Launch Media Player" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchMediaPlayer = LogicalKeyboardKey(0x01000000b04);
+
+  /// Represents the logical "Launch Music Player" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchMusicPlayer = LogicalKeyboardKey(0x01000000b05);
+
+  /// Represents the logical "Launch Application 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchApplication1 = LogicalKeyboardKey(0x01000000b06);
+
+  /// Represents the logical "Launch Screen Saver" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchScreenSaver = LogicalKeyboardKey(0x01000000b07);
+
+  /// Represents the logical "Launch Spreadsheet" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchSpreadsheet = LogicalKeyboardKey(0x01000000b08);
+
+  /// Represents the logical "Launch Web Browser" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchWebBrowser = LogicalKeyboardKey(0x01000000b09);
+
+  /// Represents the logical "Launch Web Cam" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchWebCam = LogicalKeyboardKey(0x01000000b0a);
+
+  /// Represents the logical "Launch Word Processor" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchWordProcessor = LogicalKeyboardKey(0x01000000b0b);
+
+  /// Represents the logical "Launch Contacts" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchContacts = LogicalKeyboardKey(0x01000000b0c);
+
+  /// Represents the logical "Launch Phone" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchPhone = LogicalKeyboardKey(0x01000000b0d);
+
+  /// Represents the logical "Launch Assistant" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchAssistant = LogicalKeyboardKey(0x01000000b0e);
+
+  /// Represents the logical "Launch Control Panel" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchControlPanel = LogicalKeyboardKey(0x01000000b0f);
+
+  /// Represents the logical "Browser Back" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey browserBack = LogicalKeyboardKey(0x01000000c01);
+
+  /// Represents the logical "Browser Favorites" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey browserFavorites = LogicalKeyboardKey(0x01000000c02);
+
+  /// Represents the logical "Browser Forward" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey browserForward = LogicalKeyboardKey(0x01000000c03);
+
+  /// Represents the logical "Browser Home" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey browserHome = LogicalKeyboardKey(0x01000000c04);
+
+  /// Represents the logical "Browser Refresh" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey browserRefresh = LogicalKeyboardKey(0x01000000c05);
+
+  /// Represents the logical "Browser Search" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey browserSearch = LogicalKeyboardKey(0x01000000c06);
+
+  /// Represents the logical "Browser Stop" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey browserStop = LogicalKeyboardKey(0x01000000c07);
+
+  /// Represents the logical "Audio Balance Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioBalanceLeft = LogicalKeyboardKey(0x01000000d01);
+
+  /// Represents the logical "Audio Balance Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioBalanceRight = LogicalKeyboardKey(0x01000000d02);
+
+  /// Represents the logical "Audio Bass Boost Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioBassBoostDown = LogicalKeyboardKey(0x01000000d03);
+
+  /// Represents the logical "Audio Bass Boost Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioBassBoostUp = LogicalKeyboardKey(0x01000000d04);
+
+  /// Represents the logical "Audio Fader Front" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioFaderFront = LogicalKeyboardKey(0x01000000d05);
+
+  /// Represents the logical "Audio Fader Rear" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioFaderRear = LogicalKeyboardKey(0x01000000d06);
+
+  /// Represents the logical "Audio Surround Mode Next" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioSurroundModeNext = LogicalKeyboardKey(0x01000000d07);
+
+  /// Represents the logical "AVR Input" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey avrInput = LogicalKeyboardKey(0x01000000d08);
+
+  /// Represents the logical "AVR Power" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey avrPower = LogicalKeyboardKey(0x01000000d09);
+
+  /// Represents the logical "Channel Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey channelDown = LogicalKeyboardKey(0x01000000d0a);
+
+  /// Represents the logical "Channel Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey channelUp = LogicalKeyboardKey(0x01000000d0b);
+
+  /// Represents the logical "Color F0 Red" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey colorF0Red = LogicalKeyboardKey(0x01000000d0c);
+
+  /// Represents the logical "Color F1 Green" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey colorF1Green = LogicalKeyboardKey(0x01000000d0d);
+
+  /// Represents the logical "Color F2 Yellow" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey colorF2Yellow = LogicalKeyboardKey(0x01000000d0e);
+
+  /// Represents the logical "Color F3 Blue" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey colorF3Blue = LogicalKeyboardKey(0x01000000d0f);
+
+  /// Represents the logical "Color F4 Grey" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey colorF4Grey = LogicalKeyboardKey(0x01000000d10);
+
+  /// Represents the logical "Color F5 Brown" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey colorF5Brown = LogicalKeyboardKey(0x01000000d11);
+
+  /// Represents the logical "Closed Caption Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey closedCaptionToggle = LogicalKeyboardKey(0x01000000d12);
+
+  /// Represents the logical "Dimmer" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey dimmer = LogicalKeyboardKey(0x01000000d13);
+
+  /// Represents the logical "Display Swap" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey displaySwap = LogicalKeyboardKey(0x01000000d14);
+
+  /// Represents the logical "Exit" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey exit = LogicalKeyboardKey(0x01000000d15);
+
+  /// Represents the logical "Favorite Clear 0" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteClear0 = LogicalKeyboardKey(0x01000000d16);
+
+  /// Represents the logical "Favorite Clear 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteClear1 = LogicalKeyboardKey(0x01000000d17);
+
+  /// Represents the logical "Favorite Clear 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteClear2 = LogicalKeyboardKey(0x01000000d18);
+
+  /// Represents the logical "Favorite Clear 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteClear3 = LogicalKeyboardKey(0x01000000d19);
+
+  /// Represents the logical "Favorite Recall 0" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteRecall0 = LogicalKeyboardKey(0x01000000d1a);
+
+  /// Represents the logical "Favorite Recall 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteRecall1 = LogicalKeyboardKey(0x01000000d1b);
+
+  /// Represents the logical "Favorite Recall 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteRecall2 = LogicalKeyboardKey(0x01000000d1c);
+
+  /// Represents the logical "Favorite Recall 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteRecall3 = LogicalKeyboardKey(0x01000000d1d);
+
+  /// Represents the logical "Favorite Store 0" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteStore0 = LogicalKeyboardKey(0x01000000d1e);
+
+  /// Represents the logical "Favorite Store 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteStore1 = LogicalKeyboardKey(0x01000000d1f);
+
+  /// Represents the logical "Favorite Store 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteStore2 = LogicalKeyboardKey(0x01000000d20);
+
+  /// Represents the logical "Favorite Store 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey favoriteStore3 = LogicalKeyboardKey(0x01000000d21);
+
+  /// Represents the logical "Guide" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey guide = LogicalKeyboardKey(0x01000000d22);
+
+  /// Represents the logical "Guide Next Day" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey guideNextDay = LogicalKeyboardKey(0x01000000d23);
+
+  /// Represents the logical "Guide Previous Day" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey guidePreviousDay = LogicalKeyboardKey(0x01000000d24);
+
+  /// Represents the logical "Info" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey info = LogicalKeyboardKey(0x01000000d25);
+
+  /// Represents the logical "Instant Replay" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey instantReplay = LogicalKeyboardKey(0x01000000d26);
+
+  /// Represents the logical "Link" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey link = LogicalKeyboardKey(0x01000000d27);
+
+  /// Represents the logical "List Program" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey listProgram = LogicalKeyboardKey(0x01000000d28);
+
+  /// Represents the logical "Live Content" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey liveContent = LogicalKeyboardKey(0x01000000d29);
+
+  /// Represents the logical "Lock" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lock = LogicalKeyboardKey(0x01000000d2a);
+
+  /// Represents the logical "Media Apps" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaApps = LogicalKeyboardKey(0x01000000d2b);
+
+  /// Represents the logical "Media Fast Forward" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaFastForward = LogicalKeyboardKey(0x01000000d2c);
+
+  /// Represents the logical "Media Last" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaLast = LogicalKeyboardKey(0x01000000d2d);
+
+  /// Represents the logical "Media Pause" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaPause = LogicalKeyboardKey(0x01000000d2e);
+
+  /// Represents the logical "Media Play" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaPlay = LogicalKeyboardKey(0x01000000d2f);
+
+  /// Represents the logical "Media Record" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaRecord = LogicalKeyboardKey(0x01000000d30);
+
+  /// Represents the logical "Media Rewind" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaRewind = LogicalKeyboardKey(0x01000000d31);
+
+  /// Represents the logical "Media Skip" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaSkip = LogicalKeyboardKey(0x01000000d32);
+
+  /// Represents the logical "Next Favorite Channel" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey nextFavoriteChannel = LogicalKeyboardKey(0x01000000d33);
+
+  /// Represents the logical "Next User Profile" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey nextUserProfile = LogicalKeyboardKey(0x01000000d34);
+
+  /// Represents the logical "On Demand" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey onDemand = LogicalKeyboardKey(0x01000000d35);
+
+  /// Represents the logical "P In P Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey pInPDown = LogicalKeyboardKey(0x01000000d36);
+
+  /// Represents the logical "P In P Move" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey pInPMove = LogicalKeyboardKey(0x01000000d37);
+
+  /// Represents the logical "P In P Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey pInPToggle = LogicalKeyboardKey(0x01000000d38);
+
+  /// Represents the logical "P In P Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey pInPUp = LogicalKeyboardKey(0x01000000d39);
+
+  /// Represents the logical "Play Speed Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey playSpeedDown = LogicalKeyboardKey(0x01000000d3a);
+
+  /// Represents the logical "Play Speed Reset" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey playSpeedReset = LogicalKeyboardKey(0x01000000d3b);
+
+  /// Represents the logical "Play Speed Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey playSpeedUp = LogicalKeyboardKey(0x01000000d3c);
+
+  /// Represents the logical "Random Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey randomToggle = LogicalKeyboardKey(0x01000000d3d);
+
+  /// Represents the logical "Rc Low Battery" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey rcLowBattery = LogicalKeyboardKey(0x01000000d3e);
+
+  /// Represents the logical "Record Speed Next" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey recordSpeedNext = LogicalKeyboardKey(0x01000000d3f);
+
+  /// Represents the logical "Rf Bypass" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey rfBypass = LogicalKeyboardKey(0x01000000d40);
+
+  /// Represents the logical "Scan Channels Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey scanChannelsToggle = LogicalKeyboardKey(0x01000000d41);
+
+  /// Represents the logical "Screen Mode Next" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey screenModeNext = LogicalKeyboardKey(0x01000000d42);
+
+  /// Represents the logical "Settings" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey settings = LogicalKeyboardKey(0x01000000d43);
+
+  /// Represents the logical "Split Screen Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey splitScreenToggle = LogicalKeyboardKey(0x01000000d44);
+
+  /// Represents the logical "STB Input" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey stbInput = LogicalKeyboardKey(0x01000000d45);
+
+  /// Represents the logical "STB Power" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey stbPower = LogicalKeyboardKey(0x01000000d46);
+
+  /// Represents the logical "Subtitle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey subtitle = LogicalKeyboardKey(0x01000000d47);
+
+  /// Represents the logical "Teletext" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey teletext = LogicalKeyboardKey(0x01000000d48);
+
+  /// Represents the logical "TV" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tv = LogicalKeyboardKey(0x01000000d49);
+
+  /// Represents the logical "TV Input" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInput = LogicalKeyboardKey(0x01000000d4a);
+
+  /// Represents the logical "TV Power" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvPower = LogicalKeyboardKey(0x01000000d4b);
+
+  /// Represents the logical "Video Mode Next" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey videoModeNext = LogicalKeyboardKey(0x01000000d4c);
+
+  /// Represents the logical "Wink" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey wink = LogicalKeyboardKey(0x01000000d4d);
+
+  /// Represents the logical "Zoom Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey zoomToggle = LogicalKeyboardKey(0x01000000d4e);
+
+  /// Represents the logical "DVR" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey dvr = LogicalKeyboardKey(0x01000000d4f);
+
+  /// Represents the logical "Media Audio Track" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaAudioTrack = LogicalKeyboardKey(0x01000000d50);
+
+  /// Represents the logical "Media Skip Backward" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaSkipBackward = LogicalKeyboardKey(0x01000000d51);
+
+  /// Represents the logical "Media Skip Forward" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaSkipForward = LogicalKeyboardKey(0x01000000d52);
+
+  /// Represents the logical "Media Step Backward" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaStepBackward = LogicalKeyboardKey(0x01000000d53);
+
+  /// Represents the logical "Media Step Forward" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaStepForward = LogicalKeyboardKey(0x01000000d54);
+
+  /// Represents the logical "Media Top Menu" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaTopMenu = LogicalKeyboardKey(0x01000000d55);
+
+  /// Represents the logical "Navigate In" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey navigateIn = LogicalKeyboardKey(0x01000000d56);
+
+  /// Represents the logical "Navigate Next" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey navigateNext = LogicalKeyboardKey(0x01000000d57);
+
+  /// Represents the logical "Navigate Out" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey navigateOut = LogicalKeyboardKey(0x01000000d58);
+
+  /// Represents the logical "Navigate Previous" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey navigatePrevious = LogicalKeyboardKey(0x01000000d59);
+
+  /// Represents the logical "Pairing" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey pairing = LogicalKeyboardKey(0x01000000d5a);
+
+  /// Represents the logical "Media Close" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaClose = LogicalKeyboardKey(0x01000000d5b);
+
+  /// Represents the logical "Audio Bass Boost Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioBassBoostToggle = LogicalKeyboardKey(0x01000000e02);
+
+  /// Represents the logical "Audio Treble Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioTrebleDown = LogicalKeyboardKey(0x01000000e04);
+
+  /// Represents the logical "Audio Treble Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioTrebleUp = LogicalKeyboardKey(0x01000000e05);
+
+  /// Represents the logical "Microphone Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey microphoneToggle = LogicalKeyboardKey(0x01000000e06);
+
+  /// Represents the logical "Microphone Volume Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey microphoneVolumeDown = LogicalKeyboardKey(0x01000000e07);
+
+  /// Represents the logical "Microphone Volume Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey microphoneVolumeUp = LogicalKeyboardKey(0x01000000e08);
+
+  /// Represents the logical "Microphone Volume Mute" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey microphoneVolumeMute = LogicalKeyboardKey(0x01000000e09);
+
+  /// Represents the logical "Speech Correction List" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey speechCorrectionList = LogicalKeyboardKey(0x01000000f01);
+
+  /// Represents the logical "Speech Input Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey speechInputToggle = LogicalKeyboardKey(0x01000000f02);
+
+  /// Represents the logical "App Switch" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey appSwitch = LogicalKeyboardKey(0x01000001001);
+
+  /// Represents the logical "Call" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey call = LogicalKeyboardKey(0x01000001002);
+
+  /// Represents the logical "Camera Focus" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey cameraFocus = LogicalKeyboardKey(0x01000001003);
+
+  /// Represents the logical "End Call" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey endCall = LogicalKeyboardKey(0x01000001004);
+
+  /// Represents the logical "Go Back" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey goBack = LogicalKeyboardKey(0x01000001005);
+
+  /// Represents the logical "Go Home" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey goHome = LogicalKeyboardKey(0x01000001006);
+
+  /// Represents the logical "Headset Hook" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey headsetHook = LogicalKeyboardKey(0x01000001007);
+
+  /// Represents the logical "Last Number Redial" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lastNumberRedial = LogicalKeyboardKey(0x01000001008);
+
+  /// Represents the logical "Notification" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey notification = LogicalKeyboardKey(0x01000001009);
+
+  /// Represents the logical "Manner Mode" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mannerMode = LogicalKeyboardKey(0x0100000100a);
+
+  /// Represents the logical "Voice Dial" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey voiceDial = LogicalKeyboardKey(0x0100000100b);
+
+  /// Represents the logical "TV 3 D Mode" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tv3DMode = LogicalKeyboardKey(0x01000001101);
+
+  /// Represents the logical "TV Antenna Cable" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvAntennaCable = LogicalKeyboardKey(0x01000001102);
+
+  /// Represents the logical "TV Audio Description" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvAudioDescription = LogicalKeyboardKey(0x01000001103);
+
+  /// Represents the logical "TV Audio Description Mix Down" key on the
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvAudioDescriptionMixDown = LogicalKeyboardKey(0x01000001104);
+
+  /// Represents the logical "TV Audio Description Mix Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvAudioDescriptionMixUp = LogicalKeyboardKey(0x01000001105);
+
+  /// Represents the logical "TV Contents Menu" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvContentsMenu = LogicalKeyboardKey(0x01000001106);
+
+  /// Represents the logical "TV Data Service" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvDataService = LogicalKeyboardKey(0x01000001107);
+
+  /// Represents the logical "TV Input Component 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputComponent1 = LogicalKeyboardKey(0x01000001108);
+
+  /// Represents the logical "TV Input Component 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputComponent2 = LogicalKeyboardKey(0x01000001109);
+
+  /// Represents the logical "TV Input Composite 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputComposite1 = LogicalKeyboardKey(0x0100000110a);
+
+  /// Represents the logical "TV Input Composite 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputComposite2 = LogicalKeyboardKey(0x0100000110b);
+
+  /// Represents the logical "TV Input HDMI 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputHDMI1 = LogicalKeyboardKey(0x0100000110c);
+
+  /// Represents the logical "TV Input HDMI 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputHDMI2 = LogicalKeyboardKey(0x0100000110d);
+
+  /// Represents the logical "TV Input HDMI 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputHDMI3 = LogicalKeyboardKey(0x0100000110e);
+
+  /// Represents the logical "TV Input HDMI 4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputHDMI4 = LogicalKeyboardKey(0x0100000110f);
+
+  /// Represents the logical "TV Input VGA 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputVGA1 = LogicalKeyboardKey(0x01000001110);
+
+  /// Represents the logical "TV Media Context" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvMediaContext = LogicalKeyboardKey(0x01000001111);
+
+  /// Represents the logical "TV Network" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvNetwork = LogicalKeyboardKey(0x01000001112);
+
+  /// Represents the logical "TV Number Entry" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvNumberEntry = LogicalKeyboardKey(0x01000001113);
+
+  /// Represents the logical "TV Radio Service" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvRadioService = LogicalKeyboardKey(0x01000001114);
+
+  /// Represents the logical "TV Satellite" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvSatellite = LogicalKeyboardKey(0x01000001115);
+
+  /// Represents the logical "TV Satellite BS" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvSatelliteBS = LogicalKeyboardKey(0x01000001116);
+
+  /// Represents the logical "TV Satellite CS" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvSatelliteCS = LogicalKeyboardKey(0x01000001117);
+
+  /// Represents the logical "TV Satellite Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvSatelliteToggle = LogicalKeyboardKey(0x01000001118);
+
+  /// Represents the logical "TV Terrestrial Analog" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvTerrestrialAnalog = LogicalKeyboardKey(0x01000001119);
+
+  /// Represents the logical "TV Terrestrial Digital" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvTerrestrialDigital = LogicalKeyboardKey(0x0100000111a);
+
+  /// Represents the logical "TV Timer" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvTimer = LogicalKeyboardKey(0x0100000111b);
+
+  /// Represents the logical "Key 11" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey key11 = LogicalKeyboardKey(0x01000001201);
+
+  /// Represents the logical "Key 12" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey key12 = LogicalKeyboardKey(0x01000001202);
+
+  /// Represents the logical "Game Button 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton1 = LogicalKeyboardKey(0x0100005ff01);
+
+  /// Represents the logical "Game Button 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton2 = LogicalKeyboardKey(0x0100005ff02);
+
+  /// Represents the logical "Game Button 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton3 = LogicalKeyboardKey(0x0100005ff03);
+
+  /// Represents the logical "Game Button 4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton4 = LogicalKeyboardKey(0x0100005ff04);
+
+  /// Represents the logical "Game Button 5" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton5 = LogicalKeyboardKey(0x0100005ff05);
+
+  /// Represents the logical "Game Button 6" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton6 = LogicalKeyboardKey(0x0100005ff06);
+
+  /// Represents the logical "Game Button 7" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton7 = LogicalKeyboardKey(0x0100005ff07);
+
+  /// Represents the logical "Game Button 8" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton8 = LogicalKeyboardKey(0x0100005ff08);
+
+  /// Represents the logical "Game Button 9" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton9 = LogicalKeyboardKey(0x0100005ff09);
+
+  /// Represents the logical "Game Button 10" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton10 = LogicalKeyboardKey(0x0100005ff0a);
+
+  /// Represents the logical "Game Button 11" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton11 = LogicalKeyboardKey(0x0100005ff0b);
+
+  /// Represents the logical "Game Button 12" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton12 = LogicalKeyboardKey(0x0100005ff0c);
+
+  /// Represents the logical "Game Button 13" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton13 = LogicalKeyboardKey(0x0100005ff0d);
+
+  /// Represents the logical "Game Button 14" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton14 = LogicalKeyboardKey(0x0100005ff0e);
+
+  /// Represents the logical "Game Button 15" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton15 = LogicalKeyboardKey(0x0100005ff0f);
+
+  /// Represents the logical "Game Button 16" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButton16 = LogicalKeyboardKey(0x0100005ff10);
+
+  /// Represents the logical "Game Button A" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonA = LogicalKeyboardKey(0x0100005ff11);
+
+  /// Represents the logical "Game Button B" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonB = LogicalKeyboardKey(0x0100005ff12);
+
+  /// Represents the logical "Game Button C" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonC = LogicalKeyboardKey(0x0100005ff13);
+
+  /// Represents the logical "Game Button Left 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonLeft1 = LogicalKeyboardKey(0x0100005ff14);
+
+  /// Represents the logical "Game Button Left 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonLeft2 = LogicalKeyboardKey(0x0100005ff15);
+
+  /// Represents the logical "Game Button Mode" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonMode = LogicalKeyboardKey(0x0100005ff16);
+
+  /// Represents the logical "Game Button Right 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonRight1 = LogicalKeyboardKey(0x0100005ff17);
+
+  /// Represents the logical "Game Button Right 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonRight2 = LogicalKeyboardKey(0x0100005ff18);
+
+  /// Represents the logical "Game Button Select" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonSelect = LogicalKeyboardKey(0x0100005ff19);
+
+  /// Represents the logical "Game Button Start" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonStart = LogicalKeyboardKey(0x0100005ff1a);
+
+  /// Represents the logical "Game Button Thumb Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonThumbLeft = LogicalKeyboardKey(0x0100005ff1b);
+
+  /// Represents the logical "Game Button Thumb Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonThumbRight = LogicalKeyboardKey(0x0100005ff1c);
+
+  /// Represents the logical "Game Button X" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonX = LogicalKeyboardKey(0x0100005ff1d);
+
+  /// Represents the logical "Game Button Y" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonY = LogicalKeyboardKey(0x0100005ff1e);
+
+  /// Represents the logical "Game Button Z" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey gameButtonZ = LogicalKeyboardKey(0x0100005ff1f);
+
+  /// Represents the logical "Suspend" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey suspend = LogicalKeyboardKey(0x01100000014);
+
+  /// Represents the logical "Resume" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey resume = LogicalKeyboardKey(0x01100000015);
+
+  /// Represents the logical "Sleep" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey sleep = LogicalKeyboardKey(0x01100010082);
+
+  /// Represents the logical "Intl Backslash" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey intlBackslash = LogicalKeyboardKey(0x01100070064);
+
+  /// Represents the logical "Intl Ro" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey intlRo = LogicalKeyboardKey(0x01100070087);
+
+  /// Represents the logical "Intl Yen" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey intlYen = LogicalKeyboardKey(0x01100070089);
+
+  /// Represents the logical "Lang 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lang1 = LogicalKeyboardKey(0x01100070090);
+
+  /// Represents the logical "Lang 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lang2 = LogicalKeyboardKey(0x01100070091);
+
+  /// Represents the logical "Lang 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lang3 = LogicalKeyboardKey(0x01100070092);
+
+  /// Represents the logical "Lang 4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lang4 = LogicalKeyboardKey(0x01100070093);
+
+  /// Represents the logical "Lang 5" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lang5 = LogicalKeyboardKey(0x01100070094);
+
+  /// Represents the logical "Abort" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey abort = LogicalKeyboardKey(0x0110007009b);
+
+  /// Represents the logical "Alt Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey altLeft = LogicalKeyboardKey(0x30000000102);
+
+  /// Represents the logical "Control Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey controlLeft = LogicalKeyboardKey(0x30000000105);
+
+  /// Represents the logical "Meta Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey metaLeft = LogicalKeyboardKey(0x30000000109);
+
+  /// Represents the logical "Shift Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey shiftLeft = LogicalKeyboardKey(0x3000000010d);
+
+  /// Represents the logical "Alt Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey altRight = LogicalKeyboardKey(0x40000000102);
+
+  /// Represents the logical "Control Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey controlRight = LogicalKeyboardKey(0x40000000105);
+
+  /// Represents the logical "Meta Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey metaRight = LogicalKeyboardKey(0x40000000109);
+
+  /// Represents the logical "Shift Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey shiftRight = LogicalKeyboardKey(0x4000000010d);
+
+  /// Represents the logical "Numpad Enter" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadEnter = LogicalKeyboardKey(0x5000000000d);
+
+  /// Represents the logical "Numpad Paren Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadParenLeft = LogicalKeyboardKey(0x50000000028);
+
+  /// Represents the logical "Numpad Paren Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadParenRight = LogicalKeyboardKey(0x50000000029);
+
+  /// Represents the logical "Numpad Multiply" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadMultiply = LogicalKeyboardKey(0x5000000002a);
+
+  /// Represents the logical "Numpad Add" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadAdd = LogicalKeyboardKey(0x5000000002b);
+
+  /// Represents the logical "Numpad Comma" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadComma = LogicalKeyboardKey(0x5000000002c);
+
+  /// Represents the logical "Numpad Subtract" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadSubtract = LogicalKeyboardKey(0x5000000002d);
+
+  /// Represents the logical "Numpad Decimal" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadDecimal = LogicalKeyboardKey(0x5000000002e);
+
+  /// Represents the logical "Numpad Divide" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadDivide = LogicalKeyboardKey(0x5000000002f);
+
+  /// Represents the logical "Numpad 0" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad0 = LogicalKeyboardKey(0x50000000030);
+
+  /// Represents the logical "Numpad 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad1 = LogicalKeyboardKey(0x50000000031);
+
+  /// Represents the logical "Numpad 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad2 = LogicalKeyboardKey(0x50000000032);
+
+  /// Represents the logical "Numpad 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad3 = LogicalKeyboardKey(0x50000000033);
+
+  /// Represents the logical "Numpad 4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad4 = LogicalKeyboardKey(0x50000000034);
+
+  /// Represents the logical "Numpad 5" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad5 = LogicalKeyboardKey(0x50000000035);
+
+  /// Represents the logical "Numpad 6" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad6 = LogicalKeyboardKey(0x50000000036);
+
+  /// Represents the logical "Numpad 7" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad7 = LogicalKeyboardKey(0x50000000037);
+
+  /// Represents the logical "Numpad 8" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad8 = LogicalKeyboardKey(0x50000000038);
+
+  /// Represents the logical "Numpad 9" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad9 = LogicalKeyboardKey(0x50000000039);
+
+  /// Represents the logical "Numpad Equal" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadEqual = LogicalKeyboardKey(0x5000000003d);
 
   /// Represents the logical "Shift" key on the keyboard.
   ///
   /// This key represents the union of the keys {shiftLeft, shiftRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey shift = LogicalKeyboardKey(0x201000700e1);
+  static const LogicalKeyboardKey shift = LogicalKeyboardKey(0x2000000010d);
 
   /// Represents the logical "Meta" key on the keyboard.
   ///
   /// This key represents the union of the keys {metaLeft, metaRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey meta = LogicalKeyboardKey(0x201000700e3);
+  static const LogicalKeyboardKey meta = LogicalKeyboardKey(0x20000000109);
 
   /// Represents the logical "Alt" key on the keyboard.
   ///
   /// This key represents the union of the keys {altLeft, altRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey alt = LogicalKeyboardKey(0x201000700e2);
+  static const LogicalKeyboardKey alt = LogicalKeyboardKey(0x20000000102);
 
   /// Represents the logical "Control" key on the keyboard.
   ///
   /// This key represents the union of the keys {controlLeft, controlRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey control = LogicalKeyboardKey(0x201000700e0);
+  static const LogicalKeyboardKey control = LogicalKeyboardKey(0x20000000105);
 
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
-    0x0100000000: none,
-    0x0100000010: hyper,
-    0x0100000011: superKey,
-    0x0100000013: fnLock,
-    0x0100000014: suspend,
-    0x0100000015: resume,
-    0x0100000016: turbo,
-    0x0100000017: privacyScreenToggle,
-    0x0100010082: sleep,
-    0x0100010083: wakeUp,
-    0x01000100b5: displayToggleIntExt,
-    0x0100070000: usbReserved,
-    0x0100070001: usbErrorRollOver,
-    0x0100070002: usbPostFail,
-    0x0100070003: usbErrorUndefined,
-    0x0000000061: keyA,
-    0x0000000062: keyB,
-    0x0000000063: keyC,
-    0x0000000064: keyD,
-    0x0000000065: keyE,
-    0x0000000066: keyF,
-    0x0000000067: keyG,
-    0x0000000068: keyH,
-    0x0000000069: keyI,
-    0x000000006a: keyJ,
-    0x000000006b: keyK,
-    0x000000006c: keyL,
-    0x000000006d: keyM,
-    0x000000006e: keyN,
-    0x000000006f: keyO,
-    0x0000000070: keyP,
-    0x0000000071: keyQ,
-    0x0000000072: keyR,
-    0x0000000073: keyS,
-    0x0000000074: keyT,
-    0x0000000075: keyU,
-    0x0000000076: keyV,
-    0x0000000077: keyW,
-    0x0000000078: keyX,
-    0x0000000079: keyY,
-    0x000000007a: keyZ,
-    0x0000000031: digit1,
-    0x0000000032: digit2,
-    0x0000000033: digit3,
-    0x0000000034: digit4,
-    0x0000000035: digit5,
-    0x0000000036: digit6,
-    0x0000000037: digit7,
-    0x0000000038: digit8,
-    0x0000000039: digit9,
-    0x0000000030: digit0,
-    0x0100070028: enter,
-    0x0100070029: escape,
-    0x010007002a: backspace,
-    0x010007002b: tab,
-    0x0000000020: space,
-    0x000000002d: minus,
-    0x000000003d: equal,
-    0x000000005b: bracketLeft,
-    0x000000005d: bracketRight,
-    0x000000005c: backslash,
-    0x000000003b: semicolon,
-    0x0000000027: quote,
-    0x0000000060: backquote,
-    0x000000002c: comma,
-    0x000000002e: period,
-    0x000000002f: slash,
-    0x0100070039: capsLock,
-    0x010007003a: f1,
-    0x010007003b: f2,
-    0x010007003c: f3,
-    0x010007003d: f4,
-    0x010007003e: f5,
-    0x010007003f: f6,
-    0x0100070040: f7,
-    0x0100070041: f8,
-    0x0100070042: f9,
-    0x0100070043: f10,
-    0x0100070044: f11,
-    0x0100070045: f12,
-    0x0100070046: printScreen,
-    0x0100070047: scrollLock,
-    0x0100070048: pause,
-    0x0100070049: insert,
-    0x010007004a: home,
-    0x010007004b: pageUp,
-    0x010007004c: delete,
-    0x010007004d: end,
-    0x010007004e: pageDown,
-    0x010007004f: arrowRight,
-    0x0100070050: arrowLeft,
-    0x0100070051: arrowDown,
-    0x0100070052: arrowUp,
-    0x0100070053: numLock,
-    0x0100070054: numpadDivide,
-    0x0100070055: numpadMultiply,
-    0x0100070056: numpadSubtract,
-    0x0100070057: numpadAdd,
-    0x0100070058: numpadEnter,
-    0x0100070059: numpad1,
-    0x010007005a: numpad2,
-    0x010007005b: numpad3,
-    0x010007005c: numpad4,
-    0x010007005d: numpad5,
-    0x010007005e: numpad6,
-    0x010007005f: numpad7,
-    0x0100070060: numpad8,
-    0x0100070061: numpad9,
-    0x0100070062: numpad0,
-    0x0100070063: numpadDecimal,
-    0x0100070064: intlBackslash,
-    0x0100070065: contextMenu,
-    0x0100070066: power,
-    0x0100070067: numpadEqual,
-    0x0100070068: f13,
-    0x0100070069: f14,
-    0x010007006a: f15,
-    0x010007006b: f16,
-    0x010007006c: f17,
-    0x010007006d: f18,
-    0x010007006e: f19,
-    0x010007006f: f20,
-    0x0100070070: f21,
-    0x0100070071: f22,
-    0x0100070072: f23,
-    0x0100070073: f24,
-    0x0100070074: open,
-    0x0100070075: help,
-    0x0100070077: select,
-    0x0100070079: again,
-    0x010007007a: undo,
-    0x010007007b: cut,
-    0x010007007c: copy,
-    0x010007007d: paste,
-    0x010007007e: find,
-    0x010007007f: audioVolumeMute,
-    0x0100070080: audioVolumeUp,
-    0x0100070081: audioVolumeDown,
-    0x0100070085: numpadComma,
-    0x0100070087: intlRo,
-    0x0100070088: kanaMode,
-    0x0100070089: intlYen,
-    0x010007008a: convert,
-    0x010007008b: nonConvert,
-    0x0100070090: lang1,
-    0x0100070091: lang2,
-    0x0100070092: lang3,
-    0x0100070093: lang4,
-    0x0100070094: lang5,
-    0x010007009b: abort,
-    0x01000700a3: props,
-    0x01000700b6: numpadParenLeft,
-    0x01000700b7: numpadParenRight,
-    0x01000700bb: numpadBackspace,
-    0x01000700d0: numpadMemoryStore,
-    0x01000700d1: numpadMemoryRecall,
-    0x01000700d2: numpadMemoryClear,
-    0x01000700d3: numpadMemoryAdd,
-    0x01000700d4: numpadMemorySubtract,
-    0x01000700d7: numpadSignChange,
-    0x01000700d8: numpadClear,
-    0x01000700d9: numpadClearEntry,
-    0x01000700e0: controlLeft,
-    0x01000700e1: shiftLeft,
-    0x01000700e2: altLeft,
-    0x01000700e3: metaLeft,
-    0x01000700e4: controlRight,
-    0x01000700e5: shiftRight,
-    0x01000700e6: altRight,
-    0x01000700e7: metaRight,
-    0x01000c0060: info,
-    0x01000c0061: closedCaptionToggle,
-    0x01000c006f: brightnessUp,
-    0x01000c0070: brightnessDown,
-    0x01000c0072: brightnessToggle,
-    0x01000c0073: brightnessMinimum,
-    0x01000c0074: brightnessMaximum,
-    0x01000c0075: brightnessAuto,
-    0x01000c0079: kbdIllumUp,
-    0x01000c007a: kbdIllumDown,
-    0x01000c0083: mediaLast,
-    0x01000c008c: launchPhone,
-    0x01000c008d: programGuide,
-    0x01000c0094: exit,
-    0x01000c009c: channelUp,
-    0x01000c009d: channelDown,
-    0x01000c00b0: mediaPlay,
-    0x01000c00b1: mediaPause,
-    0x01000c00b2: mediaRecord,
-    0x01000c00b3: mediaFastForward,
-    0x01000c00b4: mediaRewind,
-    0x01000c00b5: mediaTrackNext,
-    0x01000c00b6: mediaTrackPrevious,
-    0x01000c00b7: mediaStop,
-    0x01000c00b8: eject,
-    0x01000c00cd: mediaPlayPause,
-    0x01000c00cf: speechInputToggle,
-    0x01000c00e5: bassBoost,
-    0x01000c0183: mediaSelect,
-    0x01000c0184: launchWordProcessor,
-    0x01000c0186: launchSpreadsheet,
-    0x01000c018a: launchMail,
-    0x01000c018d: launchContacts,
-    0x01000c018e: launchCalendar,
-    0x01000c0192: launchApp2,
-    0x01000c0194: launchApp1,
-    0x01000c0196: launchInternetBrowser,
-    0x01000c019c: logOff,
-    0x01000c019e: lockScreen,
-    0x01000c019f: launchControlPanel,
-    0x01000c01a2: selectTask,
-    0x01000c01a7: launchDocuments,
-    0x01000c01ab: spellCheck,
-    0x01000c01ae: launchKeyboardLayout,
-    0x01000c01b1: launchScreenSaver,
-    0x01000c01cb: launchAssistant,
-    0x01000c01b7: launchAudioBrowser,
-    0x01000c0201: newKey,
-    0x01000c0203: close,
-    0x01000c0207: save,
-    0x01000c0208: print,
-    0x01000c0221: browserSearch,
-    0x01000c0223: browserHome,
-    0x01000c0224: browserBack,
-    0x01000c0225: browserForward,
-    0x01000c0226: browserStop,
-    0x01000c0227: browserRefresh,
-    0x01000c022a: browserFavorites,
-    0x01000c022d: zoomIn,
-    0x01000c022e: zoomOut,
-    0x01000c0232: zoomToggle,
-    0x01000c0279: redo,
-    0x01000c0289: mailReply,
-    0x01000c028b: mailForward,
-    0x01000c028c: mailSend,
-    0x01000c029d: keyboardLayoutSelect,
-    0x01000c029f: showAllWindows,
-    0x010005ff01: gameButton1,
-    0x010005ff02: gameButton2,
-    0x010005ff03: gameButton3,
-    0x010005ff04: gameButton4,
-    0x010005ff05: gameButton5,
-    0x010005ff06: gameButton6,
-    0x010005ff07: gameButton7,
-    0x010005ff08: gameButton8,
-    0x010005ff09: gameButton9,
-    0x010005ff0a: gameButton10,
-    0x010005ff0b: gameButton11,
-    0x010005ff0c: gameButton12,
-    0x010005ff0d: gameButton13,
-    0x010005ff0e: gameButton14,
-    0x010005ff0f: gameButton15,
-    0x010005ff10: gameButton16,
-    0x010005ff11: gameButtonA,
-    0x010005ff12: gameButtonB,
-    0x010005ff13: gameButtonC,
-    0x010005ff14: gameButtonLeft1,
-    0x010005ff15: gameButtonLeft2,
-    0x010005ff16: gameButtonMode,
-    0x010005ff17: gameButtonRight1,
-    0x010005ff18: gameButtonRight2,
-    0x010005ff19: gameButtonSelect,
-    0x010005ff1a: gameButtonStart,
-    0x010005ff1b: gameButtonThumbLeft,
-    0x010005ff1c: gameButtonThumbRight,
-    0x010005ff1d: gameButtonX,
-    0x010005ff1e: gameButtonY,
-    0x010005ff1f: gameButtonZ,
-    0x0100000012: fn,
-    0x201000700e1: shift,
-    0x201000700e3: meta,
-    0x201000700e2: alt,
-    0x201000700e0: control,
+    0x00000000000: none,
+    0x00000000020: space,
+    0x00000000021: exclamation,
+    0x00000000022: quote,
+    0x00000000023: numberSign,
+    0x00000000024: dollar,
+    0x00000000025: percent,
+    0x00000000026: ampersand,
+    0x00000000027: quoteSingle,
+    0x00000000028: parenthesisLeft,
+    0x00000000029: parenthesisRight,
+    0x0000000002a: asterisk,
+    0x0000000002b: add,
+    0x0000000002c: comma,
+    0x0000000002d: minus,
+    0x0000000002e: period,
+    0x0000000002f: slash,
+    0x00000000030: digit0,
+    0x00000000031: digit1,
+    0x00000000032: digit2,
+    0x00000000033: digit3,
+    0x00000000034: digit4,
+    0x00000000035: digit5,
+    0x00000000036: digit6,
+    0x00000000037: digit7,
+    0x00000000038: digit8,
+    0x00000000039: digit9,
+    0x0000000003a: colon,
+    0x0000000003b: semicolon,
+    0x0000000003c: less,
+    0x0000000003d: equal,
+    0x0000000003e: greater,
+    0x0000000003f: question,
+    0x00000000040: at,
+    0x0000000005b: bracketLeft,
+    0x0000000005c: backslash,
+    0x0000000005d: bracketRight,
+    0x0000000005e: caret,
+    0x0000000005f: underscore,
+    0x00000000060: backquote,
+    0x00000000061: keyA,
+    0x00000000062: keyB,
+    0x00000000063: keyC,
+    0x00000000064: keyD,
+    0x00000000065: keyE,
+    0x00000000066: keyF,
+    0x00000000067: keyG,
+    0x00000000068: keyH,
+    0x00000000069: keyI,
+    0x0000000006a: keyJ,
+    0x0000000006b: keyK,
+    0x0000000006c: keyL,
+    0x0000000006d: keyM,
+    0x0000000006e: keyN,
+    0x0000000006f: keyO,
+    0x00000000070: keyP,
+    0x00000000071: keyQ,
+    0x00000000072: keyR,
+    0x00000000073: keyS,
+    0x00000000074: keyT,
+    0x00000000075: keyU,
+    0x00000000076: keyV,
+    0x00000000077: keyW,
+    0x00000000078: keyX,
+    0x00000000079: keyY,
+    0x0000000007a: keyZ,
+    0x0000000007b: braceLeft,
+    0x0000000007c: bar,
+    0x0000000007d: braceRight,
+    0x0000000007e: tilde,
+    0x01000000001: unidentified,
+    0x01000000008: backspace,
+    0x01000000009: tab,
+    0x0100000000d: enter,
+    0x0100000001b: escape,
+    0x0100000007f: delete,
+    0x01000000101: accel,
+    0x01000000103: altGraph,
+    0x01000000104: capsLock,
+    0x01000000106: fn,
+    0x01000000107: fnLock,
+    0x01000000108: hyper,
+    0x0100000010a: numLock,
+    0x0100000010c: scrollLock,
+    0x0100000010e: superKey,
+    0x0100000010f: symbol,
+    0x01000000110: symbolLock,
+    0x01000000111: shiftLevel5,
+    0x01000000301: arrowDown,
+    0x01000000302: arrowLeft,
+    0x01000000303: arrowRight,
+    0x01000000304: arrowUp,
+    0x01000000305: end,
+    0x01000000306: home,
+    0x01000000307: pageDown,
+    0x01000000308: pageUp,
+    0x01000000401: clear,
+    0x01000000402: copy,
+    0x01000000403: crSel,
+    0x01000000404: cut,
+    0x01000000405: eraseEof,
+    0x01000000406: exSel,
+    0x01000000407: insert,
+    0x01000000408: paste,
+    0x01000000409: redo,
+    0x0100000040a: undo,
+    0x01000000501: accept,
+    0x01000000502: again,
+    0x01000000503: attn,
+    0x01000000504: cancel,
+    0x01000000505: contextMenu,
+    0x01000000506: execute,
+    0x01000000507: find,
+    0x01000000508: help,
+    0x01000000509: pause,
+    0x0100000050a: play,
+    0x0100000050b: props,
+    0x0100000050c: select,
+    0x0100000050d: zoomIn,
+    0x0100000050e: zoomOut,
+    0x01000000601: brightnessDown,
+    0x01000000602: brightnessUp,
+    0x01000000603: camera,
+    0x01000000604: eject,
+    0x01000000605: logOff,
+    0x01000000606: power,
+    0x01000000607: powerOff,
+    0x01000000608: printScreen,
+    0x01000000609: hibernate,
+    0x0100000060a: standby,
+    0x0100000060b: wakeUp,
+    0x01000000701: allCandidates,
+    0x01000000702: alphanumeric,
+    0x01000000703: codeInput,
+    0x01000000704: compose,
+    0x01000000705: convert,
+    0x01000000706: finalMode,
+    0x01000000707: groupFirst,
+    0x01000000708: groupLast,
+    0x01000000709: groupNext,
+    0x0100000070a: groupPrevious,
+    0x0100000070b: modeChange,
+    0x0100000070c: nextCandidate,
+    0x0100000070d: nonConvert,
+    0x0100000070e: previousCandidate,
+    0x0100000070f: process,
+    0x01000000710: singleCandidate,
+    0x01000000711: hangulMode,
+    0x01000000712: hanjaMode,
+    0x01000000713: junjaMode,
+    0x01000000714: eisu,
+    0x01000000715: hankaku,
+    0x01000000716: hiragana,
+    0x01000000717: hiraganaKatakana,
+    0x01000000718: kanaMode,
+    0x01000000719: kanjiMode,
+    0x0100000071a: katakana,
+    0x0100000071b: romaji,
+    0x0100000071c: zenkaku,
+    0x0100000071d: zenkakuHankaku,
+    0x01000000801: f1,
+    0x01000000802: f2,
+    0x01000000803: f3,
+    0x01000000804: f4,
+    0x01000000805: f5,
+    0x01000000806: f6,
+    0x01000000807: f7,
+    0x01000000808: f8,
+    0x01000000809: f9,
+    0x0100000080a: f10,
+    0x0100000080b: f11,
+    0x0100000080c: f12,
+    0x0100000080d: f13,
+    0x0100000080e: f14,
+    0x0100000080f: f15,
+    0x01000000810: f16,
+    0x01000000811: f17,
+    0x01000000812: f18,
+    0x01000000813: f19,
+    0x01000000814: f20,
+    0x01000000815: f21,
+    0x01000000816: f22,
+    0x01000000817: f23,
+    0x01000000818: f24,
+    0x01000000901: soft1,
+    0x01000000902: soft2,
+    0x01000000903: soft3,
+    0x01000000904: soft4,
+    0x01000000905: soft5,
+    0x01000000906: soft6,
+    0x01000000907: soft7,
+    0x01000000908: soft8,
+    0x01000000a01: close,
+    0x01000000a02: mailForward,
+    0x01000000a03: mailReply,
+    0x01000000a04: mailSend,
+    0x01000000a05: mediaPlayPause,
+    0x01000000a07: mediaStop,
+    0x01000000a08: mediaTrackNext,
+    0x01000000a09: mediaTrackPrevious,
+    0x01000000a0a: newKey,
+    0x01000000a0b: open,
+    0x01000000a0c: print,
+    0x01000000a0d: save,
+    0x01000000a0e: spellCheck,
+    0x01000000a0f: audioVolumeDown,
+    0x01000000a10: audioVolumeUp,
+    0x01000000a11: audioVolumeMute,
+    0x01000000b01: launchApplication2,
+    0x01000000b02: launchCalendar,
+    0x01000000b03: launchMail,
+    0x01000000b04: launchMediaPlayer,
+    0x01000000b05: launchMusicPlayer,
+    0x01000000b06: launchApplication1,
+    0x01000000b07: launchScreenSaver,
+    0x01000000b08: launchSpreadsheet,
+    0x01000000b09: launchWebBrowser,
+    0x01000000b0a: launchWebCam,
+    0x01000000b0b: launchWordProcessor,
+    0x01000000b0c: launchContacts,
+    0x01000000b0d: launchPhone,
+    0x01000000b0e: launchAssistant,
+    0x01000000b0f: launchControlPanel,
+    0x01000000c01: browserBack,
+    0x01000000c02: browserFavorites,
+    0x01000000c03: browserForward,
+    0x01000000c04: browserHome,
+    0x01000000c05: browserRefresh,
+    0x01000000c06: browserSearch,
+    0x01000000c07: browserStop,
+    0x01000000d01: audioBalanceLeft,
+    0x01000000d02: audioBalanceRight,
+    0x01000000d03: audioBassBoostDown,
+    0x01000000d04: audioBassBoostUp,
+    0x01000000d05: audioFaderFront,
+    0x01000000d06: audioFaderRear,
+    0x01000000d07: audioSurroundModeNext,
+    0x01000000d08: avrInput,
+    0x01000000d09: avrPower,
+    0x01000000d0a: channelDown,
+    0x01000000d0b: channelUp,
+    0x01000000d0c: colorF0Red,
+    0x01000000d0d: colorF1Green,
+    0x01000000d0e: colorF2Yellow,
+    0x01000000d0f: colorF3Blue,
+    0x01000000d10: colorF4Grey,
+    0x01000000d11: colorF5Brown,
+    0x01000000d12: closedCaptionToggle,
+    0x01000000d13: dimmer,
+    0x01000000d14: displaySwap,
+    0x01000000d15: exit,
+    0x01000000d16: favoriteClear0,
+    0x01000000d17: favoriteClear1,
+    0x01000000d18: favoriteClear2,
+    0x01000000d19: favoriteClear3,
+    0x01000000d1a: favoriteRecall0,
+    0x01000000d1b: favoriteRecall1,
+    0x01000000d1c: favoriteRecall2,
+    0x01000000d1d: favoriteRecall3,
+    0x01000000d1e: favoriteStore0,
+    0x01000000d1f: favoriteStore1,
+    0x01000000d20: favoriteStore2,
+    0x01000000d21: favoriteStore3,
+    0x01000000d22: guide,
+    0x01000000d23: guideNextDay,
+    0x01000000d24: guidePreviousDay,
+    0x01000000d25: info,
+    0x01000000d26: instantReplay,
+    0x01000000d27: link,
+    0x01000000d28: listProgram,
+    0x01000000d29: liveContent,
+    0x01000000d2a: lock,
+    0x01000000d2b: mediaApps,
+    0x01000000d2c: mediaFastForward,
+    0x01000000d2d: mediaLast,
+    0x01000000d2e: mediaPause,
+    0x01000000d2f: mediaPlay,
+    0x01000000d30: mediaRecord,
+    0x01000000d31: mediaRewind,
+    0x01000000d32: mediaSkip,
+    0x01000000d33: nextFavoriteChannel,
+    0x01000000d34: nextUserProfile,
+    0x01000000d35: onDemand,
+    0x01000000d36: pInPDown,
+    0x01000000d37: pInPMove,
+    0x01000000d38: pInPToggle,
+    0x01000000d39: pInPUp,
+    0x01000000d3a: playSpeedDown,
+    0x01000000d3b: playSpeedReset,
+    0x01000000d3c: playSpeedUp,
+    0x01000000d3d: randomToggle,
+    0x01000000d3e: rcLowBattery,
+    0x01000000d3f: recordSpeedNext,
+    0x01000000d40: rfBypass,
+    0x01000000d41: scanChannelsToggle,
+    0x01000000d42: screenModeNext,
+    0x01000000d43: settings,
+    0x01000000d44: splitScreenToggle,
+    0x01000000d45: stbInput,
+    0x01000000d46: stbPower,
+    0x01000000d47: subtitle,
+    0x01000000d48: teletext,
+    0x01000000d49: tv,
+    0x01000000d4a: tvInput,
+    0x01000000d4b: tvPower,
+    0x01000000d4c: videoModeNext,
+    0x01000000d4d: wink,
+    0x01000000d4e: zoomToggle,
+    0x01000000d4f: dvr,
+    0x01000000d50: mediaAudioTrack,
+    0x01000000d51: mediaSkipBackward,
+    0x01000000d52: mediaSkipForward,
+    0x01000000d53: mediaStepBackward,
+    0x01000000d54: mediaStepForward,
+    0x01000000d55: mediaTopMenu,
+    0x01000000d56: navigateIn,
+    0x01000000d57: navigateNext,
+    0x01000000d58: navigateOut,
+    0x01000000d59: navigatePrevious,
+    0x01000000d5a: pairing,
+    0x01000000d5b: mediaClose,
+    0x01000000e02: audioBassBoostToggle,
+    0x01000000e04: audioTrebleDown,
+    0x01000000e05: audioTrebleUp,
+    0x01000000e06: microphoneToggle,
+    0x01000000e07: microphoneVolumeDown,
+    0x01000000e08: microphoneVolumeUp,
+    0x01000000e09: microphoneVolumeMute,
+    0x01000000f01: speechCorrectionList,
+    0x01000000f02: speechInputToggle,
+    0x01000001001: appSwitch,
+    0x01000001002: call,
+    0x01000001003: cameraFocus,
+    0x01000001004: endCall,
+    0x01000001005: goBack,
+    0x01000001006: goHome,
+    0x01000001007: headsetHook,
+    0x01000001008: lastNumberRedial,
+    0x01000001009: notification,
+    0x0100000100a: mannerMode,
+    0x0100000100b: voiceDial,
+    0x01000001101: tv3DMode,
+    0x01000001102: tvAntennaCable,
+    0x01000001103: tvAudioDescription,
+    0x01000001104: tvAudioDescriptionMixDown,
+    0x01000001105: tvAudioDescriptionMixUp,
+    0x01000001106: tvContentsMenu,
+    0x01000001107: tvDataService,
+    0x01000001108: tvInputComponent1,
+    0x01000001109: tvInputComponent2,
+    0x0100000110a: tvInputComposite1,
+    0x0100000110b: tvInputComposite2,
+    0x0100000110c: tvInputHDMI1,
+    0x0100000110d: tvInputHDMI2,
+    0x0100000110e: tvInputHDMI3,
+    0x0100000110f: tvInputHDMI4,
+    0x01000001110: tvInputVGA1,
+    0x01000001111: tvMediaContext,
+    0x01000001112: tvNetwork,
+    0x01000001113: tvNumberEntry,
+    0x01000001114: tvRadioService,
+    0x01000001115: tvSatellite,
+    0x01000001116: tvSatelliteBS,
+    0x01000001117: tvSatelliteCS,
+    0x01000001118: tvSatelliteToggle,
+    0x01000001119: tvTerrestrialAnalog,
+    0x0100000111a: tvTerrestrialDigital,
+    0x0100000111b: tvTimer,
+    0x01000001201: key11,
+    0x01000001202: key12,
+    0x0100005ff01: gameButton1,
+    0x0100005ff02: gameButton2,
+    0x0100005ff03: gameButton3,
+    0x0100005ff04: gameButton4,
+    0x0100005ff05: gameButton5,
+    0x0100005ff06: gameButton6,
+    0x0100005ff07: gameButton7,
+    0x0100005ff08: gameButton8,
+    0x0100005ff09: gameButton9,
+    0x0100005ff0a: gameButton10,
+    0x0100005ff0b: gameButton11,
+    0x0100005ff0c: gameButton12,
+    0x0100005ff0d: gameButton13,
+    0x0100005ff0e: gameButton14,
+    0x0100005ff0f: gameButton15,
+    0x0100005ff10: gameButton16,
+    0x0100005ff11: gameButtonA,
+    0x0100005ff12: gameButtonB,
+    0x0100005ff13: gameButtonC,
+    0x0100005ff14: gameButtonLeft1,
+    0x0100005ff15: gameButtonLeft2,
+    0x0100005ff16: gameButtonMode,
+    0x0100005ff17: gameButtonRight1,
+    0x0100005ff18: gameButtonRight2,
+    0x0100005ff19: gameButtonSelect,
+    0x0100005ff1a: gameButtonStart,
+    0x0100005ff1b: gameButtonThumbLeft,
+    0x0100005ff1c: gameButtonThumbRight,
+    0x0100005ff1d: gameButtonX,
+    0x0100005ff1e: gameButtonY,
+    0x0100005ff1f: gameButtonZ,
+    0x01100000014: suspend,
+    0x01100000015: resume,
+    0x01100010082: sleep,
+    0x01100070064: intlBackslash,
+    0x01100070087: intlRo,
+    0x01100070089: intlYen,
+    0x01100070090: lang1,
+    0x01100070091: lang2,
+    0x01100070092: lang3,
+    0x01100070093: lang4,
+    0x01100070094: lang5,
+    0x0110007009b: abort,
+    0x30000000102: altLeft,
+    0x30000000105: controlLeft,
+    0x30000000109: metaLeft,
+    0x3000000010d: shiftLeft,
+    0x40000000102: altRight,
+    0x40000000105: controlRight,
+    0x40000000109: metaRight,
+    0x4000000010d: shiftRight,
+    0x5000000000d: numpadEnter,
+    0x50000000028: numpadParenLeft,
+    0x50000000029: numpadParenRight,
+    0x5000000002a: numpadMultiply,
+    0x5000000002b: numpadAdd,
+    0x5000000002c: numpadComma,
+    0x5000000002d: numpadSubtract,
+    0x5000000002e: numpadDecimal,
+    0x5000000002f: numpadDivide,
+    0x50000000030: numpad0,
+    0x50000000031: numpad1,
+    0x50000000032: numpad2,
+    0x50000000033: numpad3,
+    0x50000000034: numpad4,
+    0x50000000035: numpad5,
+    0x50000000036: numpad6,
+    0x50000000037: numpad7,
+    0x50000000038: numpad8,
+    0x50000000039: numpad9,
+    0x5000000003d: numpadEqual,
+    0x2000000010d: shift,
+    0x20000000109: meta,
+    0x20000000102: alt,
+    0x20000000105: control,
   };
 
   // A map of keys to the pseudo-key synonym for that key. Used by getSynonyms.
@@ -2026,21 +3059,46 @@ class LogicalKeyboardKey extends KeyboardKey {
   };
 
   static const Map<int, String> _keyLabels = <int, String>{
-    0x00100000000: 'None',
-    0x00100000010: 'Hyper',
-    0x00100000011: 'Super Key',
-    0x00100000013: 'Fn Lock',
-    0x00100000014: 'Suspend',
-    0x00100000015: 'Resume',
-    0x00100000016: 'Turbo',
-    0x00100000017: 'Privacy Screen Toggle',
-    0x00100010082: 'Sleep',
-    0x00100010083: 'Wake Up',
-    0x001000100b5: 'Display Toggle Int Ext',
-    0x00100070000: 'Usb Reserved',
-    0x00100070001: 'Usb Error Roll Over',
-    0x00100070002: 'Usb Post Fail',
-    0x00100070003: 'Usb Error Undefined',
+    0x00000000000: 'None',
+    0x00000000020: 'Space',
+    0x00000000021: 'Exclamation',
+    0x00000000022: 'Quote',
+    0x00000000023: 'Number Sign',
+    0x00000000024: 'Dollar',
+    0x00000000025: 'Percent',
+    0x00000000026: 'Ampersand',
+    0x00000000027: 'Quote Single',
+    0x00000000028: 'Parenthesis Left',
+    0x00000000029: 'Parenthesis Right',
+    0x0000000002a: 'Asterisk',
+    0x0000000002b: 'Add',
+    0x0000000002c: 'Comma',
+    0x0000000002d: 'Minus',
+    0x0000000002e: 'Period',
+    0x0000000002f: 'Slash',
+    0x00000000030: 'Digit 0',
+    0x00000000031: 'Digit 1',
+    0x00000000032: 'Digit 2',
+    0x00000000033: 'Digit 3',
+    0x00000000034: 'Digit 4',
+    0x00000000035: 'Digit 5',
+    0x00000000036: 'Digit 6',
+    0x00000000037: 'Digit 7',
+    0x00000000038: 'Digit 8',
+    0x00000000039: 'Digit 9',
+    0x0000000003a: 'Colon',
+    0x0000000003b: 'Semicolon',
+    0x0000000003c: 'Less',
+    0x0000000003d: 'Equal',
+    0x0000000003e: 'Greater',
+    0x0000000003f: 'Question',
+    0x00000000040: 'At',
+    0x0000000005b: 'Bracket Left',
+    0x0000000005c: 'Backslash',
+    0x0000000005d: 'Bracket Right',
+    0x0000000005e: 'Caret',
+    0x0000000005f: 'Underscore',
+    0x00000000060: 'Backquote',
     0x00000000061: 'Key A',
     0x00000000062: 'Key B',
     0x00000000063: 'Key C',
@@ -2067,238 +3125,385 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x00000000078: 'Key X',
     0x00000000079: 'Key Y',
     0x0000000007a: 'Key Z',
-    0x00000000031: 'Digit 1',
-    0x00000000032: 'Digit 2',
-    0x00000000033: 'Digit 3',
-    0x00000000034: 'Digit 4',
-    0x00000000035: 'Digit 5',
-    0x00000000036: 'Digit 6',
-    0x00000000037: 'Digit 7',
-    0x00000000038: 'Digit 8',
-    0x00000000039: 'Digit 9',
-    0x00000000030: 'Digit 0',
-    0x00100070028: 'Enter',
-    0x00100070029: 'Escape',
-    0x0010007002a: 'Backspace',
-    0x0010007002b: 'Tab',
-    0x00000000020: 'Space',
-    0x0000000002d: 'Minus',
-    0x0000000003d: 'Equal',
-    0x0000000005b: 'Bracket Left',
-    0x0000000005d: 'Bracket Right',
-    0x0000000005c: 'Backslash',
-    0x0000000003b: 'Semicolon',
-    0x00000000027: 'Quote',
-    0x00000000060: 'Backquote',
-    0x0000000002c: 'Comma',
-    0x0000000002e: 'Period',
-    0x0000000002f: 'Slash',
-    0x00100070039: 'Caps Lock',
-    0x0010007003a: 'F1',
-    0x0010007003b: 'F2',
-    0x0010007003c: 'F3',
-    0x0010007003d: 'F4',
-    0x0010007003e: 'F5',
-    0x0010007003f: 'F6',
-    0x00100070040: 'F7',
-    0x00100070041: 'F8',
-    0x00100070042: 'F9',
-    0x00100070043: 'F10',
-    0x00100070044: 'F11',
-    0x00100070045: 'F12',
-    0x00100070046: 'Print Screen',
-    0x00100070047: 'Scroll Lock',
-    0x00100070048: 'Pause',
-    0x00100070049: 'Insert',
-    0x0010007004a: 'Home',
-    0x0010007004b: 'Page Up',
-    0x0010007004c: 'Delete',
-    0x0010007004d: 'End',
-    0x0010007004e: 'Page Down',
-    0x0010007004f: 'Arrow Right',
-    0x00100070050: 'Arrow Left',
-    0x00100070051: 'Arrow Down',
-    0x00100070052: 'Arrow Up',
-    0x00100070053: 'Num Lock',
-    0x00100070054: 'Numpad Divide',
-    0x00100070055: 'Numpad Multiply',
-    0x00100070056: 'Numpad Subtract',
-    0x00100070057: 'Numpad Add',
-    0x00100070058: 'Numpad Enter',
-    0x00100070059: 'Numpad 1',
-    0x0010007005a: 'Numpad 2',
-    0x0010007005b: 'Numpad 3',
-    0x0010007005c: 'Numpad 4',
-    0x0010007005d: 'Numpad 5',
-    0x0010007005e: 'Numpad 6',
-    0x0010007005f: 'Numpad 7',
-    0x00100070060: 'Numpad 8',
-    0x00100070061: 'Numpad 9',
-    0x00100070062: 'Numpad 0',
-    0x00100070063: 'Numpad Decimal',
-    0x00100070064: 'Intl Backslash',
-    0x00100070065: 'Context Menu',
-    0x00100070066: 'Power',
-    0x00100070067: 'Numpad Equal',
-    0x00100070068: 'F13',
-    0x00100070069: 'F14',
-    0x0010007006a: 'F15',
-    0x0010007006b: 'F16',
-    0x0010007006c: 'F17',
-    0x0010007006d: 'F18',
-    0x0010007006e: 'F19',
-    0x0010007006f: 'F20',
-    0x00100070070: 'F21',
-    0x00100070071: 'F22',
-    0x00100070072: 'F23',
-    0x00100070073: 'F24',
-    0x00100070074: 'Open',
-    0x00100070075: 'Help',
-    0x00100070077: 'Select',
-    0x00100070079: 'Again',
-    0x0010007007a: 'Undo',
-    0x0010007007b: 'Cut',
-    0x0010007007c: 'Copy',
-    0x0010007007d: 'Paste',
-    0x0010007007e: 'Find',
-    0x0010007007f: 'Audio Volume Mute',
-    0x00100070080: 'Audio Volume Up',
-    0x00100070081: 'Audio Volume Down',
-    0x00100070085: 'Numpad Comma',
-    0x00100070087: 'Intl Ro',
-    0x00100070088: 'Kana Mode',
-    0x00100070089: 'Intl Yen',
-    0x0010007008a: 'Convert',
-    0x0010007008b: 'Non Convert',
-    0x00100070090: 'Lang 1',
-    0x00100070091: 'Lang 2',
-    0x00100070092: 'Lang 3',
-    0x00100070093: 'Lang 4',
-    0x00100070094: 'Lang 5',
-    0x0010007009b: 'Abort',
-    0x001000700a3: 'Props',
-    0x001000700b6: 'Numpad Paren Left',
-    0x001000700b7: 'Numpad Paren Right',
-    0x001000700bb: 'Numpad Backspace',
-    0x001000700d0: 'Numpad Memory Store',
-    0x001000700d1: 'Numpad Memory Recall',
-    0x001000700d2: 'Numpad Memory Clear',
-    0x001000700d3: 'Numpad Memory Add',
-    0x001000700d4: 'Numpad Memory Subtract',
-    0x001000700d7: 'Numpad Sign Change',
-    0x001000700d8: 'Numpad Clear',
-    0x001000700d9: 'Numpad Clear Entry',
-    0x001000700e0: 'Control Left',
-    0x001000700e1: 'Shift Left',
-    0x001000700e2: 'Alt Left',
-    0x001000700e3: 'Meta Left',
-    0x001000700e4: 'Control Right',
-    0x001000700e5: 'Shift Right',
-    0x001000700e6: 'Alt Right',
-    0x001000700e7: 'Meta Right',
-    0x001000c0060: 'Info',
-    0x001000c0061: 'Closed Caption Toggle',
-    0x001000c006f: 'Brightness Up',
-    0x001000c0070: 'Brightness Down',
-    0x001000c0072: 'Brightness Toggle',
-    0x001000c0073: 'Brightness Minimum',
-    0x001000c0074: 'Brightness Maximum',
-    0x001000c0075: 'Brightness Auto',
-    0x001000c0079: 'Kbd Illum Up',
-    0x001000c007a: 'Kbd Illum Down',
-    0x001000c0083: 'Media Last',
-    0x001000c008c: 'Launch Phone',
-    0x001000c008d: 'Program Guide',
-    0x001000c0094: 'Exit',
-    0x001000c009c: 'Channel Up',
-    0x001000c009d: 'Channel Down',
-    0x001000c00b0: 'Media Play',
-    0x001000c00b1: 'Media Pause',
-    0x001000c00b2: 'Media Record',
-    0x001000c00b3: 'Media Fast Forward',
-    0x001000c00b4: 'Media Rewind',
-    0x001000c00b5: 'Media Track Next',
-    0x001000c00b6: 'Media Track Previous',
-    0x001000c00b7: 'Media Stop',
-    0x001000c00b8: 'Eject',
-    0x001000c00cd: 'Media Play Pause',
-    0x001000c00cf: 'Speech Input Toggle',
-    0x001000c00e5: 'Bass Boost',
-    0x001000c0183: 'Media Select',
-    0x001000c0184: 'Launch Word Processor',
-    0x001000c0186: 'Launch Spreadsheet',
-    0x001000c018a: 'Launch Mail',
-    0x001000c018d: 'Launch Contacts',
-    0x001000c018e: 'Launch Calendar',
-    0x001000c0192: 'Launch App2',
-    0x001000c0194: 'Launch App1',
-    0x001000c0196: 'Launch Internet Browser',
-    0x001000c019c: 'Log Off',
-    0x001000c019e: 'Lock Screen',
-    0x001000c019f: 'Launch Control Panel',
-    0x001000c01a2: 'Select Task',
-    0x001000c01a7: 'Launch Documents',
-    0x001000c01ab: 'Spell Check',
-    0x001000c01ae: 'Launch Keyboard Layout',
-    0x001000c01b1: 'Launch Screen Saver',
-    0x001000c01cb: 'Launch Assistant',
-    0x001000c01b7: 'Launch Audio Browser',
-    0x001000c0201: 'New Key',
-    0x001000c0203: 'Close',
-    0x001000c0207: 'Save',
-    0x001000c0208: 'Print',
-    0x001000c0221: 'Browser Search',
-    0x001000c0223: 'Browser Home',
-    0x001000c0224: 'Browser Back',
-    0x001000c0225: 'Browser Forward',
-    0x001000c0226: 'Browser Stop',
-    0x001000c0227: 'Browser Refresh',
-    0x001000c022a: 'Browser Favorites',
-    0x001000c022d: 'Zoom In',
-    0x001000c022e: 'Zoom Out',
-    0x001000c0232: 'Zoom Toggle',
-    0x001000c0279: 'Redo',
-    0x001000c0289: 'Mail Reply',
-    0x001000c028b: 'Mail Forward',
-    0x001000c028c: 'Mail Send',
-    0x001000c029d: 'Keyboard Layout Select',
-    0x001000c029f: 'Show All Windows',
-    0x0010005ff01: 'Game Button 1',
-    0x0010005ff02: 'Game Button 2',
-    0x0010005ff03: 'Game Button 3',
-    0x0010005ff04: 'Game Button 4',
-    0x0010005ff05: 'Game Button 5',
-    0x0010005ff06: 'Game Button 6',
-    0x0010005ff07: 'Game Button 7',
-    0x0010005ff08: 'Game Button 8',
-    0x0010005ff09: 'Game Button 9',
-    0x0010005ff0a: 'Game Button 10',
-    0x0010005ff0b: 'Game Button 11',
-    0x0010005ff0c: 'Game Button 12',
-    0x0010005ff0d: 'Game Button 13',
-    0x0010005ff0e: 'Game Button 14',
-    0x0010005ff0f: 'Game Button 15',
-    0x0010005ff10: 'Game Button 16',
-    0x0010005ff11: 'Game Button A',
-    0x0010005ff12: 'Game Button B',
-    0x0010005ff13: 'Game Button C',
-    0x0010005ff14: 'Game Button Left 1',
-    0x0010005ff15: 'Game Button Left 2',
-    0x0010005ff16: 'Game Button Mode',
-    0x0010005ff17: 'Game Button Right 1',
-    0x0010005ff18: 'Game Button Right 2',
-    0x0010005ff19: 'Game Button Select',
-    0x0010005ff1a: 'Game Button Start',
-    0x0010005ff1b: 'Game Button Thumb Left',
-    0x0010005ff1c: 'Game Button Thumb Right',
-    0x0010005ff1d: 'Game Button X',
-    0x0010005ff1e: 'Game Button Y',
-    0x0010005ff1f: 'Game Button Z',
-    0x00100000012: 'Fn',
-    0x201000700e1: 'Shift',
-    0x201000700e3: 'Meta',
-    0x201000700e2: 'Alt',
-    0x201000700e0: 'Control',
+    0x0000000007b: 'Brace Left',
+    0x0000000007c: 'Bar',
+    0x0000000007d: 'Brace Right',
+    0x0000000007e: 'Tilde',
+    0x01000000001: 'Unidentified',
+    0x01000000008: 'Backspace',
+    0x01000000009: 'Tab',
+    0x0100000000d: 'Enter',
+    0x0100000001b: 'Escape',
+    0x0100000007f: 'Delete',
+    0x01000000101: 'Accel',
+    0x01000000103: 'Alt Graph',
+    0x01000000104: 'Caps Lock',
+    0x01000000106: 'Fn',
+    0x01000000107: 'Fn Lock',
+    0x01000000108: 'Hyper',
+    0x0100000010a: 'Num Lock',
+    0x0100000010c: 'Scroll Lock',
+    0x0100000010e: 'Super',
+    0x0100000010f: 'Symbol',
+    0x01000000110: 'Symbol Lock',
+    0x01000000111: 'Shift Level 5',
+    0x01000000301: 'Arrow Down',
+    0x01000000302: 'Arrow Left',
+    0x01000000303: 'Arrow Right',
+    0x01000000304: 'Arrow Up',
+    0x01000000305: 'End',
+    0x01000000306: 'Home',
+    0x01000000307: 'Page Down',
+    0x01000000308: 'Page Up',
+    0x01000000401: 'Clear',
+    0x01000000402: 'Copy',
+    0x01000000403: 'Cr Sel',
+    0x01000000404: 'Cut',
+    0x01000000405: 'Erase Eof',
+    0x01000000406: 'Ex Sel',
+    0x01000000407: 'Insert',
+    0x01000000408: 'Paste',
+    0x01000000409: 'Redo',
+    0x0100000040a: 'Undo',
+    0x01000000501: 'Accept',
+    0x01000000502: 'Again',
+    0x01000000503: 'Attn',
+    0x01000000504: 'Cancel',
+    0x01000000505: 'Context Menu',
+    0x01000000506: 'Execute',
+    0x01000000507: 'Find',
+    0x01000000508: 'Help',
+    0x01000000509: 'Pause',
+    0x0100000050a: 'Play',
+    0x0100000050b: 'Props',
+    0x0100000050c: 'Select',
+    0x0100000050d: 'Zoom In',
+    0x0100000050e: 'Zoom Out',
+    0x01000000601: 'Brightness Down',
+    0x01000000602: 'Brightness Up',
+    0x01000000603: 'Camera',
+    0x01000000604: 'Eject',
+    0x01000000605: 'Log Off',
+    0x01000000606: 'Power',
+    0x01000000607: 'Power Off',
+    0x01000000608: 'Print Screen',
+    0x01000000609: 'Hibernate',
+    0x0100000060a: 'Standby',
+    0x0100000060b: 'Wake Up',
+    0x01000000701: 'All Candidates',
+    0x01000000702: 'Alphanumeric',
+    0x01000000703: 'Code Input',
+    0x01000000704: 'Compose',
+    0x01000000705: 'Convert',
+    0x01000000706: 'Final Mode',
+    0x01000000707: 'Group First',
+    0x01000000708: 'Group Last',
+    0x01000000709: 'Group Next',
+    0x0100000070a: 'Group Previous',
+    0x0100000070b: 'Mode Change',
+    0x0100000070c: 'Next Candidate',
+    0x0100000070d: 'Non Convert',
+    0x0100000070e: 'Previous Candidate',
+    0x0100000070f: 'Process',
+    0x01000000710: 'Single Candidate',
+    0x01000000711: 'Hangul Mode',
+    0x01000000712: 'Hanja Mode',
+    0x01000000713: 'Junja Mode',
+    0x01000000714: 'Eisu',
+    0x01000000715: 'Hankaku',
+    0x01000000716: 'Hiragana',
+    0x01000000717: 'Hiragana Katakana',
+    0x01000000718: 'Kana Mode',
+    0x01000000719: 'Kanji Mode',
+    0x0100000071a: 'Katakana',
+    0x0100000071b: 'Romaji',
+    0x0100000071c: 'Zenkaku',
+    0x0100000071d: 'Zenkaku Hankaku',
+    0x01000000801: 'F1',
+    0x01000000802: 'F2',
+    0x01000000803: 'F3',
+    0x01000000804: 'F4',
+    0x01000000805: 'F5',
+    0x01000000806: 'F6',
+    0x01000000807: 'F7',
+    0x01000000808: 'F8',
+    0x01000000809: 'F9',
+    0x0100000080a: 'F10',
+    0x0100000080b: 'F11',
+    0x0100000080c: 'F12',
+    0x0100000080d: 'F13',
+    0x0100000080e: 'F14',
+    0x0100000080f: 'F15',
+    0x01000000810: 'F16',
+    0x01000000811: 'F17',
+    0x01000000812: 'F18',
+    0x01000000813: 'F19',
+    0x01000000814: 'F20',
+    0x01000000815: 'F21',
+    0x01000000816: 'F22',
+    0x01000000817: 'F23',
+    0x01000000818: 'F24',
+    0x01000000901: 'Soft 1',
+    0x01000000902: 'Soft 2',
+    0x01000000903: 'Soft 3',
+    0x01000000904: 'Soft 4',
+    0x01000000905: 'Soft 5',
+    0x01000000906: 'Soft 6',
+    0x01000000907: 'Soft 7',
+    0x01000000908: 'Soft 8',
+    0x01000000a01: 'Close',
+    0x01000000a02: 'Mail Forward',
+    0x01000000a03: 'Mail Reply',
+    0x01000000a04: 'Mail Send',
+    0x01000000a05: 'Media Play Pause',
+    0x01000000a07: 'Media Stop',
+    0x01000000a08: 'Media Track Next',
+    0x01000000a09: 'Media Track Previous',
+    0x01000000a0a: 'New',
+    0x01000000a0b: 'Open',
+    0x01000000a0c: 'Print',
+    0x01000000a0d: 'Save',
+    0x01000000a0e: 'Spell Check',
+    0x01000000a0f: 'Audio Volume Down',
+    0x01000000a10: 'Audio Volume Up',
+    0x01000000a11: 'Audio Volume Mute',
+    0x01000000b01: 'Launch Application 2',
+    0x01000000b02: 'Launch Calendar',
+    0x01000000b03: 'Launch Mail',
+    0x01000000b04: 'Launch Media Player',
+    0x01000000b05: 'Launch Music Player',
+    0x01000000b06: 'Launch Application 1',
+    0x01000000b07: 'Launch Screen Saver',
+    0x01000000b08: 'Launch Spreadsheet',
+    0x01000000b09: 'Launch Web Browser',
+    0x01000000b0a: 'Launch Web Cam',
+    0x01000000b0b: 'Launch Word Processor',
+    0x01000000b0c: 'Launch Contacts',
+    0x01000000b0d: 'Launch Phone',
+    0x01000000b0e: 'Launch Assistant',
+    0x01000000b0f: 'Launch Control Panel',
+    0x01000000c01: 'Browser Back',
+    0x01000000c02: 'Browser Favorites',
+    0x01000000c03: 'Browser Forward',
+    0x01000000c04: 'Browser Home',
+    0x01000000c05: 'Browser Refresh',
+    0x01000000c06: 'Browser Search',
+    0x01000000c07: 'Browser Stop',
+    0x01000000d01: 'Audio Balance Left',
+    0x01000000d02: 'Audio Balance Right',
+    0x01000000d03: 'Audio Bass Boost Down',
+    0x01000000d04: 'Audio Bass Boost Up',
+    0x01000000d05: 'Audio Fader Front',
+    0x01000000d06: 'Audio Fader Rear',
+    0x01000000d07: 'Audio Surround Mode Next',
+    0x01000000d08: 'AVR Input',
+    0x01000000d09: 'AVR Power',
+    0x01000000d0a: 'Channel Down',
+    0x01000000d0b: 'Channel Up',
+    0x01000000d0c: 'Color F0 Red',
+    0x01000000d0d: 'Color F1 Green',
+    0x01000000d0e: 'Color F2 Yellow',
+    0x01000000d0f: 'Color F3 Blue',
+    0x01000000d10: 'Color F4 Grey',
+    0x01000000d11: 'Color F5 Brown',
+    0x01000000d12: 'Closed Caption Toggle',
+    0x01000000d13: 'Dimmer',
+    0x01000000d14: 'Display Swap',
+    0x01000000d15: 'Exit',
+    0x01000000d16: 'Favorite Clear 0',
+    0x01000000d17: 'Favorite Clear 1',
+    0x01000000d18: 'Favorite Clear 2',
+    0x01000000d19: 'Favorite Clear 3',
+    0x01000000d1a: 'Favorite Recall 0',
+    0x01000000d1b: 'Favorite Recall 1',
+    0x01000000d1c: 'Favorite Recall 2',
+    0x01000000d1d: 'Favorite Recall 3',
+    0x01000000d1e: 'Favorite Store 0',
+    0x01000000d1f: 'Favorite Store 1',
+    0x01000000d20: 'Favorite Store 2',
+    0x01000000d21: 'Favorite Store 3',
+    0x01000000d22: 'Guide',
+    0x01000000d23: 'Guide Next Day',
+    0x01000000d24: 'Guide Previous Day',
+    0x01000000d25: 'Info',
+    0x01000000d26: 'Instant Replay',
+    0x01000000d27: 'Link',
+    0x01000000d28: 'List Program',
+    0x01000000d29: 'Live Content',
+    0x01000000d2a: 'Lock',
+    0x01000000d2b: 'Media Apps',
+    0x01000000d2c: 'Media Fast Forward',
+    0x01000000d2d: 'Media Last',
+    0x01000000d2e: 'Media Pause',
+    0x01000000d2f: 'Media Play',
+    0x01000000d30: 'Media Record',
+    0x01000000d31: 'Media Rewind',
+    0x01000000d32: 'Media Skip',
+    0x01000000d33: 'Next Favorite Channel',
+    0x01000000d34: 'Next User Profile',
+    0x01000000d35: 'On Demand',
+    0x01000000d36: 'P In P Down',
+    0x01000000d37: 'P In P Move',
+    0x01000000d38: 'P In P Toggle',
+    0x01000000d39: 'P In P Up',
+    0x01000000d3a: 'Play Speed Down',
+    0x01000000d3b: 'Play Speed Reset',
+    0x01000000d3c: 'Play Speed Up',
+    0x01000000d3d: 'Random Toggle',
+    0x01000000d3e: 'Rc Low Battery',
+    0x01000000d3f: 'Record Speed Next',
+    0x01000000d40: 'Rf Bypass',
+    0x01000000d41: 'Scan Channels Toggle',
+    0x01000000d42: 'Screen Mode Next',
+    0x01000000d43: 'Settings',
+    0x01000000d44: 'Split Screen Toggle',
+    0x01000000d45: 'STB Input',
+    0x01000000d46: 'STB Power',
+    0x01000000d47: 'Subtitle',
+    0x01000000d48: 'Teletext',
+    0x01000000d49: 'TV',
+    0x01000000d4a: 'TV Input',
+    0x01000000d4b: 'TV Power',
+    0x01000000d4c: 'Video Mode Next',
+    0x01000000d4d: 'Wink',
+    0x01000000d4e: 'Zoom Toggle',
+    0x01000000d4f: 'DVR',
+    0x01000000d50: 'Media Audio Track',
+    0x01000000d51: 'Media Skip Backward',
+    0x01000000d52: 'Media Skip Forward',
+    0x01000000d53: 'Media Step Backward',
+    0x01000000d54: 'Media Step Forward',
+    0x01000000d55: 'Media Top Menu',
+    0x01000000d56: 'Navigate In',
+    0x01000000d57: 'Navigate Next',
+    0x01000000d58: 'Navigate Out',
+    0x01000000d59: 'Navigate Previous',
+    0x01000000d5a: 'Pairing',
+    0x01000000d5b: 'Media Close',
+    0x01000000e02: 'Audio Bass Boost Toggle',
+    0x01000000e04: 'Audio Treble Down',
+    0x01000000e05: 'Audio Treble Up',
+    0x01000000e06: 'Microphone Toggle',
+    0x01000000e07: 'Microphone Volume Down',
+    0x01000000e08: 'Microphone Volume Up',
+    0x01000000e09: 'Microphone Volume Mute',
+    0x01000000f01: 'Speech Correction List',
+    0x01000000f02: 'Speech Input Toggle',
+    0x01000001001: 'App Switch',
+    0x01000001002: 'Call',
+    0x01000001003: 'Camera Focus',
+    0x01000001004: 'End Call',
+    0x01000001005: 'Go Back',
+    0x01000001006: 'Go Home',
+    0x01000001007: 'Headset Hook',
+    0x01000001008: 'Last Number Redial',
+    0x01000001009: 'Notification',
+    0x0100000100a: 'Manner Mode',
+    0x0100000100b: 'Voice Dial',
+    0x01000001101: 'TV 3 D Mode',
+    0x01000001102: 'TV Antenna Cable',
+    0x01000001103: 'TV Audio Description',
+    0x01000001104: 'TV Audio Description Mix Down',
+    0x01000001105: 'TV Audio Description Mix Up',
+    0x01000001106: 'TV Contents Menu',
+    0x01000001107: 'TV Data Service',
+    0x01000001108: 'TV Input Component 1',
+    0x01000001109: 'TV Input Component 2',
+    0x0100000110a: 'TV Input Composite 1',
+    0x0100000110b: 'TV Input Composite 2',
+    0x0100000110c: 'TV Input HDMI 1',
+    0x0100000110d: 'TV Input HDMI 2',
+    0x0100000110e: 'TV Input HDMI 3',
+    0x0100000110f: 'TV Input HDMI 4',
+    0x01000001110: 'TV Input VGA 1',
+    0x01000001111: 'TV Media Context',
+    0x01000001112: 'TV Network',
+    0x01000001113: 'TV Number Entry',
+    0x01000001114: 'TV Radio Service',
+    0x01000001115: 'TV Satellite',
+    0x01000001116: 'TV Satellite BS',
+    0x01000001117: 'TV Satellite CS',
+    0x01000001118: 'TV Satellite Toggle',
+    0x01000001119: 'TV Terrestrial Analog',
+    0x0100000111a: 'TV Terrestrial Digital',
+    0x0100000111b: 'TV Timer',
+    0x01000001201: 'Key 11',
+    0x01000001202: 'Key 12',
+    0x0100005ff01: 'Game Button 1',
+    0x0100005ff02: 'Game Button 2',
+    0x0100005ff03: 'Game Button 3',
+    0x0100005ff04: 'Game Button 4',
+    0x0100005ff05: 'Game Button 5',
+    0x0100005ff06: 'Game Button 6',
+    0x0100005ff07: 'Game Button 7',
+    0x0100005ff08: 'Game Button 8',
+    0x0100005ff09: 'Game Button 9',
+    0x0100005ff0a: 'Game Button 10',
+    0x0100005ff0b: 'Game Button 11',
+    0x0100005ff0c: 'Game Button 12',
+    0x0100005ff0d: 'Game Button 13',
+    0x0100005ff0e: 'Game Button 14',
+    0x0100005ff0f: 'Game Button 15',
+    0x0100005ff10: 'Game Button 16',
+    0x0100005ff11: 'Game Button A',
+    0x0100005ff12: 'Game Button B',
+    0x0100005ff13: 'Game Button C',
+    0x0100005ff14: 'Game Button Left 1',
+    0x0100005ff15: 'Game Button Left 2',
+    0x0100005ff16: 'Game Button Mode',
+    0x0100005ff17: 'Game Button Right 1',
+    0x0100005ff18: 'Game Button Right 2',
+    0x0100005ff19: 'Game Button Select',
+    0x0100005ff1a: 'Game Button Start',
+    0x0100005ff1b: 'Game Button Thumb Left',
+    0x0100005ff1c: 'Game Button Thumb Right',
+    0x0100005ff1d: 'Game Button X',
+    0x0100005ff1e: 'Game Button Y',
+    0x0100005ff1f: 'Game Button Z',
+    0x01100000014: 'Suspend',
+    0x01100000015: 'Resume',
+    0x01100010082: 'Sleep',
+    0x01100070064: 'Intl Backslash',
+    0x01100070087: 'Intl Ro',
+    0x01100070089: 'Intl Yen',
+    0x01100070090: 'Lang 1',
+    0x01100070091: 'Lang 2',
+    0x01100070092: 'Lang 3',
+    0x01100070093: 'Lang 4',
+    0x01100070094: 'Lang 5',
+    0x0110007009b: 'Abort',
+    0x30000000102: 'Alt Left',
+    0x30000000105: 'Control Left',
+    0x30000000109: 'Meta Left',
+    0x3000000010d: 'Shift Left',
+    0x40000000102: 'Alt Right',
+    0x40000000105: 'Control Right',
+    0x40000000109: 'Meta Right',
+    0x4000000010d: 'Shift Right',
+    0x5000000000d: 'Numpad Enter',
+    0x50000000028: 'Numpad Paren Left',
+    0x50000000029: 'Numpad Paren Right',
+    0x5000000002a: 'Numpad Multiply',
+    0x5000000002b: 'Numpad Add',
+    0x5000000002c: 'Numpad Comma',
+    0x5000000002d: 'Numpad Subtract',
+    0x5000000002e: 'Numpad Decimal',
+    0x5000000002f: 'Numpad Divide',
+    0x50000000030: 'Numpad 0',
+    0x50000000031: 'Numpad 1',
+    0x50000000032: 'Numpad 2',
+    0x50000000033: 'Numpad 3',
+    0x50000000034: 'Numpad 4',
+    0x50000000035: 'Numpad 5',
+    0x50000000036: 'Numpad 6',
+    0x50000000037: 'Numpad 7',
+    0x50000000038: 'Numpad 8',
+    0x50000000039: 'Numpad 9',
+    0x5000000003d: 'Numpad Equal',
+    0x2000000010d: 'Shift',
+    0x20000000109: 'Meta',
+    0x20000000102: 'Alt',
+    0x20000000105: 'Control',
     };
 }
 
@@ -2319,7 +3524,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 /// Conversely, if you wanted to implement an app where the "Q" key "quit"
 /// something, you'd want to look at the logical key to detect this, since you
 /// would like to have it match the key with "Q" on it, instead of always
-/// looking for "the key next next to the TAB key", since on a French keyboard,
+/// looking for "the key next to the TAB key", since on a French keyboard,
 /// the key next to the TAB key has an "A" on it.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
@@ -2462,6 +3667,11 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey superKey = PhysicalKeyboardKey(0x00000011);
 
+  /// Represents the location of the "Fn" key on a generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey fn = PhysicalKeyboardKey(0x00000012);
+
   /// Represents the location of the "Fn Lock" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
@@ -2503,6 +3713,192 @@ class PhysicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey displayToggleIntExt = PhysicalKeyboardKey(0x000100b5);
+
+  /// Represents the location of the "Game Button 1" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton1 = PhysicalKeyboardKey(0x0005ff01);
+
+  /// Represents the location of the "Game Button 2" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton2 = PhysicalKeyboardKey(0x0005ff02);
+
+  /// Represents the location of the "Game Button 3" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton3 = PhysicalKeyboardKey(0x0005ff03);
+
+  /// Represents the location of the "Game Button 4" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton4 = PhysicalKeyboardKey(0x0005ff04);
+
+  /// Represents the location of the "Game Button 5" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton5 = PhysicalKeyboardKey(0x0005ff05);
+
+  /// Represents the location of the "Game Button 6" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton6 = PhysicalKeyboardKey(0x0005ff06);
+
+  /// Represents the location of the "Game Button 7" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton7 = PhysicalKeyboardKey(0x0005ff07);
+
+  /// Represents the location of the "Game Button 8" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton8 = PhysicalKeyboardKey(0x0005ff08);
+
+  /// Represents the location of the "Game Button 9" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton9 = PhysicalKeyboardKey(0x0005ff09);
+
+  /// Represents the location of the "Game Button 10" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton10 = PhysicalKeyboardKey(0x0005ff0a);
+
+  /// Represents the location of the "Game Button 11" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton11 = PhysicalKeyboardKey(0x0005ff0b);
+
+  /// Represents the location of the "Game Button 12" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton12 = PhysicalKeyboardKey(0x0005ff0c);
+
+  /// Represents the location of the "Game Button 13" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton13 = PhysicalKeyboardKey(0x0005ff0d);
+
+  /// Represents the location of the "Game Button 14" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton14 = PhysicalKeyboardKey(0x0005ff0e);
+
+  /// Represents the location of the "Game Button 15" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton15 = PhysicalKeyboardKey(0x0005ff0f);
+
+  /// Represents the location of the "Game Button 16" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton16 = PhysicalKeyboardKey(0x0005ff10);
+
+  /// Represents the location of the "Game Button A" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonA = PhysicalKeyboardKey(0x0005ff11);
+
+  /// Represents the location of the "Game Button B" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonB = PhysicalKeyboardKey(0x0005ff12);
+
+  /// Represents the location of the "Game Button C" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonC = PhysicalKeyboardKey(0x0005ff13);
+
+  /// Represents the location of the "Game Button Left 1" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonLeft1 = PhysicalKeyboardKey(0x0005ff14);
+
+  /// Represents the location of the "Game Button Left 2" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonLeft2 = PhysicalKeyboardKey(0x0005ff15);
+
+  /// Represents the location of the "Game Button Mode" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonMode = PhysicalKeyboardKey(0x0005ff16);
+
+  /// Represents the location of the "Game Button Right 1" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonRight1 = PhysicalKeyboardKey(0x0005ff17);
+
+  /// Represents the location of the "Game Button Right 2" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonRight2 = PhysicalKeyboardKey(0x0005ff18);
+
+  /// Represents the location of the "Game Button Select" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonSelect = PhysicalKeyboardKey(0x0005ff19);
+
+  /// Represents the location of the "Game Button Start" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonStart = PhysicalKeyboardKey(0x0005ff1a);
+
+  /// Represents the location of the "Game Button Thumb Left" key on a
+  /// generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonThumbLeft = PhysicalKeyboardKey(0x0005ff1b);
+
+  /// Represents the location of the "Game Button Thumb Right" key on a
+  /// generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonThumbRight = PhysicalKeyboardKey(0x0005ff1c);
+
+  /// Represents the location of the "Game Button X" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonX = PhysicalKeyboardKey(0x0005ff1d);
+
+  /// Represents the location of the "Game Button Y" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonY = PhysicalKeyboardKey(0x0005ff1e);
+
+  /// Represents the location of the "Game Button Z" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonZ = PhysicalKeyboardKey(0x0005ff1f);
 
   /// Represents the location of the "Usb Reserved" key on a generalized
   /// keyboard.
@@ -3596,17 +4992,17 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey launchScreenSaver = PhysicalKeyboardKey(0x000c01b1);
 
-  /// Represents the location of the "Launch Assistant" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey launchAssistant = PhysicalKeyboardKey(0x000c01cb);
-
   /// Represents the location of the "Launch Audio Browser" key on a generalized
   /// keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey launchAudioBrowser = PhysicalKeyboardKey(0x000c01b7);
+
+  /// Represents the location of the "Launch Assistant" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey launchAssistant = PhysicalKeyboardKey(0x000c01cb);
 
   /// Represents the location of the "New Key" key on a generalized keyboard.
   ///
@@ -3719,203 +5115,13 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey showAllWindows = PhysicalKeyboardKey(0x000c029f);
 
-  /// Represents the location of the "Game Button 1" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton1 = PhysicalKeyboardKey(0x0005ff01);
-
-  /// Represents the location of the "Game Button 2" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton2 = PhysicalKeyboardKey(0x0005ff02);
-
-  /// Represents the location of the "Game Button 3" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton3 = PhysicalKeyboardKey(0x0005ff03);
-
-  /// Represents the location of the "Game Button 4" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton4 = PhysicalKeyboardKey(0x0005ff04);
-
-  /// Represents the location of the "Game Button 5" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton5 = PhysicalKeyboardKey(0x0005ff05);
-
-  /// Represents the location of the "Game Button 6" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton6 = PhysicalKeyboardKey(0x0005ff06);
-
-  /// Represents the location of the "Game Button 7" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton7 = PhysicalKeyboardKey(0x0005ff07);
-
-  /// Represents the location of the "Game Button 8" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton8 = PhysicalKeyboardKey(0x0005ff08);
-
-  /// Represents the location of the "Game Button 9" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton9 = PhysicalKeyboardKey(0x0005ff09);
-
-  /// Represents the location of the "Game Button 10" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton10 = PhysicalKeyboardKey(0x0005ff0a);
-
-  /// Represents the location of the "Game Button 11" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton11 = PhysicalKeyboardKey(0x0005ff0b);
-
-  /// Represents the location of the "Game Button 12" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton12 = PhysicalKeyboardKey(0x0005ff0c);
-
-  /// Represents the location of the "Game Button 13" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton13 = PhysicalKeyboardKey(0x0005ff0d);
-
-  /// Represents the location of the "Game Button 14" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton14 = PhysicalKeyboardKey(0x0005ff0e);
-
-  /// Represents the location of the "Game Button 15" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton15 = PhysicalKeyboardKey(0x0005ff0f);
-
-  /// Represents the location of the "Game Button 16" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton16 = PhysicalKeyboardKey(0x0005ff10);
-
-  /// Represents the location of the "Game Button A" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonA = PhysicalKeyboardKey(0x0005ff11);
-
-  /// Represents the location of the "Game Button B" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonB = PhysicalKeyboardKey(0x0005ff12);
-
-  /// Represents the location of the "Game Button C" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonC = PhysicalKeyboardKey(0x0005ff13);
-
-  /// Represents the location of the "Game Button Left 1" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonLeft1 = PhysicalKeyboardKey(0x0005ff14);
-
-  /// Represents the location of the "Game Button Left 2" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonLeft2 = PhysicalKeyboardKey(0x0005ff15);
-
-  /// Represents the location of the "Game Button Mode" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonMode = PhysicalKeyboardKey(0x0005ff16);
-
-  /// Represents the location of the "Game Button Right 1" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonRight1 = PhysicalKeyboardKey(0x0005ff17);
-
-  /// Represents the location of the "Game Button Right 2" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonRight2 = PhysicalKeyboardKey(0x0005ff18);
-
-  /// Represents the location of the "Game Button Select" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonSelect = PhysicalKeyboardKey(0x0005ff19);
-
-  /// Represents the location of the "Game Button Start" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonStart = PhysicalKeyboardKey(0x0005ff1a);
-
-  /// Represents the location of the "Game Button Thumb Left" key on a
-  /// generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonThumbLeft = PhysicalKeyboardKey(0x0005ff1b);
-
-  /// Represents the location of the "Game Button Thumb Right" key on a
-  /// generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonThumbRight = PhysicalKeyboardKey(0x0005ff1c);
-
-  /// Represents the location of the "Game Button X" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonX = PhysicalKeyboardKey(0x0005ff1d);
-
-  /// Represents the location of the "Game Button Y" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonY = PhysicalKeyboardKey(0x0005ff1e);
-
-  /// Represents the location of the "Game Button Z" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonZ = PhysicalKeyboardKey(0x0005ff1f);
-
-  /// Represents the location of the "Fn" key on a generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey fn = PhysicalKeyboardKey(0x00000012);
-
   // A list of all the predefined constant PhysicalKeyboardKeys so that they
   // can be searched.
   static const Map<int, PhysicalKeyboardKey> _knownPhysicalKeys = <int, PhysicalKeyboardKey>{
     0x00000000: none,
     0x00000010: hyper,
     0x00000011: superKey,
+    0x00000012: fn,
     0x00000013: fnLock,
     0x00000014: suspend,
     0x00000015: resume,
@@ -3924,6 +5130,37 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x00010082: sleep,
     0x00010083: wakeUp,
     0x000100b5: displayToggleIntExt,
+    0x0005ff01: gameButton1,
+    0x0005ff02: gameButton2,
+    0x0005ff03: gameButton3,
+    0x0005ff04: gameButton4,
+    0x0005ff05: gameButton5,
+    0x0005ff06: gameButton6,
+    0x0005ff07: gameButton7,
+    0x0005ff08: gameButton8,
+    0x0005ff09: gameButton9,
+    0x0005ff0a: gameButton10,
+    0x0005ff0b: gameButton11,
+    0x0005ff0c: gameButton12,
+    0x0005ff0d: gameButton13,
+    0x0005ff0e: gameButton14,
+    0x0005ff0f: gameButton15,
+    0x0005ff10: gameButton16,
+    0x0005ff11: gameButtonA,
+    0x0005ff12: gameButtonB,
+    0x0005ff13: gameButtonC,
+    0x0005ff14: gameButtonLeft1,
+    0x0005ff15: gameButtonLeft2,
+    0x0005ff16: gameButtonMode,
+    0x0005ff17: gameButtonRight1,
+    0x0005ff18: gameButtonRight2,
+    0x0005ff19: gameButtonSelect,
+    0x0005ff1a: gameButtonStart,
+    0x0005ff1b: gameButtonThumbLeft,
+    0x0005ff1c: gameButtonThumbRight,
+    0x0005ff1d: gameButtonX,
+    0x0005ff1e: gameButtonY,
+    0x0005ff1f: gameButtonZ,
     0x00070000: usbReserved,
     0x00070001: usbErrorRollOver,
     0x00070002: usbPostFail,
@@ -4128,8 +5365,8 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x000c01ab: spellCheck,
     0x000c01ae: launchKeyboardLayout,
     0x000c01b1: launchScreenSaver,
-    0x000c01cb: launchAssistant,
     0x000c01b7: launchAudioBrowser,
+    0x000c01cb: launchAssistant,
     0x000c0201: newKey,
     0x000c0203: close,
     0x000c0207: save,
@@ -4150,38 +5387,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x000c028c: mailSend,
     0x000c029d: keyboardLayoutSelect,
     0x000c029f: showAllWindows,
-    0x0005ff01: gameButton1,
-    0x0005ff02: gameButton2,
-    0x0005ff03: gameButton3,
-    0x0005ff04: gameButton4,
-    0x0005ff05: gameButton5,
-    0x0005ff06: gameButton6,
-    0x0005ff07: gameButton7,
-    0x0005ff08: gameButton8,
-    0x0005ff09: gameButton9,
-    0x0005ff0a: gameButton10,
-    0x0005ff0b: gameButton11,
-    0x0005ff0c: gameButton12,
-    0x0005ff0d: gameButton13,
-    0x0005ff0e: gameButton14,
-    0x0005ff0f: gameButton15,
-    0x0005ff10: gameButton16,
-    0x0005ff11: gameButtonA,
-    0x0005ff12: gameButtonB,
-    0x0005ff13: gameButtonC,
-    0x0005ff14: gameButtonLeft1,
-    0x0005ff15: gameButtonLeft2,
-    0x0005ff16: gameButtonMode,
-    0x0005ff17: gameButtonRight1,
-    0x0005ff18: gameButtonRight2,
-    0x0005ff19: gameButtonSelect,
-    0x0005ff1a: gameButtonStart,
-    0x0005ff1b: gameButtonThumbLeft,
-    0x0005ff1c: gameButtonThumbRight,
-    0x0005ff1d: gameButtonX,
-    0x0005ff1e: gameButtonY,
-    0x0005ff1f: gameButtonZ,
-    0x00000012: fn,
   };
 
   static const Map<int, String> _debugNames = kReleaseMode ?
@@ -4190,6 +5395,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
       0x00000000: 'None',
       0x00000010: 'Hyper',
       0x00000011: 'Super Key',
+      0x00000012: 'Fn',
       0x00000013: 'Fn Lock',
       0x00000014: 'Suspend',
       0x00000015: 'Resume',
@@ -4198,6 +5404,37 @@ class PhysicalKeyboardKey extends KeyboardKey {
       0x00010082: 'Sleep',
       0x00010083: 'Wake Up',
       0x000100b5: 'Display Toggle Int Ext',
+      0x0005ff01: 'Game Button 1',
+      0x0005ff02: 'Game Button 2',
+      0x0005ff03: 'Game Button 3',
+      0x0005ff04: 'Game Button 4',
+      0x0005ff05: 'Game Button 5',
+      0x0005ff06: 'Game Button 6',
+      0x0005ff07: 'Game Button 7',
+      0x0005ff08: 'Game Button 8',
+      0x0005ff09: 'Game Button 9',
+      0x0005ff0a: 'Game Button 10',
+      0x0005ff0b: 'Game Button 11',
+      0x0005ff0c: 'Game Button 12',
+      0x0005ff0d: 'Game Button 13',
+      0x0005ff0e: 'Game Button 14',
+      0x0005ff0f: 'Game Button 15',
+      0x0005ff10: 'Game Button 16',
+      0x0005ff11: 'Game Button A',
+      0x0005ff12: 'Game Button B',
+      0x0005ff13: 'Game Button C',
+      0x0005ff14: 'Game Button Left 1',
+      0x0005ff15: 'Game Button Left 2',
+      0x0005ff16: 'Game Button Mode',
+      0x0005ff17: 'Game Button Right 1',
+      0x0005ff18: 'Game Button Right 2',
+      0x0005ff19: 'Game Button Select',
+      0x0005ff1a: 'Game Button Start',
+      0x0005ff1b: 'Game Button Thumb Left',
+      0x0005ff1c: 'Game Button Thumb Right',
+      0x0005ff1d: 'Game Button X',
+      0x0005ff1e: 'Game Button Y',
+      0x0005ff1f: 'Game Button Z',
       0x00070000: 'Usb Reserved',
       0x00070001: 'Usb Error Roll Over',
       0x00070002: 'Usb Post Fail',
@@ -4402,8 +5639,8 @@ class PhysicalKeyboardKey extends KeyboardKey {
       0x000c01ab: 'Spell Check',
       0x000c01ae: 'Launch Keyboard Layout',
       0x000c01b1: 'Launch Screen Saver',
-      0x000c01cb: 'Launch Assistant',
       0x000c01b7: 'Launch Audio Browser',
+      0x000c01cb: 'Launch Assistant',
       0x000c0201: 'New Key',
       0x000c0203: 'Close',
       0x000c0207: 'Save',
@@ -4424,37 +5661,5 @@ class PhysicalKeyboardKey extends KeyboardKey {
       0x000c028c: 'Mail Send',
       0x000c029d: 'Keyboard Layout Select',
       0x000c029f: 'Show All Windows',
-      0x0005ff01: 'Game Button 1',
-      0x0005ff02: 'Game Button 2',
-      0x0005ff03: 'Game Button 3',
-      0x0005ff04: 'Game Button 4',
-      0x0005ff05: 'Game Button 5',
-      0x0005ff06: 'Game Button 6',
-      0x0005ff07: 'Game Button 7',
-      0x0005ff08: 'Game Button 8',
-      0x0005ff09: 'Game Button 9',
-      0x0005ff0a: 'Game Button 10',
-      0x0005ff0b: 'Game Button 11',
-      0x0005ff0c: 'Game Button 12',
-      0x0005ff0d: 'Game Button 13',
-      0x0005ff0e: 'Game Button 14',
-      0x0005ff0f: 'Game Button 15',
-      0x0005ff10: 'Game Button 16',
-      0x0005ff11: 'Game Button A',
-      0x0005ff12: 'Game Button B',
-      0x0005ff13: 'Game Button C',
-      0x0005ff14: 'Game Button Left 1',
-      0x0005ff15: 'Game Button Left 2',
-      0x0005ff16: 'Game Button Mode',
-      0x0005ff17: 'Game Button Right 1',
-      0x0005ff18: 'Game Button Right 2',
-      0x0005ff19: 'Game Button Select',
-      0x0005ff1a: 'Game Button Start',
-      0x0005ff1b: 'Game Button Thumb Left',
-      0x0005ff1c: 'Game Button Thumb Right',
-      0x0005ff1d: 'Game Button X',
-      0x0005ff1e: 'Game Button Y',
-      0x0005ff1f: 'Game Button Z',
-      0x00000012: 'Fn',
     };
 }

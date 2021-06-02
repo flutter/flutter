@@ -206,7 +206,7 @@ _TASK_- the name of your test that also matches the name of the
 
 1. Add prod builder to [flutter/infra devicelab_config.star](https://github.com/flutter/infra/blob/master/config/devicelab_config.star)
   - Example PR: https://github.com/flutter/infra/pull/401/files
-  - This will need to soak for 15 minutes after merged to propagate (should show up in [LUCI console[(https://ci.chromium.org/p/flutter/g/devicelab/console))
+  - This will need to soak for 15 minutes after merged to propagate (should show up in [LUCI console](https://ci.chromium.org/p/flutter/g/devicelab/console))
   - There are various lists for the different testbeds a test can run on
 2. Add task to [flutter/flutter prod_builders.json](https://github.com/flutter/flutter/blob/master/dev/prod_builders.json)
   - Example PR: https://github.com/flutter/flutter/pull/79913/files

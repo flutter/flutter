@@ -13,12 +13,12 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 
 /// A request to the [TestCompiler] for recompilation.
-class _CompilationRequest {
-  _CompilationRequest(this.mainUri, this.result);
+class CompilationRequest {
+  CompilationRequest(this.mainUri, this.result);
 
   Uri mainUri;
   Completer<String> result;
@@ -61,8 +61,8 @@ class TestCompiler {
     });
   }
 
-  final StreamController<_CompilationRequest> compilerController = StreamController<_CompilationRequest>();
-  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
+  final StreamController<CompilationRequest> compilerController = StreamController<CompilationRequest>();
+  final List<CompilationRequest> compilationQueue = <CompilationRequest>[];
   final FlutterProject flutterProject;
   final BuildInfo buildInfo;
   final String testFilePath;
@@ -76,7 +76,7 @@ class TestCompiler {
     if (compilerController.isClosed) {
       return null;
     }
-    compilerController.add(_CompilationRequest(mainDart, completer));
+    compilerController.add(CompilationRequest(mainDart, completer));
     return completer.future;
   }
 
@@ -117,7 +117,7 @@ class TestCompiler {
   }
 
   // Handle a compilation request.
-  Future<void> _onCompilationRequest(_CompilationRequest request) async {
+  Future<void> _onCompilationRequest(CompilationRequest request) async {
     final bool isEmpty = compilationQueue.isEmpty;
     compilationQueue.add(request);
     // Only trigger processing if queue was empty - i.e. no other requests
@@ -127,7 +127,7 @@ class TestCompiler {
       return;
     }
     while (compilationQueue.isNotEmpty) {
-      final _CompilationRequest request = compilationQueue.first;
+      final CompilationRequest request = compilationQueue.first;
       globals.printTrace('Compiling ${request.mainUri}');
       final Stopwatch compilerTime = Stopwatch()..start();
       bool firstCompile = false;
@@ -140,6 +140,8 @@ class TestCompiler {
         <Uri>[request.mainUri],
         outputPath: outputDill.path,
         packageConfig: buildInfo.packageConfig,
+        projectRootPath: flutterProject.directory.absolute.path,
+        fs: globals.fs,
       );
       final String outputPath = compilerOutput?.outputFilename;
 

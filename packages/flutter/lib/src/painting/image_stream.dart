@@ -668,7 +668,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// messages, but errors during development will still be reported.
   ///
   /// See [FlutterErrorDetails] for further details on these values.
-  @protected
   @pragma('vm:notify-debugger-on-exception')
   void reportError({
     DiagnosticsNode? context,
@@ -975,7 +974,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
   @override
   void addListener(ImageStreamListener listener) {
-    if (!hasListeners && _codec != null)
+    if (!hasListeners && _codec != null && (_currentImage == null || _codec!.frameCount > 1))
       _decodeNextFrameAndSchedule();
     super.addListener(listener);
   }

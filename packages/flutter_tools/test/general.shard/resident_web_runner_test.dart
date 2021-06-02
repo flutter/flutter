@@ -16,12 +16,12 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/isolated/devfs_web.dart';
-import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -100,10 +100,8 @@ void main() {
   MockFlutterDevice mockFlutterDevice;
   MockWebDevFS mockWebDevFS;
   MockResidentCompiler mockResidentCompiler;
-  MockChromeConnection mockChromeConnection;
-  MockChromeTab mockChromeTab;
-  MockWipConnection mockWipConnection;
-  MockWipDebugger mockWipDebugger;
+  FakeChromeConnection chromeConnection;
+  FakeChromeTab chromeTab;
   MockWebServerDevice mockWebServerDevice;
   MockDevice mockDevice;
   FakeVmServiceHost fakeVmServiceHost;
@@ -121,10 +119,8 @@ void main() {
     mockFlutterDevice = MockFlutterDevice();
     mockWebDevFS = MockWebDevFS();
     mockResidentCompiler = MockResidentCompiler();
-    mockChromeConnection = MockChromeConnection();
-    mockChromeTab = MockChromeTab();
-    mockWipConnection = MockWipConnection();
-    mockWipDebugger = MockWipDebugger();
+    chromeConnection = FakeChromeConnection();
+    chromeTab = FakeChromeTab('index.html');
     mockWebServerDevice = MockWebServerDevice();
     when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
@@ -170,13 +166,7 @@ void main() {
     when(mockWebDevFS.sources).thenReturn(<Uri>[]);
     when(mockWebDevFS.baseUri).thenReturn(Uri.parse('http://localhost:12345'));
     when(mockFlutterDevice.generator).thenReturn(mockResidentCompiler);
-    when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
-      return mockChromeTab;
-    });
-    when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
-      return mockWipConnection;
-    });
-    when(mockWipConnection.debugger).thenReturn(mockWipDebugger);
+    chromeConnection.tabs.add(chromeTab);
   }
 
   testUsingContext('runner with web server device does not support debugging without --start-paused', () {
@@ -195,7 +185,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -229,7 +218,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -253,7 +241,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
@@ -268,7 +255,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -373,7 +359,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -398,7 +383,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -517,7 +501,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
@@ -553,7 +536,7 @@ void main() {
     ]);
     _setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
-    final Chromium chrome = Chromium(1, mockChromeConnection, chromiumLauncher: chromiumLauncher);
+    final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
     chromiumLauncher.instance = chrome;
 
     when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
@@ -597,8 +580,8 @@ void main() {
     verify(mockResidentCompiler.accept()).called(2);
 
     // ensure that analytics are sent.
-    expect(testUsage.events, const <TestUsageEvent>[
-      TestUsageEvent('hot', 'restart', parameters: <String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'}),
+    expect(testUsage.events, <TestUsageEvent>[
+      TestUsageEvent('hot', 'restart', parameters: CustomDimensions.fromMap(<String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'})),
     ]);
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
@@ -627,7 +610,7 @@ void main() {
     ]);
     _setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
-    final Chromium chrome = Chromium(1, mockChromeConnection, chromiumLauncher: chromiumLauncher);
+    final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
     chromiumLauncher.instance = chrome;
 
     when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
@@ -675,8 +658,8 @@ void main() {
     verify(mockResidentCompiler.accept()).called(2);
 
 	  // ensure that analytics are sent.
-    expect(testUsage.events, const <TestUsageEvent>[
-      TestUsageEvent('hot', 'restart', parameters: <String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'}),
+    expect(testUsage.events, <TestUsageEvent>[
+      TestUsageEvent('hot', 'restart', parameters: CustomDimensions.fromMap(<String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'})),
     ]);
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
@@ -914,412 +897,6 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('debugDumpApp', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugDumpApp',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    await residentWebRunner.debugDumpApp();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugDumpLayerTree', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugDumpLayerTree',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    await residentWebRunner.debugDumpLayerTree();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugDumpRenderTree', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugDumpRenderTree',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    await residentWebRunner.debugDumpRenderTree();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugDumpSemanticsTreeInTraversalOrder', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    await residentWebRunner.debugDumpSemanticsTreeInTraversalOrder();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugDumpSemanticsTreeInInverseHitTestOrder', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-
-    await connectionInfoCompleter.future;
-    await residentWebRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugToggleDebugPaintSizeEnabled', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugPaint',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'false'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugPaint',
-        args: <String, Object>{
-          'isolateId': null,
-          'enabled': 'true',
-        },
-        jsonResponse: <String, Object>{
-          'value': 'true'
-        },
-      )
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugToggleDebugPaintSizeEnabled();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugTogglePerformanceOverlayOverride', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.showPerformanceOverlay',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'false'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.showPerformanceOverlay',
-        args: <String, Object>{
-          'isolateId': null,
-          'enabled': 'true',
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'true'
-        },
-      )
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugTogglePerformanceOverlayOverride();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugToggleInvertOversizedImagesOverride', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.invertOversizedImages',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'false'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.invertOversizedImages',
-        args: <String, Object>{
-          'isolateId': null,
-          'enabled': 'true',
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'true'
-        },
-      )
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugToggleInvertOversizedImages();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugToggleWidgetInspector', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.inspector.show',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'false'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.inspector.show',
-        args: <String, Object>{
-          'isolateId': null,
-          'enabled': 'true',
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'true'
-        },
-      )
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugToggleWidgetInspector();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugToggleProfileWidgetBuilds', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.profileWidgetBuilds',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'false'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.profileWidgetBuilds',
-        args: <String, Object>{
-          'isolateId': null,
-          'enabled': 'true',
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'true'
-        },
-      )
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugToggleProfileWidgetBuilds();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugTogglePlatform', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.platformOverride',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'value': 'iOS'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.platformOverride',
-        args: <String, Object>{
-          'isolateId': null,
-          'value': 'fuchsia',
-        },
-        jsonResponse: <String, Object>{
-          'value': 'fuchsia'
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugTogglePlatform();
-
-    expect(logger.statusText,
-      contains('Switched operating system to fuchsia'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugToggleBrightness', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.brightnessOverride',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'value': 'Brightness.light'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.brightnessOverride',
-        args: <String, Object>{
-          'isolateId': null,
-          'value': 'Brightness.dark',
-        },
-        jsonResponse: <String, Object>{
-          'value': 'Brightness.dark'
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugToggleBrightness();
-
-    expect(logger.statusText,
-      contains('Changed brightness to Brightness.dark.'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
   testUsingContext('cleanup of resources is safe to call multiple times', () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
@@ -1405,9 +982,9 @@ void main() {
       ...kAttachIsolateExpectations,
     ]);
     _setupMocks();
-    final MockChromeConnection mockChromeConnection = MockChromeConnection();
+    final FakeChromeConnection chromeConnection = FakeChromeConnection();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
-    final Chromium chrome = Chromium(1, mockChromeConnection, chromiumLauncher: chromiumLauncher);
+    final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
     chromiumLauncher.instance = chrome;
 
     when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
@@ -1420,14 +997,8 @@ void main() {
     when(mockWebDevFS.create()).thenAnswer((Invocation invocation) async {
       return Uri.parse('http://localhost:8765/app/');
     });
-    final MockChromeTab mockChromeTab = MockChromeTab();
-    final MockWipConnection mockWipConnection = MockWipConnection();
-    when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
-      return mockChromeTab;
-    });
-    when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
-      return mockWipConnection;
-    });
+    final FakeChromeTab chromeTab = FakeChromeTab('index.html');
+    chromeConnection.tabs.add(chromeTab);
 
     final ResidentWebRunner runner = ResidentWebRunner(
       mockFlutterDevice,
@@ -1439,7 +1010,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -1487,7 +1057,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -1606,7 +1175,6 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
-    featureFlags: TestFeatureFlags(),
   );
 }
 
@@ -1617,11 +1185,36 @@ class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockWebDevFS extends Mock implements WebDevFS {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
-class MockChrome extends Mock implements Chromium {}
-class MockChromeConnection extends Mock implements ChromeConnection {}
-class MockChromeTab extends Mock implements ChromeTab {}
-class MockWipConnection extends Mock implements WipConnection {}
-class MockWipDebugger extends Mock implements WipDebugger {}
+
+class FakeChromeConnection extends Fake implements ChromeConnection {
+  final List<ChromeTab> tabs = <ChromeTab>[];
+
+  @override
+  Future<ChromeTab> getTab(bool Function(ChromeTab tab) accept, {Duration retryFor}) async {
+    return tabs.firstWhere(accept);
+  }
+}
+
+class FakeChromeTab extends Fake implements ChromeTab {
+  FakeChromeTab(this.url);
+
+  @override
+  final String url;
+  final FakeWipConnection connection = FakeWipConnection();
+
+  @override
+  Future<WipConnection> connect() async {
+    return connection;
+  }
+}
+
+class FakeWipConnection extends Fake implements WipConnection {
+  @override
+  final WipDebugger debugger = FakeWipDebugger();
+}
+
+class FakeWipDebugger extends Fake implements WipDebugger {}
+
 class MockWebServerDevice extends Mock implements WebServerDevice {}
 class MockDevice extends Mock implements Device {}
 

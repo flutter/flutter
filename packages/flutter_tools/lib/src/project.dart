@@ -16,6 +16,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
+import 'cmake.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
@@ -119,24 +120,40 @@ class FlutterProject {
   /// part of iOS product bundle identifier, Android application ID, or
   /// Gradle group ID.
   Future<Set<String>> get organizationNames async {
-    final List<String> candidates = <String>[
+    final List<String> candidates = <String>[];
+
+    if (ios.existsSync()) {
       // Don't require iOS build info, this method is only
       // used during create as best-effort, use the
       // default target bundle identifier.
-      if (ios.existsSync())
-        await ios.productBundleIdentifier(null),
-      if (android.existsSync()) ...<String>[
-        android.applicationId,
-        android.group,
-      ],
-      if (example.android.existsSync())
-        example.android.applicationId,
-      if (example.ios.existsSync())
-        await example.ios.productBundleIdentifier(null),
-    ];
-    return Set<String>.of(candidates
-        .map<String>(_organizationNameFromPackageName)
-        .where((String name) => name != null));
+      final String bundleIdentifier = await ios.productBundleIdentifier(null);
+      if (bundleIdentifier != null) {
+        candidates.add(bundleIdentifier);
+      }
+    }
+    if (android.existsSync()) {
+      final String applicationId = android.applicationId;
+      final String group = android.group;
+      candidates.addAll(<String>[
+        if (applicationId != null)
+          applicationId,
+        if (group != null)
+          group,
+      ]);
+    }
+    if (example.android.existsSync()) {
+      final String applicationId = example.android.applicationId;
+      if (applicationId != null) {
+        candidates.add(applicationId);
+      }
+    }
+    if (example.ios.existsSync()) {
+      final String bundleIdentifier = await example.ios.productBundleIdentifier(null);
+      if (bundleIdentifier != null) {
+        candidates.add(bundleIdentifier);
+      }
+    }
+    return Set<String>.of(candidates.map<String>(_organizationNameFromPackageName).whereType<String>());
   }
 
   String _organizationNameFromPackageName(String packageName) {
@@ -333,10 +350,14 @@ class FlutterProject {
 
   /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
   String getVersionInfo()  {
+    final String buildName = manifest.buildName;
+    final String buildNumber = manifest.buildNumber;
     final Map<String, String> versionFileJson = <String, String>{
       'app_name': manifest.appName,
-      'version': manifest.buildName,
-      'build_number': manifest.buildNumber
+      if (buildName != null)
+        'version': buildName,
+      if (buildNumber != null)
+        'build_number': buildNumber,
     };
     return jsonEncode(versionFileJson);
   }
@@ -593,11 +614,10 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// The build settings for the host app of this project, as a detached map.
   ///
   /// Returns null, if iOS tooling is unavailable.
-  Future<Map<String, String>> buildSettingsForBuildInfo(BuildInfo buildInfo) async {
+  Future<Map<String, String>> buildSettingsForBuildInfo(BuildInfo buildInfo, { EnvironmentType environmentType = EnvironmentType.physical }) async {
     if (!existsSync()) {
       return null;
     }
-    _buildSettingsByScheme ??= <String, Map<String, String>>{};
     final XcodeProjectInfo info = await projectInfo();
     if (info == null) {
       return null;
@@ -608,25 +628,40 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       info.reportFlavorNotFoundAndExit();
     }
 
-    return _buildSettingsByScheme[scheme] ??= await _xcodeProjectBuildSettings(scheme);
+    final String configuration = (await projectInfo()).buildConfigurationFor(
+      buildInfo,
+      scheme,
+    );
+    final XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(environmentType: environmentType, scheme: scheme, configuration: configuration);
+    if (_buildSettingsByBuildContext[buildContext] == null) {
+      final Map<String, String> calculatedBuildSettings = await _xcodeProjectBuildSettings(buildContext);
+      if (calculatedBuildSettings != null) {
+        _buildSettingsByBuildContext[buildContext] = calculatedBuildSettings;
+      }
+    }
+    return _buildSettingsByBuildContext[buildContext];
   }
-  Map<String, Map<String, String>> _buildSettingsByScheme;
+
+  final Map<XcodeProjectBuildContext, Map<String, String>> _buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
 
   Future<XcodeProjectInfo> projectInfo() async {
-    if (!xcodeProject.existsSync() || !globals.xcodeProjectInterpreter.isInstalled) {
+    final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
+    if (!xcodeProject.existsSync() || xcodeProjectInterpreter == null || !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    return _projectInfo ??= await globals.xcodeProjectInterpreter.getInfo(hostAppRoot.path);
+    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
   }
   XcodeProjectInfo _projectInfo;
 
-  Future<Map<String, String>> _xcodeProjectBuildSettings(String scheme) async {
-    if (!globals.xcodeProjectInterpreter.isInstalled) {
+  Future<Map<String, String>> _xcodeProjectBuildSettings(XcodeProjectBuildContext buildContext) async {
+    final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
+    if (xcodeProjectInterpreter == null || !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    final Map<String, String> buildSettings = await globals.xcodeProjectInterpreter.getBuildSettings(
+
+    final Map<String, String> buildSettings = await xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
-      scheme: scheme,
+      buildContext: buildContext,
     );
     if (buildSettings != null && buildSettings.isNotEmpty) {
       // No timeouts, flakes, or errors.
@@ -784,12 +819,13 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
     );
+    final String iosBundleIdentifier = parent.manifest.iosBundleIdentifier ?? 'com.example.${parent.manifest.appName}';
     template.render(
       target,
       <String, Object>{
         'ios': true,
         'projectName': parent.manifest.appName,
-        'iosIdentifier': parent.manifest.iosBundleIdentifier,
+        'iosIdentifier': iosBundleIdentifier,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,
@@ -968,12 +1004,13 @@ to migrate your project.
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
     );
+    final String androidIdentifier = parent.manifest.androidPackage ?? 'com.example.${parent.manifest.appName}';
     template.render(
       target,
       <String, Object>{
         'android': true,
         'projectName': parent.manifest.appName,
-        'androidIdentifier': parent.manifest.androidPackage,
+        'androidIdentifier': androidIdentifier,
         'androidX': usesAndroidX,
       },
       printStatusWhenWriting: false,
@@ -1157,7 +1194,6 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
         project: parent,
         buildInfo: BuildInfo.debug,
         useMacOSConfig: true,
-        setSymroot: false,
       );
     }
   }
@@ -1215,8 +1251,38 @@ class WindowsUwpProject extends WindowsProject {
   @override
   String get _childDirectory => 'winuwp';
 
+  File get runnerCmakeFile => _editableDirectory.childDirectory('runner_uwp').childFile('CMakeLists.txt');
+
   /// Eventually this will be used to check if the user's unstable project needs to be regenerated.
   int get projectVersion => int.tryParse(_editableDirectory.childFile('project_version').readAsStringSync());
+
+  /// Retrieve the GUID of the UWP package.
+  String get packageGuid => _packageGuid ??= getCmakePackageGuid(runnerCmakeFile);
+  String _packageGuid;
+
+  File get appManifest => _editableDirectory.childDirectory('runner_uwp').childFile('appxmanifest.in');
+
+  String get packageVersion => _packageVersion ??= parseAppVersion(this);
+  String _packageVersion;
+}
+
+@visibleForTesting
+String parseAppVersion(WindowsUwpProject project) {
+  final File appManifestFile = project.appManifest;
+  if (!appManifestFile.existsSync()) {
+    return null;
+  }
+
+  XmlDocument document;
+  try {
+    document = XmlDocument.parse(appManifestFile.readAsStringSync());
+  } on XmlParserException {
+    throwToolExit('Error parsing $appManifestFile. Please ensure that the appx manifest is a valid XML document and try again.');
+  }
+  for (final XmlElement metaData in document.findAllElements('Identity')) {
+    return metaData.getAttribute('Version');
+  }
+  return null;
 }
 
 /// The Linux sub project.

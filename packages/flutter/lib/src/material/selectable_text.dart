@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
@@ -204,7 +204,7 @@ class SelectableText extends StatefulWidget {
         assert(minLines == null || minLines > 0),
         assert(
           (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-          'minLines can\'t be greater than maxLines',
+          "minLines can't be greater than maxLines",
         ),
         assert(
           data != null,
@@ -257,7 +257,7 @@ class SelectableText extends StatefulWidget {
     assert(minLines == null || minLines > 0),
     assert(
       (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-      'minLines can\'t be greater than maxLines',
+      "minLines can't be greater than maxLines",
     ),
     assert(
       textSpan != null,
@@ -304,7 +304,9 @@ class SelectableText extends StatefulWidget {
   /// focusNode.addListener(() { print(myFocusNode.hasFocus); });
   /// ```
   ///
-  /// If null, this widget will create its own [FocusNode].
+  /// If null, this widget will create its own [FocusNode] with
+  /// [FocusNode.skipTraversal] parameter set to `true`, which causes the widget
+  /// to be skipped over during focus traversal.
   final FocusNode? focusNode;
 
   /// The style to use for the text.
@@ -399,7 +401,7 @@ class SelectableText extends StatefulWidget {
   final SelectionChangedCallback? onSelectionChanged;
 
   @override
-  _SelectableTextState createState() => _SelectableTextState();
+  State<SelectableText> createState() => _SelectableTextState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -431,7 +433,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   late _TextSpanEditingController _controller;
 
   FocusNode? _focusNode;
-  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
+  FocusNode get _effectiveFocusNode =>
+      widget.focusNode ?? (_focusNode ??= FocusNode(skipTraversal: true));
 
   bool _showSelectionHandles = false;
 

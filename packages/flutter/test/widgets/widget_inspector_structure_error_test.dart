@@ -68,9 +68,10 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
       WidgetsFlutterBinding.ensureInitialized();
       try {
         // Enables structured errors.
-        expect(await service.testBoolExtension(
-          'structuredErrors', <String, String>{'enabled': 'true'}),
-          equals('true'));
+        expect(
+          await service.testBoolExtension('structuredErrors', <String, String>{'enabled': 'true'}),
+          equals('true'),
+        );
 
         // Creates an error.
         final FlutterErrorDetails expectedError = FlutterErrorDetails(

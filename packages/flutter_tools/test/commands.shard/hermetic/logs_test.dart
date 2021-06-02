@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/logs.dart';
 
-import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -24,12 +23,10 @@ void main() {
 
     testUsingContext('fail with a bad device id', () async {
       final LogsCommand command = LogsCommand();
-      try {
-        await createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']);
-        fail('Expect exception');
-      } on ToolExit catch (e) {
-        expect(e.exitCode ?? 1, 1);
-      }
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']),
+        throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
+      );
     });
   });
 }

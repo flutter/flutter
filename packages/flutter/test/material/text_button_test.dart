@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -149,9 +149,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: TextButton(
-              child: const Text('TextButton'),
               onPressed: () { },
               focusNode: focusNode,
+              child: const Text('TextButton'),
             ),
           ),
         ),
@@ -216,9 +216,9 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return TextButton(
-                    child: const Text('TextButton'),
                     onPressed: () {},
                     focusNode: focusNode,
+                    child: const Text('TextButton'),
                   );
                 },
               ),
@@ -631,9 +631,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: TextButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -739,7 +739,7 @@ void main() {
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(100, 100)));
+    expect(box.size, equals(const Size(116, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(VisualDensity.standard, useText: true);
@@ -757,7 +757,7 @@ void main() {
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(56, 36)));
+    expect(box.size, equals(const Size(72, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
@@ -996,7 +996,7 @@ void main() {
                   child: TextButton(
                     style: TextButton.styleFrom(padding: const EdgeInsets.all(22)),
                     onPressed: () {},
-                    child: const Text('TextButton')
+                    child: const Text('TextButton'),
                   ),
                 ),
               ),
@@ -1115,7 +1115,7 @@ void main() {
     final Key labelKey = UniqueKey();
     final ButtonStyle style = TextButton.styleFrom(
       padding: EdgeInsets.zero,
-      visualDensity: const VisualDensity(), // dx=0, dy=0
+      visualDensity: VisualDensity.standard, // dx=0, dy=0
     );
 
     await tester.pumpWidget(

@@ -21,7 +21,8 @@ class TestServiceExtensionsBinding extends BindingBase
        PaintingBinding,
        SemanticsBinding,
        RendererBinding,
-       WidgetsBinding {
+       WidgetsBinding,
+       TestDefaultBinaryMessengerBinding {
 
   final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
 
@@ -245,7 +246,7 @@ void main() {
         r'   window size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
         r'   device pixel ratio: 3\.0 \(physical pixels per logical pixel\)\n'
         r'   configuration: Size\(800\.0, 600\.0\) at 3\.0x \(in logical pixels\)\n'
-        r'$'
+        r'$',
       ),
     });
   });
@@ -267,7 +268,7 @@ void main() {
         r'     \[1] 0\.0,3\.0,0\.0,0\.0\n'
         r'     \[2] 0\.0,0\.0,1\.0,0\.0\n'
         r'     \[3] 0\.0,0\.0,0\.0,1\.0\n'
-        r'$'
+        r'$',
       ),
     });
   });
@@ -277,7 +278,7 @@ void main() {
     final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
 
     expect(result, <String, String>{
-      'data': 'Semantics not collected.'
+      'data': 'Semantics not collected.',
     });
   });
 
@@ -286,7 +287,7 @@ void main() {
     final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
 
     expect(result, <String, String>{
-      'data': 'Semantics not collected.'
+      'data': 'Semantics not collected.',
     });
   });
 
@@ -467,7 +468,7 @@ void main() {
     bool completed;
 
     completed = false;
-    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
       expect(utf8.decode(message!.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
@@ -494,7 +495,7 @@ void main() {
     });
     expect(data, isFalse);
     expect(completed, isTrue);
-    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {

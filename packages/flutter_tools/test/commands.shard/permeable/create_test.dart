@@ -18,14 +18,16 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
+import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -34,7 +36,7 @@ import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn\'t yet support any platforms.\n';
+const String _kNoPlatformsMessage = "You've created a plugin project that doesn't yet support any platforms.\n";
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
@@ -83,6 +85,28 @@ void main() {
     await _restoreFlutterToolsSnapshot();
   });
 
+  test('createAndroidIdentifier emits a valid identifier', () {
+    final String identifier = CreateBase.createAndroidIdentifier('42org', '8project');
+    expect(identifier.contains('.'), isTrue);
+
+    final RegExp startsWithLetter = RegExp(r'^[a-zA-Z][\w]*$');
+    final List<String> segments = identifier.split('.');
+    for (final String segment in segments) {
+      expect(startsWithLetter.hasMatch(segment), isTrue);
+    }
+  });
+
+  test('createUTIIdentifier emits a valid identifier', () {
+    final String identifier = CreateBase.createUTIIdentifier('org@', 'project');
+    expect(identifier.contains('.'), isTrue);
+    expect(identifier.contains('@'), isFalse);
+  });
+
+  test('createWindowsIdentifier emits a GUID', () {
+    final String identifier = CreateBase.createWindowsIdentifier('org', 'project');
+    expect(Uuid.isValidUUID(fromString: identifier), isTrue);
+  });
+
   // Verify that we create a default project ('app') that is
   // well-formed.
   testUsingContext('can create a default project', () async {
@@ -90,6 +114,7 @@ void main() {
       projectDir,
       <String>['-i', 'objc', '-a', 'java'],
       <String>[
+        'analysis_options.yaml',
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'flutter_project.iml',
@@ -117,6 +142,7 @@ void main() {
       projectDir,
       <String>['-i', 'objc', '-a', 'java'],
       <String>[
+        'analysis_options.yaml',
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'flutter_project.iml',
@@ -146,6 +172,7 @@ void main() {
       '.ios/Flutter/flutter_project.podspec',
       '.ios/Flutter/engine/Flutter.podspec',
       '.metadata',
+      'analysis_options.yaml',
       'lib/main.dart',
       'pubspec.yaml',
       'README.md',
@@ -380,6 +407,7 @@ void main() {
       projectDir,
       <String>['--template=package'],
       <String>[
+        'analysis_options.yaml',
         'lib/flutter_project.dart',
         'test/flutter_project_test.dart',
       ],
@@ -417,6 +445,7 @@ void main() {
       projectDir,
       <String>['--template=plugin', '-i', 'objc', '-a', 'java'],
       <String>[
+        'analysis_options.yaml',
         'example/lib/main.dart',
         'flutter_project.iml',
         'lib/flutter_project.dart',
@@ -500,6 +529,7 @@ void main() {
       projectDir,
       <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift', '--platforms', 'ios,android'],
       <String>[
+        'analysis_options.yaml',
         'android/src/main/kotlin/com/example/flutter_project/FlutterProjectPlugin.kt',
         'example/android/app/src/main/kotlin/com/example/flutter_project_example/MainActivity.kt',
         'example/ios/Runner/AppDelegate.swift',
@@ -592,6 +622,7 @@ void main() {
       '.gitignore',
       '.metadata',
       '.packages',
+      'analysis_options.yaml',
       'lib/main.dart',
       'pubspec.lock',
       'pubspec.yaml',
@@ -629,7 +660,7 @@ void main() {
 
     expectExists('android/gradle.properties');
 
-    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+    final String actualContents = await globals.fs.file('${projectDir.path}/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), true);
   });
@@ -663,7 +694,7 @@ void main() {
 
     expectExists('android/gradle.properties');
 
-    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+    final String actualContents = await globals.fs.file('${projectDir.path}/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), true);
   });
@@ -677,13 +708,13 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--platforms', 'android', projectDir.path]);
 
     final String androidManifest = await globals.fs.file(
-      projectDir.path + '/android/app/src/main/AndroidManifest.xml'
+      '${projectDir.path}/android/app/src/main/AndroidManifest.xml'
     ).readAsString();
     expect(androidManifest.contains('android:name="flutterEmbedding"'), true);
     expect(androidManifest.contains('android:value="2"'), true);
 
     final String mainActivity = await globals.fs.file(
-      projectDir.path +  '/android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt'
+      '${projectDir.path}/android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt'
     ).readAsString();
     // Import for the new embedding class.
     expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
@@ -1059,7 +1090,7 @@ void main() {
     expectExists('lib/main.dart');
     expectExists('test/widget_test.dart');
 
-    final String actualContents = await globals.fs.file(projectDir.path + '/test/widget_test.dart').readAsString();
+    final String actualContents = await globals.fs.file('${projectDir.path}/test/widget_test.dart').readAsString();
 
     expect(actualContents.contains('flutter_test.dart'), true);
 
@@ -1069,7 +1100,7 @@ void main() {
 
         final Process process = await Process.start(
           globals.fs.path.join(
-            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
             'bin',
             globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
           ),
@@ -1093,6 +1124,8 @@ void main() {
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('FLUTTER_TARGET='));
     expect(xcodeConfig, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
+    // Avoid legacy build locations to support Swift Package Manager.
+    expect(xcodeConfig, isNot(contains('SYMROOT')));
 
     // Generated export environment variables script
     final String buildPhaseScriptPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_export_environment.sh');
@@ -1103,6 +1136,8 @@ void main() {
     expect(buildPhaseScript, contains('FLUTTER_APPLICATION_PATH='));
     expect(buildPhaseScript, contains('FLUTTER_TARGET='));
     expect(buildPhaseScript, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
+    // Do not override host app build settings.
+    expect(buildPhaseScript, isNot(contains('SYMROOT')));
 
     // Generated podspec
     final String podspecPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_project.podspec');
@@ -1171,7 +1206,7 @@ void main() {
 
         final Process process = await Process.start(
           globals.fs.path.join(
-            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
             'bin',
             globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
           ),
@@ -1691,7 +1726,7 @@ void main() {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
-            response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); }')),
+            response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); } // ignore: avoid_print')),
           )
         ]);
       };
@@ -2219,7 +2254,7 @@ void main() {
 
     expect(globals.fs.isFileSync('${projectDir.path}/android/app/build.gradle'), true);
 
-    final String buildContent = await globals.fs.file(projectDir.path + '/android/app/build.gradle').readAsString();
+    final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle').readAsString();
 
     expect(buildContent.contains('compileSdkVersion 30'), true);
     expect(buildContent.contains('targetSdkVersion 30'), true);
@@ -2450,6 +2485,47 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true, isAndroidEnabled: false, isIOSEnabled: false),
     Logger: () => logger,
   });
+
+  testUsingContext('default project has analysis_options.yaml set up correctly', () async {
+    await _createProject(
+        projectDir,
+        <String>[],
+        <String>[
+          'analysis_options.yaml',
+        ],
+    );
+    final String dataPath = globals.fs.path.join(
+      getFlutterRoot(),
+      'packages',
+      'flutter_tools',
+      'test',
+      'commands.shard',
+      'permeable',
+      'data',
+    );
+    final File toAnalyze = await globals.fs.file(globals.fs.path.join(dataPath, 'to_analyze.dart.test'))
+        .copy(globals.fs.path.join(projectDir.path, 'lib', 'to_analyze.dart'));
+    final String relativePath = globals.fs.path.join('lib', 'to_analyze.dart');
+    final List<String> expectedFailures = <String>[
+      '$relativePath:11:7: use_key_in_widget_constructors',
+      '$relativePath:20:3: prefer_const_constructors_in_immutables',
+      '$relativePath:31:26: use_full_hex_values_for_flutter_colors',
+    ];
+    expect(expectedFailures.length, '// LINT:'.allMatches(toAnalyze.readAsStringSync()).length);
+    await _analyzeProject(
+      projectDir.path,
+      expectedFailures: expectedFailures,
+    );
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
 }
 
 Future<void> _createProject(
@@ -2511,7 +2587,7 @@ Future<void> _ensureFlutterToolsSnapshot() async {
 
   final File snapshotFile = globals.fs.file(flutterToolsSnapshotPath);
   if (snapshotFile.existsSync()) {
-    snapshotFile.renameSync(flutterToolsSnapshotPath + '.bak');
+    snapshotFile.renameSync('$flutterToolsSnapshotPath.bak');
   }
 
   final List<String> snapshotArgs = <String>[
@@ -2539,7 +2615,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
     'flutter_tools.snapshot',
   ));
 
-  final File snapshotBackup = globals.fs.file(flutterToolsSnapshotPath + '.bak');
+  final File snapshotBackup = globals.fs.file('$flutterToolsSnapshotPath.bak');
   if (!snapshotBackup.existsSync()) {
     // No backup to restore.
     return;
@@ -2548,7 +2624,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
   snapshotBackup.renameSync(flutterToolsSnapshotPath);
 }
 
-Future<void> _analyzeProject(String workingDir) async {
+Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures = const <String>[] }) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
@@ -2563,15 +2639,34 @@ Future<void> _analyzeProject(String workingDir) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir,
   );
-  if (exec.exitCode != 0) {
-    print(exec.stdout);
-    print(exec.stderr);
+  if (expectedFailures.isEmpty) {
+    if (exec.exitCode != 0) {
+      print(exec.stdout);
+      print(exec.stderr);
+    }
+    expect(exec.exitCode, 0);
+    return;
   }
-  expect(exec.exitCode, 0);
+  expect(exec.exitCode, isNot(0));
+  String lineParser(String line) {
+    print('#$line#');
+    final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
+    final List<String> lineComponents = line.trim().split(analyzerSeparator);
+    final String lintName = lineComponents.removeLast();
+    final String location = lineComponents.removeLast();
+    return '$location: $lintName';
+  }
+  final List<String> errors = const LineSplitter().convert(exec.stdout.toString())
+      .where((String line) {
+        return line.trim().isNotEmpty &&
+            !line.startsWith('Analyzing') &&
+            !line.contains('flutter pub get');
+      }).map(lineParser).toList();
+  expect(errors, unorderedEquals(expectedFailures));
 }
 
 Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
@@ -2586,7 +2681,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   // While flutter test does get packages, it doesn't write version
   // files anymore.
   await Process.run(
-    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
     <String>[
       flutterToolsSnapshotPath,
       'packages',
@@ -2603,7 +2698,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir.path,
   );

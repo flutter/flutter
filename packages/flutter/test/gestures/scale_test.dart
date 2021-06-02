@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
@@ -650,5 +650,20 @@ void main() {
     expect(pointerCountOfEnd, 0);
 
     scale.dispose();
+  });
+
+  testWidgets('ScaleGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    expect(
+      () {
+        ScaleGestureRecognizer(
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
+      ),
+    );
   });
 }

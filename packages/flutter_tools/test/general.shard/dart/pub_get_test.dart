@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+import 'package:fake_async/fake_async.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -14,7 +13,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -22,6 +20,31 @@ import '../../src/fake_process_manager.dart';
 void main() {
   setUpAll(() {
     Cache.flutterRoot = '';
+  });
+
+  testWithoutContext('Throws a tool exit if pub cannot be run', () async {
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/pub');
+
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      usage: TestUsage(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+
+    await expectLater(() => pub.get(
+      context: PubContext.pubGet,
+      checkUpToDate: true,
+    ), throwsToolExit(message: 'Your Flutter SDK download may be corrupt or missing permissions to run'));
   });
 
   testWithoutContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
@@ -288,7 +311,7 @@ void main() {
   });
 
   testWithoutContext('pub get 69', () async {
-    String error;
+    String? error;
 
     const FakeCommand pubGetCommand = FakeCommand(
       command: <String>[
@@ -408,12 +431,10 @@ void main() {
       botDetector: const BotDetectorAlwaysNo(),
       processManager: processManager,
     );
-    try {
-      await pub.get(context: PubContext.flutterTests);
-      throw AssertionError('pubGet did not fail');
-    } on ToolExit catch (error) {
-      expect(error.message, 'pub get failed (66; err3)');
-    }
+    await expectLater(
+      () => pub.get(context: PubContext.flutterTests),
+      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', 'pub get failed (66; err3)')),
+    );
     expect(logger.statusText,
       'Running "flutter pub get" in /...\n'
       'out1\n'
@@ -429,7 +450,7 @@ void main() {
   });
 
   testWithoutContext('pub cache in root is used', () async {
-    String error;
+    String? error;
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory pubCache = fileSystem.directory(Cache.flutterRoot).childDirectory('.pub-cache')..createSync();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -503,7 +524,7 @@ void main() {
     );
 
     FakeAsync().run((FakeAsync time) {
-      String error;
+      String? error;
       pub.get(context: PubContext.flutterTests).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {

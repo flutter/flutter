@@ -11,6 +11,7 @@ import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -27,7 +28,7 @@ import 'custom_device_config.dart';
 import 'custom_device_workflow.dart';
 import 'custom_devices_config.dart';
 
-/// Replace all ocurrences of `${someName}` with the value found for that
+/// Replace all occurrences of `${someName}` with the value found for that
 /// name inside replacementValues or additionalReplacementValues.
 ///
 /// The replacement value is first looked for in [replacementValues] and then
@@ -79,7 +80,7 @@ class CustomDeviceLogReader extends DeviceLogReader {
   /// Add all lines emitted by [lines] to this [CustomDeviceLogReader]s [logLines]
   /// stream.
   ///
-  /// Similiar to [listenToProcessOutput], [logLines] will not be marked as done
+  /// Similar to [listenToProcessOutput], [logLines] will not be marked as done
   /// when the argument stream is done.
   ///
   /// Useful when you want to combine the contents of multiple log readers.
@@ -214,7 +215,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     assert(_forwardedPorts.contains(forwardedPort));
 
     // since a forwarded port represents a running process launched with
-    // the forwardPortCommand, unforwarding is as easy as killing the proces
+    // the forwardPortCommand, unforwarding is as easy as killing the process
     _processManager.killPid(forwardedPort.context.pid);
     _forwardedPorts.remove(forwardedPort);
   }
@@ -595,6 +596,24 @@ class CustomDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
+  bool get supportsScreenshot => _config.supportsScreenshotting;
+
+  @override
+  Future<void> takeScreenshot(File outputFile) async {
+    if (supportsScreenshot == false) {
+      throw UnsupportedError('Screenshotting is not supported for this device.');
+    }
+
+    final List<String> interpolated = interpolateCommand(
+      _config.screenshotCommand,
+      <String, String>{},
+    );
+
+    final RunResult result = await _processUtils.run(interpolated, throwOnError: true);
+    await outputFile.writeAsBytes(base64Decode(result.stdout));
+  }
+
+  @override
   bool isSupported() {
     return true;
   }
@@ -639,7 +658,6 @@ class CustomDevice extends Device {
         mainPath: mainPath,
         depfilePath: defaultDepfilePath,
         assetDirPath: assetBundleDir,
-        treeShakeIcons: false,
       );
 
       // if we have a post build step (needed for some embedders), execute it

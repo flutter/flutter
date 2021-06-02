@@ -183,7 +183,7 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///   const MyStatefulWidget({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 /// }
 ///
 /// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
@@ -344,9 +344,9 @@ class CupertinoAlertDialog extends StatelessWidget {
     );
     if (actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
-        children: actions,
         scrollController: actionScrollController,
         isActionSheet: false,
+        children: actions,
       );
     }
 
@@ -495,7 +495,7 @@ class CupertinoPopupSurface extends StatelessWidget {
 ///   const MyStatefulWidget({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 /// }
 ///
 /// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
@@ -646,10 +646,10 @@ class CupertinoActionSheet extends StatelessWidget {
       );
     }
     return _CupertinoAlertActionSection(
-      children: actions!,
       scrollController: actionScrollController,
       hasCancelButton: cancelButton != null,
       isActionSheet: true,
+      children: actions!,
     );
   }
 
@@ -708,9 +708,9 @@ class CupertinoActionSheet extends StatelessWidget {
               vertical: _kActionSheetEdgeVerticalPadding,
             ),
             child: Column(
-              children: children,
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
             ),
           ),
         ),
@@ -788,8 +788,8 @@ class CupertinoActionSheetAction extends StatelessWidget {
             ),
             child: DefaultTextStyle(
               style: style,
-              child: child,
               textAlign: TextAlign.center,
+              child: child,
             ),
           ),
         ),
@@ -890,7 +890,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
 class _CupertinoDialogRenderElement extends RenderObjectElement {
   _CupertinoDialogRenderElement(_CupertinoDialogRenderWidget widget, {this.allowMoveRenderObjectChild = false}) : super(widget);
 
-  // Whether to allow overriden method moveRenderObjectChild call or default to super.
+  // Whether to allow overridden method moveRenderObjectChild call or default to super.
   // CupertinoActionSheet should default to [super] but CupertinoAlertDialog not.
   final bool allowMoveRenderObjectChild;
 
@@ -1199,8 +1199,10 @@ class _RenderCupertinoDialog extends RenderBox {
 
     // Set the position of the actions box to sit at the bottom of the dialog.
     // The content box defaults to the top left, which is where we want it.
-    assert((!isActionSheet && actionsSection!.parentData is BoxParentData)
-        || (isActionSheet && actionsSection!.parentData is MultiChildLayoutParentData));
+    assert(
+      (!isActionSheet && actionsSection!.parentData is BoxParentData) ||
+          (isActionSheet && actionsSection!.parentData is MultiChildLayoutParentData),
+    );
     if (isActionSheet) {
       final MultiChildLayoutParentData actionParentData = actionsSection!.parentData! as MultiChildLayoutParentData;
       actionParentData.offset = Offset(0.0, dialogSizes.contentHeight + dialogSizes.dividerThickness);
@@ -1880,8 +1882,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, _RenderCupertinoDialogActions renderObject) {
+  void updateRenderObject(BuildContext context, _RenderCupertinoDialogActions renderObject) {
     renderObject
       ..dialogWidth = _isActionSheet
           ? null
@@ -2226,7 +2227,7 @@ class _RenderCupertinoDialogActions extends RenderBox
         );
 
         return constraints.constrain(
-          Size(dialogWidth!, childSize.height)
+          Size(dialogWidth!, childSize.height),
         );
       } else {
         // Each button gets half the available width, minus a single divider.

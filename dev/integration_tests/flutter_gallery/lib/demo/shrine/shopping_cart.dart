@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:scoped_model/scoped_model.dart';
-
 import 'package:flutter_gallery/demo/shrine/colors.dart';
 import 'package:flutter_gallery/demo/shrine/expanding_bottom_sheet.dart';
 import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
 import 'package:flutter_gallery/demo/shrine/model/product.dart';
+import 'package:intl/intl.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 const double _leftColumnWidth = 60.0;
 
@@ -17,7 +16,7 @@ class ShoppingCartPage extends StatefulWidget {
   const ShoppingCartPage({Key? key}) : super(key: key);
 
   @override
-  _ShoppingCartPageState createState() => _ShoppingCartPageState();
+  State<ShoppingCartPage> createState() => _ShoppingCartPageState();
 }
 
 class _ShoppingCartPageState extends State<ShoppingCartPage> {

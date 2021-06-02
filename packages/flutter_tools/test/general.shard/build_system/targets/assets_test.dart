@@ -88,7 +88,7 @@ flutter:
 
     expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/AssetManifest.json'), exists);
     expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'), exists);
-    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/NOTICES'), exists);
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/NOTICES.Z'), exists);
     // See https://github.com/flutter/flutter/issues/35293
     expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/foo/bar.png'), exists);
     // See https://github.com/flutter/flutter/issues/46163
@@ -110,8 +110,7 @@ flutter:
 
 ''');
 
-    expect(() async => const CopyAssets().build(environment),
-      throwsA(isA<Exception>()));
+    expect(() async => const CopyAssets().build(environment), throwsException);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -138,7 +137,7 @@ flutter:
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       engineVersion: null,
-    ), throwsA(isA<Exception>()));
+    ), throwsException);
   });
 
   testWithoutContext('processSkSLBundle throws exception if the bundle is not '
@@ -154,7 +153,7 @@ flutter:
       fileSystem: fileSystem,
       logger: logger,
       engineVersion: null,
-    ), throwsA(isA<Exception>()));
+    ), throwsException);
     expect(logger.errorText, contains('was not a JSON object'));
   });
 
@@ -171,7 +170,7 @@ flutter:
       fileSystem: fileSystem,
       logger: logger,
       engineVersion: null,
-    ), throwsA(isA<Exception>()));
+    ), throwsException);
     expect(logger.errorText, contains('was not a JSON object'));
   });
 
@@ -192,7 +191,7 @@ flutter:
       fileSystem: fileSystem,
       logger: logger,
       engineVersion: '2',
-    ), throwsA(isA<Exception>()));
+    ), throwsException);
     expect(logger.errorText, contains('Expected Flutter 1, but found 2'));
   });
 

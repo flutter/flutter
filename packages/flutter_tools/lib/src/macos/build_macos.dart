@@ -13,7 +13,7 @@ import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
@@ -62,7 +62,6 @@ Future<void> buildMacOS({
     buildInfo: buildInfo,
     targetOverride: targetOverride,
     useMacOSConfig: true,
-    setSymroot: false,
   );
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.
@@ -114,6 +113,7 @@ Future<void> buildMacOS({
       else
         '-quiet',
       'COMPILER_INDEX_STORE_ENABLE=NO',
+      ...environmentVariablesAsXcodeBuildSettings(globals.platform)
     ],
     trace: true,
     stdoutErrorMatcher: verboseLogging ? null : _anyOutput,

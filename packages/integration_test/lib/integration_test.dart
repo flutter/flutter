@@ -6,11 +6,11 @@ import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui';
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 import 'package:vm_service/vm_service_io.dart' as vm_io;
 
@@ -40,7 +40,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   IntegrationTestWidgetsFlutterBinding() {
     tearDownAll(() async {
       if (!_allTestsPassed.isCompleted) {
-        _allTestsPassed.complete(true);
+        _allTestsPassed.complete(failureMethodsDetails.isEmpty);
       }
       callbackManager.cleanup();
 
@@ -83,9 +83,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     reportTestException =
         (FlutterErrorDetails details, String testDescription) {
       results[testDescription] = Failure(testDescription, details.toString());
-      if (!_allTestsPassed.isCompleted) {
-        _allTestsPassed.complete(false);
-      }
       oldTestExceptionReporter(details, testDescription);
     };
   }
@@ -133,7 +130,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   final Completer<bool> _allTestsPassed = Completer<bool>();
 
   @override
-  List<Failure> get failureMethodsDetails => _failures;
+  List<Failure> get failureMethodsDetails => results.values.whereType<Failure>().toList();
 
   /// Similar to [WidgetsFlutterBinding.ensureInitialized].
   ///
@@ -156,8 +153,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// a [Failure].
   @visibleForTesting
   Map<String, Object> results = <String, Object>{};
-
-  List<Failure> get _failures => results.values.whereType<Failure>().toList();
 
   /// The extra data for the reported result.
   ///
@@ -228,8 +223,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
       _vmService = vmService;
     }
     if (_vmService == null) {
-      final developer.ServiceProtocolInfo info =
-          await developer.Service.getInfo();
+      final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
       assert(info.serverUri != null);
       _vmService = await vm_io.vmServiceConnectUri(
         'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
@@ -302,6 +296,29 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     reportData![reportKey] = timeline.toJson();
   }
 
+  Future<_GarbageCollectionInfo> _runAndGetGCInfo(Future<void> Function() action) async {
+    if (kIsWeb) {
+      await action();
+      return const _GarbageCollectionInfo();
+    }
+
+    final vm.Timeline timeline = await traceTimeline(
+      action,
+      streams: <String>['GC'],
+    );
+
+    final int oldGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
+      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectOldGeneration';
+    }).length;
+    final int newGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
+      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectNewGeneration';
+    }).length;
+    return _GarbageCollectionInfo(
+      oldCount: oldGenGCCount,
+      newCount: newGenGCCount,
+    );
+  }
+
   /// Watches the [FrameTiming] during `action` and report it to the binding
   /// with key `reportKey`.
   ///
@@ -340,11 +357,16 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     await Future<void>.delayed(const Duration(seconds: 2)); // flush old FrameTimings
     final TimingsCallback watcher = frameTimings.addAll;
     addTimingsCallback(watcher);
-    await action();
+    final _GarbageCollectionInfo gcInfo = await _runAndGetGCInfo(action);
+
     await delayForFrameTimings(); // make sure all FrameTimings are reported
     removeTimingsCallback(watcher);
-    final FrameTimingSummarizer frameTimes =
-        FrameTimingSummarizer(frameTimings);
+
+    final FrameTimingSummarizer frameTimes = FrameTimingSummarizer(
+      frameTimings,
+      newGenGCCount: gcInfo.newCount,
+      oldGenGCCount: gcInfo.oldCount,
+    );
     reportData ??= <String, dynamic>{};
     reportData![reportKey] = frameTimes.summary;
   }
@@ -365,4 +387,27 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
     super.attachRootWidget(RepaintBoundary(child: rootWidget));
   }
+
+  @override
+  void reportExceptionNoticed(FlutterErrorDetails exception) {
+    // This method is called to log errors as they happen, and they will also
+    // be eventually logged again at the end of the tests. The superclass
+    // behavior is specific to the "live" execution semantics of
+    // [LiveTestWidgetsFlutterBinding] so users don't have to wait until tests
+    // finish to see the stack traces.
+    //
+    // Disable this because Integration Tests follow the semantics of
+    // [AutomatedTestWidgetsFlutterBinding] that does not log the stack traces
+    // live, and avoids the doubly logged stack trace.
+    // TODO(jiahaog): Integration test binding should not inherit from
+    // `LiveTestWidgetsFlutterBinding` https://github.com/flutter/flutter/issues/81534
+  }
+}
+
+@immutable
+class _GarbageCollectionInfo {
+  const _GarbageCollectionInfo({this.oldCount = -1, this.newCount = -1});
+
+  final int oldCount;
+  final int newCount;
 }

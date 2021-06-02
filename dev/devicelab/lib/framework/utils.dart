@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -279,10 +280,10 @@ Future<Process> startProcess(
   assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  print('\nExecuting: $command in $finalWorkingDirectory'
-      + (environment != null ? ' with environment $environment' : ''));
   final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
+  newEnvironment['LANG'] = 'en_US.UTF-8';
+  print('\nExecuting: $command in $finalWorkingDirectory with environment $newEnvironment');
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
     environment: newEnvironment,
@@ -291,10 +292,10 @@ Future<Process> startProcess(
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
-  process.exitCode.then<void>((int exitCode) {
+  unawaited(process.exitCode.then<void>((int exitCode) {
     print('"$executable" exit code: $exitCode');
     _runningProcesses.remove(processInfo);
-  });
+  }));
 
   return process;
 }
@@ -563,7 +564,8 @@ T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
 }
 
 String jsonEncode(dynamic data) {
-  return const JsonEncoder.withIndent('  ').convert(data) + '\n';
+  final String jsonValue = const JsonEncoder.withIndent('  ').convert(data);
+  return '$jsonValue\n';
 }
 
 Future<void> getNewGallery(String revision, Directory galleryDir) async {

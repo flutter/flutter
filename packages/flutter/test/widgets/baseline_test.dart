@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Baseline - control test', (WidgetTester tester) async {
@@ -38,8 +38,10 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
-    expect(tester.renderObject<RenderBox>(find.byType(Baseline)).size,
-           within<Size>(from: const Size(100.0, 200.0), distance: 0.001));
+    expect(
+      tester.renderObject<RenderBox>(find.byType(Baseline)).size,
+      within<Size>(from: const Size(100.0, 200.0), distance: 0.001),
+    );
   });
 
   testWidgets('Chip caches baseline', (WidgetTester tester) async {
@@ -92,7 +94,7 @@ void main() {
     expect(calls, 2);
   });
 
-  testWidgets('LayoutBuilder returns child\'s baseline', (WidgetTester tester) async {
+  testWidgets("LayoutBuilder returns child's baseline", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

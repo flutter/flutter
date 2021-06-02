@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -245,8 +245,14 @@ void main() {
     expect(painter, paints..rotate(angle: math.pi / 2.0)..circle()..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(-5.0, 0.0));
-    expect(painter, paints..rotate(angle: math.pi / 2.0)..circle()
-                          ..rotate(angle: math.pi / 2.0)..circle());
+    expect(
+      painter,
+      paints
+        ..rotate(angle: math.pi / 2.0)
+        ..circle()
+        ..rotate(angle: math.pi / 2.0)
+        ..circle(),
+    );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
@@ -539,9 +545,9 @@ class TestScrollBehavior1 extends ScrollBehavior {
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
-      child: child,
       axisDirection: details.direction,
       color: const Color(0xFF00FF00),
+      child: child,
     );
   }
 }
@@ -552,9 +558,9 @@ class TestScrollBehavior2 extends ScrollBehavior {
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
-      child: child,
       axisDirection: details.direction,
       color: const Color(0xFF0000FF),
+      child: child,
     );
   }
 }

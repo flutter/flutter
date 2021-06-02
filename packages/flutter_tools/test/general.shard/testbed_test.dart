@@ -10,8 +10,8 @@ import 'dart:io';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
@@ -82,7 +82,7 @@ void main() {
       }), throwsStateError);
     });
 
-    test('Doesnt throw a StateError if Timer is left cleaned up', () async {
+    test("Doesn't throw a StateError if Timer is left cleaned up", () async {
       final Testbed testbed = Testbed();
 
       await testbed.run(() async {
@@ -96,7 +96,7 @@ void main() {
         ProcessUtils: () => null,
       });
 
-      expect(() => testbed.run(() {}), throwsA(isA<StateError>()));
+      expect(() => testbed.run(() {}), throwsStateError);
     });
   });
 }

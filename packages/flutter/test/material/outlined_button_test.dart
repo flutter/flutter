@@ -4,8 +4,8 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -259,9 +259,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlinedButton(
-              child: const Text('OutlinedButton'),
               onPressed: () {},
               focusNode: focusNode,
+              child: const Text('OutlinedButton'),
             ),
           ),
         ),
@@ -327,9 +327,9 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return OutlinedButton(
-                    child: const Text('OutlinedButton'),
                     onPressed: () {},
                     focusNode: focusNode,
+                    child: const Text('OutlinedButton'),
                   );
                 },
               ),
@@ -578,9 +578,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: OutlinedButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -675,7 +675,7 @@ void main() {
 
     BorderSide getBorderSide() {
       final OutlinedBorder border = tester.widget<Material>(
-        find.descendant(of: outlinedButton, matching: find.byType(Material))
+        find.descendant(of: outlinedButton, matching: find.byType(Material)),
       ).shape! as OutlinedBorder;
       return border.side;
     }
@@ -956,7 +956,7 @@ void main() {
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(108, 100)));
+    expect(box.size, equals(const Size(132, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(VisualDensity.standard, useText: true);
@@ -974,7 +974,7 @@ void main() {
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(64, 36)));
+    expect(box.size, equals(const Size(88, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
@@ -1199,7 +1199,7 @@ void main() {
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(22)),
                     onPressed: () {},
-                    child: const Text('OutlinedButton')
+                    child: const Text('OutlinedButton'),
                   ),
                 ),
               ),
@@ -1318,7 +1318,7 @@ void main() {
     final Key labelKey = UniqueKey();
     final ButtonStyle style = OutlinedButton.styleFrom(
       padding: EdgeInsets.zero,
-      visualDensity: const VisualDensity(), // dx=0, dy=0
+      visualDensity: VisualDensity.standard, // dx=0, dy=0
     );
 
     await tester.pumpWidget(

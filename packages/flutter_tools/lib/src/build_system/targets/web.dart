@@ -17,12 +17,11 @@ import '../../build_info.dart';
 import '../../cache.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
-import '../../globals.dart' as globals;
+import '../../globals_null_migrated.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
-import 'common.dart';
 import 'localizations.dart';
 
 /// Whether the application has web plugins.
@@ -35,6 +34,12 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 
 /// Whether to disable dynamic generation code to satisfy csp policies.
 const String kCspMode = 'cspMode';
+
+/// Base href to set in index.html in flutter build command
+const String kBaseHref = 'baseHref';
+
+/// Placeholder for base href
+const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
@@ -178,9 +183,9 @@ class Dart2JSTarget extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.artifact(Artifact.flutterWebSdk),
-    Source.artifact(Artifact.dart2jsSnapshot),
-    Source.artifact(Artifact.engineDartBinary),
+    Source.hostArtifact(HostArtifact.flutterWebSdk),
+    Source.hostArtifact(HostArtifact.dart2jsSnapshot),
+    Source.hostArtifact(HostArtifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
   ];
@@ -198,12 +203,12 @@ class Dart2JSTarget extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
     final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
-
+    final String librariesSpec = (globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory).childFile('libraries.json').path;
     final List<String> sharedCommandOptions = <String>[
-      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
-      globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
-      '--libraries-spec=${globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json')}',
+      globals.artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
+      '--libraries-spec=$librariesSpec',
       ...?decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (nativeNullAssertions)
         '--native-null-assertions',
@@ -357,7 +362,7 @@ class WebReleaseBundle extends Target {
       // in question.
       if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
         final String randomHash = Random().nextInt(4294967296).toString();
-        final String resultString = inputFile.readAsStringSync()
+        String resultString = inputFile.readAsStringSync()
           .replaceFirst(
             'var serviceWorkerVersion = null',
             "var serviceWorkerVersion = '$randomHash'",
@@ -368,6 +373,13 @@ class WebReleaseBundle extends Target {
             "navigator.serviceWorker.register('flutter_service_worker.js')",
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
           );
+        if (resultString.contains(kBaseHrefPlaceholder) &&
+            environment.defines[kBaseHref] == null) {
+          resultString = resultString.replaceAll(kBaseHrefPlaceholder, '/');
+        } else if (resultString.contains(kBaseHrefPlaceholder) &&
+            environment.defines[kBaseHref] != null) {
+          resultString = resultString.replaceAll(kBaseHrefPlaceholder, environment.defines[kBaseHref]);
+        }
         outputFile.writeAsStringSync(resultString);
         continue;
       }

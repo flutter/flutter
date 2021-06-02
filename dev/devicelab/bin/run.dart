@@ -6,13 +6,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:path/path.dart' as path;
-
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/ab.dart';
 import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 ArgResults args;
 
@@ -184,7 +184,7 @@ Future<void> _runABTest() async {
   abTest.finalize();
 
   final File jsonFile = _uniqueFile(args['ab-result-file'] as String ?? 'ABresults#.json');
-  jsonFile.writeAsString(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap));
+  unawaited(jsonFile.writeAsString(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap)));
 
   if (!silent) {
     section('Raw results');

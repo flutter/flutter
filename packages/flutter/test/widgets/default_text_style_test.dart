@@ -4,8 +4,8 @@
 
 import 'dart:ui' as ui show TextHeightBehavior;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('DefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
@@ -58,8 +58,8 @@ void main() {
 
     await tester.pumpWidget(const AnimatedDefaultTextStyle(
       style: s1,
-      child: textWidget,
       duration: Duration(milliseconds: 1000),
+      child: textWidget,
     ));
 
     final RichText text1 = tester.firstWidget(find.byType(RichText));
@@ -80,8 +80,8 @@ void main() {
       maxLines: 3,
       textWidthBasis: TextWidthBasis.longestLine,
       textHeightBehavior: ui.TextHeightBehavior(applyHeightToFirstAscent: false),
-      child: textWidget,
       duration: Duration(milliseconds: 1000),
+      child: textWidget,
     ));
 
     final RichText text2 = tester.firstWidget(find.byType(RichText));
