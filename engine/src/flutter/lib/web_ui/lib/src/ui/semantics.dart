@@ -275,6 +275,58 @@ class SemanticsFlag {
   }
 }
 
+
+// When adding a new StringAttributeType, the classes in these file must be
+// updated as well.
+//  * engine/src/flutter/lib/ui/semantics.dart
+//  * engine/src/flutter/lib/ui/semantics/string_attribute.h
+//  * engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java
+
+abstract class StringAttribute {
+  StringAttribute._({
+    required this.range,
+  });
+
+  final TextRange range;
+
+  StringAttribute copy({required TextRange range});
+}
+
+class SpellOutStringAttribute extends StringAttribute {
+  SpellOutStringAttribute({
+    required TextRange range,
+  }) : super._(range: range);
+
+  @override
+  StringAttribute copy({required TextRange range}) {
+    return SpellOutStringAttribute(range: range);
+  }
+
+  @override
+  String toString() {
+    return 'SpellOutStringAttribute(range: $range)';
+  }
+}
+
+class LocaleStringAttribute extends StringAttribute {
+  LocaleStringAttribute({
+    required TextRange range,
+    required this.locale,
+  }) : super._(range: range);
+
+  final Locale locale;
+
+  @override
+  StringAttribute copy({required TextRange range}) {
+    return LocaleStringAttribute(range: range, locale: this.locale);
+  }
+
+  @override
+  String toString() {
+    return 'LocaleStringAttribute(range: $range, locale: ${locale.toLanguageTag()})';
+  }
+}
+
 class SemanticsUpdateBuilder {
   SemanticsUpdateBuilder();
 
@@ -297,10 +349,15 @@ class SemanticsUpdateBuilder {
     required double thickness,
     required Rect rect,
     required String label,
-    required String hint,
+    List<StringAttribute>? labelAttributes,
     required String value,
+    List<StringAttribute>? valueAttributes,
     required String increasedValue,
+    List<StringAttribute>? increasedValueAttributes,
     required String decreasedValue,
+    List<StringAttribute>? decreasedValueAttributes,
+    required String hint,
+    List<StringAttribute>? hintAttributes,
     TextDirection? textDirection,
     required Float64List transform,
     required Int32List childrenInTraversalOrder,
@@ -324,10 +381,15 @@ class SemanticsUpdateBuilder {
       scrollExtentMin: scrollExtentMin,
       rect: rect,
       label: label,
-      hint: hint,
+      labelAttributes: labelAttributes,
       value: value,
+      valueAttributes: valueAttributes,
       increasedValue: increasedValue,
+      increasedValueAttributes: increasedValueAttributes,
       decreasedValue: decreasedValue,
+      decreasedValueAttributes: decreasedValueAttributes,
+      hint: hint,
+      hintAttributes: hintAttributes,
       textDirection: textDirection,
       transform: engine.toMatrix32(transform),
       elevation: elevation,

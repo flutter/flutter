@@ -609,10 +609,13 @@ public class FlutterJNI {
    */
   @SuppressWarnings("unused")
   @UiThread
-  private void updateSemantics(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
+  private void updateSemantics(
+      @NonNull ByteBuffer buffer,
+      @NonNull String[] strings,
+      @NonNull ByteBuffer[] stringAttributeArgs) {
     ensureRunningOnMainThread();
     if (accessibilityDelegate != null) {
-      accessibilityDelegate.updateSemantics(buffer, strings);
+      accessibilityDelegate.updateSemantics(buffer, strings, stringAttributeArgs);
     }
     // TODO(mattcarroll): log dropped messages when in debug mode
     // (https://github.com/flutter/flutter/issues/25391)
@@ -1256,7 +1259,10 @@ public class FlutterJNI {
      * <p>Implementers are expected to maintain an Android-side cache of Flutter's semantics tree.
      * This method provides updates from Flutter for the Android-side semantics tree cache.
      */
-    void updateSemantics(@NonNull ByteBuffer buffer, @NonNull String[] strings);
+    void updateSemantics(
+        @NonNull ByteBuffer buffer,
+        @NonNull String[] strings,
+        @NonNull ByteBuffer[] stringAttributeArgs);
   }
 
   public interface AsyncWaitForVsyncDelegate {
