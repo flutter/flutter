@@ -302,13 +302,10 @@ class TestBoxWrapper implements StackTraceDebugger {
       _debugStackTrace = StackTrace.current;
     }
     box = SkiaObjectBox<TestBoxWrapper, TestSkDeletable>.resurrectable(
-      this,
-      TestSkDeletable(),
-      () {
-        resurrectCount += 1;
-        return TestSkDeletable();
-      }
-    );
+        this, TestSkDeletable(), () {
+      resurrectCount += 1;
+      return TestSkDeletable();
+    });
   }
 
   TestBoxWrapper.cloneOf(this.box) {
@@ -331,7 +328,6 @@ class TestBoxWrapper implements StackTraceDebugger {
   TestBoxWrapper clone() => TestBoxWrapper.cloneOf(box);
 }
 
-
 class TestSkDeletable implements SkDeletable {
   static int deleteCount = 0;
 
@@ -342,7 +338,8 @@ class TestSkDeletable implements SkDeletable {
   @override
   void delete() {
     expect(_isDeleted, isFalse,
-      reason: 'CanvasKit does not allow deleting the same object more than once.');
+        reason:
+            'CanvasKit does not allow deleting the same object more than once.');
     _isDeleted = true;
     deleteCount++;
   }
@@ -351,7 +348,7 @@ class TestSkDeletable implements SkDeletable {
   JsConstructor get constructor => TestJsConstructor('TestSkDeletable');
 }
 
-class TestJsConstructor implements JsConstructor{
+class TestJsConstructor implements JsConstructor {
   TestJsConstructor(this.name);
 
   @override
@@ -409,9 +406,6 @@ class FakeRasterizer implements Rasterizer {
   void setSkiaResourceCacheMaxBytes(int bytes) {
     throw UnimplementedError();
   }
-
-  @override
-  Surface get surface => throw UnimplementedError();
 }
 
 class TestSelfManagedObject extends SkiaObject<TestSkDeletable> {

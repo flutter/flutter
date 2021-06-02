@@ -490,6 +490,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/rasterizer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/shader.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/skia_object_cache.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/surface.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/surface_factory.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/text.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/util.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/vertices.dart
