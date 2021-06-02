@@ -234,9 +234,9 @@ public class StandardMessageCodec implements MessageCodec<Object> {
       } else {
         throw new IllegalArgumentException("Unsupported Number type: " + value.getClass());
       }
-    } else if (value instanceof String) {
+    } else if (value instanceof CharSequence) {
       stream.write(STRING);
-      writeBytes(stream, ((String) value).getBytes(UTF8));
+      writeBytes(stream, value.toString().getBytes(UTF8));
     } else if (value instanceof byte[]) {
       stream.write(BYTE_ARRAY);
       writeBytes(stream, (byte[]) value);

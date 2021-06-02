@@ -3,6 +3,7 @@ package io.flutter.plugin.common;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import android.text.SpannableString;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import org.junit.Test;
@@ -107,5 +108,18 @@ public class StandardMessageCodecTest {
 
     float[] values = (float[]) codec.decodeMessage(message);
     assertArrayEquals(expectedValues, values, 0.01f);
+  }
+
+  @Test
+  public void itEncodesCharSequences() {
+    StandardMessageCodec codec = new StandardMessageCodec();
+
+    CharSequence cs = new SpannableString("hello world");
+
+    ByteBuffer message = codec.encodeMessage(cs);
+    message.flip();
+
+    String value = (String) codec.decodeMessage(message);
+    assertEquals(value, "hello world");
   }
 }
