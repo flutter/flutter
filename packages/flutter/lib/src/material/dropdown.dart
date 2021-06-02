@@ -285,9 +285,10 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             textStyle: route.style,
             child: ScrollConfiguration(
               // Dropdown menus should never overscroll or display an overscroll indicator.
-              // The default scrollbar platforms will apply.
+              // Scrollbars are built-in below.
               // Platform must use Theme and ScrollPhysics must be Clamping.
               behavior: ScrollConfiguration.of(context).copyWith(
+                scrollbars: false,
                 overscroll: false,
                 physics: const ClampingScrollPhysics(),
                 platform: Theme.of(context).platform,
