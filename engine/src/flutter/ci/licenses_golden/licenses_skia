@@ -1,4 +1,4 @@
-Signature: c553ee687fddf1499d6c92c9ddf44fa5
+Signature: 8858e94fcb0b2a00bb987f68b144b3f7
 
 UNUSED LICENSES:
 
@@ -3944,7 +3944,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathShapeData.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrMiddleOutPolygonTriangulator.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrMidpointContourParser.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIterator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrVectorXform.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTControl.cpp
@@ -5784,10 +5783,15 @@ FILE: ../../../third_party/skia/include/sksl/DSLRuntimeEffects.h
 FILE: ../../../third_party/skia/include/sksl/DSLStatement.h
 FILE: ../../../third_party/skia/include/sksl/DSLWrapper.h
 FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathCurveTessellator.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathCurveTessellator.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathIndirectTessellator.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathIndirectTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilFillOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilFillOp.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathWedgeTessellator.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathWedgeTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellator.h
