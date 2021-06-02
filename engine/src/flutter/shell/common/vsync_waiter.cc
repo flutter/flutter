@@ -129,8 +129,13 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
 
     TRACE_FLOW_BEGIN("flutter", kVsyncFlowName, flow_identifier);
 
-    fml::TaskQueueId ui_task_queue_id =
-        task_runners_.GetUITaskRunner()->GetTaskQueueId();
+    fml::TaskQueueId ui_task_queue_id = fml::_kUnmerged;
+    if (pause_secondary_tasks) {
+      // Guarding `GetTaskQueueId` behind `pause_secondary_tasks` as on Fuchsia
+      // the task runners don't initialize message loop task queues.
+      // Once the migration to embedder API is done, this can be deleted.
+      ui_task_queue_id = task_runners_.GetUITaskRunner()->GetTaskQueueId();
+    }
 
     task_runners_.GetUITaskRunner()->PostTaskForTime(
         [ui_task_queue_id, callback, flow_identifier, frame_start_time,
