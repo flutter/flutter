@@ -3632,7 +3632,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow af ca. $rowCount';
 
   @override
-  String get pasteButtonLabel => 'Sæt ind';
+  String get pasteButtonLabel => 'Indsæt';
 
   @override
   String get popupMenuLabel => 'Pop op-menu';
@@ -12467,7 +12467,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get dialogLabel => 'Երկխոսության պատուհան';
 
   @override
-  String get drawerLabel => 'Նավարկման ընտրացանկ';
+  String get drawerLabel => 'Նավիգացիայի ընտրացանկ';
 
   @override
   String get expandedIconTapHint => 'Ծալել';
@@ -12533,7 +12533,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get okButtonLabel => 'Եղավ';
 
   @override
-  String get openAppDrawerTooltip => 'Բացել նավարկման ընտրացանկը';
+  String get openAppDrawerTooltip => 'Բացել նավիգացիայի ընտրացանկը';
 
   @override
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow $rowCount-ից';
