@@ -10,8 +10,6 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide window;
 import 'package:ui/src/engine.dart';
-import 'package:ui/src/engine/html/path/path_ref.dart';
-import 'package:ui/src/engine/html/path/path_utils.dart';
 
 import 'matchers.dart';
 

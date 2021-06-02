@@ -634,7 +634,8 @@ class SurfacePath implements ui.Path {
       final ui.Offset lastPoint = pathRef.atPoint(pointCount - 1);
       final double lastPointX = lastPoint.dx;
       final double lastPointY = lastPoint.dy;
-      if (!SPath.nearlyEqual(px, lastPointX) || !SPath.nearlyEqual(py, lastPointY)) {
+      if (!SPath.nearlyEqual(px, lastPointX)
+          || SPath.nearlyEqual(py, lastPointY)) {
         lineTo(px, py);
       }
     }

@@ -60,11 +60,11 @@ class SPath {
     return x < 0 ? -1 : ((x > 0) ? 1 : 0);
   }
 
+  // Snaps a value to zero if almost zero (within tolerance).
+  static double snapToZero(double value) => nearlyEqual(value, 0.0) ? 0.0 : value;
+
   static bool nearlyEqual(double value1, double value2) =>
       (value1 - value2).abs() < SPath.scalarNearlyZero;
-
-  // Snaps a value to zero if almost zero (within tolerance).
-  static double snapToZero(double value) => SPath.nearlyEqual(value, 0.0) ? 0.0 : value;
 
   static bool isInteger(double value) => value.floor() == value;
 }
