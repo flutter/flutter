@@ -660,9 +660,6 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       defaultsTo: 'no screenshotting support',
     );
 
-    unawaited(keystrokesSubscription.cancel());
-    unawaited(nonClosingKeystrokes.close());
-
     // SSH expects IPv6 addresses to use the bracket syntax like URIs do too,
     // but the IPv6 the user enters is a raw IPv6 address, so we need to wrap it.
     final String sshTarget =
@@ -768,6 +765,9 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       hasErrorsOrWarnings:
         shouldCheck && !(await _checkConfigWithLogging(config))
     );
+
+    unawaited(keystrokesSubscription.cancel());
+    unawaited(nonClosingKeystrokes.close());
 
     if (apply) {
       customDevicesConfig.add(config);
