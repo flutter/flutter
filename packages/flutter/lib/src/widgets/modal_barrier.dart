@@ -34,6 +34,7 @@ class ModalBarrier extends StatelessWidget {
     Key? key,
     this.color,
     this.dismissible = true,
+    this.onDismiss,
     this.semanticsLabel,
     this.barrierSemanticsDismissible = true,
   }) : super(key: key);
@@ -53,6 +54,16 @@ class ModalBarrier extends StatelessWidget {
   ///  * [ModalRoute.barrierDismissible], which controls this property for the
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final bool dismissible;
+
+  /// Called when the barrier is being dismissed.
+  ///
+  /// If non-null [onDismiss] will be called in place of popping the current
+  /// route. It is up to the callback to handle dismissing the barrier.
+  ///
+  /// If null, the ambient [Navigator]'s current route will be popped.
+  ///
+  /// This field is ignored if [dismissible] is false.
+  final VoidCallback? onDismiss;
 
   /// Whether the modal barrier semantics are included in the semantics tree.
   ///
@@ -94,7 +105,15 @@ class ModalBarrier extends StatelessWidget {
     final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;
 
     void handleDismiss() {
-      Navigator.maybePop(context);
+      if (dismissible) {
+        if (onDismiss != null) {
+          onDismiss!();
+        } else {
+          Navigator.maybePop(context);
+        }
+      } else {
+        SystemSound.play(SystemSoundType.alert);
+      }
     }
 
     return BlockSemantics(
@@ -103,12 +122,7 @@ class ModalBarrier extends StatelessWidget {
         // modal barriers are not dismissible in accessibility mode.
         excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
         child: _ModalBarrierGestureDetector(
-          onDismiss: () {
-            if (dismissible)
-              handleDismiss();
-            else
-              SystemSound.play(SystemSoundType.alert);
-          },
+          onDismiss: handleDismiss,
           child: Semantics(
             label: semanticsDismissible ? semanticsLabel : null,
             onDismiss: semanticsDismissible ? handleDismiss : null,
