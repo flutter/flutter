@@ -389,7 +389,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
           canRequestFocus: widget.enabled,
           onFocusChange: updateMaterialState(MaterialState.focused),
           autofocus: widget.autofocus,
-          onHighlightChanged: updateMaterialState(MaterialState.pressed, callback: widget.onHighlightChanged),
+          onHighlightChanged: updateMaterialState(MaterialState.pressed, onChanged: widget.onHighlightChanged),
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           focusColor: widget.focusColor,
