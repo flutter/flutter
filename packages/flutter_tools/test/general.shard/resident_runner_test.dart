@@ -1926,37 +1926,6 @@ void main() {
     FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem.test()),
   }));
 
-  testUsingContext('printDebuggerList handles a null', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      listViews,
-      listViews,
-      setAssetBundlePath,
-    ]);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
-      <FlutterDevice>[
-        mockFlutterDevice,
-      ],
-      stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
-      target: 'main.dart',
-      devtoolsHandler: createNoOpHandler,
-    );
-    when(mockFlutterDevice.runHot(
-      hotRunner: anyNamed('hotRunner'),
-      route: anyNamed('route'),
-    )).thenAnswer((Invocation invocation) async {
-      return 0;
-    });
-    await residentRunner.run(enableDevTools: true);
-
-    expect(testLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem.test()),
-  }));
-
-
   testUsingContext('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
