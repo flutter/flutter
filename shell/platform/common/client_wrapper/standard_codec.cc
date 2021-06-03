@@ -71,7 +71,7 @@ EncodedType EncodedTypeForValue(const EncodableValue& value) {
       return EncodedType::kList;
     case 11:
       return EncodedType::kMap;
-    case 12:
+    case 13:
       return EncodedType::kFloat32List;
   }
   assert(false);
@@ -153,15 +153,15 @@ void StandardCodecSerializer::WriteValue(const EncodableValue& value,
       }
       break;
     }
-    case 12: {
-      WriteVector(std::get<std::vector<float>>(value), stream);
-      break;
-    }
-    case 13:
+    case 12:
       std::cerr
           << "Unhandled custom type in StandardCodecSerializer::WriteValue. "
           << "Custom types require codec extensions." << std::endl;
       break;
+    case 13: {
+      WriteVector(std::get<std::vector<float>>(value), stream);
+      break;
+    }
   }
 }
 
