@@ -194,6 +194,9 @@ void main() {
   InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.never);
   InputDecorationTheme();
   inputDecorationTheme.floatingLabelBehavior;
+  inputDecorationTheme.copyWith(floatingLabelBehavior: FloatingLabelBehavior.never);
+  inputDecorationTheme.copyWith(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  inputDecorationTheme.copyWith();
 
   // Changes made in https://github.com/flutter/flutter/pull/66482
   ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
