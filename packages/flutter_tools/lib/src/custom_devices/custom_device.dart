@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../bundle_builder.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';

@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -85,12 +82,12 @@ const Version cocoaPodsRecommendedVersion = Version.withText(1, 10, 0, '1.10.0')
 ///     installing iOS/macOS dependencies.
 class CocoaPods {
   CocoaPods({
-    @required FileSystem fileSystem,
-    @required ProcessManager processManager,
-    @required XcodeProjectInterpreter xcodeProjectInterpreter,
-    @required Logger logger,
-    @required Platform platform,
-    @required Usage usage,
+    required FileSystem fileSystem,
+    required ProcessManager processManager,
+    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required Logger logger,
+    required Platform platform,
+    required Usage usage,
   }) : _fileSystem = fileSystem,
       _processManager = processManager,
       _xcodeProjectInterpreter = xcodeProjectInterpreter,
@@ -112,33 +109,33 @@ class CocoaPods {
   final Logger _logger;
   final Usage _usage;
 
-  Future<String> _versionText;
+  Future<String?>? _versionText;
 
   Future<bool> get isInstalled =>
     _processUtils.exitsHappy(<String>['which', 'pod']);
 
-  Future<String> get cocoaPodsVersionText {
+  Future<String?> get cocoaPodsVersionText {
     _versionText ??= _processUtils.run(
       <String>['pod', '--version'],
       environment: <String, String>{
         'LANG': 'en_US.UTF-8',
       },
-    ).then<String>((RunResult result) {
+    ).then<String?>((RunResult result) {
       return result.exitCode == 0 ? result.stdout.trim() : null;
     }, onError: (dynamic _) => null);
-    return _versionText;
+    return _versionText!;
   }
 
   Future<CocoaPodsStatus> get evaluateCocoaPodsInstallation async {
     if (!(await isInstalled)) {
       return CocoaPodsStatus.notInstalled;
     }
-    final String versionText = await cocoaPodsVersionText;
+    final String? versionText = await cocoaPodsVersionText;
     if (versionText == null) {
       return CocoaPodsStatus.brokenInstall;
     }
     try {
-      final Version installedVersion = Version.parse(versionText);
+      final Version? installedVersion = Version.parse(versionText);
       if (installedVersion == null) {
         return CocoaPodsStatus.unknownVersion;
       }
@@ -155,8 +152,8 @@ class CocoaPods {
   }
 
   Future<bool> processPods({
-    @required XcodeBasedProject xcodeProject,
-    @required BuildMode buildMode,
+    required XcodeBasedProject xcodeProject,
+    required BuildMode buildMode,
     bool dependenciesChanged = true,
   }) async {
     if (!xcodeProject.podfile.existsSync()) {
@@ -253,7 +250,7 @@ class CocoaPods {
       podfileTemplateName = isSwift ? 'Podfile-ios-swift' : 'Podfile-ios-objc';
     }
     final File podfileTemplate = _fileSystem.file(_fileSystem.path.join(
-      Cache.flutterRoot,
+      Cache.flutterRoot!,
       'packages',
       'flutter_tools',
       'templates',
@@ -391,7 +388,7 @@ class CocoaPods {
       //
       // Warn the user if they are still symlinking to the framework.
       final Link flutterSymlink = _fileSystem.link(_fileSystem.path.join(
-        (xcodeProject as IosProject).symlinks.path,
+        xcodeProject.symlinks.path,
         'flutter',
       ));
       if (flutterSymlink.existsSync()) {

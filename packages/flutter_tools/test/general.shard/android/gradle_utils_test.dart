@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,9 +15,9 @@ import '../../src/fakes.dart';
 
 void main() {
    group('injectGradleWrapperIfNeeded', () {
-    MemoryFileSystem fileSystem;
-    Directory gradleWrapperDirectory;
-    GradleUtils gradleUtils;
+    late MemoryFileSystem fileSystem;
+    late Directory gradleWrapperDirectory;
+    late GradleUtils gradleUtils;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
