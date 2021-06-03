@@ -64,7 +64,16 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   // We set `autoUncompress` to false to ensure that we can trust the value of
   // the `Content-Length` HTTP header. We automatically uncompress the content
   // in our call to [consolidateHttpClientResponseBytes].
-  static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
+  //
+  // In order to allow HttpOverrides to be used in different parts of a Flutter
+  // application, use these or the parent zone as a key to look up the client.
+  static final Expando<HttpClient> _sharedClients = Expando<HttpClient>();
+  static HttpClient get _sharedHttpClient {
+    final Object token = HttpOverrides.current ?? Zone.root;
+    HttpClient? cachedClient = _sharedClients[token];
+    cachedClient ??= (_sharedClients[token] = HttpClient()..autoUncompress = false);
+    return cachedClient;
+  }
 
   static HttpClient get _httpClient {
     HttpClient client = _sharedHttpClient;
@@ -85,12 +94,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       assert(key == this);
 
       final Uri resolved = Uri.base.resolve(key.url);
-
       final HttpClientRequest request = await _httpClient.getUrl(resolved);
-
-      headers?.forEach((String name, String value) {
-        request.headers.add(name, value);
-      });
+      headers?.forEach(request.headers.add);
       final HttpClientResponse response = await request.close();
       if (response.statusCode != HttpStatus.ok) {
         // The network may be only temporarily unavailable, or the file will be

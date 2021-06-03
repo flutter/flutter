@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' show Codec, FrameInfo;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -211,11 +212,77 @@ void main() {
 
     expect(completer.debugLabel, url);
   });
+
+  test('Different zones have different HttpClients', () async {
+    debugNetworkImageHttpClientProvider = null;
+    final Object error1 = Object();
+    final Object error2 = Object();
+
+    // assert that a configured fake http client throws the expected error
+    // within an HttpOverrides zone.
+    Future<void> expectError(Object expected) async {
+      await HttpOverrides.runZoned(() async {
+        final Completer<Object> completer = Completer<Object>();
+        final ImageStreamListener listener = ImageStreamListener((ImageInfo data, bool syncCall) {
+          // Do nothing.
+        }, onError: (dynamic error, StackTrace? stackTrace) {
+          completer.complete(error);
+        });
+        final ImageProvider imageProvider = NetworkImage(nonconst('testing.url'));
+        final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+        stream.addListener(listener);
+
+        final Object value = await completer.future;
+        if (!identical(await completer.future, expected)) {
+          throw StateError('Expected $expected|${expected.hashCode} to be thrown but it was $value|${value.hashCode}.');
+        }
+      }, createHttpClient: (SecurityContext? context) {
+        return _FakeHttpClient()..thrownError = expected;
+      });
+    }
+
+    await expectError(error1);
+    // Freshly created client should throw the new error instead of the previously
+    // configured value.
+    await expectError(error2);
+  });
+
+  test('Identical zones have the same HttpClients', () async {
+    debugNetworkImageHttpClientProvider = null;
+
+    // assert that a configured fake http client throws the expected error.
+    Future<void> expectError() async {
+      final Completer<Object> completer = Completer<Object>();
+      final ImageStreamListener listener = ImageStreamListener((ImageInfo data, bool syncCall) {
+        // Do nothing.
+      }, onError: (dynamic error, StackTrace? stackTrace) {
+        completer.complete(error);
+      });
+      final ImageProvider imageProvider = NetworkImage(nonconst('testing.url'));
+      final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+      stream.addListener(listener);
+      await completer.future;
+    }
+
+    int created = 0;
+    await HttpOverrides.runZoned(() async {
+      await expectError();
+      await expectError();
+    }, createHttpClient: (SecurityContext? context) {
+      created += 1;
+      return _FakeHttpClient()..thrownError = Object();
+    });
+
+    expect(created, 1);
+  });
 }
 
 class _FakeHttpClient extends Fake implements HttpClient {
   final _FakeHttpClientRequest request = _FakeHttpClientRequest();
   Object? thrownError;
+
+  @override
+  bool autoUncompress = false;
 
   @override
   Future<HttpClientRequest> getUrl(Uri url) async {
@@ -246,7 +313,7 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
   @override
   HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.notCompressed;
 
-  late List<List<int>> content;
+  List<List<int>> content = <List<int>>[];
 
   @override
   StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
