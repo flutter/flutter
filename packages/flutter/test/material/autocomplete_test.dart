@@ -453,4 +453,46 @@ void main() {
     checkOptionHighlight('chameleon', null);
     checkOptionHighlight('elephant', highlightColor);
   });
+
+  testWidgets('keyboard navigation keeps the highlighted option scrolled into view', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextFormField));
+    await tester.enterText(find.byType(TextFormField), 'e');
+    await tester.pump();
+    expect(find.byType(ListView), findsOneWidget);
+    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    expect(list.semanticChildCount, 6);
+
+    // Highlighted item should be at the top
+    expect(tester.getTopLeft(find.text('chameleon')).dy, equals(64.0));
+
+    // Move down the list of options
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+
+    // First item should have scrolled off the top
+    expect(find.text('chameleon'), findsNothing);
+
+    // Highlighted item 'lemur' should be centered in the options popup
+    expect(tester.getTopLeft(find.text('lemur')).dy, equals(141.0));
+  });
 }
