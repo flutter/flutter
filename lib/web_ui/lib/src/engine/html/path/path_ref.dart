@@ -8,8 +8,8 @@ import 'dart:math' as math;
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../util.dart';
 import 'path_utils.dart';
+import '../../util.dart';
 
 /// Stores the path verbs, points and conic weights.
 ///
@@ -21,7 +21,7 @@ import 'path_utils.dart';
 /// to update caches due to content changes.
 class PathRef {
   PathRef()
-      : _fPoints = Float32List(kInitialPointsCapacity * 2),
+      : fPoints = Float32List(kInitialPointsCapacity * 2),
         _fVerbs = Uint8List(kInitialVerbsCapacity) {
     _fPointsCapacity = kInitialPointsCapacity;
     _fVerbsCapacity = kInitialVerbsCapacity;
@@ -55,7 +55,7 @@ class PathRef {
   int _fPointsCapacity = 0;
   int _fPointsLength = 0;
   int _fVerbsCapacity = 0;
-  Float32List _fPoints;
+  Float32List fPoints;
   Uint8List _fVerbs;
   int _fVerbsLength = 0;
   int _conicWeightsCapacity = 0;
@@ -82,8 +82,8 @@ class PathRef {
   void setPoint(int pointIndex, double x, double y) {
     assert(pointIndex < _fPointsLength);
     int index = pointIndex * 2;
-    _fPoints[index] = x;
-    _fPoints[index + 1] = y;
+    fPoints[index] = x;
+    fPoints[index + 1] = y;
   }
 
   /// Creates a copy of the path by pointing new path to a current
@@ -91,7 +91,7 @@ class PathRef {
   /// more verbs, this copy only returns path at the time of copy and shares
   /// typed arrays of original path.
   PathRef.shallowCopy(PathRef ref)
-      : _fPoints = ref._fPoints,
+      : fPoints = ref.fPoints,
         _fVerbs = ref._fVerbs {
     _fVerbsCapacity = ref._fVerbsCapacity;
     _fVerbsLength = ref._fVerbsLength;
@@ -117,7 +117,7 @@ class PathRef {
     debugValidate();
   }
 
-  Float32List get points => _fPoints;
+  Float32List get points => fPoints;
   Float32List? get conicWeights => _conicWeights;
 
   int countPoints() => _fPointsLength;
@@ -130,12 +130,12 @@ class PathRef {
   }
 
   ui.Offset atPoint(int index) {
-    return ui.Offset(_fPoints[index * 2], _fPoints[index * 2 + 1]);
+    return ui.Offset(fPoints[index * 2], fPoints[index * 2 + 1]);
   }
 
-  double pointXAt(int index) => _fPoints[index * 2];
+  double pointXAt(int index) => fPoints[index * 2];
 
-  double pointYAt(int index) => _fPoints[index * 2 + 1];
+  double pointYAt(int index) => fPoints[index * 2 + 1];
 
   double atWeight(int index) {
     return _conicWeights![index];
@@ -227,10 +227,10 @@ class PathRef {
         _fVerbs[1] != SPath.kLineVerb) {
       return null;
     }
-    final double x0 = _fPoints[0];
-    final double y0 = _fPoints[1];
-    final double x1 = _fPoints[2];
-    final double y1 = _fPoints[3];
+    final double x0 = fPoints[0];
+    final double y0 = fPoints[1];
+    final double x1 = fPoints[2];
+    final double y1 = fPoints[3];
     if (y0 == y1 || x0 == x1) {
       return ui.Rect.fromLTRB(x0, y0, x1, y1);
     }
@@ -324,7 +324,7 @@ class PathRef {
       return false;
     }
     for (int i = 0, len = pointCount * 2; i < len; i++) {
-      if (_fPoints[i] != ref._fPoints[i]) {
+      if (fPoints[i] != ref.fPoints[i]) {
         return false;
       }
     }
@@ -383,7 +383,7 @@ class PathRef {
 
   /// Returns a new path by translating [source] by [offsetX], [offsetY].
   PathRef.shiftedFrom(PathRef source, double offsetX, double offsetY)
-      : _fPoints = _fPointsFromSource(source, offsetX, offsetY),
+      : fPoints = _fPointsFromSource(source, offsetX, offsetY),
         _fVerbs = _fVerbsFromSource(source) {
     _conicWeightsCapacity = source._conicWeightsCapacity;
     _conicWeightsLength = source._conicWeightsLength;
@@ -422,7 +422,7 @@ class PathRef {
         additionalReservePoints);
 
     js_util.callMethod(_fVerbs, 'set', [ref._fVerbs]);
-    js_util.callMethod(_fPoints, 'set', [ref._fPoints]);
+    js_util.callMethod(fPoints, 'set', [ref.fPoints]);
     if (ref._conicWeights == null) {
       _conicWeights = null;
     } else {
@@ -448,8 +448,8 @@ class PathRef {
     if (newLength > _fPointsCapacity) {
       _fPointsCapacity = newLength + 10;
       Float32List newPoints = Float32List(_fPointsCapacity * 2);
-      js_util.callMethod(newPoints, 'set', <dynamic>[_fPoints]);
-      _fPoints = newPoints;
+      js_util.callMethod(newPoints, 'set', <dynamic>[fPoints]);
+      fPoints = newPoints;
     }
     _fPointsLength = newLength;
   }
@@ -486,7 +486,7 @@ class PathRef {
     for (int source = pointCount * 2 - 1, dst = newPointCount * 2 - 1;
         source >= 0;
         source--, dst--) {
-      _fPoints[dst] = sourcePoints[source];
+      fPoints[dst] = sourcePoints[source];
     }
     final int verbCount = countVerbs();
     final int newVerbCount = source.countVerbs();
@@ -564,14 +564,14 @@ class PathRef {
       fIsFinite = true;
     } else {
       double minX, maxX, minY, maxY;
-      minX = maxX = _fPoints[0];
+      minX = maxX = fPoints[0];
       accum *= minX;
-      minY = maxY = _fPoints[1];
+      minY = maxY = fPoints[1];
       accum *= minY;
       for (int i = 2, len = 2 * pointCount; i < len; i += 2) {
-        final double x = _fPoints[i];
+        final double x = fPoints[i];
         accum *= x;
-        final double y = _fPoints[i + 1];
+        final double y = fPoints[i + 1];
         accum *= y;
         minX = math.min(minX, x);
         minY = math.min(minY, y);
@@ -765,7 +765,7 @@ class PathRef {
     if (numPts != 0) {
       int curLength = countPoints();
       _resizePoints(curLength + numPts);
-      _fPoints.setAll(curLength * 2, path._fPoints);
+      fPoints.setAll(curLength * 2, path.fPoints);
     }
 
     final int numConics = path.countWeights();
@@ -814,7 +814,7 @@ class PathRef {
 
   Float32List getPoints() {
     debugValidate();
-    return _fPoints;
+    return fPoints;
   }
 
   static const int kMinSize = 256;
@@ -864,8 +864,8 @@ class PathRef {
       final double boundsRight = bounds.right;
       final double boundsBottom = bounds.bottom;
       for (int i = 0, len = _fPointsLength * 2; i < len; i += 2) {
-        final double pointX = _fPoints[i];
-        final double pointY = _fPoints[i + 1];
+        final double pointX = fPoints[i];
+        final double pointY = fPoints[i + 1];
         double tolerance = 0.0001;
         final bool pointIsFinite = pointX.isFinite && pointY.isFinite;
         if (pointIsFinite &&
@@ -897,10 +897,10 @@ class PathRef {
   int findMaxY(int pointIndex, int count) {
     assert(count > 0);
     // move to y component.
-    double max = _fPoints[pointIndex * 2 + 1];
+    double max = fPoints[pointIndex * 2 + 1];
     int firstIndex = pointIndex;
     for (int i = 1; i < count; i++) {
-      double y = _fPoints[(pointIndex + i) * 2];
+      double y = fPoints[(pointIndex + i) * 2];
       if (y > max) {
         max = y;
         firstIndex = pointIndex + i;
@@ -921,8 +921,8 @@ class PathRef {
         // we wrapped around, so abort
         break;
       }
-      if (_fPoints[index * 2] != _fPoints[i * 2] ||
-          _fPoints[index * 2 + 1] != _fPoints[i * 2 + 1]) {
+      if (fPoints[index * 2] != fPoints[i * 2] ||
+          fPoints[index * 2 + 1] != fPoints[i * 2 + 1]) {
         // found a different point, success!
         break;
       }
