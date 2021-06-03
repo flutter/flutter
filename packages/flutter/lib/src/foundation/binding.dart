@@ -174,6 +174,13 @@ abstract class BindingBase {
         name: 'exit',
         callback: _exitApplication,
       );
+      registerStringServiceExtension(
+        name: 'connectedVmServiceUri',
+        getter: () async => connectedVmServiceUri ?? '',
+        setter: (String uri) async {
+          connectedVmServiceUri = uri;
+        },
+      );
     }
 
     assert(() {
@@ -243,14 +250,6 @@ abstract class BindingBase {
           return <String, dynamic>{
             'value': (debugBrightnessOverride ?? window.platformBrightness).toString(),
           };
-        },
-      );
-
-      registerStringServiceExtension(
-        name: 'connectedVmServiceUri',
-        getter: () async => connectedVmServiceUri ?? '',
-        setter: (String uri) async {
-          connectedVmServiceUri = uri;
         },
       );
 
