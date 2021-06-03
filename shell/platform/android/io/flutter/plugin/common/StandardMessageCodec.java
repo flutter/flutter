@@ -288,7 +288,8 @@ public class StandardMessageCodec implements MessageCodec<Object> {
         writeFloat(stream, f);
       }
     } else {
-      throw new IllegalArgumentException("Unsupported value: " + value);
+      throw new IllegalArgumentException(
+          "Unsupported value: '" + value + "' of type '" + value.getClass() + "'");
     }
   }
 
