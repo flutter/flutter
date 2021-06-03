@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
-import 'dart:ui' show AttributedString, StringAttribute;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';

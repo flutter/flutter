@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
-import 'dart:ui' show StringAttribute;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
