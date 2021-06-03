@@ -4,10 +4,12 @@
 
 #pragma once
 
+#include <map>
+
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/formats.h"
 #include "impeller/compositor/texture.h"
-#include "impeller/entity/color.h"
+#include "impeller/geometry/color.h"
 
 namespace impeller {
 
@@ -15,6 +17,8 @@ struct RenderPassAttachment {
   std::shared_ptr<Texture> texture;
   LoadAction load_action = LoadAction::kDontCare;
   StoreAction store_action = StoreAction::kDontCare;
+
+  constexpr operator bool() const { return static_cast<bool>(texture); }
 };
 
 struct ColorRenderPassAttachment : public RenderPassAttachment {
@@ -31,17 +35,34 @@ struct StencilRenderPassAttachment : public RenderPassAttachment {
 
 class RenderPassDescriptor {
  public:
+  RenderPassDescriptor();
+
+  ~RenderPassDescriptor();
+
+  RenderPassDescriptor& SetColorAttachment(ColorRenderPassAttachment attachment,
+                                           size_t index);
+
+  RenderPassDescriptor& SetDepthAttachment(
+      DepthRenderPassAttachment attachment);
+
+  RenderPassDescriptor& SetStencilAttachment(
+      StencilRenderPassAttachment attachment);
+
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(RenderPassDescriptor);
+  std::map<size_t, ColorRenderPassAttachment> color_;
+  std::optional<DepthRenderPassAttachment> depth_;
+  std::optional<StencilRenderPassAttachment> stencil_;
 };
 
 class RenderPass {
  public:
-  RenderPass();
+  RenderPass(RenderPassDescriptor desc);
 
   ~RenderPass();
 
  private:
+  RenderPassDescriptor desc_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPass);
 };
 

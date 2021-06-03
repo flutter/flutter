@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "color.h"
+#include "impeller/geometry/color.h"
+
 #include <algorithm>
 #include <cmath>
 #include <sstream>
