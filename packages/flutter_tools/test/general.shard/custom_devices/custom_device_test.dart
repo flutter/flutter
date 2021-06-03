@@ -577,6 +577,18 @@ void main() {
     expect(screenshotCommandWasExecuted, false);
     expect(screenshotFile.existsSync(), false);
   });
+
+  testWithoutContext('CustomDevice returns correct target platform', () async {
+    final CustomDevice device = CustomDevice(
+      config: testConfig.copyWith(
+        platform: TargetPlatform.linux_x64
+      ),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.empty()
+    );
+
+    expect(device.targetPlatform, TargetPlatform.linux_x64);
+  });
 }
 
 class FakeBundleBuilder extends Fake implements BundleBuilder {

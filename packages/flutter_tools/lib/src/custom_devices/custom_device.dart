@@ -804,8 +804,7 @@ class CustomDevice extends Device {
   }
 
   @override
-  // TODO(ardera): Allow configuring or auto-detecting the target platform, https://github.com/flutter/flutter/issues/78151
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.linux_arm64;
+  Future<TargetPlatform> get targetPlatform async => _config.platform ?? TargetPlatform.linux_arm64;
 
   @override
   Future<bool> uninstallApp(covariant ApplicationPackage app, {String userIdentifier}) {
