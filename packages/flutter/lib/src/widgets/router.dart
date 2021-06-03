@@ -392,8 +392,8 @@ class Router<T> extends StatefulWidget {
     return scope?.routerState.widget as Router<T>?;
   }
 
-  /// Forces the [Router] to run the [callback] and reports the route
-  /// information back to the engine.
+  /// Forces the [Router] to run the [callback] and create a new history
+  /// entry in the browser.
   ///
   /// The web application relies on the [Router] to report new route information
   /// in order to create browser history entry. The [Router] will only report
@@ -414,8 +414,8 @@ class Router<T> extends StatefulWidget {
   ///
   ///  * [Router]: see the "URL updates for web applications" section for more
   ///    information about route information reporting.
-  ///  * [neglect]: which forces the [Router] to not report the route
-  ///    information even if location does change.
+  ///  * [neglect]: which forces the [Router] to not create a new history entry
+  ///    even if location does change.
   static void navigate(BuildContext context, VoidCallback callback) {
     final _RouterScope scope = context
       .getElementForInheritedWidgetOfExactType<_RouterScope>()!
@@ -423,24 +423,27 @@ class Router<T> extends StatefulWidget {
     scope.routerState._setStateWithExplicitReportStatus(_IntentionToReportRouteInformation.must, callback);
   }
 
-  /// Forces the [Router] to run the [callback] without reporting the route
-  /// information back to the engine.
-  ///
-  /// Use this method if you don't want the [Router] to report the new route
-  /// information even if it detects changes as a result of running the
-  /// [callback].
+  /// Forces the [Router] to run the [callback] without creating a new history
+  /// entry in the browser.
   ///
   /// The web application relies on the [Router] to report new route information
   /// in order to create browser history entry. The [Router] will report them
-  /// automatically if it detects the [RouteInformation.location] changes. You
-  /// can use this method if you want to navigate to a new route without
-  /// creating the browser history entry.
+  /// automatically if it detects the [RouteInformation.location] changes.
+  ///
+  /// Creating a new route history entry makes users feel they have visited a
+  /// new page, and the browser back button brings them back to previous history
+  /// entry. Use this method if you don't want the [Router] to create a new
+  /// route information even if it detects changes as a result of running the
+  /// [callback].
+  ///
+  /// Note that using this method will still update the current URL and
+  /// browser state.
   ///
   /// See also:
   ///
   ///  * [Router]: see the "URL updates for web applications" section for more
   ///    information about route information reporting.
-  ///  * [navigate]: which forces the [Router] to report the route information
+  ///  * [navigate]: which forces the [Router] to create a new history entry
   ///    even if location does not change.
   static void neglect(BuildContext context, VoidCallback callback) {
     final _RouterScope scope = context

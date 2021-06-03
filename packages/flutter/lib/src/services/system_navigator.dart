@@ -67,11 +67,23 @@ class SystemNavigator {
 
   /// Notifies the platform for a route information change.
   ///
-  /// On web, creates a new browser history entry and update URL with the route
-  /// information. Whether the history holds one entry or multiple entries is
-  /// determined by [selectSingleEntryHistory] and [selectMultiEntryHistory].
+  /// On web, this method behaves differently based on the single-entry or
+  /// multiple-entries history mode. Use the [selectSingleEntryHistory] and
+  /// [selectMultiEntryHistory] to toggle between modes.
+  ///
+  /// For single-entry mode, this method replace the current url and state in
+  /// the current history entry. The flag `replace` is ignored.
+  ///
+  /// For multiple-entries mode, this method create a new history entry on top
+  /// of the current entry if the `replace` is true. This means the user will
+  /// be on a new history entry as if the user has visited a new page, and the
+  /// browser back button brings the user back to the previous entry. If the
+  /// `replace` is false, this method only updates the url and the state in the
+  /// current history entry without pushing a new one.
   ///
   /// Currently, this is ignored on other platforms.
+  ///
+  /// The `replace` flag defaults to false.
   static Future<void> routeInformationUpdated({
     required String location,
     Object? state,
