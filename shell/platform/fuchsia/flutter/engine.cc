@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#define FML_USED_ON_EMBEDDER
+
 #include "engine.h"
 
 #include <lib/async/cpp/task.h>
@@ -10,6 +12,7 @@
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/make_copyable.h"
+#include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
@@ -24,7 +27,6 @@
 #include "fuchsia_intl.h"
 #include "platform_view.h"
 #include "surface.h"
-#include "task_runner_adapter.h"
 #include "vsync_waiter.h"
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
@@ -80,12 +82,15 @@ Engine::Engine(Delegate& delegate,
 
   // Get the task runners from the managed threads. The current thread will be
   // used as the "platform" thread.
+  fml::RefPtr<fml::TaskRunner> platform_task_runner =
+      fml::MessageLoop::GetCurrent().GetTaskRunner();
+
   const flutter::TaskRunners task_runners(
-      thread_label_,  // Dart thread labels
-      CreateFMLTaskRunner(async_get_default_dispatcher()),  // platform
-      CreateFMLTaskRunner(threads_[0].dispatcher()),        // raster
-      CreateFMLTaskRunner(threads_[1].dispatcher()),        // ui
-      CreateFMLTaskRunner(threads_[2].dispatcher())         // io
+      thread_label_,                // Dart thread labels
+      platform_task_runner,         // platform
+      threads_[0].GetTaskRunner(),  // raster
+      threads_[1].GetTaskRunner(),  // ui
+      threads_[2].GetTaskRunner()   // io
   );
   UpdateNativeThreadLabelNames(thread_label_, task_runners);
 
@@ -120,10 +125,9 @@ Engine::Engine(Delegate& delegate,
   // This handles the fidl error callback when the Session connection is
   // broken. The SessionListener interface also has an OnError method, which is
   // invoked on the platform thread (in PlatformView).
-  fml::closure session_error_callback = [dispatcher =
-                                             async_get_default_dispatcher(),
+  fml::closure session_error_callback = [task_runner = platform_task_runner,
                                          weak = weak_factory_.GetWeakPtr()]() {
-    async::PostTask(dispatcher, [weak]() {
+    task_runner->PostTask([weak]() {
       if (weak) {
         weak->Terminate();
       }
@@ -221,9 +225,9 @@ Engine::Engine(Delegate& delegate,
   // platform thread when that happens. The Session itself should also be
   // disconnected when this happens, and it will also attempt to terminate.
   fit::closure on_session_listener_error_callback =
-      [dispatcher = async_get_default_dispatcher(),
+      [task_runner = platform_task_runner,
        weak = weak_factory_.GetWeakPtr()]() {
-        async::PostTask(dispatcher, [weak]() {
+        task_runner->PostTask([weak]() {
           if (weak) {
             weak->Terminate();
           }
@@ -511,9 +515,6 @@ Engine::Engine(Delegate& delegate,
 
 Engine::~Engine() {
   shell_.reset();
-  for (auto& thread : threads_) {
-    thread.Quit();
-  }
   for (auto& thread : threads_) {
     thread.Join();
   }
