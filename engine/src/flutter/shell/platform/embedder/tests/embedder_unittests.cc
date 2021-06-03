@@ -725,6 +725,10 @@ TEST_F(EmbedderTest,
   event.width = 800;
   event.height = 600;
   event.pixel_ratio = 1.0;
+  event.physical_view_inset_top = 0.0;
+  event.physical_view_inset_right = 0.0;
+  event.physical_view_inset_bottom = 0.0;
+  event.physical_view_inset_left = 0.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
@@ -786,6 +790,10 @@ TEST_F(EmbedderTest, CaDeinitializeAnEngine) {
   event.width = 800;
   event.height = 600;
   event.pixel_ratio = 1.0;
+  event.physical_view_inset_top = 0.0;
+  event.physical_view_inset_right = 0.0;
+  event.physical_view_inset_bottom = 0.0;
+  event.physical_view_inset_left = 0.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kInvalidArguments);
   engine.reset();
@@ -984,6 +992,10 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
   event.width = 1024;
   event.height = 600;
   event.pixel_ratio = 1.0;
+  event.physical_view_inset_top = 0.0;
+  event.physical_view_inset_right = 0.0;
+  event.physical_view_inset_bottom = 0.0;
+  event.physical_view_inset_left = 0.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
@@ -1229,6 +1241,49 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithAValidElfSource) {
   // Wait for the root isolate to launch.
   latch.Wait();
   engine.reset();
+}
+
+TEST_F(EmbedderTest, InvalidFlutterWindowMetricsEvent) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 0.0;
+  event.physical_view_inset_top = 0.0;
+  event.physical_view_inset_right = 0.0;
+  event.physical_view_inset_bottom = 0.0;
+  event.physical_view_inset_left = 0.0;
+
+  // Pixel ratio must be positive.
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+
+  event.pixel_ratio = 1.0;
+  event.physical_view_inset_top = -1.0;
+  event.physical_view_inset_right = -1.0;
+  event.physical_view_inset_bottom = -1.0;
+  event.physical_view_inset_left = -1.0;
+
+  // Physical view insets must be non-negative.
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+
+  event.physical_view_inset_top = 700;
+  event.physical_view_inset_right = 900;
+  event.physical_view_inset_bottom = 700;
+  event.physical_view_inset_left = 900;
+
+  // Top/bottom insets cannot be greater than height.
+  // Left/right insets cannot be greater than width.
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
 }
 
 //------------------------------------------------------------------------------

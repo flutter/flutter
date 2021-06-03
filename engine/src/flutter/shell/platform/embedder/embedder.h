@@ -572,6 +572,14 @@ typedef struct {
   size_t left;
   /// Vertical physical location of the top of the window on the screen.
   size_t top;
+  /// Top inset of window.
+  double physical_view_inset_top;
+  /// Right inset of window.
+  double physical_view_inset_right;
+  /// Bottom inset of window.
+  double physical_view_inset_bottom;
+  /// Left inset of window.
+  double physical_view_inset_left;
 } FlutterWindowMetricsEvent;
 
 /// The phase of the pointer event.
