@@ -59,7 +59,7 @@ const Duration _kExpand = Duration(milliseconds: 200);
 ///         children: const <Widget>[
 ///           ListTile(title: Text('This is tile number 2')),
 ///         ],
-///         onExpansionChanged: (expanded) {
+///         onExpansionChanged: (bool expanded) {
 ///           setState(() => _customTileExpanded = expanded);
 ///         },
 ///       ),
