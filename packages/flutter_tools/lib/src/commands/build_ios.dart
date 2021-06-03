@@ -146,8 +146,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           ...globals.xcode.xcrunCommand(),
           'xcodebuild',
           '-exportArchive',
-          if (shouldCodesign) '-allowProvisioningDeviceRegistration',
-          if (shouldCodesign) '-allowProvisioningUpdates',
+          if (shouldCodesign) ...<String>[
+            '-allowProvisioningDeviceRegistration',
+            '-allowProvisioningUpdates',
+          ],
           '-archivePath',
           globals.fs.path.absolute(app.archiveBundleOutputPath),
           '-exportPath',
