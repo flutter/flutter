@@ -175,7 +175,7 @@ TEST(StandardMessageCodec, CanEncodeAndDecodeInt64Array) {
   CheckEncodeDecode(value, bytes);
 }
 
-TEST(StandradMessageCodec, CanEncodeAndDecodeFloat32Array) {
+TEST(StandardMessageCodec, CanEncodeAndDecodeFloat32Array) {
   std::vector<uint8_t> bytes = {0x0e, 0x02, 0x00, 0x00, 0xd8, 0x0f,
                                 0x49, 0x40, 0x00, 0x00, 0x7a, 0x44};
   EncodableValue value(std::vector<float>{3.1415920257568359375f, 1000.0f});
