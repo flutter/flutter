@@ -169,11 +169,13 @@ abstract class BindingBase {
       return true;
     }());
 
-    if (!kReleaseMode && !kIsWeb) {
-      registerSignalServiceExtension(
-        name: 'exit',
-        callback: _exitApplication,
-      );
+    if (!kReleaseMode) {
+      if (!kIsWeb) {
+        registerSignalServiceExtension(
+          name: 'exit',
+          callback: _exitApplication,
+        );
+      }
       registerStringServiceExtension(
         name: 'connectedVmServiceUri',
         getter: () async => connectedVmServiceUri ?? '',
