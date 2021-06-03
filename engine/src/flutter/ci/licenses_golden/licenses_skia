@@ -1,4 +1,4 @@
-Signature: 21842f112f7dd87464222f9a81ec3cc7
+Signature: 0fb2e22207cb3db740b1da1a2aefa5c5
 
 UNUSED LICENSES:
 
@@ -671,25 +671,16 @@ FILE: ../../../third_party/skia/experimental/skottiekit/preamble.js
 FILE: ../../../third_party/skia/experimental/skottiekit/release.js
 FILE: ../../../third_party/skia/experimental/skottiekit/skottiekit/package.json
 FILE: ../../../third_party/skia/experimental/sktext/include/Layout.h
-FILE: ../../../third_party/skia/experimental/sktext/include/Paint.h
+FILE: ../../../third_party/skia/experimental/sktext/include/Text.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Types.h
 FILE: ../../../third_party/skia/experimental/sktext/samples/Text.cpp
-FILE: ../../../third_party/skia/experimental/sktext/src/Formatter.cpp
-FILE: ../../../third_party/skia/experimental/sktext/src/Formatter.h
-FILE: ../../../third_party/skia/experimental/sktext/src/Layout.cpp
 FILE: ../../../third_party/skia/experimental/sktext/src/Line.cpp
 FILE: ../../../third_party/skia/experimental/sktext/src/Line.h
 FILE: ../../../third_party/skia/experimental/sktext/src/Paint.cpp
-FILE: ../../../third_party/skia/experimental/sktext/src/Processor.cpp
-FILE: ../../../third_party/skia/experimental/sktext/src/Processor.h
-FILE: ../../../third_party/skia/experimental/sktext/src/Shaper.cpp
-FILE: ../../../third_party/skia/experimental/sktext/src/Shaper.h
+FILE: ../../../third_party/skia/experimental/sktext/src/Paint.h
+FILE: ../../../third_party/skia/experimental/sktext/src/Text.cpp
 FILE: ../../../third_party/skia/experimental/sktext/src/TextRun.cpp
 FILE: ../../../third_party/skia/experimental/sktext/src/TextRun.h
-FILE: ../../../third_party/skia/experimental/sktext/src/Visitor.cpp
-FILE: ../../../third_party/skia/experimental/sktext/src/Visitor.h
-FILE: ../../../third_party/skia/experimental/sktext/src/Wrapper.cpp
-FILE: ../../../third_party/skia/experimental/sktext/src/Wrapper.h
 FILE: ../../../third_party/skia/experimental/tskit/.eslintignore
 FILE: ../../../third_party/skia/experimental/tskit/.eslintrc.js
 FILE: ../../../third_party/skia/experimental/tskit/bindings/core.d.ts
@@ -969,7 +960,6 @@ FILE: ../../../third_party/skia/modules/canvaskit/font.js
 FILE: ../../../third_party/skia/modules/canvaskit/fonts/NotoMono-Regular.ttf
 FILE: ../../../third_party/skia/modules/canvaskit/gm.js
 FILE: ../../../third_party/skia/modules/canvaskit/gpu.js
-FILE: ../../../third_party/skia/modules/canvaskit/helper.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/_namedcolors.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/canvas2dcontext.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/color.js
