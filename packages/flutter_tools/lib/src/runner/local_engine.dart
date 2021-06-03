@@ -163,7 +163,7 @@ class LocalEngineLocator {
     for (final String suffix in suffixes) {
       tmpBasename = tmpBasename.replaceFirst(RegExp('$suffix\$'), '');
     }
-    return 'host_' + tmpBasename;
+    return 'host_$tmpBasename';
   }
 
   EngineBuildPaths _findEngineBuildPath(String localEngine, String enginePath) {

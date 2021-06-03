@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
 
@@ -17,7 +17,7 @@ class BenchmarkingBinding extends LiveTestWidgetsFlutterBinding {
   final Stopwatch stopwatch;
 
   @override
-  void handleBeginFrame(Duration rawTimeStamp) {
+  void handleBeginFrame(Duration? rawTimeStamp) {
     stopwatch.start();
     super.handleBeginFrame(rawTimeStamp);
   }
@@ -68,7 +68,7 @@ Future<void> main() async {
 
       // Time how long each frame takes
       cpuWatch.reset();
-      while (SchedulerBinding.instance.hasScheduledFrame) {
+      while (SchedulerBinding.instance!.hasScheduledFrame) {
         await tester.pump();
         totalSubsequentFramesIterationCount += 1;
       }

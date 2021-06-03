@@ -1913,7 +1913,7 @@ class InputDecorator extends StatefulWidget {
   bool get _labelShouldWithdraw => !isEmpty || (isFocused && decoration.enabled);
 
   @override
-  _InputDecoratorState createState() => _InputDecoratorState();
+  State<InputDecorator> createState() => _InputDecoratorState();
 
   /// The RenderBox that defines this decorator's "container". That's the
   /// area which is filled if [InputDecoration.filled] is true. It's the area
@@ -2363,7 +2363,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
 
-    return _Decorator(
+    final _Decorator decorator = _Decorator(
       decoration: _Decoration(
         contentPadding: contentPadding,
         isCollapsed: decoration!.isCollapsed,
@@ -2393,6 +2393,15 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       isFocused: isFocused,
       expands: widget.expands,
     );
+
+    final BoxConstraints? constraints = decoration!.constraints ?? themeData.inputDecorationTheme.constraints;
+    if (constraints != null) {
+      return ConstrainedBox(
+        constraints: constraints,
+        child: decorator,
+      );
+    }
+    return decorator;
   }
 }
 
@@ -2563,6 +2572,7 @@ class InputDecoration {
     this.enabled = true,
     this.semanticCounterText,
     this.alignLabelWithHint,
+    this.constraints,
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
@@ -2625,7 +2635,8 @@ class InputDecoration {
        disabledBorder = null,
        enabledBorder = null,
        semanticCounterText = null,
-       alignLabelWithHint = false;
+       alignLabelWithHint = false,
+       constraints = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -3320,6 +3331,20 @@ class InputDecoration {
   /// Defaults to false.
   final bool? alignLabelWithHint;
 
+  /// Defines minimum and maximum sizes for the [InputDecorator].
+  ///
+  /// Typically the decorator will fill the horizontal space it is given. For
+  /// larger screens, it may be useful to have the maximum width clamped to
+  /// a given value so it doesn't fill the whole screen. This property
+  /// allows you to control how big the decorator will be in its available
+  /// space.
+  ///
+  /// If null, then the ambient [ThemeData.inputDecorationTheme]'s
+  /// [InputDecorationTheme.constraints] will be used. If that
+  /// is null then the decorator will fill the available width with
+  /// a default height based on text size.
+  final BoxConstraints? constraints;
+
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
   InputDecoration copyWith({
@@ -3367,6 +3392,7 @@ class InputDecoration {
     bool? enabled,
     String? semanticCounterText,
     bool? alignLabelWithHint,
+    BoxConstraints? constraints,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -3413,6 +3439,7 @@ class InputDecoration {
       enabled: enabled ?? this.enabled,
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
+      constraints: constraints ?? this.constraints,
     );
   }
 
@@ -3448,6 +3475,7 @@ class InputDecoration {
       enabledBorder: enabledBorder ?? theme.enabledBorder,
       border: border ?? theme.border,
       alignLabelWithHint: alignLabelWithHint ?? theme.alignLabelWithHint,
+      constraints: constraints ?? theme.constraints,
     );
   }
 
@@ -3501,7 +3529,8 @@ class InputDecoration {
         && other.border == border
         && other.enabled == enabled
         && other.semanticCounterText == semanticCounterText
-        && other.alignLabelWithHint == alignLabelWithHint;
+        && other.alignLabelWithHint == alignLabelWithHint
+        && other.constraints == constraints;
   }
 
   @override
@@ -3553,6 +3582,7 @@ class InputDecoration {
       enabled,
       semanticCounterText,
       alignLabelWithHint,
+      constraints,
     ];
     return hashList(values);
   }
@@ -3600,6 +3630,7 @@ class InputDecoration {
       if (!enabled) 'enabled: false',
       if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
       if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
+      if (constraints != null) 'constraints: $constraints',
     ];
     return 'InputDecoration(${description.join(', ')})';
   }
@@ -3651,6 +3682,7 @@ class InputDecorationTheme with Diagnosticable {
     this.enabledBorder,
     this.border,
     this.alignLabelWithHint = false,
+    this.constraints,
   }) : assert(isDense != null),
        assert(isCollapsed != null),
        assert(filled != null),
@@ -3972,6 +4004,23 @@ class InputDecorationTheme with Diagnosticable {
   /// behavior of aligning the label with the center of the [TextField].
   final bool alignLabelWithHint;
 
+  /// Defines minimum and maximum sizes for the [InputDecorator].
+  ///
+  /// Typically the decorator will fill the horizontal space it is given. For
+  /// larger screens, it may be useful to have the maximum width clamped to
+  /// a given value so it doesn't fill the whole screen. This property
+  /// allows you to control how big the decorator will be in its available
+  /// space.
+  ///
+  /// If null, then the decorator will fill the available width with
+  /// a default height based on text size.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.constraints], which can override this setting for a
+  ///    given decorator.
+  final BoxConstraints? constraints;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   InputDecorationTheme copyWith({
@@ -4004,6 +4053,7 @@ class InputDecorationTheme with Diagnosticable {
     InputBorder? enabledBorder,
     InputBorder? border,
     bool? alignLabelWithHint,
+    BoxConstraints? constraints,
   }) {
     return InputDecorationTheme(
       labelStyle: labelStyle ?? this.labelStyle,
@@ -4031,6 +4081,7 @@ class InputDecorationTheme with Diagnosticable {
       enabledBorder: enabledBorder ?? this.enabledBorder,
       border: border ?? this.border,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
+      constraints: constraints ?? this.constraints,
     );
   }
 
@@ -4062,6 +4113,7 @@ class InputDecorationTheme with Diagnosticable {
       enabledBorder,
       border,
       alignLabelWithHint,
+      constraints,
     ]);
   }
 
@@ -4096,6 +4148,7 @@ class InputDecorationTheme with Diagnosticable {
         && other.enabledBorder == enabledBorder
         && other.border == border
         && other.alignLabelWithHint == alignLabelWithHint
+        && other.constraints == constraints
         && other.disabledBorder == disabledBorder;
   }
 
@@ -4128,5 +4181,6 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<InputBorder>('enabledBorder', enabledBorder, defaultValue: defaultTheme.enabledBorder));
     properties.add(DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
     properties.add(DiagnosticsProperty<bool>('alignLabelWithHint', alignLabelWithHint, defaultValue: defaultTheme.alignLabelWithHint));
+    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: defaultTheme.constraints));
   }
 }

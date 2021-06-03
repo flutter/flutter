@@ -12,7 +12,7 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../bundle.dart';
+import '../bundle_builder.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../globals_null_migrated.dart' as globals;
@@ -254,7 +254,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     _testFiles = argResults.rest.map<String>(globals.fs.path.absolute).toList();
     if (_testFiles.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
-      // files with names like like "hit_test.dart" don't get run.
+      // files with names like "hit_test.dart" don't get run.
       final Directory testDir = globals.fs.directory('test');
       if (!testDir.existsSync()) {
         throwToolExit('Test directory "${testDir.path}" not found.');
@@ -315,7 +315,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
+    if (buildTestAssets) {
       await _buildTestAsset();
     }
 
@@ -392,7 +392,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
-      disableDds: disableDds,
+      enableDds: enableDds,
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
     );
 

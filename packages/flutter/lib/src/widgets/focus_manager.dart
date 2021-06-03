@@ -55,8 +55,7 @@ enum KeyEventResult {
 ///
 /// Returns a [KeyEventResult] that describes how, and whether, the key event
 /// was handled.
-// TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
-typedef FocusOnKeyCallback = dynamic Function(FocusNode node, RawKeyEvent event);
+typedef FocusOnKeyCallback = KeyEventResult Function(FocusNode node, RawKeyEvent event);
 
 /// An attachment point for a [FocusNode].
 ///
@@ -317,7 +316,7 @@ enum UnfocusDisposition {
 ///   const ColorfulButton({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _ColorfulButtonState createState() => _ColorfulButtonState();
+///   State<ColorfulButton> createState() => _ColorfulButtonState();
 /// }
 ///
 /// class _ColorfulButtonState extends State<ColorfulButton> {
@@ -1597,6 +1596,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusManager] notifies.
   void removeHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _listeners.remove(listener);
 
+  @pragma('vm:notify-debugger-on-exception')
   void _notifyHighlightModeListeners() {
     if (_listeners.isEmpty) {
       return;
@@ -1674,33 +1674,18 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     bool handled = false;
     for (final FocusNode node in <FocusNode>[_primaryFocus!, ..._primaryFocus!.ancestors]) {
       if (node.onKey != null) {
-        // TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
-        final dynamic result = node.onKey!(node, event);
-        assert(
-          result is bool || result is KeyEventResult,
-          'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}',
-        );
-        if (result is KeyEventResult) {
-          switch (result) {
-            case KeyEventResult.handled:
-              assert(_focusDebug('Node $node handled key event $event.'));
-              handled = true;
-              break;
-            case KeyEventResult.skipRemainingHandlers:
-              assert(_focusDebug('Node $node stopped key event propagation: $event.'));
-              handled = false;
-              break;
-            case KeyEventResult.ignored:
-              continue;
-          }
-        } else if (result is bool){
-          if (result) {
+        final KeyEventResult result = node.onKey!(node, event);
+        switch (result) {
+          case KeyEventResult.handled:
             assert(_focusDebug('Node $node handled key event $event.'));
             handled = true;
             break;
-          } else {
+          case KeyEventResult.skipRemainingHandlers:
+            assert(_focusDebug('Node $node stopped key event propagation: $event.'));
+            handled = false;
+            break;
+          case KeyEventResult.ignored:
             continue;
-          }
         }
         break;
       }

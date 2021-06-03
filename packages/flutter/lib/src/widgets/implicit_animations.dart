@@ -125,7 +125,7 @@ class EdgeInsetsGeometryTween extends Tween<EdgeInsetsGeometry> {
 /// [BorderRadius.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
-class BorderRadiusTween extends Tween<BorderRadius> {
+class BorderRadiusTween extends Tween<BorderRadius?> {
   /// Creates a [BorderRadius] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -134,7 +134,7 @@ class BorderRadiusTween extends Tween<BorderRadius> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  BorderRadius lerp(double t) => BorderRadius.lerp(begin, end, t)!;
+  BorderRadius? lerp(double t) => BorderRadius.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Border]s.
@@ -729,7 +729,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   final Clip clipBehavior;
 
   @override
-  _AnimatedContainerState createState() => _AnimatedContainerState();
+  AnimatedWidgetBaseState<AnimatedContainer> createState() => _AnimatedContainerState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -772,7 +772,6 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   Widget build(BuildContext context) {
     final Animation<double> animation = this.animation;
     return Container(
-      child: widget.child,
       alignment: _alignment?.evaluate(animation),
       padding: _padding?.evaluate(animation),
       decoration: _decoration?.evaluate(animation),
@@ -782,6 +781,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
       transform: _transform?.evaluate(animation),
       transformAlignment: _transformAlignment?.evaluate(animation),
       clipBehavior: widget.clipBehavior,
+      child: widget.child,
     );
   }
 
@@ -880,7 +880,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
   final Widget? child;
 
   @override
-  _AnimatedPaddingState createState() => _AnimatedPaddingState();
+  AnimatedWidgetBaseState<AnimatedPadding> createState() => _AnimatedPaddingState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1024,7 +1024,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
   final double? widthFactor;
 
   @override
-  _AnimatedAlignState createState() => _AnimatedAlignState();
+  AnimatedWidgetBaseState<AnimatedAlign> createState() => _AnimatedAlignState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1213,7 +1213,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   final double? height;
 
   @override
-  _AnimatedPositionedState createState() => _AnimatedPositionedState();
+  AnimatedWidgetBaseState<AnimatedPositioned> createState() => _AnimatedPositionedState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1248,13 +1248,13 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      child: widget.child,
       left: _left?.evaluate(animation),
       top: _top?.evaluate(animation),
       right: _right?.evaluate(animation),
       bottom: _bottom?.evaluate(animation),
       width: _width?.evaluate(animation),
       height: _height?.evaluate(animation),
+      child: widget.child,
     );
   }
 
@@ -1348,7 +1348,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
   final double? height;
 
   @override
-  _AnimatedPositionedDirectionalState createState() => _AnimatedPositionedDirectionalState();
+  AnimatedWidgetBaseState<AnimatedPositionedDirectional> createState() => _AnimatedPositionedDirectionalState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1385,13 +1385,13 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
     assert(debugCheckHasDirectionality(context));
     return Positioned.directional(
       textDirection: Directionality.of(context),
-      child: widget.child,
       start: _start?.evaluate(animation),
       top: _top?.evaluate(animation),
       end: _end?.evaluate(animation),
       bottom: _bottom?.evaluate(animation),
       width: _width?.evaluate(animation),
       height: _height?.evaluate(animation),
+      child: widget.child,
     );
   }
 
@@ -1505,7 +1505,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   final bool alwaysIncludeSemantics;
 
   @override
-  _AnimatedOpacityState createState() => _AnimatedOpacityState();
+  ImplicitlyAnimatedWidgetState<AnimatedOpacity> createState() => _AnimatedOpacityState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1532,8 +1532,8 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacityAnimation,
-      child: widget.child,
       alwaysIncludeSemantics: widget.alwaysIncludeSemantics,
+      child: widget.child,
     );
   }
 }
@@ -1639,7 +1639,7 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
   final bool alwaysIncludeSemantics;
 
   @override
-  _SliverAnimatedOpacityState createState() => _SliverAnimatedOpacityState();
+  ImplicitlyAnimatedWidgetState<SliverAnimatedOpacity> createState() => _SliverAnimatedOpacityState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1763,7 +1763,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
 
   @override
-  _AnimatedDefaultTextStyleState createState() => _AnimatedDefaultTextStyleState();
+  AnimatedWidgetBaseState<AnimatedDefaultTextStyle> createState() => _AnimatedDefaultTextStyleState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1887,7 +1887,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   final bool animateShadowColor;
 
   @override
-  _AnimatedPhysicalModelState createState() => _AnimatedPhysicalModelState();
+  AnimatedWidgetBaseState<AnimatedPhysicalModel> createState() => _AnimatedPhysicalModelState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1919,7 +1919,6 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
   @override
   Widget build(BuildContext context) {
     return PhysicalModel(
-      child: widget.child,
       shape: widget.shape,
       clipBehavior: widget.clipBehavior,
       borderRadius: _borderRadius!.evaluate(animation),
@@ -1928,6 +1927,7 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       shadowColor: widget.animateShadowColor
           ? _shadowColor!.evaluate(animation)!
           : widget.shadowColor,
+      child: widget.child,
     );
   }
 }

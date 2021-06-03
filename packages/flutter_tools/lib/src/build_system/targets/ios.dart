@@ -12,7 +12,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals show xcode;
+import '../../globals_null_migrated.dart' as globals show xcode;
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -139,7 +139,7 @@ class AotAssemblyRelease extends AotAssemblyBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.artifact(Artifact.engineDartBinary),
+    Source.hostArtifact(HostArtifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     // TODO(jonahwilliams): cannot reference gen_snapshot with artifacts since
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
@@ -174,7 +174,7 @@ class AotAssemblyProfile extends AotAssemblyBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.artifact(Artifact.engineDartBinary),
+    Source.hostArtifact(HostArtifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     // TODO(jonahwilliams): cannot reference gen_snapshot with artifacts since
     // it resolves to a file (ios/gen_snapshot) that never exists. This was

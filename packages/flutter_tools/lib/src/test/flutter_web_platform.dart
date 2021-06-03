@@ -12,6 +12,7 @@ import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
+import 'package:process/process.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
@@ -51,6 +52,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     @required ChromiumLauncher chromiumLauncher,
     @required Logger logger,
     @required Artifacts artifacts,
+    @required ProcessManager processManager,
   }) : _fileSystem = fileSystem,
       _flutterToolPackageConfig = flutterToolPackageConfig,
       _chromiumLauncher = chromiumLauncher,
@@ -75,6 +77,9 @@ class FlutterWebPlatform extends PlatformPlugin {
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
       () => TestCompiler(buildInfo, flutterProject),
+      fileSystem: _fileSystem,
+      logger: _logger,
+      processManager: processManager,
     );
   }
 
@@ -111,6 +116,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     @required Logger logger,
     @required ChromiumLauncher chromiumLauncher,
     @required Artifacts artifacts,
+    @required ProcessManager processManager,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -138,6 +144,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       artifacts: artifacts,
       logger: logger,
       nullAssertions: nullAssertions,
+      processManager: processManager,
     );
   }
 
@@ -173,7 +180,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The require js binary.
   File get _requireJs => _fileSystem.file(_fileSystem.path.join(
-    _artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    _artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'kernel',
@@ -183,7 +190,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(_fileSystem.path.join(
-    _artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    _artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'web',
@@ -191,10 +198,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File get _dartSdk => _fileSystem.file(
-    _artifacts.getArtifactPath(kDartSdkJsArtifactMap[_rendererMode][_nullSafetyMode]));
+    _artifacts.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode][_nullSafetyMode]));
 
   File get _dartSdkSourcemaps => _fileSystem.file(
-    _artifacts.getArtifactPath(kDartSdkJsMapArtifactMap[_rendererMode][_nullSafetyMode]));
+    _artifacts.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode][_nullSafetyMode]));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(
@@ -214,26 +221,26 @@ class FlutterWebPlatform extends PlatformPlugin {
   Future<shelf.Response> _handleTestRequest(shelf.Request request) async {
     if (request.url.path.endsWith('.dart.browser_test.dart.js')) {
       final String leadingPath = request.url.path.split('.browser_test.dart.js')[0];
-      final String generatedFile = _fileSystem.path.split(leadingPath).join('_') + '.bootstrap.js';
-      return shelf.Response.ok(generateTestBootstrapFileContents('/' + generatedFile, 'require.js', 'dart_stack_trace_mapper.js'), headers: <String, String>{
+      final String generatedFile = '${_fileSystem.path.split(leadingPath).join('_')}.bootstrap.js';
+      return shelf.Response.ok(generateTestBootstrapFileContents('/$generatedFile', 'require.js', 'dart_stack_trace_mapper.js'), headers: <String, String>{
         HttpHeaders.contentTypeHeader: 'text/javascript',
       });
     }
     if (request.url.path.endsWith('.dart.bootstrap.js')) {
       final String leadingPath = request.url.path.split('.dart.bootstrap.js')[0];
-      final String generatedFile = _fileSystem.path.split(leadingPath).join('_') + '.dart.test.dart.js';
+      final String generatedFile = '${_fileSystem.path.split(leadingPath).join('_')}.dart.test.dart.js';
       return shelf.Response.ok(generateMainModule(
         nullAssertions: nullAssertions,
         nativeNullAssertions: true,
-        bootstrapModule: _fileSystem.path.basename(leadingPath) + '.dart.bootstrap',
-        entrypoint: '/' + generatedFile
+        bootstrapModule: '${_fileSystem.path.basename(leadingPath)}.dart.bootstrap',
+        entrypoint: '/$generatedFile'
        ), headers: <String, String>{
         HttpHeaders.contentTypeHeader: 'text/javascript',
       });
     }
     if (request.url.path.endsWith('.dart.js')) {
       final String path = request.url.path.split('.dart.js')[0];
-      return shelf.Response.ok(webMemoryFS.files[path + '.dart.lib.js'], headers: <String, String>{
+      return shelf.Response.ok(webMemoryFS.files['$path.dart.lib.js'], headers: <String, String>{
         HttpHeaders.contentTypeHeader: 'text/javascript',
       });
     }
@@ -362,7 +369,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   shelf.Response _wrapperHandler(shelf.Request request) {
     final String path = _fileSystem.path.fromUri(request.url);
     if (path.endsWith('.html')) {
-      final String test = _fileSystem.path.withoutExtension(path) + '.dart';
+      final String test = '${_fileSystem.path.withoutExtension(path)}.dart';
       final String scriptBase = htmlEscape.convert(_fileSystem.path.basename(test));
       final String link = '<link rel="x-dart-test" href="$scriptBase">';
       return shelf.Response.ok('''
@@ -403,8 +410,8 @@ class FlutterWebPlatform extends PlatformPlugin {
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
 
-    final Uri suiteUrl = url.resolveUri(_fileSystem.path.toUri(_fileSystem.path.withoutExtension(
-        _fileSystem.path.relative(path, from: _fileSystem.path.join(_root, 'test'))) + '.html'));
+    final String pathFromTest = _fileSystem.path.relative(path, from: _fileSystem.path.join(_root, 'test'));
+    final Uri suiteUrl = url.resolveUri(_fileSystem.path.toUri('${_fileSystem.path.withoutExtension(pathFromTest)}.html'));
     final String relativePath = _fileSystem.path.relative(_fileSystem.path.normalize(path), from: _fileSystem.currentDirectory.path);
     final RunnerSuite suite = await _browserManager.load(relativePath, suiteUrl, suiteConfig, message, onDone: () async {
       await _browserManager.close();

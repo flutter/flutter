@@ -155,10 +155,8 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    final DefaultTextStyle titleStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
-        'Action Sheet'));
-    final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
-        'An action sheet'));
+    final DefaultTextStyle titleStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle, 'Action Sheet'));
+    final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle, 'An action sheet'));
 
     expect(titleStyle.style.fontWeight, FontWeight.w600);
     expect(messageStyle.style.fontWeight, FontWeight.w400);
@@ -176,8 +174,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    final DefaultTextStyle titleStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
-        'Action Sheet'));
+    final DefaultTextStyle titleStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle, 'Action Sheet'));
 
     expect(titleStyle.style.fontWeight, FontWeight.w400);
   });
@@ -194,8 +191,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
-        'An action sheet'));
+    final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle, 'An action sheet'));
 
     expect(messageStyle.style.fontWeight, FontWeight.w600);
   });
@@ -219,8 +215,10 @@ void main() {
 
     // Content section should be at the bottom left of action sheet
     // (minus padding).
-    expect(tester.getBottomLeft(find.byType(ClipRRect)),
-        tester.getBottomLeft(find.byType(CupertinoActionSheet)) - const Offset(-8.0, 10.0));
+    expect(
+      tester.getBottomLeft(find.byType(ClipRRect)),
+      tester.getBottomLeft(find.byType(CupertinoActionSheet)) - const Offset(-8.0, 10.0),
+    );
 
     // Check that the dialog size is the same as the content section size
     // (minus padding).
@@ -268,13 +266,19 @@ void main() {
 
     // Check that the title/message section is not displayed (action section is
     // at the top of the action sheet + padding).
-    expect(tester.getTopLeft(finder),
-        tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 10.0));
+    expect(
+      tester.getTopLeft(finder),
+      tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 10.0),
+    );
 
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 10.0),
-        tester.getTopLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')));
-    expect(tester.getBottomLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, -10.0),
-        tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')));
+    expect(
+      tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 10.0),
+      tester.getTopLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')),
+    );
+    expect(
+      tester.getBottomLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, -10.0),
+      tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')),
+    );
   });
 
   testWidgets('Action section is scrollable', (WidgetTester tester) async {
@@ -474,8 +478,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(tester.getSize(find.byType(CupertinoActionSheet)).height,
-        moreOrLessEquals(132.33333333333334));
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, moreOrLessEquals(132.33333333333334));
   });
 
   testWidgets('1 action button with cancel button', (WidgetTester tester) async {
@@ -532,8 +535,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height,
-        moreOrLessEquals(112.33333333333331));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(112.33333333333331));
   });
 
   testWidgets('3 action buttons with cancel button', (WidgetTester tester) async {
@@ -567,8 +569,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height,
-        moreOrLessEquals(168.66666666666669));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(168.66666666666669));
   });
 
   testWidgets('4+ action buttons with cancel button', (WidgetTester tester) async {
@@ -606,8 +607,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height,
-        moreOrLessEquals(84.33333333333337));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.33333333333337));
   });
 
   testWidgets('1 action button without cancel button', (WidgetTester tester) async {
@@ -655,8 +655,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height,
-        moreOrLessEquals(84.33333333333337));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.33333333333337));
   });
 
   testWidgets('Action sheet with just cancel button is correct', (WidgetTester tester) async {
@@ -744,8 +743,10 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Cancel')).dy, 590.0);
-    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')).dy,
-        moreOrLessEquals(469.66666666666663));
+    expect(
+      tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')).dy,
+      moreOrLessEquals(469.66666666666663),
+    );
     expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')).dy, 526.0);
   });
 
@@ -978,7 +979,7 @@ void main() {
                         ),
                       ],
                     ),
-                  ]
+                  ],
                 ),
               ],
             ),
@@ -995,8 +996,8 @@ void main() {
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
-  final RenderObject actionsSection = tester.renderObject(find.byElementPredicate(
-    (Element element) {
+  final RenderObject actionsSection = tester.renderObject(
+    find.byElementPredicate((Element element) {
       return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
     }),
   );

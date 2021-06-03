@@ -6,8 +6,8 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';
 import 'binding.dart';
@@ -27,19 +27,17 @@ typedef RecognizerCallback<T> = T Function();
 
 /// Configuration of offset passed to [DragStartDetails].
 ///
-/// The settings determines when a drag formally starts when the user
-/// initiates a drag.
-///
 /// See also:
 ///
-///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the
+///  different behaviors.
 enum DragStartBehavior {
-  /// Set the initial offset, at the position where the first down event was
+  /// Set the initial offset at the position where the first down event was
   /// detected.
   down,
 
-  /// Set the initial position at the position where the drag start event was
-  /// detected.
+  /// Set the initial position at the position where this gesture recognizer
+  /// won the arena.
   start,
 }
 
@@ -51,7 +49,8 @@ enum DragStartBehavior {
 ///
 /// See also:
 ///
-///  * [GestureDetector], the widget that is used to detect gestures.
+///  * [GestureDetector], the widget that is used to detect built-in gestures.
+///  * [RawGestureDetector], the widget that is used to detect custom gestures.
 ///  * [debugPrintRecognizerCallbacksTrace], a flag that can be set to help
 ///    debug issues with gesture recognizers.
 abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableTreeMixin {
@@ -60,12 +59,21 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// The argument is optional and is only used for debug purposes (e.g. in the
   /// [toString] serialization).
   ///
-  /// {@template flutter.gestures.GestureRecognizer.kind}
-  /// It's possible to limit this recognizer to a specific [PointerDeviceKind]
-  /// by providing the optional [kind] argument. If [kind] is null,
+  /// {@template flutter.gestures.GestureRecognizer.supportedDevices}
+  /// It's possible to limit this recognizer to a specific set of [PointerDeviceKind]s
+  /// by providing the optional [supportedDevices] argument. If [supportedDevices] is null,
   /// the recognizer will accept pointer events from all device kinds.
   /// {@endtemplate}
-  GestureRecognizer({ this.debugOwner, PointerDeviceKind? kind }) : _kindFilter = kind;
+  GestureRecognizer({
+    this.debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
+    PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : assert(kind == null || supportedDevices == null),
+       _supportedDevices = kind == null ? supportedDevices : <PointerDeviceKind>{ kind };
 
   /// The recognizer's owner.
   ///
@@ -73,9 +81,11 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// this gesture recognizer was created, to aid in debugging.
   final Object? debugOwner;
 
-  /// The kind of device that's allowed to be recognized. If null, events from
-  /// all device kinds will be tracked and recognized.
-  final PointerDeviceKind? _kindFilter;
+  /// The kind of devices that are allowed to be recognized as provided by
+  /// `supportedDevices` in the constructor, or the currently deprecated `kind`.
+  /// These cannot both be set. If both are null, events from all device kinds will be
+  /// tracked and recognized.
+  final Set<PointerDeviceKind>? _supportedDevices;
 
   /// Holds a mapping between pointer IDs and the kind of devices they are
   /// coming from.
@@ -129,7 +139,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   bool isPointerAllowed(PointerDownEvent event) {
     // Currently, it only checks for device kind. But in the future we could check
     // for other things e.g. mouse button.
-    return _kindFilter == null || _kindFilter == event.kind;
+    return _supportedDevices == null || _supportedDevices!.contains(event.kind);
   }
 
   /// For a given pointer ID, returns the device kind associated with it.
@@ -165,6 +175,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// callback that returns a string describing useful debugging information,
   /// e.g. the arguments passed to the callback.
   @protected
+  @pragma('vm:notify-debugger-on-exception')
   T? invokeCallback<T>(String name, RecognizerCallback<T> callback, { String Function()? debugReport }) {
     assert(callback != null);
     T? result;
@@ -174,7 +185,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
           final String? report = debugReport != null ? debugReport() : null;
           // The 19 in the line below is the width of the prefix used by
           // _debugLogDiagnostic in arena.dart.
-          final String prefix = debugPrintGestureArenaDiagnostics ? ' ' * 19 + '❙ ' : '';
+          final String prefix = debugPrintGestureArenaDiagnostics ? '${' ' * 19}❙ ' : '';
           debugPrint('$prefix$this calling $name callback.${ report?.isNotEmpty == true ? " $report" : "" }');
         }
         return true;
@@ -218,21 +229,51 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// Initialize the object.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   OneSequenceGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : super(
+         debugOwner: debugOwner,
+         kind: kind,
+         supportedDevices: supportedDevices,
+       );
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
   final Set<int> _trackedPointers = HashSet<int>();
 
   @override
+  @protected
+  void addAllowedPointer(PointerDownEvent event) {
+    startTrackingPointer(event.pointer, event.transform);
+  }
+
+  @override
+  @protected
   void handleNonAllowedPointer(PointerDownEvent event) {
     resolve(GestureDisposition.rejected);
   }
 
   /// Called when a pointer event is routed to this recognizer.
+  ///
+  /// This will be called for every pointer event while the pointer is being
+  /// tracked. Typically, this recognizer will start tracking the pointer in
+  /// [addAllowedPointer], which means that [handleEvent] will be called
+  /// starting with the [PointerDownEvent] that was passed to [addAllowedPointer].
+  ///
+  /// See also:
+  ///
+  ///  * [startTrackingPointer], which causes pointer events to be routed to
+  ///    this recognizer.
+  ///  * [stopTrackingPointer], which stops events from being routed to this
+  ///    recognizer.
+  ///  * [stopTrackingIfPointerNoLongerDown], which conditionally stops events
+  ///    from being routed to this recognizer.
   @protected
   void handleEvent(PointerEvent event);
 
@@ -318,6 +359,11 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// null if no transformation is necessary.
   ///
   /// Use [stopTrackingPointer] to remove the route added by this function.
+  ///
+  /// This method also adds this recognizer (or its [team] if it's non-null) to
+  /// the gesture arena for the specified pointer.
+  ///
+  /// This is called by [OneSequenceGestureRecognizer.addAllowedPointer].
   @protected
   void startTrackingPointer(int pointer, [Matrix4? transform]) {
     GestureBinding.instance!.pointerRouter.addRoute(pointer, handleEvent, transform);
@@ -354,8 +400,15 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
 /// The possible states of a [PrimaryPointerGestureRecognizer].
 ///
 /// The recognizer advances from [ready] to [possible] when it starts tracking a
-/// primary pointer. When the primary pointer is resolved in the gesture
-/// arena (either accepted or rejected), the recognizers advances to [defunct].
+/// primary pointer. Where it advances from there depends on how the gesture is
+/// resolved for that pointer:
+///
+///  * If the primary pointer is resolved by the gesture winning the arena, the
+///    recognizer stays in the [possible] state as long as it continues to track
+///    a pointer.
+///  * If the primary pointer is resolved by the gesture being rejected and
+///    losing the arena, the recognizer's state advances to [defunct].
+///
 /// Once the recognizer has stopped tracking any remaining pointers, the
 /// recognizer returns to [ready].
 enum GestureRecognizerState {
@@ -384,13 +437,18 @@ enum GestureRecognizerState {
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   PrimaryPointerGestureRecognizer({
     this.deadline,
     this.preAcceptSlopTolerance = kTouchSlop,
     this.postAcceptSlopTolerance = kTouchSlop,
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
   }) : assert(
          preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be positive or null',
@@ -399,7 +457,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
          postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
          'The postAcceptSlopTolerance must be positive or null',
        ),
-       super(debugOwner: debugOwner, kind: kind);
+       super(
+         debugOwner: debugOwner,
+         kind: kind,
+         supportedDevices: supportedDevices,
+       );
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.
@@ -430,13 +492,27 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// The current state of the recognizer.
   ///
   /// See [GestureRecognizerState] for a description of the states.
-  GestureRecognizerState state = GestureRecognizerState.ready;
+  GestureRecognizerState get state => _state;
+  GestureRecognizerState _state = GestureRecognizerState.ready;
 
   /// The ID of the primary pointer this recognizer is tracking.
-  int? primaryPointer;
+  ///
+  /// If this recognizer is no longer tracking any pointers, this field holds
+  /// the ID of the primary pointer this recognizer was most recently tracking.
+  /// This enables the recognizer to know which pointer it was most recently
+  /// tracking when [acceptGesture] or [rejectGesture] is called (which may be
+  /// called after the recognizer is no longer tracking a pointer if, e.g.
+  /// [GestureArenaManager.hold] has been called, or if there are other
+  /// recognizers keeping the arena open).
+  int? get primaryPointer => _primaryPointer;
+  int? _primaryPointer;
 
   /// The location at which the primary pointer contacted the screen.
-  OffsetPair? initialPosition;
+  ///
+  /// This will only be non-null while this recognizer is tracking at least
+  /// one pointer.
+  OffsetPair? get initialPosition => _initialPosition;
+  OffsetPair? _initialPosition;
 
   // Whether this pointer is accepted by winning the arena or as defined by
   // a subclass calling acceptGesture.
@@ -445,13 +521,20 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    startTrackingPointer(event.pointer, event.transform);
+    super.addAllowedPointer(event);
     if (state == GestureRecognizerState.ready) {
-      state = GestureRecognizerState.possible;
-      primaryPointer = event.pointer;
-      initialPosition = OffsetPair(local: event.localPosition, global: event.position);
+      _state = GestureRecognizerState.possible;
+      _primaryPointer = event.pointer;
+      _initialPosition = OffsetPair(local: event.localPosition, global: event.position);
       if (deadline != null)
         _timer = Timer(deadline!, () => didExceedDeadlineWithEvent(event));
+    }
+  }
+
+  @override
+  void handleNonAllowedPointer(PointerDownEvent event) {
+    if (!_gestureAccepted) {
+      super.handleNonAllowedPointer(event);
     }
   }
 
@@ -485,7 +568,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// Override to be notified when [deadline] is exceeded.
   ///
   /// You must override this method or [didExceedDeadlineWithEvent] if you
-  /// supply a [deadline].
+  /// supply a [deadline]. Subclasses that override this method must _not_
+  /// call `super.didExceedDeadline()`.
   @protected
   void didExceedDeadline() {
     assert(deadline == null);
@@ -495,7 +579,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// gesture.
   ///
   /// You must override this method or [didExceedDeadline] if you supply a
-  /// [deadline].
+  /// [deadline]. Subclasses that override this method must _not_ call
+  /// `super.didExceedDeadlineWithEvent(event)`.
   @protected
   void didExceedDeadlineWithEvent(PointerDownEvent event) {
     didExceedDeadline();
@@ -513,7 +598,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   void rejectGesture(int pointer) {
     if (pointer == primaryPointer && state == GestureRecognizerState.possible) {
       _stopTimer();
-      state = GestureRecognizerState.defunct;
+      _state = GestureRecognizerState.defunct;
     }
   }
 
@@ -521,7 +606,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   void didStopTrackingLastPointer(int pointer) {
     assert(state != GestureRecognizerState.ready);
     _stopTimer();
-    state = GestureRecognizerState.ready;
+    _state = GestureRecognizerState.ready;
+    _initialPosition = null;
+    _gestureAccepted = false;
   }
 
   @override
@@ -554,6 +641,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 /// Usually, the [global] [Offset] is in the coordinate space of the screen
 /// after conversion to logical pixels and the [local] offset is the same
 /// [Offset], but transformed to a local coordinate space.
+@immutable
 class OffsetPair {
   /// Creates a [OffsetPair] combining a [local] and [global] [Offset].
   const OffsetPair({

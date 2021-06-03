@@ -15,9 +15,9 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../flutter_plugins.dart';
+import '../globals_null_migrated.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
-import '../plugins.dart';
 import '../project.dart';
 
 // Matches the following error and warning patterns:
@@ -131,7 +131,7 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
         '-G',
         'Ninja',
         '-DCMAKE_BUILD_TYPE=$buildFlag',
-        '-DFLUTTER_TARGET_PLATFORM=' + getNameForTargetPlatform(targetPlatform),
+        '-DFLUTTER_TARGET_PLATFORM=${getNameForTargetPlatform(targetPlatform)}',
         // Support cross-building for arm64 targets on x64 hosts.
         // (Cross-building for x64 on arm64 hosts isn't supported now.)
         if (needCrossBuild)

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('no overlap with floating action button', (WidgetTester tester) async {
@@ -96,7 +96,7 @@ void main() {
                 bottomNavigationBar: BottomAppBar(),
               ),
             );
-          }
+          },
         ),
       ),
     );
@@ -119,11 +119,11 @@ void main() {
                   onPressed: null,
                 ),
                 bottomNavigationBar: BottomAppBar(
-                  color: Color(0xff0000ff)
+                  color: Color(0xff0000ff),
                 ),
               ),
             );
-          }
+          },
         ),
       ),
     );
@@ -143,7 +143,7 @@ void main() {
             color: const ColorScheme.dark().surface,
           ),
         ),
-      )
+      ),
     );
 
     final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
@@ -225,9 +225,9 @@ void main() {
         home: Scaffold(
           bottomNavigationBar: ShapeListener(
             BottomAppBar(
-              child: SizedBox(height: 100.0),
               shape: RectangularNotch(),
               notchMargin: 0.0,
+              child: SizedBox(height: 100.0),
             ),
           ),
           floatingActionButton: FloatingActionButton(
@@ -277,9 +277,9 @@ void main() {
         home: Scaffold(
           bottomNavigationBar: ShapeListener(
             BottomAppBar(
-              child: SizedBox(height: 100.0),
               shape: RectangularNotch(),
               notchMargin: 6.0,
+              child: SizedBox(height: 100.0),
             ),
           ),
           floatingActionButton: FloatingActionButton(
@@ -353,9 +353,9 @@ void main() {
         home: Scaffold(
           bottomNavigationBar:
               BottomAppBar(
-                child: SizedBox(height: 100.0),
                 shape: RectangularNotch(),
                 notchMargin: 0.0,
+                child: SizedBox(height: 100.0),
               ),
         ),
       ),
@@ -369,10 +369,10 @@ void main() {
         home: Scaffold(
           bottomNavigationBar:
           BottomAppBar(
-            child: SizedBox(height: 100.0),
             shape: RectangularNotch(),
             notchMargin: 0.0,
             clipBehavior: Clip.antiAliasWithSaveLayer,
+            child: SizedBox(height: 100.0),
           ),
         ),
       ),
@@ -380,6 +380,40 @@ void main() {
 
     physicalShape = tester.widget(find.byType(PhysicalShape));
     expect(physicalShape.clipBehavior, Clip.antiAliasWithSaveLayer);
+  });
+
+  testWidgets('BottomAppBar with shape when Scaffold.bottomNavigationBar == null', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/80878
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: Colors.green,
+            child: const Icon(Icons.home),
+            onPressed: () {},
+          ),
+          body: Stack(
+            children: <Widget>[
+              Container(
+                color: Colors.amber,
+              ),
+              Container(
+                alignment: Alignment.bottomCenter,
+                child: BottomAppBar(
+                  color: Colors.green,
+                  shape: const CircularNotchedRectangle(),
+                  child: Container(height: 50),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(FloatingActionButton)), const Rect.fromLTRB(372, 528, 428, 584));
+    expect(tester.getSize(find.byType(BottomAppBar)), const Size(800, 50));
   });
 }
 
@@ -433,8 +467,8 @@ class ShapeListenerState extends State<ShapeListener> {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      child: widget.child,
       painter: cache,
+      child: widget.child,
     );
   }
 

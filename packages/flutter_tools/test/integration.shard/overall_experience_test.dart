@@ -113,7 +113,7 @@ class Multiple extends Transition {
 
   @override
   String toString() {
-    return _originalPatterns.map(describe).join(', ') + ' (matched ${_originalPatterns.length - patterns.length} so far)';
+    return '${_originalPatterns.map(describe).join(', ')} (matched ${_originalPatterns.length - patterns.length} so far)';
   }
 }
 
@@ -280,6 +280,8 @@ Future<ProcessTestResult> runFlutter(
   return ProcessTestResult(exitCode, stdoutLog, stderrLog);
 }
 
+const int progressMessageWidth = 64;
+
 void main() {
   testWithoutContext('flutter run writes and clears pidfile appropriately', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
@@ -326,17 +328,17 @@ void main() {
         <String>['run', '-dflutter-tester', '--report-ready', '--pid-file', pidFile, '--no-devtools', testScript],
         testDirectory,
         <Transition>[
-          Barrier('Flutter run key commands.', handler: (String line) {
+          Multiple(<Pattern>['Flutter run key commands.', 'called paint'], handler: (String line) {
             pid = int.parse(fileSystem.file(pidFile).readAsStringSync());
             processManager.killPid(pid, ProcessSignal.sigusr1);
             return null;
           }),
-          Barrier(RegExp(r'^Performing hot reload\.\.\.'), logging: true),
-          Multiple(<Pattern>[RegExp(r'^Reloaded 0 libraries in [0-9]+ms\.$'), /*'called reassemble', (see TODO below)*/ 'called paint'], handler: (String line) {
+          Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
+          Multiple(<Pattern>[RegExp(r'^Reloaded 0 libraries in [0-9]+ms\.$'), 'called reassemble', 'called paint'], handler: (String line) {
             processManager.killPid(pid, ProcessSignal.sigusr2);
             return null;
           }),
-          Barrier(RegExp(r'^Performing hot restart\.\.\.')),
+          Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
           Multiple(<Pattern>[RegExp(r'^Restarted application in [0-9]+ms.$'), 'called main', 'called paint'], handler: (String line) {
             return 'q';
           }),
@@ -347,12 +349,10 @@ void main() {
       // We check the output from the app (all starts with "called ...") and the output from the tool
       // (everything else) separately, because their relative timing isn't guaranteed. Their rough timing
       // is verified by the expected transitions above.
-      // TODO(ianh): Fix the tool so that the output isn't garbled (right now we're putting debug output from
-      // the app on the line where we're spinning the busy signal, rather than adding a newline).
-      expect(result.stdout.where((String line) => line.startsWith('called ') && line != 'called reassemble' /* see todo above*/), <Object>[
+      expect(result.stdout.where((String line) => line.startsWith('called ')), <Object>[
         // logs start after we receive the response to sending SIGUSR1
         // SIGUSR1:
-        // 'called reassemble', // see todo above, this only sometimes gets included, other times it's on the "performing..." line
+        'called reassemble',
         'called paint',
         // SIGUSR2:
         'called main',
@@ -360,10 +360,9 @@ void main() {
       ]);
       expect(result.stdout.where((String line) => !line.startsWith('called ')), <Object>[
         // logs start after we receive the response to sending SIGUSR1
-        startsWith('Performing hot reload...'), // see todo above, this sometimes ends with "called reassemble"
-        '', // this newline is probably the misplaced one for the reassemble; see todo above
+        'Performing hot reload...'.padRight(progressMessageWidth),
         startsWith('Reloaded 0 libraries in '),
-        'Performing hot restart...                                       ',
+        'Performing hot restart...'.padRight(progressMessageWidth),
         startsWith('Restarted application in '),
         '', // this newline is the one for after we hit "q"
         'Application finished.',
@@ -384,14 +383,14 @@ void main() {
         <String>['run', '-dflutter-tester', '--report-ready', '--no-devtools', testScript],
         testDirectory,
         <Transition>[
-          Multiple(<Pattern>['Flutter run key commands.', 'called main'], handler: (String line) {
+          Multiple(<Pattern>['Flutter run key commands.', 'called main', 'called paint'], handler: (String line) {
             return 'r';
           }),
-          Barrier(RegExp(r'^Performing hot reload\.\.\.'), logging: true),
-          Multiple(<Pattern>['ready', /*'reassemble', (see todo below)*/ 'called paint'], handler: (String line) {
+          Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
+          Multiple(<Pattern>['ready', 'called reassemble', 'called paint'], handler: (String line) {
             return 'R';
           }),
-          Barrier(RegExp(r'^Performing hot restart\.\.\.')),
+          Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
           Multiple(<Pattern>['ready', 'called main', 'called paint'], handler: (String line) {
             return 'p';
           }),
@@ -408,11 +407,10 @@ void main() {
       // We check the output from the app (all starts with "called ...") and the output from the tool
       // (everything else) separately, because their relative timing isn't guaranteed. Their rough timing
       // is verified by the expected transitions above.
-      // TODO(ianh): Fix the tool so that the output isn't garbled (right now we're putting debug output from
-      // the app on the line where we're spinning the busy signal, rather than adding a newline).
-      expect(result.stdout.where((String line) => line.startsWith('called ') && line != 'called reassemble' /* see todo above*/), <Object>[
+      expect(result.stdout.where((String line) => line.startsWith('called ')), <Object>[
+        // logs start after we initiate the hot reload
         // hot reload:
-        // 'called reassemble', // see todo above, this sometimes gets placed on the "Performing hot reload..." line
+        'called reassemble',
         'called paint',
         // hot restart:
         'called main',
@@ -425,12 +423,11 @@ void main() {
       ]);
       expect(result.stdout.where((String line) => !line.startsWith('called ')), <Object>[
         // logs start after we receive the response to hitting "r"
-        startsWith('Performing hot reload...'), // see todo above, this sometimes ends with "called reassemble"
-        '', // this newline is probably the misplaced one for the reassemble; see todo above
+        'Performing hot reload...'.padRight(progressMessageWidth),
         startsWith('Reloaded 0 libraries in '),
         'ready',
         '', // this newline is the one for after we hit "R"
-        'Performing hot restart...                                       ',
+        'Performing hot restart...'.padRight(progressMessageWidth),
         startsWith('Restarted application in '),
         'ready',
         '', // newline for after we hit "p" the first time
@@ -445,11 +442,22 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  });
+  }, skip: Platform.isWindows); // TODO(jonahwilliams): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81556
 
   testWithoutContext('flutter error messages include a DevTools link', () async {
-    final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String testDirectory = fileSystem.path.join(flutterRoot, 'dev', 'integration_tests', 'ui');
+
+    // Ensure that DevTools is activated.
+    final ProcessResult pubResult = await processManager.run(<String>[
+      fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+      'pub', 'global', 'activate', 'devtools',
+    ], workingDirectory: testDirectory).timeout(const Duration(seconds: 20));
+    if (pubResult.exitCode != 0) {
+      print('Unable to activate devtools:\n${pubResult.stderr}');
+    }
+    expect(pubResult.exitCode, 0);
+
+    final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String testScript = fileSystem.path.join('lib', 'overflow.dart');
     try {
       final ProcessTestResult result = await runFlutter(
@@ -460,7 +468,7 @@ void main() {
           Barrier(RegExp(r'^The Flutter DevTools debugger and profiler on Flutter test device is available at: '), handler: (String line) {
             return 'r';
           }),
-          Barrier(RegExp(r'^Performing hot reload\.\.\.'), logging: true),
+          Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
           Barrier(RegExp(r'^Reloaded 0 libraries in [0-9]+ms.'), handler: (String line) {
             return 'q';
           }),
@@ -470,6 +478,7 @@ void main() {
       expect(result.exitCode, 0);
       expect(result.stdout, <Object>[
         startsWith('Performing hot reload...'),
+        '',
         '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════',
         'The following assertion was thrown during layout:',
         'A RenderFlex overflowed by 69200 pixels on the right.',
@@ -504,7 +513,6 @@ void main() {
         '  verticalDirection: down',
         '◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤',
         '════════════════════════════════════════════════════════════════════════════════════════════════════',
-        '',
         startsWith('Reloaded 0 libraries in '),
         '',
         'Application finished.',
@@ -512,7 +520,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: 'DevTools does not reliably launch on bots currently.'); // TODO(ianh): fix and re-enable test.
+  }, skip: Platform.isWindows); // TODO(goderbauer): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81486
 
   testWithoutContext('flutter run help output', () async {
     // This test enables all logging so that it checks the exact text of starting up an application.
@@ -542,7 +550,7 @@ void main() {
       'Flutter run key commands.',
       startsWith('r Hot reload.'),
       'R Hot restart.',
-      'h Repeat this help message.',
+      'h List all available interactive commands.',
       'd Detach (terminate "flutter run" but leave application running).',
       'c Clear the screen',
       'q Quit (terminate the application on the device).',
@@ -555,25 +563,26 @@ void main() {
       'Flutter run key commands.',
       startsWith('r Hot reload.'),
       'R Hot restart.',
-      'h Repeat this help message.',
-      'd Detach (terminate "flutter run" but leave application running).',
-      'c Clear the screen',
-      'q Quit (terminate the application on the device).',
-      'b Toggle the platform brightness setting (dark and light mode).            (debugBrightnessOverride)',
+      'v Open Flutter DevTools.',
       'w Dump widget hierarchy to the console.                                               (debugDumpApp)',
       't Dump rendering tree to the console.                                          (debugDumpRenderTree)',
       'L Dump layer tree to the console.                                               (debugDumpLayerTree)',
       'S Dump accessibility tree in traversal order.                                   (debugDumpSemantics)',
       'U Dump accessibility tree in inverse hit test order.                            (debugDumpSemantics)',
       'i Toggle widget inspector.                                  (WidgetsApp.showWidgetInspectorOverride)',
-      startsWith('I Toggle oversized image inversion'),
       'p Toggle the display of construction lines.                                  (debugPaintSizeEnabled)',
+      'I Toggle oversized image inversion.                                     (debugInvertOversizedImages)',
       'o Simulate different operating systems.                                      (defaultTargetPlatform)',
-      'z Toggle elevation checker.',
-      'g Run source code generators.',
-      'M Write SkSL shaders to a unique file in the project directory.',
+      'b Toggle platform brightness (dark and light mode).                        (debugBrightnessOverride)',
+      'z Toggle elevation checker.                                            (debugCheckElevationsEnabled)',
       'P Toggle performance overlay.                                    (WidgetsApp.showPerformanceOverlay)',
       'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
+      'M Write SkSL shaders to a unique file in the project directory.',
+      'g Run source code generators.',
+      'h Repeat this help message.',
+      'd Detach (terminate "flutter run" but leave application running).',
+      'c Clear the screen',
+      'q Quit (terminate the application on the device).',
       '',
       contains('Running with sound null safety'),
       '',

@@ -501,7 +501,7 @@ class RenderAspectRatio extends RenderProxyBox {
           '$runtimeType has unbounded constraints.\n'
           'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
           'both unbounded width and unbounded height constraints. Because both '
-          'constraints were unbounded, this render object doesn\'t know how much '
+          "constraints were unbounded, this render object doesn't know how much "
           'size to consume.',
         );
       }
@@ -1141,9 +1141,13 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// Creates a backdrop filter.
   ///
   /// The [filter] argument must not be null.
-  RenderBackdropFilter({ RenderBox? child, required ui.ImageFilter filter })
+  /// The [blendMode] argument, if provided, must not be null
+  /// and will default to [BlendMode.srcOver].
+  RenderBackdropFilter({ RenderBox? child, required ui.ImageFilter filter, BlendMode blendMode = BlendMode.srcOver })
     : assert(filter != null),
+      assert(blendMode != null),
       _filter = filter,
+      _blendMode = blendMode,
       super(child);
 
   @override
@@ -1164,6 +1168,20 @@ class RenderBackdropFilter extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// The blend mode to use to apply the filtered background content onto the background
+  /// surface.
+  ///
+  /// {@macro flutter.widgets.BackdropFilter.blendMode}
+  BlendMode get blendMode => _blendMode;
+  BlendMode _blendMode;
+  set blendMode(BlendMode value) {
+    assert(value != null);
+    if (_blendMode == value)
+      return;
+    _blendMode = value;
+    markNeedsPaint();
+  }
+
   @override
   bool get alwaysNeedsCompositing => child != null;
 
@@ -1173,6 +1191,7 @@ class RenderBackdropFilter extends RenderProxyBox {
       assert(needsCompositing);
       layer ??= BackdropFilterLayer();
       layer!.filter = _filter;
+      layer!.blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
     } else {
       layer = null;
@@ -2186,12 +2205,14 @@ class RenderTransform extends RenderProxyBox {
     AlignmentGeometry? alignment,
     TextDirection? textDirection,
     this.transformHitTests = true,
+    FilterQuality? filterQuality,
     RenderBox? child,
   }) : assert(transform != null),
        super(child) {
     this.transform = transform;
     this.alignment = alignment;
     this.textDirection = textDirection;
+    this.filterQuality = filterQuality;
     this.origin = origin;
   }
 
@@ -2245,6 +2266,9 @@ class RenderTransform extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  @override
+  bool get alwaysNeedsCompositing => child != null && _filterQuality != null;
+
   /// When set to true, hit tests are performed based on the position of the
   /// child as it is painted. When set to false, hit tests are performed
   /// ignoring the transformation.
@@ -2264,6 +2288,21 @@ class RenderTransform extends RenderProxyBox {
     _transform = Matrix4.copy(value);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
+  }
+
+  /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@macro flutter.widgets.Transform.optional.FilterQuality}
+  FilterQuality? get filterQuality => _filterQuality;
+  FilterQuality? _filterQuality;
+  set filterQuality(FilterQuality? value) {
+    if (_filterQuality == value)
+      return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
+    _filterQuality = value;
+    if (didNeedCompositing != alwaysNeedsCompositing)
+      markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
   }
 
   /// Sets the transform to the identity matrix.
@@ -2353,18 +2392,32 @@ class RenderTransform extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       final Matrix4 transform = _effectiveTransform!;
-      final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
-      if (childOffset == null) {
-        layer = context.pushTransform(
-          needsCompositing,
-          offset,
-          transform,
-          super.paint,
-          oldLayer: layer as TransformLayer?,
-        );
+      if (filterQuality == null) {
+        final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
+        if (childOffset == null) {
+          layer = context.pushTransform(
+            needsCompositing,
+            offset,
+            transform,
+            super.paint,
+            oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
+          );
+        } else {
+          super.paint(context, offset + childOffset);
+          layer = null;
+        }
       } else {
-        super.paint(context, offset + childOffset);
-        layer = null;
+        final ui.ImageFilter filter = ui.ImageFilter.matrix(
+          transform.storage,
+          filterQuality: filterQuality!,
+        );
+        if (layer is ImageFilterLayer) {
+          final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
+          filterLayer.imageFilter = filter;
+        } else {
+          layer = ImageFilterLayer(imageFilter: filter);
+        }
+        context.pushLayer(layer!, super.paint, offset);
       }
     }
   }
@@ -3059,7 +3112,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///   const PngHome({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   _PngHomeState createState() => _PngHomeState();
+  ///   State<PngHome> createState() => _PngHomeState();
   /// }
   ///
   /// class _PngHomeState extends State<PngHome> {
@@ -4230,7 +4283,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// Adds a semenatics tag to the semantics subtree.
+  /// Adds a semantics tag to the semantics subtree.
   SemanticsTag? get tagForChildren => _tagForChildren;
   SemanticsTag? _tagForChildren;
   set tagForChildren(SemanticsTag? value) {

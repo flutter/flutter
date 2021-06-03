@@ -344,7 +344,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String datePickerHour(int hour) => hour.toString();
 
   @override
-  String datePickerHourSemanticsLabel(int hour) => hour.toString() + " o'clock";
+  String datePickerHourSemanticsLabel(int hour) => "$hour o'clock";
 
   @override
   String datePickerMinute(int minute) => minute.toString().padLeft(2, '0');
@@ -353,7 +353,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String datePickerMinuteSemanticsLabel(int minute) {
     if (minute == 1)
       return '1 minute';
-    return minute.toString() + ' minutes';
+    return '$minute minutes';
   }
 
   @override

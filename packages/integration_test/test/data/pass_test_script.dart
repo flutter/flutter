@@ -4,11 +4,14 @@
 
 import 'dart:convert';
 
-import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 
 Future<void> main() async {
   final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;
+  binding.allTestsPassed.future.then((_) {
+    print('IntegrationTestWidgetsFlutterBinding test results: ${jsonEncode(binding.results)}');
+  });
 
   testWidgets('passing test 1', (WidgetTester tester) async {
     expect(true, true);
@@ -16,10 +19,5 @@ Future<void> main() async {
 
   testWidgets('passing test 2', (WidgetTester tester) async {
     expect(true, true);
-  });
-
-  tearDownAll(() {
-    print(
-        'IntegrationTestWidgetsFlutterBinding test results: ${jsonEncode(binding.results)}');
   });
 }

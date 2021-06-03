@@ -6,12 +6,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 Future<String> runFlutterAndQuit(List<String> args, Device device) async {
   final Completer<void> ready = Completer<void>();
@@ -39,9 +39,9 @@ Future<String> runFlutterAndQuit(List<String> args, Device device) async {
       stderr.add(line);
     },
   );
-  run.exitCode.then<void>((int exitCode) {
+  unawaited(run.exitCode.then<void>((int exitCode) {
     runExitCode = exitCode;
-  });
+  }));
   await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);
   if (runExitCode != null) {
     throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Centered text', (WidgetTester tester) async {
@@ -75,7 +75,7 @@ void main() {
             style: TextStyle(
               foreground: Paint()
                 ..color = black
-                ..shader = linearGradient
+                ..shader = linearGradient,
             ),
           ),
         ),
@@ -97,7 +97,7 @@ void main() {
               foreground: Paint()
                 ..color = black
                 ..style = PaintingStyle.stroke
-                ..strokeWidth = 2.0
+                ..strokeWidth = 2.0,
             ),
           ),
         ),
@@ -120,7 +120,7 @@ void main() {
                 ..color = black
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 2.0
-                ..shader = linearGradient
+                ..shader = linearGradient,
             ),
           ),
         ),

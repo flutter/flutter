@@ -188,7 +188,7 @@ void main() {
         '                   color: Color(0xffffff00)\n'
         '                 configuration: ImageConfiguration(bundle:\n'
         '                   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        '                   android)\n'
+        '                   android)\n',
       ),
     );
 
@@ -297,7 +297,7 @@ void main() {
         '                   shape: rectangle\n'
         '                 configuration: ImageConfiguration(bundle:\n'
         '                   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        '                   android)\n'
+        '                   android)\n',
       ),
     );
 
@@ -453,7 +453,7 @@ void main() {
       '   The decoration was:\n'
       '     BoxDecoration(color: Color(0xffffff00))\n'
       '   The painter was:\n'
-      '     BoxPainter for BoxDecoration(color: Color(0xffffff00))\n'
+      '     BoxPainter for BoxDecoration(color: Color(0xffffff00))\n',
     );
   });
 
@@ -633,16 +633,17 @@ void main() {
     final Container container = Container(
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          color: Colors.red,
-          boxShadow: const <BoxShadow>[
-            BoxShadow(
-              color: Colors.blue,
-              offset: Offset.zero,
-              spreadRadius: 10,
-              blurRadius: 20.0,
-            ),
-          ]),
+        borderRadius: BorderRadius.circular(30),
+        color: Colors.red,
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Colors.blue,
+            offset: Offset.zero,
+            spreadRadius: 10,
+            blurRadius: 20.0,
+          ),
+        ],
+      ),
       child: const SizedBox(width: 50, height: 50),
     );
 
@@ -651,7 +652,8 @@ void main() {
         child: Padding(
           padding: const EdgeInsets.all(30.0),
           child: container,
-      )),
+        ),
+      ),
     );
 
     await expectLater(

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -13,14 +11,15 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/fake_process_manager.dart';
+import '../src/fakes.dart';
 
 void main() {
   group('CachedArtifacts', () {
-    CachedArtifacts artifacts;
-    Cache cache;
-    FileSystem fileSystem;
-    Platform platform;
+    late CachedArtifacts artifacts;
+    late Cache cache;
+    late FileSystem fileSystem;
+    late Platform platform;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -134,35 +133,35 @@ void main() {
 
     testWithoutContext('precompiled web artifact paths are correct', () {
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledSdk),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledSdk).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledSdkSourcemaps),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledSdkSourcemaps).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js.map',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdk),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js.map',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdk),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd-sound/dart_sdk.js',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd-sound/dart_sdk.js.map',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js.map',
       );
     });
@@ -177,17 +176,17 @@ void main() {
         'ios-release',
       );
       expect(
-        artifacts.getEngineType(TargetPlatform.darwin_x64),
+        artifacts.getEngineType(TargetPlatform.darwin),
         'darwin-x64',
       );
     });
   });
 
   group('LocalEngineArtifacts', () {
-    LocalEngineArtifacts artifacts;
-    Cache cache;
-    FileSystem fileSystem;
-    Platform platform;
+    late LocalEngineArtifacts artifacts;
+    late Cache cache;
+    late FileSystem fileSystem;
+    late Platform platform;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -292,7 +291,7 @@ void main() {
         fileSystem.path.join('/out', 'android_debug_unopt', 'flutter_tester'),
       );
       expect(
-        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk'),
       );
     });
@@ -307,7 +306,7 @@ void main() {
         'android_debug_unopt',
       );
       expect(
-        artifacts.getEngineType(TargetPlatform.darwin_x64),
+        artifacts.getEngineType(TargetPlatform.darwin),
         'android_debug_unopt',
       );
     });
@@ -323,7 +322,7 @@ void main() {
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
 
-      expect(artifacts.getArtifactPath(Artifact.engineDartBinary), contains('.exe'));
+      expect(artifacts.getHostArtifact(HostArtifact.engineDartBinary).path, contains('.exe'));
     });
 
     testWithoutContext('Looks up windows UWP artifacts in host engine', () async {
@@ -341,7 +340,7 @@ void main() {
     });
 
     testWithoutContext('Looks up dart on linux platforms', () async {
-      expect(artifacts.getArtifactPath(Artifact.engineDartBinary), isNot(contains('.exe')));
+      expect(artifacts.getHostArtifact(HostArtifact.engineDartBinary).path, isNot(contains('.exe')));
     });
   });
 }

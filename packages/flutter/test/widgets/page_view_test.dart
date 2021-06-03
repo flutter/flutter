@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
@@ -343,11 +343,11 @@ void main() {
 
       if (size != null) {
         return OverflowBox(
-          child: pageView,
           minWidth: size.width,
           minHeight: size.height,
           maxWidth: size.width,
           maxHeight: size.height,
+          child: pageView,
         );
       } else {
         return pageView;
@@ -597,7 +597,8 @@ void main() {
       await tester.pump();
 
       expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-(4 - 1) * 800 / 2, 0));
-  });
+    },
+  );
 
   testWidgets(
     'PageView large viewportFraction can scroll to the last page and snap',
@@ -633,7 +634,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.getCenter(find.text('2')), const Offset(400, 300));
-  });
+    },
+  );
 
   testWidgets(
     'All visible pages are able to receive touch events',
@@ -680,7 +682,8 @@ void main() {
         await tester.tap(find.text('$index'));
         expect(tappedIndex, index);
       }
-  });
+    },
+  );
 
   testWidgets('the current item remains centered on constraint change', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/50505.
@@ -696,8 +699,8 @@ void main() {
           child: SizedBox.fromSize(
             size: size,
             child: PageView(
-              children: kStates.map<Widget>((String state) => Text(state)).toList(),
               controller: controller,
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
               onPageChanged: (int page) { },
             ),
           ),
@@ -733,9 +736,8 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
-          children:
-              kStates.map<Widget>((String state) => Text(state)).toList(),
           controller: controller,
+          children: kStates.map<Widget>((String state) => Text(state)).toList(),
           onPageChanged: (int page) {
             changeIndex = page;
           },
@@ -753,15 +755,14 @@ void main() {
 
   testWidgets('PageView can restore page', (WidgetTester tester) async {
     final PageController controller = PageController();
-    try {
-      controller.page;
-      fail('Accessing page before attaching should fail.');
-    } on AssertionError catch (e) {
-      expect(
-        e.message,
-        'PageController.page cannot be accessed before a PageView is built with it.',
-      );
-    }
+    expect(
+      () => controller.page,
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.message,
+        'message',
+        equals('PageController.page cannot be accessed before a PageView is built with it.'),
+      )),
+    );
     final PageStorageBucket bucket = PageStorageBucket();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -788,15 +789,14 @@ void main() {
         child: Container(),
       ),
     );
-    try {
-      controller.page;
-      fail('Accessing page after detaching all PageViews should fail.');
-    } on AssertionError catch (e) {
-      expect(
-        e.message,
-        'PageController.page cannot be accessed before a PageView is built with it.',
-      );
-    }
+    expect(
+      () => controller.page,
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.message,
+        'message',
+        equals('PageController.page cannot be accessed before a PageView is built with it.'),
+      )),
+    );
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageStorage(
@@ -843,8 +843,8 @@ void main() {
           controller: controller,
           children: List<Widget>.generate(3, (int i) {
             return Semantics(
-              child: Text('Page #$i'),
               container: true,
+              child: Text('Page #$i'),
             );
           }),
         ),
@@ -897,8 +897,8 @@ void main() {
         controller: pageController,
         children: List<Widget>.generate(3, (int i) {
           return Semantics(
-            child: Text('Page #$i'),
             container: true,
+            child: Text('Page #$i'),
           );
         }),
       ),
@@ -916,13 +916,13 @@ void main() {
       textDirection: TextDirection.ltr,
       child: PageView(
           controller: controller,
+          allowImplicitScrolling: true,
           children: List<Widget>.generate(4, (int i) {
             return Semantics(
-              child: Text('Page #$i'),
               container: true,
+              child: Text('Page #$i'),
             );
           }),
-          allowImplicitScrolling: true,
         ),
     ));
     expect(controller.page, 0);
@@ -974,8 +974,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
-          children: <Widget>[Container(height: 2000.0)],
           clipBehavior: Clip.antiAlias,
+          children: <Widget>[Container(height: 2000.0)],
         ),
       ),
     );
@@ -984,5 +984,30 @@ void main() {
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('PageView.padEnds tests', (WidgetTester tester) async {
+    Finder viewportFinder() => find.byType(SliverFillViewport, skipOffstage: false);
+
+    // PageView() defaults to true.
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        children: const <Widget>[],
+      ),
+    ));
+
+    expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, true);
+
+    // PageView(padEnds: false) is propagated properly.
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        padEnds: false,
+        children: const <Widget>[],
+      ),
+    ));
+
+    expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, false);
   });
 }

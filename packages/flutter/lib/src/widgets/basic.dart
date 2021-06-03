@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -67,6 +68,8 @@ export 'package:flutter/rendering.dart' show
   ValueGetter,
   WrapAlignment,
   WrapCrossAlignment;
+export 'package:flutter/services.dart' show
+  AssetBundle;
 
 // Examples can assume:
 // class TestWidget extends StatelessWidget { const TestWidget({Key? key}) : super(key: key); @override Widget build(BuildContext context) => const Placeholder(); }
@@ -165,6 +168,12 @@ class Directionality extends InheritedWidget {
 /// expensive because it requires painting the child into an intermediate
 /// buffer. For the value 0.0, the child is simply not painted at all. For the
 /// value 1.0, the child is painted immediately without an intermediate buffer.
+///
+/// The presence of the intermediate buffer which has a transparent background
+/// by default may cause some child widgets to behave differently. For example
+/// a [BackdropFilter] child will only be able to apply its filter to the content
+/// between this widget and the backdrop child and may require adjusting the
+/// [BackdropFilter.blendMode] property to produce the desired results.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=9hltevOHQBw}
 ///
@@ -377,6 +386,18 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// widget's clip. If there's no clip, the filter will be applied to the full
 /// screen.
 ///
+/// The results of the filter will be blended back into the background using
+/// the [blendMode] parameter.
+/// {@template flutter.widgets.BackdropFilter.blendMode}
+/// The only value for [blendMode] that is supported on all platforms is
+/// [BlendMode.srcOver] which works well for most scenes. But that value may
+/// produce surprising results when a parent of the [BackdropFilter] uses a
+/// temporary buffer, or save layer, as does an [Opacity] widget. In that
+/// situation, a value of [BlendMode.src] can produce more pleasing results,
+/// but at the cost of incompatibility with some platforms, most notably the
+/// html renderer for web applications.
+/// {@endtemplate}
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=dYRs7Q1vfYI}
 ///
 /// {@tool snippet}
@@ -427,10 +448,13 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// Creates a backdrop filter.
   ///
   /// The [filter] argument must not be null.
+  /// The [blendMode] argument will default to [BlendMode.srcOver] and must not be
+  /// null if provided.
   const BackdropFilter({
     Key? key,
     required this.filter,
     Widget? child,
+    this.blendMode = BlendMode.srcOver,
   }) : assert(filter != null),
        super(key: key, child: child);
 
@@ -440,14 +464,22 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// blur effect.
   final ui.ImageFilter filter;
 
+  /// The blend mode to use to apply the filtered background content onto the background
+  /// surface.
+  ///
+  /// {@macro flutter.widgets.BackdropFilter.blendMode}
+  final BlendMode blendMode;
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
-    return RenderBackdropFilter(filter: filter);
+    return RenderBackdropFilter(filter: filter, blendMode: blendMode);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
-    renderObject.filter = filter;
+    renderObject
+      ..filter = filter
+      ..blendMode = blendMode;
   }
 }
 
@@ -1149,6 +1181,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : assert(transform != null),
        super(key: key, child: child);
@@ -1186,6 +1219,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment = Alignment.center,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.rotationZ(angle),
        super(key: key, child: child);
@@ -1213,6 +1247,7 @@ class Transform extends SingleChildRenderObjectWidget {
     Key? key,
     required Offset offset,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.translationValues(offset.dx, offset.dy, 0.0),
        origin = null,
@@ -1254,6 +1289,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment = Alignment.center,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.diagonal3Values(scale, scale, 1.0),
        super(key: key, child: child);
@@ -1285,6 +1321,15 @@ class Transform extends SingleChildRenderObjectWidget {
   /// Whether to apply the transformation when performing hit tests.
   final bool transformHitTests;
 
+  /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@template flutter.widgets.Transform.optional.FilterQuality}
+  /// The transform will be applied by re-rendering the child if [filterQuality] is null,
+  /// otherwise it controls the quality of an [ImageFilter.matrix] applied to a bitmap
+  /// rendering of the child.
+  /// {@endtemplate}
+  final FilterQuality? filterQuality;
+
   @override
   RenderTransform createRenderObject(BuildContext context) {
     return RenderTransform(
@@ -1293,6 +1338,7 @@ class Transform extends SingleChildRenderObjectWidget {
       alignment: alignment,
       textDirection: Directionality.maybeOf(context),
       transformHitTests: transformHitTests,
+      filterQuality: filterQuality,
     );
   }
 
@@ -1303,7 +1349,8 @@ class Transform extends SingleChildRenderObjectWidget {
       ..origin = origin
       ..alignment = alignment
       ..textDirection = Directionality.maybeOf(context)
-      ..transformHitTests = transformHitTests;
+      ..transformHitTests = transformHitTests
+      ..filterQuality = filterQuality;
   }
 }
 
@@ -2624,11 +2671,11 @@ class UnconstrainedBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstraintsTransformBox(
-      child: child,
       textDirection: textDirection,
       alignment: alignment,
       clipBehavior: clipBehavior,
       constraintsTransform: _axisToTransform(constrainedAxis),
+      child: child,
     );
   }
 
@@ -2646,6 +2693,33 @@ class UnconstrainedBox extends StatelessWidget {
 /// [RenderFractionallySizedOverflowBox].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=PEsY654EGZ0}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows a [FractionallySizedBox] whose one child is 50% of
+/// the box's size per the width and height factor parameters, and centered
+/// within that box by the alignment parameter.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return SizedBox.expand(
+///     child: FractionallySizedBox(
+///       widthFactor: 0.5,
+///       heightFactor: 0.5,
+///       alignment: FractionalOffset.center,
+///       child: DecoratedBox(
+///         decoration: BoxDecoration(
+///           border: Border.all(
+///             color: Colors.blue,
+///             width: 4,
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -3089,7 +3163,7 @@ class Offstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  _OffstageElement createElement() => _OffstageElement(this);
+  SingleChildRenderObjectElement createElement() => _OffstageElement(this);
 }
 
 class _OffstageElement extends SingleChildRenderObjectElement {
@@ -3796,9 +3870,9 @@ class Stack extends MultiChildRenderObjectWidget {
     if (alignment is AlignmentDirectional && textDirection == null) {
       assert(debugCheckHasDirectionality(
         context,
-        why: 'to resolve the \'alignment\' argument',
-        hint: alignment == AlignmentDirectional.topStart ? 'The default value for \'alignment\' is AlignmentDirectional.topStart, which requires a text direction.' : null,
-        alternative: 'Instead of providing a Directionality widget, another solution would be passing a non-directional \'alignment\', or an explicit \'textDirection\', to the $runtimeType.',
+        why: "to resolve the 'alignment' argument",
+        hint: alignment == AlignmentDirectional.topStart ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction." : null,
+        alternative: "Instead of providing a Directionality widget, another solution would be passing a non-directional 'alignment', or an explicit 'textDirection', to the $runtimeType.",
       ));
     }
     return true;
@@ -5465,7 +5539,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///   const FlowMenu({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _FlowMenuState createState() => _FlowMenuState();
+///   State<FlowMenu> createState() => _FlowMenuState();
 /// }
 ///
 /// class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin {
@@ -5844,6 +5918,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.height,
     this.scale = 1.0,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -5889,6 +5964,13 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color? color;
+
+  /// If non-null, the value from the [Animation] is multiplied with the opacity
+  /// of each image pixel before painting onto the canvas.
+  ///
+  /// This is more efficient than using [FadeTransition] to change the opacity
+  /// of an image.
+  final Animation<double>? opacity;
 
   /// Used to set the filterQuality of the image
   /// Use the "low" quality setting to scale the image, which corresponds to
@@ -5999,6 +6081,7 @@ class RawImage extends LeafRenderObjectWidget {
       height: height,
       scale: scale,
       color: color,
+      opacity: opacity,
       colorBlendMode: colorBlendMode,
       fit: fit,
       alignment: alignment,
@@ -6051,6 +6134,7 @@ class RawImage extends LeafRenderObjectWidget {
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DoubleProperty('scale', scale, defaultValue: 1.0));
     properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Animation<double>?>('opacity', opacity, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
@@ -6109,7 +6193,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// See also:
 ///
 ///  * [AssetBundle], the interface for asset bundles.
-///  * [rootBundle], the default default asset bundle.
+///  * [rootBundle], the default asset bundle.
 class DefaultAssetBundle extends InheritedWidget {
   /// Creates a widget that determines the default asset bundle for its descendants.
   ///
@@ -6590,7 +6674,7 @@ class MouseRegion extends StatefulWidget {
   ///   final VoidCallback onExitButton;
   ///
   ///   @override
-  ///   _MyTimedButton createState() => _MyTimedButton();
+  ///   State<MyTimedButton> createState() => _MyTimedButton();
   /// }
   ///
   /// class _MyTimedButton extends State<MyTimedButton> {
@@ -6708,7 +6792,7 @@ class MouseRegion extends StatefulWidget {
   final Widget? child;
 
   @override
-  _MouseRegionState createState() => _MouseRegionState();
+  State<MouseRegion> createState() => _MouseRegionState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -7867,7 +7951,7 @@ class StatefulBuilder extends StatefulWidget {
   final StatefulWidgetBuilder builder;
 
   @override
-  _StatefulBuilderState createState() => _StatefulBuilderState();
+  State<StatefulBuilder> createState() => _StatefulBuilderState();
 }
 
 class _StatefulBuilderState extends State<StatefulBuilder> {
@@ -7889,13 +7973,13 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   final Color color;
 
   @override
-  _RenderColoredBox createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(BuildContext context) {
     return _RenderColoredBox(color: color);
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderColoredBox renderObject) {
-    renderObject.color = color;
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _RenderColoredBox).color = color;
   }
 
   @override

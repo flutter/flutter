@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Scroll notification basics', (WidgetTester tester) async {
@@ -72,8 +72,8 @@ void main() {
             child: Container(
               padding: const EdgeInsets.all(50.0),
               child: const SingleChildScrollView(
-                child: SizedBox(height: 1200.0),
                 dragStartBehavior: DragStartBehavior.down,
+                child: SizedBox(height: 1200.0),
               ),
             ),
           ),
@@ -121,8 +121,8 @@ void main() {
                   child: Container(
                     padding: const EdgeInsets.all(50.0),
                     child: const SingleChildScrollView(
-                      child: SizedBox(height: 1200.0),
                       dragStartBehavior: DragStartBehavior.down,
+                      child: SizedBox(height: 1200.0),
                     ),
                   ),
                 ),

@@ -67,7 +67,7 @@ void main() {
       excludes: const <Offset>[ Offset(10.0, 20.0), Offset(30.0, 40.0) ],
     );
     const ContinuousRectangleBorder border = ContinuousRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(5.0))
+      borderRadius: BorderRadius.all(Radius.circular(5.0)),
     );
     expect(border.getOuterPath(rect), looksLikeRect);
     expect(border.getInnerPath(rect), looksLikeRect);

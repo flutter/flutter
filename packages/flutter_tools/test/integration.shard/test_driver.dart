@@ -68,11 +68,11 @@ abstract class FlutterTestDriver {
   String lastTime = '';
   void _debugPrint(String message, { String topic = '' }) {
     const int maxLength = 2500;
-    final String truncatedMessage = message.length > maxLength ? message.substring(0, maxLength) + '...' : message;
+    final String truncatedMessage = message.length > maxLength ? '${message.substring(0, maxLength)}...' : message;
     final String line = '${topic.padRight(10)} $truncatedMessage';
     _allMessages.add(line);
     final int timeInSeconds = DateTime.now().difference(startTime).inSeconds;
-    String time = timeInSeconds.toString().padLeft(5) + 's ';
+    String time = '${timeInSeconds.toString().padLeft(5)}s ';
     if (time == lastTime) {
       time = ' ' * time.length;
     } else {
@@ -474,7 +474,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         if (!chrome)
           '--disable-service-auth-codes',
         '--machine',
-        if (!spawnDdsInstance) '--disable-dds',
+        if (!spawnDdsInstance) '--no-dds',
         ...getLocalEngineArguments(),
         '-d',
         if (chrome)
@@ -512,7 +512,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
          ...getLocalEngineArguments(),
         '--machine',
         if (!spawnDdsInstance)
-          '--disable-dds',
+          '--no-dds',
         '-d',
         'flutter-tester',
         '--debug-port',

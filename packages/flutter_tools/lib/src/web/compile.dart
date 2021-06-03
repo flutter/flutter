@@ -10,11 +10,10 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/common.dart';
-import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/web.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../flutter_plugins.dart';
+import '../globals_null_migrated.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -27,6 +26,7 @@ Future<void> buildWeb(
   String serviceWorkerStrategy,
   bool sourceMaps,
   bool nativeNullAssertions,
+  String baseHref,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
@@ -47,18 +47,15 @@ Future<void> buildWeb(
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build'),
       defines: <String, String>{
-        kBuildMode: getNameForBuildMode(buildInfo.mode),
         kTargetFile: target,
         kHasWebPlugins: hasWebPlugins.toString(),
-        kDartDefines: encodeDartDefines(buildInfo.dartDefines),
         kCspMode: csp.toString(),
-        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+        kBaseHref : baseHref,
         kSourceMapsEnabled: sourceMaps.toString(),
         kNativeNullAssertions: nativeNullAssertions.toString(),
         if (serviceWorkerStrategy != null)
          kServiceWorkerStrategy: serviceWorkerStrategy,
-        if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)
-          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
+        ...buildInfo.toBuildSystemEnvironment(),
       },
       artifacts: globals.artifacts,
       fileSystem: globals.fs,
@@ -70,6 +67,9 @@ Future<void> buildWeb(
         ? null
         : globals.flutterVersion.engineRevision,
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      // Web uses a different Dart plugin registry.
+      // https://github.com/flutter/flutter/issues/80406
+      generateDartPluginRegistry: false,
     ));
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
@@ -100,33 +100,33 @@ enum WebRendererMode {
 }
 
 /// The correct precompiled artifact to use for each build and render mode.
-const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> kDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, Artifact>>{
-  WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
-    NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
-    NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
+const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
+  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdk,
   },
-  WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
-    NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdk,
-    NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdk,
+  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitSdk,
   },
-  WebRendererMode.html: <NullSafetyMode, Artifact> {
-    NullSafetyMode.sound: Artifact.webPrecompiledSoundSdk,
-    NullSafetyMode.unsound: Artifact.webPrecompiledSdk,
+  WebRendererMode.html: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledSdk,
   },
 };
 
 /// The correct source map artifact to use for each build and render mode.
-const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> kDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, Artifact>>{
-  WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
-    NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
-    NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
+const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
+  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
   },
-  WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
-    NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
-    NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
+  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitSdkSourcemaps,
   },
-  WebRendererMode.html: <NullSafetyMode, Artifact> {
-    NullSafetyMode.sound: Artifact.webPrecompiledSoundSdkSourcemaps,
-    NullSafetyMode.unsound: Artifact.webPrecompiledSdkSourcemaps,
+  WebRendererMode.html: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledSdkSourcemaps,
   },
 };

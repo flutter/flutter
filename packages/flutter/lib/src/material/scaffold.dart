@@ -8,8 +8,8 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
@@ -158,7 +158,7 @@ class ScaffoldMessenger extends StatefulWidget {
   ///   const MyApp({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///  _MyAppState createState() => _MyAppState();
+  ///  State<MyApp> createState() => _MyAppState();
   /// }
   ///
   /// class _MyAppState extends State<MyApp> {
@@ -924,7 +924,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
       if (extendBody) {
         bodyMaxHeight += bottomWidgetsHeight;
-        bodyMaxHeight = bodyMaxHeight.clamp(0.0, looseConstraints.maxHeight - contentTop).toDouble();
+        bodyMaxHeight = bodyMaxHeight.clamp(0.0, looseConstraints.maxHeight - contentTop);
         assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight - contentTop));
       }
 
@@ -1505,7 +1505,7 @@ class Scaffold extends StatefulWidget {
   /// This property is often useful when the [bottomNavigationBar] has
   /// a non-rectangular shape, like [CircularNotchedRectangle], which
   /// adds a [FloatingActionButton] sized notch to the top edge of the bar.
-  /// In this case specifying `extendBody: true` ensures that that scaffold's
+  /// In this case specifying `extendBody: true` ensures that scaffold's
   /// body will be visible through the bottom navigation bar's notch.
   ///
   /// See also:
@@ -1820,6 +1820,8 @@ class Scaffold extends StatefulWidget {
   /// If no instance of this class encloses the given context, will cause an
   /// assert in debug mode, and throw an exception in release mode.
   ///
+  /// This method can be expensive (it walks the element tree).
+  ///
   /// {@tool dartpad --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
@@ -1999,6 +2001,8 @@ class Scaffold extends StatefulWidget {
   /// If no instance of this class encloses the given context, will return null.
   /// To throw an exception instead, use [of] instead of this function.
   ///
+  /// This method can be expensive (it walks the element tree).
+  ///
   /// See also:
   ///
   ///  * [of], a similar function to this one that throws if no instance
@@ -2065,6 +2069,8 @@ class Scaffold extends StatefulWidget {
   /// true. This will then set up an [InheritedWidget] relationship with the
   /// [Scaffold] so that the client widget gets rebuilt whenever the [hasDrawer]
   /// value changes.
+  ///
+  /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///
@@ -2409,7 +2415,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // bottom sheet.
   final List<_StandardBottomSheet> _dismissedBottomSheets = <_StandardBottomSheet>[];
   PersistentBottomSheetController<dynamic>? _currentBottomSheet;
-  final GlobalKey _currentBottomSheetKey = GlobalKey();
+  GlobalKey _currentBottomSheetKey = GlobalKey();
 
   void _maybeBuildPersistentBottomSheet() {
     if (widget.bottomSheet != null && _currentBottomSheet == null) {
@@ -2437,8 +2443,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         return false;
       }
 
+      // It is possible that the fade-out animation of the sheet has not finished
+      // yet, and the key needs to be regenerated at this time, otherwise, there will
+      // be an exception of duplicate GlobalKey.
+      if (_currentBottomSheetKey.currentState != null)
+        _currentBottomSheetKey = GlobalKey();
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) {
+          assert(_currentBottomSheetKey.currentState == null);
           return NotificationListener<DraggableScrollableNotification>(
             onNotification: _persistentBottomSheetExtentChanged,
             child: DraggableScrollableActuator(
@@ -2481,6 +2493,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     double? elevation,
     ShapeBorder? shape,
     Clip? clipBehavior,
+    BoxConstraints? constraints,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -2554,6 +2567,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       elevation: elevation,
       shape: shape,
       clipBehavior: clipBehavior,
+      constraints: constraints,
     );
 
     if (!isPersistent)
@@ -2653,6 +2667,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     double? elevation,
     ShapeBorder? shape,
     Clip? clipBehavior,
+    BoxConstraints? constraints,
     AnimationController? transitionAnimationController,
   }) {
     assert(() {
@@ -2678,6 +2693,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         elevation: elevation,
         shape: shape,
         clipBehavior: clipBehavior,
+        constraints: constraints,
       );
     });
     return _currentBottomSheet! as PersistentBottomSheetController<T>;
@@ -2909,13 +2925,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         DrawerController(
           key: _endDrawerKey,
           alignment: DrawerAlignment.end,
-          child: widget.endDrawer!,
           drawerCallback: _endDrawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
           isDrawerOpen: _endDrawerOpened.value,
+          child: widget.endDrawer!,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2935,13 +2951,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         DrawerController(
           key: _drawerKey,
           alignment: DrawerAlignment.start,
-          child: widget.drawer!,
           drawerCallback: _drawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
           isDrawerOpen: _drawerOpened.value,
+          child: widget.drawer!,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
@@ -3035,7 +3051,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
     if (widget.appBar != null) {
       final double topPadding = widget.primary ? mediaQuery.padding.top : 0.0;
-      _appBarMaxHeight = widget.appBar!.preferredSize.height + topPadding;
+      _appBarMaxHeight = AppBar.preferredHeightFor(context, widget.appBar!.preferredSize) + topPadding;
       assert(_appBarMaxHeight! >= 0.0 && _appBarMaxHeight!.isFinite);
       _addIfNonNull(
         children,
@@ -3175,11 +3191,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _addIfNonNull(
       children,
       _FloatingActionButtonTransition(
-        child: widget.floatingActionButton,
         fabMoveAnimation: _floatingActionButtonMoveController,
         fabMotionAnimator: _floatingActionButtonAnimator,
         geometryNotifier: _geometryNotifier,
         currentController: _floatingActionButtonVisibilityController,
+        child: widget.floatingActionButton,
       ),
       _ScaffoldSlot.floatingActionButton,
       removeLeftPadding: true,
@@ -3243,7 +3259,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
           child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
             return CustomMultiChildLayout(
-              children: children,
               delegate: _ScaffoldLayout(
                 extendBody: _extendBody,
                 extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
@@ -3258,6 +3273,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
                 isSnackBarFloating: isSnackBarFloating,
                 snackBarWidth: snackBarWidth,
               ),
+              children: children,
             );
           }),
         ),
@@ -3356,6 +3372,7 @@ class _StandardBottomSheet extends StatefulWidget {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.constraints,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
@@ -3368,6 +3385,7 @@ class _StandardBottomSheet extends StatefulWidget {
   final double? elevation;
   final ShapeBorder? shape;
   final Clip? clipBehavior;
+  final BoxConstraints? constraints;
 
   @override
   _StandardBottomSheetState createState() => _StandardBottomSheetState();
@@ -3472,6 +3490,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           elevation: widget.elevation,
           shape: widget.shape,
           clipBehavior: widget.clipBehavior,
+          constraints: widget.constraints,
         ),
       ),
     );

@@ -1029,7 +1029,7 @@ void main() {
         'descendantsAreFocusable: true',
         'canRequestFocus: true',
         'hasFocus: false',
-        'hasPrimaryFocus: false'
+        'hasPrimaryFocus: false',
       ]);
     });
 
@@ -1099,8 +1099,9 @@ void main() {
           '       │\n'
           '       └─Child 2: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
           '           context: Container-[GlobalKey#00000]\n'
-          '           PRIMARY FOCUS\n'
-        ));
+          '           PRIMARY FOCUS\n',
+        ),
+      );
     });
   });
 

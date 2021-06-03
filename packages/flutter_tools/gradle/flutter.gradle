@@ -20,12 +20,13 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.0'
@@ -101,12 +102,25 @@ class FlutterPlugin implements Plugin<Project> {
     void apply(Project project) {
         this.project = project
 
+        def rootProject = project.rootProject
+        rootProject.tasks.register('generateLockfiles') {
+            rootProject.subprojects.each { subproject ->
+                def gradlew = (OperatingSystem.current().isWindows()) ?
+                    "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
+                rootProject.exec {
+                    workingDir rootProject.projectDir
+                    executable gradlew
+                    args ":${subproject.name}:dependencies", "--write-locks"
+                }
+            }
+        }
+
         // Configure the Maven repository.
         String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
         String repository = useLocalEngine()
             ? project.property('local-engine-repo')
             : "$hostedRepository/download.flutter.io"
-        project.rootProject.allprojects {
+        rootProject.allprojects {
             repositories {
                 maven {
                     url repository
@@ -339,6 +353,9 @@ class FlutterPlugin implements Plugin<Project> {
             // so java8 features are desugared against the runtime classpath.
             // For more, see https://github.com/flutter/flutter/issues/40126
             if (!supportsBuildMode(flutterBuildMode)) {
+                return
+            }
+            if (!pluginProject.hasProperty('android')) {
                 return
             }
             // Copy build types from the app to the plugin.
@@ -1075,7 +1092,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--DartDefines=${dartDefines}"
             }
             if (bundleSkSLPath != null) {
-                args "-iBundleSkSLPath=${bundleSkSLPath}"
+                args "-dBundleSkSLPath=${bundleSkSLPath}"
             }
             if (codeSizeDirectory != null) {
                 args "-dCodeSizeDirectory=${codeSizeDirectory}"

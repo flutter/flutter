@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'constants.dart';

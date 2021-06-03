@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -21,16 +19,16 @@ import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
-  ResidentCompiler generator;
-  ResidentCompiler generatorWithScheme;
-  MemoryIOSink frontendServerStdIn;
-  BufferLogger testLogger;
-  StdoutHandler generatorStdoutHandler;
-  StdoutHandler generatorWithSchemeStdoutHandler;
-  FakeProcessManager fakeProcessManager;
+  late ResidentCompiler generator;
+  late ResidentCompiler generatorWithScheme;
+  late MemoryIOSink frontendServerStdIn;
+  late BufferLogger testLogger;
+  late StdoutHandler generatorStdoutHandler;
+  late StdoutHandler generatorWithSchemeStdoutHandler;
+  late FakeProcessManager fakeProcessManager;
 
   const List<String> frontendServerCommand = <String>[
-    'Artifact.engineDartBinary',
+    'HostArtifact.engineDartBinary',
     '--disable-dart-dev',
     'Artifact.frontendServerSnapshotForEngineDartSdk',
     '--sdk-root',
@@ -51,7 +49,7 @@ void main() {
     testLogger = BufferLogger.test();
     frontendServerStdIn = MemoryIOSink();
 
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
     generatorStdoutHandler = StdoutHandler(logger: testLogger, fileSystem: MemoryFileSystem.test());
     generatorWithSchemeStdoutHandler = StdoutHandler(logger: testLogger, fileSystem: MemoryFileSystem.test());
     generator = DefaultResidentCompiler(
@@ -87,15 +85,17 @@ void main() {
       stdin: frontendServerStdIn,
     ));
 
-    final CompilerOutput output = await generator.recompile(
+    final CompilerOutput? output = await generator.recompile(
       Uri.parse('/path/to/main.dart'),
         null /* invalidatedFiles */,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
-    expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+    expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -112,15 +112,17 @@ void main() {
       stdin: frontendServerStdIn,
     ));
 
-    final CompilerOutput output = await generatorWithScheme.recompile(
+    final CompilerOutput? output = await generatorWithScheme.recompile(
       Uri.parse('file:///foo/bar/fizz/main.dart'),
         null /* invalidatedFiles */,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
-    expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+    expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -135,6 +137,8 @@ void main() {
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     )), throwsToolExit());
   });
 
@@ -150,6 +154,8 @@ void main() {
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     )), throwsToolExit(message: 'the Dart compiler exited unexpectedly.'));
   });
 
@@ -167,6 +173,8 @@ void main() {
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      projectRootPath: '',
+      fs: MemoryFileSystem(),
     );
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
@@ -213,6 +221,8 @@ void main() {
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
 
@@ -274,6 +284,8 @@ void main() {
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
 
@@ -323,6 +335,8 @@ void main() {
       <Uri>[],
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
@@ -359,6 +373,8 @@ void main() {
       null /* invalidatedFiles */,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
@@ -383,21 +399,23 @@ Future<void> _recompile(
   MemoryIOSink frontendServerStdIn,
   String mockCompilerOutput, {
   bool suppressErrors = false,
-  Uri mainUri,
+  Uri? mainUri,
   String expectedMainUri = '/path/to/main.dart',
-  List<Uri> updatedUris,
-  List<String> expectedUpdatedUris,
+  List<Uri>? updatedUris,
+  List<String>? expectedUpdatedUris,
 }) async {
   mainUri ??= Uri.parse('/path/to/main.dart');
   updatedUris ??= <Uri>[mainUri];
   expectedUpdatedUris ??= <String>[expectedMainUri];
 
-  final Future<CompilerOutput> recompileFuture = generator.recompile(
+  final Future<CompilerOutput?> recompileFuture = generator.recompile(
     mainUri,
     updatedUris,
     outputPath: '/build/',
     packageConfig: PackageConfig.empty,
     suppressErrors: suppressErrors,
+    fs: MemoryFileSystem(),
+    projectRootPath: '',
   );
 
   // Put content into the output stream after generator.recompile gets
@@ -405,8 +423,8 @@ Future<void> _recompile(
   scheduleMicrotask(() {
     LineSplitter.split(mockCompilerOutput).forEach(stdoutHandler.handler);
   });
-  final CompilerOutput output = await recompileFuture;
-  expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+  final CompilerOutput? output = await recompileFuture;
+  expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
   final String commands = frontendServerStdIn.getAndClear();
   final RegExp whitespace = RegExp(r'\s+');
   final List<String> parts = commands.split(whitespace);
@@ -439,11 +457,11 @@ Future<void> _reject(
 ) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
-  final Future<CompilerOutput> rejectFuture = generator.reject();
+  final Future<CompilerOutput?> rejectFuture = generator.reject();
   scheduleMicrotask(() {
     LineSplitter.split(mockCompilerOutput).forEach(stdoutHandler.handler);
   });
-  final CompilerOutput output = await rejectFuture;
+  final CompilerOutput? output = await rejectFuture;
   expect(output, isNull);
 
   final String commands = frontendServerStdIn.getAndClear();

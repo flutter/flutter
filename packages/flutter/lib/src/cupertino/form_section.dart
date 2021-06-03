@@ -66,7 +66,7 @@ enum _CupertinoFormSectionType { base, insetGrouped }
 ///
 /// {@macro flutter.material.Material.clipBehavior}
 class CupertinoFormSection extends StatelessWidget {
-  /// Creates a section that mimicks standard iOS forms.
+  /// Creates a section that mimics standard iOS forms.
   ///
   /// The base constructor for [CupertinoFormSection] constructs an
   /// edge-to-edge style section which includes an iOS-style header,
@@ -111,7 +111,7 @@ class CupertinoFormSection extends StatelessWidget {
         assert(children.length > 0),
         super(key: key);
 
-  /// Creates a section that mimicks standard "Inset Grouped" iOS forms.
+  /// Creates a section that mimics standard "Inset Grouped" iOS forms.
   ///
   /// The [CupertinoFormSection.insetGrouped] constructor creates a round-edged and
   /// padded section that is commonly seen in notched-displays like iPhone X and
@@ -217,7 +217,7 @@ class CupertinoFormSection extends StatelessWidget {
 
     // Short divider is used between rows.
     // The value of the starting inset (15.0) is determined using SwiftUI's Form
-    // seperators in the iOS 14.2 SDK.
+    // separators in the iOS 14.2 SDK.
     final Widget shortDivider = Container(
       margin: const EdgeInsetsDirectional.only(start: 15.0),
       color: dividerColor,
@@ -287,7 +287,7 @@ class CupertinoFormSection extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: _kDefaultHeaderMargin,
-                  child: header!,
+                  child: header,
                 ),
               ),
             ),
@@ -311,7 +311,7 @@ class CupertinoFormSection extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: _kDefaultFooterMargin,
-                  child: footer!,
+                  child: footer,
                 ),
               ),
             ),

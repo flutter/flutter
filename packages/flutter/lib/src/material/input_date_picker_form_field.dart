@@ -129,7 +129,7 @@ class InputDatePickerFormField extends StatefulWidget {
   final bool autofocus;
 
   @override
-  _InputDatePickerFormFieldState createState() => _InputDatePickerFormFieldState();
+  State<InputDatePickerFormField> createState() => _InputDatePickerFormFieldState();
 }
 
 class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {

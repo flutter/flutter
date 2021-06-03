@@ -23,9 +23,9 @@ void main() {
 /// the undo stack when they are invoked.
 class Memento extends Object with Diagnosticable {
   const Memento({
-    @required this.name,
-    @required this.undo,
-    @required this.redo,
+    required this.name,
+    required this.undo,
+    required this.redo,
   });
 
   /// Returns true if this Memento can be used to undo.
@@ -110,11 +110,11 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   }
 
   @override
-  Object invokeAction(Action<Intent> action, Intent intent, [BuildContext context]) {
-    final Object result = super.invokeAction(action, intent, context);
+  Object? invokeAction(Action<Intent> action, Intent intent, [BuildContext? context]) {
+    final Object? result = super.invokeAction(action, intent, context);
     print('Invoking ${action is UndoableAction ? 'undoable ' : ''}$intent as $action: $this ');
     if (action is UndoableAction) {
-      _completedActions.addLast(result as Memento);
+      _completedActions.addLast(result! as Memento);
       _undoneActions.clear();
       _pruneActions();
       notifyListeners();
@@ -193,14 +193,22 @@ class UndoIntent extends Intent {
 class UndoAction extends Action<UndoIntent> {
   @override
   bool isEnabled(UndoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext) as UndoableActionDispatcher;
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    if (buildContext == null) {
+      return false;
+    }
+    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
     return manager.canUndo;
   }
 
   @override
   void invoke(UndoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext) as UndoableActionDispatcher;
-    manager?.undo();
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    if (buildContext == null) {
+      return;
+    }
+    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!) as UndoableActionDispatcher;
+    manager.undo();
   }
 }
 
@@ -211,14 +219,22 @@ class RedoIntent extends Intent {
 class RedoAction extends Action<RedoIntent> {
   @override
   bool isEnabled(RedoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus.context) as UndoableActionDispatcher;
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    if (buildContext == null) {
+      return false;
+    }
+    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
     return manager.canRedo;
   }
 
   @override
   RedoAction invoke(RedoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus.context) as UndoableActionDispatcher;
-    manager?.redo();
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    if (buildContext == null) {
+      return this;
+    }
+    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
+    manager.redo();
     return this;
   }
 }
@@ -226,11 +242,11 @@ class RedoAction extends Action<RedoIntent> {
 /// An action that can be undone.
 abstract class UndoableAction<T extends Intent> extends Action<T> {
   /// The [Intent] this action was originally invoked with.
-  Intent get invocationIntent => _invocationTag;
-  Intent _invocationTag;
+  Intent? get invocationIntent => _invocationTag;
+  Intent? _invocationTag;
 
   @protected
-  set invocationIntent(Intent value) => _invocationTag = value;
+  set invocationIntent(Intent? value) => _invocationTag = value;
 
   @override
   @mustCallSuper
@@ -244,8 +260,8 @@ class UndoableFocusActionBase<T extends Intent> extends UndoableAction<T> {
   @mustCallSuper
   Memento invoke(T intent) {
     super.invoke(intent);
-    final FocusNode previousFocus = primaryFocus;
-    return Memento(name: previousFocus.debugLabel, undo: () {
+    final FocusNode? previousFocus = primaryFocus;
+    return Memento(name: previousFocus!.debugLabel!, undo: () {
       previousFocus.requestFocus();
     }, redo: () {
       return invoke(intent);
@@ -267,7 +283,7 @@ class UndoableNextFocusAction extends UndoableFocusActionBase<NextFocusIntent> {
   @override
   Memento invoke(NextFocusIntent intent) {
     final Memento memento = super.invoke(intent);
-    primaryFocus.nextFocus();
+    primaryFocus?.nextFocus();
     return memento;
   }
 }
@@ -276,46 +292,40 @@ class UndoablePreviousFocusAction extends UndoableFocusActionBase<PreviousFocusI
   @override
   Memento invoke(PreviousFocusIntent intent) {
     final Memento memento = super.invoke(intent);
-    primaryFocus.previousFocus();
+    primaryFocus?.previousFocus();
     return memento;
   }
 }
 
 class UndoableDirectionalFocusAction extends UndoableFocusActionBase<DirectionalFocusIntent> {
-  TraversalDirection direction;
+  TraversalDirection? direction;
 
   @override
   Memento invoke(DirectionalFocusIntent intent) {
     final Memento memento = super.invoke(intent);
-    primaryFocus.focusInDirection(intent.direction);
+    primaryFocus?.focusInDirection(intent.direction);
     return memento;
   }
 }
 
 /// A button class that takes focus when clicked.
 class DemoButton extends StatefulWidget {
-  const DemoButton({Key key, this.name}) : super(key: key);
+  const DemoButton({Key? key, required this.name}) : super(key: key);
 
   final String name;
 
   @override
-  _DemoButtonState createState() => _DemoButtonState();
+  State<DemoButton> createState() => _DemoButtonState();
 }
 
 class _DemoButtonState extends State<DemoButton> {
-  FocusNode _focusNode;
+  late final FocusNode _focusNode = FocusNode(debugLabel: widget.name);
   final GlobalKey _nameKey = GlobalKey();
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode(debugLabel: widget.name);
-  }
 
   void _handleOnPressed() {
     print('Button ${widget.name} pressed.');
     setState(() {
-      Actions.invoke(_nameKey.currentContext, RequestFocusIntent(_focusNode));
+      Actions.invoke(_nameKey.currentContext!, RequestFocusIntent(_focusNode));
     });
   }
 
@@ -336,7 +346,7 @@ class _DemoButtonState extends State<DemoButton> {
             return Colors.red;
           if (states.contains(MaterialState.hovered))
             return Colors.blue;
-          return null;
+          return Colors.transparent;
         }),
       ),
       onPressed: () => _handleOnPressed(),
@@ -346,25 +356,23 @@ class _DemoButtonState extends State<DemoButton> {
 }
 
 class FocusDemo extends StatefulWidget {
-  const FocusDemo({Key key}) : super(key: key);
+  const FocusDemo({Key? key}) : super(key: key);
 
   static GlobalKey appKey = GlobalKey();
 
   @override
-  _FocusDemoState createState() => _FocusDemoState();
+  State<FocusDemo> createState() => _FocusDemoState();
 }
 
 class _FocusDemoState extends State<FocusDemo> {
-  FocusNode outlineFocus;
-  UndoableActionDispatcher dispatcher;
-  bool canUndo;
-  bool canRedo;
+  final FocusNode outlineFocus = FocusNode(debugLabel: 'Demo Focus Node');
+  late final UndoableActionDispatcher dispatcher = UndoableActionDispatcher();
+  bool canUndo = false;
+  bool canRedo = false;
 
   @override
   void initState() {
     super.initState();
-    outlineFocus = FocusNode(debugLabel: 'Demo Focus Node');
-    dispatcher = UndoableActionDispatcher();
     canUndo = dispatcher.canUndo;
     canRedo = dispatcher.canRedo;
     dispatcher.addListener(_handleUndoStateChange);
@@ -406,16 +414,16 @@ class _FocusDemoState extends State<FocusDemo> {
       child: FocusTraversalGroup(
         policy: ReadingOrderTraversalPolicy(),
         child: Shortcuts(
-          shortcuts: <LogicalKeySet, Intent>{
-            LogicalKeySet(Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.keyZ): const RedoIntent(),
-            LogicalKeySet(Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control, LogicalKeyboardKey.keyZ): const UndoIntent(),
+          shortcuts: <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS, shift: true): const RedoIntent(),
+            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS): const UndoIntent(),
           },
           child: FocusScope(
             key: FocusDemo.appKey,
             debugLabel: 'Scope',
             autofocus: true,
             child: DefaultTextStyle(
-              style: textTheme.headline4,
+              style: textTheme.headline4!,
               child: Scaffold(
                 appBar: AppBar(
                   title: const Text('Actions Demo'),
@@ -455,23 +463,23 @@ class _FocusDemoState extends State<FocusDemo> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: ElevatedButton(
-                                child: const Text('UNDO'),
                                 onPressed: canUndo
                                     ? () {
                                         Actions.invoke(context, const UndoIntent());
                                       }
                                     : null,
+                                child: const Text('UNDO'),
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: ElevatedButton(
-                                child: const Text('REDO'),
                                 onPressed: canRedo
                                     ? () {
                                         Actions.invoke(context, const RedoIntent());
                                       }
                                     : null,
+                                child: const Text('REDO'),
                               ),
                             ),
                           ],

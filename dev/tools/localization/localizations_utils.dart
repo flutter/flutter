@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -94,9 +96,9 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       // Update the base string to reflect assumed scriptCodes.
       originalString = languageCode;
       if (scriptCode != null)
-        originalString += '_' + scriptCode;
+        originalString += '_$scriptCode';
       if (countryCode != null)
-        originalString += '_' + countryCode;
+        originalString += '_$countryCode';
     }
 
     return LocaleInfo(
@@ -200,7 +202,7 @@ void loadMatchingArbsIntoBundleMaps({
       // Add an assumed locale to default to when there is no info on scriptOnly locales.
       locale = LocaleInfo.fromString(localeString, deriveScriptCode: true);
       if (locale.scriptCode != null) {
-        final LocaleInfo scriptLocale = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
+        final LocaleInfo scriptLocale = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
         if (!localeToResources.containsKey(scriptLocale)) {
           assumedLocales.add(scriptLocale);
           localeToResources[scriptLocale] ??= <String, String>{};

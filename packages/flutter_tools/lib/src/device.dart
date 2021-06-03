@@ -650,7 +650,7 @@ abstract class Device {
 
     // Join columns into lines of text
     for (final List<String> row in table) {
-      yield indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
+      yield indices.map<String>((int i) => row[i].padRight(widths[i])).followedBy(<String>[row.last]).join(' • ');
     }
   }
 
@@ -717,13 +717,14 @@ class DebuggingOptions {
     this.buildInfo, {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
-    this.disableDds = false,
+    this.enableDds = true,
     this.dartEntrypointArgs = const <String>[],
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
     this.traceAllowlist,
+    this.traceSkiaAllowlist,
     this.traceSystrace = false,
     this.endlessTraceBuffer = false,
     this.dumpSkpOnShaderCompilation = false,
@@ -768,10 +769,11 @@ class DebuggingOptions {
       startPaused = false,
       dartFlags = '',
       disableServiceAuthCodes = false,
-      disableDds = false,
+      enableDds = true,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
       traceSkia = false,
+      traceSkiaAllowlist = null,
       traceSystrace = false,
       endlessTraceBuffer = false,
       dumpSkpOnShaderCompilation = false,
@@ -795,11 +797,12 @@ class DebuggingOptions {
   final String dartFlags;
   final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
-  final bool disableDds;
+  final bool enableDds;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
   final String traceAllowlist;
+  final String traceSkiaAllowlist;
   final bool traceSystrace;
   final bool endlessTraceBuffer;
   final bool dumpSkpOnShaderCompilation;

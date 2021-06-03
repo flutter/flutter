@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
@@ -94,11 +92,6 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
-class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
-  _ListenerEntry(this.listener);
-  final VoidCallback listener;
-}
-
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
@@ -109,11 +102,15 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
-  LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
+  int _count = 0;
+  List<VoidCallback?> _listeners = List<VoidCallback?>.filled(0, null);
+  int _notificationCallStackDepth = 0;
+  int _reentrantlyRemovedListeners = 0;
+  bool _debugDisposed = false;
 
   bool _debugAssertNotDisposed() {
     assert(() {
-      if (_listeners == null) {
+      if (_debugDisposed) {
         throw FlutterError(
           'A $runtimeType was used after being disposed.\n'
           'Once you have called dispose() on a $runtimeType, it can no longer be used.',
@@ -142,7 +139,7 @@ class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners {
     assert(_debugAssertNotDisposed());
-    return _listeners!.isNotEmpty;
+    return _count > 0;
   }
 
   /// Register a closure to be called when the object changes.
@@ -174,7 +171,48 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners!.add(_ListenerEntry(listener));
+    if (_count == _listeners.length) {
+      if (_count == 0) {
+        _listeners = List<VoidCallback?>.filled(1, null);
+      } else {
+        final List<VoidCallback?> newListeners =
+            List<VoidCallback?>.filled(_listeners.length * 2, null);
+        for (int i = 0; i < _count; i++) {
+          newListeners[i] = _listeners[i];
+        }
+        _listeners = newListeners;
+      }
+    }
+    _listeners[_count++] = listener;
+  }
+
+  void _removeAt(int index) {
+    // The list holding the listeners is not growable for performances reasons.
+    // We still want to shrink this list if a lot of listeners have been added
+    // and then removed outside a notifyListeners iteration.
+    // We do this only when the real number of listeners is half the length
+    // of our list.
+    _count -= 1;
+    if (_count * 2 <= _listeners.length) {
+      final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(_count, null);
+
+      // Listeners before the index are at the same place.
+      for (int i = 0; i < index; i++)
+        newListeners[i] = _listeners[i];
+
+      // Listeners after the index move towards the start of the list.
+      for (int i = index; i < _count; i++)
+        newListeners[i] = _listeners[i + 1];
+
+      _listeners = newListeners;
+    } else {
+      // When there are more listeners than half the length of the list, we only
+      // shift our listeners, so that we avoid to reallocate memory for the
+      // whole list.
+      for (int i = index; i < _count; i++)
+        _listeners[i] = _listeners[i + 1];
+      _listeners[_count] = null;
+    }
   }
 
   /// Remove a previously registered closure from the list of closures that are
@@ -193,10 +231,22 @@ class ChangeNotifier implements Listenable {
   @override
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    for (final _ListenerEntry entry in _listeners!) {
-      if (entry.listener == listener) {
-        entry.unlink();
-        return;
+    for (int i = 0; i < _count; i++) {
+      final VoidCallback? _listener = _listeners[i];
+      if (_listener == listener) {
+        if (_notificationCallStackDepth > 0) {
+          // We don't resize the list during notifyListeners iterations
+          // but we set to null, the listeners we want to remove. We will
+          // effectively resize the list at the end of all notifyListeners
+          // iterations.
+          _listeners[i] = null;
+          _reentrantlyRemovedListeners++;
+        } else {
+          // When we are outside the notifyListeners iterations we can
+          // effectively shrink the list.
+          _removeAt(i);
+        }
+        break;
       }
     }
   }
@@ -210,7 +260,10 @@ class ChangeNotifier implements Listenable {
   @mustCallSuper
   void dispose() {
     assert(_debugAssertNotDisposed());
-    _listeners = null;
+    assert(() {
+      _debugDisposed = true;
+      return true;
+    }());
   }
 
   /// Call all the registered listeners.
@@ -230,17 +283,29 @@ class ChangeNotifier implements Listenable {
   /// See the discussion at [removeListener].
   @protected
   @visibleForTesting
+  @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
-    if (_listeners!.isEmpty)
+    if (_count == 0)
       return;
 
-    final List<_ListenerEntry> localListeners = List<_ListenerEntry>.from(_listeners!);
+    // To make sure that listeners removed during this iteration are not called,
+    // we set them to null, but we don't shrink the list right away.
+    // By doing this, we can continue to iterate on our list until it reaches
+    // the last listener added before the call to this method.
 
-    for (final _ListenerEntry entry in localListeners) {
+    // To allow potential listeners to recursively call notifyListener, we track
+    // the number of times this method is called in _notificationCallStackDepth.
+    // Once every recursive iteration is finished (i.e. when _notificationCallStackDepth == 0),
+    // we can safely shrink our list so that it will only contain not null
+    // listeners.
+
+    _notificationCallStackDepth++;
+
+    final int end = _count;
+    for (int i = 0; i < end; i++) {
       try {
-        if (entry.list != null)
-          entry.listener();
+        _listeners[i]?.call();
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -256,6 +321,44 @@ class ChangeNotifier implements Listenable {
           },
         ));
       }
+    }
+
+    _notificationCallStackDepth--;
+
+    if (_notificationCallStackDepth == 0 && _reentrantlyRemovedListeners > 0) {
+      // We really remove the listeners when all notifications are done.
+      final int newLength = _count - _reentrantlyRemovedListeners;
+      if (newLength * 2 <= _listeners.length) {
+        // As in _removeAt, we only shrink the list when the real number of
+        // listeners is half the length of our list.
+        final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(newLength, null);
+
+        int newIndex = 0;
+        for (int i = 0; i < _count; i++) {
+          final VoidCallback? listener = _listeners[i];
+          if (listener != null) {
+            newListeners[newIndex++] = listener;
+          }
+        }
+
+        _listeners = newListeners;
+      } else {
+        // Otherwise we put all the null references at the end.
+        for (int i = 0; i < newLength; i += 1) {
+          if (_listeners[i] == null) {
+            // We swap this item with the next not null item.
+            int swapIndex = i + 1;
+            while(_listeners[swapIndex] == null){
+              swapIndex += 1;
+            }
+            _listeners[i] = _listeners[swapIndex];
+            _listeners[swapIndex] = null;
+          }
+        }
+      }
+
+      _reentrantlyRemovedListeners = 0;
+      _count = newLength;
     }
   }
 }

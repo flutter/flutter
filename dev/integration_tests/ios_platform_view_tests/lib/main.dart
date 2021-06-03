@@ -12,7 +12,7 @@ void main() {
 
 /// The main app entrance of the test
 class MyApp extends StatelessWidget {
-  const MyApp({Key key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +30,11 @@ class MyApp extends StatelessWidget {
 ///
 /// On press the button, a page with platform view should be pushed into the scene.
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  const MyHomePage({Key? key, this.title}) : super(key: key);
+  final String? title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -42,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title ?? ''),
       ),
       body: Column(children: <Widget>[
         TextButton(
@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 /// A page contains the platform view to be tested.
 class PlatformViewPage extends StatelessWidget {
-  const PlatformViewPage({Key key}) : super(key: key);
+  const PlatformViewPage({Key? key}) : super(key: key);
 
   static Key button = const ValueKey<String>('plus_button');
 
@@ -83,8 +83,8 @@ class PlatformViewPage extends StatelessWidget {
         children: <Widget>[
           const Expanded(
             child: SizedBox(
-              child: UiKitView(viewType: 'platform_view'),
               width: 300,
+              child: UiKitView(viewType: 'platform_view'),
             ),
           ),
           ElevatedButton(

@@ -385,8 +385,9 @@ class TextSelectionOverlay {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], handle drag behavior will
-  /// begin upon the detection of a drag gesture. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// begin at the position where the drag gesture won the arena. If set to
+  /// [DragStartBehavior.down] it will begin at the position where a down
+  /// event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -952,7 +953,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
 
-  /// Returns true iff lastSecondaryTapDownPosition was on selection.
+  /// Returns true if lastSecondaryTapDownPosition was on selection.
   bool get _lastSecondaryTapWasOnSelection {
     assert(renderEditable.lastSecondaryTapDownPosition != null);
     if (renderEditable.selection == null) {
@@ -963,8 +964,8 @@ class TextSelectionGestureDetectorBuilder {
       renderEditable.lastSecondaryTapDownPosition!,
     );
 
-    return renderEditable.selection!.base.offset <= textPosition.offset
-        && renderEditable.selection!.extent.offset >= textPosition.offset;
+    return renderEditable.selection!.start <= textPosition.offset
+        && renderEditable.selection!.end >= textPosition.offset;
   }
 
   /// Whether to show the selection toolbar.
@@ -984,6 +985,9 @@ class TextSelectionGestureDetectorBuilder {
   /// provide a [TextSelectionGestureDetector].
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
+
+  /// The viewport offset pixels of the [RenderEditable] at the last drag start.
+  double _dragStartViewportOffset = 0.0;
 
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
@@ -1197,6 +1201,8 @@ class TextSelectionGestureDetectorBuilder {
       from: details.globalPosition,
       cause: SelectionChangedCause.drag,
     );
+
+    _dragStartViewportOffset = renderEditable.offset.pixels;
   }
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionUpdate].
@@ -1212,8 +1218,14 @@ class TextSelectionGestureDetectorBuilder {
   void onDragSelectionUpdate(DragStartDetails startDetails, DragUpdateDetails updateDetails) {
     if (!delegate.selectionEnabled)
       return;
+
+    // Adjust the drag start offset for possible viewport offset changes.
+    final Offset startOffset = renderEditable.maxLines == 1
+        ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
+        : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+
     renderEditable.selectPositionAt(
-      from: startDetails.globalPosition,
+      from: startDetails.globalPosition - startOffset,
       to: updateDetails.globalPosition,
       cause: SelectionChangedCause.drag,
     );
@@ -1618,7 +1630,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   }) : super(value);
 
   bool _disposed = false;
-  /// True iff this instance has been disposed.
+  /// True if this instance has been disposed.
   bool get disposed => _disposed;
 
   /// Check the [Clipboard] and update [value] if needed.

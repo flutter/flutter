@@ -5,8 +5,8 @@
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -43,6 +43,7 @@ Widget buildFormFrame({
   List<String>? items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
+  AlignmentGeometry buttonAlignment = AlignmentDirectional.centerStart,
 }) {
   return TestApp(
     textDirection: textDirection,
@@ -69,9 +70,10 @@ Widget buildFormFrame({
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,
-                child: Text(item, key: ValueKey<String>(item + 'Text')),
+                child: Text(item, key: ValueKey<String>('${item}Text')),
               );
             }).toList(),
+            alignment: buttonAlignment,
           ),
         ),
       ),
@@ -120,7 +122,7 @@ class TestApp extends StatefulWidget {
   final Size? mediaSize;
 
   @override
-  _TestAppState createState() => _TestAppState();
+  State<TestApp> createState() => _TestAppState();
 }
 
 void verifyPaintedShadow(Finder customPaint, int elevation) {
@@ -130,7 +132,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
   final List<RRect> rrects = List<RRect>.generate(3, (int index) {
     return RRect.fromRectAndRadius(
       originalRectangle.shift(
-        boxShadows[index].offset
+        boxShadows[index].offset,
       ).inflate(boxShadows[index].spreadRadius),
       const Radius.circular(2.0),
     );
@@ -160,7 +162,7 @@ void main() {
                 value: value,
                 hint: const Text('Select Value'),
                 decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.fastfood)
+                  prefixIcon: Icon(Icons.fastfood),
                 ),
                 items: menuItems.map((String value) {
                   return DropdownMenuItem<String>(
@@ -290,7 +292,7 @@ void main() {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,
-                child: Text(item, key: ValueKey<String>(item + 'Text')),
+                child: Text(item, key: ValueKey<String>('${item}Text')),
               );
             }).toList(),
           ),
@@ -574,8 +576,8 @@ void main() {
         );
       }).toList();
 
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: DropdownButtonFormField<String>(
@@ -585,15 +587,13 @@ void main() {
             ),
           ),
         ),
-      );
-
-      fail('Should not be possible to have duplicate item value');
-    } on AssertionError catch (error) {
-      expect(
-        error.toString(),
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
         contains("There should be exactly one item with [DropdownButton]'s value"),
-      );
-    }
+      )),
+    );
   });
 
   testWidgets('DropdownButtonFormField value should only appear in one menu item', (WidgetTester tester) async {
@@ -605,8 +605,8 @@ void main() {
         );
       }).toList();
 
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: DropdownButton<String>(
@@ -616,15 +616,13 @@ void main() {
             ),
           ),
         ),
-      );
-
-      fail('Should not be possible to have no items with passed in value');
-    } on AssertionError catch (error) {
-      expect(
-        error.toString(),
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
         contains("There should be exactly one item with [DropdownButton]'s value"),
-      );
-    }
+      )),
+    );
   });
 
   testWidgets('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
@@ -652,8 +650,8 @@ void main() {
                 },
                 items: items.map((String string) {
                   return DropdownMenuItem<String>(
-                    child: Text(string),
                     value: string,
+                    child: Text(string),
                   );
                 }).toList(),
               ),
@@ -815,4 +813,20 @@ void main() {
     expect(() => builder(), throwsAssertionError);
   });
 
+  testWidgets('DropdownButtonFormField - Custom button alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(buildFormFrame(
+      buttonAlignment: AlignmentDirectional.center,
+      items: <String>['one'],
+      value: 'one',
+    ));
+
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byType(IndexedStack));
+    final RenderBox selectedItemBox = tester.renderObject(find.text('one'));
+
+    // Should be center-center aligned.
+    expect(
+      buttonBox.localToGlobal(Offset(buttonBox.size.width / 2.0, buttonBox.size.height / 2.0)),
+      selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)),
+    );
+  });
 }

@@ -753,6 +753,19 @@ void main() {
     expect(renderer.colorBlendMode, BlendMode.clear);
   });
 
+  testWidgets('Image opacity parameter', (WidgetTester tester) async {
+    const Animation<double> opacity = AlwaysStoppedAnimation<double>(0.5);
+    await tester.pumpWidget(
+      Image(
+        excludeFromSemantics: true,
+        image: _TestImageProvider(),
+        opacity: opacity,
+      ),
+    );
+    final RenderImage renderer = tester.renderObject<RenderImage>(find.byType(Image));
+    expect(renderer.opacity, opacity);
+  });
+
   testWidgets('Precache', (WidgetTester tester) async {
     final _TestImageProvider provider = _TestImageProvider();
     late Future<void> precache;
@@ -761,8 +774,8 @@ void main() {
         builder: (BuildContext context) {
           precache = precacheImage(provider, context);
           return Container();
-        }
-      )
+        },
+      ),
     );
     provider.complete(image10x10);
     await precache;
@@ -784,8 +797,8 @@ void main() {
         builder: (BuildContext context) {
           precacheImage(provider, context);
           return Container();
-        }
-      )
+        },
+      ),
     );
 
     // Two listeners - one is the listener added by precacheImage, the other by the ImageCache.
@@ -819,8 +832,8 @@ void main() {
         builder: (BuildContext context) {
           precache = precacheImage(imageProvider, context, onError: errorListener);
           return Container();
-        }
-      )
+        },
+      ),
     );
     imageProvider.fail(testException, testStack);
     await precache;
@@ -967,7 +980,7 @@ void main() {
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[]
+      children: <TestSemantics>[],
     )));
     semantics.dispose();
   });
@@ -1506,8 +1519,8 @@ void main() {
         builder: (BuildContext context) {
           precache = precacheImage(provider, context);
           return Container();
-        }
-      )
+        },
+      ),
     );
     provider.complete(image10x10);
     await precache;
@@ -1556,8 +1569,8 @@ void main() {
         builder: (BuildContext context) {
           precache = precacheImage(provider, context);
           return Container();
-        }
-      )
+        },
+      ),
     );
     provider.complete(image10x10);
     await precache;
@@ -1717,6 +1730,57 @@ void main() {
     (WidgetTester tester) async {
       await _testRotatedImage(tester, true);
       await _testRotatedImage(tester, false);
+    },
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/54292.
+  );
+
+  testWidgets(
+    'Image opacity',
+    (WidgetTester tester) async {
+      final Key key = UniqueKey();
+      await tester.pumpWidget(RepaintBoundary(
+        key: key,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          textDirection: TextDirection.ltr,
+          children: <Widget>[
+            Image.memory(
+              Uint8List.fromList(kBlueRectPng),
+              opacity: const AlwaysStoppedAnimation<double>(0.25),
+            ),
+            Image.memory(
+              Uint8List.fromList(kBlueRectPng),
+              opacity: const AlwaysStoppedAnimation<double>(0.5),
+            ),
+            Image.memory(
+              Uint8List.fromList(kBlueRectPng),
+              opacity: const AlwaysStoppedAnimation<double>(0.75),
+            ),
+            Image.memory(
+              Uint8List.fromList(kBlueRectPng),
+              opacity: const AlwaysStoppedAnimation<double>(1.0),
+            ),
+          ],
+        ),
+      ));
+
+      // precacheImage is needed, or the image in the golden file will be empty.
+      if (!kIsWeb) {
+        final Finder allImages = find.byType(Image);
+        for (final Element e in allImages.evaluate()) {
+          await tester.runAsync(() async {
+            final Image image = e.widget as Image;
+            await precacheImage(image.image, e);
+          });
+        }
+        await tester.pumpAndSettle();
+      }
+
+      await expectLater(
+        find.byKey(key),
+        matchesGoldenFile('transparent_image.png'),
+      );
     },
     skip: kIsWeb, // https://github.com/flutter/flutter/issues/54292.
   );

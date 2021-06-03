@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'text_form_field.dart';
+import 'theme.dart';
 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
 ///
@@ -166,7 +167,9 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.onSelected,
+    this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
+    this.initialValue,
   }) : assert(displayStringForOption != null),
        assert(optionsBuilder != null),
        super(key: key);
@@ -192,6 +195,17 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// default.
   final AutocompleteOptionsViewBuilder<T>? optionsViewBuilder;
 
+  /// The maximum height used for the default Material options list widget.
+  ///
+  /// When [optionsViewBuilder] is `null`, this property sets the maximum height
+  /// that the options widget can occupy.
+  ///
+  /// The default value is set to 200.
+  final double optionsMaxHeight;
+
+  /// {@macro flutter.widgets.RawAutocomplete.initialValue}
+  final TextEditingValue? initialValue;
+
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
     return _AutocompleteField(
       focusNode: focusNode,
@@ -205,12 +219,14 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     return RawAutocomplete<T>(
       displayStringForOption: displayStringForOption,
       fieldViewBuilder: fieldViewBuilder,
+      initialValue: initialValue,
       optionsBuilder: optionsBuilder,
       optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
         return _AutocompleteOptions<T>(
           displayStringForOption: displayStringForOption,
           onSelected: onSelected,
           options: options,
+          maxOptionsHeight: optionsMaxHeight,
         );
       },
       onSelected: onSelected,
@@ -252,6 +268,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     required this.displayStringForOption,
     required this.onSelected,
     required this.options,
+    required this.maxOptionsHeight,
   }) : super(key: key);
 
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -259,6 +276,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final AutocompleteOnSelected<T> onSelected;
 
   final Iterable<T> options;
+  final double maxOptionsHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -266,18 +284,21 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
       alignment: Alignment.topLeft,
       child: Material(
         elevation: 4.0,
-        child: SizedBox(
-          height: 200.0,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxOptionsHeight),
           child: ListView.builder(
             padding: EdgeInsets.zero,
+            shrinkWrap: true,
             itemCount: options.length,
             itemBuilder: (BuildContext context, int index) {
               final T option = options.elementAt(index);
+              final bool highlight = AutocompleteHighlightedOption.of(context) == index;
               return InkWell(
                 onTap: () {
                   onSelected(option);
                 },
-                child: Padding(
+                child: Container(
+                  color: highlight ? Theme.of(context).focusColor : null,
                   padding: const EdgeInsets.all(16.0),
                   child: Text(displayStringForOption(option)),
                 ),

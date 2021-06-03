@@ -43,7 +43,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///   const AppLifecycleReactor({ Key? key }) : super(key: key);
 ///
 ///   @override
-///   _AppLifecycleReactorState createState() => _AppLifecycleReactorState();
+///   State<AppLifecycleReactor> createState() => _AppLifecycleReactorState();
 /// }
 ///
 /// class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver {
@@ -138,7 +138,7 @@ abstract class WidgetsBindingObserver {
   ///   const MetricsReactor({ Key? key }) : super(key: key);
   ///
   ///   @override
-  ///   _MetricsReactorState createState() => _MetricsReactorState();
+  ///   State<MetricsReactor> createState() => _MetricsReactorState();
   /// }
   ///
   /// class _MetricsReactorState extends State<MetricsReactor> with WidgetsBindingObserver {
@@ -196,7 +196,7 @@ abstract class WidgetsBindingObserver {
   ///   const TextScaleFactorReactor({ Key? key }) : super(key: key);
   ///
   ///   @override
-  ///   _TextScaleFactorReactorState createState() => _TextScaleFactorReactorState();
+  ///   State<TextScaleFactorReactor> createState() => _TextScaleFactorReactorState();
   /// }
   ///
   /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor> with WidgetsBindingObserver {
@@ -290,7 +290,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     window.onLocaleChanged = handleLocaleChanged;
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
-    FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
+    assert(() {
+      FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
+      return true;
+    }());
   }
 
   void _debugAddStackFilters() {
@@ -1184,6 +1187,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
     assert(_newWidget == null);
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _rebuild() {
     try {
       _child = updateChild(_child, widget.child, _rootChildSlot);

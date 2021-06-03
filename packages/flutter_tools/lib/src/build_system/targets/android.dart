@@ -9,7 +9,7 @@ import '../../base/build.dart';
 import '../../base/deferred_component.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals show platform, printError, xcode;
+import '../../globals_null_migrated.dart' as globals show platform, printError, xcode;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -181,7 +181,7 @@ class AndroidAot extends AotElfBase {
   List<Source> get inputs => <Source>[
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/android.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.artifact(Artifact.engineDartBinary),
+    const Source.hostArtifact(HostArtifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
       mode: buildMode,

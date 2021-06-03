@@ -8,8 +8,8 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:path/path.dart' as path;
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
 import 'adb.dart';
@@ -25,7 +25,7 @@ final Set<String> noRebootForbidList = <String>{
 /// The maximum number of test runs before a device must be rebooted.
 ///
 /// This number was chosen arbitrarily.
-const int maxiumRuns = 30;
+const int maximumRuns = 30;
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
@@ -190,7 +190,7 @@ class _TaskRunner {
       } else {
         runCount = 0;
       }
-      if (runCount < maxiumRuns) {
+      if (runCount < maximumRuns) {
         rebootFile
           ..createSync()
           ..writeAsStringSync((runCount + 1).toString());

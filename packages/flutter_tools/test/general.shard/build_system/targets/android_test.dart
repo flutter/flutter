@@ -15,8 +15,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/android.dart';
-import 'package:flutter_tools/src/build_system/targets/assets.dart';
-import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/convert.dart';
 
 import '../../../src/common.dart';
@@ -33,11 +31,11 @@ void main() {
   setUp(() {
     logger = BufferLogger.test();
     fileSystem = MemoryFileSystem.test();
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     artifacts = Artifacts.test();
   });
 
-  testWithoutContext('Android AOT targets has analyicsName', () {
+  testWithoutContext('Android AOT targets has analyticsName', () {
     expect(androidArmProfile.analyticsName, 'android_aot');
   });
 
@@ -173,7 +171,7 @@ void main() {
   });
 
   testUsingContext('AndroidAot can build provided target platform', () async {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -212,7 +210,7 @@ void main() {
   });
 
   testUsingContext('AndroidAot provide code size information.', () async {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -254,7 +252,7 @@ void main() {
   });
 
   testUsingContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -297,7 +295,7 @@ void main() {
   });
 
   testUsingContext('--no-strip in kExtraGenSnapshotOptions suppresses --strip gen_snapshot flag', () async {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),

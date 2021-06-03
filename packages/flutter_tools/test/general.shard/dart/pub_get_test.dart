@@ -2,33 +2,54 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+import 'package:fake_async/fake_async.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/mocks.dart' as mocks;
 
 void main() {
   setUpAll(() {
     Cache.flutterRoot = '';
   });
 
+  testWithoutContext('Throws a tool exit if pub cannot be run', () async {
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/pub');
+
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      usage: TestUsage(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+
+    await expectLater(() => pub.get(
+      context: PubContext.pubGet,
+      checkUpToDate: true,
+    ), throwsToolExit(message: 'Your Flutter SDK download may be corrupt or missing permissions to run'));
+  });
+
   testWithoutContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
     'and the current framework version is the same as the last version', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -290,15 +311,36 @@ void main() {
   });
 
   testWithoutContext('pub get 69', () async {
-    String error;
+    String? error;
 
-    final MockProcessManager processMock = MockProcessManager(69);
+    const FakeCommand pubGetCommand = FakeCommand(
+      command: <String>[
+        'bin/cache/dart-sdk/bin/pub',
+        '--verbosity=warning',
+        'get',
+        '--no-precompile',
+      ],
+      exitCode: 69,
+      environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+    );
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      pubGetCommand,
+      pubGetCommand,
+      pubGetCommand,
+      pubGetCommand,
+      pubGetCommand,
+      pubGetCommand,
+      pubGetCommand,
+      pubGetCommand,
+      pubGetCommand,
+      pubGetCommand,
+    ]);
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Pub pub = Pub(
       fileSystem: fileSystem,
       logger: logger,
-      processManager: processMock,
+      processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
@@ -307,7 +349,6 @@ void main() {
     );
 
     FakeAsync().run((FakeAsync time) {
-      expect(processMock.lastPubEnvironment, isNull);
       expect(logger.statusText, '');
       pub.get(context: PubContext.flutterTests).then((void value) {
         error = 'test completed unexpectedly';
@@ -319,8 +360,7 @@ void main() {
         'Running "flutter pub get" in /...\n'
         'pub get failed (server unavailable) -- attempting retry 1 in 1 second...\n',
       );
-      expect(processMock.lastPubEnvironment, contains('flutter_cli:flutter_tests'));
-      expect(processMock.lastPubCache, isNull);
+
       time.elapse(const Duration(milliseconds: 500));
       expect(logger.statusText,
         'Running "flutter pub get" in /...\n'
@@ -361,25 +401,40 @@ void main() {
     });
     expect(logger.errorText, isEmpty);
     expect(error, isNull);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('pub get 66 shows message from pub', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+        exitCode: 66,
+        stderr: 'err1\nerr2\nerr3\n',
+        stdout: 'out1\nout2\nout3\n',
+        environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+      ),
+    ]);
+
     final Pub pub = Pub(
       platform: FakePlatform(environment: const <String, String>{}),
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
-      processManager: MockProcessManager(66, stderr: 'err1\nerr2\nerr3\n', stdout: 'out1\nout2\nout3\n'),
+      processManager: processManager,
     );
-    try {
-      await pub.get(context: PubContext.flutterTests);
-      throw AssertionError('pubGet did not fail');
-    } on ToolExit catch (error) {
-      expect(error.message, 'pub get failed (66; err3)');
-    }
+    await expectLater(
+      () => pub.get(context: PubContext.flutterTests),
+      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', 'pub get failed (66; err3)')),
+    );
     expect(logger.statusText,
       'Running "flutter pub get" in /...\n'
       'out1\n'
@@ -391,46 +446,74 @@ void main() {
       'err2\n'
       'err3\n'
     );
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('pub cache in root is used', () async {
-    String error;
-    final MockProcessManager processMock = MockProcessManager(69);
+    String? error;
     final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.directory(Cache.flutterRoot).childDirectory('.pub-cache').createSync();
+    final Directory pubCache = fileSystem.directory(Cache.flutterRoot).childDirectory('.pub-cache')..createSync();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>[
+          'bin/cache/dart-sdk/bin/pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+        exitCode: 69,
+        environment: <String, String>{
+          'FLUTTER_ROOT': '',
+          'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
+          'PUB_CACHE': pubCache.path,
+        },
+      ),
+    ]);
 
     final Pub pub = Pub(
       platform: FakePlatform(environment: const <String, String>{}),
       usage: TestUsage(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      processManager: processMock,
+      processManager: processManager,
       botDetector: const BotDetectorAlwaysNo(),
     );
 
     FakeAsync().run((FakeAsync time) {
-      expect(processMock.lastPubEnvironment, isNull);
-      expect(processMock.lastPubCache, isNull);
       pub.get(context: PubContext.flutterTests).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
       });
       time.elapse(const Duration(milliseconds: 500));
-
-      expect(processMock.lastPubCache, equals(fileSystem.path.join(Cache.flutterRoot, '.pub-cache')));
       expect(error, isNull);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 
   testWithoutContext('pub cache in environment is used', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory('custom/pub-cache/path').createSync(recursive: true);
-    final MockProcessManager processMock = MockProcessManager(69);
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+        exitCode: 69,
+        environment: <String, String>{
+          'FLUTTER_ROOT': '',
+          'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
+          'PUB_CACHE': 'custom/pub-cache/path',
+        },
+      ),
+    ]);
     final Pub pub = Pub(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      processManager: processMock,
+      processManager: processManager,
       usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
       platform: FakePlatform(
@@ -441,19 +524,15 @@ void main() {
     );
 
     FakeAsync().run((FakeAsync time) {
-      expect(processMock.lastPubEnvironment, isNull);
-      expect(processMock.lastPubCache, isNull);
-
-      String error;
+      String? error;
       pub.get(context: PubContext.flutterTests).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
       });
       time.elapse(const Duration(milliseconds: 500));
-
-      expect(processMock.lastPubCache, equals('custom/pub-cache/path'));
       expect(error, isNull);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 
@@ -463,7 +542,7 @@ void main() {
     final Pub pub = Pub(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      processManager: MockProcessManager(0),
+      processManager: FakeProcessManager.any(),
       botDetector: const BotDetectorAlwaysNo(),
       usage: usage,
       platform: FakePlatform(
@@ -493,7 +572,7 @@ void main() {
     final Pub pub = Pub(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      processManager: MockProcessManager(0),
+      processManager: FakeProcessManager.any(),
       botDetector: const BotDetectorAlwaysNo(),
       usage: usage,
       platform: FakePlatform(
@@ -536,11 +615,24 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory('custom/pub-cache/path').createSync(recursive: true);
     final TestUsage usage = TestUsage();
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+        exitCode: 1,
+      ),
+    ]);
+
     final Pub pub = Pub(
       usage: usage,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      processManager: MockProcessManager(1),
+      processManager: processManager,
       botDetector: const BotDetectorAlwaysNo(),
       platform: FakePlatform(
         environment: const <String, String>{
@@ -557,18 +649,31 @@ void main() {
     expect(usage.events, contains(
       const TestUsageEvent('pub-result', 'flutter-tests', label: 'failure'),
     ));
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('analytics sent on failed version solve', () async {
     final TestUsage usage = TestUsage();
     final FileSystem fileSystem = MemoryFileSystem.test();
+
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+        exitCode: 1,
+        stderr: 'version solving failed',
+      ),
+    ]);
+
     final Pub pub = Pub(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      processManager: MockProcessManager(
-        1,
-        stderr: 'version solving failed',
-      ),
+      processManager: processManager,
       platform: FakePlatform(
         environment: <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
@@ -588,6 +693,7 @@ void main() {
     expect(usage.events, contains(
       const TestUsageEvent('pub-result', 'flutter-tests', label: 'version-solving-failed'),
     ));
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Pub error handling', () async {
@@ -681,41 +787,4 @@ class BotDetectorAlwaysNo implements BotDetector {
 
   @override
   Future<bool> get isRunningOnBot async => false;
-}
-
-typedef StartCallback = void Function(List<dynamic> command);
-
-class MockProcessManager implements ProcessManager {
-  MockProcessManager(this.fakeExitCode, {
-    this.stdout = '',
-    this.stderr = '',
-  });
-
-  final int fakeExitCode;
-  final String stdout;
-  final String stderr;
-
-  String lastPubEnvironment;
-  String lastPubCache;
-
-  @override
-  Future<Process> start(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    ProcessStartMode mode = ProcessStartMode.normal,
-  }) {
-    lastPubEnvironment = environment['PUB_ENVIRONMENT'];
-    lastPubCache = environment['PUB_CACHE'];
-    return Future<Process>.value(mocks.createMockProcess(
-      exitCode: fakeExitCode,
-      stdout: stdout,
-      stderr: stderr,
-    ));
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
 }

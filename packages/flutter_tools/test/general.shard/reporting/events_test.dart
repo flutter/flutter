@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -76,9 +74,9 @@ void main() {
 
     expect(usage.events, unorderedEquals(<TestUsageEvent>[
       const TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound'),
-      const TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
+      TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: CustomDimensions.fromMap(<String, String>{
       'cd49': '1', 'cd50': '3',
-      }),
+      })),
       const TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: '2.12'),
     ]));
   });
@@ -100,9 +98,9 @@ void main() {
 
     expect(usage.events, unorderedEquals(<TestUsageEvent>[
       const TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound'),
-      const TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
+      TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: CustomDimensions.fromMap(<String, String>{
         'cd49': '1', 'cd50': '3',
-      }),
+      })),
     ]));
   });
 
@@ -121,9 +119,9 @@ void main() {
 
     expect(usage.events, unorderedEquals(<TestUsageEvent>[
       const TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound'),
-      const TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
+      TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: CustomDimensions.fromMap(<String, String>{
         'cd49': '0', 'cd50': '1',
-      }),
+      })),
     ]));
   });
 }

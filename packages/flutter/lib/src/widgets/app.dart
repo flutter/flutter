@@ -79,6 +79,134 @@ typedef LocaleListResolutionCallback = Locale? Function(List<Locale>? locales, I
 /// {@endtemplate}
 typedef LocaleResolutionCallback = Locale? Function(Locale? locale, Iterable<Locale> supportedLocales);
 
+/// The default locale resolution algorithm.
+///
+/// Custom resolution algorithms can be provided through
+/// [WidgetsApp.localeListResolutionCallback] or
+/// [WidgetsApp.localeResolutionCallback].
+///
+/// When no custom locale resolution algorithms are provided or if both fail
+/// to resolve, Flutter will default to calling this algorithm.
+///
+/// This algorithm prioritizes speed at the cost of slightly less appropriate
+/// resolutions for edge cases.
+///
+/// This algorithm will resolve to the earliest preferred locale that
+/// matches the most fields, prioritizing in the order of perfect match,
+/// languageCode+countryCode, languageCode+scriptCode, languageCode-only.
+///
+/// In the case where a locale is matched by languageCode-only and is not the
+/// default (first) locale, the next preferred locale with a
+/// perfect match can supersede the languageCode-only match if it exists.
+///
+/// When a preferredLocale matches more than one supported locale, it will
+/// resolve to the first matching locale listed in the supportedLocales.
+///
+/// When all preferred locales have been exhausted without a match, the first
+/// countryCode only match will be returned.
+///
+/// When no match at all is found, the first (default) locale in
+/// [supportedLocales] will be returned.
+///
+/// To summarize, the main matching priority is:
+///
+///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
+///  1. [Locale.languageCode] and [Locale.scriptCode] only
+///  1. [Locale.languageCode] and [Locale.countryCode] only
+///  1. [Locale.languageCode] only (with caveats, see above)
+///  1. [Locale.countryCode] only when all [preferredLocales] fail to match
+///  1. Returns the first element of [supportedLocales] as a fallback
+///
+/// This algorithm does not take language distance (how similar languages are to each other)
+/// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
+/// when `de` is not supported and `zh` is listed before `fr` (German is closer to French
+/// than Chinese).
+Locale basicLocaleListResolution(List<Locale>? preferredLocales, Iterable<Locale> supportedLocales) {
+  // preferredLocales can be null when called before the platform has had a chance to
+  // initialize the locales. Platforms without locale passing support will provide an empty list.
+  // We default to the first supported locale in these cases.
+  if (preferredLocales == null || preferredLocales.isEmpty) {
+    return supportedLocales.first;
+  }
+  // Hash the supported locales because apps can support many locales and would
+  // be expensive to search through them many times.
+  final Map<String, Locale> allSupportedLocales = HashMap<String, Locale>();
+  final Map<String, Locale> languageAndCountryLocales = HashMap<String, Locale>();
+  final Map<String, Locale> languageAndScriptLocales = HashMap<String, Locale>();
+  final Map<String, Locale> languageLocales = HashMap<String, Locale>();
+  final Map<String?, Locale> countryLocales = HashMap<String?, Locale>();
+  for (final Locale locale in supportedLocales) {
+    allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??= locale;
+    languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;
+    languageAndCountryLocales['${locale.languageCode}_${locale.countryCode}'] ??= locale;
+    languageLocales[locale.languageCode] ??= locale;
+    countryLocales[locale.countryCode] ??= locale;
+  }
+
+  // Since languageCode-only matches are possibly low quality, we don't return
+  // it instantly when we find such a match. We check to see if the next
+  // preferred locale in the list has a high accuracy match, and only return
+  // the languageCode-only match when a higher accuracy match in the next
+  // preferred locale cannot be found.
+  Locale? matchesLanguageCode;
+  Locale? matchesCountryCode;
+  // Loop over user's preferred locales
+  for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
+    final Locale userLocale = preferredLocales[localeIndex];
+    // Look for perfect match.
+    if (allSupportedLocales.containsKey('${userLocale.languageCode}_${userLocale.scriptCode}_${userLocale.countryCode}')) {
+      return userLocale;
+    }
+    // Look for language+script match.
+    if (userLocale.scriptCode != null) {
+      final Locale? match = languageAndScriptLocales['${userLocale.languageCode}_${userLocale.scriptCode}'];
+      if (match != null) {
+        return match;
+      }
+    }
+    // Look for language+country match.
+    if (userLocale.countryCode != null) {
+      final Locale? match = languageAndCountryLocales['${userLocale.languageCode}_${userLocale.countryCode}'];
+      if (match != null) {
+        return match;
+      }
+    }
+    // If there was a languageCode-only match in the previous iteration's higher
+    // ranked preferred locale, we return it if the current userLocale does not
+    // have a better match.
+    if (matchesLanguageCode != null) {
+      return matchesLanguageCode;
+    }
+    // Look and store language-only match.
+    Locale? match = languageLocales[userLocale.languageCode];
+    if (match != null) {
+      matchesLanguageCode = match;
+      // Since first (default) locale is usually highly preferred, we will allow
+      // a languageCode-only match to be instantly matched. If the next preferred
+      // languageCode is the same, we defer hastily returning until the next iteration
+      // since at worst it is the same and at best an improved match.
+      if (localeIndex == 0 &&
+          !(localeIndex + 1 < preferredLocales.length && preferredLocales[localeIndex + 1].languageCode == userLocale.languageCode)) {
+        return matchesLanguageCode;
+      }
+    }
+    // countryCode-only match. When all else except default supported locale fails,
+    // attempt to match by country only, as a user is likely to be familiar with a
+    // language from their listed country.
+    if (matchesCountryCode == null && userLocale.countryCode != null) {
+      match = countryLocales[userLocale.countryCode];
+      if (match != null) {
+        matchesCountryCode = match;
+      }
+    }
+  }
+  // When there is no languageCode-only match. Fallback to matching countryCode only. Country
+  // fallback only applies on iOS. When there is no countryCode-only match, we return first
+  // supported locale.
+  final Locale resolvedLocale = matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
+  return resolvedLocale;
+}
+
 /// The signature of [WidgetsApp.onGenerateTitle].
 ///
 /// Used to generate a value for the app's [Title.title], which the device uses
@@ -695,14 +823,14 @@ class WidgetsApp extends StatefulWidget {
   /// [localeListResolutionCallback]. If the callback or result is null, it will
   /// fallback to trying the [localeResolutionCallback]. If both
   /// [localeResolutionCallback] and [localeListResolutionCallback] are left
-  /// null or fail to resolve (return null), the a basic fallback algorithm will
+  /// null or fail to resolve (return null), basic fallback algorithm will
   /// be used.
   ///
   /// The priority of each available fallback is:
   ///
-  ///  1. [localeListResolutionCallback] is attempted first.
-  ///  1. [localeResolutionCallback] is attempted second.
-  ///  1. Flutter's basic resolution algorithm, as described in
+  ///  1. [localeListResolutionCallback] is attempted.
+  ///  2. [localeResolutionCallback] is attempted.
+  ///  3. Flutter's basic resolution algorithm, as described in
   ///     [supportedLocales], is attempted last.
   ///
   /// Properly localized projects should provide a more advanced algorithm than
@@ -721,6 +849,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.localeListResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
   final LocaleListResolutionCallback? localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
@@ -736,6 +865,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
   final LocaleResolutionCallback? localeResolutionCallback;
 
   /// {@template flutter.widgets.widgetsApp.supportedLocales}
@@ -804,6 +934,7 @@ class WidgetsApp extends StatefulWidget {
   ///    when the device's locale changes.
   ///  * [localizationsDelegates], which collectively define all of the localized
   ///    resources used by this app.
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
@@ -880,9 +1011,9 @@ class WidgetsApp extends StatefulWidget {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return WidgetsApp(
-  ///     shortcuts: <LogicalKeySet, Intent>{
+  ///     shortcuts: <ShortcutActivator, Intent>{
   ///       ... WidgetsApp.defaultShortcuts,
-  ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
+  ///       const SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
   ///     builder: (BuildContext context, Widget? child) {
@@ -896,14 +1027,14 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.shortcuts.seeAlso}
   /// See also:
   ///
-  ///  * [LogicalKeySet], a set of [LogicalKeyboardKey]s that make up the keys
-  ///    for this map.
+  ///  * [SingleActivator], which defines shortcut key combination of a single
+  ///    key and modifiers, such as "Delete" or "Control+C".
   ///  * The [Shortcuts] widget, which defines a keyboard mapping.
   ///  * The [Actions] widget, which defines the mapping from intent to action.
   ///  * The [Intent] and [Action] classes, which allow definition of new
   ///    actions.
   /// {@endtemplate}
-  final Map<LogicalKeySet, Intent>? shortcuts;
+  final Map<ShortcutActivator, Intent>? shortcuts;
 
   /// {@template flutter.widgets.widgetsApp.actions}
   /// The default map of intent keys to actions for the application.
@@ -968,10 +1099,10 @@ class WidgetsApp extends StatefulWidget {
   /// Providing a restoration ID inserts a [RootRestorationScope] into the
   /// widget hierarchy, which enables state restoration for descendant widgets.
   ///
-  /// Providing a restoration ID also enables the [Navigator] built by the
-  /// [WidgetsApp] to restore its state (i.e. to restore the history stack of
-  /// active [Route]s). See the documentation on [Navigator] for more details
-  /// around state restoration of [Route]s.
+  /// Providing a restoration ID also enables the [Navigator] or [Router] built
+  /// by the [WidgetsApp] to restore its state (i.e. to restore the history
+  /// stack of active [Route]s). See the documentation on [Navigator] for more
+  /// details around state restoration of [Route]s.
   ///
   /// See also:
   ///
@@ -1003,91 +1134,91 @@ class WidgetsApp extends StatefulWidget {
   /// with "s".
   static bool debugAllowBannerOverride = true;
 
-  static final Map<LogicalKeySet, Intent> _defaultShortcuts = <LogicalKeySet, Intent>{
+  static const Map<ShortcutActivator, Intent> _defaultShortcuts = <ShortcutActivator, Intent>{
     // Activation
-    LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
-    LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
-    LogicalKeySet(LogicalKeyboardKey.gameButtonA): const ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
 
     // Dismissal
-    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+    SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
 
     // Keyboard traversal.
-    LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    SingleActivator(LogicalKeyboardKey.tab): NextFocusIntent(),
+    SingleActivator(LogicalKeyboardKey.tab, shift: true): PreviousFocusIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
+    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
 
     // Scrolling
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.arrowUp, control: true): ScrollIntent(direction: AxisDirection.up),
+    SingleActivator(LogicalKeyboardKey.arrowDown, control: true): ScrollIntent(direction: AxisDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): ScrollIntent(direction: AxisDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight, control: true): ScrollIntent(direction: AxisDirection.right),
+    SingleActivator(LogicalKeyboardKey.pageUp): ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.pageDown): ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
   };
 
   // Default shortcuts for the web platform.
-  static final Map<LogicalKeySet, Intent> _defaultWebShortcuts = <LogicalKeySet, Intent>{
+  static const Map<ShortcutActivator, Intent> _defaultWebShortcuts = <ShortcutActivator, Intent>{
     // Activation
-    LogicalKeySet(LogicalKeyboardKey.space): const PrioritizedIntents(
+    SingleActivator(LogicalKeyboardKey.space): PrioritizedIntents(
       orderedIntents: <Intent>[
         ActivateIntent(),
         ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
       ],
     ),
     // On the web, enter activates buttons, but not other controls.
-    LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.enter): ButtonActivateIntent(),
 
     // Dismissal
-    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+    SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
 
     // Keyboard traversal.
-    LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
+    SingleActivator(LogicalKeyboardKey.tab): NextFocusIntent(),
+    SingleActivator(LogicalKeyboardKey.tab, shift: true): PreviousFocusIntent(),
 
     // Scrolling
-    LogicalKeySet(LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
-    LogicalKeySet(LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.arrowUp): ScrollIntent(direction: AxisDirection.up),
+    SingleActivator(LogicalKeyboardKey.arrowDown): ScrollIntent(direction: AxisDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowLeft): ScrollIntent(direction: AxisDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight): ScrollIntent(direction: AxisDirection.right),
+    SingleActivator(LogicalKeyboardKey.pageUp): ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.pageDown): ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
   };
 
   // Default shortcuts for the macOS platform.
-  static final Map<LogicalKeySet, Intent> _defaultAppleOsShortcuts = <LogicalKeySet, Intent>{
+  static const Map<ShortcutActivator, Intent> _defaultAppleOsShortcuts = <ShortcutActivator, Intent>{
     // Activation
-    LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
-    LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
 
     // Dismissal
-    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+    SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
 
     // Keyboard traversal
-    LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    SingleActivator(LogicalKeyboardKey.tab): NextFocusIntent(),
+    SingleActivator(LogicalKeyboardKey.tab, shift: true): PreviousFocusIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
+    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
 
     // Scrolling
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): ScrollIntent(direction: AxisDirection.up),
+    SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): ScrollIntent(direction: AxisDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): ScrollIntent(direction: AxisDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): ScrollIntent(direction: AxisDirection.right),
+    SingleActivator(LogicalKeyboardKey.pageUp): ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.pageDown): ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
   };
 
   /// Generates the default shortcut key bindings based on the
   /// [defaultTargetPlatform].
   ///
   /// Used by [WidgetsApp] to assign a default value to [WidgetsApp.shortcuts].
-  static Map<LogicalKeySet, Intent> get defaultShortcuts {
+  static Map<ShortcutActivator, Intent> get defaultShortcuts {
     if (kIsWeb) {
       return _defaultWebShortcuts;
     }
@@ -1117,7 +1248,7 @@ class WidgetsApp extends StatefulWidget {
   };
 
   @override
-  _WidgetsAppState createState() => _WidgetsAppState();
+  State<WidgetsApp> createState() => _WidgetsAppState();
 }
 
 class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
@@ -1170,7 +1301,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       assert(!_usesRouter);
       _defaultRouteInformationProvider?.dispose();
       _defaultRouteInformationProvider = null;
-      if (oldWidget == null || widget.navigatorKey != oldWidget.navigatorKey) {
+      if (_navigator == null || widget.navigatorKey != oldWidget!.navigatorKey) {
         _navigator = widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
       }
       assert(_navigator != null);
@@ -1311,134 +1442,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return basicLocaleListResolution(preferredLocales, supportedLocales);
   }
 
-  /// The default locale resolution algorithm.
-  ///
-  /// Custom resolution algorithms can be provided through
-  /// [WidgetsApp.localeListResolutionCallback] or
-  /// [WidgetsApp.localeResolutionCallback].
-  ///
-  /// When no custom locale resolution algorithms are provided or if both fail
-  /// to resolve, Flutter will default to calling this algorithm.
-  ///
-  /// This algorithm prioritizes speed at the cost of slightly less appropriate
-  /// resolutions for edge cases.
-  ///
-  /// This algorithm will resolve to the earliest preferred locale that
-  /// matches the most fields, prioritizing in the order of perfect match,
-  /// languageCode+countryCode, languageCode+scriptCode, languageCode-only.
-  ///
-  /// In the case where a locale is matched by languageCode-only and is not the
-  /// default (first) locale, the next preferred locale with a
-  /// perfect match can supersede the languageCode-only match if it exists.
-  ///
-  /// When a preferredLocale matches more than one supported locale, it will
-  /// resolve to the first matching locale listed in the supportedLocales.
-  ///
-  /// When all preferred locales have been exhausted without a match, the first
-  /// countryCode only match will be returned.
-  ///
-  /// When no match at all is found, the first (default) locale in
-  /// [supportedLocales] will be returned.
-  ///
-  /// To summarize, the main matching priority is:
-  ///
-  ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  1. [Locale.languageCode] and [Locale.scriptCode] only
-  ///  1. [Locale.languageCode] and [Locale.countryCode] only
-  ///  1. [Locale.languageCode] only (with caveats, see above)
-  ///  1. [Locale.countryCode] only when all [preferredLocales] fail to match
-  ///  1. Returns the first element of [supportedLocales] as a fallback
-  ///
-  /// This algorithm does not take language distance (how similar languages are to each other)
-  /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
-  /// when `de` is not supported and `zh` is listed before `fr` (German is closer to French
-  /// than Chinese).
-  static Locale basicLocaleListResolution(List<Locale>? preferredLocales, Iterable<Locale> supportedLocales) {
-    // preferredLocales can be null when called before the platform has had a chance to
-    // initialize the locales. Platforms without locale passing support will provide an empty list.
-    // We default to the first supported locale in these cases.
-    if (preferredLocales == null || preferredLocales.isEmpty) {
-      return supportedLocales.first;
-    }
-    // Hash the supported locales because apps can support many locales and would
-    // be expensive to search through them many times.
-    final Map<String, Locale> allSupportedLocales = HashMap<String, Locale>();
-    final Map<String, Locale> languageAndCountryLocales = HashMap<String, Locale>();
-    final Map<String, Locale> languageAndScriptLocales = HashMap<String, Locale>();
-    final Map<String, Locale> languageLocales = HashMap<String, Locale>();
-    final Map<String?, Locale> countryLocales = HashMap<String?, Locale>();
-    for (final Locale locale in supportedLocales) {
-      allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??= locale;
-      languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;
-      languageAndCountryLocales['${locale.languageCode}_${locale.countryCode}'] ??= locale;
-      languageLocales[locale.languageCode] ??= locale;
-      countryLocales[locale.countryCode] ??= locale;
-    }
-
-    // Since languageCode-only matches are possibly low quality, we don't return
-    // it instantly when we find such a match. We check to see if the next
-    // preferred locale in the list has a high accuracy match, and only return
-    // the languageCode-only match when a higher accuracy match in the next
-    // preferred locale cannot be found.
-    Locale? matchesLanguageCode;
-    Locale? matchesCountryCode;
-    // Loop over user's preferred locales
-    for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
-      final Locale userLocale = preferredLocales[localeIndex];
-      // Look for perfect match.
-      if (allSupportedLocales.containsKey('${userLocale.languageCode}_${userLocale.scriptCode}_${userLocale.countryCode}')) {
-        return userLocale;
-      }
-      // Look for language+script match.
-      if (userLocale.scriptCode != null) {
-        final Locale? match = languageAndScriptLocales['${userLocale.languageCode}_${userLocale.scriptCode}'];
-        if (match != null) {
-          return match;
-        }
-      }
-      // Look for language+country match.
-      if (userLocale.countryCode != null) {
-        final Locale? match = languageAndCountryLocales['${userLocale.languageCode}_${userLocale.countryCode}'];
-        if (match != null) {
-          return match;
-        }
-      }
-      // If there was a languageCode-only match in the previous iteration's higher
-      // ranked preferred locale, we return it if the current userLocale does not
-      // have a better match.
-      if (matchesLanguageCode != null) {
-        return matchesLanguageCode;
-      }
-      // Look and store language-only match.
-      Locale? match = languageLocales[userLocale.languageCode];
-      if (match != null) {
-        matchesLanguageCode = match;
-        // Since first (default) locale is usually highly preferred, we will allow
-        // a languageCode-only match to be instantly matched. If the next preferred
-        // languageCode is the same, we defer hastily returning until the next iteration
-        // since at worst it is the same and at best an improved match.
-        if (localeIndex == 0 &&
-            !(localeIndex + 1 < preferredLocales.length && preferredLocales[localeIndex + 1].languageCode == userLocale.languageCode)) {
-          return matchesLanguageCode;
-        }
-      }
-      // countryCode-only match. When all else except default supported locale fails,
-      // attempt to match by country only, as a user is likely to be familiar with a
-      // language from their listed country.
-      if (matchesCountryCode == null && userLocale.countryCode != null) {
-        match = countryLocales[userLocale.countryCode];
-        if (match != null) {
-          matchesCountryCode = match;
-        }
-      }
-    }
-    // When there is no languageCode-only match. Fallback to matching countryCode only. Country
-    // fallback only applies on iOS. When there is no countryCode-only match, we return first
-    // supported locale.
-    final Locale resolvedLocale = matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
-    return resolvedLocale;
-  }
-
   @override
   void didChangeLocales(List<Locale>? locales) {
     final Locale newLocale = _resolveLocales(locales, widget.supportedLocales);
@@ -1515,6 +1518,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (_usesRouter) {
       assert(_effectiveRouteInformationProvider != null);
       routing = Router<Object>(
+        restorationScopeId: 'router',
         routeInformationProvider: _effectiveRouteInformationProvider,
         routeInformationParser: widget.routeInformationParser,
         routerDelegate: widget.routerDelegate!,
@@ -1589,8 +1593,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(() {
       if (widget.debugShowWidgetInspector || WidgetsApp.debugShowWidgetInspectorOverride) {
         result = WidgetInspector(
-          child: result,
           selectButtonBuilder: widget.inspectorSelectButtonBuilder,
+          child: result,
         );
       }
       if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {

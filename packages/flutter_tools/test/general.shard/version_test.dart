@@ -32,7 +32,7 @@ void main() {
   FakeProcessManager processManager;
 
   setUp(() {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     mockProcessManager = MockProcessManager();
     mockCache = MockCache();
   });
