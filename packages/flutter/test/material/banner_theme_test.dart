@@ -50,6 +50,29 @@ void main() {
 
   testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
     const String contentText = 'Content';
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: MaterialBanner(
+          content: const Text(contentText),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Action'),
+              onPressed: () { },
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Container container = _getContainerFromText(tester, contentText);
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(container.color, const Color(0xffffffff));
+    // Default value for ThemeData.typography is Typography.material2014()
+    expect(content.text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().black.bodyText2));
+  });
+
+  testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
+    const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -89,6 +112,39 @@ void main() {
   });
 
   testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {
+    final MaterialBannerThemeData bannerTheme = _bannerTheme();
+    const String contentText = 'Content';
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(bannerTheme: bannerTheme),
+      home: Scaffold(
+        body: MaterialBanner(
+          leading: const Icon(Icons.ac_unit),
+          content: const Text(contentText),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Action'),
+              onPressed: () { },
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Container container = _getContainerFromText(tester, contentText);
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(container.color, bannerTheme.backgroundColor);
+    expect(content.text.style, bannerTheme.contentTextStyle);
+
+    final Offset contentTopLeft = tester.getTopLeft(_textFinder(contentText));
+    final Offset containerTopLeft = tester.getTopLeft(_containerFinder());
+    final Offset leadingTopLeft = tester.getTopLeft(find.byIcon(Icons.ac_unit));
+    expect(contentTopLeft.dy - containerTopLeft.dy, 24);
+    expect(contentTopLeft.dx - containerTopLeft.dx, 41);
+    expect(leadingTopLeft.dy - containerTopLeft.dy, 19);
+    expect(leadingTopLeft.dx - containerTopLeft.dx, 11);
+  });
+
+  testWidgets('MaterialBanner uses values from MaterialBannerThemeData when presented by ScaffoldMessenger', (WidgetTester tester) async {
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
@@ -139,6 +195,45 @@ void main() {
   });
 
   testWidgets('MaterialBanner widget properties take priority over theme', (WidgetTester tester) async {
+    const Color backgroundColor = Colors.purple;
+    const TextStyle textStyle = TextStyle(color: Colors.green);
+    final MaterialBannerThemeData bannerTheme = _bannerTheme();
+    const String contentText = 'Content';
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(bannerTheme: bannerTheme),
+      home: Scaffold(
+        body: MaterialBanner(
+          backgroundColor: backgroundColor,
+          leading: const Icon(Icons.ac_unit),
+          contentTextStyle: textStyle,
+          content: const Text(contentText),
+          padding: const EdgeInsets.all(10),
+          leadingPadding: const EdgeInsets.all(12),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Action'),
+              onPressed: () { },
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Container container = _getContainerFromText(tester, contentText);
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(container.color, backgroundColor);
+    expect(content.text.style, textStyle);
+
+    final Offset contentTopLeft = tester.getTopLeft(_textFinder(contentText));
+    final Offset containerTopLeft = tester.getTopLeft(_containerFinder());
+    final Offset leadingTopLeft = tester.getTopLeft(find.byIcon(Icons.ac_unit));
+    expect(contentTopLeft.dy - containerTopLeft.dy, 29);
+    expect(contentTopLeft.dx - containerTopLeft.dx, 58);
+    expect(leadingTopLeft.dy - containerTopLeft.dy, 24);
+    expect(leadingTopLeft.dx - containerTopLeft.dx, 22);
+  });
+
+  testWidgets('MaterialBanner widget properties take priority over theme when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const TextStyle textStyle = TextStyle(color: Colors.green);
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
@@ -195,6 +290,28 @@ void main() {
   });
 
   testWidgets('MaterialBanner uses color scheme when necessary', (WidgetTester tester) async {
+    final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
+    const String contentText = 'Content';
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(colorScheme: colorScheme),
+      home: Scaffold(
+        body: MaterialBanner(
+          content: const Text(contentText),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Action'),
+              onPressed: () { },
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Container container = _getContainerFromText(tester, contentText);
+    expect(container.color, colorScheme.surface);
+  });
+
+  testWidgets('MaterialBanner uses color scheme when necessary when presented by ScaffoldMessenger', (WidgetTester tester) async {
     final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');

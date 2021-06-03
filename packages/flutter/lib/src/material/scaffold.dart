@@ -2580,11 +2580,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   // This is used to update the _messengerSnackBar by the ScaffoldMessenger.
   void _updateSnackBar() {
-    setState(() {
-        _messengerSnackBar = _scaffoldMessenger!._snackBars.isNotEmpty
-          ? _scaffoldMessenger!._snackBars.first
-          : null;
-    });
+    final ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? messengerSnackBar = _scaffoldMessenger!._snackBars.isNotEmpty
+        ? _scaffoldMessenger!._snackBars.first
+        : null;
+
+    if (_messengerSnackBar != messengerSnackBar) {
+      setState(() {
+        _messengerSnackBar = messengerSnackBar;
+      });
+    }
   }
 
   // MATERIAL BANNER API
@@ -2595,11 +2599,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   // This is used to update the _messengerMaterialBanner by the ScaffoldMessenger.
   void _updateMaterialBanner() {
-    setState(() {
-      _messengerMaterialBanner = _scaffoldMessenger!._materialBanners.isNotEmpty
-          ? _scaffoldMessenger!._materialBanners.first
-          : null;
-    });
+    final ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason>? messengerMaterialBanner = _scaffoldMessenger!._materialBanners.isNotEmpty
+        ? _scaffoldMessenger!._materialBanners.first
+        : null;
+
+    if (_messengerMaterialBanner != messengerMaterialBanner) {
+      setState(() {
+        _messengerMaterialBanner = messengerMaterialBanner;
+      });
+    }
   }
 
   // PERSISTENT BOTTOM SHEET API

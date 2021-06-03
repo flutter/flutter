@@ -55,6 +55,41 @@ enum MaterialBannerClosedReason {
 /// interact with them at any time.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
+///
+/// Banners placed directly into the widget tree are static.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('The MaterialBanner is below'),
+///     ),
+///     body: const MaterialBanner(
+///       padding: EdgeInsets.all(20),
+///       content: Text('Hello, I am a Material Banner'),
+///       leading: Icon(Icons.agriculture_outlined),
+///       backgroundColor: Color(0xFFE0E0E0),
+///       actions: <Widget>[
+///         TextButton(
+///           child: Text('OPEN'),
+///           onPressed: null,
+///         ),
+///         TextButton(
+///           child: Text('DISMISS'),
+///           onPressed: null,
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// MaterialBanner's can also be presented through a [ScaffoldMessenger].
+/// Here is an example where ScaffoldMessengerState.showMaterialBanner() is used to show the MaterialBanner.
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
@@ -179,10 +214,10 @@ class MaterialBanner extends StatefulWidget {
   /// Defaults to [OverflowBarAlignment.end].
   final OverflowBarAlignment overflowAlignment;
 
-  /// The animation driving the entrance and exit of the material banner.
+  /// The animation driving the entrance and exit of the material banner when presented by the [ScaffoldMessenger].
   final Animation<double>? animation;
 
-  /// Called the first time that the material banner is visible within a [Scaffold].
+  /// Called the first time that the material banner is visible within a [Scaffold] when presented by the [ScaffoldMessenger].
   final VoidCallback? onVisible;
 
   // API for ScaffoldMessengerState.showMaterialBanner():
