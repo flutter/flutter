@@ -1487,6 +1487,14 @@ class TextInputSetCaretRect extends TextInputCommand {
   }
 }
 
+class TextInputRequestAutofill extends TextInputCommand {
+  const TextInputRequestAutofill();
+
+  void run(HybridTextEditing textEditing) {
+    // No-op: not supported on this platform.
+  }
+}
+
 class TextInputFinishAutofillContext extends TextInputCommand {
   TextInputFinishAutofillContext({
     required this.saveForm,
@@ -1544,7 +1552,7 @@ class TextEditingChannel {
       ByteData? data, ui.PlatformMessageResponseCallback? callback) {
     const JSONMethodCodec codec = JSONMethodCodec();
     final MethodCall call = codec.decodeMethodCall(data);
-    late final TextInputCommand command;
+    final TextInputCommand command;
     switch (call.method) {
       case 'TextInput.setClient':
         command = TextInputSetClient(
@@ -1595,6 +1603,7 @@ class TextEditingChannel {
         // There's no API to request autofill on the web. Instead we let the
         // browser show autofill options automatically, if available. We
         // therefore simply ignore this message.
+        command = const TextInputRequestAutofill();
         break;
 
       case 'TextInput.finishAutofillContext':
