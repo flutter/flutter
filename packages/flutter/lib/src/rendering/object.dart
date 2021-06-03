@@ -1276,12 +1276,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(!_debugDisposed);
     _layer = null;
     assert(() {
-      visitChildren((RenderObject child) {
-        assert(
-          child.debugDisposed!,
-          '${child.runtimeType} (child of $runtimeType) must be disposed before calling super.dispose().',
-        );
-      });
+      // TODO(dnfield): Enable this assert once clients have had a chance to
+      // migrate.
+      // visitChildren((RenderObject child) {
+      //   assert(
+      //     child.debugDisposed!,
+      //     '${child.runtimeType} (child of $runtimeType) must be disposed before calling super.dispose().',
+      //   );
+      // });
       _debugDisposed = true;
       return true;
     }());
