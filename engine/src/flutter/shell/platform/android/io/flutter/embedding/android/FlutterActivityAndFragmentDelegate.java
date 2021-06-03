@@ -279,6 +279,8 @@ import java.util.Arrays;
     } else {
       FlutterTextureView flutterTextureView = new FlutterTextureView(host.getActivity());
 
+      flutterTextureView.setOpaque(host.getTransparencyMode() == TransparencyMode.opaque);
+
       // Allow our host to customize FlutterSurfaceView, if desired.
       host.onFlutterTextureViewCreated(flutterTextureView);
 
