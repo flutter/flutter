@@ -2649,7 +2649,7 @@ void main() {
     expect(logs, isEmpty);
     expect(controller.dispatchedPointerEvents, isEmpty);
 
-    // Test: Transluscent
+    // Test: Translucent
     await tester.pumpWidget(
       scaffold(PlatformViewSurface(
         controller: controller,

@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../bundle_builder.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
@@ -28,7 +29,7 @@ import 'custom_device_config.dart';
 import 'custom_device_workflow.dart';
 import 'custom_devices_config.dart';
 
-/// Replace all ocurrences of `${someName}` with the value found for that
+/// Replace all occurrences of `${someName}` with the value found for that
 /// name inside replacementValues or additionalReplacementValues.
 ///
 /// The replacement value is first looked for in [replacementValues] and then
@@ -80,7 +81,7 @@ class CustomDeviceLogReader extends DeviceLogReader {
   /// Add all lines emitted by [lines] to this [CustomDeviceLogReader]s [logLines]
   /// stream.
   ///
-  /// Similiar to [listenToProcessOutput], [logLines] will not be marked as done
+  /// Similar to [listenToProcessOutput], [logLines] will not be marked as done
   /// when the argument stream is done.
   ///
   /// Useful when you want to combine the contents of multiple log readers.
@@ -215,7 +216,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     assert(_forwardedPorts.contains(forwardedPort));
 
     // since a forwarded port represents a running process launched with
-    // the forwardPortCommand, unforwarding is as easy as killing the proces
+    // the forwardPortCommand, unforwarding is as easy as killing the process
     _processManager.killPid(forwardedPort.context.pid);
     _forwardedPorts.remove(forwardedPort);
   }

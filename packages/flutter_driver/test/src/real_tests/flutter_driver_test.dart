@@ -154,7 +154,7 @@ void main() {
       });
       expect(log, <String>[
         'VMServiceFlutterDriver: Connecting to Flutter application at ',
-        'VMServiceFlutterDriver: The root isolate is taking an unuusally long time to start.',
+        'VMServiceFlutterDriver: The root isolate is taking an unusually long time to start.',
       ]);
     });
 

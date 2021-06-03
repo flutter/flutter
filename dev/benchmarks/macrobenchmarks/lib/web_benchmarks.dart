@@ -38,6 +38,7 @@ const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultVal
 /// When adding a new benchmark, add it to this map. Make sure that the name
 /// of your benchmark is unique.
 final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
+  // Benchmarks that run both in CanvasKit and HTML modes
   BenchDefaultTargetPlatform.benchmarkName: () => BenchDefaultTargetPlatform(),
   BenchBuildImage.benchmarkName: () => BenchBuildImage(),
   BenchCardInfiniteScroll.benchmarkName: () => BenchCardInfiniteScroll.forward(),
@@ -57,15 +58,20 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchMouseRegionGridHover.benchmarkName: () => BenchMouseRegionGridHover(),
   BenchMouseRegionMixedGridHover.benchmarkName: () => BenchMouseRegionMixedGridHover(),
   BenchWrapBoxScroll.benchmarkName: () => BenchWrapBoxScroll(),
-  if (isCanvasKit)
-    BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
 
-  // Benchmarks that we don't want to run using CanvasKit.
+  // CanvasKit-only benchmarks
+  if (isCanvasKit) ...<String, RecorderFactory>{
+    BenchTextLayout.canvasKitBenchmarkName: () => BenchTextLayout.canvasKit(),
+    BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
+    BenchTextCachedLayout.canvasKitBenchmarkName: () => BenchTextCachedLayout.canvasKit(),
+  },
+
+  // HTML-only benchmarks
   if (!isCanvasKit) ...<String, RecorderFactory>{
-    BenchTextLayout.domBenchmarkName: () => BenchTextLayout(useCanvas: false),
-    BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout(useCanvas: true),
-    BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout(useCanvas: false),
-    BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout(useCanvas: true),
+    BenchTextLayout.domBenchmarkName: () => BenchTextLayout.dom(),
+    BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout.canvas(),
+    BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout.dom(),
+    BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout.canvas(),
     BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid.dom(),
     BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),
   },
@@ -239,7 +245,7 @@ class TimeseriesVisualization {
       final AnnotatedSample sample = _stats.samples[i];
 
       if (sample.isWarmUpValue) {
-        // Put gray background behing warm-up samples.
+        // Put gray background behind warm-up samples.
         _ctx.fillStyle = 'rgba(200,200,200,1)';
         _ctx.fillRect(xOffset, 0, barWidth, _normalized(_maxValueChartRange));
       }

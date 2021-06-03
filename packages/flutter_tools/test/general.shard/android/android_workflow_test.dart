@@ -289,9 +289,11 @@ Review licenses that have not been accepted (y/N)?
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
   });
 
-  testWithoutContext('detects license-only SDK installation', () async {
-    sdk.licensesAvailable = true;
-    sdk.platformToolsAvailable = false;
+  testWithoutContext('detects license-only SDK installation with cmdline-tools', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = false
+      ..cmdlineToolsAvailable = true;
     final ValidationResult validationResult = await AndroidValidator(
       androidStudio: null,
       androidSdk: sdk,
@@ -304,8 +306,8 @@ Review licenses that have not been accepted (y/N)?
 
     expect(validationResult.type, ValidationType.partial);
     expect(
-      validationResult.messages.last.message,
-      UserMessages().androidSdkLicenseOnly(kAndroidHome),
+      validationResult.messages.map((ValidationMessage message) => message.message),
+      contains(contains(UserMessages().androidSdkLicenseOnly(kAndroidHome))),
     );
   });
 
@@ -323,6 +325,7 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
     // Test with invalid SDK and build tools
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager'
@@ -364,7 +367,7 @@ Review licenses that have not been accepted (y/N)?
     );
 
     // Test with valid SDK and valid build tools
-    // Will still be partial because AnroidSdk.findJavaBinary is static :(
+    // Will still be partial because AndroidSdk.findJavaBinary is static :(
     sdkVersion.sdkLevel = kAndroidSdkMinVersion;
     sdkVersion.buildToolsVersion = kAndroidSdkBuildToolsMinVersion;
 
@@ -373,6 +376,32 @@ Review licenses that have not been accepted (y/N)?
     expect(
       validationResult.messages.any((ValidationMessage message) => message.message == errorMessage),
       isFalse,
+    );
+  });
+
+  testWithoutContext('detects missing cmdline tools', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = false;
+
+    final AndroidValidator androidValidator = AndroidValidator(
+      androidStudio: null,
+      androidSdk: sdk,
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+      userMessages: UserMessages(),
+    );
+
+    final String errorMessage = UserMessages().androidMissingCmdTools;
+
+    final ValidationResult validationResult = await androidValidator.validate();
+    expect(validationResult.type, ValidationType.missing);
+    expect(
+      validationResult.messages.last.message,
+      errorMessage,
     );
   });
 
@@ -393,6 +422,7 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.latestVersion = sdkVersion;
@@ -456,6 +486,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   bool platformToolsAvailable;
+
+  @override
+  bool cmdlineToolsAvailable;
 
   @override
   Directory directory;

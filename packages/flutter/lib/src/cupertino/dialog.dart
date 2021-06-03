@@ -890,7 +890,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
 class _CupertinoDialogRenderElement extends RenderObjectElement {
   _CupertinoDialogRenderElement(_CupertinoDialogRenderWidget widget, {this.allowMoveRenderObjectChild = false}) : super(widget);
 
-  // Whether to allow overriden method moveRenderObjectChild call or default to super.
+  // Whether to allow overridden method moveRenderObjectChild call or default to super.
   // CupertinoActionSheet should default to [super] but CupertinoAlertDialog not.
   final bool allowMoveRenderObjectChild;
 
