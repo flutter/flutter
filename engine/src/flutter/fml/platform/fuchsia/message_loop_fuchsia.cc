@@ -8,11 +8,25 @@
 #include <lib/async/cpp/task.h>
 #include <lib/async/default.h>
 #include <lib/zx/time.h>
+#include "flutter/fml/platform/fuchsia/task_observers.h"
 
 namespace fml {
 
-MessageLoopFuchsia::MessageLoopFuchsia()
-    : loop_(&kAsyncLoopConfigNoAttachToCurrentThread) {
+namespace {
+
+// See comment on `ExecuteAfterTaskObservers` for explanation.
+static void LoopEpilogue(async_loop_t*, void*) {
+  ExecuteAfterTaskObservers();
+}
+
+constexpr async_loop_config_t kLoopConfig = {
+    .make_default_for_current_thread = false,
+    .epilogue = &LoopEpilogue,
+};
+
+}  // namespace
+
+MessageLoopFuchsia::MessageLoopFuchsia() : loop_(&kLoopConfig) {
   async_set_default_dispatcher(loop_.dispatcher());
 }
 

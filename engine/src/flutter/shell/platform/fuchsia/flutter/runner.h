@@ -16,6 +16,8 @@
 
 #include "component.h"
 #include "flutter/fml/macros.h"
+#include "fml/memory/ref_ptr.h"
+#include "fml/task_runner.h"
 #include "lib/fidl/cpp/binding_set.h"
 #include "runtime/dart/utils/vmservice_object.h"
 
@@ -25,13 +27,14 @@ namespace flutter_runner {
 // their own threads.
 class Runner final : public fuchsia::sys::Runner {
  public:
-  // Does not take ownership of loop or context.
-  Runner(async::Loop* loop, sys::ComponentContext* context);
+  // Does not take ownership of context.
+  Runner(fml::RefPtr<fml::TaskRunner> task_runner,
+         sys::ComponentContext* context);
 
   ~Runner();
 
  private:
-  async::Loop* loop_;
+  fml::RefPtr<fml::TaskRunner> task_runner_;
 
   sys::ComponentContext* context_;
   fidl::BindingSet<fuchsia::sys::Runner> active_applications_bindings_;
