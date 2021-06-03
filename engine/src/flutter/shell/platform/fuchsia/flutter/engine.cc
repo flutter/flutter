@@ -91,12 +91,15 @@ Engine::Engine(Delegate& delegate,
 
   // Connect to Scenic.
   auto scenic = svc->Connect<fuchsia::ui::scenic::Scenic>();
+  fuchsia::ui::scenic::SessionEndpoints endpoints;
   fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session;
+  endpoints.set_session(session.NewRequest());
   fidl::InterfaceHandle<fuchsia::ui::scenic::SessionListener> session_listener;
   auto session_listener_request = session_listener.NewRequest();
+  endpoints.set_session_listener(session_listener.Bind());
   fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser;
-  scenic->CreateSession2(session.NewRequest(), session_listener.Bind(),
-                         focuser.NewRequest());
+  endpoints.set_view_focuser(focuser.NewRequest());
+  scenic->CreateSessionT(std::move(endpoints), [] {});
 
   // Make clones of the `ViewRef` before sending it down to Scenic, since the
   // refs are not copyable, and multiple consumers need view refs.
