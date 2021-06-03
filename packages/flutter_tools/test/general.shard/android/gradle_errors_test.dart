@@ -681,7 +681,6 @@ assembleProfile
           '\n'
           "Note that your app won't be available to users running Android SDKs below 19.\n"
           'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.\n'
-          ''
         )
       );
     }, overrides: <Type, Generator>{
@@ -719,7 +718,6 @@ assembleProfile
           '    checkReleaseBuilds false\n'
           '  }\n'
           '}\n'
-          ''
         )
       );
     }, overrides: <Type, Generator>{
@@ -757,7 +755,6 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
           'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle\n'
           'To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle\n'
           '\n'
-          ''
         )
       );
     }, overrides: <Type, Generator>{
