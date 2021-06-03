@@ -42,7 +42,7 @@ class CreateCommand extends CreateBase {
       allowedHelp: <String, String>{
         flutterProjectTypeToString(FlutterProjectType.app): '(default) Generate a Flutter application.',
         flutterProjectTypeToString(FlutterProjectType.skeleton): 'Generate a List View / Detail View Flutter '
-            'application that follows community best practices',
+            'application that follows community best practices.',
         flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
             'Dart code.',
         flutterProjectTypeToString(FlutterProjectType.plugin): 'Generate a shareable Flutter project containing an API '
