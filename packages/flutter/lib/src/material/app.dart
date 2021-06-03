@@ -903,7 +903,7 @@ class _MaterialAppState extends State<MaterialApp> {
       onKey: (FocusNode node, RawKeyEvent event) {
         if (event is! RawKeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape)
           return KeyEventResult.ignored;
-        return Tooltip.dismissToolTip() ? KeyEventResult.handled : KeyEventResult.ignored;
+        return Tooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
       },
       child: result,
     );

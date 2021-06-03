@@ -912,7 +912,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip text is also when hoverable', (WidgetTester tester) async {
+  testWidgets('Tooltip text is also hoverable', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
@@ -1004,6 +1004,72 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsNothing);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+    await gesture.removePointer();
+    gesture = null;
+  });
+
+  testWidgets('Multiple Tooltips are dismissed by escape key', (WidgetTester tester) async {
+    const Duration waitDuration = Duration.zero;
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      if (gesture != null)
+        return gesture.removePointer();
+    });
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Column(
+            children: const <Widget>[
+              Tooltip(
+                message: 'message1',
+                waitDuration: waitDuration,
+                showDuration: Duration(days: 1),
+                child: Text('tooltip1'),
+              ),
+              Spacer(flex: 2),
+              Tooltip(
+                message: 'message2',
+                waitDuration: waitDuration,
+                showDuration: Duration(days: 1),
+                child: Text('tooltip2'),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.text('tooltip1');
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    await tester.pump(waitDuration);
+    expect(find.text('message1'), findsOneWidget);
+
+    final Finder secondTooltip = find.text('tooltip2');
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(secondTooltip));
+    await tester.pump();
+    await tester.pump(waitDuration);
+    // Make sure both messages are on the screen.
+    expect(find.text('message1'), findsOneWidget);
+    expect(find.text('message2'), findsOneWidget);
+
+    // Try to dismiss the tooltip with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('message1'), findsNothing);
+    expect(find.text('message2'), findsNothing);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();

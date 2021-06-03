@@ -203,13 +203,17 @@ class Tooltip extends StatefulWidget {
 
   static final Set<_TooltipState> _openedToolTips = <_TooltipState>{};
 
-  /// Dismiss the most recently shown tooltip.
+  /// Dismiss all of the tooltips that are currently shown on the screen.
   ///
-  /// This method returns true if it successfully dismisses a tooltip. It returns
-  /// false if there is no tooltip shown on the screen.
-  static bool dismissToolTip() {
+  /// This method returns true if it successfully dismisses the tooltips. It
+  /// returns false if there is no tooltip shown on the screen.
+  static bool dismissAllToolTips() {
     if (_openedToolTips.isNotEmpty) {
-      _openedToolTips.first._hideTooltip(immediately: true);
+      // Avoid concurrent modification.
+      final List<_TooltipState> openedToolTips = List<_TooltipState>.from(_openedToolTips);
+      for (final _TooltipState state in openedToolTips) {
+        state._hideTooltip(immediately: true);
+      }
       return true;
     }
     return false;
@@ -454,8 +458,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void dispose() {
     GestureBinding.instance!.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     RendererBinding.instance!.mouseTracker.removeListener(_handleMouseTrackerChange);
-    if (_entry != null)
-      _removeEntry();
+    _removeEntry();
     _controller.dispose();
     super.dispose();
   }
