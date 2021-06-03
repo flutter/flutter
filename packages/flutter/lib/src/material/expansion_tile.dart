@@ -60,7 +60,7 @@ class ExpansionTile extends StatefulWidget {
     this.collapsedTextColor,
     this.iconColor,
     this.collapsedIconColor,
-    this.controlAffinity = ListTileControlAffinity.platform,
+    this.controlAffinity,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
        assert(
@@ -189,10 +189,11 @@ class ExpansionTile extends StatefulWidget {
   /// Used to override to the [ListTileTheme.textColor].
   final Color? collapsedTextColor;
 
-  /// Defines the position of [trailing], relative to text.
+  /// Typically used to force the expansion arrow icon to the tile's leading or trailing edge.
   ///
-  /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
-  final ListTileControlAffinity controlAffinity;
+  /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform],
+  /// which means that the expansion arrow icon will appear on the tile's trailing edge.
+  final ListTileControlAffinity? controlAffinity;
 
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
@@ -259,19 +260,34 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     widget.onExpansionChanged?.call(_isExpanded);
   }
 
-  ListTileControlAffinity effectiveAffinity(ListTileControlAffinity affinity) {
-    if (affinity == ListTileControlAffinity.platform)
-      return ListTileControlAffinity.trailing;
-    return affinity;
+  // Platform or null affinity defaults to trailing.
+  ListTileControlAffinity _effectiveAffinity(ListTileControlAffinity? affinity) {
+    switch (affinity ?? ListTileControlAffinity.trailing) {
+      case ListTileControlAffinity.leading:
+        return ListTileControlAffinity.leading;
+      case ListTileControlAffinity.trailing:
+      case ListTileControlAffinity.platform:
+        return ListTileControlAffinity.trailing;
+    }
   }
 
-  Widget? _buildIcon(BuildContext context, ListTileControlAffinity affinity) {
-    if (affinity != effectiveAffinity(widget.controlAffinity))
-      return null;
+  Widget? _buildIcon(BuildContext context) {
     return RotationTransition(
       turns: _iconTurns,
       child: const Icon(Icons.expand_more),
     );
+  }
+
+  Widget? _buildLeadingIcon(BuildContext context) {
+    if (_effectiveAffinity(widget.controlAffinity) != ListTileControlAffinity.leading)
+      return null;
+    return _buildIcon(context);
+  }
+
+  Widget? _buildTrailingIcon(BuildContext context) {
+    if (_effectiveAffinity(widget.controlAffinity) != ListTileControlAffinity.trailing)
+      return null;
+    return _buildIcon(context);
   }
 
   Widget _buildChildren(BuildContext context, Widget? child) {
@@ -294,10 +310,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
             child: ListTile(
               onTap: _handleTap,
               contentPadding: widget.tilePadding,
-              leading: widget.leading ?? _buildIcon(context, ListTileControlAffinity.leading),
+              leading: widget.leading ?? _buildLeadingIcon(context),
               title: widget.title,
               subtitle: widget.subtitle,
-              trailing: widget.trailing ?? _buildIcon(context, ListTileControlAffinity.trailing),
+              trailing: widget.trailing ?? _buildTrailingIcon(context),
             ),
           ),
           ClipRect(
