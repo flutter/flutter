@@ -6,7 +6,36 @@
 
 namespace impeller {
 
-RenderPass::RenderPass() = default;
+RenderPassDescriptor::RenderPassDescriptor() = default;
+
+RenderPassDescriptor::~RenderPassDescriptor() = default;
+
+RenderPassDescriptor& RenderPassDescriptor::SetColorAttachment(
+    ColorRenderPassAttachment attachment,
+    size_t index) {
+  if (attachment) {
+    color_[index] = attachment;
+  }
+  return *this;
+}
+
+RenderPassDescriptor& RenderPassDescriptor::SetDepthAttachment(
+    DepthRenderPassAttachment attachment) {
+  if (attachment) {
+    depth_ = std::move(attachment);
+  }
+  return *this;
+}
+
+RenderPassDescriptor& RenderPassDescriptor::SetStencilAttachment(
+    StencilRenderPassAttachment attachment) {
+  if (attachment) {
+    stencil_ = std::move(attachment);
+  }
+  return *this;
+}
+
+RenderPass::RenderPass(RenderPassDescriptor desc) : desc_(std::move(desc)) {}
 
 RenderPass::~RenderPass() = default;
 
