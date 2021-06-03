@@ -464,7 +464,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
           exitCode: exitCode,
         );
       } else {
-        final GradleBuildStatus status = await detectedGradleError!.handler.call(
+        final GradleBuildStatus status = await detectedGradleError!.handler(
           line: detectedGradleErrorLine!,
           project: project,
           usesAndroidX: usesAndroidX,
