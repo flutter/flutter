@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:{{projectName}}/src/app.dart';
-import 'package:{{projectName}}/src/dummy_feature/dummy_item_details_view.dart';
+import 'package:{{projectName}}/src/sample_feature/sample_item_details_view.dart';
 import 'package:{{projectName}}/src/settings/settings_controller.dart';
 import 'package:{{projectName}}/src/settings/settings_service.dart';
 import 'package:{{projectName}}/src/settings/settings_view.dart';
@@ -27,7 +27,7 @@ void main() {
       await tester.tap(find.byType(ListTile).first);
       await tester.pumpAndSettle();
 
-      expect(find.byType(DummyItemDetailsView), findsOneWidget);
+      expect(find.byType(SampleItemDetailsView), findsOneWidget);
     });
 
     testWidgets('changes the app theme', (WidgetTester tester) async {

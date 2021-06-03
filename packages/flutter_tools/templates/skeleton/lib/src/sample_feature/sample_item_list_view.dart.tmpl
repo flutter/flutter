@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 
 import '../settings/settings_view.dart';
-import 'dummy_item.dart';
-import 'dummy_item_details_view.dart';
+import 'sample_item.dart';
+import 'sample_item_details_view.dart';
 
-/// Displays a list of DummyItems.
-class DummyItemListView extends StatelessWidget {
-  const DummyItemListView({
+/// Displays a list of SampleItems.
+class SampleItemListView extends StatelessWidget {
+  const SampleItemListView({
     Key? key,
-    this.items = const [DummyItem(1), DummyItem(2), DummyItem(3)],
+    this.items = const [SampleItem(1), SampleItem(2), SampleItem(3)],
   }) : super(key: key);
 
   static const routeName = '/';
 
-  final List<DummyItem> items;
+  final List<SampleItem> items;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dummy Items'),
+        title: const Text('Sample Items'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -43,13 +43,13 @@ class DummyItemListView extends StatelessWidget {
         // Providing a restorationId allows the ListView to restore the
         // scroll position when a user leaves and returns to the app after it
         // has been killed while running in the background.
-        restorationId: 'dummyItemListView',
+        restorationId: 'sampleItemListView',
         itemCount: items.length,
         itemBuilder: (BuildContext context, int index) {
           final item = items[index];
 
           return ListTile(
-            title: Text('DummyItem ${item.id}'),
+            title: Text('SampleItem ${item.id}'),
             leading: const CircleAvatar(
               // Display the Flutter Logo image asset.
               foregroundImage: AssetImage('assets/images/flutter_logo.png'),
@@ -60,7 +60,7 @@ class DummyItemListView extends StatelessWidget {
               // background, the navigation stack is restored.
               Navigator.restorablePushNamed(
                 context,
-                DummyItemDetailsView.routeName,
+                SampleItemDetailsView.routeName,
               );
             }
           );
