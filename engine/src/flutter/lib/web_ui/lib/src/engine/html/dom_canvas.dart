@@ -212,8 +212,18 @@ html.HtmlElement _buildDrawRectElement(
       ..width = '${right - left}px'
       ..height = '${bottom - top}px'
       ..backgroundColor = cssColor;
+
+    if (paint.shader != null && paint.shader is EngineImageShader) {
+      _applyImageShaderToElement(rectangle, paint.shader! as EngineImageShader);
+    }
   }
   return rectangle;
+}
+
+void _applyImageShaderToElement(html.HtmlElement targetElement,
+    EngineImageShader imageShader) {
+  final HtmlImage image = imageShader.image;
+  targetElement.style.backgroundImage = image.imgElement.src;
 }
 
 void _applyRRectBorderRadius(html.CssStyleDeclaration style, ui.RRect rrect) {
