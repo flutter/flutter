@@ -66,8 +66,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
       );
       if (!androidFiles.verifyFilesExist()) {
         // generate into temp directory
-        final Map<String, List<File>> results =
-        await androidFiles.generateFiles(
+        final Map<String, List<File>> results = await androidFiles.generateFiles(
           alternateAndroidDir: outputDir,
           clearAlternateOutputDir: true,
         );
