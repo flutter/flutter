@@ -27,7 +27,6 @@
 #include "flutter_runner_product_configuration.h"
 #include "fuchsia_external_view_embedder.h"
 #include "isolate_configurator.h"
-#include "thread.h"
 #include "vulkan_surface_producer.h"
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
@@ -73,7 +72,7 @@ class Engine final {
   Delegate& delegate_;
 
   const std::string thread_label_;
-  std::array<Thread, 3> threads_;
+  std::array<fml::Thread, 3> threads_;
 
   std::shared_ptr<DefaultSessionConnection> session_connection_;
   std::optional<VulkanSurfaceProducer> surface_producer_;
