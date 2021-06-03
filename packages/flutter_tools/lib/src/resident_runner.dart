@@ -344,49 +344,10 @@ class FlutterDevice {
   Future<void> exitApps({
     @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
   }) async {
-    if (!device.supportsFlutterExit || vmService == null) {
-      return device.stopApp(package, userIdentifier: userIdentifier);
-    }
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    if (views == null || views.isEmpty) {
-      return device.stopApp(package, userIdentifier: userIdentifier);
-    }
-    // If any of the flutter views are paused, we might not be able to
-    // cleanly exit since the service extension may not have been registered.
-    for (final FlutterView flutterView in views) {
-      final vm_service.Isolate isolate = await vmService
-        .getIsolateOrNull(flutterView.uiIsolate.id);
-      if (isolate == null) {
-        continue;
-      }
-      if (isPauseEvent(isolate.pauseEvent.kind)) {
-        return device.stopApp(package, userIdentifier: userIdentifier);
-      }
-    }
-    for (final FlutterView view in views) {
-      if (view != null && view.uiIsolate != null) {
-        // If successful, there will be no response from flutterExit. If the exit
-        // method is not registered, this will complete with `false`.
-        unawaited(vmService.flutterExit(
-          isolateId: view.uiIsolate.id,
-        ).then((bool exited) async {
-          // If exiting the app failed, fall back to stopApp
-          if (!exited) {
-            await device.stopApp(package, userIdentifier: userIdentifier);
-          }
-        }));
-      }
-    }
-    return vmService.service.onDone
-      .catchError((dynamic error, StackTrace stackTrace) {
-        globals.logger.printError(
-          'unhandled error waiting for vm service exit:\n $error',
-          stackTrace: stackTrace,
-         );
-      })
-      .timeout(timeoutDelay, onTimeout: () {
-        return device.stopApp(package, userIdentifier: userIdentifier);
-      });
+    // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/83127
+    // When updating `flutter attach` to support running without a device,
+    // this will need to be changed to fall back to io exit.
+    return device.stopApp(package, userIdentifier: userIdentifier);
   }
 
   Future<Uri> setupDevFS(
