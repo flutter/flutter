@@ -24,8 +24,6 @@ import 'typography.dart';
 ///
 /// ![](https://storage.googleapis.com/spec-host-backup/mio-design%2Fassets%2F1W8kyGVruuG_O8psvyiOaCf1lLFIMzB-N%2Ftypesystem-typescale.png)
 ///
-/// ## Migrating from the 2014 names
-///
 /// The Material Design typography scheme was significantly changed in the
 /// current (2018) version of the specification
 /// ([https://material.io/design/typography](https://material.io/design/typography)).
@@ -52,10 +50,9 @@ import 'typography.dart';
 /// "medium" is `FontWeight.w500`.
 ///
 /// The [TextTheme] API was originally based on the original material (2014)
-/// design spec, which used different text style names. For backwards
-/// compatibility's sake, this API continues to expose the old names. The table
-/// below should help with understanding the mapping of the API's old names and
-/// the new names (those in terms of the 2018 material specification).
+/// design spec, which used different text style names. The table
+/// below should help with understanding the mapping of the 2014 names and
+/// the 2018 names in terms of the 2018 material specification.
 ///
 /// Each of the [TextTheme] text styles corresponds to one of the
 /// styles from 2018 spec. By default, the font sizes, font weights
@@ -83,14 +80,14 @@ import 'typography.dart';
 /// "medium" is `FontWeight.w500`. Letter spacing for all of the original
 /// text styles was 0.0.
 ///
-/// The old names are deprecated in this API.
-///
 /// Since the names `body1` and `body2` are used in both specifications but with
 /// different meanings, the API uses the terms `bodyText1` and `bodyText2` for
-/// the new API.
+/// the newer API.
 ///
-/// To configure a [Theme] for the new sizes, weights, and letter spacings,
+/// To configure a [Theme] for the 2018 sizes, weights, and letter spacings,
 /// initialize its [ThemeData.typography] value using [Typography.material2018].
+/// To configure a [Theme] for the 2014 sizes, weights, and letter spacings,
+/// initialize its [ThemeData.typography] value using [Typography.material2014].
 ///
 /// See also:
 ///
@@ -111,88 +108,20 @@ class TextTheme with Diagnosticable {
   /// If you do decide to create your own text theme, consider using one of
   /// those predefined themes as a starting point for [copyWith] or [apply].
   const TextTheme({
-    TextStyle? headline1,
-    TextStyle? headline2,
-    TextStyle? headline3,
-    TextStyle? headline4,
-    TextStyle? headline5,
-    TextStyle? headline6,
-    TextStyle? subtitle1,
-    TextStyle? subtitle2,
-    TextStyle? bodyText1,
-    TextStyle? bodyText2,
+    this.headline1,
+    this.headline2,
+    this.headline3,
+    this.headline4,
+    this.headline5,
+    this.headline6,
+    this.subtitle1,
+    this.subtitle2,
+    this.bodyText1,
+    this.bodyText2,
     this.caption,
     this.button,
     this.overline,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline1. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? display4,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline2. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? display3,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline3. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? display2,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline4. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? display1,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline5. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? headline,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline6. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? title,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is subtitle1. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? subhead,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is subtitle2. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? subtitle,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? body2,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is bodyText2. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? body1,
-  }) : assert(
-         (headline1 == null && headline2 == null && headline3 == null && headline4 == null && headline5 == null && headline6 == null &&
-          subtitle1 == null && subtitle2 == null &&
-          bodyText1 == null && bodyText2 == null) ||
-         (display4 == null && display3 == null && display2 == null && display1 == null && headline == null && title == null &&
-          subhead == null && subtitle == null &&
-          body2 == null && body1 == null),
-         'Cannot mix 2014 and 2018 terms in call to TextTheme() constructor.',
-       ),
-       headline1 = headline1 ?? display4,
-       headline2 = headline2 ?? display3,
-       headline3 = headline3 ?? display2,
-       headline4 = headline4 ?? display1,
-       headline5 = headline5 ?? headline,
-       headline6 = headline6 ?? title,
-       subtitle1 = subtitle1 ?? subhead,
-       subtitle2 = subtitle2 ?? subtitle,
-       bodyText1 = bodyText1 ?? body2,
-       bodyText2 = bodyText2 ?? body1;
+  });
 
   /// Extremely large text.
   final TextStyle? headline1;
@@ -238,109 +167,6 @@ class TextTheme with Diagnosticable {
   ///
   /// Typically used for captions or to introduce a (larger) headline.
   final TextStyle? overline;
-
-  /// Extremely large text.
-  ///
-  /// This was the name used in the material design 2014 specification. The new
-  /// specification calls this [headline1].
-  @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is headline1. '
-    'This feature was deprecated after v1.13.8.',
-  )
-  TextStyle? get display4 => headline1;
-
-  /// Very, very large text.
-  ///
-  /// This was the name used in the material design 2014 specification. The new
-  /// specification calls this [headline2].
-  @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is headline2. '
-    'This feature was deprecated after v1.13.8.',
-  )
-  TextStyle? get display3 => headline2;
-
-  /// Very large text.
-  ///
-  /// This was the name used in the material design 2014 specification. The new
-  /// specification calls this [headline3].
-  @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is headline3. '
-    'This feature was deprecated after v1.13.8.',
-  )
-  TextStyle? get display2 => headline3;
-
-  /// Large text.
-  ///
-  /// This was the name used in the material design 2014 specification. The new
-  /// specification calls this [headline4].
-  @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is headline4. '
-    'This feature was deprecated after v1.13.8.',
-  )
-  TextStyle? get display1 => headline4;
-
-  /// Used for large text in dialogs.
-  ///
-  /// This was the name used in the material design 2014 specification. The new
-  /// specification calls this [headline5].
-  @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is headline5. '
-    'This feature was deprecated after v1.13.8.',
-  )
-  TextStyle? get headline => headline5;
-
-  /// Used for the primary text in app bars and dialogs.
-  ///
-  /// This was the name used in the material design 2014 specification. The new
-  /// specification calls this [headline6].
-  @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is headline6. '
-    'This feature was deprecated after v1.13.8.',
-  )
-  TextStyle? get title => headline6;
-
-  /// Used for the primary text in lists (e.g., [ListTile.title]).
-  ///
-  /// This was the name used in the material design 2014 specification. The new
-  /// specification calls this [subtitle1].
-  @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is subtitle1. '
-    'This feature was deprecated after v1.13.8.',
-  )
-  TextStyle? get subhead => subtitle1;
-
-  /// For medium emphasis text that's a little smaller than [subhead].
-  ///
-  /// This was the name used in the material design 2014 specification. The new
-  /// specification calls this [subtitle2].
-  @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is subtitle2. '
-    'This feature was deprecated after v1.13.8.',
-  )
-  TextStyle? get subtitle => subtitle2;
-
-  /// Used for emphasizing text that would otherwise be [body1].
-  ///
-  /// This was the name used in the material design 2014 specification. The new
-  /// specification calls this `body1`, and it is exposed in this API as
-  /// [bodyText1].
-  @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
-    'This feature was deprecated after v1.13.8.',
-  )
-  TextStyle? get body2 => bodyText1;
-
-  /// Used for the default text style for [Material].
-  ///
-  /// This was the name used in the material design 2014 specification. The new
-  /// specification calls this `body2`, and it is exposed in this API as
-  /// [bodyText2].
-  @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is bodyText2. '
-    'This feature was deprecated after v1.13.8.',
-  )
-  TextStyle? get body1 => bodyText2;
-
 
   /// Creates a copy of this text theme but with the given fields replaced with
   /// the new values.
@@ -396,77 +222,18 @@ class TextTheme with Diagnosticable {
     TextStyle? caption,
     TextStyle? button,
     TextStyle? overline,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline1. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? display4,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline2. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? display3,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline3. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? display2,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline4. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? display1,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline5. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? headline,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is headline6. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? title,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is subtitle1. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? subhead,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is subtitle2. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? subtitle,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? body2,
-    @Deprecated(
-      'This is the term used in the 2014 version of material design. The modern term is bodyText2. '
-      'This feature was deprecated after v1.13.8.',
-    )
-    TextStyle? body1,
   }) {
-    assert(
-      (headline1 == null && headline2 == null && headline3 == null && headline4 == null && headline5 == null && headline6 == null &&
-       subtitle1 == null && subtitle2 == null &&
-       bodyText1 == null && bodyText2 == null) ||
-      (display4 == null && display3 == null && display2 == null && display1 == null && headline == null && title == null &&
-       subhead == null && subtitle == null &&
-       body2 == null && body1 == null),
-      'Cannot mix 2014 and 2018 terms in call to TextTheme.copyWith().',
-    );
     return TextTheme(
-      headline1: headline1 ?? display4 ?? this.headline1,
-      headline2: headline2 ?? display3 ?? this.headline2,
-      headline3: headline3 ?? display2 ?? this.headline3,
-      headline4: headline4 ?? display1 ?? this.headline4,
-      headline5: headline5 ?? headline ?? this.headline5,
-      headline6: headline6 ?? title ?? this.headline6,
-      subtitle1: subtitle1 ?? subhead ?? this.subtitle1,
-      subtitle2: subtitle2 ?? subtitle ?? this.subtitle2,
-      bodyText1: bodyText1 ?? body2 ?? this.bodyText1,
-      bodyText2: bodyText2 ?? body1 ?? this.bodyText2,
+      headline1: headline1 ?? this.headline1,
+      headline2: headline2 ?? this.headline2,
+      headline3: headline3 ?? this.headline3,
+      headline4: headline4 ?? this.headline4,
+      headline5: headline5 ?? this.headline5,
+      headline6: headline6 ?? this.headline6,
+      subtitle1: subtitle1 ?? this.subtitle1,
+      subtitle2: subtitle2 ?? this.subtitle2,
+      bodyText1: bodyText1 ?? this.bodyText1,
+      bodyText2: bodyText2 ?? this.bodyText2,
       caption: caption ?? this.caption,
       button: button ?? this.button,
       overline: overline ?? this.overline,
