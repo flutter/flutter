@@ -15,6 +15,7 @@ dependencies:
   path: 1.8.0
   platform: 3.0.0
   process: 4.2.1
+  pubspec_parse: ^1.0.0
   stack_trace: 1.10.0
 
   logging: 1.0.1
