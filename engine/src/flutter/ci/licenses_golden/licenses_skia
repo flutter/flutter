@@ -1,4 +1,4 @@
-Signature: 7c6c0bd6c661f3de70cbf53c12dbfa66
+Signature: 5b77cd74ab26a7580e7bd94776109c1b
 
 UNUSED LICENSES:
 
@@ -635,6 +635,8 @@ FILE: ../../../third_party/skia/demos.skia.org/demos/sampling_types/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/textedit/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/textedit/spiralshader.js
 FILE: ../../../third_party/skia/demos.skia.org/demos/textedit/textapi_utils.js
+FILE: ../../../third_party/skia/demos.skia.org/demos/textures/index.html
+FILE: ../../../third_party/skia/demos.skia.org/demos/textures/testimg.png
 FILE: ../../../third_party/skia/demos.skia.org/demos/up_scaling/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/web_worker/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/web_worker/main.js
