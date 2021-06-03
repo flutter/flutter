@@ -538,53 +538,6 @@ std::optional<uint32_t> Engine::GetEngineReturnCode() const {
   return code;
 }
 
-static void CreateCompilationTrace(Dart_Isolate isolate) {
-  Dart_EnterIsolate(isolate);
-
-  {
-    Dart_EnterScope();
-    uint8_t* trace = nullptr;
-    intptr_t trace_length = 0;
-    Dart_Handle result = Dart_SaveCompilationTrace(&trace, &trace_length);
-    tonic::LogIfError(result);
-
-    for (intptr_t start = 0; start < trace_length;) {
-      intptr_t end = start;
-      while ((end < trace_length) && trace[end] != '\n')
-        end++;
-
-      std::string line(reinterpret_cast<char*>(&trace[start]), end - start);
-      FML_LOG(INFO) << "compilation-trace: " << line;
-
-      start = end + 1;
-    }
-
-    Dart_ExitScope();
-  }
-
-  // Re-enter Dart scope to release the compilation trace's memory.
-
-  {
-    Dart_EnterScope();
-    uint8_t* feedback = nullptr;
-    intptr_t feedback_length = 0;
-    Dart_Handle result = Dart_SaveTypeFeedback(&feedback, &feedback_length);
-    tonic::LogIfError(result);
-    const std::string kTypeFeedbackFile = "/data/dart_type_feedback.bin";
-    if (dart_utils::WriteFile(kTypeFeedbackFile,
-                              reinterpret_cast<const char*>(feedback),
-                              feedback_length)) {
-      FML_LOG(INFO) << "Dart type feedback written to " << kTypeFeedbackFile;
-    } else {
-      FML_LOG(ERROR) << "Could not write Dart type feedback to "
-                     << kTypeFeedbackFile;
-    }
-    Dart_ExitScope();
-  }
-
-  Dart_ExitIsolate();
-}
-
 void Engine::OnMainIsolateStart() {
   if (!isolate_configurator_ ||
       !isolate_configurator_->ConfigureCurrentIsolate()) {
@@ -593,20 +546,6 @@ void Engine::OnMainIsolateStart() {
   }
   FML_DLOG(INFO) << "Main isolate for engine '" << thread_label_
                  << "' was started.";
-
-  const intptr_t kCompilationTraceDelayInSeconds = 0;
-  if (kCompilationTraceDelayInSeconds != 0) {
-    Dart_Isolate isolate = Dart_CurrentIsolate();
-    FML_CHECK(isolate);
-    shell_->GetTaskRunners().GetUITaskRunner()->PostDelayedTask(
-        [engine = shell_->GetEngine(), isolate]() {
-          if (!engine) {
-            return;
-          }
-          CreateCompilationTrace(isolate);
-        },
-        fml::TimeDelta::FromSeconds(kCompilationTraceDelayInSeconds));
-  }
 }
 
 void Engine::OnMainIsolateShutdown() {
