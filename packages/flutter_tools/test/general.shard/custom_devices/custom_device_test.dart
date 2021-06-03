@@ -587,7 +587,7 @@ void main() {
       processManager: FakeProcessManager.empty()
     );
 
-    expect(device.targetPlatform, TargetPlatform.linux_x64);
+    expect(await device.targetPlatform, TargetPlatform.linux_x64);
   });
 }
 
