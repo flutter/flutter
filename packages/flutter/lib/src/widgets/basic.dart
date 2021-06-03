@@ -68,6 +68,8 @@ export 'package:flutter/rendering.dart' show
   ValueGetter,
   WrapAlignment,
   WrapCrossAlignment;
+export 'package:flutter/services.dart' show
+  AssetBundle;
 
 // Examples can assume:
 // class TestWidget extends StatelessWidget { const TestWidget({Key? key}) : super(key: key); @override Widget build(BuildContext context) => const Placeholder(); }

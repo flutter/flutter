@@ -501,6 +501,23 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/83668
+  testWidgets('Scaffold.bottomSheet update test', (WidgetTester tester) async {
+    Widget buildFrame(Widget? bottomSheet) {
+      return MaterialApp(
+        home: Scaffold(
+          body: const Placeholder(),
+          bottomSheet: bottomSheet,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(const Text('I love Flutter!')));
+    await tester.pumpWidget(buildFrame(null));
+    // The disappearing animation has not yet been completed.
+    await tester.pumpWidget(buildFrame(const Text('I love Flutter!')));
+  });
+
   testWidgets('Verify that visual properties are passed through', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color color = Colors.pink;

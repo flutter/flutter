@@ -1655,71 +1655,6 @@ void main() {
     expect(await result, 0);
   }));
 
-  testUsingContext('FlutterDevice will not exit a paused isolate', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
-        method: '_flutter.listViews',
-        jsonResponse: <String, Object>{
-          'views': <Object>[
-            fakeFlutterView.toJson(),
-          ],
-        },
-      ),
-      FakeVmServiceRequest(
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
-        },
-        jsonResponse: fakePausedIsolate.toJson(),
-      ),
-    ]);
-    final TestFlutterDevice flutterDevice = TestFlutterDevice(
-      mockDevice,
-    );
-    flutterDevice.vmService = fakeVmServiceHost.vmService;
-
-    await flutterDevice.exitApps();
-
-    expect(mockDevice.appStopped, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }));
-
-  testUsingContext('FlutterDevice will exit an isolate that did not register the exit extension method', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
-        method: '_flutter.listViews',
-        jsonResponse: <String, Object>{
-          'views': <Object>[
-            fakeFlutterView.toJson(),
-          ],
-        },
-      ),
-      FakeVmServiceRequest(
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
-        },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
-      ),
-      FakeVmServiceRequest(
-        method: 'ext.flutter.exit',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
-        },
-        errorCode: RPCErrorCodes.kMethodNotFound,
-      ),
-    ]);
-    final TestFlutterDevice flutterDevice = TestFlutterDevice(
-      mockDevice,
-    );
-    flutterDevice.vmService = fakeVmServiceHost.vmService;
-
-    await flutterDevice.exitApps(timeoutDelay: Duration.zero);
-
-    expect(mockDevice.appStopped, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }));
-
   testUsingContext('FlutterDevice can exit from a release mode isolate with no VmService', () => testbed.run(() async {
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
@@ -1730,70 +1665,8 @@ void main() {
     expect(mockDevice.appStopped, true);
   }));
 
-  testUsingContext('FlutterDevice will call stopApp if the exit request times out', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
-        method: '_flutter.listViews',
-        jsonResponse: <String, Object>{
-          'views': <Object>[
-            fakeFlutterView.toJson(),
-          ],
-        },
-      ),
-      FakeVmServiceRequest(
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
-        },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
-      ),
-      FakeVmServiceRequest(
-        method: 'ext.flutter.exit',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
-        },
-        // Intentionally do not close isolate.
-        close: false,
-      )
-    ]);
-    final TestFlutterDevice flutterDevice = TestFlutterDevice(
-      mockDevice,
-    );
-    flutterDevice.vmService = fakeVmServiceHost.vmService;
-
-    await flutterDevice.exitApps(
-      timeoutDelay: Duration.zero,
-    );
-
-    expect(mockDevice.appStopped, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }));
-
-  testUsingContext('FlutterDevice will exit an un-paused isolate', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
-        method: kListViewsMethod,
-        jsonResponse: <String, Object>{
-          'views': <Object>[
-            fakeFlutterView.toJson(),
-          ],
-        },
-      ),
-      FakeVmServiceRequest(
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id
-        },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
-      ),
-      FakeVmServiceRequest(
-        method: 'ext.flutter.exit',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
-        },
-        close: true,
-      )
-    ]);
+  testUsingContext('FlutterDevice will exit an un-paused isolate using stopApp', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
     );
@@ -1802,6 +1675,7 @@ void main() {
     final Future<void> exitFuture = flutterDevice.exitApps();
 
     await expectLater(exitFuture, completes);
+    expect(mockDevice.appStopped, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 

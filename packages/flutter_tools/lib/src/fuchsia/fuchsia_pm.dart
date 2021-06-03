@@ -185,7 +185,7 @@ class FuchsiaPackageServer {
 
   int get port => _port;
 
-  /// Uses [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
+  /// Uses [FuchsiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
   /// package server.
   ///
   /// Returns false if the repo could not be created or the server could not

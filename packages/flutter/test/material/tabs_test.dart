@@ -3747,6 +3747,71 @@ void main() {
     expect(tabTwo.padding, expectedPaddingAdjusted);
     expect(tabThree.padding, expectedPaddingAdjusted);
   });
+
+  testWidgets('Change tab bar height', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 4,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(
+                  icon: Icon(Icons.check,size: 40),
+                  child: Text('1 - OK',style: TextStyle(fontSize: 25),),
+                  height: 85,
+                ), // icon and child
+                Tab(
+                  child: Text('2 - OK',style: TextStyle(fontSize: 25),),
+                  height: 85,
+                ), // child
+                Tab(
+                  icon: Icon(Icons.done,size: 40),
+                  height: 85,
+                ), // icon
+                Tab(
+                  text: '4 - OK',
+                  height: 85,
+                ), // text
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+    final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.check));
+    final Tab secTab = tester.widget(find.widgetWithText(Tab, '2 - OK' ));
+    final Tab thirdTab = tester.widget(find.widgetWithIcon(Tab, Icons.done));
+    final Tab fourthTab = tester.widget(find.widgetWithText(Tab, '4 - OK' ));
+    expect(firstTab.preferredSize.height, 85);
+    expect(firstTab.height, 85);
+    expect(secTab.height, 85);
+    expect(thirdTab.height, 85);
+    expect(fourthTab.height, 85);
+  });
+
+  testWidgets('Change tab bar height 2', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 1,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(
+                  icon: Icon(Icons.check,size: 40),
+                  text: '1 - OK',
+                  height: 85,
+                ), // icon and text
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+    final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.check));
+    expect(firstTab.height, 85);
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {

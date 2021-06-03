@@ -161,7 +161,7 @@ void main() {
         );
 
       expect(nextInvalidationResult.uris, contains(Uri.parse('.packages')));
-      // The PackagConfig should have been recreated too
+      // The PackageConfig should have been recreated too
       expect(nextInvalidationResult.packageConfig,
         isNot(invalidationResult.packageConfig));
     });

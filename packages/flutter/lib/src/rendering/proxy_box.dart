@@ -4283,7 +4283,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// Adds a semenatics tag to the semantics subtree.
+  /// Adds a semantics tag to the semantics subtree.
   SemanticsTag? get tagForChildren => _tagForChildren;
   SemanticsTag? _tagForChildren;
   set tagForChildren(SemanticsTag? value) {

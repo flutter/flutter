@@ -10,7 +10,7 @@ Future<void> main() async {
   const MethodChannel channel = MethodChannel('com.example.abstract_method_smoke_test');
   await channel.invokeMethod<void>('show_keyboard');
   runApp(const MyApp());
-  print('Test suceeded');
+  print('Test succeeded');
 }
 
 class MyApp extends StatelessWidget {

@@ -103,7 +103,7 @@ class UwpTool {
     return true;
   }
 
-  /// Installs a developer signing cerificate.
+  /// Installs a developer signing certificate.
   ///
   /// Returns `true` on success.
   Future<bool> installCertificate(String certificatePath) async {

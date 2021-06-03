@@ -75,7 +75,7 @@ void main(List<String> arguments) {
     // Verify that the Gradlew wrapper exists.
     final File gradleWrapper = androidDirectory.childFile('gradlew');
     // Generate Gradle wrapper if it doesn't exists.
-    // This logic is embededed within the Flutter tool.
+    // This logic is embedded within the Flutter tool.
     // To generate the wrapper, build a flavor that doesn't exist.
     if (!gradleWrapper.existsSync()) {
       Process.runSync(
