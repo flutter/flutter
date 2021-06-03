@@ -6,6 +6,8 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("geometry") {
   sources = [
+    "color.cc",
+    "color.h",
     "matrix.cc",
     "matrix.h",
     "path.cc",
