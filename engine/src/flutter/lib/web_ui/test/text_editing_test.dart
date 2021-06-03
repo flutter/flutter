@@ -435,6 +435,13 @@ void testMain() {
       textEditing = null;
     });
 
+    test('TextInput.requestAutofill', () async {
+      final MethodCall requestAutofill = MethodCall('TextInput.requestAutofill');
+      sendFrameworkMessage(codec.encodeMethodCall(requestAutofill));
+
+      //No-op and without crashing.
+    });
+
     test('setClient, show, setEditingState, hide', () {
       final MethodCall setClient = MethodCall(
           'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
