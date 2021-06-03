@@ -11,6 +11,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../offscreen_canvas.dart';
 import '../../browser_detection.dart';
+import '../../vector_math.dart';
 
 /// Compiled and cached gl program.
 class GlProgram {
@@ -484,5 +485,61 @@ class GlContextCache {
     _cachedContext ??= GlContext(_offScreenCanvas!);
     _cachedContext!.setViewportSize(widthInPixels, heightInPixels);
     return _cachedContext;
+  }
+}
+
+void setupVertexTransforms(
+    GlContext gl,
+    GlProgram glProgram,
+    double offsetX,
+    double offsetY,
+    double widthInPixels,
+    double heightInPixels,
+    Matrix4 transform) {
+  Object transformUniform =
+      gl.getUniformLocation(glProgram.program, 'u_ctransform');
+  Matrix4 transformAtOffset = transform.clone()
+    ..translate(-offsetX, -offsetY);
+  gl.setUniformMatrix4fv(transformUniform, false, transformAtOffset.storage);
+
+  // Set uniform to scale 0..width/height pixels coordinates to -1..1
+  // clipspace range and flip the Y axis.
+  Object resolution = gl.getUniformLocation(glProgram.program, 'u_scale');
+  gl.setUniform4f(resolution, 2.0 / widthInPixels.toDouble(),
+      -2.0 / heightInPixels.toDouble(), 1, 1);
+  Object shift = gl.getUniformLocation(glProgram.program, 'u_shift');
+  gl.setUniform4f(shift, -1, 1, 0, 0);
+}
+
+void setupTextureTransform(
+    GlContext gl, GlProgram glProgram, double offsetx, double offsety, double sx, double sy) {
+  Object scalar = gl.getUniformLocation(glProgram.program, 'u_textransform');
+  gl.setUniform4f(scalar, sx, sy, offsetx, offsety);
+}
+
+void bufferVertexData(GlContext gl, Float32List positions,
+    double devicePixelRatio) {
+  if (devicePixelRatio == 1.0) {
+    gl.bufferData(positions, gl.kStaticDraw);
+  } else {
+    final int length = positions.length;
+    Float32List scaledList = Float32List(length);
+    for (int i = 0; i < length; i++) {
+      scaledList[i] = positions[i] * devicePixelRatio;
+    }
+    gl.bufferData(scaledList, gl.kStaticDraw);
+  }
+}
+
+dynamic tileModeToGlWrapping(GlContext gl, ui.TileMode tileMode) {
+  switch (tileMode) {
+    case ui.TileMode.clamp:
+    return gl.kClampToEdge;
+    case ui.TileMode.decal:
+    return gl.kClampToEdge;
+    case ui.TileMode.mirror:
+    return gl.kMirroredRepeat;
+    case ui.TileMode.repeated:
+    return gl.kRepeat;
   }
 }

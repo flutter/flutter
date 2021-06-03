@@ -357,8 +357,6 @@ class RecordingCanvas {
 
   void drawRect(ui.Rect rect, SurfacePaint paint) {
     assert(!_recordingEnded);
-    assert(paint.shader == null || paint.shader is! EngineImageShader,
-        'ImageShader not supported yet');
     if (paint.shader != null) {
       renderStrategy.hasArbitraryPaint = true;
     }
@@ -375,8 +373,6 @@ class RecordingCanvas {
 
   void drawRRect(ui.RRect rrect, SurfacePaint paint) {
     assert(!_recordingEnded);
-    assert(paint.shader == null || paint.shader is! EngineImageShader,
-        'ImageShader not supported yet');
     if (paint.shader != null || !rrect.webOnlyUniformRadii) {
       renderStrategy.hasArbitraryPaint = true;
     }
@@ -393,8 +389,6 @@ class RecordingCanvas {
 
   void drawDRRect(ui.RRect outer, ui.RRect inner, SurfacePaint paint) {
     assert(!_recordingEnded);
-    assert(paint.shader == null || paint.shader is! EngineImageShader,
-        'ImageShader not supported yet');
     // Check the inner bounds are contained within the outer bounds
     // see: https://cs.chromium.org/chromium/src/third_party/skia/src/core/SkCanvas.cpp?l=1787-1789
     ui.Rect innerRect = inner.outerRect;
@@ -453,8 +447,6 @@ class RecordingCanvas {
 
   void drawOval(ui.Rect rect, SurfacePaint paint) {
     assert(!_recordingEnded);
-    assert(paint.shader == null || paint.shader is! EngineImageShader,
-        'ImageShader not supported yet');
     renderStrategy.hasArbitraryPaint = true;
     _didDraw = true;
     final double paintSpread = _getPaintSpread(paint);
@@ -469,8 +461,6 @@ class RecordingCanvas {
 
   void drawCircle(ui.Offset c, double radius, SurfacePaint paint) {
     assert(!_recordingEnded);
-    assert(paint.shader == null || paint.shader is! EngineImageShader,
-        'ImageShader not supported yet');
     renderStrategy.hasArbitraryPaint = true;
     _didDraw = true;
     final double paintSpread = _getPaintSpread(paint);
@@ -488,8 +478,6 @@ class RecordingCanvas {
 
   void drawPath(ui.Path path, SurfacePaint paint) {
     assert(!_recordingEnded);
-    assert(paint.shader == null || paint.shader is! EngineImageShader,
-        'ImageShader not supported yet');
     if (paint.shader == null) {
       // For Rect/RoundedRect paths use drawRect/drawRRect code paths for
       // DomCanvas optimization.
