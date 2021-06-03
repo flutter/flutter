@@ -3471,5 +3471,5 @@ void main() {
     expect(find.byType(Scrollbar), findsOneWidget);
     expect(find.byType(RawScrollbar), findsNothing);
 
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ ...TargetPlatform.values }));
+  }, variant: TargetPlatformVariant.all());
 }

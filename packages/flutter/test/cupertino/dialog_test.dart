@@ -1286,7 +1286,7 @@ void main() {
     // Built in CupertinoScrollbars should only number 2: one for the actions,
     // one for the content.
     expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ ...TargetPlatform.values }));
+  }, variant: TargetPlatformVariant.all());
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
