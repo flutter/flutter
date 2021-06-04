@@ -5,7 +5,6 @@
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
-import 'package:ui/src/engine/canvaskit/surface_factory.dart';
 import 'package:ui/ui.dart' as ui;
 
 /// Whether the current browser is Safari on iOS.

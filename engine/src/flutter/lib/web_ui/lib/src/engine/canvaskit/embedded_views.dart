@@ -7,16 +7,6 @@ import 'dart:html' as html;
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../html/path_to_svg_clip.dart';
-import '../util.dart';
-import '../vector_math.dart';
-import 'canvas.dart';
-import 'initialization.dart';
-import 'path.dart';
-import 'picture_recorder.dart';
-import 'surface.dart';
-import 'surface_factory.dart';
-
 /// This composites HTML views into the [ui.Scene].
 class HtmlViewEmbedder {
   /// The [HtmlViewEmbedder] singleton.
