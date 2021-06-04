@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 
+import 'dart:_http';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -64,22 +65,16 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   // We set `autoUncompress` to false to ensure that we can trust the value of
   // the `Content-Length` HTTP header. We automatically uncompress the content
   // in our call to [consolidateHttpClientResponseBytes].
-  //
-  // In order to allow HttpOverrides to be used in different parts of a Flutter
-  // application, use these or the parent zone as a key to look up the client.
-  static final Expando<HttpClient> _sharedClients = Expando<HttpClient>();
-  static HttpClient get _sharedHttpClient {
-    final Object token = HttpOverrides.current ?? Zone.root;
-    HttpClient? cachedClient = _sharedClients[token];
-    cachedClient ??= (_sharedClients[token] = HttpClient()..autoUncompress = false);
-    return cachedClient;
-  }
+  static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 
   static HttpClient get _httpClient {
     HttpClient client = _sharedHttpClient;
     assert(() {
       if (debugNetworkImageHttpClientProvider != null)
         client = debugNetworkImageHttpClientProvider!();
+     // do not use the cached client if an HttpOverrides is defined for testing.
+      else if (HttpOverrides.current != null)
+        client = HttpClient()..autoUncompress = false;
       return true;
     }());
     return client;
