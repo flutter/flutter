@@ -1460,7 +1460,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 }
 
 class OperationResult {
-  OperationResult(this.code, this.message, { this.fatal = false });
+  OperationResult(this.code, this.message, { this.fatal = false, this.updateFSReport });
 
   /// The result of the operation; a non-zero code indicates a failure.
   final int code;
@@ -1470,6 +1470,8 @@ class OperationResult {
 
   /// Whether this error should cause the runner to exit.
   final bool fatal;
+
+  final UpdateFSReport updateFSReport;
 
   bool get isOk => code == 0;
 

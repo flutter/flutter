@@ -119,6 +119,29 @@ class HotRunner extends ResidentRunner {
 
   DateTime firstBuildTime;
 
+  String _targetPlatform;
+  String _sdkName;
+  bool _emulator;
+
+  Future<void> _calculateTargetPlatform() async {
+    if (_targetPlatform == null) {
+      if (flutterDevices.length == 1) {
+        final Device device = flutterDevices.first.device;
+        _targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
+        _sdkName = await device.sdkNameAndVersion;
+        _emulator = await device.isLocalEmulator;
+      } else if (flutterDevices.length > 1) {
+        _targetPlatform = 'multiple';
+        _sdkName = 'multiple';
+        _emulator = false;
+      } else {
+        _targetPlatform = 'unknown';
+        _sdkName = 'unknown';
+        _emulator = false;
+      }
+    }
+  }
+
   void _addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];
     benchmarkData[name].add(value);
@@ -315,8 +338,14 @@ class HotRunner extends ResidentRunner {
     bool enableDevTools = false,
     String route,
   }) async {
+    await _calculateTargetPlatform();
+
+    final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);
     firstBuildTime = DateTime.now();
+
+    Duration totalCompileTime = Duration.zero;
+    Duration totalLaunchAppTime = Duration.zero;
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
     for (final FlutterDevice device in flutterDevices) {
@@ -326,6 +355,7 @@ class HotRunner extends ResidentRunner {
       // subsequent invocation in devfs will not overwrite.
       await runSourceGenerators();
       if (device.generator != null) {
+        final Stopwatch compileTimer = Stopwatch()..start();
         startupTasks.add(
           device.generator.recompile(
             mainFile.uri,
@@ -342,14 +372,35 @@ class HotRunner extends ResidentRunner {
             packageConfig: debuggingOptions.buildInfo.packageConfig,
             projectRootPath: FlutterProject.current().directory.absolute.path,
             fs: globals.fs,
-          ).then((CompilerOutput output) => output?.errorCount == 0)
+          ).then((CompilerOutput output) {
+            compileTimer.stop();
+            totalCompileTime += compileTimer.elapsed;
+            return output?.errorCount == 0;
+          })
         );
       }
+
+      final Stopwatch launchAppTimer = Stopwatch()..start();
       startupTasks.add(device.runHot(
         hotRunner: this,
         route: route,
-      ).then((int result) => result == 0));
+      ).then((int result) {
+        totalLaunchAppTime += launchAppTimer.elapsed;
+        return result == 0;
+      }));
     }
+
+    unawaited(appStartedCompleter?.future?.then((_) => HotEvent('reload-ready',
+      targetPlatform: _targetPlatform,
+      sdkName: _sdkName,
+      emulator: _emulator,
+      fullRestart: null,
+      fastReassemble: null,
+      overallTimeInMs: appStartedTimer.elapsed.inMilliseconds,
+      compileTimeInMs: totalCompileTime.inMilliseconds,
+      transferTimeInMs: totalLaunchAppTime.inMilliseconds,
+    )?.send()));
+
     try {
       final List<bool> results = await Future.wait(startupTasks);
       if (!results.every((bool passed) => passed)) {
@@ -392,6 +443,7 @@ class HotRunner extends ResidentRunner {
       }
     }
 
+    final Stopwatch findInvalidationTimer = Stopwatch()..start();
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevices[0].devFS.lastCompiled,
       urisToMonitor: flutterDevices[0].devFS.sources,
@@ -400,6 +452,7 @@ class HotRunner extends ResidentRunner {
       packageConfig: flutterDevices[0].devFS.lastPackageConfig
           ?? debuggingOptions.buildInfo.packageConfig,
     );
+    findInvalidationTimer.stop();
     final File entrypointFile = globals.fs.file(mainPath);
     if (!entrypointFile.existsSync()) {
       globals.printError(
@@ -409,7 +462,11 @@ class HotRunner extends ResidentRunner {
         'flutter is restarted or the file is restored.'
       );
     }
-    final UpdateFSReport results = UpdateFSReport(success: true);
+    final UpdateFSReport results = UpdateFSReport(
+      success: true,
+      scannedSourcesCount: flutterDevices[0].devFS.sources.length,
+      findInvalidatedDuration: findInvalidationTimer.elapsed,
+    );
     for (final FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
         mainUri: entrypointFile.absolute.uri,
@@ -574,7 +631,11 @@ class HotRunner extends ResidentRunner {
     // Toggle the main dill name after successfully uploading.
     _swap =! _swap;
 
-    return OperationResult.ok;
+    return OperationResult(
+      OperationResult.ok.code,
+      OperationResult.ok.message,
+      updateFSReport: updatedDevFS,
+    );
   }
 
   /// Returns [true] if the reload was successful.
@@ -612,23 +673,7 @@ class HotRunner extends ResidentRunner {
     if (flutterDevices.any((FlutterDevice device) => device.devFS == null)) {
       return OperationResult(1, 'Device initialization has not completed.');
     }
-    String targetPlatform;
-    String sdkName;
-    bool emulator;
-    if (flutterDevices.length == 1) {
-      final Device device = flutterDevices.first.device;
-      targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
-      sdkName = await device.sdkNameAndVersion;
-      emulator = await device.isLocalEmulator;
-    } else if (flutterDevices.length > 1) {
-      targetPlatform = 'multiple';
-      sdkName = 'multiple';
-      emulator = false;
-    } else {
-      targetPlatform = 'unknown';
-      sdkName = 'unknown';
-      emulator = false;
-    }
+    await _calculateTargetPlatform();
     final Stopwatch timer = Stopwatch()..start();
 
     // Run source generation if needed.
@@ -636,9 +681,9 @@ class HotRunner extends ResidentRunner {
 
     if (fullRestart) {
       final OperationResult result = await _fullRestartHelper(
-        targetPlatform: targetPlatform,
-        sdkName: sdkName,
-        emulator: emulator,
+        targetPlatform: _targetPlatform,
+        sdkName: _sdkName,
+        emulator: _emulator,
         reason: reason,
         silent: silent,
       );
@@ -649,9 +694,9 @@ class HotRunner extends ResidentRunner {
       return result;
     }
     final OperationResult result = await _hotReloadHelper(
-      targetPlatform: targetPlatform,
-      sdkName: sdkName,
-      emulator: emulator,
+      targetPlatform: _targetPlatform,
+      sdkName: _sdkName,
+      emulator: _emulator,
       reason: reason,
       pause: pause,
     );
@@ -682,14 +727,32 @@ class HotRunner extends ResidentRunner {
       );
     }
     OperationResult result;
-    String restartEvent = 'restart';
+    String restartEvent;
     try {
+      final Stopwatch restartTimer = Stopwatch()..start();
       if (!(await hotRunnerConfig.setupHotRestart())) {
         return OperationResult(1, 'setupHotRestart failed');
       }
-      result = await _restartFromSources(reason: reason,);
+      result = await _restartFromSources(reason: reason);
+      restartTimer.stop();
       if (!result.isOk) {
         restartEvent = 'restart-failed';
+      } else {
+        HotEvent('restart',
+          targetPlatform: targetPlatform,
+          sdkName: sdkName,
+          emulator: emulator,
+          fullRestart: true,
+          reason: reason,
+          fastReassemble: null,
+          overallTimeInMs: restartTimer.elapsed.inMilliseconds,
+          syncedBytes: result.updateFSReport?.syncedBytes,
+          invalidatedSourcesCount: result.updateFSReport?.invalidatedSourcesCount,
+          transferTimeInMs: result.updateFSReport?.transferDuration?.inMilliseconds,
+          compileTimeInMs: result.updateFSReport?.compileDuration?.inMilliseconds,
+          findInvalidatedTimeInMs: result.updateFSReport?.findInvalidatedDuration?.inMilliseconds,
+          scannedSourcesCount: result.updateFSReport?.scannedSourcesCount,
+        ).send();
       }
     } on vm_service.SentinelException catch (err, st) {
       restartEvent = 'exception';
@@ -698,14 +761,16 @@ class HotRunner extends ResidentRunner {
       restartEvent = 'exception';
       return OperationResult(1, 'hot restart failed to complete: $err\n$st', fatal: true);
     } finally {
-      HotEvent(restartEvent,
-        targetPlatform: targetPlatform,
-        sdkName: sdkName,
-        emulator: emulator,
-        fullRestart: true,
-        reason: reason,
-        fastReassemble: null,
-      ).send();
+      if (restartEvent != null) {
+        HotEvent(restartEvent,
+          targetPlatform: targetPlatform,
+          sdkName: sdkName,
+          emulator: emulator,
+          fullRestart: true,
+          reason: reason,
+          fastReassemble: null,
+        ).send();
+      }
       status?.cancel();
     }
     return result;
@@ -819,6 +884,7 @@ class HotRunner extends ResidentRunner {
       return OperationResult(1, 'DevFS synchronization failed');
     }
     String reloadMessage = 'Reloaded 0 libraries';
+    final Stopwatch reloadVMTimer = Stopwatch()..start();
     final Map<String, Object> firstReloadDetails = <String, Object>{};
     if (updatedDevFS.invalidatedSourcesCount > 0) {
       final OperationResult result = await _reloadSourcesHelper(
@@ -836,6 +902,7 @@ class HotRunner extends ResidentRunner {
     } else {
       _addBenchmarkData('hotReloadVMReloadMilliseconds', 0);
     }
+    reloadVMTimer.stop();
 
     final Stopwatch reassembleTimer = Stopwatch()..start();
     await _evictDirtyAssets();
@@ -937,6 +1004,7 @@ class HotRunner extends ResidentRunner {
       },
     );
     // Record time it took for Flutter to reassemble the application.
+    reassembleTimer.stop();
     _addBenchmarkData('hotReloadFlutterReassembleMilliseconds', reassembleTimer.elapsed.inMilliseconds);
 
     reloadTimer.stop();
@@ -961,10 +1029,15 @@ class HotRunner extends ResidentRunner {
       syncedProceduresCount: firstReloadDetails['receivedProceduresCount'] as int ?? 0,
       syncedBytes: updatedDevFS.syncedBytes,
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
-      transferTimeInMs: devFSTimer.elapsed.inMilliseconds,
+      transferTimeInMs: updatedDevFS.transferDuration.inMilliseconds,
       fastReassemble: featureFlags.isSingleWidgetReloadEnabled
         ? updatedDevFS.fastReassembleClassName != null
         : null,
+      compileTimeInMs: updatedDevFS.compileDuration.inMilliseconds,
+      findInvalidatedTimeInMs: updatedDevFS.findInvalidatedDuration.inMilliseconds,
+      scannedSourcesCount: updatedDevFS.scannedSourcesCount,
+      reassembleTimeInMs: reassembleTimer.elapsed.inMilliseconds,
+      reloadVMTimeInMs: reloadVMTimer.elapsed.inMilliseconds,
     ).send();
 
     if (shouldReportReloadTime) {
@@ -1225,7 +1298,7 @@ class ProjectFileInvalidator {
       assert(urisToMonitor.isEmpty);
       return InvalidationResult(
         packageConfig: packageConfig,
-        uris: <Uri>[]
+        uris: <Uri>[],
       );
     }
 
