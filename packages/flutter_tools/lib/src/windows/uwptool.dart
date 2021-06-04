@@ -45,7 +45,7 @@ class UwpTool {
       return <String>[];
     }
     final List<String> packageFamilies = <String>[];
-    for (final String line in result.stdout.toString().split('\n')) {
+    for (final String line in result.stdout.split('\n')) {
       final String packageFamily = line.trim();
       if (packageFamily.isNotEmpty) {
         packageFamilies.add(packageFamily);
@@ -82,7 +82,7 @@ class UwpTool {
       return null;
     }
     // Read the process ID from stdout.
-    final int processId = int.tryParse(result.stdout.toString().trim());
+    final int processId = int.tryParse(result.stdout.trim());
     _logger.printTrace('Launched application $packageFamily with process ID $processId');
     return processId;
   }
