@@ -360,6 +360,8 @@ void debugFlushLastFrameImageSizeInfo() {
 ///
 ///  * `scale`: The number of image pixels for each logical pixel.
 ///
+///  * `opacity`: The opacity to paint the image onto the canvas with.
+///
 ///  * `colorFilter`: If non-null, the color filter to apply when painting the
 ///    image.
 ///
@@ -420,6 +422,7 @@ void paintImage({
   required ui.Image image,
   String? debugImageLabel,
   double scale = 1.0,
+  double opacity = 1.0,
   ColorFilter? colorFilter,
   BoxFit? fit,
   Alignment alignment = Alignment.center,
@@ -473,6 +476,7 @@ void paintImage({
   final Paint paint = Paint()..isAntiAlias = isAntiAlias;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
+  paint.color = Color.fromRGBO(0, 0, 0, opacity);
   paint.filterQuality = filterQuality;
   paint.invertColors = invertColors;
   final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;

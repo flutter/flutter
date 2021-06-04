@@ -47,9 +47,32 @@ class ParagraphGenerator {
   }
 }
 
+/// Which mode to run [BenchBuildColorsGrid] in.
+enum _TestMode {
+  /// Uses the HTML rendering backend with the canvas 2D text layout.
+  useCanvasTextLayout,
+
+  /// Uses the HTML rendering backend with the DOM text layout.
+  useDomTextLayout,
+
+  /// Uses CanvasKit for everything.
+  useCanvasKit,
+}
+
 /// Sends a platform message to the web engine to enable/disable the usage of
-/// the new canvas-based text measurement implementation.
-void _useCanvasText(bool useCanvasText) {
+/// the canvas-based text measurement implementation.
+void _setTestMode(_TestMode mode) {
+  bool useCanvasText; // null means do not force DOM or canvas, works for CanvasKit
+  switch (mode) {
+    case _TestMode.useDomTextLayout:
+      useCanvasText = false;
+      break;
+    case _TestMode.useCanvasTextLayout:
+      useCanvasText = true;
+      break;
+    default:
+      // Keep as null.
+  }
   js_util.callMethod(
     html.window,
     '_flutter_internal_update_experiment',
@@ -57,20 +80,27 @@ void _useCanvasText(bool useCanvasText) {
   );
 }
 
-/// Repeatedly lays out a paragraph using the DOM measurement approach.
+/// Repeatedly lays out a paragraph.
 ///
 /// Creates a different paragraph each time in order to avoid hitting the cache.
 class BenchTextLayout extends RawRecorder {
-  BenchTextLayout({@required this.useCanvas})
-      : super(name: useCanvas ? canvasBenchmarkName : domBenchmarkName);
+  BenchTextLayout.dom()
+      : _mode = _TestMode.useDomTextLayout, super(name: domBenchmarkName);
+
+  BenchTextLayout.canvas()
+      : _mode = _TestMode.useCanvasTextLayout, super(name: canvasBenchmarkName);
+
+  BenchTextLayout.canvasKit()
+      : _mode = _TestMode.useCanvasKit, super(name: canvasKitBenchmarkName);
 
   static const String domBenchmarkName = 'text_dom_layout';
   static const String canvasBenchmarkName = 'text_canvas_layout';
+  static const String canvasKitBenchmarkName = 'text_canvaskit_layout';
 
   final ParagraphGenerator generator = ParagraphGenerator();
 
   /// Whether to use the new canvas-based text measurement implementation.
-  final bool useCanvas;
+  final _TestMode _mode;
 
   static const String singleLineText = '*** ** ****';
   static const String multiLineText = '*** ****** **** *** ******** * *** '
@@ -80,7 +110,7 @@ class BenchTextLayout extends RawRecorder {
 
   @override
   void body(Profile profile) {
-    _useCanvasText(useCanvas);
+    _setTestMode(_mode);
 
     recordParagraphOperations(
       profile: profile,
@@ -114,7 +144,7 @@ class BenchTextLayout extends RawRecorder {
       maxWidth: 200.0,
     );
 
-    _useCanvasText(null);
+    _setTestMode(null);
   }
 
   void recordParagraphOperations({
@@ -144,37 +174,42 @@ class BenchTextLayout extends RawRecorder {
   }
 }
 
-/// Repeatedly lays out a paragraph using the DOM measurement approach.
+/// Repeatedly lays out the same paragraph.
 ///
 /// Uses the same paragraph content to make sure we hit the cache. It doesn't
 /// use the same paragraph instance because the layout method will shortcircuit
 /// in that case.
 class BenchTextCachedLayout extends RawRecorder {
-  BenchTextCachedLayout({@required this.useCanvas})
-      : super(name: useCanvas ? canvasBenchmarkName : domBenchmarkName);
+  BenchTextCachedLayout.dom()
+      : _mode = _TestMode.useDomTextLayout, super(name: domBenchmarkName);
+
+  BenchTextCachedLayout.canvas()
+      : _mode = _TestMode.useCanvasTextLayout, super(name: canvasBenchmarkName);
+
+  BenchTextCachedLayout.canvasKit()
+      : _mode = _TestMode.useCanvasKit, super(name: canvasKitBenchmarkName);
 
   static const String domBenchmarkName = 'text_dom_cached_layout';
   static const String canvasBenchmarkName = 'text_canvas_cached_layout';
+  static const String canvasKitBenchmarkName = 'text_canvas_kit_cached_layout';
 
   /// Whether to use the new canvas-based text measurement implementation.
-  final bool useCanvas;
+  final _TestMode _mode;
 
-  final ui.ParagraphBuilder builder =
-      ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
+  @override
+  void body(Profile profile) {
+    _setTestMode(_mode);
+    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
         ..pushStyle(ui.TextStyle(fontSize: 12.0))
         ..addText(
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
           'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
         );
-
-  @override
-  void body(Profile profile) {
-    _useCanvasText(useCanvas);
     final ui.Paragraph paragraph = builder.build();
     profile.record('layout', () {
       paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
     }, reported: true);
-    _useCanvasText(null);
+    _setTestMode(null);
   }
 }
 
@@ -184,18 +219,6 @@ class BenchTextCachedLayout extends RawRecorder {
 /// The purpose of this counter is to make sure the rendered paragraphs on each
 /// build are unique.
 int _counter = 0;
-
-/// Which mode to run [BenchBuildColorsGrid] in.
-enum _TestMode {
-  /// Uses the HTML rendering backend with the canvas 2D text layout.
-  useCanvasTextLayout,
-
-  /// Uses the HTML rendering backend with the DOM text layout.
-  useDomTextLayout,
-
-  /// Uses CanvasKit for everything.
-  useCanvasKit,
-}
 
 /// Measures how expensive it is to construct a realistic text-heavy piece of UI.
 ///
@@ -230,12 +253,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
 
   @override
   Future<void> setUpAll() async {
-    if (_mode == _TestMode.useCanvasTextLayout) {
-      _useCanvasText(true);
-    }
-    if (_mode == _TestMode.useDomTextLayout) {
-      _useCanvasText(false);
-    }
+    _setTestMode(_mode);
     registerEngineBenchmarkValueListener('text_layout', (num value) {
       _textLayoutMicros += value;
     });
@@ -243,7 +261,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
 
   @override
   Future<void> tearDownAll() async {
-    _useCanvasText(null);
+    _setTestMode(null);
     stopListeningToEngineBenchmarkValues('text_layout');
   }
 

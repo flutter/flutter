@@ -217,7 +217,7 @@ void main() {
 
     test('reads token from service account file with whitespace', () {
       final File serviceAccountFile = fs.file(serviceAccountTokenPath)..createSync();
-      serviceAccountFile.writeAsStringSync(serviceAccountToken + ' \n');
+      serviceAccountFile.writeAsStringSync('$serviceAccountToken \n');
       final AuthenticatedCocoonClient client = AuthenticatedCocoonClient(serviceAccountTokenPath, filesystem: fs);
       expect(client.serviceAccountToken, serviceAccountToken);
     });

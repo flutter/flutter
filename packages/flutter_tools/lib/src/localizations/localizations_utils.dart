@@ -93,10 +93,10 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       // Update the base string to reflect assumed scriptCodes.
       originalString = languageCode;
       if (scriptCode != null) {
-        originalString += '_' + scriptCode;
+        originalString += '_$scriptCode';
       }
       if (countryCode != null) {
-        originalString += '_' + countryCode;
+        originalString += '_$countryCode';
       }
     }
 

@@ -27,7 +27,7 @@ import 'package:flutter_tools/src/fuchsia/tiles_ctl.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -38,7 +38,7 @@ void main() {
     MemoryFileSystem memoryFileSystem;
     FakeOperatingSystemUtils osUtils;
     FakeFuchsiaDeviceTools fuchsiaDeviceTools;
-    MockFuchsiaSdk fuchsiaSdk;
+    FakeFuchsiaSdk fuchsiaSdk;
     Artifacts artifacts;
     FakeProcessManager fakeSuccessfulProcessManager;
     FakeProcessManager fakeFailedProcessManager;
@@ -48,7 +48,7 @@ void main() {
       memoryFileSystem = MemoryFileSystem.test();
       osUtils = FakeOperatingSystemUtils();
       fuchsiaDeviceTools = FakeFuchsiaDeviceTools();
-      fuchsiaSdk = MockFuchsiaSdk();
+      fuchsiaSdk = FakeFuchsiaSdk();
       sshConfig = MemoryFileSystem.test().file('ssh_config')..writeAsStringSync('\n');
       artifacts = Artifacts.test();
       for (final BuildMode mode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
@@ -258,7 +258,7 @@ void main() {
       ProcessManager: () => fakeSuccessfulProcessManager,
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
-      FuchsiaSdk: () => MockFuchsiaSdk(pm: FailingPM()),
+      FuchsiaSdk: () => FakeFuchsiaSdk(pm: FailingPM()),
       OperatingSystemUtils: () => osUtils,
     });
 
@@ -295,13 +295,7 @@ void main() {
   });
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
-
-class MockProcessResult extends Mock implements ProcessResult {}
-
-class MockProcess extends Mock implements Process {}
-
-Process _createMockProcess({
+Process _createFakeProcess({
   int exitCode = 0,
   String stdout = '',
   String stderr = '',
@@ -313,24 +307,14 @@ Process _createMockProcess({
   final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
     utf8.encode(stderr),
   ]);
-  final Process process = MockProcess();
-
-  when(process.stdout).thenAnswer((_) => stdoutStream);
-  when(process.stderr).thenAnswer((_) => stderrStream);
-
-  if (persistent) {
-    final Completer<int> exitCodeCompleter = Completer<int>();
-    when(process.kill()).thenAnswer((_) {
-      exitCodeCompleter.complete(-11);
-      return true;
-    });
-    when(process.exitCode).thenAnswer((_) => exitCodeCompleter.future);
-  } else {
-    when(process.exitCode).thenAnswer((_) => Future<int>.value(exitCode));
-  }
+  final Completer<int> exitCodeCompleter = Completer<int>();
+  final Process process = FakeProcess(
+    stdout: stdoutStream,
+    stderr: stderrStream,
+    exitCode: persistent ? exitCodeCompleter.future : Future<int>.value(exitCode),
+  );
   return process;
 }
-
 
 class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
   FuchsiaDeviceWithFakeDiscovery(String id, {String name}) : super(id, name: name);
@@ -555,7 +539,7 @@ class FakeFuchsiaPM implements FuchsiaPM {
 
   @override
   Future<Process> serve(String repoPath, String host, int port) async {
-    return _createMockProcess(persistent: true);
+    return _createFakeProcess(persistent: true);
   }
 
   @override
@@ -594,7 +578,7 @@ class FailingPM implements FuchsiaPM {
 
   @override
   Future<Process> serve(String repoPath, String host, int port) async {
-    return _createMockProcess(exitCode: 6);
+    return _createFakeProcess(exitCode: 6);
   }
 
   @override
@@ -652,8 +636,8 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
   }
 }
 
-class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
-  MockFuchsiaSdk({
+class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
+  FakeFuchsiaSdk({
     FuchsiaPM pm,
     FuchsiaKernelCompiler compiler,
     FuchsiaDevFinder devFinder,

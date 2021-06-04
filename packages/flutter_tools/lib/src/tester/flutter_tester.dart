@@ -18,6 +18,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../bundle_builder.dart';
 import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';

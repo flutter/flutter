@@ -993,7 +993,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha! > 0 && _alpha! < 255;
+      _currentlyNeedsCompositing = _alpha! > 0;
       if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
         markNeedsCompositingBitsUpdate();
       markNeedsPaint();
@@ -1008,12 +1008,6 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
       if (_alpha == 0) {
         // No need to keep the layer. We'll create a new one if necessary.
         layer = null;
-        return;
-      }
-      if (_alpha == 255) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        context.paintChild(child!, offset);
         return;
       }
       assert(needsCompositing);
@@ -2205,12 +2199,14 @@ class RenderTransform extends RenderProxyBox {
     AlignmentGeometry? alignment,
     TextDirection? textDirection,
     this.transformHitTests = true,
+    FilterQuality? filterQuality,
     RenderBox? child,
   }) : assert(transform != null),
        super(child) {
     this.transform = transform;
     this.alignment = alignment;
     this.textDirection = textDirection;
+    this.filterQuality = filterQuality;
     this.origin = origin;
   }
 
@@ -2264,6 +2260,9 @@ class RenderTransform extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  @override
+  bool get alwaysNeedsCompositing => child != null && _filterQuality != null;
+
   /// When set to true, hit tests are performed based on the position of the
   /// child as it is painted. When set to false, hit tests are performed
   /// ignoring the transformation.
@@ -2283,6 +2282,21 @@ class RenderTransform extends RenderProxyBox {
     _transform = Matrix4.copy(value);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
+  }
+
+  /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@macro flutter.widgets.Transform.optional.FilterQuality}
+  FilterQuality? get filterQuality => _filterQuality;
+  FilterQuality? _filterQuality;
+  set filterQuality(FilterQuality? value) {
+    if (_filterQuality == value)
+      return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
+    _filterQuality = value;
+    if (didNeedCompositing != alwaysNeedsCompositing)
+      markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
   }
 
   /// Sets the transform to the identity matrix.
@@ -2372,18 +2386,32 @@ class RenderTransform extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       final Matrix4 transform = _effectiveTransform!;
-      final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
-      if (childOffset == null) {
-        layer = context.pushTransform(
-          needsCompositing,
-          offset,
-          transform,
-          super.paint,
-          oldLayer: layer as TransformLayer?,
-        );
+      if (filterQuality == null) {
+        final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
+        if (childOffset == null) {
+          layer = context.pushTransform(
+            needsCompositing,
+            offset,
+            transform,
+            super.paint,
+            oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
+          );
+        } else {
+          super.paint(context, offset + childOffset);
+          layer = null;
+        }
       } else {
-        super.paint(context, offset + childOffset);
-        layer = null;
+        final ui.ImageFilter filter = ui.ImageFilter.matrix(
+          transform.storage,
+          filterQuality: filterQuality!,
+        );
+        if (layer is ImageFilterLayer) {
+          final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
+          filterLayer.imageFilter = filter;
+        } else {
+          layer = ImageFilterLayer(imageFilter: filter);
+        }
+        context.pushLayer(layer!, super.paint, offset);
       }
     }
   }
@@ -4249,7 +4277,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// Adds a semenatics tag to the semantics subtree.
+  /// Adds a semantics tag to the semantics subtree.
   SemanticsTag? get tagForChildren => _tagForChildren;
   SemanticsTag? _tagForChildren;
   set tagForChildren(SemanticsTag? value) {

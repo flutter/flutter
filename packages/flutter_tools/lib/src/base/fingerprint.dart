@@ -86,7 +86,7 @@ class Fingerprint {
     final Iterable<File> files = inputPaths.map<File>(fileSystem.file);
     final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
     if (missingInputs.isNotEmpty) {
-      throw Exception('Missing input files:\n' + missingInputs.join('\n'));
+      throw Exception('Missing input files:\n${missingInputs.join('\n')}');
     }
     return Fingerprint._(
       checksums: <String, String>{

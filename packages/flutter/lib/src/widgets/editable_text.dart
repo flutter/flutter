@@ -228,8 +228,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
   ///
-  /// If the new selection if of non-zero length, or is outside the composing
-  /// range, the composing composing range is cleared.
+  /// If the new selection is of non-zero length, or is outside the composing
+  /// range, the composing range is cleared.
   set selection(TextSelection newSelection) {
     if (!isSelectionWithinTextBounds(newSelection))
       throw FlutterError('invalid text selection: $newSelection');
@@ -391,7 +391,7 @@ class ToolbarOptions {
 /// [RenderEditable.selectWord], etc. programmatically.
 ///
 /// {@template flutter.widgets.editableText.showCaretOnScreen}
-/// ## Keep the caret visisble when focused
+/// ## Keep the caret visible when focused
 ///
 /// When focused, this widget will make attempts to keep the text area and its
 /// caret (even when [showCursor] is `false`) visible, on these occasions:
@@ -1253,7 +1253,7 @@ class EditableText extends StatefulWidget {
   /// #### Autofill UI refuses to show up when I tap on the text field
   ///
   /// Check the device's system settings and make sure autofill is turned on,
-  /// and there're available credentials stored in the autofill service.
+  /// and there are available credentials stored in the autofill service.
   ///
   /// * iOS password autofill: Go to Settings -> Password, turn on "Autofill
   ///   Passwords", and add new passwords for testing by pressing the top right
@@ -1271,7 +1271,7 @@ class EditableText extends StatefulWidget {
   ///
   /// * Android autofill: Go to Settings -> System -> Languages & input ->
   ///   Autofill service. Enable the autofill service of your choice, and make
-  ///   sure there're available credentials associated with your app.
+  ///   sure there are available credentials associated with your app.
   ///
   /// #### I called `TextInput.finishAutofillContext` but the autofill save
   /// prompt isn't showing
@@ -2112,7 +2112,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasFocus) {
       _openInputConnection();
     } else {
-      widget.focusNode.requestFocus();
+      widget.focusNode.requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
     }
   }
 
@@ -2360,11 +2360,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _cursorWaitForStart(Timer timer) {
     assert(_kCursorBlinkHalfPeriod > _fadeDuration);
+    assert(!EditableText.debugDeterministicCursor);
     _cursorTimer?.cancel();
     _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
   void _startCursorTimer() {
+    assert(_cursorTimer == null);
     _targetCursorVisibility = true;
     _cursorBlinkOpacityController.value = 1.0;
     if (EditableText.debugDeterministicCursor)

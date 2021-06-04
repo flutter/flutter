@@ -14,7 +14,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart';
@@ -146,6 +146,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           ...globals.xcode.xcrunCommand(),
           'xcodebuild',
           '-exportArchive',
+          if (shouldCodesign) ...<String>[
+            '-allowProvisioningDeviceRegistration',
+            '-allowProvisioningUpdates',
+          ],
           '-archivePath',
           globals.fs.path.absolute(app.archiveBundleOutputPath),
           '-exportPath',

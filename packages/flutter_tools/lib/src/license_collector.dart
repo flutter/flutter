@@ -31,7 +31,7 @@ class LicenseCollector {
   final FileSystem _fileSystem;
 
   /// The expected separator for multiple licenses.
-  static final String licenseSeparator = '\n' + ('-' * 80) + '\n';
+  static final String licenseSeparator = '\n${'-' * 80}\n';
 
   /// Obtain licenses from the `packageMap` into a single result.
   ///
@@ -86,7 +86,7 @@ class LicenseCollector {
       .map<String>((String license) {
         final List<String> packageNames = packageLicenses[license]!.toList()
           ..sort();
-        return packageNames.join('\n') + '\n\n' + license;
+        return '${packageNames.join('\n')}\n\n$license';
       }).toList();
     combinedLicensesList.sort();
 

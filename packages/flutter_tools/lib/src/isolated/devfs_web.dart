@@ -29,13 +29,13 @@ import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
-import '../bundle.dart';
+import '../bundle_builder.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
 import '../web/bootstrap.dart';
@@ -841,7 +841,7 @@ class WebDevFS implements DevFS {
     final CompilerOutput compilerOutput = await generator.recompile(
       Uri(
         scheme: 'org-dartlang-app',
-        path: '/' + mainUri.pathSegments.last,
+        path: '/${mainUri.pathSegments.last}',
       ),
       invalidatedFiles,
       outputPath: dillOutputPath,

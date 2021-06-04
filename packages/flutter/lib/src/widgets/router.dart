@@ -491,7 +491,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     if (_routeInformation.value != null) {
       _processRouteInformation(_routeInformation.value!, () => widget.routerDelegate.setRestoredRoutePath);
     } else if (widget.routeInformationProvider != null) {
-      _processRouteInformation(widget.routeInformationProvider!.value!, () => widget.routerDelegate.setInitialRoutePath);
+      _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setInitialRoutePath);
     }
   }
 
@@ -632,7 +632,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
 
   void _handleRouteInformationProviderNotification() {
     assert(widget.routeInformationProvider!.value != null);
-    _processRouteInformation(widget.routeInformationProvider!.value!, () => widget.routerDelegate.setNewRoutePath);
+    _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setNewRoutePath);
   }
 
   Future<bool> _handleBackButtonDispatcherNotification() {
@@ -1300,7 +1300,7 @@ abstract class RouterDelegate<T> extends Listenable {
 ///    intent to the [Router] widget, as well as reports new route information
 ///    from the [Router] back to the engine by overriding the
 ///    [routerReportsNewRouteInformation].
-abstract class RouteInformationProvider extends ValueListenable<RouteInformation?> {
+abstract class RouteInformationProvider extends ValueListenable<RouteInformation> {
   /// A callback called when the [Router] widget detects any navigation event
   /// due to state changes.
   ///
@@ -1318,17 +1318,23 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
 /// This provider also reports the new route information from the [Router] widget
 /// back to engine using message channel method, the
 /// [SystemNavigator.routeInformationUpdated].
+///
+/// Each time [SystemNavigator.routeInformationUpdated] is called, the
+/// [SystemNavigator.selectMultiEntryHistory] method is also called. This
+/// overrides the initialization behavior of
+/// [Navigator.reportsRouteUpdateToEngine].
 class PlatformRouteInformationProvider extends RouteInformationProvider with WidgetsBindingObserver, ChangeNotifier {
   /// Create a platform route information provider.
   ///
   /// Use the [initialRouteInformation] to set the default route information for this
   /// provider.
   PlatformRouteInformationProvider({
-    RouteInformation? initialRouteInformation,
+    required RouteInformation initialRouteInformation,
   }) : _value = initialRouteInformation;
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation) {
+    SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       location: routeInformation.location!,
       state: routeInformation.state,
@@ -1337,8 +1343,8 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   }
 
   @override
-  RouteInformation? get value => _value;
-  RouteInformation? _value;
+  RouteInformation get value => _value;
+  RouteInformation _value;
 
   void _platformReportsNewRouteInformation(RouteInformation routeInformation) {
     if (_value == routeInformation)

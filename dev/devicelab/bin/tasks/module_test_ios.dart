@@ -57,6 +57,8 @@ Future<void> main() async {
         );
       });
 
+      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
+
       final Directory ephemeralIOSHostApp = Directory(path.join(
         projectDir.path,
         'build',
@@ -89,6 +91,8 @@ Future<void> main() async {
           options: <String>['ios', '--no-codesign', '--profile'],
         );
       });
+
+      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
 
       if (!exists(ephemeralIOSHostApp)) {
         return TaskResult.failure('Failed to build ephemeral host .app');
@@ -126,6 +130,7 @@ Future<void> main() async {
       if (!exists(ephemeralSimulatorHostApp)) {
         return TaskResult.failure('Failed to build ephemeral host .app');
       }
+      checkFileExists(path.join(ephemeralSimulatorHostApp.path, 'Frameworks', 'Flutter.framework', 'Flutter'));
 
       if (!exists(File(path.join(
         ephemeralSimulatorHostApp.path,
@@ -170,6 +175,7 @@ Future<void> main() async {
           options: <String>['ios', '--no-codesign', '-v'],
         );
       });
+      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
 
       final bool ephemeralHostAppWithCocoaPodsBuilt = exists(ephemeralIOSHostApp);
 
@@ -189,6 +195,7 @@ Future<void> main() async {
       }
 
       checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'device_info.framework', 'device_info'));
+      checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'Flutter.framework', 'Flutter'));
 
       // Static, no embedded framework.
       checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'google_sign_in.framework'));

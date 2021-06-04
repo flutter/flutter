@@ -17,7 +17,7 @@
   "timerPickerSecondLabelOther": "sek.",
   "cutButtonLabel": "Klip",
   "copyButtonLabel": "Kopiér",
-  "pasteButtonLabel": "Sæt ind",
+  "pasteButtonLabel": "Indsæt",
   "selectAllButtonLabel": "Vælg alle",
   "tabSemanticsLabel": "Fane $tabIndex af $tabCount",
   "modalBarrierDismissLabel": "Afvis",
