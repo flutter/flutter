@@ -2057,7 +2057,7 @@ abstract class BuildContext {
   /// complete. It is therefore not valid to call this from a build method.
   /// It should only be called from interaction event handlers (e.g.
   /// gesture callbacks) or layout or paint callbacks. It is also not valid to
-  /// call if [mounted] returns false.
+  /// call if [State.mounted] returns false.
   ///
   /// If the render object is a [RenderBox], which is the common case, then the
   /// size of the render object can be obtained from the [size] getter. This is
