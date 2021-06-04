@@ -1619,6 +1619,32 @@ void main() {
     await pumpWidget(Container());
     expect(states, <String>['deactivate', 'dispose']);
   });
+
+  testWidgets('Getting the render object of an unmounted element throws', (WidgetTester tester) async {
+    await tester.pumpWidget(const _StatefulLeaf());
+    final StatefulElement element = tester.element<StatefulElement>(find.byType(_StatefulLeaf));
+    expect(element.state, isA<State<_StatefulLeaf>>());
+    expect(element.widget, isA<_StatefulLeaf>());
+    // Replace the widget tree to unmount the element.
+    await tester.pumpWidget(Container());
+
+    try {
+      element.findRenderObject();
+      fail('Expected exception');
+    } catch (e) {
+      // Make sure we only throw this type of error and no other.
+      final FlutterError error = e as FlutterError;
+      expect(
+        error.message,
+        equalsIgnoringHashCodes('''
+Cannot get renderObject of inactive element.
+In order for an element to have a valid renderObject, it must be active, which means it is part of the tree.
+Instead, this element is in the _ElementLifecycle.defunct state.
+The findRenderObject() method was called for the following element:
+  StatefulElement#00000(DEFUNCT)'''),
+      );
+    }
+  }, skip: kIsWeb);
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
