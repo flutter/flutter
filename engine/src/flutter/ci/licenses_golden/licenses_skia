@@ -1,4 +1,4 @@
-Signature: 4bc392824b01ffe5044cc9ed8fc0822d
+Signature: 3c75d6e7d8fe81ce0d2278c584cdacd2
 
 UNUSED LICENSES:
 
@@ -5247,6 +5247,7 @@ FILE: ../../../third_party/skia/include/gpu/gl/egl/GrGLMakeEGLInterface.h
 FILE: ../../../third_party/skia/include/gpu/gl/glx/GrGLMakeGLXInterface.h
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings_gen.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
+FILE: ../../../third_party/skia/src/gpu/GrDstProxyView.h
 FILE: ../../../third_party/skia/src/gpu/GrInnerFanTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSubRunAllocator.cpp
@@ -5763,6 +5764,7 @@ FILE: ../../../third_party/skia/experimental/ngatoy/Fake.cpp
 FILE: ../../../third_party/skia/experimental/ngatoy/Fake.h
 FILE: ../../../third_party/skia/experimental/ngatoy/SortKey.h
 FILE: ../../../third_party/skia/experimental/ngatoy/ngatoy.cpp
+FILE: ../../../third_party/skia/gm/destcolor.cpp
 FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
 FILE: ../../../third_party/skia/include/private/SkSLProgramKind.h
 FILE: ../../../third_party/skia/include/private/SkTOptional.h
