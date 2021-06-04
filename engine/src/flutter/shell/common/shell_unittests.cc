@@ -2485,10 +2485,12 @@ TEST_F(ShellTest, Spawn) {
         main_latch.Signal();
       }));
   // Fulfill native function for the second Shell's entrypoint.
+  fml::CountDownLatch second_latch(2);
   AddNativeCallback(
       // The Dart native function names aren't very consistent but this is just
       // the native function name of the second vm entrypoint in the fixture.
-      "NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {}));
+      "NotifyNative",
+      CREATE_NATIVE_ENTRY([&](auto args) { second_latch.CountDown(); }));
 
   RunEngine(shell.get(), std::move(configuration));
   main_latch.Wait();
@@ -2498,7 +2500,7 @@ TEST_F(ShellTest, Spawn) {
 
   PostSync(
       shell->GetTaskRunners().GetPlatformTaskRunner(),
-      [this, &spawner = shell, &second_configuration]() {
+      [this, &spawner = shell, &second_configuration, &second_latch]() {
         MockPlatformViewDelegate platform_view_delegate;
         auto spawn = spawner->Spawn(
             std::move(second_configuration),
@@ -2541,6 +2543,11 @@ TEST_F(ShellTest, Spawn) {
               ASSERT_EQ(spawner->GetIOManager()->GetResourceContext().get(),
                         spawn->GetIOManager()->GetResourceContext().get());
             });
+
+        // Before destroying the shell, wait for expectations of the spawned
+        // isolate to be met.
+        second_latch.Wait();
+
         DestroyShell(std::move(spawn));
       });
 
