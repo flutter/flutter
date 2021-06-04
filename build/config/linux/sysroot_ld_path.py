@@ -12,9 +12,10 @@ import subprocess
 import sys
 
 if len(sys.argv) != 3:
-  print "Need two arguments"
+  print("Need two arguments")
   sys.exit(1)
 
-result = subprocess.check_output([sys.argv[1], sys.argv[2]]).strip()
+result = subprocess.check_output([sys.argv[1], sys.argv[2]],
+                                 universal_newlines=True).strip()
 
-print '"' + result + '"'
+print('"%s"' % result)
