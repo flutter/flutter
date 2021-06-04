@@ -246,35 +246,6 @@ void main() {
     // configured value.
     await expectError(error2);
   }, skip: isBrowser); // Browser implementation does not use HTTP client but an <img> tag.
-
-  test('Identical zones have the same HttpClients', () async {
-    debugNetworkImageHttpClientProvider = null;
-
-    // assert that a configured fake http client throws the expected error.
-    Future<void> expectError() async {
-      final Completer<Object> completer = Completer<Object>();
-      final ImageStreamListener listener = ImageStreamListener((ImageInfo data, bool syncCall) {
-        // Do nothing.
-      }, onError: (dynamic error, StackTrace? stackTrace) {
-        completer.complete(error);
-      });
-      final ImageProvider imageProvider = NetworkImage(nonconst('testing.url'));
-      final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-      stream.addListener(listener);
-      await completer.future;
-    }
-
-    int created = 0;
-    await HttpOverrides.runZoned(() async {
-      await expectError();
-      await expectError();
-    }, createHttpClient: (SecurityContext? context) {
-      created += 1;
-      return _FakeHttpClient()..thrownError = Object();
-    });
-
-    expect(created, 1);
-  }, skip: isBrowser); // Browser implementation does not use HTTP client but an <img> tag.
 }
 
 class _FakeHttpClient extends Fake implements HttpClient {
