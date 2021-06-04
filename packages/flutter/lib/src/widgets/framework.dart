@@ -3873,7 +3873,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           ErrorDescription(
             'In order for an element to have a valid renderObject, it must be '
             'active, which means it is part of the tree.\n'
-            'Instead, this element is in the $_lifecycleState state.',
+            'Instead, this element is in the $_lifecycleState state.\n'
+            'If you called this method from a State object, consider guarding '
+            'it with State.mounted.',
           ),
           describeElement('The findRenderObject() method was called for the following element'),
         ]);

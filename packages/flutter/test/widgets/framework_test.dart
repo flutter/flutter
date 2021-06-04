@@ -1628,20 +1628,20 @@ void main() {
     // Replace the widget tree to unmount the element.
     await tester.pumpWidget(Container());
 
-    try {
-      element.findRenderObject();
-      fail('Expected exception');
-    } on FlutterError catch (e) {
-      expect(
-        e.message,
-        equalsIgnoringHashCodes('''
+  expect(
+    () => element.findRenderObject(),
+    throwsA(isA<FlutterError>().having(
+      (FlutterError error) => error.message,
+      'message',
+      equalsIgnoringHashCodes('''
 Cannot get renderObject of inactive element.
 In order for an element to have a valid renderObject, it must be active, which means it is part of the tree.
 Instead, this element is in the _ElementLifecycle.defunct state.
+If you called this method from a State object, consider guarding it with State.mounted.
 The findRenderObject() method was called for the following element:
   StatefulElement#00000(DEFUNCT)'''),
-      );
-    }
+      )),
+    );
   });
 }
 
