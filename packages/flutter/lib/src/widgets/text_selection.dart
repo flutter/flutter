@@ -110,10 +110,15 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 ///
 /// Override text operations such as [handleCut] if needed.
 abstract class TextSelectionControls {
-  /// Builds a selection handle of the given type.
+  /// Builds a selection handle of the given `type`.
   ///
   /// The top left corner of this widget is positioned at the bottom of the
   /// selection position.
+  ///
+  /// The supplied [onTap] should be invoked when the handle is tapped, if such
+  /// interaction is allowed. As a counterexample, the default selection handle
+  /// on iOS [cupertinoTextSelectionControls] does not call [onTap] at all,
+  /// since its handles are not meant to be tapped.
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, VoidCallback? onTap);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
