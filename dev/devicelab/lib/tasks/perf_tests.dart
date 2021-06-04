@@ -807,7 +807,7 @@ class PerfTest {
       final String deviceId = device.deviceId;
 
       await flutter('drive', options: <String>[
-        '--no-dds', // TODO(dnfield): consider removing when https://github.com/flutter/flutter/issues/81707 is fixed
+        '--no-dds',
         '--no-android-gradle-daemon',
         '-v',
         '--verbose-system-logs',
