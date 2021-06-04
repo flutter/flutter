@@ -22,13 +22,16 @@ const String _kTypeOption = 'type';
 const String _kShowDartPad = 'dartpad';
 
 String getChannelName() {
-  final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
-  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
+  final RegExp gitBranchRegexp = RegExp(r'^## (?<branch>.*)');
+  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain'], environment: <String, String>{
+    'GIT_TRACE': '2',
+    'GIT_TRACE_SETUP': '2',
+  }, includeParentEnvironment: true);
   if (gitResult.exitCode != 0)
-    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
-  final Match gitBranchMatch = gitBranchRegexp.firstMatch(
+    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}: ${gitResult.stderr}';
+  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(
       (gitResult.stdout as String).trim().split('\n').first);
-  return gitBranchMatch == null ? '<unknown>' : gitBranchMatch.group(1).split('...').first;
+  return gitBranchMatch == null ? '<unknown>' : gitBranchMatch.namedGroup('branch')!.split('...').first;
 }
 
 /// Generates snippet dartdoc output for a given input, and creates any sample
@@ -113,8 +116,7 @@ void main(List<String> argList) {
   }
 
   final SnippetType snippetType = SnippetType.values
-      .firstWhere((SnippetType type) => getEnumName(type) == args[_kTypeOption], orElse: () => null);
-  assert(snippetType != null, "Unable to find '${args[_kTypeOption]}' in SnippetType enum.");
+      .firstWhere((SnippetType type) => getEnumName(type) == args[_kTypeOption]);
 
   if (args[_kShowDartPad] == true && snippetType != SnippetType.sample) {
     errorExit('${args[_kTypeOption]} was selected, but the --dartpad flag is only valid '
@@ -132,7 +134,7 @@ void main(List<String> argList) {
     errorExit('The input file ${input.path} does not exist.');
   }
 
-  String template;
+  String? template;
   if (snippetType == SnippetType.sample) {
     final String templateArg = args[_kTemplateOption] as String;
     if (templateArg == null || templateArg.isEmpty) {
@@ -143,25 +145,24 @@ void main(List<String> argList) {
     template = templateArg.replaceAll(RegExp(r'.tmpl$'), '');
   }
 
-  String emptyToNull(String value) => value?.isEmpty ?? true ? null : value;
-  final String packageName = emptyToNull(args[_kPackageOption] as String);
-  final String libraryName = emptyToNull(args[_kLibraryOption] as String);
-  final String elementName = emptyToNull(args[_kElementOption] as String);
-  final String serial = emptyToNull(args[_kSerialOption] as String);
+  final String packageName = args[_kPackageOption] as String? ?? '';
+  final String libraryName = args[_kLibraryOption] as String? ?? '';
+  final String elementName = args[_kElementOption] as String? ?? '';
+  final String serial = args[_kSerialOption] as String? ?? '';
   final List<String> id = <String>[];
   if (args[_kOutputOption] != null) {
     id.add(path.basename(path.basenameWithoutExtension(args[_kOutputOption] as String)));
   } else {
-    if (packageName != null && packageName != 'flutter') {
+    if (packageName.isNotEmpty && packageName != 'flutter') {
       id.add(packageName);
     }
-    if (libraryName != null) {
+    if (libraryName.isNotEmpty) {
       id.add(libraryName);
     }
-    if (elementName != null) {
+    if (elementName.isNotEmpty) {
       id.add(elementName);
     }
-    if (serial != null) {
+    if (serial.isNotEmpty) {
       id.add(serial);
     }
     if (id.isEmpty) {
@@ -178,10 +179,10 @@ void main(List<String> argList) {
     showDartPad: args[_kShowDartPad] as bool,
     template: template,
     output: args[_kOutputOption] != null ? File(args[_kOutputOption] as String) : null,
-    metadata: <String, Object>{
+    metadata: <String, Object?>{
       'sourcePath': environment['SOURCE_PATH'],
       'sourceLine': environment['SOURCE_LINE'] != null
-          ? int.tryParse(environment['SOURCE_LINE'])
+          ? int.tryParse(environment['SOURCE_LINE']!)
           : null,
       'id': id.join('.'),
       'channel': getChannelName(),

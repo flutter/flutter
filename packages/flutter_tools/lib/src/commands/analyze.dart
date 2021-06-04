@@ -41,8 +41,8 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'Analyze the current project, if applicable.', defaultsTo: true);
     argParser.addFlag('dartdocs',
         negatable: false,
-        help: 'List every public member that is lacking documentation. '
-              '(The "public_member_api_docs" lint must be enabled in "analysis_options.yaml".)',
+        help: '(deprecated) List every public member that is lacking documentation. '
+              'This command will be removed in a future version of Flutter.',
         hide: !verboseHelp);
     argParser.addFlag('watch',
         help: 'Run analysis continuously, watching the filesystem for changes.',
@@ -54,6 +54,11 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addOption('dart-sdk',
         valueHelp: 'path-to-sdk',
         help: 'The path to the Dart SDK.',
+        hide: !verboseHelp);
+    argParser.addOption('protocol-traffic-log',
+        valueHelp: 'path-to-protocol-traffic-log',
+        help: 'The path to write the request and response protocol. This is '
+              'only intended to be used for debugging the tooling.',
         hide: !verboseHelp);
 
     // Hidden option to enable a benchmarking mode.

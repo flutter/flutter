@@ -5,8 +5,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:process_runner/process_runner.dart';
 import 'package:path/path.dart' as path;
+import 'package:process_runner/process_runner.dart';
 
 // This program enables testing of private interfaces in the flutter package.
 //
@@ -175,7 +175,7 @@ class TestCase {
         return false;
       }
     }
-    // Copy the test files into the the tmpdir's lib directory.
+    // Copy the test files into the tmpdir's lib directory.
     for (final File file in tests) {
       String destination = tmpdir.path;
       try {

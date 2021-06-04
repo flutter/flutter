@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -325,7 +321,7 @@ class Checkbox extends StatefulWidget {
   static const double width = 18.0;
 
   @override
-  _CheckboxState createState() => _CheckboxState();
+  State<Checkbox> createState() => _CheckboxState();
 }
 
 class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, ToggleableStateMixin {
@@ -479,7 +475,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..value = value
           ..previousValue = _previousValue
           ..shape = widget.shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(1.0))
+              borderRadius: BorderRadius.all(Radius.circular(1.0)),
           )
           ..side = widget.side ?? themeData.checkboxTheme.side,
       ),

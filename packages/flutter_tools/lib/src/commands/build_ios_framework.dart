@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
@@ -16,13 +15,11 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/common.dart';
-import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../flutter_plugins.dart';
+import '../globals_null_migrated.dart' as globals;
 import '../macos/cocoapod_utils.dart';
-import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../version.dart';
@@ -363,25 +360,19 @@ end
           flutterRootDir: globals.fs.directory(Cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
-            kBuildMode: getNameForBuildMode(buildInfo.mode),
             kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
-            kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-            kDartDefines: encodeDartDefines(buildInfo.dartDefines),
             kBitcodeFlag: 'true',
-            if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
-              kExtraGenSnapshotOptions:
-                  buildInfo.extraGenSnapshotOptions.join(','),
-            if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
-              kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
             kIosArchs: defaultIOSArchsForEnvironment(sdkType)
                 .map(getNameForDarwinArch)
                 .join(' '),
             kSdkRoot: await globals.xcode.sdkLocation(sdkType),
+            ...buildInfo.toBuildSystemEnvironment(),
           },
           artifacts: globals.artifacts,
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
+          platform: globals.platform,
           engineVersion: globals.artifacts.isLocalEngine
               ? null
               : globals.flutterVersion.engineRevision,
@@ -526,7 +517,15 @@ end
       '-create-xcframework',
       for (Directory framework in frameworks) ...<String>[
         '-framework',
-        framework.path
+        framework.path,
+        ...framework.parent
+            .listSync()
+            .where((FileSystemEntity entity) =>
+                entity.basename.endsWith('bcsymbolmap') ||
+                entity.basename.endsWith('dSYM'))
+            .map((FileSystemEntity entity) =>
+                <String>['-debug-symbols', entity.path])
+            .expand<String>((List<String> parameter) => parameter)
       ],
       '-output',
       outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path

@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
@@ -14,7 +10,7 @@ import '../convert.dart';
 /// the app's pubspec.yaml.
 class DeferredComponent {
   DeferredComponent({
-    @required this.name,
+    required this.name,
     this.libraries = const <String>[],
     this.assets = const <Uri>[],
   }) : _assigned = false;
@@ -49,8 +45,8 @@ class DeferredComponent {
   /// unassigned and should not be used for any tasks that require loading unit information.
   /// When using [loadingUnits], [assigned] should be checked first. Loading units can be
   /// assigned with [assignLoadingUnits].
-  Set<LoadingUnit> get loadingUnits => _loadingUnits;
-  Set<LoadingUnit> _loadingUnits;
+  Set<LoadingUnit>? get loadingUnits => _loadingUnits;
+  Set<LoadingUnit>? _loadingUnits;
 
   /// Indicates if the component has loading units assigned.
   ///
@@ -81,7 +77,7 @@ class DeferredComponent {
     for (final String lib in libraries) {
       for (final LoadingUnit loadingUnit in allLoadingUnits) {
         if (loadingUnit.libraries.contains(lib)) {
-          _loadingUnits.add(loadingUnit);
+          _loadingUnits!.add(loadingUnit);
         }
       }
     }
@@ -97,7 +93,7 @@ class DeferredComponent {
     }
     if (loadingUnits != null && _assigned) {
       out.write('\n  LoadingUnits:');
-      for (final LoadingUnit loadingUnit in loadingUnits) {
+      for (final LoadingUnit loadingUnit in loadingUnits!) {
         out.write('\n    - ${loadingUnit.id}');
       }
     }
@@ -115,10 +111,10 @@ class LoadingUnit {
   /// Constructs a [LoadingUnit].
   ///
   /// Loading units must include an [id] and [libraries]. The [path] is only present when
-  /// parsing the loading unit from a laoding unit manifest produced by gen_snapshot.
+  /// parsing the loading unit from a loading unit manifest produced by gen_snapshot.
   LoadingUnit({
-    @required this.id,
-    @required this.libraries,
+    required this.id,
+    required this.libraries,
     this.path,
   });
 
@@ -132,7 +128,7 @@ class LoadingUnit {
   ///
   /// This value may be null when the loading unit is parsed from a
   /// `deferred_components_golden.yaml` file, which does not store the path.
-  final String path;
+  final String? path;
 
   /// Returns a human readable string representation of this LoadingUnit, ignoring
   /// the [path] field. The [path] is not included as it is not relevant when the
@@ -156,7 +152,7 @@ class LoadingUnit {
   ///
   /// This will read all existing loading units for every provided abi. If no abis are
   /// provided, loading units for all abis will be parsed.
-  static List<LoadingUnit> parseGeneratedLoadingUnits(Directory outputDir, Logger logger, {List<String> abis}) {
+  static List<LoadingUnit> parseGeneratedLoadingUnits(Directory outputDir, Logger logger, {List<String>? abis}) {
     final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
     final List<FileSystemEntity> files = outputDir.listSync(recursive: true);
     for (final FileSystemEntity fileEntity in files) {
@@ -190,7 +186,7 @@ class LoadingUnit {
     }
     // Read gen_snapshot manifest
     final String fileString = manifestFile.readAsStringSync();
-    Map<String, dynamic> manifest;
+    Map<String, dynamic>? manifest;
     try {
       manifest = jsonDecode(fileString) as Map<String, dynamic>;
     } on FormatException catch (e) {

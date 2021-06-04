@@ -36,7 +36,6 @@ Future<void> main() async {
 
     if (timeline != null) {
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeSummaryToFile(fileName, pretty: true);
       await summary.writeTimelineToFile(fileName, pretty: true);
     }
 

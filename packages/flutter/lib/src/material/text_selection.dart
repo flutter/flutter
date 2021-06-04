@@ -210,7 +210,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
       : widget.endpoints[0];
     final Offset anchorAbove = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
-      widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance
+      widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance,
     );
     final Offset anchorBelow = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,

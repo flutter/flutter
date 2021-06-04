@@ -161,8 +161,7 @@ void main() {
               itemExtent: 15.0,
               children: const <Widget>[Text('1'), Text('1')],
               onSelectedItemChanged: (int i) {},
-              selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
-                  background: Color(0x12345678)),
+              selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(background: Color(0x12345678)),
             ),
           ),
         ),
@@ -172,6 +171,29 @@ void main() {
     expect(find.byType(CupertinoPicker), paints..rrect(color: const Color(0x12345678)));
   });
 
+  testWidgets('CupertinoPicker.selectionOverlay is nullable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300.0,
+            width: 300.0,
+            child: CupertinoPicker(
+              itemExtent: 15.0,
+              onSelectedItemChanged: (int i) {},
+              selectionOverlay: null,
+              children: const <Widget>[Text('1'), Text('1')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoPicker), isNot(paints..rrect()));
+  });
+
   group('scroll', () {
     testWidgets(
       'scrolling calls onSelectedItemChanged and triggers haptic feedback',
@@ -179,7 +201,7 @@ void main() {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
 
-        SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
         });
 
@@ -222,7 +244,9 @@ void main() {
             arguments: 'HapticFeedbackType.selectionClick',
           ),
         );
-    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
 
     testWidgets(
       'do not trigger haptic effects on non-iOS devices',
@@ -230,7 +254,7 @@ void main() {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
 
-        SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
         });
 
@@ -256,7 +280,9 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, -100.0), warnIfMissed: false); // has an IgnorePointer
         expect(selectedItems, <int>[1]);
         expect(systemCalls, isEmpty);
-    }, variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform platform) => platform != TargetPlatform.iOS).toSet()));
+      },
+      variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform platform) => platform != TargetPlatform.iOS).toSet()),
+    );
 
     testWidgets('a drag in between items settles back', (WidgetTester tester) async {
       final FixedExtentScrollController controller =

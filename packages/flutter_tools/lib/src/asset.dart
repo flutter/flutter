@@ -72,6 +72,9 @@ abstract class AssetBundle {
   /// output result.
   List<File> get additionalDependencies;
 
+  /// Input files used to build this asset bundle.
+  List<File> get inputFiles;
+
   bool wasBuiltOnce();
 
   bool needsBuild({ String manifestPath = defaultManifestPath });
@@ -82,6 +85,7 @@ abstract class AssetBundle {
     String assetDirPath,
     @required String packagesPath,
     bool deferredComponentsEnabled = false,
+    TargetPlatform targetPlatform,
   });
 }
 
@@ -132,6 +136,9 @@ class ManifestAssetBundle implements AssetBundle {
   @override
   final Map<String, Map<String, DevFSContent>> deferredComponentsEntries = <String, Map<String, DevFSContent>>{};
 
+  @override
+  final List<File> inputFiles = <File>[];
+
   // If an asset corresponds to a wildcard directory, then it may have been
   // updated without changes to the manifest. These are only tracked for
   // the current project.
@@ -141,6 +148,13 @@ class ManifestAssetBundle implements AssetBundle {
 
   static const String _kAssetManifestJson = 'AssetManifest.json';
   static const String _kNoticeFile = 'NOTICES';
+  // Comically, this can't be name with the more common .gz file extension
+  // because when it's part of an AAR and brought into another APK via gradle,
+  // gradle individually traverses all the files of the AAR and unzips .gz
+  // files (b/37117906). A less common .Z extension still describes how the
+  // file is formatted if users want to manually inspect the application
+  // bundle and is recognized by default file handlers on OS such as macOS.˚
+  static const String _kNoticeZippedFile = 'NOTICES.Z';
 
   @override
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
@@ -180,6 +194,7 @@ class ManifestAssetBundle implements AssetBundle {
     String assetDirPath,
     @required String packagesPath,
     bool deferredComponentsEnabled = false,
+    TargetPlatform targetPlatform,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     FlutterProject flutterProject;
@@ -204,8 +219,10 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     final String assetBasePath = _fileSystem.path.dirname(_fileSystem.path.absolute(manifestPath));
+    final File packageConfigFile = _fileSystem.file(packagesPath);
+    inputFiles.add(packageConfigFile);
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      _fileSystem.file(packagesPath),
+      packageConfigFile,
       logger: _logger,
     );
     final List<Uri> wildcardDirectories = <Uri>[];
@@ -270,6 +287,7 @@ class ManifestAssetBundle implements AssetBundle {
       final Uri packageUri = package.packageUriRoot;
       if (packageUri != null && packageUri.scheme == 'file') {
         final String packageManifestPath = _fileSystem.path.fromUri(packageUri.resolve('../pubspec.yaml'));
+        inputFiles.add(_fileSystem.file(packageManifestPath));
         final FlutterManifest packageFlutterManifest = FlutterManifest.createFromPath(
           packageManifestPath,
           logger: _logger,
@@ -347,6 +365,7 @@ class ManifestAssetBundle implements AssetBundle {
       }
       for (final _Asset variant in assetVariants[asset]) {
         final File variantFile = variant.lookupAssetFile(_fileSystem);
+        inputFiles.add(variantFile);
         assert(variantFile.existsSync());
         entries[variant.entryUri.path] ??= DevFSFileContent(variantFile);
       }
@@ -394,12 +413,12 @@ class ManifestAssetBundle implements AssetBundle {
       entries[asset.entryUri.path] ??= DevFSFileContent(assetFile);
     }
 
-    // Update wildcard directories we we can detect changes in them.
+    // Update wildcard directories we can detect changes in them.
     for (final Uri uri in wildcardDirectories) {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
 
-    final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants);
+    final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
     if (licenseResult.errorMessages.isNotEmpty) {
@@ -407,8 +426,8 @@ class ManifestAssetBundle implements AssetBundle {
       return 1;
     }
 
-    final DevFSStringContent licenses = DevFSStringContent(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
+    inputFiles.addAll(additionalDependencies);
 
     if (wildcardDirectories.isNotEmpty) {
       // Force the depfile to contain missing files so that Gradle does not skip
@@ -425,7 +444,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     _setIfChanged(_kAssetManifestJson, assetManifest);
     _setIfChanged(kFontManifestJson, fontManifest);
-    _setIfChanged(_kNoticeFile, licenses);
+    _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);
     return 0;
   }
 
@@ -440,6 +459,35 @@ class ManifestAssetBundle implements AssetBundle {
     final DevFSStringContent oldContent = entries[key] as DevFSStringContent;
     if (oldContent.string != content.string) {
       entries[key] = content;
+    }
+  }
+
+  void _setLicenseIfChanged(
+    String combinedLicenses,
+    TargetPlatform targetPlatform,
+  ) {
+    // On the web, don't compress the NOTICES file since the client doesn't have
+    // dart:io to decompress it. So use the standard _setIfChanged to check if
+    // the strings still match.
+    if (targetPlatform == TargetPlatform.web_javascript) {
+      _setIfChanged(_kNoticeFile, DevFSStringContent(combinedLicenses));
+      return;
+    }
+
+    // On other platforms, let the NOTICES file be compressed. But use a
+    // specialized DevFSStringCompressingBytesContent class to compare
+    // the uncompressed strings to not incur decompression/decoding while making
+    // the comparison.
+    if (!entries.containsKey(_kNoticeZippedFile) ||
+        !(entries[_kNoticeZippedFile] as DevFSStringCompressingBytesContent)
+            .equals(combinedLicenses)) {
+      entries[_kNoticeZippedFile] = DevFSStringCompressingBytesContent(
+        combinedLicenses,
+        // A zlib dictionary is a hinting string sequence with the most
+        // likely string occurrences at the end. This ends up just being
+        // common English words with domain specific words like copyright.
+        hintString: 'copyrightsoftwaretothisinandorofthe',
+      );
     }
   }
 
@@ -524,15 +572,33 @@ class ManifestAssetBundle implements AssetBundle {
     return deferredComponentsAssetVariants;
   }
 
-  DevFSStringContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
+  DevFSStringContent _createAssetManifest(
+    Map<_Asset, List<_Asset>> assetVariants,
+    Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
+  ) {
     final Map<String, List<String>> jsonObject = <String, List<String>>{};
-    final List<_Asset> assets = assetVariants.keys.toList()
-      ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
+    final List<_Asset> assets = assetVariants.keys.toList();
+    final Map<_Asset, List<String>> jsonEntries = <_Asset, List<String>>{};
     for (final _Asset main in assets) {
-      jsonObject[main.entryUri.path] = <String>[
+      jsonEntries[main] = <String>[
         for (final _Asset variant in assetVariants[main])
           variant.entryUri.path,
       ];
+    }
+    if (deferredComponentsAssetVariants != null) {
+      for (final Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values) {
+        for (final _Asset main in componentAssets.keys) {
+          jsonEntries[main] = <String>[
+            for (final _Asset variant in componentAssets[main])
+              variant.entryUri.path,
+          ];
+        }
+      }
+    }
+    final List<_Asset> sortedKeys = jsonEntries.keys.toList()
+        ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
+    for (final _Asset main in sortedKeys) {
+      jsonObject[main.entryUri.path] = jsonEntries[main];
     }
     return DevFSStringContent(json.encode(jsonObject));
   }

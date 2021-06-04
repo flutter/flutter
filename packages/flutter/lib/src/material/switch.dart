@@ -385,7 +385,7 @@ class Switch extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeColor: activeColor,
-            trackColor: inactiveTrackColor
+            trackColor: inactiveTrackColor,
         ),
       ),
     );
@@ -741,7 +741,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             ..isInteractive = isInteractive
             ..trackInnerLength = _trackInnerLength
             ..textDirection = Directionality.of(context)
-            ..surfaceColor = theme.colorScheme.surface
+            ..surfaceColor = theme.colorScheme.surface,
         ),
       ),
     );
@@ -938,6 +938,7 @@ class _SwitchPainter extends ToggleablePainter {
         _cachedThumbColor = thumbColor;
         _cachedThumbImage = thumbImage;
         _cachedThumbErrorListener = thumbErrorListener;
+        _cachedThumbPainter?.dispose();
         _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor, thumbImage, thumbErrorListener).createBoxPainter(_handleDecorationChanged);
       }
       final BoxPainter thumbPainter = _cachedThumbPainter!;
@@ -953,5 +954,15 @@ class _SwitchPainter extends ToggleablePainter {
     } finally {
       _isPainting = false;
     }
+  }
+
+  @override
+  void dispose() {
+    _cachedThumbPainter?.dispose();
+    _cachedThumbPainter = null;
+    _cachedThumbColor = null;
+    _cachedThumbImage = null;
+    _cachedThumbErrorListener = null;
+    super.dispose();
   }
 }

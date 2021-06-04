@@ -6,12 +6,11 @@
 // the test should be run as:
 // flutter drive -t test/using_array.dart --driver test_driver/scrolling_test_e2e_test.dart
 
+import 'package:complex_layout/main.dart' as app;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-
-import 'package:complex_layout/main.dart' as app;
 
 /// Generates the [PointerEvent] to simulate a drag operation from
 /// `center - totalMove/2` to `center + totalMove/2`.
@@ -168,7 +167,7 @@ Future<void> main() async {
         } else if (delays.last < delay) {
           delays.last = delay;
         }
-        tester.binding.handlePointerEvent(event, source: TestBindingEventSource.test);
+        tester.binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
       }
     }
 

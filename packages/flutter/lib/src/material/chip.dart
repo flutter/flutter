@@ -919,7 +919,7 @@ class InputChip extends StatelessWidget
 ///   const MyThreeOptions({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyThreeOptionsState createState() => _MyThreeOptionsState();
+///   State<MyThreeOptions> createState() => _MyThreeOptionsState();
 /// }
 ///
 /// class _MyThreeOptionsState extends State<MyThreeOptions> {
@@ -1628,7 +1628,7 @@ class RawChip extends StatefulWidget
   final bool tapEnabled;
 
   @override
-  _RawChipState createState() => _RawChipState();
+  State<RawChip> createState() => _RawChipState();
 }
 
 class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip> {
@@ -1982,14 +1982,14 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                   child: widget.label,
                 ),
                 avatar: AnimatedSwitcher(
-                  child: widget.avatar,
                   duration: _kDrawerDuration,
                   switchInCurve: Curves.fastOutSlowIn,
+                  child: widget.avatar,
                 ),
                 deleteIcon: AnimatedSwitcher(
-                  child: _buildDeleteIcon(context, theme, chipTheme, deleteIconKey),
                   duration: _kDrawerDuration,
                   switchInCurve: Curves.fastOutSlowIn,
+                  child: _buildDeleteIcon(context, theme, chipTheme, deleteIconKey),
                 ),
                 brightness: chipTheme.brightness,
                 padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
@@ -2028,9 +2028,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     result = _ChipRedirectingHitDetectionWidget(
       constraints: constraints,
       child: Center(
-        child: result,
         widthFactor: 1.0,
         heightFactor: 1.0,
+        child: result,
       ),
     );
     return Semantics(
@@ -2189,7 +2189,7 @@ class _RenderChipElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _mountChild(widget.theme.avatar, _ChipSlot.avatar);
     _mountChild(widget.theme.deleteIcon, _ChipSlot.deleteIcon);
@@ -2246,7 +2246,7 @@ class _RenderChipElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -2779,13 +2779,15 @@ class _RenderChip extends RenderBox {
     );
     size = constraints.constrain(paddedSize);
     assert(
-        size.height == constraints.constrainHeight(paddedSize.height),
-        "Constrained height ${size.height} doesn't match expected height "
-        '${constraints.constrainWidth(paddedSize.height)}');
+      size.height == constraints.constrainHeight(paddedSize.height),
+      "Constrained height ${size.height} doesn't match expected height "
+      '${constraints.constrainWidth(paddedSize.height)}',
+    );
     assert(
-        size.width == constraints.constrainWidth(paddedSize.width),
-        "Constrained width ${size.width} doesn't match expected width "
-        '${constraints.constrainWidth(paddedSize.width)}');
+      size.width == constraints.constrainWidth(paddedSize.width),
+      "Constrained width ${size.width} doesn't match expected width "
+      '${constraints.constrainWidth(paddedSize.width)}',
+    );
   }
 
   static final ColorTween selectionScrimTween = ColorTween(

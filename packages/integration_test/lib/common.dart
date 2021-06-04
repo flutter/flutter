@@ -211,7 +211,7 @@ class DriverTestMessage {
 /// These commands are either commands that WebDriver can execute or used
 /// for the communication between `integration_test` and the driver test.
 enum WebDriverCommandType {
-  /// Acknowlegement for the previously sent message.
+  /// Acknowledgement for the previously sent message.
   ack,
 
   /// No further WebDriver commands is requested by the app-side tests.
@@ -293,6 +293,9 @@ abstract class IntegrationTestResults {
   /// The extra data for the reported result.
   Map<String, dynamic>? get reportData;
 
-  /// Whether all the test methods completed succesfully.
+  /// Whether all the test methods completed successfully.
+  ///
+  /// Completes when the tests have finished. The boolean value will be true if
+  /// all tests have passed, and false otherwise.
   Completer<bool> get allTestsPassed;
 }

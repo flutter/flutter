@@ -11,9 +11,9 @@
 # which should be kept in sync with this file:
 #
 #   - analysis_options.yaml (this file)
-#   - packages/flutter/lib/analysis_options_user.yaml
 #   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
 #   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
+#   - https://github.com/flutter/packages/blob/master/analysis_options.yaml
 #
 # This file contains the analysis options used by Flutter tools, such as IntelliJ,
 # Android Studio, and the `flutter analyze` command.
@@ -40,6 +40,8 @@ analyzer:
     unnecessary_null_comparison: ignore
   exclude:
     - "bin/cache/**"
+      # Ignore protoc generated files
+    - "dev/conductor/lib/proto/*"
 
 linter:
   rules:
@@ -62,7 +64,7 @@ linter:
     # - avoid_dynamic_calls # not yet tested
     - avoid_empty_else
     - avoid_equals_and_hash_code_on_mutable_classes
-    # - avoid_escaping_inner_quotes # not yet tested
+    - avoid_escaping_inner_quotes
     - avoid_field_initializers_in_const_classes
     - avoid_function_literals_in_foreach_calls
     # - avoid_implementing_value_types # not yet tested
@@ -120,6 +122,7 @@ linter:
     - leading_newlines_in_multiline_strings
     - library_names
     - library_prefixes
+    - library_private_types_in_public_api
     # - lines_longer_than_80_chars # not required by flutter style
     - list_remove_unrelated_type
     # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/sdk/issues/34181
@@ -129,6 +132,7 @@ linter:
     - no_duplicate_case_values
     - no_logic_in_create_state
     # - no_runtimeType_toString # ok in tests; we enable this only in packages/
+    - noop_primitive_operations
     - non_constant_identifier_names
     - null_check_on_nullable_type_parameter
     - null_closures
@@ -166,7 +170,7 @@ linter:
     - prefer_initializing_formals
     - prefer_inlined_adds
     # - prefer_int_literals # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#use-double-literals-for-double-constants
-    # - prefer_interpolation_to_compose_strings # doesn't work with raw strings, see https://github.com/dart-lang/linter/issues/2490
+    - prefer_interpolation_to_compose_strings
     - prefer_is_empty
     - prefer_is_not_empty
     - prefer_is_not_operator
@@ -201,7 +205,7 @@ linter:
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
     - unnecessary_new
     - unnecessary_null_aware_assignments
-    # - unnecessary_null_checks # not yet tested
+    - unnecessary_null_checks
     - unnecessary_null_in_if_null_operators
     - unnecessary_nullable_for_final_variable_declarations
     - unnecessary_overrides
@@ -219,11 +223,12 @@ linter:
     - use_is_even_rather_than_modulo
     - use_key_in_widget_constructors
     - use_late_for_private_fields_and_variables
-    # - use_named_constants # not yet tested
+    - use_named_constants
     - use_raw_strings
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
     # - use_string_buffers # has false positives: https://github.com/dart-lang/sdk/issues/34182
+    - use_test_throws_matchers
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
     - valid_regexps
     - void_checks

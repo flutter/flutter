@@ -27,8 +27,8 @@ void main() {
 
   test('RenderSliverFloatingPinnedPersistentHeader maxScrollObstructionExtent is minExtent', () {
     final TestRenderSliverFloatingPinnedPersistentHeader header = TestRenderSliverFloatingPinnedPersistentHeader(
-      child: RenderSizedBox(const Size(400.0, 100.0)
-    ));
+      child: RenderSizedBox(const Size(400.0, 100.0)),
+    );
     final RenderViewport root = RenderViewport(
       axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,

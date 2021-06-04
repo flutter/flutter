@@ -5,8 +5,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
 
@@ -44,9 +45,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Container(height: 600.0,)
-        )
-      )
+          child: Container(height: 600.0),
+        ),
+      ),
     );
 
     // 1st, check that the render object has received the default clip behavior.
@@ -64,9 +65,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Container(height: 600.1,)
-        )
-      )
+          child: Container(height: 600.1),
+        ),
+      ),
     );
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
@@ -79,9 +80,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Container(width: 800.0,)
-        )
-      )
+          child: Container(width: 800.0),
+        ),
+      ),
     );
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
@@ -92,9 +93,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Container(width: 800.1,)
-        )
-      )
+          child: Container(width: 800.1),
+        ),
+      ),
     );
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));

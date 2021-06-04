@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 
 import 'file_system.dart';
@@ -23,7 +21,7 @@ abstract class ProjectMigrator {
 
   /// Return null if the line should be deleted.
   @protected
-  String migrateLine(String line) {
+  String? migrateLine(String line) {
     return line;
   }
 
@@ -43,7 +41,7 @@ abstract class ProjectMigrator {
 
     bool migrationRequired = false;
     for (final String line in lines) {
-      final String newProjectLine = migrateLine(line);
+      final String? newProjectLine = migrateLine(line);
       if (newProjectLine == null) {
         logger.printTrace('Migrating $basename, removing:');
         logger.printTrace('    $line');

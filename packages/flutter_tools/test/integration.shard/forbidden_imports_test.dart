@@ -51,10 +51,11 @@ void main() {
       .map(_asFile);
     for (final File file in files) {
       for (final String line in file.readAsLinesSync()) {
-        if (line.startsWith(RegExp(r'import.*globals.dart'))
-         && !line.contains(r'as globals')) {
+        if ((line.startsWith(RegExp(r'import.*globals.dart')) ||
+                line.startsWith(RegExp(r'import.*globals_null_migrated.dart'))) &&
+            !line.contains(r'as globals')) {
           final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
-          fail('$relativePath imports globals.dart without a globals prefix.');
+          fail('$relativePath imports globals_null_migrated.dart or globals.dart without a globals prefix.');
         }
       }
     }
@@ -65,6 +66,7 @@ void main() {
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'platform.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_io.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'multi_root_file_system.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 
@@ -89,7 +91,7 @@ void main() {
   test('no unauthorized imports of package:http', () {
     final List<String> allowedPaths = <String>[
       // Used only for multi-part file uploads, which are non-trivial to reimplement.
-      fileSystem.path.join(flutterTools, 'lib', 'src', 'reporting', 'reporting.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'reporting', 'crash_reporting.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 

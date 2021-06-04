@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
+import 'dart:ui' as ui;
+
 import 'platform.dart' as platform;
 
 /// The dart:html implementation of [platform.defaultTargetPlatform].
@@ -10,8 +12,23 @@ platform.TargetPlatform get defaultTargetPlatform {
   // To get a better guess at the targetPlatform we need to be able to reference
   // the window, but that won't be available until we fix the platforms
   // configuration for Flutter.
-  return platform.debugDefaultTargetPlatformOverride ?? _browserPlatform;
+  return platform.debugDefaultTargetPlatformOverride ??
+      _testPlatform ??
+      _browserPlatform;
 }
+
+final platform.TargetPlatform? _testPlatform = () {
+  platform.TargetPlatform? result;
+  assert(() {
+    // This member is only available in the web's dart:ui implementation.
+    // ignore: undefined_prefixed_name
+    if (ui.debugEmulateFlutterTesterEnvironment as bool) {
+      result = platform.TargetPlatform.android;
+    }
+    return true;
+  }());
+  return result;
+}();
 
 // Lazy-initialized and forever cached current browser platform.
 //

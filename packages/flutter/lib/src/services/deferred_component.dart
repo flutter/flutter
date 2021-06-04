@@ -10,7 +10,7 @@ import 'system_channels.dart';
 ///
 /// Deferred components allow Flutter applications to download precompiled AOT
 /// dart code and assets at runtime, reducing the install size of apps and
-/// avoiding installing unnessecary code/assets on end user devices. Common
+/// avoiding installing unnecessary code/assets on end user devices. Common
 /// use cases include deferring installation of advanced or infrequently
 /// used features and limiting locale specific features to users of matching
 /// locales. Deferred components can only deliver split off parts of the same

@@ -92,7 +92,7 @@ class Tracing {
 }
 
 /// Download the startup trace information from the given observatory client and
-/// store it to build/start_up_info.json.
+/// store it to `$output/start_up_info.json`.
 Future<void> downloadStartupTrace(FlutterVmService vmService, {
   bool awaitFirstFrame = true,
   @required Logger logger,

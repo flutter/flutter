@@ -196,18 +196,22 @@ void main() {
     boundary = RenderRepaintBoundary();
     final RenderStack stack = RenderStack()..alignment = Alignment.topLeft;
     final RenderDecoratedBox blackBox = RenderDecoratedBox(
-        decoration: const BoxDecoration(color: Color(0xff000000)),
-        child: RenderConstrainedBox(
-          additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
-        ));
-    stack.add(RenderOpacity()
-      ..opacity = 0.5
-      ..child = blackBox);
+      decoration: const BoxDecoration(color: Color(0xff000000)),
+      child: RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
+      ),
+    );
+    stack.add(
+      RenderOpacity()
+        ..opacity = 0.5
+        ..child = blackBox,
+    );
     final RenderDecoratedBox whiteBox = RenderDecoratedBox(
-        decoration: const BoxDecoration(color: Color(0xffffffff)),
-        child: RenderConstrainedBox(
-          additionalConstraints: BoxConstraints.tight(const Size.square(10.0)),
-        ));
+      decoration: const BoxDecoration(color: Color(0xffffffff)),
+      child: RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size.square(10.0)),
+      ),
+    );
     final RenderPositionedBox positioned = RenderPositionedBox(
       widthFactor: 2.0,
       heightFactor: 2.0,
@@ -302,7 +306,7 @@ void main() {
     expect(renderAnimatedOpacity.needsCompositing, false);
   });
 
-  test('RenderAnimatedOpacity does not composite if it is opaque', () {
+  test('RenderAnimatedOpacity does composite if it is opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
     )..value = 1.0;
@@ -314,7 +318,7 @@ void main() {
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
-    expect(renderAnimatedOpacity.needsCompositing, false);
+    expect(renderAnimatedOpacity.needsCompositing, true);
   });
 
   test('RenderAnimatedOpacity reuses its layer', () {

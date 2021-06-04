@@ -247,13 +247,22 @@ class _LineBetweenPointers{
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create a gesture recognizer for interactions intended for scaling content.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   ScaleGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
     this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(dragStartBehavior != null),
-       super(debugOwner: debugOwner, kind: kind);
+       super(
+         debugOwner: debugOwner,
+         kind: kind,
+         supportedDevices: supportedDevices,
+       );
 
   /// Determines what point is used as the starting point in all calculations
   /// involving this gesture.
@@ -341,8 +350,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void addAllowedPointer(PointerEvent event) {
-    startTrackingPointer(event.pointer, event.transform);
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
     _velocityTrackers[event.pointer] = VelocityTracker.withKind(event.kind);
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
@@ -441,7 +450,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         pointerEndId: _pointerQueue[1],
         pointerEndLocation: _pointerLocations[_pointerQueue[1]]!,
       );
-      _currentLine = null;
+      _currentLine = _initialLine;
     }
   }
 

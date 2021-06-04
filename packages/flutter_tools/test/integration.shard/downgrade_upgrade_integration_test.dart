@@ -26,7 +26,6 @@ final ProcessUtils processUtils = ProcessUtils(processManager: processManager, l
   outputPreferences: OutputPreferences.test(wrapText: true),
 ));
 final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
-final String dartBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'dart.bat' : 'dart');
 
 /// A test for flutter upgrade & downgrade that checks out a parallel flutter repo.
 void main() {

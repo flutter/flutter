@@ -121,7 +121,7 @@ class StackFrame {
       packageScheme = 'package';
       final Uri packageUri = Uri.parse(match.group(1)!);
       package = packageUri.pathSegments[0];
-      packagePath = packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', '');
+      packagePath = packageUri.path.replaceFirst('${packageUri.pathSegments[0]}/', '');
     }
 
     return StackFrame(
@@ -194,7 +194,7 @@ class StackFrame {
       line != '===== asynchronous gap ===========================',
       'Got a stack frame from package:stack_trace, where a vm or web frame was expected. '
       'This can happen if FlutterError.demangleStackTrace was not set in an environment '
-      'that propagates non-standard stack traces to the framework, such as during tests.'
+      'that propagates non-standard stack traces to the framework, such as during tests.',
     );
 
     // Web frames.
@@ -232,7 +232,7 @@ class StackFrame {
     String packagePath = packageUri.path;
     if (packageUri.scheme == 'dart' || packageUri.scheme == 'package') {
       package = packageUri.pathSegments[0];
-      packagePath = packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', '');
+      packagePath = packageUri.path.replaceFirst('${packageUri.pathSegments[0]}/', '');
     }
 
     return StackFrame(

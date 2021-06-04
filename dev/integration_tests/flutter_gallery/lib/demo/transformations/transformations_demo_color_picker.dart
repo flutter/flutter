@@ -27,9 +27,7 @@ class ColorPicker extends StatelessWidget {
           color: color,
           selected: color == selectedColor,
           onTap: () {
-            if (onColorSelection != null) {
-              onColorSelection!(color);
-            }
+            onColorSelection?.call(color);
           },
         );
       }).toList(),
@@ -59,9 +57,7 @@ class _ColorPickerSwatch extends StatelessWidget {
       child: RawMaterialButton(
         fillColor: color,
         onPressed: () {
-          if (onTap != null) {
-            onTap!();
-          }
+          onTap?.call();
         },
         child: !selected ? null : const Icon(
           Icons.check,

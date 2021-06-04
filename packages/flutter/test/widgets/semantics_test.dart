@@ -419,7 +419,7 @@ void main() {
               tags: <SemanticsTag>[const SemanticsTag('custom tag')],
               textDirection: TextDirection.ltr,
             ),
-          ]
+          ],
         ),
       ],
     );
@@ -519,6 +519,7 @@ void main() {
           selected: true,
           button: true,
           slider: true,
+          keyboardKey: true,
           link: true,
           textField: true,
           readOnly: true,
@@ -594,7 +595,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
 
     final List<String> performedActions = <String>[];
@@ -768,7 +769,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -836,8 +837,10 @@ void main() {
             ],
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true),
-    );
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -849,7 +852,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -892,7 +895,10 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true));
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -904,7 +910,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -949,8 +955,11 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
-    );
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -962,7 +971,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -1010,8 +1019,11 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
-    );
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -1110,7 +1122,8 @@ void main() {
         ),
         ignoreTransform: true,
         ignoreRect: true,
-        ignoreId: true),
+        ignoreId: true,
+      ),
     );
 
     handle.dispose();
@@ -1137,8 +1150,11 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreId: true, ignoreRect: true, ignoreTransform: true),
-    );
+      ),
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
     semantics.dispose();
   });
 

@@ -17,13 +17,12 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/testbed.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 // Defined globally for fakes to use.
 FileSystem fileSystem;
@@ -189,18 +188,8 @@ class FakeFuchsiaPM extends Fake implements FuchsiaPM {
   }
 
   @override
-  Future<bool> genkey(String buildPath, String outKeyPath) async {
-    if (!fileSystem.file(fileSystem.path.join(buildPath, 'meta', 'package')).existsSync()) {
-      return false;
-    }
-    fileSystem.file(outKeyPath).createSync(recursive: true);
-    return true;
-  }
-
-  @override
-  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> build(String buildPath, String manifestPath) async {
     if (!fileSystem.file(fileSystem.path.join(buildPath, 'meta', 'package')).existsSync() ||
-        !fileSystem.file(keyPath).existsSync() ||
         !fileSystem.file(manifestPath).existsSync()) {
       return false;
     }
@@ -209,9 +198,8 @@ class FakeFuchsiaPM extends Fake implements FuchsiaPM {
   }
 
   @override
-  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String manifestPath) async {
     if (!fileSystem.file(fileSystem.path.join(buildPath, 'meta', 'package')).existsSync() ||
-        !fileSystem.file(keyPath).existsSync() ||
         !fileSystem.file(manifestPath).existsSync()) {
       return false;
     }

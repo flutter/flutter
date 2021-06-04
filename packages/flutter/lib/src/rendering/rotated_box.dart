@@ -117,8 +117,13 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      _transformLayer = context.pushTransform(needsCompositing, offset, _paintTransform!, _paintChild,
-          oldLayer: _transformLayer);
+      _transformLayer = context.pushTransform(
+        needsCompositing,
+        offset,
+        _paintTransform!,
+        _paintChild,
+        oldLayer: _transformLayer,
+      );
     } else {
       _transformLayer = null;
     }

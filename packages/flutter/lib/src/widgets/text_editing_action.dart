@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart' show RenderEditable;
 
 import 'actions.dart';
@@ -61,8 +60,7 @@ abstract class TextEditingAction<T extends Intent> extends ContextAction<T> {
 
   @override
   bool isEnabled(T intent) {
-    // The Action is disabled if there is no focused TextEditingActionTarget, or
-    // if the platform is web, because web lets the browser handle text editing.
-    return !kIsWeb && textEditingActionTarget != null;
+    // The Action is disabled if there is no focused TextEditingActionTarget.
+    return textEditingActionTarget != null;
   }
 }

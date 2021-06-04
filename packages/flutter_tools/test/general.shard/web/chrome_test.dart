@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -14,7 +13,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const List<String> kChromeArgs = <String>[
   '--disable-background-timer-throttling',
@@ -27,15 +27,21 @@ const List<String> kChromeArgs = <String>[
   '--disable-translate',
 ];
 
+const List<String> kCodeCache = <String>[
+  'Cache',
+  'Code Cache',
+  'GPUCache',
+];
+
 const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
 
 void main() {
-  FileExceptionHandler exceptionHandler;
-  ChromiumLauncher chromeLauncher;
-  FileSystem fileSystem;
-  Platform platform;
-  FakeProcessManager processManager;
-  OperatingSystemUtils operatingSystemUtils;
+  late FileExceptionHandler exceptionHandler;
+  late ChromiumLauncher chromeLauncher;
+  late FileSystem fileSystem;
+  late Platform platform;
+  late FakeProcessManager processManager;
+  late OperatingSystemUtils operatingSystemUtils;
 
   setUp(() {
     exceptionHandler = FileExceptionHandler();
@@ -44,7 +50,7 @@ void main() {
       kChromeEnvironment: 'example_chrome',
     });
     fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
@@ -128,7 +134,7 @@ void main() {
       cacheDir: fileSystem.currentDirectory,
     );
 
-    // Create cache dir that the Chrome launcher will atttempt to persist, and a file
+    // Create cache dir that the Chrome launcher will attempt to persist, and a file
     // that will thrown an exception when it is read.
     const String directoryPrefix = '/.tmp_rand0/flutter_tools_chrome_device.rand0/Default';
     fileSystem.directory('$directoryPrefix/Local Storage')
@@ -181,12 +187,127 @@ void main() {
       cacheDir: fileSystem.currentDirectory,
     );
 
-    // Create cache dir that the Chrome launcher will atttempt to persist.
+    // Create cache dir that the Chrome launcher will attempt to persist.
     fileSystem.directory('/.tmp_rand0/flutter_tools_chrome_device.rand0/Default/Local Storage')
       .createSync(recursive: true);
 
     await chrome.close(); // does not exit with error.
     expect(logger.errorText, contains('Failed to restore Chrome preferences'));
+  });
+
+  testWithoutContext('can launch Chrome on x86_64 macOS', () async {
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: macOSUtils,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      )
+    ]);
+
+    expect(
+          () async => chromiumLauncher.launch(
+        'example_url',
+        skipCheck: true,
+      ),
+      returnsNormally,
+    );
+  });
+
+  testWithoutContext('can launch x86_64 Chrome on ARM macOS', () async {
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: macOSUtils,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'file',
+          'example_chrome',
+        ],
+        stdout: 'Mach-O 64-bit executable x86_64',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      )
+    ]);
+
+    expect(
+          () async => chromiumLauncher.launch(
+        'example_url',
+        skipCheck: true,
+      ),
+      returnsNormally,
+    );
+  });
+
+  testWithoutContext('can launch ARM Chrome natively on ARM macOS when installed', () async {
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: macOSUtils,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'file',
+          'example_chrome',
+        ],
+        stdout: 'Mach-O 64-bit executable arm64',
+      ),
+      const FakeCommand(
+        command: <String>[
+          '/usr/bin/arch',
+          '-arm64',
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      ),
+    ]);
+
+    expect(
+      () async => chromiumLauncher.launch(
+        'example_url',
+        skipCheck: true,
+      ),
+      returnsNormally,
+    );
   });
 
   testWithoutContext('can launch chrome with a custom debug port', () async {
@@ -237,7 +358,7 @@ void main() {
     );
   });
 
-  testWithoutContext('can seed chrome temp directory with existing session data', () async {
+  testWithoutContext('can seed chrome temp directory with existing session data, excluding Cache folder', () async {
     final Completer<void> exitCompleter = Completer<void>.sync();
     final Directory dataDir = fileSystem.directory('chrome-stuff');
     final File preferencesFile = dataDir
@@ -248,9 +369,16 @@ void main() {
       ..writeAsStringSync('"exit_type":"Crashed"');
 
     final Directory defaultContentDirectory = dataDir
+      .childDirectory('Default')
+      .childDirectory('Foo');
+    defaultContentDirectory.createSync(recursive: true);
+    // Create Cache directories that should be skipped
+    for (final String cache in kCodeCache) {
+      dataDir
         .childDirectory('Default')
-        .childDirectory('Foo');
-        defaultContentDirectory.createSync(recursive: true);
+        .childDirectory(cache)
+        .createSync(recursive: true);
+    }
 
     processManager.addCommand(FakeCommand(
       command: const <String>[
@@ -283,7 +411,15 @@ void main() {
         .childDirectory('Default')
         .childDirectory('Foo');
 
-    expect(defaultContentDir.existsSync(), true);
+    expect(defaultContentDir, exists);
+
+    // Validate cache dirs are not copied.
+    for (final String cache in kCodeCache) {
+      expect(fileSystem
+        .directory('.tmp_rand0/flutter_tools_chrome_device.rand0')
+        .childDirectory('Default')
+        .childDirectory(cache), isNot(exists));
+    }
   });
 
   testWithoutContext('can retry launch when glibc bug happens', () async {
@@ -305,7 +441,7 @@ void main() {
         command: args,
         stderr: 'Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: '
                 '_dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen '
-                '<= GL(dl_tls_generation)\' failed!',
+                "<= GL(dl_tls_generation)' failed!",
       ));
     }
 

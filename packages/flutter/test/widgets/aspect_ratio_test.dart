@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double aspectRatio) async {
   final Key childKey = UniqueKey();
@@ -14,7 +14,7 @@ Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double as
         child: AspectRatio(
           aspectRatio: aspectRatio,
           child: Container(
-            key: childKey
+            key: childKey,
           ),
         ),
       ),
@@ -40,7 +40,7 @@ void main() {
           child: AspectRatio(
             aspectRatio: 2.0,
             child: Container(
-              key: childKey
+              key: childKey,
             ),
           ),
         ),

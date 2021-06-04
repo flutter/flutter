@@ -20,15 +20,15 @@ void main() {
 }
 
 class RawKeyboardDemo extends StatefulWidget {
-  const RawKeyboardDemo({Key key}) : super(key: key);
+  const RawKeyboardDemo({Key? key}) : super(key: key);
 
   @override
-  _HardwareKeyDemoState createState() => _HardwareKeyDemoState();
+  State<RawKeyboardDemo> createState() => _HardwareKeyDemoState();
 }
 
 class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
   final FocusNode _focusNode = FocusNode();
-  RawKeyEvent _event;
+  RawKeyEvent? _event;
 
   @override
   void dispose() {
@@ -60,7 +60,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
       autofocus: true,
       child: AnimatedBuilder(
         animation: _focusNode,
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           if (!_focusNode.hasFocus) {
             return GestureDetector(
               onTap: () {
@@ -74,11 +74,11 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             return Text('Press a key', style: textTheme.headline4);
           }
 
-          final RawKeyEventData data = _event.data;
-          final String modifierList = data.modifiersPressed.keys.map<String>(_getEnumName).join(', ').replaceAll('Modifier', '');
+          final RawKeyEventData? data = _event?.data;
+          final String? modifierList = data?.modifiersPressed.keys.map<String>(_getEnumName).join(', ').replaceAll('Modifier', '');
           final List<Widget> dataText = <Widget>[
             Text('${_event.runtimeType}'),
-            if (_event.character?.isNotEmpty ?? false) Text('character produced: "${_event.character}"'),
+            if (_event?.character?.isNotEmpty ?? false) Text('character produced: "${_event?.character}"'),
             Text('modifiers set: $modifierList'),
           ];
           if (data is RawKeyEventDataAndroid) {
@@ -119,12 +119,12 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('code: ${data.code}'));
             dataText.add(Text('metaState: ${data.metaState} (${_asHex(data.metaState)})'));
           }
-          dataText.add(Text('logical: ${_event.logicalKey}'));
-          dataText.add(Text('physical: ${_event.physicalKey}'));
-          if (_event.character != null) {
-            dataText.add(Text('character: ${_event.character}'));
+          dataText.add(Text('logical: ${_event?.logicalKey}'));
+          dataText.add(Text('physical: ${_event?.physicalKey}'));
+          if (_event?.character != null) {
+            dataText.add(Text('character: ${_event?.character}'));
           }
-          for (final ModifierKey modifier in data.modifiersPressed.keys) {
+          for (final ModifierKey modifier in data!.modifiersPressed.keys) {
             for (final KeyboardSide side in KeyboardSide.values) {
               if (data.isModifierPressed(modifier, side: side)) {
                 dataText.add(
@@ -135,11 +135,11 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           }
           final List<String> pressed = <String>['Pressed:'];
           for (final LogicalKeyboardKey key in RawKeyboard.instance.keysPressed) {
-            pressed.add(key.debugName);
+            pressed.add(key.debugName!);
           }
           dataText.add(Text(pressed.join(' ')));
           return DefaultTextStyle(
-            style: textTheme.subtitle1,
+            style: textTheme.subtitle1!,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: dataText,

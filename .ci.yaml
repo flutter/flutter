@@ -1,0 +1,1498 @@
+# Describes the targets run in continuous integration environment.
+#
+# Flutter infra uses this file to generate a checklist of tasks to be performed
+# for every commit.
+#
+# More information at:
+#  * https://github.com/flutter/cocoon/blob/master/scheduler/README.md
+enabled_branches:
+  - master
+
+targets:
+  - name: linux_analyze
+    builder: Linux analyze
+    scheduler: luci
+
+  - name: linux_build_aar_module_test
+    builder: Linux build_aar_module_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: linux_customer_testing
+    builder: Linux customer_testing
+    scheduler: luci
+
+  - name: linux_build_tests_1_2
+    builder: Linux build_tests_1_2
+    scheduler: luci
+
+  - name: linux_build_tests_2_2
+    builder: Linux build_tests_2_2
+    scheduler: luci
+
+  - name: linux_docs
+    builder: Linux docs
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter/
+      - packages/flutter_test/
+      - packages/flutter_drive/
+      - packages/flutter_localizations/
+      - bin/
+
+  - name: linux_framework_tests_libraries
+    builder: Linux framework_tests_libraries
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter/
+      - packages/flutter_driver/
+      - packages/integration_test/
+      - packages/flutter_localizations/
+      - packages/fuchsia_remote_debug_protocol/
+      - packages/flutter_test/
+      - packages/flutter_goldens/
+      - packages/flutter_tools/lib/src/test/
+      - bin/
+
+  - name: linux_framework_tests_misc
+    builder: Linux framework_tests_misc
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter/
+      - packages/flutter_driver/
+      - packages/integration_test/
+      - packages/flutter_localizations/
+      - packages/fuchsia_remote_debug_protocol/
+      - packages/flutter_test/
+      - packages/flutter_goldens/
+      - packages/flutter_tools/lib/src/test/
+      - bin/
+
+  - name: linux_framework_tests_widgets
+    builder: Linux framework_tests_widgets
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter/
+      - packages/flutter_driver/
+      - packages/integration_test/
+      - packages/flutter_localizations/
+      - packages/fuchsia_remote_debug_protocol/
+      - packages/flutter_test/
+      - packages/flutter_goldens/
+      - packages/flutter_tools/lib/src/test/
+      - bin/
+
+  - name: linux_firebase_abstract_method_smoke_test
+    builder: Linux firebase_abstract_method_smoke_test
+    scheduler: luci
+
+  - name: linux_firebase_android_embedding_v2_smoke_test
+    builder: Linux firebase_android_embedding_v2_smoke_test
+    scheduler: luci
+
+  - name: linux_firebase_release_smoke_test
+    builder: Linux firebase_release_smoke_test
+    scheduler: luci
+
+  - name: linux_fuchsia_precache
+    builder: Linux fuchsia_precache
+    scheduler: luci
+
+  - name: linux_gradle_desugar_classes_test
+    builder: Linux gradle_desugar_classes_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - bin/**
+
+  - name: linux_gradle_plugin_bundle_test
+    builder: Linux gradle_plugin_bundle_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - bin/**
+
+  - name: linux_gradle_plugin_fat_apk_test
+    builder: Linux gradle_plugin_fat_apk_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - bin/**
+
+  - name: linux_gradle_plugin_light_apk_test
+    builder: Linux gradle_plugin_light_apk_test
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/**
+      - bin/**
+
+  - name: linux_module_host_with_custom_build_test
+    builder: Linux module_host_with_custom_build_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: linux_module_custom_host_app_name_test
+    builder: Linux module_custom_host_app_name_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: linux_module_test
+    builder: Linux module_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: linux_plugin_test
+    builder: Linux plugin_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: linux_skp_generator
+    builder: Linux skp_generator
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter/
+      - packages/flutter_tools/
+      - bin/
+
+  - name: linux_tool_tests_general
+    builder: Linux tool_tests_general
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter_tools/
+      - bin/
+
+  - name: linux_tool_tests_commands
+    builder: Linux tool_tests_commands
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter_tools/
+      - bin/
+
+  - name: linux_tool_integration_tests_1_4
+    builder: Linux tool_integration_tests_1_4
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter_tools/
+      - bin/
+
+  - name: linux_tool_integration_tests_2_4
+    builder: Linux tool_integration_tests_2_4
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter_tools/
+      - bin/
+
+  - name: linux_tool_integration_tests_3_4
+    builder: Linux tool_integration_tests_3_4
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter_tools/
+      - bin/
+
+  - name: linux_tool_integration_tests_4_4
+    builder: Linux tool_integration_tests_4_4
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter_tools/
+      - bin/
+
+  - name: linux_web_tool_tests
+    builder: Linux web_tool_tests
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter_tools/
+      - bin/
+
+  - name: linux_web_benchmarks_html
+    builder: Linux web_benchmarks_html
+    scheduler: luci
+    runIf:
+      - dev/**
+      - bin/**
+
+  - name: linux_web_tests_0
+    builder: Linux web_tests_0
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: linux_web_tests_1
+    builder: Linux web_tests_1
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: linux_web_tests_2
+    builder: Linux web_tests_2
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: linux_web_tests_3
+    builder: Linux web_tests_3
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: linux_web_tests_4
+    builder: Linux web_tests_4
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: linux_web_tests_5
+    builder: Linux web_tests_5
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: linux_web_tests_6
+    builder: Linux web_tests_6
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: linux_web_tests_7_last
+    builder: Linux web_tests_7_last
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: web_long_running_tests_1_5
+    builder: Linux web_long_running_tests_1_5
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: web_long_running_tests_2_5
+    builder: Linux web_long_running_tests_2_5
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: web_long_running_tests_3_5
+    builder: Linux web_long_running_tests_3_5
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: web_long_running_tests_4_5
+    builder: Linux web_long_running_tests_4_5
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: web_long_running_tests_5_5
+    builder: Linux web_long_running_tests_5_5
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: flutter_plugins
+    builder: Linux flutter_plugins
+    scheduler: luci
+
+  - name: mac_build_aar_module_test
+    builder: Mac build_aar_module_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_build_ios_framework_module_test
+    builder: Mac build_ios_framework_module_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_build_tests_1_4
+    builder: Mac build_tests_1_4
+    scheduler: luci
+
+  - name: mac_build_tests_2_4
+    builder: Mac build_tests_2_4
+    scheduler: luci
+
+  - name: mac_build_tests_3_4
+    builder: Mac build_tests_3_4
+    scheduler: luci
+
+  - name: mac_build_tests_4_4
+    builder: Mac build_tests_4_4
+    scheduler: luci
+
+  - name: mac_customer_testing
+    builder: Mac customer_testing
+    scheduler: luci
+
+  - name: mac_framework_tests_libraries
+    builder: Mac framework_tests_libraries
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/lib/src/test/**
+      - bin/**
+
+  - name: mac_framework_tests_misc
+    builder: Mac framework_tests_misc
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/lib/src/test/**
+      - bin/**
+
+  - name: mac_framework_tests_widgets
+    builder: Mac framework_tests_widgets
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/lib/src/test/**
+      - bin/**
+
+  - name: mac_gradle_plugin_bundle_test
+    builder: Mac gradle_plugin_bundle_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - bin/**
+
+  - name: mac_gradle_plugin_fat_apk_test
+    builder: Mac gradle_plugin_fat_apk_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - bin/**
+
+  - name: mac_gradle_plugin_light_apk_test
+    builder: Mac gradle_plugin_light_apk_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - bin/**
+
+  - name: mac_module_custom_host_app_name_test
+    builder: Mac module_custom_host_app_name_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_module_host_with_custom_build_test
+    builder: Mac module_host_with_custom_build_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_module_test
+    builder: Mac module_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_module_test_ios
+    builder: Mac module_test_ios
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_plugin_lint_mac
+    builder: Mac plugin_lint_mac
+    scheduler: luci
+    runIf:
+      - dev/**
+      - bin/**
+
+  - name: mac_plugin_test
+    builder: Mac plugin_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: dart_plugin_registry_test
+    builder: Mac dart_plugin_registry_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_tool_tests_general
+    builder: Mac tool_tests_general
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: tool_tests_commands
+    builder: Windows tool_tests_commands
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_tool_integration_tests_1_4
+    builder: Mac tool_integration_tests_1_4
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_tool_integration_tests_2_4
+    builder: Mac tool_integration_tests_2_4
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_tool_integration_tests_3_4
+    builder: Mac tool_integration_tests_3_4
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_tool_integration_tests_4_4
+    builder: Mac tool_integration_tests_4_4
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: mac_web_tool_tests
+    builder: Mac web_tool_tests
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: win_build_aar_module_test
+    builder: Windows build_aar_module_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: win_build_tests_1_3
+    builder: Windows build_tests_1_3
+    scheduler: luci
+
+  - name: win_build_tests_2_3
+    builder: Windows build_tests_2_3
+    scheduler: luci
+
+  - name: win_build_tests_3_3
+    builder: Windows build_tests_3_3
+    scheduler: luci
+
+  - name: win_customer_testing
+    builder: Windows customer_testing
+    scheduler: luci
+
+  - name: win_framework_tests_libraries
+    builder: Windows framework_tests_libraries
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter/
+      - packages/flutter_driver/
+      - packages/integration_test/
+      - packages/flutter_localizations/
+      - packages/fuchsia_remote_debug_protocol/
+      - packages/flutter_test/
+      - packages/flutter_goldens/
+      - packages/flutter_tools/lib/src/test/
+      - bin/
+
+  - name: framework_tests_misc
+    builder: Windows framework_tests_misc
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter/
+      - packages/flutter_driver/
+      - packages/integration_test/
+      - packages/flutter_localizations/
+      - packages/fuchsia_remote_debug_protocol/
+      - packages/flutter_test/
+      - packages/flutter_goldens/
+      - packages/flutter_tools/lib/src/test/
+      - bin/
+
+  - name: framework_tests_widgets
+    builder: Windows framework_tests_widgets
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter/
+      - packages/flutter_driver/
+      - packages/integration_test/
+      - packages/flutter_localizations/
+      - packages/fuchsia_remote_debug_protocol/
+      - packages/flutter_test/
+      - packages/flutter_goldens/
+      - packages/flutter_tools/lib/src/test/
+      - bin/
+
+  - name: win_gradle_plugin_bundle_test
+    builder: Windows gradle_plugin_bundle_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - bin/**
+
+  - name: win_gradle_plugin_light_apk_test
+    builder: Windows gradle_plugin_light_apk_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - bin/**
+
+  - name: win_module_custom_host_app_name_test
+    builder: Windows module_custom_host_app_name_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: win_module_test
+    builder: Windows module_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: win_module_host_with_custom_build_test
+    builder: Windows module_host_with_custom_build_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: win_plugin_test
+    builder: Windows plugin_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: tool_tests_general
+    builder: Windows tool_tests_general
+    postsubmit: false
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: win_tool_integration_tests_1_5
+    builder: Windows tool_integration_tests_1_5
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: win_tool_integration_tests_2_5
+    builder: Windows tool_integration_tests_2_5
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: win_tool_integration_tests_3_5
+    builder: Windows tool_integration_tests_3_5
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: win_tool_integration_tests_4_5
+    builder: Windows tool_integration_tests_4_5
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: win_tool_integration_tests_5_5
+    builder: Windows tool_integration_tests_5_5
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: win_web_tool_tests
+    builder: Windows web_tool_tests
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: linux_analyzer_benchmark
+    builder: Linux analyzer_benchmark
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_android_defines_test
+    builder: Linux android_defines_test
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_android_obfuscate_test
+    builder: Linux android_obfuscate_test
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_android_stack_size_test
+    builder: Linux android_stack_size_test
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_android_view_scroll_perf__timeline_summary
+    builder: Linux android_view_scroll_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_animated_placeholder_perf__e2e_summary
+    builder: Linux animated_placeholder_perf__e2e_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_backdrop_filter_perf__e2e_summary
+    builder: Linux backdrop_filter_perf__e2e_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_basic_material_app_android__compile
+    builder: Linux basic_material_app_android__compile
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_color_filter_and_fade_perf__e2e_summary
+    builder: Linux color_filter_and_fade_perf__e2e_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_complex_layout_android__compile
+    builder: Linux complex_layout_android__compile
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_complex_layout_android__scroll_smoothness
+    builder: Linux complex_layout_android__scroll_smoothness
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_complex_layout_scroll_perf__devtools_memory
+    builder: Linux complex_layout_scroll_perf__devtools_memory
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_complex_layout_semantics_perf
+    builder: Linux complex_layout_semantics_perf
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_cubic_bezier_perf__e2e_summary
+    builder: Linux cubic_bezier_perf__e2e_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_cubic_bezier_perf_sksl_warmup__e2e_summary
+    builder: Linux cubic_bezier_perf_sksl_warmup__e2e_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_cull_opacity_perf__e2e_summary
+    builder: Linux cull_opacity_perf__e2e_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_docs_test
+    builder: Linux docs_test
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_docs_publish
+    builder: Linux docs_publish
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_fast_scroll_heavy_gridview__memory
+    builder: Linux fast_scroll_heavy_gridview__memory
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_engine_group_performance
+    builder: Linux flutter_engine_group_performance
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery__back_button_memory
+    builder: Linux flutter_gallery__back_button_memory
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery__image_cache_memory
+    builder: Linux flutter_gallery__image_cache_memory
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery__memory_nav
+    builder: Linux flutter_gallery__memory_nav
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery__start_up
+    builder: Linux flutter_gallery__start_up
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery__transition_perf_e2e
+    builder: Linux flutter_gallery__transition_perf_e2e
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery__transition_perf_hybrid
+    builder: Linux flutter_gallery__transition_perf_hybrid
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery__transition_perf_with_semantics
+    builder: Linux flutter_gallery__transition_perf_with_semantics
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery__transition_perf
+    builder: Linux flutter_gallery__transition_perf
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery_android__compile
+    builder: Linux flutter_gallery_android__compile
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery_sksl_warmup__transition_perf_e2e
+    builder: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery_sksl_warmup__transition_perf
+    builder: Linux flutter_gallery_sksl_warmup__transition_perf
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery_v2_chrome_run_test
+    builder: Linux flutter_gallery_v2_chrome_run_test
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_gallery_v2_web_compile_test
+    builder: Linux flutter_gallery_v2_web_compile_test
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_flutter_test_performance
+    builder: Linux flutter_test_performance
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_frame_policy_delay_test_android
+    builder: Linux frame_policy_delay_test_android
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_hot_mode_dev_cycle_linux__benchmark
+    builder: Linux hot_mode_dev_cycle_linux__benchmark
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_image_list_jit_reported_duration
+    builder: Linux image_list_jit_reported_duration
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_image_list_reported_duration
+    builder: Linux image_list_reported_duration
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_large_image_changer_perf_android
+    builder: Linux large_image_changer_perf_android
+    presubmit: false
+    scheduler: luci
+
+  - name: animated_image_gc_perf
+    builder: Linux animated_image_gc_perf
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_linux_chrome_dev_mode
+    builder: Linux linux_chrome_dev_mode
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_multi_widget_construction_perf__e2e_summary
+    builder: Linux multi_widget_construction_perf__e2e_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_new_gallery__crane_perf
+    builder: Linux new_gallery__crane_perf
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_picture_cache_perf__e2e_summary
+    builder: Linux picture_cache_perf__e2e_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_platform_channels_benchmarks
+    builder: Linux platform_channels_benchmarks
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_platform_views_scroll_perf__timeline_summary
+    builder: Linux platform_views_scroll_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_routing_test
+    builder: Linux routing_test
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_technical_debt__cost
+    builder: Linux technical_debt__cost
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_textfield_perf__e2e_summary
+    builder: Linux textfield_perf__e2e_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_web_benchmarks_canvaskit
+    builder: Linux web_benchmarks_canvaskit
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_web_size__compile_test
+    builder: Linux web_size__compile_test
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_web_long_running_tests_1_5
+    builder: Linux web_long_running_tests_1_5
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_web_long_running_tests_2_5
+    builder: Linux web_long_running_tests_2_5
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_web_long_running_tests_3_5
+    builder: Linux web_long_running_tests_3_5
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_web_long_running_tests_4_5
+    builder: Linux web_long_running_tests_4_5
+    presubmit: false
+    scheduler: luci
+
+  - name: linux_web_long_running_tests_5_5
+    builder: Linux web_long_running_tests_5_5
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_android_semantics_integration_test
+    builder: Mac_android android_semantics_integration_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_backdrop_filter_perf__timeline_summary
+    builder: Mac_android backdrop_filter_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_channels_integration_test
+    builder: Mac_android channels_integration_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_color_filter_and_fade_perf__timeline_summary
+    builder: Mac_android color_filter_and_fade_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_complex_layout__start_up
+    builder: Mac_android complex_layout__start_up
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_complex_layout_scroll_perf__memory
+    builder: Mac_android complex_layout_scroll_perf__memory
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_complex_layout_scroll_perf__timeline_summary
+    builder: Mac_android complex_layout_scroll_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_cubic_bezier_perf__timeline_summary
+    builder: Mac_android cubic_bezier_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_cubic_bezier_perf_sksl_warmup__timeline_summary
+    builder: Mac_android cubic_bezier_perf_sksl_warmup__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_cull_opacity_perf__timeline_summary
+    builder: Mac_android cull_opacity_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_drive_perf_debug_warning
+    builder: Mac_android drive_perf_debug_warning
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_embedded_android_views_integration_test
+    builder: Mac_android embedded_android_views_integration_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_external_ui_integration_test
+    builder: Mac_android external_ui_integration_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_fading_child_animation_perf__timeline_summary
+    builder: Mac_android fading_child_animation_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_fast_scroll_large_images__memory
+    builder: Mac_android fast_scroll_large_images__memory
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_flavors_test
+    builder: Mac_android flavors_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_flutter_view__start_up
+    builder: Mac_android flutter_view__start_up
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_fullscreen_textfield_perf__timeline_summary
+    builder: Mac_android fullscreen_textfield_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_hello_world__memory
+    builder: Mac_android hello_world__memory
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_hello_world_android__compile
+    builder: Mac_android hello_world_android__compile
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_home_scroll_perf__timeline_summary
+    builder: Mac_android home_scroll_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_hot_mode_dev_cycle__benchmark
+    builder: Mac_android hot_mode_dev_cycle__benchmark
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_hybrid_android_views_integration_test
+    builder: Mac_android hybrid_android_views_integration_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_imagefiltered_transform_animation_perf__timeline_summary
+    builder: Mac_android imagefiltered_transform_animation_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_integration_ui_driver
+    builder: Mac_android integration_ui_driver
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_integration_ui_keyboard_resize
+    builder: Mac_android integration_ui_keyboard_resize
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_integration_ui_screenshot
+    builder: Mac_android integration_ui_screenshot
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_integration_ui_textfield
+    builder: Mac_android integration_ui_textfield
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_integration_test_test
+    builder: Mac_android integration_test_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_microbenchmarks
+    builder: Mac_android microbenchmarks
+    bringup: true
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_new_gallery__transition_perf
+    builder: Mac_android new_gallery__transition_perf
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_picture_cache_perf__timeline_summary
+    builder: Mac_android picture_cache_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_platform_channel_sample_test
+    builder: Mac_android platform_channel_sample_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_platform_interaction_test
+    builder: Mac_android platform_interaction_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_platform_view__start_up
+    builder: Mac_android platform_view__start_up
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_run_release_test
+    builder: Mac_android run_release_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_service_extensions_test
+    builder: Mac_android service_extensions_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_smoke_catalina_start_up
+    builder: Mac_android smoke_catalina_start_up
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_textfield_perf__timeline_summary
+    builder: Mac_android textfield_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_android_tiles_scroll_perf__timeline_summary
+    builder: Mac_android tiles_scroll_perf__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_framework_testslibraries
+    builder: Mac framework_tests_libraries
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_tool_tests_commands
+    builder: Mac tool_tests_commands
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_backdrop_filter_perf_ios__timeline_summary
+    builder: Mac_ios backdrop_filter_perf_ios__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_basic_material_app_ios__compile
+    builder: Mac_ios basic_material_app_ios__compile
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_channels_integration_test_ios
+    builder: Mac_ios channels_integration_test_ios
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_complex_layout_ios__compile
+    builder: Mac_ios complex_layout_ios__compile
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_complex_layout_ios__start_up
+    builder: Mac_ios complex_layout_ios__start_up
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_complex_layout_scroll_perf_ios__timeline_summary
+    builder: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_external_ui_integration_test_ios
+    builder: Mac_ios external_ui_integration_test_ios
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_flavors_test_ios
+    builder: Mac_ios flavors_test_ios
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_flutter_gallery__transition_perf_e2e_ios
+    builder: Mac_ios flutter_gallery__transition_perf_e2e_ios
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_flutter_gallery__transition_perf_e2e_ios32
+    builder: Mac_ios flutter_gallery__transition_perf_e2e_ios32
+    bringup: true
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_flutter_gallery_ios__compile
+    builder: Mac_ios flutter_gallery_ios__compile
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_flutter_gallery_ios__start_up
+    builder: Mac_ios flutter_gallery_ios__start_up
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_flutter_gallery_ios__transition_perf
+    builder: Mac_ios flutter_gallery_ios__transition_perf
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_flutter_view_ios__start_up
+    builder: Mac_ios flutter_view_ios__start_up
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_hello_world_ios__compile
+    builder: Mac_ios hello_world_ios__compile
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_hot_mode_dev_cycle_macos_target__benchmark
+    builder: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_integration_ui_ios_driver
+    builder: Mac_ios integration_ui_ios_driver
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_integration_ui_ios_keyboard_resize
+    builder: Mac_ios integration_ui_ios_keyboard_resize
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_integration_ui_ios_screenshot
+    builder: Mac_ios integration_ui_ios_screenshot
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_integration_ui_ios_textfield
+    builder: Mac_ios integration_ui_ios_textfield
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_integration_test_test_ios
+    builder: Mac_ios integration_test_test_ios
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_ios_app_with_extensions_test
+    builder: Mac_ios ios_app_with_extensions_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_ios_content_validation_test
+    builder: Mac_ios ios_content_validation_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_ios_defines_test
+    builder: Mac_ios ios_defines_test
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_ios_platform_view_tests
+    builder: Mac_ios ios_platform_view_tests
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_large_image_changer_perf_ios
+    builder: Mac_ios large_image_changer_perf_ios
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_macos_chrome_dev_mode
+    builder: Mac_ios macos_chrome_dev_mode
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_microbenchmarks_ios
+    builder: Mac_ios microbenchmarks_ios
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_native_ui_tests_ios32
+    builder: Mac_ios native_ui_tests_ios32
+    bringup: true
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_new_gallery_ios__transition_perf
+    builder: Mac_ios new_gallery_ios__transition_perf
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_platform_channel_sample_test_ios
+    builder: Mac_ios platform_channel_sample_test_ios
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_platform_channel_sample_test_swift
+    builder: Mac_ios platform_channel_sample_test_swift
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_platform_channels_benchmarks_ios
+    builder: Mac_ios platform_channels_benchmarks_ios
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_platform_interaction_test_ios
+    builder: Mac_ios platform_interaction_test_ios
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_platform_view_ios__start_up
+    builder: Mac_ios platform_view_ios__start_up
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_platform_views_scroll_perf_ios__timeline_summary
+    builder: Mac_ios platform_views_scroll_perf_ios__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_post_backdrop_filter_perf_ios__timeline_summary
+    builder: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_simple_animation_perf_ios
+    builder: Mac_ios simple_animation_perf_ios
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_smoke_catalina_hot_mode_dev_cycle_ios__benchmark
+    builder: Mac_ios smoke_catalina_hot_mode_dev_cycle_ios__benchmark
+    presubmit: false
+    scheduler: luci
+
+  - name: mac_ios_tiles_scroll_perf_ios__timeline_summary
+    builder: Mac_ios tiles_scroll_perf_ios__timeline_summary
+    presubmit: false
+    scheduler: luci
+
+  - name: win_framework_tests_misc
+    builder: Windows framework_tests_misc
+    presubmit: false
+    scheduler: luci
+
+  - name: win_framework_tests_widgets
+    builder: Windows framework_tests_widgets
+    presubmit: false
+    scheduler: luci
+
+  - name: win_gradle_plugin_fat_apk_test
+    builder: Windows gradle_plugin_fat_apk_test
+    presubmit: false
+    scheduler: luci
+
+  - name: win_tool_tests_general
+    builder: Windows tool_tests_general
+    presubmit: false
+    scheduler: luci
+
+  - name: win_tool_tests_commands
+    builder: Windows tool_tests_commands
+    presubmit: false
+    scheduler: luci
+
+  - name: complex_layout_win__compile
+    builder: Windows_android complex_layout_win__compile
+    presubmit: false
+    scheduler: luci
+
+  - name: basic_material_app_win__compile
+    builder: Windows_android basic_material_app_win__compile
+    presubmit: false
+    scheduler: luci
+
+  - name: flutter_gallery_win__compile
+    builder: Windows_android flutter_gallery_win__compile
+    presubmit: false
+    scheduler: luci
+
+  - name: windows_chrome_dev_mode
+    builder: Windows_android windows_chrome_dev_mode
+    presubmit: false
+    scheduler: luci
+
+  - name: flavors_test_win
+    builder: Windows_android flavors_test_win
+    presubmit: false
+    scheduler: luci
+
+  - name: channels_integration_test_win
+    builder: Windows_android channels_integration_test_win
+    presubmit: false
+    scheduler: luci
+
+  - name: hot_mode_dev_cycle_win__benchmark
+    builder: Windows_android hot_mode_dev_cycle_win__benchmark
+    presubmit: false
+    scheduler: luci

@@ -74,8 +74,7 @@ void main() {
     test('should encode and decode a list containing big numbers', () {
       final List<dynamic> message = <dynamic>[
         -7000000000000000007,
-        Int64List.fromList(
-            <int>[-0x7fffffffffffffff - 1, 0, 0x7fffffffffffffff]),
+        Int64List.fromList(<int>[-0x7fffffffffffffff - 1, 0, 0x7fffffffffffffff]),
       ];
       checkEncodeDecode<dynamic>(standard, message);
     });

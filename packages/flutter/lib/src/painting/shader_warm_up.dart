@@ -127,7 +127,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
   /// Defaults to 0.0.
   ///
   /// When changing this value, the [canvasSize] must also be changed to
-  /// accomodate the bigger canvas.
+  /// accommodate the bigger canvas.
   final double drawCallSpacing;
 
   /// The [size] of the canvas required to paint the shapes in [warmUpOnCanvas].
@@ -145,7 +145,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     const ui.RRect rrect = ui.RRect.fromLTRBXY(20.0, 20.0, 60.0, 60.0, 10.0, 10.0);
     final ui.Path rrectPath = ui.Path()..addRRect(rrect);
     final ui.Path circlePath = ui.Path()..addOval(
-      ui.Rect.fromCircle(center: const ui.Offset(40.0, 40.0), radius: 20.0)
+      ui.Rect.fromCircle(center: const ui.Offset(40.0, 40.0), radius: 20.0),
     );
 
     // The following path is based on

@@ -6,7 +6,7 @@
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class FormatCommand extends FlutterCommand {
@@ -61,8 +61,8 @@ class FormatCommand extends FlutterCommand {
       );
     }
 
-    final String dartSdk = globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath);
-    final String dartBinary = globals.artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final String dartSdk = globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
+    final String dartBinary = globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
     final List<String> command = <String>[
       dartBinary,
       globals.fs.path.join(dartSdk, 'bin', 'snapshots', 'dartfmt.dart.snapshot'),

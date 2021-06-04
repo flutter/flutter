@@ -11,7 +11,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 void main() {
   group('FlutterDriver', () {
     final SerializableFinder presentText = find.text('present');
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
@@ -26,12 +26,14 @@ void main() {
     });
 
     test('waitForAbsent should time out waiting for text "present" to disappear', () async {
-      try {
-        await driver.waitForAbsent(presentText, timeout: const Duration(seconds: 1));
-        fail('expected DriverError');
-      } on DriverError catch (error) {
-        expect(error.message, contains('Timeout while executing waitForAbsent'));
-      }
+      await expectLater(
+        () => driver.waitForAbsent(presentText, timeout: const Duration(seconds: 1)),
+        throwsA(isA<DriverError>().having(
+          (DriverError error) => error.message,
+          'message',
+          contains('Timeout while executing waitForAbsent'),
+        )),
+      );
     });
 
     test('waitForAbsent should resolve when text "present" disappears', () async {
@@ -51,12 +53,14 @@ void main() {
     });
 
     test('waitFor times out waiting for "present" to reappear', () async {
-      try {
-        await driver.waitFor(presentText, timeout: const Duration(seconds: 1));
-        fail('expected DriverError');
-      } on DriverError catch (error) {
-        expect(error.message, contains('Timeout while executing waitFor'));
-      }
+      await expectLater(
+        () => driver.waitFor(presentText, timeout: const Duration(seconds: 1)),
+        throwsA(isA<DriverError>().having(
+          (DriverError error) => error.message,
+          'message',
+          contains('Timeout while executing waitFor'),
+        )),
+      );
     });
 
     test('waitFor should resolve when text "present" reappears', () async {

@@ -4,10 +4,10 @@
 
 @TestOn('!chrome')
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
@@ -27,19 +27,23 @@ void main() {
 
   testWidgets('cursor has expected width, height, and radius', (WidgetTester tester) async {
     await tester.pumpWidget(
-        MediaQuery(data: const MediaQueryData(devicePixelRatio: 1.0),
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
         child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-          cursorWidth: 10.0,
-          cursorHeight: 10.0,
-          cursorRadius: const Radius.circular(2.0),
-        ))));
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            cursorWidth: 10.0,
+            cursorHeight: 10.0,
+            cursorRadius: const Radius.circular(2.0),
+          ),
+        ),
+      ),
+    );
 
     final EditableText editableText = tester.firstWidget(find.byType(EditableText));
     expect(editableText.cursorWidth, 10.0);
@@ -75,7 +79,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
       return null;
@@ -127,7 +131,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
       return null;
@@ -481,16 +485,24 @@ void main() {
     expect(controller.selection.baseOffset, 29);
 
     // Moves the cursor super far right
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(2090, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(2100, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(2090, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: const Offset(2090, 20),
+    ));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: const Offset(2100, 20),
+    ));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: const Offset(2090, 20),
+    ));
 
     // After peaking the cursor, we move in the opposite direction.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(1400, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: const Offset(1400, 20),
+    ));
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
@@ -503,16 +515,24 @@ void main() {
     // Sets the origin.
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-5000, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-5010, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-5000, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: const Offset(-5000, 20),
+    ));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: const Offset(-5010, 20),
+    ));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: const Offset(-5000, 20),
+    ));
 
     // Move back in the opposite direction only a few hundred.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-4850, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: const Offset(-4850, 20),
+    ));
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
@@ -555,13 +575,18 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
 
     // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Start,
+      offset: const Offset(20, 20),
+    ));
 
     expect(controller.selection.baseOffset, 29);
 
     // Moves the cursor right a few characters.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(-250, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: const Offset(-250, 20),
+    ));
 
     // But we have not yet set the offset because the user is not done placing the cursor.
     expect(controller.selection.baseOffset, 29);
@@ -652,13 +677,18 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
 
     // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Start,
+      offset: const Offset(20, 20),
+    ));
 
     expect(controller.selection.baseOffset, 29);
 
     // Moves the cursor right a few characters.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(-250, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: const Offset(-250, 20),
+    ));
 
     // But we have not yet set the offset because the user is not done placing the cursor.
     expect(controller.selection.baseOffset, 29);
@@ -671,8 +701,10 @@ void main() {
 
     // Set and move the second cursor like a selection. Previously, the second
     // Update here caused a crash.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(-250, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: const Offset(-250, 20),
+    ));
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
   });
@@ -777,7 +809,8 @@ void main() {
       ..rrect(
         rrect: RRect.fromRectAndRadius(
           const Rect.fromLTRB(193.83334350585938, -0.916666666666668, 196.83334350585938, 19.083333969116211),
-          const Radius.circular(1.0)),
+          const Radius.circular(1.0),
+        ),
         color: const Color(0xbf2196f3),
       ),
     );
@@ -820,7 +853,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
       return null;
@@ -878,7 +911,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
       return null;

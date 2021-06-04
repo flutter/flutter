@@ -40,7 +40,10 @@ typedef SetSelectionHandler = void Function(TextSelection selection);
 /// current text with the input `text`.
 typedef SetTextHandler = void Function(String text);
 
-typedef _SemanticsActionHandler = void Function(Object? args);
+/// Signature for a handler of a [SemanticsAction].
+///
+/// Returned by [SemanticsConfiguration.getActionHandler].
+typedef SemanticsActionHandler = void Function(Object? args);
 
 /// A tag for a [SemanticsNode].
 ///
@@ -592,6 +595,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.header,
     this.textField,
     this.slider,
+    this.keyboardKey,
     this.readOnly,
     this.focusable,
     this.focused,
@@ -697,6 +701,9 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Talkback/\VoiceOver provides users with the hint "slider" when a
   /// slider is focused.
   final bool? slider;
+
+  /// If non-null, indicates that this subtree represents a keyboard key.
+  final bool? keyboardKey;
 
   /// If non-null, indicates that this subtree is read only.
   ///
@@ -1402,7 +1409,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         if (newChildren.length != _debugPreviousSnapshot.length) {
           mutationErrors.add(ErrorDescription(
             "The list's length has changed from ${_debugPreviousSnapshot.length} "
-            'to ${newChildren.length}.'
+            'to ${newChildren.length}.',
           ));
         } else {
           for (int i = 0; i < newChildren.length; i++) {
@@ -1624,7 +1631,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   // TAGS, LABELS, ACTIONS
 
-  Map<SemanticsAction, _SemanticsActionHandler> _actions = _kEmptyConfig._actions;
+  Map<SemanticsAction, SemanticsActionHandler> _actions = _kEmptyConfig._actions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions = _kEmptyConfig._customSemanticsActions;
 
   int _actionsAsBits = _kEmptyConfig._actionsAsBits;
@@ -1881,7 +1888,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
     assert(
       config.platformViewId == null || childrenInInversePaintOrder == null || childrenInInversePaintOrder.isEmpty,
-      'SemanticsNodes with children must not specify a platformViewId.'
+      'SemanticsNodes with children must not specify a platformViewId.',
     );
 
     _label = config.label;
@@ -1895,7 +1902,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _flags = config._flags;
     _textDirection = config.textDirection;
     _sortKey = config.sortKey;
-    _actions = Map<SemanticsAction, _SemanticsActionHandler>.from(config._actions);
+    _actions = Map<SemanticsAction, SemanticsActionHandler>.from(config._actions);
     _customSemanticsActions = Map<CustomSemanticsAction, VoidCallback>.from(config._customSemanticsActions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
@@ -2349,7 +2356,7 @@ class _BoxEdge implements Comparable<_BoxEdge> {
 
   @override
   int compareTo(_BoxEdge other) {
-    return (offset - other.offset).sign.toInt();
+    return offset.compareTo(other.offset);
   }
 }
 
@@ -2377,7 +2384,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
 
   @override
   int compareTo(_SemanticsSortGroup other) {
-    return (startOffset - other.startOffset).sign.toInt();
+    return startOffset.compareTo(other.startOffset);
   }
 
   /// Sorts this group assuming that [nodes] belong to the same vertical group.
@@ -2685,7 +2692,7 @@ class SemanticsOwner extends ChangeNotifier {
     notifyListeners();
   }
 
-  _SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
+  SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
     SemanticsNode? result = _nodes[id];
     if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
       result._visitDescendants((SemanticsNode node) {
@@ -2710,7 +2717,7 @@ class SemanticsOwner extends ChangeNotifier {
   /// the `args` parameter.
   void performAction(int id, SemanticsAction action, [ Object? args ]) {
     assert(action != null);
-    final _SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
+    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {
       handler(args);
       return;
@@ -2721,7 +2728,7 @@ class SemanticsOwner extends ChangeNotifier {
       _nodes[id]!._showOnScreen!();
   }
 
-  _SemanticsActionHandler? _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
+  SemanticsActionHandler? _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
     if (node.transform != null) {
       final Matrix4 inverse = Matrix4.identity();
       if (inverse.copyInverse(node.transform!) == 0.0)
@@ -2743,7 +2750,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
     if (node.hasChildren) {
       for (final SemanticsNode child in node._children!.reversed) {
-        final _SemanticsActionHandler? handler = _getSemanticsActionHandlerForPosition(child, position, action);
+        final SemanticsActionHandler? handler = _getSemanticsActionHandlerForPosition(child, position, action);
         if (handler != null)
           return handler;
       }
@@ -2763,7 +2770,7 @@ class SemanticsOwner extends ChangeNotifier {
     final SemanticsNode? node = rootSemanticsNode;
     if (node == null)
       return;
-    final _SemanticsActionHandler? handler = _getSemanticsActionHandlerForPosition(node, position, action);
+    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForPosition(node, position, action);
     if (handler != null)
       handler(args);
   }
@@ -2850,7 +2857,7 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [addAction] to add an action.
-  final Map<SemanticsAction, _SemanticsActionHandler> _actions = <SemanticsAction, _SemanticsActionHandler>{};
+  final Map<SemanticsAction, SemanticsActionHandler> _actions = <SemanticsAction, SemanticsActionHandler>{};
 
   int _actionsAsBits = 0;
 
@@ -2858,7 +2865,7 @@ class SemanticsConfiguration {
   ///
   /// The provided `handler` is called to respond to the user triggered
   /// `action`.
-  void _addAction(SemanticsAction action, _SemanticsActionHandler handler) {
+  void _addAction(SemanticsAction action, SemanticsActionHandler handler) {
     assert(handler != null);
     _actions[action] = handler;
     _actionsAsBits |= action.index;
@@ -3262,7 +3269,7 @@ class SemanticsConfiguration {
 
   /// Returns the action handler registered for [action] or null if none was
   /// registered.
-  _SemanticsActionHandler? getActionHandler(SemanticsAction action) => _actions[action];
+  SemanticsActionHandler? getActionHandler(SemanticsAction action) => _actions[action];
 
   /// Determines the position of this node among its siblings in the traversal
   /// sort order.
@@ -3692,6 +3699,13 @@ class SemanticsConfiguration {
   bool get isSlider => _hasFlag(SemanticsFlag.isSlider);
   set isSlider(bool value) {
     _setFlag(SemanticsFlag.isSlider, value);
+  }
+
+  /// Whether the owning [RenderObject] is a keyboard key (true) or not
+  //(false).
+  bool get isKeyboardKey => _hasFlag(SemanticsFlag.isKeyboardKey);
+  set isKeyboardKey(bool value) {
+    _setFlag(SemanticsFlag.isKeyboardKey, value);
   }
 
   /// Whether the owning [RenderObject] is considered hidden.

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
@@ -41,7 +39,7 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
       multiLine: true,
     );
 
-    final RegExpMatch match = projectBuildConfigurationList.firstMatch(originalProjectContents);
+    final RegExpMatch? match = projectBuildConfigurationList.firstMatch(originalProjectContents);
 
     // If the PBXProject "Runner" build configuration identifiers can't be parsed, default to the generated template identifiers.
     final String debugIdentifier = match?.group(1) ?? '97C147031CF9000F007C117D';
@@ -86,7 +84,7 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
     newProjectContents = newProjectContents.replaceAll(releaseBaseConfigurationOriginal, releaseBaseConfigurationReplacement);
     if (originalProjectContents != newProjectContents) {
       logger.printStatus('Project base configurations detected, removing.');
-      _xcodeProjectInfoFile.writeAsStringSync(newProjectContents.toString());
+      _xcodeProjectInfoFile.writeAsStringSync(newProjectContents);
     }
     return true;
   }

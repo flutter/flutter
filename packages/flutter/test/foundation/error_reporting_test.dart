@@ -78,7 +78,7 @@ Future<void> main() async {
       r'#0      getSampleStack\.<anonymous closure> \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
-      r'(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
+      r'(.+\n)+', // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -145,7 +145,7 @@ Future<void> main() async {
       r'#0      getSampleStack\.<anonymous closure> \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
-      r'(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
+      r'(.+\n)+', // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -158,8 +158,7 @@ Future<void> main() async {
 
   test('Error reporting - NoSuchMethodError', () async {
     expect(console, isEmpty);
-    final Object exception = NoSuchMethodError.withInvocation(5,
-        Invocation.method(#foo, <dynamic>[2, 4]));
+    final Object exception = NoSuchMethodError.withInvocation(5, Invocation.method(#foo, <dynamic>[2, 4]));
 
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: exception,
@@ -174,8 +173,10 @@ Future<void> main() async {
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: exception,
     ));
-    expect(console.join('\n'),
-      'Another exception was thrown: NoSuchMethodError: int has no foo method accepting arguments (_, _)');
+    expect(
+      console.join('\n'),
+      'Another exception was thrown: NoSuchMethodError: int has no foo method accepting arguments (_, _)',
+    );
     console.clear();
     FlutterError.resetErrorCount();
   });
@@ -212,10 +213,49 @@ Future<void> main() async {
       r'The following message was thrown:\n'
       r'exception - empty stack\n'
       r'\n'
-      r'When the exception was thrown, this was the stack:\n'
-      r'...\n'
+      r'When the exception was thrown, this was the stack\n'
       r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
     ));
     console.clear();
+    FlutterError.resetErrorCount();
+  });
+
+  test('Stack traces are not truncated', () async {
+    const String stackString = '''
+#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
+#1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)
+#2      new Text (package:flutter/src/widgets/text.dart:287:10)
+#3      _MyHomePageState.build (package:hello_flutter/main.dart:72:16)
+#4      StatefulElement.build (package:flutter/src/widgets/framework.dart:4414:27)
+#5      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:4303:15)
+#6      Element.rebuild (package:flutter/src/widgets/framework.dart:4027:5)
+#7      ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:4286:5)
+#8      StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:4461:11)
+#9      ComponentElement.mount (package:flutter/src/widgets/framework.dart:4281:5)
+#10      Element.inflateWidget (package:flutter/src/widgets/framework.dart:3276:14)''';
+
+    expect(console, isEmpty);
+    FlutterError.dumpErrorToConsole(FlutterErrorDetails(
+      exception: AssertionError('Test assertion'),
+      stack: StackTrace.fromString(stackString),
+    ));
+    final String x = console.join('\n');
+    expect(x, startsWith('''
+══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════
+The following assertion was thrown:
+Assertion failed: "Test assertion"
+
+When the exception was thrown, this was the stack:
+#2      new Text (package:flutter/src/widgets/text.dart:287:10)
+#3      _MyHomePageState.build (package:hello_flutter/main.dart:72:16)
+#4      StatefulElement.build (package:flutter/src/widgets/framework.dart:4414:27)
+#5      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:4303:15)
+#6      Element.rebuild (package:flutter/src/widgets/framework.dart:4027:5)
+#7      ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:4286:5)
+#8      StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:4461:11)
+#9      ComponentElement.mount (package:flutter/src/widgets/framework.dart:4281:5)''',
+    ));
+    console.clear();
+    FlutterError.resetErrorCount();
   });
 }

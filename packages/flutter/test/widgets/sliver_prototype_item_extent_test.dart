@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestItem extends StatelessWidget {
   const TestItem({ Key? key, required this.item, this.width, this.height }) : super(key: key);

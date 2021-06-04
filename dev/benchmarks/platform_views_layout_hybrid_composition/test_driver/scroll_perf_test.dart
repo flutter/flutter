@@ -47,7 +47,6 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      summary.writeSummaryToFile(summaryName, pretty: true);
       summary.writeTimelineToFile(summaryName, pretty: true);
     }
 

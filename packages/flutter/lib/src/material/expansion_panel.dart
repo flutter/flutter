@@ -14,7 +14,7 @@ import 'theme.dart';
 
 const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
-    vertical: 64.0 - _kPanelHeaderCollapsedHeight
+    vertical: 64.0 - _kPanelHeaderCollapsedHeight,
 );
 
 class _SaltedKey<S, V> extends LocalKey {
@@ -380,14 +380,8 @@ class ExpansionPanelList extends StatefulWidget {
 
   /// Defines elevation for the [ExpansionPanel] while it's expanded.
   ///
-  /// This uses [kElevationToShadow] to simulate shadows, it does not use
-  /// [Material]'s arbitrary elevation feature.
-  ///
-  /// The following values can be used to define the elevation: 0, 1, 2, 3, 4, 6,
-  /// 8, 9, 12, 16, 24.
-  ///
   /// By default, the value of elevation is 2.
-  final int elevation;
+  final double elevation;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
@@ -442,8 +436,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   void _handlePressed(bool isExpanded, int index) {
-    if (widget.expansionCallback != null)
-      widget.expansionCallback!(index, isExpanded);
+    widget.expansionCallback?.call(index, isExpanded);
 
     if (widget._allowOnlyOnePanelOpen) {
       final ExpansionPanelRadio pressedChild = widget.children[index] as ExpansionPanelRadio;
@@ -476,7 +469,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   Widget build(BuildContext context) {
     assert(kElevationToShadow.containsKey(widget.elevation),
       'Invalid value for elevation. See the kElevationToShadow constant for'
-      ' possible elevation values.'
+      ' possible elevation values.',
     );
 
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];

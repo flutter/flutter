@@ -169,7 +169,7 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
 /// [RendererBinding].
 class MouseTracker extends ChangeNotifier {
   final MouseCursorManager _mouseCursorMixin = MouseCursorManager(
-    SystemMouseCursors.basic
+    SystemMouseCursors.basic,
   );
 
   // Tracks the state of connected mouse devices.
@@ -279,7 +279,7 @@ class MouseTracker extends ChangeNotifier {
     _mouseCursorMixin.handleDeviceCursorUpdate(
       details.device,
       details.triggeringEvent,
-      details.nextAnnotations.keys.map((MouseTrackerAnnotation annotaion) => annotaion.cursor),
+      details.nextAnnotations.keys.map((MouseTrackerAnnotation annotation) => annotation.cursor),
     );
   }
 

@@ -13,6 +13,7 @@ import 'percentile_utils.dart';
 import 'profiling_summarizer.dart';
 import 'scene_display_lag_summarizer.dart';
 import 'timeline.dart';
+import 'vsync_frame_lag_summarizer.dart';
 
 const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
@@ -94,6 +95,20 @@ class TimelineSummary {
   /// The total number of rasterizer cycles recorded in the timeline.
   int countRasterizations() => _extractGpuRasterizerDrawDurations().length;
 
+  /// The total number of old generation garbage collections recorded in the timeline.
+  int oldGenerationGarbageCollections() {
+    return _timeline.events!.where((TimelineEvent event) {
+      return event.category == 'GC' && event.name == 'CollectOldGeneration';
+    }).length;
+  }
+
+  /// The total number of new generation garbage collections recorded in the timeline.
+  int newGenerationGarbageCollections() {
+    return _timeline.events!.where((TimelineEvent event) {
+      return event.category == 'GC' && event.name == 'CollectNewGeneration';
+    }).length;
+  }
+
   /// Encodes this summary as JSON.
   ///
   /// Data ends with "_time_millis" means time in milliseconds and numbers in
@@ -150,8 +165,16 @@ class TimelineSummary {
   ///   "99th_percentile_vsync_transitions_missed": The 90/99-th percentile
   ///   `vsync_transitions_missed` over the lag events.
   ///   See [SceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed].
+  /// * "average_vsync_frame_lag": Computes the average of the time between
+  ///   platform vsync signal and the engine frame process start time.
+  ///   See [VsyncFrameLagSummarizer.computeAverageVsyncFrameLag].
+  /// * "90th_percentile_vsync_frame_lag" and "99th_percentile_vsync_frame_lag":
+  ///   The 90/99-th percentile delay between platform vsync signal and engine
+  ///   frame process start time.
+  ///   See [VsyncFrameLagSummarizer.computePercentileVsyncFrameLag].
   Map<String, dynamic> get summaryJson {
     final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
+    final VsyncFrameLagSummarizer vsyncFrameLagSummarizer = _vsyncFrameLagSummarizer();
     final Map<String, dynamic> profilingSummary = _profilingSummarizer().summarize();
 
     final Map<String, dynamic> timelineSummary = <String, dynamic>{
@@ -167,6 +190,8 @@ class TimelineSummary {
       'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
       'frame_count': countFrames(),
       'frame_rasterizer_count': countRasterizations(),
+      'new_gen_gc_count': newGenerationGarbageCollections(),
+      'old_gen_gc_count': oldGenerationGarbageCollections(),
       'frame_build_times': _extractFrameDurations()
           .map<int>((Duration duration) => duration.inMicroseconds)
           .toList(),
@@ -182,6 +207,9 @@ class TimelineSummary {
       'average_vsync_transitions_missed': sceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed(),
       '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(90.0),
       '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0),
+      'average_vsync_frame_lag': vsyncFrameLagSummarizer.computeAverageVsyncFrameLag(),
+      '90th_percentile_vsync_frame_lag': vsyncFrameLagSummarizer.computePercentileVsyncFrameLag(90.0),
+      '99th_percentile_vsync_frame_lag': vsyncFrameLagSummarizer.computePercentileVsyncFrameLag(99.0),
     };
 
     timelineSummary.addAll(profilingSummary);
@@ -190,6 +218,10 @@ class TimelineSummary {
 
   /// Writes all of the recorded timeline data to a file.
   ///
+  /// By default, this will dump [summaryJson] to a companion file named
+  /// `$traceName.timeline_summary.json`. If you want to skip the summary, set
+  /// the `includeSummary` parameter to false.
+  ///
   /// See also:
   ///
   /// * [Timeline.fromJson], which explains detail about the timeline data.
@@ -197,20 +229,37 @@ class TimelineSummary {
     String traceName, {
     String? destinationDirectory,
     bool pretty = false,
+    bool includeSummary = true,
   }) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
     final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline.json'));
     await file.writeAsString(_encodeJson(_timeline.json, pretty));
+
+    if (includeSummary) {
+      await _writeSummaryToFile(traceName, destinationDirectory: destinationDirectory, pretty: pretty);
+    }
   }
 
   /// Writes [summaryJson] to a file.
+  @Deprecated(
+    'Use TimelineSummary.writeTimelineToFile. '
+    'This feature was deprecated after v2.1.0-13.0.pre.'
+  )
   Future<void> writeSummaryToFile(
     String traceName, {
     String? destinationDirectory,
     bool pretty = false,
   }) async {
     destinationDirectory ??= testOutputsDirectory;
+    await _writeSummaryToFile(traceName, destinationDirectory: destinationDirectory, pretty: pretty);
+  }
+
+  Future<void> _writeSummaryToFile(
+    String traceName, {
+    required String destinationDirectory,
+    bool pretty = false,
+  }) async {
     await fs.directory(destinationDirectory).create(recursive: true);
     final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline_summary.json'));
     await file.writeAsString(_encodeJson(summaryJson, pretty));
@@ -321,4 +370,6 @@ class TimelineSummary {
   ProfilingSummarizer _profilingSummarizer() => ProfilingSummarizer.fromEvents(_extractEventsWithNames(kProfilingEvents));
 
   List<Duration> _extractFrameDurations() => _extractBeginEndEvents(kBuildFrameEventName);
+
+  VsyncFrameLagSummarizer _vsyncFrameLagSummarizer() => VsyncFrameLagSummarizer(_extractEventsWithNames(kVsyncTimelineEventNames));
 }

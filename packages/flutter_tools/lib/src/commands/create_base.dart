@@ -18,7 +18,7 @@ import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_project_metadata.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
@@ -312,7 +312,7 @@ abstract class CreateBase extends FlutterCommand {
 
   /// Creates a template to use for [renderTemplate].
   @protected
-  Map<String, dynamic> createTemplateContext({
+  Map<String, Object> createTemplateContext({
     String organization,
     String projectName,
     String projectDescription,
@@ -332,7 +332,7 @@ abstract class CreateBase extends FlutterCommand {
     final String pluginDartClass = _createPluginClassName(projectName);
     final String pluginClass = pluginDartClass.endsWith('Plugin')
         ? pluginDartClass
-        : pluginDartClass + 'Plugin';
+        : '${pluginDartClass}Plugin';
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase =
         pluginClassSnakeCase.toUpperCase();
@@ -340,17 +340,20 @@ abstract class CreateBase extends FlutterCommand {
         createUTIIdentifier(organization, projectName);
     final String androidIdentifier =
         createAndroidIdentifier(organization, projectName);
+    final String windowsIdentifier =
+        createWindowsIdentifier(organization, projectName);
     // Linux uses the same scheme as the Android identifier.
     // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
     final String linuxIdentifier = androidIdentifier;
 
-    return <String, dynamic>{
+    return <String, Object>{
       'organization': organization,
       'projectName': projectName,
       'androidIdentifier': androidIdentifier,
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,
       'linuxIdentifier': linuxIdentifier,
+      'windowsIdentifier': windowsIdentifier,
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android_common.minApiLevel,
@@ -385,7 +388,7 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> renderTemplate(
-      String templateName, Directory directory, Map<String, dynamic> context,
+      String templateName, Directory directory, Map<String, Object> context,
       {bool overwrite = false}) async {
     final Template template = await Template.fromName(
       templateName,
@@ -402,7 +405,7 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> generateApp(
-      Directory directory, Map<String, dynamic> templateContext,
+      Directory directory, Map<String, Object> templateContext,
       {bool overwrite = false, bool pluginExampleApp = false}) async {
     int generatedCount = 0;
     generatedCount += await renderTemplate(
@@ -431,7 +434,7 @@ abstract class CreateBase extends FlutterCommand {
         macOSPlatform: templateContext['macos'] as bool ?? false,
         windowsPlatform: templateContext['windows'] as bool ?? false,
         webPlatform: templateContext['web'] as bool ?? false,
-        windowsUwpPlatform: templateContext['winuwp'] as bool ?? false,
+        winUwpPlatform: templateContext['winuwp'] as bool ?? false,
       );
     }
     if (templateContext['android'] == true) {
@@ -444,8 +447,7 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// Android application ID is specified in: https://developer.android.com/studio/build/application-id
   /// All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
-  @protected
-  String createAndroidIdentifier(String organization, String name) {
+  static String createAndroidIdentifier(String organization, String name) {
     String tmpIdentifier = '$organization.$name';
     final RegExp disallowed = RegExp(r'[^\w\.]');
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
@@ -463,11 +465,18 @@ abstract class CreateBase extends FlutterCommand {
     final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
     final List<String> prefixedSegments = segments.map((String segment) {
       if (!segmentPatternRegex.hasMatch(segment)) {
-        return 'u' + segment;
+        return 'u$segment';
       }
       return segment;
     }).toList();
     return prefixedSegments.join('.');
+  }
+
+  /// Creates a Windows package name.
+  ///
+  /// Package names must be a globally unique, commonly a GUID.
+  static String createWindowsIdentifier(String organization, String name) {
+    return const Uuid().v4().toUpperCase();
   }
 
   String _createPluginClassName(String name) {
@@ -476,8 +485,7 @@ abstract class CreateBase extends FlutterCommand {
   }
 
   /// Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
-  @protected
-  String createUTIIdentifier(String organization, String name) {
+  static String createUTIIdentifier(String organization, String name) {
     name = camelCase(name);
     String tmpIdentifier = '$organization.$name';
     final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');

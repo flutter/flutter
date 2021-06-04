@@ -7,16 +7,15 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show Card;
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 // This import is discouraged in general, but we need it to implement flutter_test.
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart';
-import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show Card;
-import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
 import 'accessibility.dart';
@@ -450,6 +449,7 @@ Matcher matchesSemantics({
   bool isSelected = false,
   bool isButton = false,
   bool isSlider = false,
+  bool isKeyboardKey = false,
   bool isLink = false,
   bool isFocused = false,
   bool isFocusable = false,
@@ -503,6 +503,7 @@ Matcher matchesSemantics({
     if (isSelected) SemanticsFlag.isSelected,
     if (isButton) SemanticsFlag.isButton,
     if (isSlider) SemanticsFlag.isSlider,
+    if (isKeyboardKey) SemanticsFlag.isKeyboardKey,
     if (isLink) SemanticsFlag.isLink,
     if (isTextField) SemanticsFlag.isTextField,
     if (isReadOnly) SemanticsFlag.isReadOnly,
@@ -1925,7 +1926,7 @@ class _DoesNotMatchAccessibilityGuideline extends AsyncMatcher {
 
   @override
   Description describe(Description description) {
-    return description.add('Does not ' + guideline.description);
+    return description.add('Does not ${guideline.description}');
   }
 
   @override

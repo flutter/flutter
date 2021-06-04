@@ -33,19 +33,6 @@ class FuchsiaPM {
     ]);
   }
 
-  /// Generates a new private key to be used to sign a Fuchsia package.
-  ///
-  /// [buildPath] should be the same [buildPath] passed to [init].
-  Future<bool> genkey(String buildPath, String outKeyPath) {
-    return _runPMCommand(<String>[
-      '-o',
-      buildPath,
-      '-k',
-      outKeyPath,
-      'genkey',
-    ]);
-  }
-
   /// Updates, signs, and seals a Fuchsia package.
   ///
   /// [buildPath] should be the same [buildPath] passed to [init].
@@ -61,12 +48,10 @@ class FuchsiaPM {
   ///
   /// where $APPNAME is the same [appName] passed to [init], and meta/package
   /// is set up to be the file `meta/package` created by [init].
-  Future<bool> build(String buildPath, String keyPath, String manifestPath) {
+  Future<bool> build(String buildPath, String manifestPath) {
     return _runPMCommand(<String>[
       '-o',
       buildPath,
-      '-k',
-      keyPath,
       '-m',
       manifestPath,
       'build',
@@ -80,12 +65,10 @@ class FuchsiaPM {
   ///
   /// [buildPath] should be the same path passed to [init], and [manifestPath]
   /// should be the same manifest passed to [build].
-  Future<bool> archive(String buildPath, String keyPath, String manifestPath) {
+  Future<bool> archive(String buildPath, String manifestPath) {
     return _runPMCommand(<String>[
       '-o',
       buildPath,
-      '-k',
-      keyPath,
       '-m',
       manifestPath,
       'archive',
@@ -202,7 +185,7 @@ class FuchsiaPackageServer {
 
   int get port => _port;
 
-  /// Uses [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
+  /// Uses [FuchsiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
   /// package server.
   ///
   /// Returns false if the repo could not be created or the server could not

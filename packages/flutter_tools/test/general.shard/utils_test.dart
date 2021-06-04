@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 
 import '../src/common.dart';
 
@@ -28,25 +26,26 @@ baz=qux
     testWithoutContext('can parse and compare', () {
       expect(Version.unknown.toString(), equals('unknown'));
       expect(Version(null, null, null).toString(), equals('0'));
+      expect(const Version.withText(1, 2, 3, 'versionText').toString(), 'versionText');
 
-      final Version v1 = Version.parse('1');
+      final Version v1 = Version.parse('1')!;
       expect(v1.major, equals(1));
       expect(v1.minor, equals(0));
       expect(v1.patch, equals(0));
 
       expect(v1, greaterThan(Version.unknown));
 
-      final Version v2 = Version.parse('1.2');
+      final Version v2 = Version.parse('1.2')!;
       expect(v2.major, equals(1));
       expect(v2.minor, equals(2));
       expect(v2.patch, equals(0));
 
-      final Version v3 = Version.parse('1.2.3');
+      final Version v3 = Version.parse('1.2.3')!;
       expect(v3.major, equals(1));
       expect(v3.minor, equals(2));
       expect(v3.patch, equals(3));
 
-      final Version v4 = Version.parse('1.12');
+      final Version v4 = Version.parse('1.12')!;
       expect(v4, greaterThan(v2));
 
       expect(v3, greaterThan(v2));
@@ -76,17 +75,17 @@ baz=qux
     const int _lineLength = 40;
     const String _longLine = 'This is a long line that needs to be wrapped.';
     final String _longLineWithNewlines = 'This is a long line with newlines that\n'
-        'needs to be wrapped.\n\n' +
-        '0123456789' * 5;
+        'needs to be wrapped.\n\n'
+        '${'0123456789' * 5}';
     final String _longAnsiLineWithNewlines = '${AnsiTerminal.red}This${AnsiTerminal.resetAll} is a long line with newlines that\n'
         'needs to be wrapped.\n\n'
-        '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}' +
-        '0123456789' * 3 +
+        '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}'
+        '${'0123456789' * 3}'
         '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}';
     const String _onlyAnsiSequences = '${AnsiTerminal.red}${AnsiTerminal.resetAll}';
     final String _indentedLongLineWithNewlines = '    This is an indented long line with newlines that\n'
-        'needs to be wrapped.\n\tAnd preserves tabs.\n      \n  ' +
-        '0123456789' * 5;
+        'needs to be wrapped.\n\tAnd preserves tabs.\n      \n  '
+        '${'0123456789' * 5}';
     const String _shortLine = 'Short line.';
     const String _indentedLongLine = '    This is an indented long line that needs to be '
         'wrapped and indentation preserved.';
@@ -136,7 +135,7 @@ wrapped.'''));
     });
 
     testWithoutContext('refuses to wrap to a column smaller than 10 characters', () {
-      expect(wrapText('$_longLine ' + '0123456789' * 4, columnWidth: 1, shouldWrap: true), equals('''
+      expect(wrapText('$_longLine ${'0123456789' * 4}', columnWidth: 1, shouldWrap: true), equals('''
 This is a
 long line
 that needs
@@ -253,7 +252,7 @@ needs to be wrapped.
 
     testWithoutContext('', () {
       expect(wrapText(
-        ' ' * 7 + 'abc def ghi', columnWidth: 20, hangingIndent: 5, indent: 3, shouldWrap: true),
+        '${' ' * 7}abc def ghi', columnWidth: 20, hangingIndent: 5, indent: 3, shouldWrap: true),
         equals(
           '          abc def\n'
           '          ghi'

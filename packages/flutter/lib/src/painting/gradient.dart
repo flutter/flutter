@@ -55,7 +55,7 @@ _ColorsAndStops _interpolateColorsAndStops(
     ..addAll(bStops);
   final List<double> interpolatedStops = stops.toList(growable: false);
   final List<Color> interpolatedColors = interpolatedStops.map<Color>(
-          (double stop) => Color.lerp(_sample(aColors, aStops, stop), _sample(bColors, bStops, stop), t)!
+          (double stop) => Color.lerp(_sample(aColors, aStops, stop), _sample(bColors, bStops, stop), t)!,
   ).toList(growable: false);
   return _ColorsAndStops(interpolatedColors, interpolatedStops);
 }

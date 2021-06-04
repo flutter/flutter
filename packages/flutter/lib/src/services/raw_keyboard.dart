@@ -132,8 +132,8 @@ abstract class RawKeyEventData {
   ///
   /// If the modifier key wasn't pressed at the time of this event, returns
   /// null. If the given key only appears in one place on the keyboard, returns
-  /// [KeyboardSide.all] if pressed. Never returns [KeyboardSide.any], because
-  /// that doesn't make sense in this context.
+  /// [KeyboardSide.all] if pressed. If the given platform does not specify
+  /// the side, return [KeyboardSide.any].
   KeyboardSide? getModifierSide(ModifierKey key);
 
   /// Returns true if a CTRL modifier key was pressed at the time of this event,
@@ -172,10 +172,12 @@ abstract class RawKeyEventData {
         }
         assert((){
           if (side == null) {
-            debugPrint('Raw key data is returning inconsistent information for '
-                'pressed modifiers. isModifierPressed returns true for $key '
-                'being pressed, but when getModifierSide is called, it says '
-                'that no modifiers are pressed.');
+            debugPrint(
+              'Raw key data is returning inconsistent information for '
+              'pressed modifiers. isModifierPressed returns true for $key '
+              'being pressed, but when getModifierSide is called, it says '
+              'that no modifiers are pressed.',
+            );
             if (this is RawKeyEventDataAndroid) {
               debugPrint('Android raw key metaState: ${(this as RawKeyEventDataAndroid).metaState}');
             }
@@ -328,28 +330,31 @@ abstract class RawKeyEvent with Diagnosticable {
           break;
         case 'macos':
           data = RawKeyEventDataMacOs(
-              characters: message['characters'] as String? ?? '',
-              charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
-              keyCode: message['keyCode'] as int? ?? 0,
-              modifiers: message['modifiers'] as int? ?? 0);
+            characters: message['characters'] as String? ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
+            keyCode: message['keyCode'] as int? ?? 0,
+            modifiers: message['modifiers'] as int? ?? 0,
+          );
           character = message['characters'] as String?;
           break;
         case 'ios':
           data = RawKeyEventDataIos(
-              characters: message['characters'] as String? ?? '',
-              charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
-              keyCode: message['keyCode'] as int? ?? 0,
-              modifiers: message['modifiers'] as int? ?? 0);
+            characters: message['characters'] as String? ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
+            keyCode: message['keyCode'] as int? ?? 0,
+            modifiers: message['modifiers'] as int? ?? 0,
+          );
           break;
         case 'linux':
           final int unicodeScalarValues = message['unicodeScalarValues'] as int? ?? 0;
           data = RawKeyEventDataLinux(
-              keyHelper: KeyHelper(message['toolkit'] as String? ?? ''),
-              unicodeScalarValues: unicodeScalarValues,
-              keyCode: message['keyCode'] as int? ?? 0,
-              scanCode: message['scanCode'] as int? ?? 0,
-              modifiers: message['modifiers'] as int? ?? 0,
-              isDown: message['type'] == 'keydown');
+            keyHelper: KeyHelper(message['toolkit'] as String? ?? ''),
+            unicodeScalarValues: unicodeScalarValues,
+            keyCode: message['keyCode'] as int? ?? 0,
+            scanCode: message['scanCode'] as int? ?? 0,
+            modifiers: message['modifiers'] as int? ?? 0,
+            isDown: message['type'] == 'keydown',
+          );
           if (unicodeScalarValues != 0) {
             character = String.fromCharCode(unicodeScalarValues);
           }
@@ -657,11 +662,13 @@ class RawKeyboard {
     // Make sure that the modifiers reflect reality, in case a modifier key was
     // pressed/released while the app didn't have focus.
     _synchronizeModifiers(event);
-    assert(event is! RawKeyDownEvent || _keysPressed.isNotEmpty,
-        'Attempted to send a key down event when no keys are in keysPressed. '
-        "This state can occur if the key event being sent doesn't properly "
-        'set its modifier flags. This was the event: $event and its data: '
-        '${event.data}');
+    assert(
+      event is! RawKeyDownEvent || _keysPressed.isNotEmpty,
+      'Attempted to send a key down event when no keys are in keysPressed. '
+      "This state can occur if the key event being sent doesn't properly "
+      'set its modifier flags. This was the event: $event and its data: '
+      '${event.data}',
+    );
     // Send the event to passive listeners.
     for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
       if (_listeners.contains(listener)) {
@@ -727,21 +734,46 @@ class RawKeyboard {
   };
 
   void _synchronizeModifiers(RawKeyEvent event) {
-    // Don't send any key events for these changes, since there *should* be
-    // separate events for each modifier key down/up that occurs while the app
-    // has focus. This is just to synchronize the modifier keys when they are
-    // pressed/released while the app doesn't have focus, to make sure that
-    // _keysPressed reflects reality at all times.
+    // Compare modifier states to the ground truth as specified by
+    // [RawKeyEvent.data.modifiersPressed] and update unsynchronized ones.
+    //
+    // This function will update the state of modifier keys in `_keysPressed` so
+    // that they match the ones given by [RawKeyEvent.data.modifiersPressed].
+    // For a `modifiersPressed` result of anything but [KeyboardSide.any], the
+    // states in `_keysPressed` will be updated to exactly match the result,
+    // i.e. exactly one of "no down", "left down", "right down" or "both down".
+    //
+    // If `modifiersPressed` returns [KeyboardSide.any], the states in
+    // `_keysPressed` will be updated to a rough match, i.e. "either side down"
+    // or "no down". If `_keysPressed` has no modifier down, a
+    // [KeyboardSide.any] will synchronize by forcing the left modifier down. If
+    // `_keysPressed` has any modifier down, a [KeyboardSide.any] will not cause
+    // a state change.
 
     final Map<ModifierKey, KeyboardSide?> modifiersPressed = event.data.modifiersPressed;
     final Map<PhysicalKeyboardKey, LogicalKeyboardKey> modifierKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
+    // Physical keys that whose modifiers are pressed at any side.
+    final Set<PhysicalKeyboardKey> anySideKeys = <PhysicalKeyboardKey>{};
+    final Set<PhysicalKeyboardKey> keysPressedAfterEvent = <PhysicalKeyboardKey>{
+      ..._keysPressed.keys,
+      if (event is RawKeyDownEvent) event.physicalKey,
+    };
     for (final ModifierKey key in modifiersPressed.keys) {
+      if (modifiersPressed[key] == KeyboardSide.any) {
+        final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
+        anySideKeys.addAll(thisModifierKeys!);
+        if (thisModifierKeys.any(keysPressedAfterEvent.contains)) {
+          continue;
+        }
+      }
       final Set<PhysicalKeyboardKey>? mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
       assert((){
         if (mappedKeys == null) {
-          debugPrint('Platform key support for ${Platform.operatingSystem} is '
-              'producing unsupported modifier combinations for '
-              'modifier $key on side ${modifiersPressed[key]}.');
+          debugPrint(
+            'Platform key support for ${Platform.operatingSystem} is '
+            'producing unsupported modifier combinations for '
+            'modifier $key on side ${modifiersPressed[key]}.',
+          );
           if (event.data is RawKeyEventDataAndroid) {
             debugPrint('Android raw key metaState: ${(event.data as RawKeyEventDataAndroid).metaState}');
           }
@@ -755,7 +787,9 @@ class RawKeyboard {
         modifierKeys[physicalModifier] = _allModifiers[physicalModifier]!;
       }
     }
-    _allModifiersExceptFn.keys.forEach(_keysPressed.remove);
+    _allModifiersExceptFn.keys
+      .where((PhysicalKeyboardKey key) => !anySideKeys.contains(key))
+      .forEach(_keysPressed.remove);
     if (event.data is! RawKeyEventDataFuchsia && event.data is! RawKeyEventDataMacOs) {
       // On Fuchsia and macOS, the Fn key is not considered a modifier key.
       _keysPressed.remove(PhysicalKeyboardKey.fn);

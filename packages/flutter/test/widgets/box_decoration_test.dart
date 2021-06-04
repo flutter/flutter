@@ -29,7 +29,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   @override
   ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      future.then<ImageInfo>((void value) => ImageInfo(image: image))
+      future.then<ImageInfo>((void value) => ImageInfo(image: image)),
     );
   }
 }
@@ -138,12 +138,10 @@ Future<void> main() async {
     const Color black = Color(0xFF000000);
 
     await tester.pumpWidget(buildFrame(Border.all()));
-    expect(find.byKey(key), paints
-      ..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 1.0));
+    expect(find.byKey(key), paints..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 1.0));
 
     await tester.pumpWidget(buildFrame(Border.all(width: 0.0)));
-    expect(find.byKey(key), paints
-      ..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 0.0));
+    expect(find.byKey(key), paints..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 0.0));
 
     const Color green = Color(0xFF00FF00);
     const BorderSide greenSide = BorderSide(color: green, width: 10.0);
@@ -164,10 +162,13 @@ Future<void> main() async {
     const BorderSide blueSide = BorderSide(color: blue, width: 0.0);
 
     await tester.pumpWidget(buildFrame(const Border(top: blueSide, right: greenSide, bottom: greenSide)));
-    expect(find.byKey(key), paints
-      ..path() // There's not much point checking the arguments to these calls because paintBorder
-      ..path() // reuses the same Paint object each time, configured differently, and so they will
-      ..path()); // all appear to have the same settings here (that of the last call).
+    expect(
+      find.byKey(key),
+      paints
+        ..path() // There's not much point checking the arguments to these calls because paintBorder
+        ..path() // reuses the same Paint object each time, configured differently, and so they will
+        ..path(), // all appear to have the same settings here (that of the last call).
+    );
   });
 
   testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
@@ -396,12 +397,12 @@ Future<void> main() async {
             key: key,
             width: width,
             height: height,
-            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius))
+            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius)),
           ),
           onTap: () {
             itemsTapped.add(1);
           },
-        )
+        ),
       );
     }
 
@@ -449,19 +450,19 @@ Future<void> main() async {
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
       return Align(
-          alignment: Alignment.topLeft,
-          child:GestureDetector(
-            behavior: HitTestBehavior.deferToChild,
-            child: Container(
-                key: key,
-                width: width,
-                height: height,
-                decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius))
-            ),
-            onTap: () {
-              itemsTapped.add(1);
-            },
-          )
+        alignment: Alignment.topLeft,
+        child:GestureDetector(
+          behavior: HitTestBehavior.deferToChild,
+          child: Container(
+            key: key,
+            width: width,
+            height: height,
+            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius)),
+          ),
+          onTap: () {
+            itemsTapped.add(1);
+          },
+        ),
       );
     }
 
@@ -497,19 +498,19 @@ Future<void> main() async {
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
       return Align(
-          alignment: Alignment.topLeft,
-          child:GestureDetector(
-            behavior: HitTestBehavior.deferToChild,
-            child: Container(
-                key: key,
-                width: width,
-                height: height,
-                decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius))
-            ),
-            onTap: () {
-              itemsTapped.add(1);
-            },
-          )
+        alignment: Alignment.topLeft,
+        child:GestureDetector(
+          behavior: HitTestBehavior.deferToChild,
+          child: Container(
+            key: key,
+            width: width,
+            height: height,
+            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius)),
+          ),
+          onTap: () {
+            itemsTapped.add(1);
+          },
+        ),
       );
     }
 

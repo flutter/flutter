@@ -131,7 +131,7 @@ void main() {
           key: painterKey,
           child: Center(
             child: Card(
-              child: SizedBox.fromSize(size: const Size(200, 300),),
+              child: SizedBox.fromSize(size: const Size(200, 300)),
             ),
           ),
         ),

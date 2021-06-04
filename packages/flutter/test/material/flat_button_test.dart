@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -119,9 +119,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: FlatButton(
-              child: const Text('FlatButton'),
               onPressed: () { },
               focusNode: focusNode,
+              child: const Text('FlatButton'),
             ),
           ),
         ),
@@ -182,10 +182,10 @@ void main() {
               colorScheme: colorScheme,
               textTheme: ButtonTextTheme.primary,
               child: FlatButton(
-                child: const Text('FlatButton'),
                 onPressed: () {},
                 focusNode: focusNode,
                 textColor: MaterialStateColor.resolveWith(getTextColor),
+                child: const Text('FlatButton'),
               ),
             ),
           ),
@@ -248,10 +248,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: FlatButton(
-              child: const Text('FlatButton'),
               onPressed: () {},
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
+              child: const Text('FlatButton'),
             ),
           ),
         ),
@@ -374,10 +374,10 @@ void main() {
           body: Center(
             child: FlatButton(
               onPressed: null,
-              child: const Text('FlatButton'),
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
               disabledTextColor: unusedDisabledTextColor,
+              child: const Text('FlatButton'),
             ),
           ),
         ),
@@ -697,9 +697,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: FlatButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -882,26 +882,6 @@ void main() {
       await buildWidget(buttonMinWidth: buttonMinWidth);
       expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minWidth, buttonMinWidth);
     });
-
-    testWidgets('Fixed FlatButton.icon RenderFlex overflow', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 200,
-              child: FlatButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add),
-                label: const Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut a euismod nibh. Morbi laoreet purus.',
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-      expect(tester.takeException(), null);
-  });
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

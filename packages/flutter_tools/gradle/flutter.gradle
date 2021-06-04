@@ -20,12 +20,13 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.0'
@@ -101,12 +102,25 @@ class FlutterPlugin implements Plugin<Project> {
     void apply(Project project) {
         this.project = project
 
+        def rootProject = project.rootProject
+        rootProject.tasks.register('generateLockfiles') {
+            rootProject.subprojects.each { subproject ->
+                def gradlew = (OperatingSystem.current().isWindows()) ?
+                    "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
+                rootProject.exec {
+                    workingDir rootProject.projectDir
+                    executable gradlew
+                    args ":${subproject.name}:dependencies", "--write-locks"
+                }
+            }
+        }
+
         // Configure the Maven repository.
         String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
         String repository = useLocalEngine()
             ? project.property('local-engine-repo')
             : "$hostedRepository/download.flutter.io"
-        project.rootProject.allprojects {
+        rootProject.allprojects {
             repositories {
                 maven {
                     url repository
@@ -214,7 +228,7 @@ class FlutterPlugin implements Plugin<Project> {
         project.android.buildTypes.all this.&addFlutterDependencies
     }
 
-    private static Boolean shouldShrinkResources(Project project) { 
+    private static Boolean shouldShrinkResources(Project project) {
         if (project.hasProperty("shrink")) {
             return project.property("shrink").toBoolean()
         }
@@ -339,6 +353,9 @@ class FlutterPlugin implements Plugin<Project> {
             // so java8 features are desugared against the runtime classpath.
             // For more, see https://github.com/flutter/flutter/issues/40126
             if (!supportsBuildMode(flutterBuildMode)) {
+                return
+            }
+            if (!pluginProject.hasProperty('android')) {
                 return
             }
             // Copy build types from the app to the plugin.
@@ -595,7 +612,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     /**
      * Gets the directory that contains the Flutter source code.
-     * This is the the directory containing the `android/` directory.
+     * This is the directory containing the `android/` directory.
      */
     private File getFlutterSourceDirectory() {
         if (project.flutter.source == null) {
@@ -842,7 +859,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
-        
+
         if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
@@ -953,18 +970,21 @@ class FlutterExtension {
 }
 
 abstract class BaseFlutterTask extends DefaultTask {
+    @Internal
     File flutterRoot
+    @Internal
     File flutterExecutable
+    @Input
     String buildMode
     @Optional @Input
     String localEngine
     @Optional @Input
     String localEngineSrcPath
-    @Input
+    @Optional @Input
     Boolean fastStart
     @Input
     String targetPath
-    @Optional
+    @Optional @Internal
     Boolean verbose
     @Optional @Input
     String[] fileSystemRoots
@@ -974,7 +994,9 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean trackWidgetCreation
     @Optional @Input
     List<String> targetPlatformValues
+    @Internal
     File sourceDir
+    @Internal
     File intermediateDir
     @Optional @Input
     String extraFrontEndOptions
@@ -992,6 +1014,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     String bundleSkSLPath
     @Optional @Input
     String codeSizeDirectory;
+    @Optional @Input
     String performanceMeasurementFile;
     @Optional @Input
     Boolean deferredComponents
@@ -1069,7 +1092,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--DartDefines=${dartDefines}"
             }
             if (bundleSkSLPath != null) {
-                args "-iBundleSkSLPath=${bundleSkSLPath}"
+                args "-dBundleSkSLPath=${bundleSkSLPath}"
             }
             if (codeSizeDirectory != null) {
                 args "-dCodeSizeDirectory=${codeSizeDirectory}"
@@ -1091,10 +1114,12 @@ class FlutterTask extends BaseFlutterTask {
         return intermediateDir
     }
 
+    @Internal
     String getAssetsDirectory() {
         return "${outputDirectory}/flutter_assets"
     }
 
+    @Internal
     CopySpec getAssets() {
         return project.copySpec {
             from "${intermediateDir}"
@@ -1102,6 +1127,7 @@ class FlutterTask extends BaseFlutterTask {
         }
     }
 
+    @Internal
     CopySpec getSnapshots() {
         return project.copySpec {
             from "${intermediateDir}"

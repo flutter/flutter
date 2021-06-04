@@ -33,7 +33,7 @@ void main() {
     FakeProcessManager processManager;
 
     setUp(() {
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       testUsage = TestUsage();
       fileSystem = MemoryFileSystem.test();
@@ -120,9 +120,9 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     });
@@ -222,9 +222,9 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     });
@@ -309,9 +309,9 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     });
@@ -358,7 +358,7 @@ void main() {
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
       await expectLater(() async {
-       await builder.buildGradleApp(
+        await builder.buildGradleApp(
           project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
@@ -371,8 +371,7 @@ void main() {
           isBuildingBundle: false,
           localGradleErrors: const <GradleHandledError>[],
         );
-      },
-      throwsA(isA<ProcessException>()));
+      }, throwsProcessException());
       expect(processManager, hasNoRemainingExpectations);
     });
 
@@ -466,9 +465,9 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-success',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
       expect(processManager, hasNoRemainingExpectations);
@@ -674,9 +673,9 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
       expect(processManager, hasNoRemainingExpectations);

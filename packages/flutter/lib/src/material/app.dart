@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import 'arc.dart';
 import 'colors.dart';
@@ -14,7 +15,9 @@ import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
+import 'scrollbar.dart';
 import 'theme.dart';
+import 'tooltip.dart';
 
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
 /// developers to be intentional about their [DefaultTextStyle].
@@ -583,9 +586,9 @@ class MaterialApp extends StatefulWidget {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return WidgetsApp(
-  ///     shortcuts: <LogicalKeySet, Intent>{
+  ///     shortcuts: <ShortcutActivator, Intent>{
   ///       ... WidgetsApp.defaultShortcuts,
-  ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
+  ///       const SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
   ///     builder: (BuildContext context, Widget? child) {
@@ -596,7 +599,7 @@ class MaterialApp extends StatefulWidget {
   /// ```
   /// {@end-tool}
   /// {@macro flutter.widgets.widgetsApp.shortcuts.seeAlso}
-  final Map<LogicalKeySet, Intent>? shortcuts;
+  final Map<ShortcutActivator, Intent>? shortcuts;
 
   /// {@macro flutter.widgets.widgetsApp.actions}
   /// {@tool snippet}
@@ -662,7 +665,7 @@ class MaterialApp extends StatefulWidget {
   final bool debugShowMaterialGrid;
 
   @override
-  _MaterialAppState createState() => _MaterialAppState();
+  State<MaterialApp> createState() => _MaterialAppState();
 
   /// The [HeroController] used for Material page transitions.
   ///
@@ -684,17 +687,47 @@ class MaterialApp extends StatefulWidget {
 /// [GlowingOverscrollIndicator] to [Scrollable] descendants when executing on
 /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
 ///
+/// When using the desktop platform, if the [Scrollable] widget scrolls in the
+/// [Axis.vertical], a [Scrollbar] is applied.
+///
 /// See also:
 ///
 ///  * [ScrollBehavior], the default scrolling behavior extended by this class.
 class MaterialScrollBehavior extends ScrollBehavior {
+  /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
+  /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
+  /// platform and provided [ScrollableDetails].
+  const MaterialScrollBehavior();
+
   @override
-  TargetPlatform getPlatform(BuildContext context) {
-    return Theme.of(context).platform;
+  TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
+    switch (axisDirectionToAxis(details.direction)) {
+      case Axis.horizontal:
+        return child;
+      case Axis.vertical:
+        switch (getPlatform(context)) {
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            return Scrollbar(
+              controller: details.controller,
+              child: child,
+            );
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            return child;
+        }
+    }
   }
 
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
     switch (getPlatform(context)) {
@@ -706,9 +739,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return GlowingOverscrollIndicator(
-          child: child,
-          axisDirection: axisDirection,
+          axisDirection: details.direction,
           color: Theme.of(context).colorScheme.secondary,
+          child: child,
         );
     }
   }
@@ -739,9 +772,9 @@ class _MaterialAppState extends State<MaterialApp> {
 
   Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
     return FloatingActionButton(
-      child: const Icon(Icons.search),
       onPressed: onPressed,
       mini: true,
+      child: const Icon(Icons.search),
     );
   }
 
@@ -784,8 +817,8 @@ class _MaterialAppState extends State<MaterialApp> {
                 return widget.builder!(context, child);
               },
             )
-          : child!,
-      )
+          : child ?? const SizedBox.shrink(),
+      ),
     );
   }
 
@@ -865,7 +898,15 @@ class _MaterialAppState extends State<MaterialApp> {
   @override
   Widget build(BuildContext context) {
     Widget result = _buildWidgetApp(context);
-
+    result = Focus(
+      canRequestFocus: false,
+      onKey: (FocusNode node, RawKeyEvent event) {
+        if (event is! RawKeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape)
+          return KeyEventResult.ignored;
+        return Tooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
+      },
+      child: result,
+    );
     assert(() {
       if (widget.debugShowMaterialGrid) {
         result = GridPaper(
@@ -880,7 +921,7 @@ class _MaterialAppState extends State<MaterialApp> {
     }());
 
     return ScrollConfiguration(
-      behavior: widget.scrollBehavior ?? MaterialScrollBehavior(),
+      behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
       child: HeroControllerScope(
         controller: _heroController,
         child: result,

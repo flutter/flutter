@@ -273,7 +273,7 @@ class Container extends StatelessWidget {
        assert(decoration != null || clipBehavior == Clip.none),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
-         'To provide both, use "decoration: BoxDecoration(color: color)".'
+         'To provide both, use "decoration: BoxDecoration(color: color)".',
        ),
        constraints =
         (width != null || height != null)
@@ -431,7 +431,7 @@ class Container extends StatelessWidget {
       current = Padding(padding: margin!, child: current);
 
     if (transform != null)
-      current = Transform(transform: transform!, child: current, alignment: transformAlignment);
+      current = Transform(transform: transform!, alignment: transformAlignment, child: current);
 
     return current!;
   }
@@ -457,7 +457,7 @@ class Container extends StatelessWidget {
 class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
     TextDirection? textDirection,
-    required this.decoration
+    required this.decoration,
   }) : assert(decoration != null),
        textDirection = textDirection ?? TextDirection.ltr;
 

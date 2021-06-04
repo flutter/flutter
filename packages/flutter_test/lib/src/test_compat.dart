@@ -8,15 +8,14 @@ import 'package:meta/meta.dart';
 import 'package:test_api/src/backend/declarer.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/group.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/group_entry.dart'; // ignore: implementation_imports
-import 'package:test_api/src/backend/test.dart'; // ignore: implementation_imports
-import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_imports
-import 'package:test_api/src/backend/live_test.dart'; // ignore: implementation_imports
-import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
-import 'package:test_api/src/backend/message.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/invoker.dart';  // ignore: implementation_imports
+import 'package:test_api/src/backend/live_test.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/message.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/state.dart'; // ignore: implementation_imports
-
+import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/test.dart'; // ignore: implementation_imports
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart';
 

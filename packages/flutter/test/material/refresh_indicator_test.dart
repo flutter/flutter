@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 bool refreshCalled = false;
 
@@ -454,49 +454,126 @@ void main() {
 
   testWidgets('RefreshIndicator responds to strokeWidth', (WidgetTester tester) async {
     await tester.pumpWidget(
-        MaterialApp(
-          home: RefreshIndicator(
-            onRefresh: () async {},
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                return SizedBox(
-                  height: 200.0,
-                  child: Text(item),
-                );
-              }).toList(),
-            ),
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: () async {},
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
+                height: 200.0,
+                child: Text(item),
+              );
+            }).toList(),
           ),
-        )
+        ),
+      ),
     );
 
     //By default the value of strokeWidth is 2.0
     expect(
-        tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
-        2.0,
+      tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
+      2.0,
     );
 
     await tester.pumpWidget(
-        MaterialApp(
-          home: RefreshIndicator(
-            onRefresh: () async {},
-            strokeWidth: 4.0,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                return SizedBox(
-                  height: 200.0,
-                  child: Text(item),
-                );
-              }).toList(),
-            ),
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: () async {},
+          strokeWidth: 4.0,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
+                height: 200.0,
+                child: Text(item),
+              );
+            }).toList(),
           ),
-        )
+        ),
+      ),
     );
 
     expect(
-        tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
-        4.0,
+      tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
+      4.0,
+    );
+  });
+
+  testWidgets('RefreshIndicator responds to edgeOffset', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: () async {},
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
+                height: 200.0,
+                child: Text(item),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    //By default the value of edgeOffset is 0.0
+    expect(
+      tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).edgeOffset,
+      0.0,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: () async {},
+          edgeOffset: kToolbarHeight,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
+                height: 200.0,
+                child: Text(item),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).edgeOffset,
+      kToolbarHeight,
+    );
+  });
+
+  testWidgets('RefreshIndicator appears at edgeOffset', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: RefreshIndicator(
+        edgeOffset: kToolbarHeight,
+        displacement: kToolbarHeight,
+        onRefresh: () async {
+          await Future<void>.delayed(const Duration(seconds: 1), () { });
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+            return SizedBox(
+              height: 200.0,
+              child: Text(item),
+            );
+          }).toList(),
+        ),
+      ),
+    ));
+
+    await tester.fling(find.byType(ListView), const Offset(0.0, 2.0 * kToolbarHeight), 1000.0);
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(
+      tester.getTopLeft(find.byType(RefreshProgressIndicator)).dy,
+      greaterThanOrEqualTo(2.0 * kToolbarHeight),
     );
   });
 

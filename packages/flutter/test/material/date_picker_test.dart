@@ -56,9 +56,9 @@ void main() {
 
   Future<void> prepareDatePicker(
     WidgetTester tester,
-    Future<void> Function(Future<DateTime?> date) callback,
-    { TextDirection textDirection = TextDirection.ltr }
-  ) async {
+    Future<void> Function(Future<DateTime?> date) callback, {
+    TextDirection textDirection = TextDirection.ltr,
+  }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -303,7 +303,7 @@ void main() {
       // Test that the defaults work
       const DialogTheme datePickerDefaultDialogTheme = DialogTheme(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0))
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
         ),
         elevation: 24,
       );
@@ -337,7 +337,7 @@ void main() {
       // Test that it honors ThemeData.dialogTheme settings
       const DialogTheme customDialogTheme = DialogTheme(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(40.0))
+          borderRadius: BorderRadius.all(Radius.circular(40.0)),
         ),
         elevation: 50,
       );
@@ -651,7 +651,7 @@ void main() {
         expect(
           Material.of(tester.element(find.text('2'))),
           // The current day should be painted with a circle outline
-          paints..circle(color: todayColor, style: PaintingStyle.stroke, strokeWidth: 1.0)
+          paints..circle(color: todayColor, style: PaintingStyle.stroke, strokeWidth: 1.0),
         );
       });
     });
@@ -1053,8 +1053,7 @@ void main() {
 
         // Should have selected Jan 18
         expect(await date, DateTime(2016, DateTime.january, 19));
-      },
-      textDirection: TextDirection.rtl);
+      }, textDirection: TextDirection.rtl);
     });
   });
 
@@ -1162,9 +1161,14 @@ void main() {
     await tester.restoreFrom(restorationData);
     expect(find.byType(DatePickerDialog), findsOneWidget);
 
-    // Select a different date and close the date picker.
+    // Select a different date.
     await tester.tap(find.text('30'));
     await tester.pumpAndSettle();
+
+    // Restart after the new selection. It should remain selected.
+    await tester.restartAndRestore();
+
+    // Close the date picker.
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
 
@@ -1210,8 +1214,8 @@ void main() {
     await tester.tapAt(const Offset(10.0, 10.0));
     await tester.pumpAndSettle();
 
-    // The date picker should be closed, the text value updated to the
-    // newly selected date.
+    // The date picker should be closed, the text value should be the same
+    // as before.
     expect(find.byType(DatePickerDialog), findsNothing);
     expect(find.text('25/7/2021'), findsOneWidget);
 
@@ -1249,7 +1253,7 @@ class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePi
         arguments: <String, dynamic>{
           'selectedDate': _selectedDate.value.millisecondsSinceEpoch,
           'datePickerEntryMode': widget.datePickerEntryMode.index,
-        }
+        },
       );
     },
   );

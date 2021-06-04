@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +41,7 @@ void main() {
       ),
     );
 
-    // Originall at full opacity.
+    // Original at full opacity.
     FadeTransition opacity = tester.widget(find.descendant(
       of: find.byType(CupertinoTextSelectionToolbarButton),
       matching: find.byType(FadeTransition),

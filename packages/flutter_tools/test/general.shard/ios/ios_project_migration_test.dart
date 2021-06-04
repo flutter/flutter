@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -14,14 +12,14 @@ import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embed
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
 void main () {
   group('iOS migration', () {
-    TestUsage testUsage;
+    late TestUsage testUsage;
+
     setUp(() {
       testUsage = TestUsage();
     });
@@ -39,22 +37,22 @@ void main () {
     });
 
     group('remove framework linking and embedding migration', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      MockIosProject mockIosProject;
-      File xcodeProjectInfoFile;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectInfoFile;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
         testLogger = BufferLogger.test();
-        mockIosProject = MockIosProject();
-        when(mockIosProject.xcodeProjectInfoFile).thenReturn(xcodeProjectInfoFile);
+        project = FakeIosProject();
+        project.xcodeProjectInfoFile = xcodeProjectInfoFile;
       });
 
       testWithoutContext('skipped if files are missing', () {
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
           testUsage
         );
@@ -73,7 +71,7 @@ void main () {
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
           testUsage,
         );
@@ -93,7 +91,7 @@ shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.
         xcodeProjectInfoFile.writeAsStringSync(contents);
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
           testUsage,
         );
@@ -120,7 +118,7 @@ keep this 2
 ''');
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
           testUsage,
         );
@@ -141,7 +139,7 @@ keep this 2
 ''');
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
           testUsage,
         );
@@ -158,7 +156,7 @@ keep this 2
 ''');
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
           testUsage,
         );
@@ -174,7 +172,7 @@ keep this 2
 ''');
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
           testUsage,
         );
@@ -186,22 +184,22 @@ keep this 2
     });
 
     group('new Xcode build system', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      MockIosProject mockIosProject;
-      File xcodeWorkspaceSharedSettings;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeWorkspaceSharedSettings;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
         xcodeWorkspaceSharedSettings = memoryFileSystem.file('WorkspaceSettings.xcsettings');
         testLogger = BufferLogger.test();
-        mockIosProject = MockIosProject();
-        when(mockIosProject.xcodeWorkspaceSharedSettings).thenReturn(xcodeWorkspaceSharedSettings);
+        project = FakeIosProject();
+        project.xcodeWorkspaceSharedSettings = xcodeWorkspaceSharedSettings;
       });
 
       testWithoutContext('skipped if files are missing', () {
         final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -224,7 +222,7 @@ keep this 2
         xcodeWorkspaceSharedSettings.writeAsStringSync(contents);
 
         final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -247,7 +245,7 @@ keep this 2
         xcodeWorkspaceSharedSettings.writeAsStringSync(contents);
 
         final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -258,22 +256,22 @@ keep this 2
     });
 
     group('Xcode default build location', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      MockIosProject mockIosProject;
-      File xcodeProjectWorkspaceData;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectWorkspaceData;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem();
         xcodeProjectWorkspaceData = memoryFileSystem.file('contents.xcworkspacedata');
         testLogger = BufferLogger.test();
-        mockIosProject = MockIosProject();
-        when(mockIosProject.xcodeProjectWorkspaceData).thenReturn(xcodeProjectWorkspaceData);
+        project = FakeIosProject();
+        project.xcodeProjectWorkspaceData = xcodeProjectWorkspaceData;
       });
 
       testWithoutContext('skipped if files are missing', () {
         final ProjectBuildLocationMigration iosProjectMigration = ProjectBuildLocationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -295,7 +293,7 @@ keep this 2
         xcodeProjectWorkspaceData.writeAsStringSync(contents);
 
         final ProjectBuildLocationMigration iosProjectMigration = ProjectBuildLocationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -319,7 +317,7 @@ keep this 2
         xcodeProjectWorkspaceData.writeAsStringSync(contents);
 
         final ProjectBuildLocationMigration iosProjectMigration = ProjectBuildLocationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -337,22 +335,22 @@ keep this 2
     });
 
     group('remove Runner project base configuration', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      MockIosProject mockIosProject;
-      File xcodeProjectInfoFile;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectInfoFile;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
         testLogger = BufferLogger.test();
-        mockIosProject = MockIosProject();
-        when(mockIosProject.xcodeProjectInfoFile).thenReturn(xcodeProjectInfoFile);
+        project = FakeIosProject();
+        project.xcodeProjectInfoFile = xcodeProjectInfoFile;
       });
 
       testWithoutContext('skipped if files are missing', () {
         final ProjectBaseConfigurationMigration iosProjectMigration = ProjectBaseConfigurationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -368,7 +366,7 @@ keep this 2
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
         final ProjectBaseConfigurationMigration iosProjectMigration = ProjectBaseConfigurationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -396,7 +394,7 @@ keep this 3
 ''');
 
         final ProjectBaseConfigurationMigration iosProjectMigration = ProjectBaseConfigurationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -451,7 +449,7 @@ keep this 3
 ''');
 
         final ProjectBaseConfigurationMigration iosProjectMigration = ProjectBaseConfigurationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -492,11 +490,20 @@ keep this 3
   });
 }
 
-class MockIosProject extends Mock implements IosProject {}
+class FakeIosProject extends Fake implements IosProject {
+  @override
+  File xcodeProjectWorkspaceData = MemoryFileSystem.test().file('xcodeProjectWorkspaceData');
+
+  @override
+  File xcodeWorkspaceSharedSettings = MemoryFileSystem.test().file('xcodeWorkspaceSharedSettings');
+
+  @override
+  File xcodeProjectInfoFile = MemoryFileSystem.test().file('xcodeProjectInfoFile');
+}
 
 class FakeIOSMigrator extends ProjectMigrator {
-  FakeIOSMigrator({@required this.succeeds})
-    : super(null);
+  FakeIOSMigrator({required this.succeeds})
+    : super(BufferLogger.test());
 
   final bool succeeds;
 

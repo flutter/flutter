@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // Regenerates the material icons file.
 // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
 
@@ -83,9 +85,6 @@ const Map<String, String> identifierRewrites = <String, String>{
   '23mp': 'twenty_three_mp',
   '24mp': 'twenty_four_mp',
   'class': 'class_',
-  // TODO(guidezpl): will clean these up in g3 b/153556862
-  'door_back': 'door_back_door',
-  'door_front': 'door_front_door',
   'try': 'try_sms_star',
 };
 

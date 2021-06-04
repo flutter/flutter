@@ -45,10 +45,10 @@ void main() {
     expect((topEnd * 0.0).add(topRight * 0.0), center);
     expect(topEnd.add(topRight) * 0.0, (topEnd * 0.0).add(topRight * 0.0));
     expect(topStart.add(topLeft), topLeft.add(topStart));
-    expect((topStart.add(topLeft)).resolve(TextDirection.ltr), (topStart.resolve(TextDirection.ltr)) + topLeft);
-    expect((topStart.add(topLeft)).resolve(TextDirection.rtl), (topStart.resolve(TextDirection.rtl)) + topLeft);
-    expect((topStart.add(topLeft)).resolve(TextDirection.ltr), (topStart.resolve(TextDirection.ltr)).add(topLeft));
-    expect((topStart.add(topLeft)).resolve(TextDirection.rtl), (topStart.resolve(TextDirection.rtl)).add(topLeft));
+    expect(topStart.add(topLeft).resolve(TextDirection.ltr), (topStart.resolve(TextDirection.ltr)) + topLeft);
+    expect(topStart.add(topLeft).resolve(TextDirection.rtl), (topStart.resolve(TextDirection.rtl)) + topLeft);
+    expect(topStart.add(topLeft).resolve(TextDirection.ltr), topStart.resolve(TextDirection.ltr).add(topLeft));
+    expect(topStart.add(topLeft).resolve(TextDirection.rtl), topStart.resolve(TextDirection.rtl).add(topLeft));
     expect(topStart.resolve(TextDirection.ltr), topLeft);
     expect(topStart.resolve(TextDirection.rtl), topRight);
     expect(topEnd * 0.0, center);
@@ -67,8 +67,8 @@ void main() {
     for (final TextDirection x in TextDirection.values) {
       expect((topEnd * 0.0).add(topRight * 0.0).resolve(x), center.add(center).resolve(x));
       expect((topEnd * 0.0).add(topLeft).resolve(x), center.add(topLeft).resolve(x));
-      expect(((topEnd * 0.0).resolve(x)).add(topLeft.resolve(x)), (center.resolve(x)).add(topLeft.resolve(x)));
-      expect(((topEnd * 0.0).resolve(x)).add(topLeft), (center.resolve(x)).add(topLeft));
+      expect((topEnd * 0.0).resolve(x).add(topLeft.resolve(x)), center.resolve(x).add(topLeft.resolve(x)));
+      expect((topEnd * 0.0).resolve(x).add(topLeft), center.resolve(x).add(topLeft));
       expect((topEnd * 0.0).resolve(x), center.resolve(x));
     }
     expect(topStart, isNot(topLeft));
@@ -94,12 +94,18 @@ void main() {
     expect(AlignmentDirectional.bottomEnd.resolve(TextDirection.rtl), Alignment.bottomLeft);
     expect(AlignmentDirectional(nonconst(1.0), 2.0), AlignmentDirectional(nonconst(1.0), 2.0));
     expect(const AlignmentDirectional(1.0, 2.0), isNot(const AlignmentDirectional(2.0, 1.0)));
-    expect(AlignmentDirectional.centerStart.resolve(TextDirection.ltr),
-           AlignmentDirectional.centerEnd.resolve(TextDirection.rtl));
-    expect(AlignmentDirectional.centerStart.resolve(TextDirection.ltr),
-     isNot(AlignmentDirectional.centerEnd.resolve(TextDirection.ltr)));
-    expect(AlignmentDirectional.centerEnd.resolve(TextDirection.ltr),
-     isNot(AlignmentDirectional.centerEnd.resolve(TextDirection.rtl)));
+    expect(
+      AlignmentDirectional.centerStart.resolve(TextDirection.ltr),
+      AlignmentDirectional.centerEnd.resolve(TextDirection.rtl),
+    );
+    expect(
+      AlignmentDirectional.centerStart.resolve(TextDirection.ltr),
+      isNot(AlignmentDirectional.centerEnd.resolve(TextDirection.ltr)),
+    );
+    expect(
+      AlignmentDirectional.centerEnd.resolve(TextDirection.ltr),
+      isNot(AlignmentDirectional.centerEnd.resolve(TextDirection.rtl)),
+    );
   });
 
   test('AlignmentGeometry.lerp ad hoc tests', () {

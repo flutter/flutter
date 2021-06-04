@@ -13,7 +13,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -35,7 +35,7 @@ class DowngradeCommand extends FlutterCommand {
     Logger logger,
     ProcessManager processManager,
     FlutterVersion flutterVersion,
-    AnsiTerminal terminal,
+    Terminal terminal,
     Stdio stdio,
     FileSystem fileSystem,
   }) : _terminal = terminal,
@@ -61,7 +61,7 @@ class DowngradeCommand extends FlutterCommand {
     );
   }
 
-  AnsiTerminal _terminal;
+  Terminal _terminal;
   FlutterVersion _flutterVersion;
   PersistentToolState _persistentToolState;
   ProcessUtils _processUtils;

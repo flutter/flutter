@@ -919,7 +919,7 @@ class SliverHitTestEntry extends HitTestEntry {
 class SliverLogicalParentData extends ParentData {
   /// The position of the child relative to the zero scroll offset.
   ///
-  /// The number of pixels from from the zero scroll offset of the parent sliver
+  /// The number of pixels from the zero scroll offset of the parent sliver
   /// (the line at which its [SliverConstraints.scrollOffset] is zero) to the
   /// side of the child closest to that offset. A [layoutOffset] can be null
   /// when it cannot be determined. The value will be set after layout.
@@ -975,13 +975,13 @@ List<DiagnosticsNode> _debugCompareFloats(String labelA, double valueA, String l
     if (valueA.toStringAsFixed(1) != valueB.toStringAsFixed(1))
       ErrorDescription(
         'The $labelA is ${valueA.toStringAsFixed(1)}, but '
-        'the $labelB is ${valueB.toStringAsFixed(1)}.'
+        'the $labelB is ${valueB.toStringAsFixed(1)}.',
       )
     else ...<DiagnosticsNode>[
       ErrorDescription('The $labelA is $valueA, but the $labelB is $valueB.'),
       ErrorHint(
         'Maybe you have fallen prey to floating point rounding errors, and should explicitly '
-        'apply the min() or max() functions, or the clamp() method, to the $labelB?'
+        'apply the min() or max() functions, or the clamp() method, to the $labelB?',
       ),
     ],
   ];
@@ -1205,7 +1205,7 @@ abstract class RenderSliver extends RenderObject {
     assert(geometry!.debugAssertIsValid(
       informationCollector: () sync* {
         yield describeForError('The RenderSliver that returned the offending geometry was');
-      }
+      },
     ));
     assert(() {
       if (geometry!.paintOrigin + geometry!.paintExtent > constraints.remainingPaintExtent) {

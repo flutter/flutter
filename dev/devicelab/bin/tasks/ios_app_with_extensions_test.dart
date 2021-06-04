@@ -5,12 +5,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(() async {
@@ -19,7 +20,7 @@ Future<void> main() async {
     String watchDeviceID;
     String phoneDeviceID;
     final Directory tempDir = Directory.systemTemp
-        .createTempSync('ios_app_with_extensions_test');
+        .createTempSync('flutter_ios_app_with_extensions_test.');
     final Directory projectDir =
         Directory(path.join(tempDir.path, 'app_with_extensions'));
     try {
@@ -80,7 +81,7 @@ Future<void> main() async {
         'EFQRCode.framework',
         'EFQRCode',
       );
-      _checkWatchExtensionFrameworkArchs(watchExtensionFrameworkPath);
+      unawaited(_checkWatchExtensionFrameworkArchs(watchExtensionFrameworkPath));
 
       section('Clean build');
 
@@ -100,7 +101,7 @@ Future<void> main() async {
       checkDirectoryExists(appBundle);
       await _checkFlutterFrameworkArchs(appFrameworkPath, isSimulator: false);
       await _checkFlutterFrameworkArchs(flutterFrameworkPath, isSimulator: false);
-      _checkWatchExtensionFrameworkArchs(watchExtensionFrameworkPath);
+      unawaited(_checkWatchExtensionFrameworkArchs(watchExtensionFrameworkPath));
 
       section('Clean build');
 

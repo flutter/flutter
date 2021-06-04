@@ -24,7 +24,8 @@ void main() {
     );
     expect(error.diagnostics[3], isA<DiagnosticsProperty<Element>>());
     expect(error.diagnostics[4], isA<DiagnosticsBlock>());
-    expect(error.toStringDeep(),
+    expect(
+      error.toStringDeep(),
       'FlutterError\n'
       '   No Material widget found.\n'
       '   ListTile widgets require a Material widget ancestor.\n'
@@ -40,12 +41,11 @@ void main() {
       '   The specific widget that could not find a Material ancestor was:\n'
       '     ListTile\n'
       '   The ancestors of this widget were:\n'
-      '     [root]\n'
+      '     [root]\n',
     );
   });
 
-  testWidgets('debugCheckHasMaterialLocalizations control test', (
-      WidgetTester tester) async {
+  testWidgets('debugCheckHasMaterialLocalizations control test', (WidgetTester tester) async {
     await tester.pumpWidget(const BackButton());
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -62,7 +62,8 @@ void main() {
     );
     expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
     expect(error.diagnostics[5], isA<DiagnosticsBlock>());
-    expect(error.toStringDeep(),
+    expect(
+      error.toStringDeep(),
       'FlutterError\n'
       '   No MaterialLocalizations found.\n'
       '   BackButton widgets require MaterialLocalizations to be provided\n'
@@ -76,12 +77,11 @@ void main() {
       '   ancestor was:\n'
       '     BackButton\n'
       '   The ancestors of this widget were:\n'
-      '     [root]\n'
+      '     [root]\n',
     );
   });
 
-  testWidgets(
-      'debugCheckHasScaffold control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasScaffold control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -93,10 +93,12 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            showBottomSheet<void>(context: context,
-                builder: (BuildContext context) => Container());
+            showBottomSheet<void>(
+              context: context,
+              builder: (BuildContext context) => Container(),
+            );
             return Container();
-          }
+          },
         ),
       ),
     );
@@ -204,12 +206,15 @@ void main() {
       '     UnmanagedRestorationScope\n'
       '     RootRestorationScope\n'
       '     WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]\n'
+      '     Semantics\n'
+      '     _FocusMarker\n'
+      '     Focus\n'
       '     HeroControllerScope\n'
       '     ScrollConfiguration\n'
       '     MaterialApp\n'
       '     [root]\n'
       '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
-      '   or WidgetsApp widget at the top of your application widget tree.\n',
+      '   or WidgetsApp widget at the top of your application widget tree.\n'
     ));
   });
 
@@ -218,7 +223,7 @@ void main() {
     final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     final SnackBar snackBar = SnackBar(
       content: const Text('Snack'),
-      action: SnackBarAction(label: 'Test', onPressed: () {})
+      action: SnackBarAction(label: 'Test', onPressed: () {}),
     );
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -232,10 +237,10 @@ void main() {
                 key: _scaffoldKey,
                 body: Container(),
               );
-            }
-          )
+            },
+          ),
         ),
-      )
+      ),
     ));
     final List<dynamic> exceptions = <dynamic>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
@@ -288,7 +293,7 @@ void main() {
       '     Directionality\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
-      '   MaterialApp at the top of your application widget tree.\n'
+      '   MaterialApp at the top of your application widget tree.\n',
     ));
   });
 }

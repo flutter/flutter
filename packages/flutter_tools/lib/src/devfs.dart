@@ -203,6 +203,61 @@ class DevFSStringContent extends DevFSByteContent {
   }
 }
 
+/// A string compressing DevFSContent.
+///
+/// A specialized DevFSContent similar to DevFSByteContent where the contents
+/// are the compressed bytes of a string. Its difference is that the original
+/// uncompressed string can be compared with directly without the indirection
+/// of a compute-expensive uncompress/decode and compress/encode to compare
+/// the strings.
+///
+/// The `hintString` parameter is a zlib dictionary hinting mechanism to suggest
+/// the most common string occurrences to potentially assist with compression.
+class DevFSStringCompressingBytesContent extends DevFSContent {
+  DevFSStringCompressingBytesContent(this._string, { String hintString })
+    : _compressor = ZLibEncoder(
+      dictionary: hintString == null
+          ? null
+          : utf8.encode(hintString),
+      gzip: true,
+      level: 9,
+    );
+
+  final String _string;
+  final ZLibEncoder _compressor;
+  final DateTime _modificationTime = DateTime.now();
+
+  List<int> _bytes;
+  bool _isModified = true;
+
+  List<int> get bytes => _bytes ??= _compressor.convert(utf8.encode(_string));
+
+  /// Return true only once so that the content is written to the device only once.
+  @override
+  bool get isModified {
+    final bool modified = _isModified;
+    _isModified = false;
+    return modified;
+  }
+
+  @override
+  bool isModifiedAfter(DateTime time) {
+    return time == null || _modificationTime.isAfter(time);
+  }
+
+  @override
+  int get size => bytes.length;
+
+  @override
+  Future<List<int>> contentsAsBytes() async => bytes;
+
+  @override
+  Stream<List<int>> contentsAsStream() => Stream<List<int>>.value(bytes);
+
+  /// This checks the source string with another string.
+  bool equals(String string) => _string == string;
+}
+
 class DevFSException implements Exception {
   DevFSException(this.message, [this.error, this.stackTrace]);
   final String message;
@@ -518,26 +573,14 @@ class DevFS {
     // dill files that depend on the invalidated files.
     _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
 
-    // `generated_main.dart` contains the Dart plugin registry.
-    if (projectRootPath != null) {
-      final File generatedMainDart = _fileSystem.file(
-        _fileSystem.path.join(
-          projectRootPath,
-          '.dart_tool',
-          'flutter_build',
-          'generated_main.dart',
-        ),
-      );
-      if (generatedMainDart != null && generatedMainDart.existsSync()) {
-        mainUri = generatedMainDart.uri;
-      }
-    }
     // Await the compiler response after checking if the bundle is updated. This allows the file
     // stating to be done while waiting for the frontend_server response.
     final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(
       mainUri,
       invalidatedFiles,
       outputPath: dillOutputPath,
+      fs: _fileSystem,
+      projectRootPath: projectRootPath,
       packageConfig: packageConfig,
     );
     if (bundle != null) {
@@ -597,7 +640,7 @@ class DevFS {
   }
 
   /// Converts a platform-specific file path to a platform-independent URL path.
-  String _asUriPath(String filePath) => _fileSystem.path.toUri(filePath).path + '/';
+  String _asUriPath(String filePath) => '${_fileSystem.path.toUri(filePath).path}/';
 }
 
 /// An implementation of a devFS writer which copies physical files for devices
