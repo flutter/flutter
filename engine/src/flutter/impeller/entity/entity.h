@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "impeller/entity/color.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/rect.h"

@@ -46,6 +46,7 @@ executable("host") {
   deps = [
     ":impeller_host_fixtures",
     ":impeller_host_shaders",
+    "../entity",
     "../primitives",
     "//flutter/fml",
   ]

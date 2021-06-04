@@ -38,7 +38,8 @@ bool Renderer::SurfaceSizeDidChange(Size size) {
   }
 
   size_ = size;
-  return true;
+
+  return OnSurfaceSizeDidChange(size_);
 }
 
 bool Renderer::Render() {

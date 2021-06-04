@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/primitives/box.h"
+#include "impeller/primitives/box_primitive.h"
 
 #include <memory>
 
@@ -15,7 +15,8 @@
 
 namespace impeller {
 
-bool RenderBox(std::shared_ptr<Context> context) {
+BoxPrimitive::BoxPrimitive(std::shared_ptr<Context> context)
+    : Primitive(context) {
   PipelineDescriptor desc;
   desc.SetLabel(shader::BoxVertexInfo::kLabel);
 
@@ -34,7 +35,7 @@ bool RenderBox(std::shared_ptr<Context> context) {
     if (!vertex_descriptor->SetStageInputs(
             shader::BoxVertexInfo::kAllShaderStageInputs)) {
       FML_LOG(ERROR) << "Could not configure vertex descriptor.";
-      return false;
+      return;
     }
     desc.SetVertexDescriptor(std::move(vertex_descriptor));
   }
@@ -43,10 +44,16 @@ bool RenderBox(std::shared_ptr<Context> context) {
       context->GetPipelineLibrary()->GetRenderPipeline(std::move(desc)).get();
   if (!pipeline) {
     FML_LOG(ERROR) << "Could not create the render pipeline.";
-    return false;
+    return;
   }
 
-  return true;
+  is_valid_ = true;
+}
+
+BoxPrimitive::~BoxPrimitive() = default;
+
+bool BoxPrimitive::Encode(RenderPass& pass) const {
+  return false;
 }
 
 }  // namespace impeller
