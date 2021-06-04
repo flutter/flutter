@@ -396,7 +396,11 @@ static void CommonInit(FlutterViewController* controller) {
 }
 
 - (void)configureTrackingArea {
-  NSAssert(self.viewLoaded, @"View must be loaded before setting tracking area");
+  if (!self.viewLoaded) {
+    // The viewDidLoad will call configureTrackingArea again when
+    // the view is actually loaded.
+    return;
+  }
   if (_mouseTrackingMode != FlutterMouseTrackingModeNone && self.flutterView) {
     NSTrackingAreaOptions options = NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved |
                                     NSTrackingInVisibleRect | NSTrackingEnabledDuringMouseDrag;
