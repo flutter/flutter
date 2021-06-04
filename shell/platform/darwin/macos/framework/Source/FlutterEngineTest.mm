@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <OCMock/OCMock.h>
-
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
@@ -13,6 +12,16 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/testing/testing.h"
+
+@interface FlutterEngine (Test)
+/**
+ * The FlutterCompositor object currently in use by the FlutterEngine. This is
+ * either a FlutterOpenGLCompositor or a FlutterMetalCompositor.
+ *
+ * May be nil if the compositor has not been initialized yet.
+ */
+@property(nonatomic, readonly, nullable) flutter::FlutterCompositor* macOSCompositor;
+@end
 
 namespace flutter::testing {
 
@@ -327,6 +336,41 @@ TEST(FlutterEngine, ResetsAccessibilityBridgeWhenSetsNewViewController) {
   EXPECT_TRUE(native_root.expired());
 
   [engine setViewController:nil];
+  [engine shutDownEngine];
+}
+
+TEST(FlutterEngine, Compositor) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:project];
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
+  [viewController loadView];
+  viewController.flutterView.frame = CGRectMake(0, 0, 800, 600);
+  [engine setViewController:viewController];
+
+  EXPECT_TRUE([engine runWithEntrypoint:@"can_composite_platform_views"]);
+
+  // Latch to ensure the entire layer tree has been generated and presented.
+  fml::AutoResetWaitableEvent latch;
+  auto compositor = engine.macOSCompositor;
+  compositor->SetPresentCallback([&]() {
+    latch.Signal();
+    return true;
+  });
+  latch.Wait();
+
+  CALayer* rootLayer = viewController.flutterView.layer;
+
+  // There are three layers total - the root layer and two sublayers.
+  // This test will need to be updated when PlatformViews are supported, as
+  // there are two PlatformView layers in this test.
+  EXPECT_EQ(rootLayer.sublayers.count, 2u);
+
+  // TODO(gw280): add support for screenshot tests in this test harness
+
   [engine shutDownEngine];
 }
 
