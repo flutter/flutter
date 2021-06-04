@@ -485,11 +485,10 @@ void main() {
             ),
           ),
         );
-        try {
-          await tester.pumpWidget(boilerplate);
-        } catch (e) {
-          fail('Expected no error, but got $e');
-        }
+        await expectLater(
+          () => tester.pumpWidget(boilerplate),
+          returnsNormally,
+        );
       });
 
       group('Accessibility (a11y/Semantics)', () {
