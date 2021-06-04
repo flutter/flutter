@@ -226,7 +226,6 @@ class CupertinoSearchTextField extends StatefulWidget {
   // https://github.com/flutter/flutter/issues/13914.
   final BorderRadius? borderRadius;
   
-  
   /// {@macro flutter.widgets.editableText.keyboardType}
   final TextInputType? keyboardType;
 
