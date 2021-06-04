@@ -141,7 +141,7 @@ class IconButton extends StatelessWidget {
   /// or an [ImageIcon].
   const IconButton({
     Key? key,
-    this.iconSize = 24.0,
+    this.iconSize,
     this.visualDensity,
     this.padding = const EdgeInsets.all(8.0),
     this.alignment = Alignment.center,
@@ -160,8 +160,7 @@ class IconButton extends StatelessWidget {
     this.enableFeedback = true,
     this.constraints,
     required this.icon,
-  }) : assert(iconSize != null),
-       assert(padding != null),
+  }) : assert(padding != null),
        assert(alignment != null),
        assert(splashRadius == null || splashRadius > 0),
        assert(autofocus != null),
@@ -170,7 +169,7 @@ class IconButton extends StatelessWidget {
 
   /// The size of the icon inside the button.
   ///
-  /// This property must not be null. It defaults to 24.0.
+  /// If [iconSize] is null, then it defaults to 24.0.
   ///
   /// The size given here is passed down to the widget in the [icon] property
   /// via an [IconTheme]. Setting the size here instead of in, for example, the
@@ -178,7 +177,7 @@ class IconButton extends StatelessWidget {
   /// fit the [Icon]. If you were to set the size of the [Icon] using
   /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
   /// the [Icon] itself would likely get clipped.
-  final double iconSize;
+  final double? iconSize;
 
   /// Defines how compact the icon button's layout will be.
   ///
@@ -329,6 +328,7 @@ class IconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
+    final IconThemeData iconThemeData = IconTheme.of(context);
     Color? currentColor;
     if (onPressed != null)
       currentColor = color;
@@ -343,18 +343,21 @@ class IconButton extends StatelessWidget {
     );
     final BoxConstraints adjustedConstraints = effectiveVisualDensity.effectiveConstraints(unadjustedConstraints);
 
+    final IconThemeData iconTheme = iconThemeData.merge(IconThemeData(size: iconSize));
+    final double size = iconTheme.size ?? 24.0;
+
     Widget result = ConstrainedBox(
       constraints: adjustedConstraints,
       child: Padding(
         padding: padding,
         child: SizedBox(
-          height: iconSize,
-          width: iconSize,
+          height: size,
+          width: size,
           child: Align(
             alignment: alignment,
             child: IconTheme.merge(
               data: IconThemeData(
-                size: iconSize,
+                size: size,
                 color: currentColor,
               ),
               child: icon,
@@ -387,7 +390,7 @@ class IconButton extends StatelessWidget {
         splashColor: splashColor ?? theme.splashColor,
         radius: splashRadius ?? math.max(
           Material.defaultSplashRadius,
-          (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+          (size + math.min(padding.horizontal, padding.vertical)) * 0.7,
           // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
         ),
         child: result,

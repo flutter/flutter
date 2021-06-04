@@ -176,6 +176,27 @@ void main() {
     expect(box.size, const Size(48.0, 600.0));
   });
 
+  testWidgets('Get size from iconButtonTheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: IconTheme(
+          data: const IconThemeData(size: 50),
+          child: IconButton(
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.link),
+            constraints: const BoxConstraints(),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+
+    // By default IconButton has a padding of 8.0 on all sides, so both
+    // width and height are 50.0 + 2 * 8.0 = 66.0
+    expect(iconButton.size, const Size(66.0, 66.0));
+  });
+
   testWidgets('test default padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
@@ -405,9 +426,9 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-        child: const IconButton(
+        child: IconButton(
           onPressed: null,
-          icon: Icon(Icons.link, semanticLabel: 'link'),
+          icon: const Icon(Icons.link, semanticLabel: 'link'),
         ),
       ),
     );
