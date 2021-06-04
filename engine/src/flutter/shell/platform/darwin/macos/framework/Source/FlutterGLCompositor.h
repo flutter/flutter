@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <map>
+#ifndef FLUTTER_GL_COMPOSITOR_H_
+#define FLUTTER_GL_COMPOSITOR_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStoreData.h"
 #include "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
 #include "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -49,29 +49,9 @@ class FlutterGLCompositor : public FlutterCompositor {
  private:
   const NSOpenGLContext* open_gl_context_;
 
-  // Count for how many CALayers have been created for a frame.
-  // Resets when a frame is finished.
-  // ca_layer_count_ is also used as a layerId.
-  size_t ca_layer_count_ = 0;
-
-  // Maps a layer_id (size_t) to a CALayer.
-  // The layer_id starts at 0 for a given frame
-  // and increments by 1 for each new CALayer.
-  std::map<size_t, CALayer*> ca_layer_map_;
-
-  // frame_started_ keeps track of if a layer has been
-  // created for the frame.
-  bool frame_started_ = false;
-
-  // Set frame_started_ to true and reset all layer state.
-  void StartFrame();
-
-  // Creates a CALayer and adds it to ca_layer_map_ and increments
-  // ca_layer_count_; Returns the key value (size_t) for the layer in
-  // ca_layer_map_.
-  size_t CreateCALayer();
-
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterGLCompositor);
 };
 
 }  // namespace flutter
+
+#endif  // FLUTTER_GL_COMPOSITOR_H_

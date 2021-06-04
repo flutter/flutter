@@ -14,14 +14,8 @@
  */
 @interface FlutterBackingStoreData : NSObject
 
-- (nullable instancetype)initWithLayerId:(size_t)layerId
-                              fbProvider:(nonnull FlutterFrameBufferProvider*)fbProvider
-                         ioSurfaceHolder:(nonnull FlutterIOSurfaceHolder*)ioSurfaceHolder;
-
-/**
- * The layer's key value in FlutterGLCompositor's ca_layer_map_.
- */
-@property(nonatomic, readonly) size_t layerId;
+- (nullable instancetype)initWithFbProvider:(nonnull FlutterFrameBufferProvider*)fbProvider
+                            ioSurfaceHolder:(nonnull FlutterIOSurfaceHolder*)ioSurfaceHolder;
 
 /**
  * Provides the fbo for rendering the layer.
