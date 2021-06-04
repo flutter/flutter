@@ -1926,7 +1926,6 @@ void main() {
     FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem.test()),
   }));
 
-
   testUsingContext('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
