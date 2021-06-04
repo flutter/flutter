@@ -365,44 +365,48 @@ class CupertinoAlertDialog extends StatelessWidget {
           // iOS does not shrink dialog content below a 1.0 scale factor
           textScaleFactor: math.max(textScaleFactor, 1.0),
         ),
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return AnimatedPadding(
-              padding: MediaQuery.of(context).viewInsets +
-                  const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-              duration: insetAnimationDuration,
-              curve: insetAnimationCurve,
-              child: MediaQuery.removeViewInsets(
-                removeLeft: true,
-                removeTop: true,
-                removeRight: true,
-                removeBottom: true,
-                context: context,
-                child: Center(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: _kDialogEdgePadding),
-                    width: isInAccessibilityMode
-                        ? _kAccessibilityCupertinoDialogWidth
-                        : _kCupertinoDialogWidth,
-                    child: CupertinoPopupSurface(
-                      isSurfacePainted: false,
-                      child: Semantics(
-                        namesRoute: true,
-                        scopesRoute: true,
-                        explicitChildNodes: true,
-                        label: localizations.alertDialogLabel,
-                        child: _CupertinoDialogRenderWidget(
-                          contentSection: _buildContent(context),
-                          actionsSection: _buildActions(),
-                          dividerColor: CupertinoColors.separator,
+        child: ScrollConfiguration(
+          // A CupertinoScrollbar is built-in below.
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return AnimatedPadding(
+                padding: MediaQuery.of(context).viewInsets +
+                    const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+                duration: insetAnimationDuration,
+                curve: insetAnimationCurve,
+                child: MediaQuery.removeViewInsets(
+                  removeLeft: true,
+                  removeTop: true,
+                  removeRight: true,
+                  removeBottom: true,
+                  context: context,
+                  child: Center(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: _kDialogEdgePadding),
+                      width: isInAccessibilityMode
+                          ? _kAccessibilityCupertinoDialogWidth
+                          : _kCupertinoDialogWidth,
+                      child: CupertinoPopupSurface(
+                        isSurfacePainted: false,
+                        child: Semantics(
+                          namesRoute: true,
+                          scopesRoute: true,
+                          explicitChildNodes: true,
+                          label: localizations.alertDialogLabel,
+                          child: _CupertinoDialogRenderWidget(
+                            contentSection: _buildContent(context),
+                            actionsSection: _buildActions(),
+                            dividerColor: CupertinoColors.separator,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -694,23 +698,27 @@ class CupertinoActionSheet extends StatelessWidget {
     }
 
     return SafeArea(
-      child: Semantics(
-        namesRoute: true,
-        scopesRoute: true,
-        explicitChildNodes: true,
-        label: 'Alert',
-        child: CupertinoUserInterfaceLevel(
-          data: CupertinoUserInterfaceLevelData.elevated,
-          child: Container(
-            width: actionSheetWidth,
-            margin: const EdgeInsets.symmetric(
-              horizontal: _kActionSheetEdgeHorizontalPadding,
-              vertical: _kActionSheetEdgeVerticalPadding,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: children,
+      child: ScrollConfiguration(
+        // A CupertinoScrollbar is built-in below
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: Semantics(
+          namesRoute: true,
+          scopesRoute: true,
+          explicitChildNodes: true,
+          label: 'Alert',
+          child: CupertinoUserInterfaceLevel(
+            data: CupertinoUserInterfaceLevelData.elevated,
+            child: Container(
+              width: actionSheetWidth,
+              margin: const EdgeInsets.symmetric(
+                horizontal: _kActionSheetEdgeHorizontalPadding,
+                vertical: _kActionSheetEdgeVerticalPadding,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: children,
+              ),
             ),
           ),
         ),

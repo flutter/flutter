@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1247,6 +1248,45 @@ void main() {
     await tester.restoreFrom(restorationData);
     expect(find.byType(CupertinoAlertDialog), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoAlertDialog', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83819
+    const double textScaleFactor = 1.0;
+    final ScrollController actionScrollController = ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+            child: CupertinoAlertDialog(
+              title: const Text('Test Title'),
+              content: const Text('Test Content'),
+              actions: const <Widget>[
+                CupertinoDialogAction(
+                  child: Text('One'),
+                ),
+                CupertinoDialogAction(
+                  child: Text('Two'),
+                ),
+              ],
+              actionScrollController: actionScrollController,
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    // The inherited ScrollBehavior should not apply Scrollbars since they are
+    // already built in to the widget.
+    expect(find.byType(Scrollbar), findsNothing);
+    expect(find.byType(RawScrollbar), findsNothing);
+    // Built in CupertinoScrollbars should only number 2: one for the actions,
+    // one for the content.
+    expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
+  }, variant: TargetPlatformVariant.all());
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
