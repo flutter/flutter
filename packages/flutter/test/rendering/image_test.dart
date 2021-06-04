@@ -27,8 +27,7 @@ Future<void> main() async {
     expect(image.size.width, equals(25.0));
     expect(image.size.height, equals(25.0));
 
-    // TODO(dnfield): https://github.com/flutter/flutter/issues/66289
-    expect(image, hasAGoodToStringDeep, skip: kIsWeb);
+    expect(image, hasAGoodToStringDeep);
     expect(
       image.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
