@@ -8,7 +8,12 @@ impeller_component("entity") {
   sources = [
     "entity.cc",
     "entity.h",
+    "entity_renderer.h",
+    "entity_renderer.mm",
   ]
 
-  public_deps = [ "../image" ]
+  public_deps = [
+    "../compositor",
+    "../image",
+  ]
 }

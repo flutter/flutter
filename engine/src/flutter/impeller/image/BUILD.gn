@@ -12,5 +12,7 @@ impeller_component("image") {
     "image_result.h",
   ]
 
+  deps = [ "../third_party/stb" ]
+
   public_deps = [ "../geometry" ]
 }

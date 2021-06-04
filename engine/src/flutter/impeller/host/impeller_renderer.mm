@@ -4,16 +4,14 @@
 
 #import <ModelIO/ModelIO.h>
 #import <simd/simd.h>
-
-#import "assets_location.h"
-#include "flutter/fml/logging.h"
-#import "impeller/compositor/renderer.h"
-#import "impeller/primitives/box.h"
-#import "impeller_renderer.h"
-#import "shaders_location.h"
-// Include header shared between C code here, which executes Metal API commands,
-// and .metal files
 #import "ShaderTypes.h"
+
+#include "assets_location.h"
+#include "flutter/fml/logging.h"
+#include "impeller/entity/entity_renderer.h"
+#include "impeller/primitives/box_primitive.h"
+#include "impeller_renderer.h"
+#include "shaders_location.h"
 
 static const NSUInteger kMaxBuffersInFlight = 3;
 
@@ -53,15 +51,11 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
     [self _loadAssets];
   }
 
-  renderer_ = std::make_unique<impeller::Renderer>(
+  renderer_ = std::make_unique<impeller::EntityRenderer>(
       impeller::ImpellerShadersDirectory());
 
   if (!renderer_->IsValid()) {
     FML_LOG(ERROR) << "Impeller Renderer is not valid.";
-  }
-
-  if (!impeller::RenderBox(renderer_->GetContext())) {
-    FML_LOG(ERROR) << "Could not render box.";
   }
 
   return self;
@@ -233,7 +227,9 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 }
 
 - (void)drawInMTKView:(nonnull MTKView*)view {
-  renderer_->Render();
+  if (!renderer_->Render()) {
+    FML_LOG(ERROR) << "Could not render.";
+  }
   /// Per frame updates here
   dispatch_semaphore_wait(_inFlightSemaphore, DISPATCH_TIME_FOREVER);
 
