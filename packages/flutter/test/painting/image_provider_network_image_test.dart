@@ -245,7 +245,7 @@ void main() {
     // Freshly created client should throw the new error instead of the previously
     // configured value.
     await expectError(error2);
-  });
+  }, skip: isBrowser); // Browser implementation does not use HTTP client but an <img> tag.
 
   test('Identical zones have the same HttpClients', () async {
     debugNetworkImageHttpClientProvider = null;
@@ -274,7 +274,7 @@ void main() {
     });
 
     expect(created, 1);
-  });
+  }, skip: isBrowser); // Browser implementation does not use HTTP client but an <img> tag.
 }
 
 class _FakeHttpClient extends Fake implements HttpClient {
