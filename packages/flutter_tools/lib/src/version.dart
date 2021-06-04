@@ -228,6 +228,10 @@ class FlutterVersion {
   /// This function must run while [Cache.lock] is acquired because it reads and
   /// writes shared cache files.
   Future<void> checkFlutterVersionFreshness() async {
+    // Don't perform update checks if we're not on an official channel.
+    if (!kOfficialChannels.contains(channel)) {
+      return;
+    }
     DateTime localFrameworkCommitDate;
     try {
       localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate(
