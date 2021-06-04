@@ -1,10 +1,6 @@
 # CIRRUS CONFIGURATION FILE
 # https://cirrus-ci.org/guide/writing-tasks/
 
-# YAML anchors used to share fields between tasks.
-# See  https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
-
-
 environment:
   # For details about environment variables used in Cirrus, including how encrypted variables work,
   # see https://cirrus-ci.org/guide/writing-tasks/#environment-variables
@@ -15,7 +11,6 @@ environment:
   # We force BOT to true so that all our tools know we're in a CI environment. This avoids any
   # dependency on precisely how Cirrus is detected by our tools.
   BOT: "true"
-
 
 gcp_credentials: ENCRYPTED[1917385f09764ac58515f6fee14ed58688afc808849b244969d41d0b082061eecd0a4c8ba801f00833877a12b51f8bb5]
 
