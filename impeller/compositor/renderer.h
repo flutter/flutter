@@ -15,9 +15,7 @@ namespace impeller {
 
 class Renderer {
  public:
-  Renderer(std::string shaders_directory);
-
-  ~Renderer();
+  virtual ~Renderer();
 
   bool IsValid() const;
 
@@ -26,6 +24,13 @@ class Renderer {
   bool Render();
 
   std::shared_ptr<Context> GetContext() const;
+
+ protected:
+  Renderer(std::string shaders_directory);
+
+  virtual bool OnRender() = 0;
+
+  virtual bool OnSurfaceSizeDidChange(Size size) = 0;
 
  private:
   std::shared_ptr<Context> context_;
