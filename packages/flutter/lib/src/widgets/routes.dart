@@ -815,7 +815,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     child: FocusScope(
                       node: focusScopeNode, // immutable
                       child: _FocusTrap(
-                      focusScopeNode: focusScopeNode,
+                        focusScopeNode: focusScopeNode,
                         child: RepaintBoundary(
                           child: AnimatedBuilder(
                             animation: _listenable, // immutable
@@ -2045,14 +2045,6 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
       }
     }
     return hitTarget;
-  }
-
-  @override
-  bool hitTestSelf(Offset position) => false;
-
-  @override
-  Size computeSizeForNoChild(BoxConstraints constraints) {
-    return constraints.biggest;
   }
 
   /// The focus dropping behavior is only present on desktop platforms
