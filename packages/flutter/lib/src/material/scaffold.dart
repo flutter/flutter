@@ -2415,7 +2415,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // bottom sheet.
   final List<_StandardBottomSheet> _dismissedBottomSheets = <_StandardBottomSheet>[];
   PersistentBottomSheetController<dynamic>? _currentBottomSheet;
-  GlobalKey _currentBottomSheetKey = GlobalKey();
+  final GlobalKey _currentBottomSheetKey = GlobalKey();
 
   void _maybeBuildPersistentBottomSheet() {
     if (widget.bottomSheet != null && _currentBottomSheet == null) {
@@ -2443,14 +2443,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         return false;
       }
 
-      // It is possible that the fade-out animation of the sheet has not finished
-      // yet, and the key needs to be regenerated at this time, otherwise, there will
-      // be an exception of duplicate GlobalKey.
-      if (_currentBottomSheetKey.currentState != null)
-        _currentBottomSheetKey = GlobalKey();
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) {
-          assert(_currentBottomSheetKey.currentState == null);
           return NotificationListener<DraggableScrollableNotification>(
             onNotification: _persistentBottomSheetExtentChanged,
             child: DraggableScrollableActuator(
