@@ -93,6 +93,7 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
+      bundleDir: MemoryFileSystem.test().directory('bundle'),
     );
 
     device.portForwarder = devicePortForwarder;
