@@ -1941,7 +1941,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SliverAppBar with flexable space has correct semantics order', (WidgetTester tester) async {
+  testWidgets('SliverAppBar with flexible space has correct semantics order', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/64922.
     final SemanticsTester semantics = SemanticsTester(tester);
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -993,6 +994,46 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoActionSheet', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83819
+    final ScrollController actionScrollController = ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: CupertinoActionSheet(
+              title: const Text('The title'),
+              message: const Text('The message.'),
+              actions: <Widget>[
+                CupertinoActionSheetAction(
+                  child: const Text('One'),
+                  onPressed: () { },
+                ),
+                CupertinoActionSheetAction(
+                  child: const Text('Two'),
+                  onPressed: () { },
+                ),
+              ],
+              actionScrollController: actionScrollController,
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    // The inherited ScrollBehavior should not apply Scrollbars since they are
+    // already built in to the widget.
+    expect(find.byType(Scrollbar), findsNothing);
+    expect(find.byType(RawScrollbar), findsNothing);
+    // Built in CupertinoScrollbars should only number 2: one for the actions,
+    // one for the content.
+    expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
+  }, variant: TargetPlatformVariant.all());
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {

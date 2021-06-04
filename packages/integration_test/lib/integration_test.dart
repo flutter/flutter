@@ -40,7 +40,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   IntegrationTestWidgetsFlutterBinding() {
     tearDownAll(() async {
       if (!_allTestsPassed.isCompleted) {
-        _allTestsPassed.complete(true);
+        _allTestsPassed.complete(failureMethodsDetails.isEmpty);
       }
       callbackManager.cleanup();
 
@@ -83,9 +83,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     reportTestException =
         (FlutterErrorDetails details, String testDescription) {
       results[testDescription] = Failure(testDescription, details.toString());
-      if (!_allTestsPassed.isCompleted) {
-        _allTestsPassed.complete(false);
-      }
       oldTestExceptionReporter(details, testDescription);
     };
   }
@@ -133,7 +130,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   final Completer<bool> _allTestsPassed = Completer<bool>();
 
   @override
-  List<Failure> get failureMethodsDetails => _failures;
+  List<Failure> get failureMethodsDetails => results.values.whereType<Failure>().toList();
 
   /// Similar to [WidgetsFlutterBinding.ensureInitialized].
   ///
@@ -156,8 +153,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// a [Failure].
   @visibleForTesting
   Map<String, Object> results = <String, Object>{};
-
-  List<Failure> get _failures => results.values.whereType<Failure>().toList();
 
   /// The extra data for the reported result.
   ///

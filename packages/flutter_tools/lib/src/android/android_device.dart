@@ -632,7 +632,9 @@ class AndroidDevice extends Device {
       if (debuggingOptions.traceSkia)
         ...<String>['--ez', 'trace-skia', 'true'],
       if (debuggingOptions.traceAllowlist != null)
-        ...<String>['--ez', 'trace-allowlist', debuggingOptions.traceAllowlist],
+        ...<String>['--es', 'trace-allowlist', debuggingOptions.traceAllowlist],
+      if (debuggingOptions.traceSkiaAllowlist != null)
+        ...<String>['--es', 'trace-skia-allowlist', debuggingOptions.traceSkiaAllowlist],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
       if (debuggingOptions.endlessTraceBuffer)
@@ -1031,7 +1033,7 @@ class AdbLogReader extends DeviceLogReader {
       final String lastLogcatTimestamp = await device.lastLogcatTimestamp();
       args.addAll(<String>[
         '-T',
-        if (lastLogcatTimestamp != null) '\'$lastLogcatTimestamp\'' else '0',
+        if (lastLogcatTimestamp != null) "'$lastLogcatTimestamp'" else '0',
       ]);
     }
     final Process process = await processManager.start(device.adbCommandForDevice(args));

@@ -122,7 +122,7 @@ import 'constants.dart';
 ///             children: tabs.map((Tab tab){
 ///               return Center(
 ///                 child: Text(
-///                   tab.text! + ' Tab',
+///                   '${tab.text!} Tab',
 ///                   style: Theme.of(context).textTheme.headline5,
 ///                 ),
 ///               );

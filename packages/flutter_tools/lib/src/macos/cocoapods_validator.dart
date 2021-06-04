@@ -52,7 +52,7 @@ class CocoaPodsValidator extends DoctorValidator {
         status = ValidationType.partial;
         final String currentVersionText = await _cocoaPods.cocoaPodsVersionText;
         messages.add(ValidationMessage.hint(
-          _userMessages.cocoaPodsOutdated(currentVersionText, cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
+          _userMessages.cocoaPodsOutdated(currentVersionText, cocoaPodsRecommendedVersion.toString(), noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
       }
     }
 

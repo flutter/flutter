@@ -60,6 +60,7 @@ void main() {
       null,
       true,
       true,
+      null,
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
@@ -119,6 +120,7 @@ void main() {
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'false',
         'TreeShakeIcons': 'false',
+        'baseHref': null,
       });
     }),
   });

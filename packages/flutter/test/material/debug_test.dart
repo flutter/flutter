@@ -206,12 +206,15 @@ void main() {
       '     UnmanagedRestorationScope\n'
       '     RootRestorationScope\n'
       '     WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]\n'
+      '     Semantics\n'
+      '     _FocusMarker\n'
+      '     Focus\n'
       '     HeroControllerScope\n'
       '     ScrollConfiguration\n'
       '     MaterialApp\n'
       '     [root]\n'
       '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
-      '   or WidgetsApp widget at the top of your application widget tree.\n',
+      '   or WidgetsApp widget at the top of your application widget tree.\n'
     ));
   });
 

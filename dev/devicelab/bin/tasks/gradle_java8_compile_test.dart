@@ -33,7 +33,7 @@ Future<void> main() async {
         );
 
         if (!pluginMainKotlinFile.existsSync()) {
-          throw TaskResult.failure('Expected ${pluginMainKotlinFile.path} to exist, but it doesn\'t');
+          throw TaskResult.failure("Expected ${pluginMainKotlinFile.path} to exist, but it doesn't");
         }
 
         section('add java 8 feature');

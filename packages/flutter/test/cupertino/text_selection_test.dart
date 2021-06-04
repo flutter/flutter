@@ -66,7 +66,7 @@ const _LongCupertinoLocalizations _longLocalizations = _LongCupertinoLocalizatio
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   // Returns true iff the button is visually enabled.
   bool appearsEnabled(WidgetTester tester, String text) {
@@ -296,7 +296,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
-    testWidgets('When a menu item doesn\'t fit, a second page is used.', (WidgetTester tester) async {
+    testWidgets("When a menu item doesn't fit, a second page is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Paste can't fit.
       tester.binding.window.physicalSizeTestValue = const Size(800, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
