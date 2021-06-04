@@ -51,7 +51,7 @@ enum GradleBuildStatus {
 }
 
 /// Returns a simple test function that evaluates to `true` if at least one of
-/// [errorMessages] is contained in the error message.
+/// `errorMessages` is contained in the error message.
 GradleErrorTest _lineMatcher(List<String> errorMessages) {
   return (String line) {
     return errorMessages.any((String errorMessage) => line.contains(errorMessage));
