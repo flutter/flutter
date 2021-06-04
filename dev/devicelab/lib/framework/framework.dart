@@ -12,7 +12,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
-import 'adb.dart';
+import 'devices.dart';
 import 'running_processes.dart';
 import 'task_result.dart';
 import 'utils.dart';

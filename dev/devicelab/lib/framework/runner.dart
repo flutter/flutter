@@ -10,7 +10,7 @@ import 'package:flutter_devicelab/common.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'adb.dart';
+import 'devices.dart';
 import 'cocoon.dart';
 import 'task_result.dart';
 import 'utils.dart';

@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/ab.dart';
+import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
+
+const String kDeviceLogPathArg = 'device-log-path';
 
 ArgResults args;
 
@@ -101,6 +105,13 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
+  final String/*?*/ logPath = args[kDeviceLogPathArg] as String/*?*/ ?? hostAgent.dumpDirectory?.path;
+  Process/*?*/ flutterLog;
+  if (logPath != null) {
+    print('Streaming logs to $logPath');
+    flutterLog = await startFlutter('logs', options: <String>['-o', logPath]);
+  }
+
   if (args.wasParsed('ab')) {
     await _runABTest();
   } else {
@@ -115,6 +126,33 @@ Future<void> main(List<String> rawArgs) async {
       resultsPath: resultsPath,
     );
   }
+
+  StreamSubscription<ProcessSignal>/*?*/ sigintSubscription;
+  StreamSubscription<ProcessSignal>/*?*/ sigtermSubscription;
+  Future<void> _cleanupFlutterLog() async {
+    await sigintSubscription?.cancel();
+    sigintSubscription = null;
+    await sigtermSubscription?.cancel();
+    sigtermSubscription = null;
+    if (flutterLog != null) {
+     flutterLog.kill();
+      await flutterLog.exitCode;
+    }
+  }
+
+  // CI agents might kill us if the test took too long - try to make sure we
+  // flush the logs if possible.
+  sigintSubscription = ProcessSignal.sigint.watch().listen((ProcessSignal signal) {
+    unawaited(_cleanupFlutterLog());
+  });
+  // Windows does not support sigterm.
+  if (!Platform.isWindows) {
+    sigtermSubscription = ProcessSignal.sigterm.watch().listen((ProcessSignal signal) {
+      unawaited(_cleanupFlutterLog());
+    });
+  }
+
+  await _cleanupFlutterLog();
 }
 
 Future<void> _runABTest() async {
@@ -365,6 +403,10 @@ final ArgParser _argParser = ArgParser()
     'silent',
     negatable: true,
     defaultsTo: false,
+  )
+  ..addOption(
+    kDeviceLogPathArg,
+    help: 'The path to write full device logs to during the test run',
   )
   ..addMultiOption(
     'test',
