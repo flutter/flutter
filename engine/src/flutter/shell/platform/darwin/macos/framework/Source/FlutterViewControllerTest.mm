@@ -140,6 +140,16 @@ TEST(FlutterViewController, SetsFlutterViewFirstResponderWhenAccessibilityDisabl
   EXPECT_EQ([window firstResponder], viewController.flutterView);
 }
 
+TEST(FlutterViewController, CanSetMouseTrackingModeBeforeViewLoaded) {
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
+  viewController.mouseTrackingMode = FlutterMouseTrackingModeInActiveApp;
+  ASSERT_EQ(viewController.mouseTrackingMode, FlutterMouseTrackingModeInActiveApp);
+}
+
 TEST(FlutterViewControllerTest, TestKeyEventsAreSentToFramework) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testKeyEventsAreSentToFramework]);
 }
