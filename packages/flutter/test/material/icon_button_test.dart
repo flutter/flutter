@@ -176,7 +176,7 @@ void main() {
     expect(box.size, const Size(48.0, 600.0));
   });
 
-  testWidgets('Get size from iconButtonTheme', (WidgetTester tester) async {
+  testWidgets('Get size from iconThemeData', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: IconTheme(
@@ -426,9 +426,9 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-        child: IconButton(
+        child: const IconButton(
           onPressed: null,
-          icon: const Icon(Icons.link, semanticLabel: 'link'),
+          icon: Icon(Icons.link, semanticLabel: 'link'),
         ),
       ),
     );
