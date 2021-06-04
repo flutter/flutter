@@ -1631,11 +1631,9 @@ void main() {
     try {
       element.findRenderObject();
       fail('Expected exception');
-    } catch (e) {
-      // Make sure we only throw this type of error and no other.
-      final FlutterError error = e as FlutterError;
+    } on FlutterError catch (e) {
       expect(
-        error.message,
+        e.message,
         equalsIgnoringHashCodes('''
 Cannot get renderObject of inactive element.
 In order for an element to have a valid renderObject, it must be active, which means it is part of the tree.
@@ -1644,7 +1642,7 @@ The findRenderObject() method was called for the following element:
   StatefulElement#00000(DEFUNCT)'''),
       );
     }
-  }, skip: kIsWeb);
+  });
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
