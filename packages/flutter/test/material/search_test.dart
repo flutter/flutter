@@ -40,8 +40,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  testWidgets('Changing query moves cursor to the end of query',
-      (WidgetTester tester) async {
+  testWidgets('Changing query moves cursor to the end of query', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -51,8 +50,7 @@ void main() {
 
     delegate.query = 'Foo';
 
-    final TextField textField =
-        tester.widget<TextField>(find.byType(TextField));
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
 
     expect(
       textField.controller!.selection,
