@@ -19,7 +19,6 @@ FLUTTER_ASSERT_ARC
 - (void)setTextInputState:(NSDictionary*)state;
 - (void)setMarkedRect:(CGRect)markedRect;
 - (void)updateEditingState;
-- (void)decommisson;
 - (BOOL)isVisibleToAutofill;
 
 @end
@@ -52,7 +51,6 @@ FLUTTER_ASSERT_ARC
 @end
 
 @interface FlutterTextInputPlugin ()
-@property(nonatomic, strong) FlutterTextInputView* reusableInputView;
 @property(nonatomic, assign) FlutterTextInputView* activeView;
 @property(nonatomic, readonly)
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
@@ -82,10 +80,11 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)tearDown {
-  [engine stopMocking];
+  [textInputPlugin.autofillContext removeAllObjects];
+  [textInputPlugin cleanUpViewHierarchy:YES clearText:YES delayRemoval:NO];
   [[[[textInputPlugin textInputView] superview] subviews]
       makeObjectsPerformSelector:@selector(removeFromSuperview)];
-
+  [engine stopMocking];
   [super tearDown];
 }
 
@@ -527,6 +526,53 @@ FLUTTER_ASSERT_ARC
   // Invalid marked rect is invalid.
   XCTAssertTrue(CGRectEqualToRect(kInvalidFirstRect, [inputView firstRectForRange:range]));
   XCTAssertTrue(CGRectEqualToRect(kInvalidFirstRect, [inputView firstRectForRange:range]));
+}
+
+#pragma mark - Floating Cursor - Tests
+
+- (void)testInputViewsHaveUIInteractions {
+  if (@available(iOS 13.0, *)) {
+    FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+    XCTAssertGreaterThan(inputView.interactions.count, 0);
+  }
+}
+
+- (void)testBoundsForFloatingCursor {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+
+  CGRect initialBounds = inputView.bounds;
+  // Make sure the initial bounds.size is not as large.
+  XCTAssertLessThan(inputView.bounds.size.width, 100);
+  XCTAssertLessThan(inputView.bounds.size.height, 100);
+
+  [inputView beginFloatingCursorAtPoint:CGPointMake(123, 321)];
+  CGRect bounds = inputView.bounds;
+  XCTAssertGreaterThan(bounds.size.width, 1000);
+  XCTAssertGreaterThan(bounds.size.height, 1000);
+
+  // Verify the caret is centered.
+  XCTAssertEqual(
+      CGRectGetMidX(bounds),
+      CGRectGetMidX([inputView caretRectForPosition:[FlutterTextPosition positionWithIndex:1235]]));
+  XCTAssertEqual(
+      CGRectGetMidY(bounds),
+      CGRectGetMidY([inputView caretRectForPosition:[FlutterTextPosition positionWithIndex:4567]]));
+
+  [inputView updateFloatingCursorAtPoint:CGPointMake(456, 654)];
+  bounds = inputView.bounds;
+  XCTAssertGreaterThan(bounds.size.width, 1000);
+  XCTAssertGreaterThan(bounds.size.height, 1000);
+
+  // Verify the caret is centered.
+  XCTAssertEqual(
+      CGRectGetMidX(bounds),
+      CGRectGetMidX([inputView caretRectForPosition:[FlutterTextPosition positionWithIndex:21]]));
+  XCTAssertEqual(
+      CGRectGetMidY(bounds),
+      CGRectGetMidY([inputView caretRectForPosition:[FlutterTextPosition positionWithIndex:42]]));
+
+  [inputView endFloatingCursor];
+  XCTAssertTrue(CGRectEqualToRect(initialBounds, inputView.bounds));
 }
 
 #pragma mark - Autofill - Utilities
