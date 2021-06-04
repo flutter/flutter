@@ -51,11 +51,13 @@ Future<void> createSingleFrameCodec() async {
   );
   final Codec codec = await descriptor.instantiateCodec();
   _validateCodec(codec);
-  await codec.getNextFrame();
+  final FrameInfo info = await codec.getNextFrame();
+  info.image.dispose();
   _validateCodec(codec);
   codec.dispose();
   descriptor.dispose();
   buffer.dispose();
+  assert(buffer.debugDisposed);
   _finish();
 }
 void _validateCodec(Codec codec) native 'ValidateCodec';
