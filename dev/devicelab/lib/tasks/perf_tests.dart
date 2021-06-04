@@ -15,6 +15,8 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+import '../common.dart';
+
 /// Must match flutter_driver/lib/src/common.dart.
 ///
 /// Redefined here to avoid taking a dependency on flutter_driver.
@@ -611,6 +613,106 @@ class StartupTest {
         'timeToFirstFrameMicros',
         'timeToFirstFrameRasterizedMicros',
       ]);
+    });
+  }
+}
+
+/// A one-off test to verify that devtools starts in profile mode.
+class DevtoolsStartupTest {
+  const DevtoolsStartupTest(this.testDirectory);
+
+  final String testDirectory;
+
+  Future<TaskResult> run() async {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+
+      section('Building application');
+      String applicationBinaryPath;
+      switch (deviceOperatingSystem) {
+        case DeviceOperatingSystem.android:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm,android-arm64',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.androidArm:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.androidArm64:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm64',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.ios:
+          await flutter('build', options: <String>[
+            'ios',
+             '-v',
+            '--profile',
+          ]);
+          applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
+          break;
+        case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.fake:
+          break;
+      }
+
+      final Process process = await startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+        'run',
+        '--no-android-gradle-daemon',
+        '--no-publish-port',
+        '--verbose',
+        '--profile',
+        '-d',
+        device.deviceId,
+        if (applicationBinaryPath != null)
+          '--use-application-binary=$applicationBinaryPath',
+       ]);
+      final Completer<void> completer = Completer<void>();
+      bool sawLine = false;
+      process.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
+          print('[STDOUT]: $line');
+        // Wait for devtools output.
+        if (line.contains('The Flutter DevTools debugger and profiler')) {
+          sawLine = true;
+          completer.complete();
+        }
+      });
+      bool didExit = false;
+      unawaited(process.exitCode.whenComplete(() {
+        didExit = true;
+      }));
+      await Future.any(<Future<void>>[completer.future, Future<void>.delayed(const Duration(minutes: 5)), process.exitCode]);
+      if (!didExit) {
+        process.stdin.writeln('q');
+        await process.exitCode;
+      }
+
+      await flutter('install', options: <String>[
+        '--uninstall-only',
+        '-d',
+        device.deviceId,
+      ]);
+
+      if (sawLine)
+        return TaskResult.success(null, benchmarkScoreKeys: <String>[]);
+      return TaskResult.failure('Did not see line "The Flutter DevTools debugger and profiler" in output');
     });
   }
 }
