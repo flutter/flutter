@@ -114,7 +114,15 @@ class TextEditingGestures extends StatefulWidget {
 
   // TODO(LongCatIsLooong): Document provenance for each platform device kind.
   static final ContextGestureRecognizerFactory<LongPressGestureRecognizer> longPressRecognizer = ContextGestureRecognizerFactory<LongPressGestureRecognizer>.withFunctions(
-    constructor: (BuildContext context) => LongPressGestureRecognizer(debugOwner: context),
+    constructor: (BuildContext context) => LongPressGestureRecognizer(
+      debugOwner: context,
+      supportedDevices: <PointerDeviceKind>{
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.invertedStylus,
+        PointerDeviceKind.touch,
+        PointerDeviceKind.unknown,
+      },
+    ),
     initializer: (LongPressGestureRecognizer recognizer, BuildContext context) {
       recognizer
         ..onLongPressStart = (LongPressStartDetails details) {
@@ -127,11 +135,6 @@ class TextEditingGestures extends StatefulWidget {
             ),
           );
           Feedback.forLongPress(context);
-          Actions.maybeInvoke(context, const SelectionHandleControlIntent(
-            // TODO() stop faking this.
-            deviceKind: PointerDeviceKind.touch,
-            cause: SelectionChangedCause.longPress,
-          ));
         }
         ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
           Actions.invoke(
@@ -144,7 +147,14 @@ class TextEditingGestures extends StatefulWidget {
           );
         }
         ..onLongPressEnd = (LongPressEndDetails details) {
-          Actions.maybeInvoke(context, SelectionToolbarControlIntent.show);
+          // Don't show selection handles & selection toolbar until the
+          // selection is finalized.
+          Actions.maybeInvoke(context, const SelectionHandleControlIntent(
+            // TODO() stop faking this.
+            deviceKind: PointerDeviceKind.touch,
+            cause: SelectionChangedCause.longPress,
+          ));
+          Actions.invoke(context, SelectionToolbarControlIntent.show);
         };
     },
   );

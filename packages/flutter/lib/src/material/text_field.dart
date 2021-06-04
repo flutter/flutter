@@ -1091,6 +1091,24 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.windows:
         // Do nothing.
     }
+
+    switch (cause) {
+      case null:
+      case SelectionChangedCause.toolBar:
+      case SelectionChangedCause.tap:
+      case SelectionChangedCause.doubleTap:
+      case SelectionChangedCause.longPress:
+      case SelectionChangedCause.drag:
+      case SelectionChangedCause.forcePress:
+        return;
+      case SelectionChangedCause.keyboard:
+        if (_showSelectionHandles) {
+          setState(() {
+            _showSelectionHandles = false;
+          });
+        }
+        return;
+    }
   }
 
   /// Toggle the toolbar when a selection handle is tapped.

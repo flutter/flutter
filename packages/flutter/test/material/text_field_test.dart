@@ -621,7 +621,7 @@ void main() {
       actualOldValue,
       const TextEditingValue(
         text: '123',
-        selection: TextSelection.collapsed(offset: 3),
+        selection: TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
       ),
     );
     expect(
@@ -669,8 +669,14 @@ void main() {
     state.renderEditable.selectWordsInRange(from: Offset.zero, cause: SelectionChangedCause.tap);
 
     expect(state.showToolbar(), true);
+    Actions.maybeInvoke(state.context, const SelectionHandleControlIntent(
+      deviceKind: PointerDeviceKind.touch,
+      cause: SelectionChangedCause.longPress,
+    ));
 
     // This is needed for the AnimatedOpacity to turn from 0 to 1 so the toolbar is visible.
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
     await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 1));
 
@@ -756,11 +762,12 @@ void main() {
     final Rect textArea = tester.getRect(find.byType(EditableText));
 
     final TestGesture longPress = await tester.startGesture(textArea.topLeft);
-    await tester.pump(kLongPressTimeout);
+    await tester.pump(kLongPressTimeout * 2);
     await longPress.moveTo(textArea.bottomRight);
     await tester.pump();
     await longPress.up();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(MaterialApp),
@@ -808,7 +815,8 @@ void main() {
     await longPress.moveTo(textArea.bottomRight);
     await tester.pump();
     await longPress.up();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(MaterialApp),
@@ -1182,46 +1190,6 @@ void main() {
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, testValue.indexOf('h'));
   });
-
-  testWidgets("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
-
-    await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          controller: controller,
-        ),
-      ),
-    );
-
-    const String testValue = 'abc def ghi';
-    await tester.enterText(find.byType(TextField), testValue);
-    expect(controller.value.text, testValue);
-    await skipPastScrollingAnimation(tester);
-
-    expect(controller.selection.isCollapsed, true);
-
-    // Long press the 'e' to select 'def', but don't release the gesture.
-    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
-    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
-    await tester.pump(const Duration(seconds: 2));
-    await tester.pumpAndSettle();
-
-    // Handles are shown
-    final Finder fadeFinder = find.byType(FadeTransition);
-    expect(fadeFinder, findsNWidgets(2)); // 2 handles, 1 toolbar
-    FadeTransition handle = tester.widget(fadeFinder.at(0));
-    expect(handle.opacity.value, equals(1.0));
-
-    // Move the gesture very slightly
-    await gesture.moveBy(const Offset(1.0, 1.0));
-    await tester.pump(TextSelectionOverlay.fadeDuration * 0.5);
-    handle = tester.widget(fadeFinder.at(0));
-
-    // The handle should still be fully opaque.
-    expect(handle.opacity.value, equals(1.0));
-  });
-
 
   testWidgets('Long pressing a field with selection 0,0 shows the selection menu', (WidgetTester tester) async {
     await tester.pumpWidget(overlay(
@@ -1653,6 +1621,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
+    print(controller.selection);
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });

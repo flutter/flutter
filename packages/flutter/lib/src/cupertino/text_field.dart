@@ -940,6 +940,23 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     if (cause == SelectionChangedCause.longPress) {
       _editableText.bringIntoView(selection.base);
     }
+    switch (cause) {
+      case null:
+      case SelectionChangedCause.toolBar:
+      case SelectionChangedCause.tap:
+      case SelectionChangedCause.doubleTap:
+      case SelectionChangedCause.longPress:
+      case SelectionChangedCause.drag:
+      case SelectionChangedCause.forcePress:
+        return;
+      case SelectionChangedCause.keyboard:
+        if (_showSelectionHandles) {
+          setState(() {
+            _showSelectionHandles = false;
+          });
+        }
+        return;
+    }
   }
 
   @override
