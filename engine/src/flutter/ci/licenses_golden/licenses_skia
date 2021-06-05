@@ -1,4 +1,4 @@
-Signature: ff092258eb446ba26a47ac3ad304f4de
+Signature: 15cca8c827eace5727da790854fa2799
 
 UNUSED LICENSES:
 
@@ -3995,6 +3995,7 @@ FILE: ../../../third_party/skia/include/utils/SkOrderedFontMgr.h
 FILE: ../../../third_party/skia/modules/androidkit/src/AndroidKit.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Canvas.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Image.cpp
+FILE: ../../../third_party/skia/modules/androidkit/src/ImageFilter.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Matrix.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Paint.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/RuntimeShaderBuilder.cpp
