@@ -2564,6 +2564,59 @@ void main() {
       expect(platformViewFocusNode.hasFocus, false);
       expect(controller.focusCleared, true);
     });
+
+    testWidgets('PlatformViewLink sets a platform view text input client when focused', (WidgetTester tester) async {
+      late FakePlatformViewController controller;
+      late int viewId;
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        viewType: 'test',
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          viewId = params.id;
+          params.onPlatformViewCreated(params.id);
+          controller = FakePlatformViewController(params.id);
+          return controller;
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+      );
+      await tester.pumpWidget(
+        Center(
+          child: Column(
+            children: <Widget>[
+              SizedBox(width: 300, height: 300, child: platformViewLink),
+            ],
+          ),
+        ),
+      );
+
+      late Map<String, dynamic> lastPlatformViewTextClient;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall call) {
+        if (call.method == 'TextInput.setPlatformViewClient') {
+          lastPlatformViewTextClient = call.arguments as Map<String, dynamic>;
+        }
+        return null;
+      });
+
+      final Focus platformViewFocusWidget = tester.widget(
+        find.descendant(
+          of: find.byType(PlatformViewLink),
+          matching: find.byType(Focus),
+        ),
+      );
+
+      platformViewFocusWidget.focusNode!.requestFocus();
+      await tester.pump();
+
+      expect(lastPlatformViewTextClient.containsKey('platformViewId'), true);
+      expect(lastPlatformViewTextClient['platformViewId'], viewId);
+
+      expect(lastPlatformViewTextClient.containsKey('usesVirtualDisplay'), false);
+    });
   });
 
   testWidgets('Platform views respect hitTestBehavior', (WidgetTester tester) async {

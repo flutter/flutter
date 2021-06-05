@@ -893,10 +893,10 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     if (!isFocused) {
       _controller?.clearFocus();
     }
-   SystemChannels.textInput.invokeMethod<void>(
+    SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setPlatformViewClient',
-      <String, dynamic>{'platformViewId': _id, 'usesVirtualDisplay': false},
-   );
+      <String, dynamic>{'platformViewId': _id},
+    );
   }
 
   void _handlePlatformFocusChanged(bool isFocused){

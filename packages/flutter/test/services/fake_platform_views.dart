@@ -119,6 +119,13 @@ class FakeAndroidViewController implements AndroidViewController {
   Future<void> create() async {
     created = true;
   }
+
+  void invokeViewFocused() {
+    final MethodCodec codec = SystemChannels.platform_views.codec;
+    final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
+    ServicesBinding.instance!.defaultBinaryMessenger
+        .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
+  }
 }
 
 class FakeAndroidPlatformViewsController {
