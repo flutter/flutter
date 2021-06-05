@@ -47,7 +47,6 @@ class _InfiniteScrollCards extends StatefulWidget {
 class _InfiniteScrollCardsState extends State<_InfiniteScrollCards> {
   static const Duration stepDuration = Duration(seconds: 20);
 
-  
   late final double offset = widget.initialOffset;
   late ScrollController scrollController = scrollController = ScrollController(
       initialScrollOffset: offset,
