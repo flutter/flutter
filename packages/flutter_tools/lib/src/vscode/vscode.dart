@@ -82,7 +82,7 @@ class VsCode {
   Version? _extensionVersion;
   final List<ValidationMessage> _validationMessages = <ValidationMessage>[];
 
-  String get productName => 'VS Code' + (edition != null ? ', $edition' : '');
+  String get productName => 'VS Code${edition != null ? ', $edition' : ''}';
 
   Iterable<ValidationMessage> get validationMessages => _validationMessages;
 

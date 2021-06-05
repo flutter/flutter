@@ -321,7 +321,11 @@ void main() {
     pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  });
+
+    // TODO(yjbanov): ahem.ttf doesn't have Chinese glyphs, making this test
+    //                sensitive to browser/OS when running in web mode:
+    //                https://github.com/flutter/flutter/issues/83129
+  }, skip: kIsWeb);
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -3208,11 +3212,11 @@ void main() {
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
 
-      editable.foregroundPainter = (currentPainter = _TestRenderEditablePainter()..repaint = false);
+      editable.foregroundPainter = currentPainter = _TestRenderEditablePainter()..repaint = false;
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 0);
 
-      editable.foregroundPainter = (currentPainter = _TestRenderEditablePainter()..repaint = true);
+      editable.foregroundPainter = currentPainter = _TestRenderEditablePainter()..repaint = true;
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
     });
@@ -3227,11 +3231,11 @@ void main() {
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
 
-      editable.painter = (currentPainter = _TestRenderEditablePainter()..repaint = false);
+      editable.painter = currentPainter = _TestRenderEditablePainter()..repaint = false;
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 0);
 
-      editable.painter = (currentPainter = _TestRenderEditablePainter()..repaint = true);
+      editable.painter = currentPainter = _TestRenderEditablePainter()..repaint = true;
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
     });

@@ -467,7 +467,7 @@ void main() {
         ));
         expect(
           testLogger.errorText,
-          'Plugin `url_launcher_linux_1` doesn\'t implement a plugin interface, '
+          "Plugin `url_launcher_linux_1` doesn't implement a plugin interface, "
           'nor sets a default implementation in pubspec.yaml.\n\n'
           'To set a default implementation, use:\n'
           'flutter:\n'
@@ -526,7 +526,7 @@ void main() {
         ));
         expect(
           testLogger.errorText,
-          'Plugin `url_launcher_linux` doesn\'t implement a plugin interface, '
+          "Plugin `url_launcher_linux` doesn't implement a plugin interface, "
           'nor sets a default implementation in pubspec.yaml.\n\n'
           'To set a default implementation, use:\n'
           'flutter:\n'
@@ -540,7 +540,7 @@ void main() {
           '  plugin:\n'
           '    implements: <plugin-interface>'
           '\n\n'
-          'Plugin `url_launcher_windows` doesn\'t implement a plugin interface, '
+          "Plugin `url_launcher_windows` doesn't implement a plugin interface, "
           'nor sets a default implementation in pubspec.yaml.\n\n'
           'To set a default implementation, use:\n'
           'flutter:\n'
@@ -632,25 +632,25 @@ void main() {
           '\n'
           '// @dart = 2.8\n'
           '\n'
-          'import \'package:app/main.dart\' as entrypoint;\n'
-          'import \'dart:io\'; // flutter_ignore: dart_io_import.\n'
-          'import \'package:url_launcher_linux/url_launcher_linux.dart\';\n'
-          'import \'package:awesome_macos/awesome_macos.dart\';\n'
-          'import \'package:url_launcher_macos/url_launcher_macos.dart\';\n'
-          'import \'package:url_launcher_windows/url_launcher_windows.dart\';\n'
+          "import 'package:app/main.dart' as entrypoint;\n"
+          "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
+          "import 'package:url_launcher_linux/url_launcher_linux.dart';\n"
+          "import 'package:awesome_macos/awesome_macos.dart';\n"
+          "import 'package:url_launcher_macos/url_launcher_macos.dart';\n"
+          "import 'package:url_launcher_windows/url_launcher_windows.dart';\n"
           '\n'
-          '@pragma(\'vm:entry-point\')\n'
+          "@pragma('vm:entry-point')\n"
           'class _PluginRegistrant {\n'
           '\n'
-          '  @pragma(\'vm:entry-point\')\n'
+          "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
           '    if (Platform.isLinux) {\n'
           '      try {\n'
           '        LinuxPlugin.registerWith();\n'
           '      } catch (err) {\n'
           '        print(\n'
-          '          \'`url_launcher_linux` threw an error: \$err. \'\n'
-          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          "          '`url_launcher_linux` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
           '        rethrow;\n'
           '      }\n'
@@ -660,8 +660,8 @@ void main() {
           '        AwesomeMacOS.registerWith();\n'
           '      } catch (err) {\n'
           '        print(\n'
-          '          \'`awesome_macos` threw an error: \$err. \'\n'
-          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          "          '`awesome_macos` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
           '        rethrow;\n'
           '      }\n'
@@ -670,8 +670,8 @@ void main() {
           '        MacOSPlugin.registerWith();\n'
           '      } catch (err) {\n'
           '        print(\n'
-          '          \'`url_launcher_macos` threw an error: \$err. \'\n'
-          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          "          '`url_launcher_macos` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
           '        rethrow;\n'
           '      }\n'
@@ -681,8 +681,8 @@ void main() {
           '        WindowsPlugin.registerWith();\n'
           '      } catch (err) {\n'
           '        print(\n'
-          '          \'`url_launcher_windows` threw an error: \$err. \'\n'
-          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          "          '`url_launcher_windows` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
           '        rethrow;\n'
           '      }\n'

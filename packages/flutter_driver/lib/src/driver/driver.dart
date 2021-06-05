@@ -174,8 +174,12 @@ abstract class FlutterDriver {
   async_io.WebDriver get webDriver => throw UnimplementedError();
 
   /// Enables accessibility feature.
+  @Deprecated(
+    'Call setSemantics(true) instead. '
+    'This feature was deprecated after v2.3.0-12.1.pre.'
+  )
   Future<void> enableAccessibility() async {
-    throw UnimplementedError();
+    await setSemantics(true);
   }
 
   /// Sends [command] to the Flutter Driver extensions.
@@ -522,6 +526,13 @@ abstract class FlutterDriver {
   ///
   /// Returns true when the call actually changed the state from on to off or
   /// vice versa.
+  ///
+  /// Does not enable or disable the assistive technology installed on the
+  /// device. For example, this does not enable VoiceOver on iOS, TalkBack on
+  /// Android, or NVDA on Windows.
+  ///
+  /// Enabling semantics on the web causes the engine to render ARIA-annotated
+  /// HTML.
   Future<bool> setSemantics(bool enabled, { Duration? timeout }) async {
     final SetSemanticsResult result = SetSemanticsResult.fromJson(await sendCommand(SetSemantics(enabled, timeout: timeout)));
     return result.changedState;

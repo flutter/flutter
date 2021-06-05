@@ -34,7 +34,7 @@ void main() {
           '-v',
           'time',
           '-T',
-          '\'$kLastLogcatTimestamp\'',
+          "'$kLastLogcatTimestamp'",
         ],
       )
     ]);
@@ -160,9 +160,9 @@ void main() {
           'time',
         ],
         completer: Completer<void>.sync(),
-        // Example stack trace from an incorrectly named application:name in the AndroidManfiest.xml
+        // Example stack trace from an incorrectly named application:name in the AndroidManifest.xml
         stdout:
-          kDummyLine +
+          '$kDummyLine'
           '05-11 12:54:46.665 E/AndroidRuntime(11787): FATAL EXCEPTION: main\n'
           '05-11 12:54:46.665 E/AndroidRuntime(11787): Process: com.example.foobar, PID: 11787\n'
           '05-11 12:54:46.665 java.lang.RuntimeException: Unable to instantiate application '

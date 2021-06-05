@@ -21,7 +21,8 @@ class TestServiceExtensionsBinding extends BindingBase
        PaintingBinding,
        SemanticsBinding,
        RendererBinding,
-       WidgetsBinding {
+       WidgetsBinding,
+       TestDefaultBinaryMessengerBinding {
 
   final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
 
@@ -467,7 +468,7 @@ void main() {
     bool completed;
 
     completed = false;
-    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
       expect(utf8.decode(message!.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
@@ -494,7 +495,7 @@ void main() {
     });
     expect(data, isFalse);
     expect(completed, isTrue);
-    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {

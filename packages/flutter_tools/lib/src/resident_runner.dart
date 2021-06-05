@@ -35,7 +35,7 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
-import 'globals.dart' as globals;
+import 'globals_null_migrated.dart' as globals;
 import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
@@ -125,7 +125,7 @@ class FlutterDevice {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
-        initializeFromDill: getDefaultCachedKernelPath(
+        initializeFromDill: buildInfo.initializeFromDill ?? getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
@@ -168,7 +168,7 @@ class FlutterDevice {
         targetModel: targetModel,
         dartDefines: buildInfo.dartDefines,
         extraFrontEndOptions: extraFrontEndOptions,
-        initializeFromDill: getDefaultCachedKernelPath(
+        initializeFromDill: buildInfo.initializeFromDill ?? getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
@@ -344,49 +344,10 @@ class FlutterDevice {
   Future<void> exitApps({
     @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
   }) async {
-    if (!device.supportsFlutterExit || vmService == null) {
-      return device.stopApp(package, userIdentifier: userIdentifier);
-    }
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    if (views == null || views.isEmpty) {
-      return device.stopApp(package, userIdentifier: userIdentifier);
-    }
-    // If any of the flutter views are paused, we might not be able to
-    // cleanly exit since the service extension may not have been registered.
-    for (final FlutterView flutterView in views) {
-      final vm_service.Isolate isolate = await vmService
-        .getIsolateOrNull(flutterView.uiIsolate.id);
-      if (isolate == null) {
-        continue;
-      }
-      if (isPauseEvent(isolate.pauseEvent.kind)) {
-        return device.stopApp(package, userIdentifier: userIdentifier);
-      }
-    }
-    for (final FlutterView view in views) {
-      if (view != null && view.uiIsolate != null) {
-        // If successful, there will be no response from flutterExit. If the exit
-        // method is not registered, this will complete with `false`.
-        unawaited(vmService.flutterExit(
-          isolateId: view.uiIsolate.id,
-        ).then((bool exited) async {
-          // If exiting the app failed, fall back to stopApp
-          if (!exited) {
-            await device.stopApp(package, userIdentifier: userIdentifier);
-          }
-        }));
-      }
-    }
-    return vmService.service.onDone
-      .catchError((dynamic error, StackTrace stackTrace) {
-        globals.logger.printError(
-          'unhandled error waiting for vm service exit:\n $error',
-          stackTrace: stackTrace,
-         );
-      })
-      .timeout(timeoutDelay, onTimeout: () {
-        return device.stopApp(package, userIdentifier: userIdentifier);
-      });
+    // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/83127
+    // When updating `flutter attach` to support running without a device,
+    // this will need to be changed to fall back to io exit.
+    return device.stopApp(package, userIdentifier: userIdentifier);
   }
 
   Future<Uri> setupDevFS(
@@ -403,18 +364,6 @@ class FlutterDevice {
       logger: globals.logger,
     );
     return devFS.create();
-  }
-
-  Future<List<vm_service.IsolateRef>> _getCurrentIsolates() async {
-    if (targetPlatform == TargetPlatform.web_javascript) {
-      final vm_service.VM vm = await vmService.service.getVM();
-      return vm.isolates;
-    }
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    return <vm_service.IsolateRef>[
-      for (FlutterView view in views)
-        view.uiIsolate,
-    ];
   }
 
   Future<void> startEchoingDeviceLog() async {
@@ -683,7 +632,7 @@ abstract class ResidentHandlers {
   /// Called to print help to the terminal.
   void printHelp({ @required bool details });
 
-  /// Perfor a hot reload or hot restart of all attached applications.
+  /// Perform a hot reload or hot restart of all attached applications.
   ///
   /// If [fullRestart] is true, a hot restart is performed. Otherwise a hot reload
   /// is run instead. On web devices, this only performs a hot restart regardless of
@@ -699,9 +648,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         final String data = await device.vmService.flutterDebugDumpApp(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
       }
@@ -715,9 +665,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         final String data = await device.vmService.flutterDebugDumpRenderTree(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
       }
@@ -731,9 +682,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         final String data = await device.vmService.flutterDebugDumpLayerTree(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
       }
@@ -749,9 +701,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         final String data = await device.vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
       }
@@ -767,9 +720,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         final String data = await device.vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
       }
@@ -783,9 +737,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterToggleDebugPaintSizeEnabled(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -798,9 +753,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterToggleDebugCheckElevationsEnabled(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -818,9 +774,10 @@ abstract class ResidentHandlers {
       if (device.targetPlatform == TargetPlatform.web_javascript) {
         continue;
       }
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterTogglePerformanceOverlayOverride(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -833,9 +790,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterToggleWidgetInspector(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -848,9 +806,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterToggleInvertOversizedImages(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -863,9 +822,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterToggleProfileWidgetBuilds(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -877,9 +837,9 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    final List<vm_service.IsolateRef> views = await flutterDevices.first._getCurrentIsolates();
+    final List<FlutterView> views = await flutterDevices.first.vmService.getFlutterViews();
     final Brightness current = await flutterDevices.first.vmService.flutterBrightnessOverride(
-      isolateId: views.first.id,
+      isolateId: views.first.uiIsolate.id,
     );
     Brightness next;
     if (current == Brightness.light) {
@@ -888,9 +848,10 @@ abstract class ResidentHandlers {
       next = Brightness.light;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterBrightnessOverride(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
           brightness: next,
         );
       }
@@ -904,17 +865,18 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    final List<vm_service.IsolateRef> views = await flutterDevices.first._getCurrentIsolates();
+    final List<FlutterView> views = await flutterDevices.first.vmService.getFlutterViews();
     final String from = await flutterDevices
       .first.vmService.flutterPlatformOverride(
-        isolateId: views.first.id,
+        isolateId: views.first.uiIsolate.id,
       );
     final String to = nextPlatform(from);
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterPlatformOverride(
           platform: to,
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -1003,17 +965,17 @@ abstract class ResidentHandlers {
   }
 
   Future<bool> _toggleDebugBanner(FlutterDevice device, Future<void> Function() cb) async {
-    List<vm_service.IsolateRef> views = <vm_service.IsolateRef>[];
+    List<FlutterView> views = <FlutterView>[];
     if (supportsServiceProtocol) {
-      views = await device._getCurrentIsolates();
+      views = await device.vmService.getFlutterViews();
     }
 
     Future<bool> setDebugBanner(bool value) async {
       try {
-        for (final vm_service.IsolateRef view in views) {
+        for (final FlutterView view in views) {
           await device.vmService.flutterDebugAllowBanner(
             value,
-            isolateId: view.id,
+            isolateId: view.uiIsolate.id,
           );
         }
         return true;
@@ -1069,7 +1031,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     String dillOutputPath,
     this.machine = false,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
-  }) : mainPath = globals.fs.path.absolute(target),
+  }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
@@ -1802,12 +1764,20 @@ abstract class DevtoolsLauncher {
   /// Launch a Dart DevTools process, optionally targeting a specific VM Service
   /// URI if [vmServiceUri] is non-null.
   ///
+  /// [additionalArguments] may be optionally specified and are passed directly
+  /// to the devtools run command.
+  ///
   /// This method must return a future that is guaranteed not to fail, because it
   /// will be used in unawaited contexts.
-  @visibleForTesting
-  Future<void> launch(Uri vmServiceUri);
+  Future<void> launch(Uri vmServiceUri, {List<String> additionalArguments});
 
   Future<void> close();
+
+  /// When measuring devtools memory via additional arguments, the launch process
+  /// will technically never complete.
+  ///
+  /// Us this as an indicator that the process has started.
+  Future<void> processStart;
 
   /// Returns a future that completes when the DevTools server is ready.
   ///
