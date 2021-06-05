@@ -455,6 +455,7 @@ class DevFS {
     @required FileSystem fileSystem,
     HttpClient httpClient,
     Duration uploadRetryThrottle,
+    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -466,13 +467,14 @@ class DevFS {
         uploadRetryThrottle: uploadRetryThrottle,
         httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
           ? HttpClient()
-          : context.get<HttpClientFactory>()())
-      );
+          : context.get<HttpClientFactory>()())),
+       _stopwatchFactory = stopwatchFactory;
 
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
+  final StopwatchFactory _stopwatchFactory;
 
   final String fsName;
   final Directory rootDirectory;
@@ -595,7 +597,7 @@ class DevFS {
 
     // Await the compiler response after checking if the bundle is updated. This allows the file
     // stating to be done while waiting for the frontend_server response.
-    final Stopwatch compileTimer = Stopwatch()..start();
+    final Stopwatch compileTimer = _stopwatchFactory.createStopwatch('compile')..start();
     final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(
       mainUri,
       invalidatedFiles,
@@ -652,7 +654,7 @@ class DevFS {
       }
     }
     _logger.printTrace('Updating files.');
-    final Stopwatch transferTimer = Stopwatch()..start();
+    final Stopwatch transferTimer = _stopwatchFactory.createStopwatch('transfer')..start();
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri, _httpWriter);
     }
