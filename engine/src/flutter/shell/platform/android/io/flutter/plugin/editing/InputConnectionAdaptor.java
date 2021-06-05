@@ -27,7 +27,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import io.flutter.Log;
-import io.flutter.embedding.android.AndroidKeyProcessor;
+import io.flutter.embedding.android.KeyboardManager;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 
@@ -38,7 +38,6 @@ class InputConnectionAdaptor extends BaseInputConnection
   private final View mFlutterView;
   private final int mClient;
   private final TextInputChannel textInputChannel;
-  private final AndroidKeyProcessor keyProcessor;
   private final ListenableEditingState mEditable;
   private final EditorInfo mEditorInfo;
   private ExtractedTextRequest mExtractRequest;
@@ -48,13 +47,14 @@ class InputConnectionAdaptor extends BaseInputConnection
   private InputMethodManager mImm;
   private final Layout mLayout;
   private FlutterTextUtils flutterTextUtils;
+  private final KeyboardManager keyboardManager;
 
   @SuppressWarnings("deprecation")
   public InputConnectionAdaptor(
       View view,
       int client,
       TextInputChannel textInputChannel,
-      AndroidKeyProcessor keyProcessor,
+      KeyboardManager keyboardManager,
       ListenableEditingState editable,
       EditorInfo editorInfo,
       FlutterJNI flutterJNI) {
@@ -65,7 +65,7 @@ class InputConnectionAdaptor extends BaseInputConnection
     mEditable = editable;
     mEditable.addEditingStateListener(this);
     mEditorInfo = editorInfo;
-    this.keyProcessor = keyProcessor;
+    this.keyboardManager = keyboardManager;
     this.flutterTextUtils = new FlutterTextUtils(flutterJNI);
     // We create a dummy Layout with max width so that the selection
     // shifting acts as if all text were in one line.
@@ -85,10 +85,10 @@ class InputConnectionAdaptor extends BaseInputConnection
       View view,
       int client,
       TextInputChannel textInputChannel,
-      AndroidKeyProcessor keyProcessor,
+      KeyboardManager keyboardManager,
       ListenableEditingState editable,
       EditorInfo editorInfo) {
-    this(view, client, textInputChannel, keyProcessor, editable, editorInfo, new FlutterJNI());
+    this(view, client, textInputChannel, keyboardManager, editable, editorInfo, new FlutterJNI());
   }
 
   private ExtractedText getExtractedText(ExtractedTextRequest request) {
@@ -290,20 +290,10 @@ class InputConnectionAdaptor extends BaseInputConnection
   // occur, and need a chance to be handled by the framework.
   @Override
   public boolean sendKeyEvent(KeyEvent event) {
-    // This gives the key processor a chance to process this event if it came
-    // from a soft keyboard. It will send it to the framework to be handled and
-    // return true. If the framework ends up not handling it, the processor will
-    // re-send the event to this function. Only do this if the event is not the
-    // current event, since that indicates that the key processor sent it to us,
-    // and we only want to call the key processor for events that it doesn't
-    // already know about (i.e. when events arrive here from a soft keyboard and
-    // not a hardware keyboard), to avoid a loop.
-    if (keyProcessor != null
-        && !keyProcessor.isPendingEvent(event)
-        && keyProcessor.onKeyEvent(event)) {
-      return true;
-    }
+    return keyboardManager.handleEvent(event);
+  }
 
+  public boolean handleKeyEvent(KeyEvent event) {
     if (event.getAction() == KeyEvent.ACTION_DOWN) {
       if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT) {
         return handleHorizontalMovement(true, event.isShiftPressed());

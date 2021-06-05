@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.WindowInsets;
@@ -25,7 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
-import io.flutter.embedding.android.AndroidKeyProcessor;
+import io.flutter.embedding.android.KeyboardManager;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel.TextEditState;
 import io.flutter.plugin.platform.PlatformViewsController;
@@ -48,7 +49,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   @NonNull private PlatformViewsController platformViewsController;
   @Nullable private Rect lastClientRect;
   private ImeSyncDeferringInsetsCallback imeSyncCallback;
-  private AndroidKeyProcessor keyProcessor;
 
   // Initialize the "last seen" text editing values to a non-null value.
   private TextEditState mLastKnownFrameworkTextEditingState;
@@ -175,15 +175,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     return imeSyncCallback;
   }
 
-  @NonNull
-  public AndroidKeyProcessor getKeyEventProcessor() {
-    return keyProcessor;
-  }
-
-  public void setKeyEventProcessor(AndroidKeyProcessor processor) {
-    keyProcessor = processor;
-  }
-
   /**
    * Use the current platform view input connection until unlockPlatformViewInputConnection is
    * called.
@@ -286,7 +277,8 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     return textType;
   }
 
-  public InputConnection createInputConnection(View view, EditorInfo outAttrs) {
+  public InputConnection createInputConnection(
+      View view, KeyboardManager keyboardManager, EditorInfo outAttrs) {
     if (inputTarget.type == InputTarget.Type.NO_TARGET) {
       lastInputConnection = null;
       return null;
@@ -330,7 +322,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
     InputConnectionAdaptor connection =
         new InputConnectionAdaptor(
-            view, inputTarget.id, textInputChannel, keyProcessor, mEditable, outAttrs);
+            view, inputTarget.id, textInputChannel, keyboardManager, mEditable, outAttrs);
     outAttrs.initialSelStart = mEditable.getSelectionStart();
     outAttrs.initialSelEnd = mEditable.getSelectionEnd();
 
@@ -556,6 +548,23 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     // For platform views this is the platform view's ID.
     int id;
   }
+
+  // -------- Start: KeyboardManager Synchronous Responder -------
+  public boolean handleKeyEvent(KeyEvent keyEvent) {
+    if (!getInputMethodManager().isAcceptingText() || lastInputConnection == null) {
+      return false;
+    }
+
+    // Send the KeyEvent as an IME KeyEvent. If the input connection is an
+    // InputConnectionAdaptor then call its handleKeyEvent method (because
+    // this method will be called by the keyboard manager, and
+    // InputConnectionAdaptor#sendKeyEvent forwards the key event back to the
+    // keyboard manager).
+    return (lastInputConnection instanceof InputConnectionAdaptor)
+        ? ((InputConnectionAdaptor) lastInputConnection).handleKeyEvent(keyEvent)
+        : lastInputConnection.sendKeyEvent(keyEvent);
+  }
+  // -------- End: KeyboardManager Synchronous Responder -------
 
   // -------- Start: ListenableEditingState watcher implementation -------
 
