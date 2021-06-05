@@ -80,6 +80,14 @@ class _TaskRunner {
 
   final TaskFunction task;
 
+  Future<Device/*?*/> _getWorkingDeviceIfAvailable() async {
+    try {
+      return await devices.workingDevice;
+    } on DeviceException {
+      return null;
+    }
+  }
+
   // TODO(ianh): workaround for https://github.com/dart-lang/sdk/issues/23797
   RawReceivePort _keepAlivePort;
   Timer _startTaskTimeout;
@@ -135,11 +143,11 @@ class _TaskRunner {
         print('Skipping enabling configs for macOS, Linux, Windows, and Web');
       }
 
-      final Device device = await devices.workingDevice;
+      final Device/*?*/ device = await _getWorkingDeviceIfAvailable();
       /*late*/ TaskResult result;
       IOSink/*?*/ sink;
       try {
-        if (device.canStreamLogs && hostAgent.dumpDirectory != null) {
+        if (device != null && device.canStreamLogs && hostAgent.dumpDirectory != null) {
           sink = File(path.join(hostAgent.dumpDirectory.path, '${device.deviceId}.log')).openWrite();
           await device.startLoggingToSink(sink);
         }
@@ -150,7 +158,8 @@ class _TaskRunner {
 
         result = await futureResult;
       } finally {
-        if (device.canStreamLogs) {
+        if (device != null && device.canStreamLogs) {
+          assert(sink != null);
           await device.stopLoggingToSink();
           await sink.close();
         }
