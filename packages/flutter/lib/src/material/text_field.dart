@@ -1113,10 +1113,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   KeyEventResult _handleRawKeyEvent(FocusNode node, RawKeyEvent event) {
     assert(node.hasFocus);
-    // TextField use the `enter` to finish the input or create a new line, and the
-    // `space` is a very common input character, so we default to terminal those
-    // two keys, otherwise, when its ancestor handles the two keys(such as `ListTile`),
-    // the functions of `TextField` will be abnormal.
+    // TextField uses "enter" to finish the input or create a new line, and "space" as
+    // a normal input character, so we default to terminate the handling of these
+    // two keys to avoid ancestor behaving incorrectly for handling the two keys
+    // (such as `ListTile` or `Material`).
     if (event.logicalKey == LogicalKeyboardKey.space
         || event.logicalKey == LogicalKeyboardKey.enter) {
       return KeyEventResult.skipRemainingHandlers;
@@ -1141,7 +1141,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
-    focusNode.onKey ??= _handleRawKeyEvent;
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
       if (widget.maxLength != null && widget.maxLengthEnforced)
@@ -1276,6 +1275,15 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         ),
       ),
     );
+
+    if (focusNode.onKey == null) {
+      child = Focus(
+        onKey: _handleRawKeyEvent,
+        includeSemantics: false,
+        skipTraversal: true,
+        child: child,
+      );
+    }
 
     if (widget.decoration != null) {
       child = AnimatedBuilder(

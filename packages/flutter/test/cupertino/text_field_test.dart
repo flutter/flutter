@@ -4783,7 +4783,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/81233
   testWidgets('CupertinoTextField should terminal the `space` and `enter` raw key events by default', (WidgetTester tester) async {
     final Set<FocusNode> outerReceivedAnEvent = <FocusNode>{};
-    final FocusNode outerFocusNode = FocusNode();
+    final FocusNode outerFocusNode = FocusNode(debugLabel: 'outerFocusNode');
     KeyEventResult outerHandleEvent(FocusNode node, RawKeyEvent event) {
       outerReceivedAnEvent.add(node);
       return KeyEventResult.handled;
@@ -4791,24 +4791,27 @@ void main() {
     outerFocusNode.onKey = outerHandleEvent;
 
     final Set<FocusNode> innerReceivedAnEvent = <FocusNode>{};
-    final FocusNode innerFocusNode = FocusNode();
+    final FocusNode innerFocusNode = FocusNode(debugLabel: 'innerFocusNode');
 
     Future<void> sendEvent(LogicalKeyboardKey key) async {
       await tester.sendKeyEvent(key, platform: 'windows');
     }
 
-    await tester.pumpWidget(
-      CupertinoApp(
+    Widget buildFrame() {
+      return CupertinoApp(
         home: Center(
           child: Focus(
+            onKey: outerFocusNode.onKey,
             focusNode: outerFocusNode,
             child: CupertinoTextField(
               focusNode: innerFocusNode,
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
     innerFocusNode.requestFocus();
     await tester.pump();
 
@@ -4827,10 +4830,12 @@ void main() {
       return KeyEventResult.ignored;
     }
     innerFocusNode.onKey = innerHandleEvent;
+    await tester.pumpWidget(buildFrame());
 
     await sendEvent(LogicalKeyboardKey.space);
-    expect(outerReceivedAnEvent.length, 1);
+
     expect(innerReceivedAnEvent.length, 1);
+    expect(outerReceivedAnEvent.length, 1);
 
     outerReceivedAnEvent.clear();
     innerReceivedAnEvent.clear();

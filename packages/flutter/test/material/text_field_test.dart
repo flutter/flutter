@@ -4554,18 +4554,20 @@ void main() {
         await tester.sendKeyEvent(key, platform: 'windows');
       }
 
-      await tester.pumpWidget(
-        MaterialApp(
+      Widget buildFrame() {
+        return MaterialApp(
           home: Material(
             child: Focus(
+              onKey: outerFocusNode.onKey,
               focusNode: outerFocusNode,
               child: TextField(
                 focusNode: innerFocusNode,
               ),
             ),
           ),
-        ),
-      );
+        );
+      }
+      await tester.pumpWidget(buildFrame());
       innerFocusNode.requestFocus();
       await tester.pump();
 
@@ -4584,6 +4586,7 @@ void main() {
         return KeyEventResult.ignored;
       }
       innerFocusNode.onKey = innerHandleEvent;
+      await tester.pumpWidget(buildFrame());
 
       await sendEvent(LogicalKeyboardKey.space);
       expect(outerReceivedAnEvent.length, 1);

@@ -1069,10 +1069,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   KeyEventResult _handleRawKeyEvent(FocusNode node, RawKeyEvent event) {
     assert(node.hasFocus);
-    // TextField use the `enter` to finish the input or create a new line, and the
-    // `space` is a very common input character, so we default to terminal those
-    // two keys, otherwise, when its ancestor handles the two keys(such as `ListTile`),
-    // the functions of `TextField` will be abnormal.
+    // TextField uses "enter" to finish the input or create a new line, and "space" as
+    // a normal input character, so we default to terminate the handling of these
+    // two keys to avoid ancestor behaving incorrectly for handling the two keys
+    // (such as `ListTile` or `Material`).
     if (event.logicalKey == LogicalKeyboardKey.space
         || event.logicalKey == LogicalKeyboardKey.enter) {
       return KeyEventResult.skipRemainingHandlers;
@@ -1086,7 +1086,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
-    focusNode.onKey ??= _handleRawKeyEvent;
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     VoidCallback? handleDidGainAccessibilityFocus;
@@ -1168,7 +1167,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     final Color selectionColor = CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
-    final Widget paddedEditable = Padding(
+    Widget paddedEditable = Padding(
       padding: widget.padding,
       child: RepaintBoundary(
         child: UnmanagedRestorationScope(
@@ -1229,6 +1228,15 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         ),
       ),
     );
+
+    if (focusNode.onKey == null) {
+      paddedEditable = Focus(
+        onKey: _handleRawKeyEvent,
+        includeSemantics: false,
+        skipTraversal: true,
+        child: paddedEditable,
+      );
+    }
 
     return Semantics(
       enabled: enabled,
