@@ -10,11 +10,14 @@ import android.text.Selection;
 import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
-import io.flutter.embedding.android.AndroidKeyProcessor;
+import io.flutter.embedding.android.KeyboardManager;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import java.util.ArrayList;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -22,6 +25,8 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class ListenableEditingStateTest {
+  @Mock KeyboardManager mockKeyboardManager;
+
   private BaseInputConnection getTestInputConnection(View view, Editable mEditable) {
     new View(RuntimeEnvironment.application);
     return new BaseInputConnection(view, true) {
@@ -30,6 +35,11 @@ public class ListenableEditingStateTest {
         return mEditable;
       }
     };
+  }
+
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
   }
 
   // -------- Start: Test BatchEditing   -------
@@ -239,13 +249,12 @@ public class ListenableEditingStateTest {
 
     final Listener listener = new Listener();
     final View testView = new View(RuntimeEnvironment.application);
-    final AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     final InputConnectionAdaptor inputConnection =
         new InputConnectionAdaptor(
             testView,
             0,
             mock(TextInputChannel.class),
-            mockKeyProcessor,
+            mockKeyboardManager,
             editingState,
             new EditorInfo());
 
@@ -266,13 +275,12 @@ public class ListenableEditingStateTest {
         new ListenableEditingState(null, new View(RuntimeEnvironment.application));
     final Listener listener = new Listener();
     final View testView = new View(RuntimeEnvironment.application);
-    final AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     final InputConnectionAdaptor inputConnection =
         new InputConnectionAdaptor(
             testView,
             0,
             mock(TextInputChannel.class),
-            mockKeyProcessor,
+            mockKeyboardManager,
             editingState,
             new EditorInfo());
     editingState.replace(0, editingState.length(), "initial text");
@@ -302,13 +310,12 @@ public class ListenableEditingStateTest {
         new ListenableEditingState(null, new View(RuntimeEnvironment.application));
     final Listener listener = new Listener();
     final View testView = new View(RuntimeEnvironment.application);
-    final AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     final InputConnectionAdaptor inputConnection =
         new InputConnectionAdaptor(
             testView,
             0,
             mock(TextInputChannel.class),
-            mockKeyProcessor,
+            mockKeyboardManager,
             editingState,
             new EditorInfo());
     editingState.replace(0, editingState.length(), "initial text");
@@ -364,13 +371,12 @@ public class ListenableEditingStateTest {
         new ListenableEditingState(null, new View(RuntimeEnvironment.application));
     final Listener listener = new Listener();
     final View testView = new View(RuntimeEnvironment.application);
-    final AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     final InputConnectionAdaptor inputConnection =
         new InputConnectionAdaptor(
             testView,
             0,
             mock(TextInputChannel.class),
-            mockKeyProcessor,
+            mockKeyboardManager,
             editingState,
             new EditorInfo());
     editingState.replace(0, editingState.length(), "initial text");

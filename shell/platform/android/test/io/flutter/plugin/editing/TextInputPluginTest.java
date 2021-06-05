@@ -40,8 +40,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
-import io.flutter.embedding.android.AndroidKeyProcessor;
 import io.flutter.embedding.android.FlutterView;
+import io.flutter.embedding.android.KeyboardManager;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -210,7 +210,8 @@ public class TextInputPluginTest {
         .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
 
     InputConnectionAdaptor inputConnectionAdaptor =
-        (InputConnectionAdaptor) textInputPlugin.createInputConnection(testView, outAttrs);
+        (InputConnectionAdaptor)
+            textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), outAttrs);
 
     inputConnectionAdaptor.beginBatchEdit();
     verify(textInputChannel, times(0))
@@ -376,7 +377,9 @@ public class TextInputPluginTest {
     textInputPlugin.setTextInputEditingState(
         testView, new TextInputChannel.TextEditState("", 0, 0, -1, -1));
     assertEquals(1, testImm.getRestartCount(testView));
-    InputConnection connection = textInputPlugin.createInputConnection(testView, new EditorInfo());
+    InputConnection connection =
+        textInputPlugin.createInputConnection(
+            testView, mock(KeyboardManager.class), new EditorInfo());
     connection.setComposingText("POWERRRRR", 1);
 
     textInputPlugin.setTextInputEditingState(
@@ -520,9 +523,12 @@ public class TextInputPluginTest {
             any(BinaryMessenger.BinaryReply.class));
     assertEquals("flutter/textinput", channelCaptor.getValue());
     verifyMethodCall(bufferCaptor.getValue(), "TextInputClient.requestExistingInputState", null);
-    InputConnection connection = textInputPlugin.createInputConnection(testView, new EditorInfo());
+    InputConnectionAdaptor connection =
+        (InputConnectionAdaptor)
+            textInputPlugin.createInputConnection(
+                testView, mock(KeyboardManager.class), new EditorInfo());
 
-    connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
+    connection.handleKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
     verify(dartExecutor, times(2))
         .send(
             channelCaptor.capture(),
@@ -533,9 +539,9 @@ public class TextInputPluginTest {
         bufferCaptor.getValue(),
         "TextInputClient.performAction",
         new String[] {"0", "TextInputAction.done"});
-    connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
+    connection.handleKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
 
-    connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_NUMPAD_ENTER));
+    connection.handleKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_NUMPAD_ENTER));
     verify(dartExecutor, times(3))
         .send(
             channelCaptor.capture(),
@@ -585,7 +591,9 @@ public class TextInputPluginTest {
     // There's a pending restart since we initialized the text input client. Flush that now.
     textInputPlugin.setTextInputEditingState(
         testView, new TextInputChannel.TextEditState("text", 0, 0, -1, -1));
-    InputConnection connection = textInputPlugin.createInputConnection(testView, new EditorInfo());
+    InputConnection connection =
+        textInputPlugin.createInputConnection(
+            testView, mock(KeyboardManager.class), new EditorInfo());
 
     connection.requestCursorUpdates(
         InputConnection.CURSOR_UPDATE_MONITOR | InputConnection.CURSOR_UPDATE_IMMEDIATE);
@@ -789,13 +797,13 @@ public class TextInputPluginTest {
 
     // The input method updates the text, call notifyValueChanged.
     testAfm.resetStates();
-    final AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
+    final KeyboardManager mockKeyboardManager = mock(KeyboardManager.class);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
             testView,
             0,
             mock(TextInputChannel.class),
-            mockKeyProcessor,
+            mockKeyboardManager,
             (ListenableEditingState) textInputPlugin.getEditable(),
             new EditorInfo());
     adaptor.commitText("input from IME ", 1);

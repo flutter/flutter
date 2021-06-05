@@ -27,33 +27,16 @@ import org.json.JSONObject;
 public class KeyEventChannel {
   private static final String TAG = "KeyEventChannel";
 
-  /**
-   * Sets the event response handler to be used to receive key event response messages from the
-   * framework on this channel.
-   */
-  public void setEventResponseHandler(EventResponseHandler handler) {
-    this.eventResponseHandler = handler;
-  }
-
-  private EventResponseHandler eventResponseHandler;
-
   /** A handler of incoming key handling messages. */
   public interface EventResponseHandler {
 
     /**
-     * Called whenever the framework responds that a given key event was handled by the framework.
+     * Called whenever the framework responds that a given key event was handled or not handled by
+     * the framework.
      *
-     * @param event the event to be marked as being handled by the framework. Must not be null.
+     * @param isEventHandled whether the framework decides to handle the event.
      */
-    public void onKeyEventHandled(KeyEvent event);
-
-    /**
-     * Called whenever the framework responds that a given key event wasn't handled by the
-     * framework.
-     *
-     * @param event the event to be marked as not being handled by the framework. Must not be null.
-     */
-    public void onKeyEventNotHandled(KeyEvent event);
+    public void onFrameworkResponse(boolean isEventHandled);
   }
 
   /**
@@ -66,58 +49,19 @@ public class KeyEventChannel {
         new BasicMessageChannel<>(binaryMessenger, "flutter/keyevent", JSONMessageCodec.INSTANCE);
   }
 
-  /**
-   * Creates a reply handler for the given key event.
-   *
-   * @param event the Android key event to create a reply for.
-   */
-  BasicMessageChannel.Reply<Object> createReplyHandler(KeyEvent event) {
-    return message -> {
-      if (eventResponseHandler == null) {
-        return;
-      }
-
-      try {
-        if (message == null) {
-          eventResponseHandler.onKeyEventNotHandled(event);
-          return;
-        }
-        final JSONObject annotatedEvent = (JSONObject) message;
-        final boolean handled = annotatedEvent.getBoolean("handled");
-        if (handled) {
-          eventResponseHandler.onKeyEventHandled(event);
-        } else {
-          eventResponseHandler.onKeyEventNotHandled(event);
-        }
-      } catch (JSONException e) {
-        Log.e(TAG, "Unable to unpack JSON message: " + e);
-        eventResponseHandler.onKeyEventNotHandled(event);
-      }
-    };
-  }
-
   @NonNull public final BasicMessageChannel<Object> channel;
 
-  public void keyUp(@NonNull FlutterKeyEvent keyEvent) {
-    Map<String, Object> message = new HashMap<>();
-    message.put("type", "keyup");
-    message.put("keymap", "android");
-    encodeKeyEvent(keyEvent, message);
-
-    channel.send(message, createReplyHandler(keyEvent.event));
+  public void sendFlutterKeyEvent(
+      @NonNull FlutterKeyEvent keyEvent,
+      boolean isKeyUp,
+      @NonNull EventResponseHandler responseHandler) {
+    channel.send(encodeKeyEvent(keyEvent, isKeyUp), createReplyHandler(responseHandler));
   }
 
-  public void keyDown(@NonNull FlutterKeyEvent keyEvent) {
+  private Map<String, Object> encodeKeyEvent(@NonNull FlutterKeyEvent keyEvent, boolean isKeyUp) {
     Map<String, Object> message = new HashMap<>();
-    message.put("type", "keydown");
+    message.put("type", isKeyUp ? "keyup" : "keydown");
     message.put("keymap", "android");
-    encodeKeyEvent(keyEvent, message);
-
-    channel.send(message, createReplyHandler(keyEvent.event));
-  }
-
-  private void encodeKeyEvent(
-      @NonNull FlutterKeyEvent keyEvent, @NonNull Map<String, Object> message) {
     message.put("flags", keyEvent.event.getFlags());
     message.put("plainCodePoint", keyEvent.event.getUnicodeChar(0x0));
     message.put("codePoint", keyEvent.event.getUnicodeChar());
@@ -141,6 +85,28 @@ public class KeyEventChannel {
     message.put("productId", productId);
     message.put("deviceId", keyEvent.event.getDeviceId());
     message.put("repeatCount", keyEvent.event.getRepeatCount());
+    return message;
+  }
+
+  /**
+   * Creates a reply handler for the given key event.
+   *
+   * @param responseHandler the completion handler to call when the framework responds.
+   */
+  private static BasicMessageChannel.Reply<Object> createReplyHandler(
+      @NonNull EventResponseHandler responseHandler) {
+    return message -> {
+      boolean isEventHandled = false;
+      try {
+        if (message != null) {
+          final JSONObject annotatedEvent = (JSONObject) message;
+          isEventHandled = annotatedEvent.getBoolean("handled");
+        }
+      } catch (JSONException e) {
+        Log.e(TAG, "Unable to unpack JSON message: " + e);
+      }
+      responseHandler.onFrameworkResponse(isEventHandled);
+    };
   }
 
   /** A key event as defined by Flutter. */
