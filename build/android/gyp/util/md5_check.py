@@ -70,7 +70,7 @@ class _Md5Checker(object):
     for i in sorted(input_paths):
       _UpdateMd5ForPath(md5, i)
     for s in input_strings:
-      md5.update(s)
+      md5.update(s.encode('utf-8'))
     self.new_digest = md5.hexdigest()
 
     self.old_digest = ''

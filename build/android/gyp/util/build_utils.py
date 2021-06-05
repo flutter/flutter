@@ -146,11 +146,13 @@ def CheckOutput(args, cwd=None,
                 print_stdout=False, print_stderr=True,
                 stdout_filter=None,
                 stderr_filter=None,
+                universal_newlines=True,
                 fail_func=lambda returncode, stderr: returncode != 0):
   if not cwd:
     cwd = os.getcwd()
 
   child = subprocess.Popen(args,
+      universal_newlines=universal_newlines,
       stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
   stdout, stderr = child.communicate()
 
@@ -260,13 +262,13 @@ def MergeZips(output, inputs, exclude_patterns=None):
 
 
 def PrintWarning(message):
-  print 'WARNING: ' + message
+  print('WARNING: %s' % message)
 
 
 def PrintBigWarning(message):
-  print '*****     ' * 8
+  print('*****     ' * 8)
   PrintWarning(message)
-  print '*****     ' * 8
+  print('*****     ' * 8)
 
 
 def GetSortedTransitiveDependencies(top, deps_func):
@@ -312,7 +314,7 @@ def GetPythonDependencies():
   src/. The paths will be relative to the current directory.
   """
   _ForceLazyModulesToLoad()
-  module_paths = (m.__file__ for m in sys.modules.itervalues()
+  module_paths = (m.__file__ for m in sys.modules.values()
                   if m is not None and hasattr(m, '__file__'))
   abs_module_paths = map(os.path.abspath, module_paths)
 

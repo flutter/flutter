@@ -16,7 +16,7 @@ def main(target_directory, file_extension):
     for f in files:
       if file_extension is None or os.path.splitext(f)[-1] == file_extension:
         path = os.path.join(root, f)
-        print path
+        print(path)
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(
