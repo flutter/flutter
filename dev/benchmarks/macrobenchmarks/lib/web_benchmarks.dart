@@ -81,7 +81,7 @@ final LocalBenchmarkServerClient _client = LocalBenchmarkServerClient();
 
 Future<void> main() async {
   // Check if the benchmark server wants us to run a specific benchmark.
-  final String nextBenchmark = await _client.requestNextBenchmark();
+  final String? nextBenchmark = await _client.requestNextBenchmark();
 
   if (nextBenchmark == LocalBenchmarkServerClient.kManualFallback) {
     _fallbackToManual('The server did not tell us which benchmark to run next.');
@@ -92,8 +92,8 @@ Future<void> main() async {
   html.window.location.reload();
 }
 
-Future<void> _runBenchmark(String benchmarkName) async {
-  final RecorderFactory recorderFactory = benchmarks[benchmarkName];
+Future<void> _runBenchmark(String? benchmarkName) async {
+  final RecorderFactory? recorderFactory = benchmarks[benchmarkName];
 
   if (recorderFactory == null) {
     _fallbackToManual('Benchmark $benchmarkName not found.');
@@ -145,7 +145,7 @@ Future<void> _runBenchmark(String benchmarkName) async {
 }
 
 void _fallbackToManual(String error) {
-  html.document.body.appendHtml('''
+  html.document.body?.appendHtml('''
     <div id="manual-panel">
       <h3>$error</h3>
 
@@ -163,9 +163,9 @@ void _fallbackToManual(String error) {
   ''', validator: html.NodeValidatorBuilder()..allowHtml5()..allowInlineStyles());
 
   for (final String benchmarkName in benchmarks.keys) {
-    final html.Element button = html.document.querySelector('#$benchmarkName');
-    button.addEventListener('click', (_) {
-      final html.Element manualPanel = html.document.querySelector('#manual-panel');
+    final html.Element? button = html.document.querySelector('#$benchmarkName');
+    button?.addEventListener('click', (_) {
+      final html.Element? manualPanel = html.document.querySelector('#manual-panel');
       manualPanel?.remove();
       _runBenchmark(benchmarkName);
     });
@@ -174,23 +174,20 @@ void _fallbackToManual(String error) {
 
 /// Visualizes results on the Web page for manual inspection.
 void _printResultsToScreen(Profile profile) {
-  html.document.body.remove();
+  html.document.body?.remove();
   html.document.body = html.BodyElement();
-  html.document.body.appendHtml('<h2>${profile.name}</h2>');
+  html.document.body?.appendHtml('<h2>${profile.name}</h2>');
 
   profile.scoreData.forEach((String scoreKey, Timeseries timeseries) {
-    html.document.body.appendHtml('<h2>$scoreKey</h2>');
-    html.document.body.appendHtml('<pre>${timeseries.computeStats()}</pre>');
-    html.document.body.append(TimeseriesVisualization(timeseries).render());
+    html.document.body?.appendHtml('<h2>$scoreKey</h2>');
+    html.document.body?.appendHtml('<pre>${timeseries.computeStats()}</pre>');
+    html.document.body?.append(TimeseriesVisualization(timeseries).render());
   });
 }
 
 /// Draws timeseries data and statistics on a canvas.
 class TimeseriesVisualization {
   TimeseriesVisualization(this._timeseries) {
-    _stats = _timeseries.computeStats();
-    _canvas = html.CanvasElement();
-    _screenWidth = html.window.screen.width;
     _canvas.width = _screenWidth;
     _canvas.height = (_kCanvasHeight * html.window.devicePixelRatio).round();
     _canvas.style
@@ -198,26 +195,24 @@ class TimeseriesVisualization {
       ..height = '${_kCanvasHeight}px'
       ..outline = '1px solid green';
     _ctx = _canvas.context2D;
-
-    // The amount of vertical space available on the chart. Because some
-    // outliers can be huge they can dwarf all the useful values. So we
-    // limit it to 1.5 x the biggest non-outlier.
-    _maxValueChartRange = 1.5 * _stats.samples
-      .where((AnnotatedSample sample) => !sample.isOutlier)
-      .map<double>((AnnotatedSample sample) => sample.magnitude)
-      .fold<double>(0, math.max);
   }
 
   static const double _kCanvasHeight = 200;
 
-  final Timeseries _timeseries;
-  TimeseriesStats _stats;
-  html.CanvasElement _canvas;
-  html.CanvasRenderingContext2D _ctx;
-  int _screenWidth;
+  late final Timeseries _timeseries;
+  late final TimeseriesStats _stats = _timeseries.computeStats();
+  late final  html.CanvasElement _canvas = html.CanvasElement();
+  html.CanvasRenderingContext2D? _ctx;
+  late final int? _screenWidth = html.window.screen?.width;
 
   // Used to normalize benchmark values to chart height.
-  double _maxValueChartRange;
+  // The amount of vertical space available on the chart. Because some
+  // outliers can be huge they can dwarf all the useful values. So we
+  // limit it to 1.5 x the biggest non-outlier.
+  late final double _maxValueChartRange = 1.5 * _stats.samples
+      .where((AnnotatedSample sample) => !sample.isOutlier)
+      .map<double>((AnnotatedSample sample) => sample.magnitude)
+      .fold<double>(0, math.max);
 
   /// Converts a sample value to vertical canvas coordinates.
   ///
@@ -228,57 +223,57 @@ class TimeseriesVisualization {
 
   /// A utility for drawing lines.
   void drawLine(num x1, num y1, num x2, num y2) {
-    _ctx.beginPath();
-    _ctx.moveTo(x1, y1);
-    _ctx.lineTo(x2, y2);
-    _ctx.stroke();
+    _ctx?.beginPath();
+    _ctx?.moveTo(x1, y1);
+    _ctx?.lineTo(x2, y2);
+    _ctx?.stroke();
   }
 
   /// Renders the timeseries into a `<canvas>` and returns the canvas element.
   html.CanvasElement render() {
-    _ctx.translate(0, _kCanvasHeight * html.window.devicePixelRatio);
-    _ctx.scale(1, -html.window.devicePixelRatio);
+    _ctx?.translate(0, _kCanvasHeight * html.window.devicePixelRatio);
+    _ctx?.scale(1, -html.window.devicePixelRatio);
 
-    final double barWidth = _screenWidth / _stats.samples.length;
+    final double barWidth = _screenWidth! / _stats.samples.length;
     double xOffset = 0;
     for (int i = 0; i < _stats.samples.length; i++) {
       final AnnotatedSample sample = _stats.samples[i];
 
       if (sample.isWarmUpValue) {
         // Put gray background behind warm-up samples.
-        _ctx.fillStyle = 'rgba(200,200,200,1)';
-        _ctx.fillRect(xOffset, 0, barWidth, _normalized(_maxValueChartRange));
+        _ctx?.fillStyle = 'rgba(200,200,200,1)';
+        _ctx?.fillRect(xOffset, 0, barWidth, _normalized(_maxValueChartRange));
       }
 
       if (sample.magnitude > _maxValueChartRange) {
         // The sample value is so big it doesn't fit on the chart. Paint it purple.
-        _ctx.fillStyle = 'rgba(100,50,100,0.8)';
+        _ctx?.fillStyle = 'rgba(100,50,100,0.8)';
       } else if (sample.isOutlier) {
         // The sample is an outlier, color it light red.
-        _ctx.fillStyle = 'rgba(255,50,50,0.6)';
+        _ctx?.fillStyle = 'rgba(255,50,50,0.6)';
       } else {
         // A non-outlier sample, color it light blue.
-        _ctx.fillStyle = 'rgba(50,50,255,0.6)';
+        _ctx?.fillStyle = 'rgba(50,50,255,0.6)';
       }
 
-      _ctx.fillRect(xOffset, 0, barWidth - 1, _normalized(sample.magnitude));
+      _ctx?.fillRect(xOffset, 0, barWidth - 1, _normalized(sample.magnitude));
       xOffset += barWidth;
     }
 
     // Draw a horizontal solid line corresponding to the average.
-    _ctx.lineWidth = 1;
-    drawLine(0, _normalized(_stats.average), _screenWidth, _normalized(_stats.average));
+    _ctx?.lineWidth = 1;
+    drawLine(0, _normalized(_stats.average), _screenWidth!, _normalized(_stats.average));
 
     // Draw a horizontal dashed line corresponding to the outlier cut off.
-    _ctx.setLineDash(<num>[5, 5]);
-    drawLine(0, _normalized(_stats.outlierCutOff), _screenWidth, _normalized(_stats.outlierCutOff));
+    _ctx?.setLineDash(<num>[5, 5]);
+    drawLine(0, _normalized(_stats.outlierCutOff), _screenWidth!, _normalized(_stats.outlierCutOff));
 
     // Draw a light red band that shows the noise (1 stddev in each direction).
-    _ctx.fillStyle = 'rgba(255,50,50,0.3)';
-    _ctx.fillRect(
+    _ctx?.fillStyle = 'rgba(255,50,50,0.3)';
+    _ctx?.fillRect(
       0,
       _normalized(_stats.average * (1 - _stats.noise)),
-      _screenWidth,
+      _screenWidth!,
       _normalized(2 * _stats.average * _stats.noise),
     );
 
@@ -300,13 +295,13 @@ class LocalBenchmarkServerClient {
   /// This happens when you run benchmarks using plain `flutter run` rather than
   /// devicelab test harness. The test harness spins up a special server that
   /// provides API for automatically picking the next benchmark to run.
-  bool isInManualMode;
+  bool isInManualMode = false;
 
   /// Asks the local server for the name of the next benchmark to run.
   ///
   /// Returns [kManualFallback] if local server is not available (uses 404 as a
   /// signal).
-  Future<String> requestNextBenchmark() async {
+  Future<String?> requestNextBenchmark() async {
     final html.HttpRequest request = await _requestXhr(
       '/next-benchmark',
       method: 'POST',
@@ -337,7 +332,7 @@ class LocalBenchmarkServerClient {
   /// This uses the chrome://tracing tracer, which is not available from within
   /// the page itself, and therefore must be controlled from outside using the
   /// DevTools Protocol.
-  Future<void> startPerformanceTracing(String benchmarkName) async {
+  Future<void> startPerformanceTracing(String? benchmarkName) async {
     _checkNotManualMode();
     await html.HttpRequest.request(
       '/start-performance-tracing?label=$benchmarkName',
@@ -405,11 +400,11 @@ class LocalBenchmarkServerClient {
   /// crash on 404, which we use to detect `flutter run`.
   Future<html.HttpRequest> _requestXhr(
     String url, {
-    String method,
-    bool withCredentials,
-    String responseType,
-    String mimeType,
-    Map<String, String> requestHeaders,
+    String? method,
+    bool? withCredentials,
+    String? responseType,
+    String? mimeType,
+    Map<String, String>? requestHeaders,
     dynamic sendData,
   }) {
     final Completer<html.HttpRequest> completer = Completer<html.HttpRequest>();

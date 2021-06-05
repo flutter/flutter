@@ -7,7 +7,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class BackdropFilterPage extends StatefulWidget {
-  const BackdropFilterPage({Key key}) : super(key: key);
+  const BackdropFilterPage({Key? key}) : super(key: key);
 
   @override
   State<BackdropFilterPage> createState() => _BackdropFilterPageState();
@@ -16,12 +16,11 @@ class BackdropFilterPage extends StatefulWidget {
 class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProviderStateMixin {
   bool _blurGroup = false;
   bool _blurTexts = true;
-  AnimationController animation;
+  late final AnimationController animation = AnimationController(vsync: this, duration: const Duration(seconds: 1));
 
   @override
   void initState() {
     super.initState();
-    animation = AnimationController(vsync: this, duration: const Duration(seconds: 1));
     animation.repeat();
   }
 
@@ -77,7 +76,7 @@ class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProv
                     child: Center(
                       child: AnimatedBuilder(
                           animation: animation,
-                          builder: (BuildContext c, Widget w) {
+                          builder: (BuildContext c, Widget? w) {
                             final int val = (animation.value * 255).round();
                             return Container(
                                 width: 50,
@@ -99,13 +98,13 @@ class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProv
                     const Text('Backdrop per txt:'),
                     Checkbox(
                       value: _blurTexts,
-                      onChanged: (bool v) => setState(() { _blurTexts = v; }),
+                      onChanged: (bool? v) => setState(() { _blurTexts = v!; }),
                     ),
                     const SizedBox(width: 10),
                     const Text('Backdrop grid:'),
                     Checkbox(
                       value: _blurGroup,
-                      onChanged: (bool v) => setState(() { _blurGroup = v; }),
+                      onChanged: (bool? v) => setState(() { _blurGroup = v!; }),
                     ),
                   ],
                 ),

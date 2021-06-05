@@ -53,10 +53,10 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
     final Canvas canvas = Canvas(pictureRecorder);
     screenSize = window.physicalSize / window.devicePixelRatio;
     clipSize = Size(
-      screenSize.width / 2,
-      screenSize.height / 5,
+      screenSize!.width / 2,
+      screenSize!.height / 5,
     );
-    final double cellWidth = screenSize.width / kColumns;
+    final double cellWidth = screenSize!.width / kColumns;
 
     final List<Paragraph> paragraphs = generateLaidOutParagraphs(
       paragraphCount: 500,
@@ -93,9 +93,9 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
 
   static const String benchmarkName = 'dynamic_clip_on_static_picture';
 
-  Size screenSize;
-  Size clipSize;
-  Picture picture;
+  Size? screenSize;
+  Size? clipSize;
+  Picture? picture;
   double pictureVerticalOffset = 0.0;
 
   @override
@@ -104,10 +104,10 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
     // This will move the clip along the Y axis in picture's local coordinates
     // causing a repaint. If we're not efficient at managing clips and/or
     // repaints this will jank (see https://github.com/flutter/flutter/issues/42987).
-    final Rect clip = Rect.fromLTWH(0.0, 0.0, clipSize.width, clipSize.height);
+    final Rect clip = Rect.fromLTWH(0.0, 0.0, clipSize!.width, clipSize!.height);
     sceneBuilder.pushClipRect(clip);
     sceneBuilder.pushOffset(0.0, pictureVerticalOffset);
-    sceneBuilder.addPicture(Offset.zero, picture);
+    sceneBuilder.addPicture(Offset.zero, picture!);
     sceneBuilder.pop();
     sceneBuilder.pop();
     pictureVerticalOffset -= kScrollDelta;

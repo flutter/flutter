@@ -54,8 +54,8 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
 
   static const String benchmarkName = 'text_out_of_picture_bounds';
 
-  List<Paragraph> singleLineParagraphs;
-  List<Paragraph> multiLineParagraphs;
+  List<Paragraph>? singleLineParagraphs;
+  List<Paragraph>? multiLineParagraphs;
 
   @override
   void onDrawFrame(SceneBuilder sceneBuilder) {
@@ -94,12 +94,12 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
             ..strokeWidth = 2.0,
         );
         // Fill single-line text.
-        fillCellWithText(singleLineParagraphs);
+        fillCellWithText(singleLineParagraphs!);
 
         // Fill multi-line text.
         canvas.save();
         canvas.translate(screenSize.width / 2, 0);
-        fillCellWithText(multiLineParagraphs);
+        fillCellWithText(multiLineParagraphs!);
         canvas.restore();
 
         // Shift to next column.

@@ -35,7 +35,7 @@ class BenchCardInfiniteScroll extends WidgetRecorder {
 }
 
 class _InfiniteScrollCards extends StatefulWidget {
-  const _InfiniteScrollCards(this.initialOffset, this.finalOffset, {Key key}) : super(key: key);
+  const _InfiniteScrollCards(this.initialOffset, this.finalOffset, {Key? key}) : super(key: key);
 
   final double initialOffset;
   final double finalOffset;
@@ -47,18 +47,15 @@ class _InfiniteScrollCards extends StatefulWidget {
 class _InfiniteScrollCardsState extends State<_InfiniteScrollCards> {
   static const Duration stepDuration = Duration(seconds: 20);
 
-  ScrollController scrollController;
-  double offset;
+  
+  late final double offset = widget.initialOffset;
+  late ScrollController scrollController = scrollController = ScrollController(
+      initialScrollOffset: offset,
+  );
 
   @override
   void initState() {
     super.initState();
-
-    offset = widget.initialOffset;
-
-    scrollController = ScrollController(
-      initialScrollOffset: offset,
-    );
 
     // Without the timer the animation doesn't begin.
     Timer.run(() async {

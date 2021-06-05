@@ -31,31 +31,30 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
   /// is correctly pumping frames.
   double wobbleCounter = 0;
 
-  List<Picture> _pictures;
-  Size windowSize;
-  Size cellSize;
-  Size rectSize;
+  final List<Picture> _pictures = <Picture>[];
+  Size? windowSize;
+  Size? cellSize;
+  Size? rectSize;
 
   @override
   Future<void> setUpAll() async {
-    _pictures = <Picture>[];
     windowSize = window.physicalSize;
     cellSize = Size(
-      windowSize.width / kColumns,
-      windowSize.height / kRows,
+      windowSize!.width / kColumns,
+      windowSize!.height / kRows,
     );
-    rectSize = cellSize * 0.8;
+    rectSize = cellSize! * 0.8;
 
     final Paint paint = Paint()..color = const Color.fromARGB(255, 255, 0, 0);
     for (int i = 0; i < kRows * kColumns; i++) {
       final PictureRecorder pictureRecorder = PictureRecorder();
       final Canvas canvas = Canvas(pictureRecorder);
-      canvas.drawRect(Offset.zero & rectSize, paint);
+      canvas.drawRect(Offset.zero & rectSize!, paint);
       _pictures.add(pictureRecorder.endRecording());
     }
   }
 
-  OffsetEngineLayer _rootLayer;
+  OffsetEngineLayer? _rootLayer;
   final Map<int, OffsetEngineLayer> _layers = <int, OffsetEngineLayer>{};
 
   @override
@@ -64,9 +63,9 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
     for (int row = 0; row < kRows; row++) {
       for (int col = 0; col < kColumns; col++) {
         final int layerId = 1000000 * row + col;
-        final OffsetEngineLayer oldLayer = _layers[layerId];
-        final double wobbleOffsetX = col * cellSize.width + (wobbleCounter - 5).abs();
-        final double offsetY = row * cellSize.height;
+        final OffsetEngineLayer? oldLayer = _layers[layerId];
+        final double wobbleOffsetX = col * cellSize!.width + (wobbleCounter - 5).abs();
+        final double offsetY = row * cellSize!.height;
         // Retain every other layer, so we exercise the update path 50% of the
         // time and the retain path the other 50%.
         final bool shouldRetain = oldLayer != null && (row + col).isEven;

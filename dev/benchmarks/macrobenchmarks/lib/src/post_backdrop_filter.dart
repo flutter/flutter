@@ -7,7 +7,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class PostBackdropFilterPage extends StatefulWidget {
-  const PostBackdropFilterPage({Key key}) : super(key: key);
+  const PostBackdropFilterPage({Key? key}) : super(key: key);
 
   @override
   State<PostBackdropFilterPage> createState() => _PostBackdropFilterPageState();
@@ -15,12 +15,11 @@ class PostBackdropFilterPage extends StatefulWidget {
 
 class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with TickerProviderStateMixin {
   bool _includeBackdropFilter = false;
-  AnimationController animation;
+  late final AnimationController animation = AnimationController(vsync: this, duration: const Duration(seconds: 1));
 
   @override
   void initState() {
     super.initState();
-    animation = AnimationController(vsync: this, duration: const Duration(seconds: 1));
   }
 
   @override
@@ -63,7 +62,7 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
                     child: Center(
                       child: AnimatedBuilder(
                           animation: animation,
-                          builder: (BuildContext c, Widget w) {
+                          builder: (BuildContext c, Widget? w) {
                             final int val = (animation.value * 255).round();
                             return Container(
                                 width: 50,
@@ -83,7 +82,7 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
                       Checkbox(
                         key: const Key('bdf-checkbox'), // this key is used by the driver test
                         value: _includeBackdropFilter,
-                        onChanged: (bool v) => setState(() { _includeBackdropFilter = v; }),
+                        onChanged: (bool? v) => setState(() { _includeBackdropFilter = v!; }),
                       ),
                       MaterialButton(
                         key: const Key('bdf-animate'), // this key is used by the driver test

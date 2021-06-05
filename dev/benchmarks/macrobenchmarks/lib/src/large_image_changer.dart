@@ -8,16 +8,16 @@ import 'package:flutter/material.dart';
 
 /// Displays a new (from image cache's perspective) large image every 500ms.
 class LargeImageChangerPage extends StatefulWidget {
-  const LargeImageChangerPage({Key key}) : super(key: key);
+  const LargeImageChangerPage({Key? key}) : super(key: key);
 
   @override
   State<LargeImageChangerPage> createState() => _LargeImageChangerState();
 }
 
 class _LargeImageChangerState extends State<LargeImageChangerPage> {
-  Timer _timer;
+  Timer? _timer;
   int imageIndex = 0;
-  ImageProvider currentImage;
+  ImageProvider? currentImage;
 
   @override
   void didChangeDependencies() {
@@ -30,7 +30,7 @@ class _LargeImageChangerState extends State<LargeImageChangerPage> {
     );
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
-      currentImage.evict().then((_) {
+      currentImage?.evict().then((_) {
         setState(() {
           imageIndex = (imageIndex + 1) % 6;
           currentImage = ResizeImage(
@@ -52,6 +52,6 @@ class _LargeImageChangerState extends State<LargeImageChangerPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Image(image: currentImage);
+    return Image(image: currentImage!);
   }
 }

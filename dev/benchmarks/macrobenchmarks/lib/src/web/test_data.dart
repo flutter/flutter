@@ -5,8 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:meta/meta.dart';
-
 // Used to randomize data.
 //
 // Using constant seed for reproducibility.
@@ -34,11 +32,11 @@ final List<String> lipsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing 
 /// Generates strings and builds pre-laid out paragraphs to be used by
 /// benchmarks.
 List<Paragraph> generateLaidOutParagraphs({
-  @required int paragraphCount,
-  @required int minWordCountPerParagraph,
-  @required int maxWordCountPerParagraph,
-  @required double widthConstraint,
-  @required Color color,
+  required int paragraphCount,
+  required int minWordCountPerParagraph,
+  required int maxWordCountPerParagraph,
+  required double widthConstraint,
+  required Color color,
 }) {
   final List<Paragraph> strings = <Paragraph>[];
   int wordPointer = 0; // points to the next word in lipsum to extract

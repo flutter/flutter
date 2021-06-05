@@ -31,7 +31,7 @@ class ParagraphGenerator {
   /// font-size so that the engine doesn't reuse a cached ruler.
   ui.Paragraph generate(
     String text, {
-    int maxLines,
+    int? maxLines,
     bool hasEllipsis = false,
   }) {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(
@@ -61,8 +61,8 @@ enum _TestMode {
 
 /// Sends a platform message to the web engine to enable/disable the usage of
 /// the canvas-based text measurement implementation.
-void _setTestMode(_TestMode mode) {
-  bool useCanvasText; // null means do not force DOM or canvas, works for CanvasKit
+void _setTestMode(_TestMode? mode) {
+  bool? useCanvasText; // null means do not force DOM or canvas, works for CanvasKit
   switch (mode) {
     case _TestMode.useDomTextLayout:
       useCanvasText = false;
@@ -148,11 +148,11 @@ class BenchTextLayout extends RawRecorder {
   }
 
   void recordParagraphOperations({
-    @required Profile profile,
-    @required ui.Paragraph paragraph,
-    @required String text,
-    @required String keyPrefix,
-    @required double maxWidth,
+    required Profile profile,
+    required ui.Paragraph paragraph,
+    required String text,
+    required String keyPrefix,
+    required double maxWidth,
   }) {
     profile.record('$keyPrefix.layout', () {
       paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
@@ -301,9 +301,9 @@ const double kColorItemHeight = 48.0;
 class Palette {
   Palette({this.name, this.primary, this.accent, this.threshold = 900});
 
-  final String name;
-  final MaterialColor primary;
-  final MaterialAccentColor accent;
+  final String? name;
+  final MaterialColor? primary;
+  final MaterialAccentColor? accent;
   final int
       threshold; // titles for indices > threshold are white, otherwise black
 
@@ -390,9 +390,9 @@ final List<Palette> allPalettes = <Palette>[
 
 class ColorItem extends StatelessWidget {
   const ColorItem({
-    Key key,
-    @required this.index,
-    @required this.color,
+    Key? key,
+    required this.index,
+    required this.color,
     this.prefix = '',
   })  : assert(index != null),
         assert(color != null),
@@ -433,8 +433,8 @@ class ColorItem extends StatelessWidget {
 
 class PaletteTabView extends StatelessWidget {
   PaletteTabView({
-    Key key,
-    @required this.colors,
+    Key? key,
+    required this.colors,
   })  : assert(colors != null && colors.isValid),
         super(key: key);
 
@@ -458,9 +458,9 @@ class PaletteTabView extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle =
-        textTheme.bodyText2.copyWith(color: Colors.white);
+        textTheme.bodyText2!.copyWith(color: Colors.white);
     final TextStyle blackTextStyle =
-        textTheme.bodyText2.copyWith(color: Colors.black);
+        textTheme.bodyText2!.copyWith(color: Colors.black);
     return Scrollbar(
       child: ListView(
         itemExtent: kColorItemHeight,
@@ -468,7 +468,7 @@ class PaletteTabView extends StatelessWidget {
           ...primaryKeys.map<Widget>((int index) {
             return DefaultTextStyle(
               style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
-              child: ColorItem(index: index, color: colors.primary[index]),
+              child: ColorItem(index: index, color: colors.primary![index]!),
             );
           }),
           if (colors.accent != null)
@@ -477,7 +477,7 @@ class PaletteTabView extends StatelessWidget {
                 style:
                     index > colors.threshold ? whiteTextStyle : blackTextStyle,
                 child: ColorItem(
-                    index: index, color: colors.accent[index], prefix: 'A'),
+                    index: index, color: colors.accent![index]!, prefix: 'A'),
               );
             }),
         ],
@@ -487,7 +487,7 @@ class PaletteTabView extends StatelessWidget {
 }
 
 class ColorsDemo extends StatelessWidget {
-  const ColorsDemo({Key key}) : super(key: key);
+  const ColorsDemo({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -52,7 +52,7 @@ class BenchBuildImage extends WidgetRecorder {
 }
 
 class _RotatingWidget extends StatefulWidget {
-  const _RotatingWidget({this.child, Key key}) : super(key: key);
+  const _RotatingWidget({required this.child, Key? key}) : super(key: key);
 
   final Widget child;
 
@@ -61,22 +61,16 @@ class _RotatingWidget extends StatefulWidget {
 }
 
 class _RotatingWidgetState extends State<_RotatingWidget> with SingleTickerProviderStateMixin {
-  AnimationController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(
+  late final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     )..repeat();
-  }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: controller,
-      builder: (BuildContext context, Widget child) {
+      builder: (BuildContext context, Widget? child) {
         return Transform(
           transform: Matrix4.identity()..rotateZ(2 * math.pi * controller.value),
           child: widget.child,

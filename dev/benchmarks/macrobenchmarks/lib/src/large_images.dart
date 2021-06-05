@@ -7,13 +7,13 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 class LargeImagesPage extends StatelessWidget {
-  const LargeImagesPage({Key key}) : super(key: key);
+  const LargeImagesPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final ImageCache imageCache = PaintingBinding.instance.imageCache;
-    imageCache.maximumSize = 30;
-    imageCache.maximumSizeBytes = 50 << 20;
+    final ImageCache? imageCache = PaintingBinding.instance?.imageCache;
+    imageCache?.maximumSize = 30;
+    imageCache?.maximumSizeBytes = 50 << 20;
     return GridView.builder(
       itemCount: 1000,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
@@ -36,7 +36,7 @@ class DummyImage extends StatelessWidget {
         // creating many copies of the image to trigger the memory issue.
         return snapshot.data == null
             ? Container()
-            : Image.memory(snapshot.data.buffer.asUint8List());
+            : Image.memory(snapshot.data!.buffer.asUint8List());
       },
     );
   }

@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 // This tests whether the Opacity layer raster cache works with color filters.
 // See https://github.com/flutter/flutter/issues/51975.
 class ColorFilterAndFadePage extends StatefulWidget {
-  const ColorFilterAndFadePage({Key key}) : super(key: key);
+  const ColorFilterAndFadePage({Key? key}) : super(key: key);
 
   @override
   State<ColorFilterAndFadePage> createState() => _ColorFilterAndFadePageState();
@@ -79,9 +79,9 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
                 const Text('Use Color Filter:'),
                 Checkbox(
                   value: _useColorFilter,
-                  onChanged: (bool value) {
+                  onChanged: (bool? value) {
                     setState(() {
-                      _useColorFilter = value;
+                      _useColorFilter = value!;
                     });
                   },
                 ),
@@ -93,8 +93,6 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
 
   // Create a looping fade-in fade-out animation for opacity.
   void _initAnimation() {
-    _controller = AnimationController(duration: const Duration(seconds: 3), vsync: this);
-    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
     _opacityAnimation.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.completed) {
         _controller.reverse();
@@ -111,17 +109,17 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
     _initAnimation();
   }
 
-  AnimationController _controller;
-  Animation<double> _opacityAnimation;
+  late final AnimationController _controller = AnimationController(duration: const Duration(seconds: 3), vsync: this);
+  late final Animation<double> _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
   bool _useColorFilter = true;
 }
 
 class _ShadowWidget extends StatelessWidget {
   const _ShadowWidget({
-    @required this.width,
-    @required this.height,
-    @required this.useColorFilter,
-    @required this.shadow,
+    required this.width,
+    required this.height,
+    required this.useColorFilter,
+    required this.shadow,
   });
 
   final double width;
@@ -148,7 +146,7 @@ class _ShadowWidget extends StatelessWidget {
 }
 
 class _ShadowPainter extends CustomPainter {
-  const _ShadowPainter({this.useColorFilter, @required this.shadow});
+  const _ShadowPainter({required this.useColorFilter, required this.shadow});
 
   final bool useColorFilter;
   final Shadow shadow;

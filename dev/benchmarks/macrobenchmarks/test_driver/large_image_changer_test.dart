@@ -14,7 +14,7 @@ Future<void> main() async {
 
     final String targetPlatform = await driver.requestData('getTargetPlatform');
 
-    Timeline timeline;
+    Timeline? timeline;
     switch (targetPlatform) {
       case 'TargetPlatform.iOS':
         {

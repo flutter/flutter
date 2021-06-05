@@ -56,9 +56,9 @@ class BenchSimpleLazyTextScroll extends WidgetRecorder {
 
 class _TestScrollingWidget extends StatefulWidget {
   const _TestScrollingWidget({
-    @required this.initialScrollOffset,
-    @required this.scrollDistance,
-    @required this.scrollDuration,
+    required this.initialScrollOffset,
+    required this.scrollDistance,
+    required this.scrollDuration,
   });
 
   final double initialScrollOffset;
@@ -72,15 +72,13 @@ class _TestScrollingWidget extends StatefulWidget {
 }
 
 class _TestScrollingWidgetState extends State<_TestScrollingWidget> {
-  ScrollController scrollController;
+  late final ScrollController scrollController = ScrollController(
+      initialScrollOffset: widget.initialScrollOffset,
+  );
 
   @override
   void initState() {
     super.initState();
-
-    scrollController = ScrollController(
-      initialScrollOffset: widget.initialScrollOffset,
-    );
 
     // Without the timer the animation doesn't begin.
     Timer.run(() async {
