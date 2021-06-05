@@ -2568,6 +2568,7 @@ void main() {
     testWidgets('PlatformViewLink sets a platform view text input client when focused', (WidgetTester tester) async {
       late FakePlatformViewController controller;
       late int viewId;
+
       final PlatformViewLink platformViewLink = PlatformViewLink(
         viewType: 'test',
         onCreatePlatformView: (PlatformViewCreationParams params) {
@@ -2584,15 +2585,18 @@ void main() {
           );
         },
       );
-      await tester.pumpWidget(
-        Center(
-          child: Column(
-            children: <Widget>[
-              SizedBox(width: 300, height: 300, child: platformViewLink),
-            ],
-          ),
+      await tester.pumpWidget(SizedBox(width: 300, height: 300, child: platformViewLink));
+
+      final Focus platformViewFocusWidget = tester.widget(
+        find.descendant(
+          of: find.byType(PlatformViewLink),
+          matching: find.byType(Focus),
         ),
       );
+
+      final FocusNode? focusNode = platformViewFocusWidget.focusNode;
+      expect(focusNode, isNotNull);
+      expect(focusNode!.hasFocus, false);
 
       late Map<String, dynamic> lastPlatformViewTextClient;
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall call) {
@@ -2602,16 +2606,10 @@ void main() {
         return null;
       });
 
-      final Focus platformViewFocusWidget = tester.widget(
-        find.descendant(
-          of: find.byType(PlatformViewLink),
-          matching: find.byType(Focus),
-        ),
-      );
-
       platformViewFocusWidget.focusNode!.requestFocus();
       await tester.pump();
 
+      expect(focusNode.hasFocus, true);
       expect(lastPlatformViewTextClient.containsKey('platformViewId'), true);
       expect(lastPlatformViewTextClient['platformViewId'], viewId);
 
