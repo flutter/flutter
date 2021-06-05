@@ -1074,10 +1074,10 @@ void main() {
       containerFocusNode.requestFocus();
       await tester.pump();
 
-      late int lastPlatformViewTextClient;
+      late Map<String, dynamic> lastPlatformViewTextClient;
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall call) {
         if (call.method == 'TextInput.setPlatformViewClient') {
-          lastPlatformViewTextClient = call.arguments as int;
+          lastPlatformViewTextClient = call.arguments as Map<String, dynamic>;
         }
         return null;
       });
@@ -1085,7 +1085,11 @@ void main() {
       viewsController.invokeViewFocused(currentViewId + 1);
       await tester.pump();
 
-      expect(lastPlatformViewTextClient, currentViewId + 1);
+      expect(lastPlatformViewTextClient.containsKey('platformViewId'), true);
+      expect(lastPlatformViewTextClient['platformViewId'], currentViewId + 1);
+
+      expect(lastPlatformViewTextClient.containsKey('usesVirtualDisplay'), true);
+      expect(lastPlatformViewTextClient['usesVirtualDisplay'], true);
     });
 
     testWidgets('AndroidView clears platform focus when unfocused', (WidgetTester tester) async {
