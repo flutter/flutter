@@ -369,7 +369,7 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key.
   // - If `value` is greater than the highest key, choose the variant with
   //   the highest key.
-  // - If the screen has low device pixel ratio, chosse the variant with the
+  // - If the screen has low device pixel ratio, choose the variant with the
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.

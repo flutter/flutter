@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -564,7 +566,8 @@ T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
 }
 
 String jsonEncode(dynamic data) {
-  return const JsonEncoder.withIndent('  ').convert(data) + '\n';
+  final String jsonValue = const JsonEncoder.withIndent('  ').convert(data);
+  return '$jsonValue\n';
 }
 
 Future<void> getNewGallery(String revision, Directory galleryDir) async {

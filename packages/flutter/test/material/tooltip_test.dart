@@ -912,6 +912,171 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
+  testWidgets('Tooltip text is also hoverable', (WidgetTester tester) async {
+    const Duration waitDuration = Duration.zero;
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      if (gesture != null)
+        return gesture.removePointer();
+    });
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            child: Text('I am tool tip'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Wait a looong time to make sure that it doesn't go away if the mouse is
+    // still over the widget.
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Hover to the tool tip text and verify the tooltip doesn't go away.
+    await gesture.moveTo(tester.getTopLeft(find.text(tooltipText)));
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+
+    // Wait for it to disappear.
+    await tester.pumpAndSettle();
+    await gesture.removePointer();
+    gesture = null;
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Tooltip can be dismissed by escape key', (WidgetTester tester) async {
+    const Duration waitDuration = Duration.zero;
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      if (gesture != null)
+        return gesture.removePointer();
+    });
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            child: Text('I am tool tip'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Try to dismiss the tooltip with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+    await gesture.removePointer();
+    gesture = null;
+  });
+
+  testWidgets('Multiple Tooltips are dismissed by escape key', (WidgetTester tester) async {
+    const Duration waitDuration = Duration.zero;
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      if (gesture != null)
+        return gesture.removePointer();
+    });
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Column(
+            children: const <Widget>[
+              Tooltip(
+                message: 'message1',
+                waitDuration: waitDuration,
+                showDuration: Duration(days: 1),
+                child: Text('tooltip1'),
+              ),
+              Spacer(flex: 2),
+              Tooltip(
+                message: 'message2',
+                waitDuration: waitDuration,
+                showDuration: Duration(days: 1),
+                child: Text('tooltip2'),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.text('tooltip1');
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    await tester.pump(waitDuration);
+    expect(find.text('message1'), findsOneWidget);
+
+    final Finder secondTooltip = find.text('tooltip2');
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(secondTooltip));
+    await tester.pump();
+    await tester.pump(waitDuration);
+    // Make sure both messages are on the screen.
+    expect(find.text('message1'), findsOneWidget);
+    expect(find.text('message2'), findsOneWidget);
+
+    // Try to dismiss the tooltip with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('message1'), findsNothing);
+    expect(find.text('message2'), findsNothing);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+    await gesture.removePointer();
+    gesture = null;
+  });
+
   testWidgets('Tooltip does not attempt to show after unmount', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/54096.
     const Duration waitDuration = Duration(seconds: 1);

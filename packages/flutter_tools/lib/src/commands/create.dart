@@ -421,7 +421,7 @@ Your $application code is in $relativeAppMain.
     final String projectName = templateContext['projectName'] as String;
     final String organization = templateContext['organization'] as String;
     final String androidPluginIdentifier = templateContext['androidIdentifier'] as String;
-    final String exampleProjectName = projectName + '_example';
+    final String exampleProjectName = '${projectName}_example';
     templateContext['projectName'] = exampleProjectName;
     templateContext['androidIdentifier'] = CreateBase.createAndroidIdentifier(organization, exampleProjectName);
     templateContext['iosIdentifier'] = CreateBase.createUTIIdentifier(organization, exampleProjectName);

@@ -1241,9 +1241,11 @@ class ProjectFileInvalidator {
       final List<Future<void>> waitList = <Future<void>>[];
       for (final Uri uri in urisToScan) {
         waitList.add(pool.withResource<void>(
-          () => _fileSystem
-            .file(uri)
-            .stat()
+          // Calling fs.stat() is more performant than fs.file().stat(), but
+          // uri.toFilePath() does not work with MultiRootFileSystem.
+          () => (uri.hasScheme && uri.scheme != 'file'
+            ? _fileSystem.file(uri).stat()
+            :  _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
             .then((FileStat stat) {
               final DateTime updatedAt = stat.modified;
               if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
@@ -1255,7 +1257,11 @@ class ProjectFileInvalidator {
       await Future.wait<void>(waitList);
     } else {
       for (final Uri uri in urisToScan) {
-        final DateTime updatedAt = _fileSystem.file(uri).statSync().modified;
+        // Calling fs.statSync() is more performant than fs.file().statSync(), but
+        // uri.toFilePath() does not work with MultiRootFileSystem.
+        final DateTime updatedAt = uri.hasScheme && uri.scheme != 'file'
+          ? _fileSystem.file(uri).statSync().modified
+          : _fileSystem.statSync(uri.toFilePath(windows: _platform.isWindows)).modified;
         if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
           invalidatedFiles.add(uri);
         }

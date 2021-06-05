@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -14,14 +12,13 @@ import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embed
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
 void main () {
   group('iOS migration', () {
-    TestUsage testUsage;
+    late TestUsage testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -40,10 +37,10 @@ void main () {
     });
 
     group('remove framework linking and embedding migration', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      FakeIosProject project;
-      File xcodeProjectInfoFile;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectInfoFile;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
@@ -187,10 +184,10 @@ keep this 2
     });
 
     group('new Xcode build system', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      FakeIosProject project;
-      File xcodeWorkspaceSharedSettings;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeWorkspaceSharedSettings;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
@@ -259,10 +256,10 @@ keep this 2
     });
 
     group('Xcode default build location', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      FakeIosProject project;
-      File xcodeProjectWorkspaceData;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectWorkspaceData;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem();
@@ -338,10 +335,10 @@ keep this 2
     });
 
     group('remove Runner project base configuration', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      FakeIosProject project;
-      File xcodeProjectInfoFile;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectInfoFile;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem();
@@ -495,18 +492,18 @@ keep this 3
 
 class FakeIosProject extends Fake implements IosProject {
   @override
-  File xcodeProjectWorkspaceData;
+  File xcodeProjectWorkspaceData = MemoryFileSystem.test().file('xcodeProjectWorkspaceData');
 
   @override
-  File xcodeWorkspaceSharedSettings;
+  File xcodeWorkspaceSharedSettings = MemoryFileSystem.test().file('xcodeWorkspaceSharedSettings');
 
   @override
-  File xcodeProjectInfoFile;
+  File xcodeProjectInfoFile = MemoryFileSystem.test().file('xcodeProjectInfoFile');
 }
 
 class FakeIOSMigrator extends ProjectMigrator {
-  FakeIOSMigrator({@required this.succeeds})
-    : super(null);
+  FakeIOSMigrator({required this.succeeds})
+    : super(BufferLogger.test());
 
   final bool succeeds;
 

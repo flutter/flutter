@@ -119,7 +119,7 @@ void main() {
     expect(manager.updateScheduled, isFalse);
   });
 
-  test('claim child with exisiting data', () {
+  test('claim child with existing data', () {
     final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
@@ -139,7 +139,7 @@ void main() {
     expect(manager.updateScheduled, isFalse);
   });
 
-  test('claim child with no exisiting data', () {
+  test('claim child with no existing data', () {
     final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
