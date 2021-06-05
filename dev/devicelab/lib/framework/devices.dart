@@ -150,6 +150,10 @@ abstract class Device {
   /// with some prefix.
   Stream<String> get logcat;
 
+  /// Whether this device supports calls to [startLoggingToSink]
+  /// and [stopLoggingToSink].
+  bool get canStreamLogs => false;
+
   /// Starts logging to an [IOSink].
   ///
   /// If `clear` is set to true, the log will be cleared before starting. This
@@ -569,6 +573,9 @@ class AndroidDevice extends Device {
     };
   }
 
+  @override
+  bool get canStreamLogs => true;
+
   bool _abortedLogging/*!*/ = false;
   Process/*?*/ _loggingProcess;
 
@@ -588,12 +595,12 @@ class AndroidDevice extends Device {
       <String>['-s', deviceId, 'logcat', 'ActivityManager:I', 'flutter:V', '*:F'],
     );
     _loggingProcess.stdout
-      .transform<String>(Utf8Decoder(allowMalformed: true))
+      .transform<String>(const Utf8Decoder(allowMalformed: true))
       .listen((String line) {
         sink.write(line);
       });
     _loggingProcess.stderr
-      .transform<String>(Utf8Decoder(allowMalformed: true))
+      .transform<String>(const Utf8Decoder(allowMalformed: true))
       .listen((String line) {
         sink.write(line);
       });
@@ -607,6 +614,7 @@ class AndroidDevice extends Device {
   @override
   Future<void> stopLoggingToSink() async {
     assert(_loggingProcess != null);
+    _abortedLogging = true;
     _loggingProcess.kill();
     await _loggingProcess.exitCode;
   }
@@ -813,10 +821,65 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
 /// iOS device.
 class IosDevice extends Device {
-  const IosDevice({ @required this.deviceId });
+  IosDevice({ @required this.deviceId });
 
   @override
   final String deviceId;
+
+  String get idevicesyslogPath {
+    return path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libimobiledevice', 'idevicesyslog');
+  }
+
+  String get dyldLibraryPath {
+    final List<String> dylibsPaths = <String>[
+      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libimobiledevice'),
+      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'openssl'),
+      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'usbmuxd'),
+      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libplist'),
+    ];
+    return dylibsPaths.join(':');
+  }
+
+  @override
+  bool get canStreamLogs => true;
+
+  bool _abortedLogging/*!*/ = false;
+  Process/*?*/ _loggingProcess;
+
+  @override
+  Future<void> startLoggingToSink(IOSink sink, {bool clear = true}) async {
+    // Clear is not supported.
+    _loggingProcess = await startProcess(
+      idevicesyslogPath,
+      <String>['-u', deviceId, '--quiet'],
+      environment: <String, String>{
+        'DYLD_LIBRARY_PATH': dyldLibraryPath,
+      },
+    );
+    _loggingProcess.stdout
+      .transform<String>(const Utf8Decoder(allowMalformed: true))
+      .listen((String line) {
+        sink.write(line);
+      });
+    _loggingProcess.stderr
+      .transform<String>(const Utf8Decoder(allowMalformed: true))
+      .listen((String line) {
+        sink.write(line);
+      });
+    unawaited(_loggingProcess.exitCode.then<void>((int exitCode) {
+      if (!_abortedLogging) {
+        sink.writeln('idevicesyslog failed with exit code $exitCode.\n');
+      }
+    }));
+  }
+
+  @override
+  Future<void> stopLoggingToSink() async {
+    assert(_loggingProcess != null);
+    _abortedLogging = true;
+    _loggingProcess.kill();
+    await _loggingProcess.exitCode;
+  }
 
   // The methods below are stubs for now. They will need to be expanded.
   // We currently do not have a way to lock/unlock iOS devices. So we assume the

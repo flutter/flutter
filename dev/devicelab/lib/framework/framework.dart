@@ -13,6 +13,7 @@ import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
 import 'devices.dart';
+import 'host_agent.dart';
 import 'running_processes.dart';
 import 'task_result.dart';
 import 'utils.dart';
@@ -134,11 +135,26 @@ class _TaskRunner {
         print('Skipping enabling configs for macOS, Linux, Windows, and Web');
       }
 
-      Future<TaskResult> futureResult = _performTask();
-      if (taskTimeout != null)
-        futureResult = futureResult.timeout(taskTimeout);
+      final Device device = await devices.workingDevice;
+      /*late*/ TaskResult result;
+      IOSink/*?*/ sink;
+      try {
+        if (device.canStreamLogs && hostAgent.dumpDirectory != null) {
+          sink = File(path.join(hostAgent.dumpDirectory.path, '${device.deviceId}.log')).openWrite();
+          await device.startLoggingToSink(sink);
+        }
 
-      TaskResult result = await futureResult;
+        Future<TaskResult> futureResult = _performTask();
+        if (taskTimeout != null)
+          futureResult = futureResult.timeout(taskTimeout);
+
+        result = await futureResult;
+      } finally {
+        if (device.canStreamLogs) {
+          await device.stopLoggingToSink();
+          await sink.close();
+        }
+      }
 
       if (runProcessCleanup) {
         section('Checking running Dart$exe processes after task...');
