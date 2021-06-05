@@ -5,7 +5,7 @@ homepage: https://flutter.dev
 author: Flutter Authors <flutter-dev@googlegroups.com>
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   args: 2.1.1
