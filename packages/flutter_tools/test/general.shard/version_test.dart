@@ -71,13 +71,13 @@ void main() {
         ));
 
         processManager.addCommand(FakeCommand(
-          command: const <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%ad', '--date=iso'],
-          stdout: getChannelUpToDateVersion().toString(),
+          command: const <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'],
+          stdout: channel,
         ));
 
         processManager.addCommand(FakeCommand(
-          command: const <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'],
-          stdout: channel,
+          command: const <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+          stdout: getChannelUpToDateVersion().toString(),
         ));
 
         processManager.addCommand(const FakeCommand(
