@@ -4781,7 +4781,7 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/81233
-  testWidgets('CupertinoTextField should terminal the `space` and `enter` raw key events by default', (WidgetTester tester) async {
+  testWidgets('CupertinoTextField should terminate the `space` and `enter` raw key events by default', (WidgetTester tester) async {
     final Set<FocusNode> outerReceivedAnEvent = <FocusNode>{};
     final FocusNode outerFocusNode = FocusNode(debugLabel: 'outerFocusNode');
     KeyEventResult outerHandleEvent(FocusNode node, RawKeyEvent event) {
