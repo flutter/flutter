@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <Metal/Metal.h>
+
 #include "flutter/fml/macros.h"
 
 namespace impeller {
@@ -14,7 +16,11 @@ class Texture {
 
   ~Texture();
 
+  id<MTLTexture> GetMTLTexture() const;
+
  private:
+  id<MTLTexture> texture_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(Texture);
 };
 

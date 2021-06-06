@@ -4,6 +4,9 @@
 
 #include "impeller/compositor/render_pass.h"
 
+#include "flutter/fml/logging.h"
+#include "impeller/compositor/formats_metal.h"
+
 namespace impeller {
 
 RenderPassDescriptor::RenderPassDescriptor() = default;
@@ -14,7 +17,7 @@ RenderPassDescriptor& RenderPassDescriptor::SetColorAttachment(
     ColorRenderPassAttachment attachment,
     size_t index) {
   if (attachment) {
-    color_[index] = attachment;
+    colors_[index] = attachment;
   }
   return *this;
 }
@@ -35,8 +38,93 @@ RenderPassDescriptor& RenderPassDescriptor::SetStencilAttachment(
   return *this;
 }
 
-RenderPass::RenderPass(RenderPassDescriptor desc) : desc_(std::move(desc)) {}
+static bool ConfigureAttachment(const RenderPassAttachment& desc,
+                                MTLRenderPassAttachmentDescriptor* attachment) {
+  if (!desc.texture) {
+    return false;
+  }
+
+  attachment.texture = desc.texture->GetMTLTexture();
+  attachment.loadAction = ToMTLLoadAction(desc.load_action);
+  attachment.storeAction = ToMTLStoreAction(desc.store_action);
+  return true;
+}
+
+static bool ConfigureColorAttachment(
+    const ColorRenderPassAttachment& desc,
+    MTLRenderPassColorAttachmentDescriptor* attachment) {
+  if (!ConfigureAttachment(desc, attachment)) {
+    return false;
+  }
+  attachment.clearColor = ToMTLClearColor(desc.clear_color);
+  return true;
+}
+
+static bool ConfigureDepthAttachment(
+    const DepthRenderPassAttachment& desc,
+    MTLRenderPassDepthAttachmentDescriptor* attachment) {
+  if (!ConfigureAttachment(desc, attachment)) {
+    return false;
+  }
+  attachment.clearDepth = desc.clear_depth;
+  return true;
+}
+
+static bool ConfigureStencilAttachment(
+    const StencilRenderPassAttachment& desc,
+    MTLRenderPassStencilAttachmentDescriptor* attachment) {
+  if (!ConfigureAttachment(desc, attachment)) {
+    return false;
+  }
+  attachment.clearStencil = desc.clear_stencil;
+  return true;
+}
+
+MTLRenderPassDescriptor* RenderPassDescriptor::ToMTLRenderPassDescriptor()
+    const {
+  auto result = [MTLRenderPassDescriptor renderPassDescriptor];
+
+  for (const auto& color : colors_) {
+    if (!ConfigureColorAttachment(color.second,
+                                  result.colorAttachments[color.first])) {
+      FML_LOG(ERROR) << "Could not configure color attachment at index "
+                     << color.first;
+      return nil;
+    }
+  }
+
+  if (depth_.has_value() &&
+      !ConfigureDepthAttachment(depth_.value(), result.depthAttachment)) {
+    return nil;
+  }
+
+  if (stencil_.has_value() &&
+      !ConfigureStencilAttachment(stencil_.value(), result.stencilAttachment)) {
+    return nil;
+  }
+
+  return result;
+}
+
+RenderPass::RenderPass(id<MTLCommandBuffer> buffer,
+                       const RenderPassDescriptor& desc) {
+  auto descriptor = desc.ToMTLRenderPassDescriptor();
+  if (!descriptor) {
+    return;
+  }
+
+  pass_ = [buffer renderCommandEncoderWithDescriptor:descriptor];
+  if (!pass_) {
+    return;
+  }
+
+  is_valid_ = true;
+}
 
 RenderPass::~RenderPass() = default;
+
+bool RenderPass::IsValid() const {
+  return is_valid_;
+}
 
 }  // namespace impeller

@@ -5,6 +5,7 @@
 #include "impeller/compositor/surface.h"
 
 #include "flutter/fml/logging.h"
+#include "impeller/compositor/command_buffer.h"
 
 namespace impeller {
 
@@ -31,7 +32,7 @@ bool Surface::Render() const {
     return false;
   }
 
-  auto command_buffer = [context_->GetRenderQueue() commandBuffer];
+  auto command_buffer = context_->CreateRenderCommandBuffer();
 
   if (!command_buffer) {
     return false;
@@ -39,12 +40,10 @@ bool Surface::Render() const {
 
   ::dispatch_semaphore_wait(frames_in_flight_sema_, DISPATCH_TIME_FOREVER);
 
-  __block dispatch_semaphore_t block_sema = frames_in_flight_sema_;
-  [command_buffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
-    ::dispatch_semaphore_signal(block_sema);
-  }];
-
-  [command_buffer commit];
+  command_buffer->Commit(
+      [sema = frames_in_flight_sema_](CommandBuffer::CommitResult) {
+        ::dispatch_semaphore_signal(sema);
+      });
 
   return true;
 }

@@ -14,6 +14,7 @@
 namespace impeller {
 
 class ShaderLibrary;
+class CommandBuffer;
 
 class Context {
  public:
@@ -23,13 +24,11 @@ class Context {
 
   bool IsValid() const;
 
-  id<MTLCommandQueue> GetRenderQueue() const;
-
-  id<MTLCommandQueue> GetTransferQueue() const;
-
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const;
 
   std::shared_ptr<PipelineLibrary> GetPipelineLibrary() const;
+
+  std::shared_ptr<CommandBuffer> CreateRenderCommandBuffer() const;
 
  private:
   id<MTLDevice> device_ = nullptr;

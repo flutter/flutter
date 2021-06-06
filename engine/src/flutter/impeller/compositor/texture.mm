@@ -10,4 +10,8 @@ Texture::Texture() = default;
 
 Texture::~Texture() = default;
 
+id<MTLTexture> Texture::GetMTLTexture() const {
+  return texture_;
+}
+
 }  // namespace impeller

@@ -12,6 +12,8 @@ impeller_component("compositor") {
     "buffer.mm",
     "command.h",
     "command.mm",
+    "command_buffer.h",
+    "command_buffer.mm",
     "comparable.cc",
     "comparable.h",
     "context.h",

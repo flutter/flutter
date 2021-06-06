@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <Metal/Metal.h>
+
 #include <map>
 
 #include "flutter/fml/macros.h"
@@ -12,6 +14,8 @@
 #include "impeller/geometry/color.h"
 
 namespace impeller {
+
+class CommandBuffer;
 
 struct RenderPassAttachment {
   std::shared_ptr<Texture> texture;
@@ -48,20 +52,27 @@ class RenderPassDescriptor {
   RenderPassDescriptor& SetStencilAttachment(
       StencilRenderPassAttachment attachment);
 
+  MTLRenderPassDescriptor* ToMTLRenderPassDescriptor() const;
+
  private:
-  std::map<size_t, ColorRenderPassAttachment> color_;
+  std::map<size_t, ColorRenderPassAttachment> colors_;
   std::optional<DepthRenderPassAttachment> depth_;
   std::optional<StencilRenderPassAttachment> stencil_;
 };
 
 class RenderPass {
  public:
-  RenderPass(RenderPassDescriptor desc);
-
   ~RenderPass();
 
+  bool IsValid() const;
+
  private:
-  RenderPassDescriptor desc_;
+  friend class CommandBuffer;
+
+  id<MTLRenderCommandEncoder> pass_ = nil;
+  bool is_valid_ = false;
+
+  RenderPass(id<MTLCommandBuffer> buffer, const RenderPassDescriptor& desc);
 
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPass);
 };
