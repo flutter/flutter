@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <limits>
 #include <string>
 
 namespace impeller {
@@ -15,6 +16,11 @@ struct Size {
   constexpr Size() {}
 
   constexpr Size(double width, double height) : width(width), height(height) {}
+
+  static constexpr Size Infinite() {
+    return Size{std::numeric_limits<double>::max(),
+                std::numeric_limits<double>::max()};
+  }
 
   /*
    *  Operator overloads
@@ -43,6 +49,13 @@ struct Size {
     return {
         std::max(width, o.width),
         std::max(height, o.height),
+    };
+  }
+
+  constexpr Size Intersection(const Size& o) const {
+    return {
+        std::min(width, o.width),
+        std::min(height, o.height),
     };
   }
 

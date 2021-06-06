@@ -230,6 +230,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
   if (!renderer_->Render(surface)) {
     FML_LOG(ERROR) << "Could not render.";
   }
+
   /// Per frame updates here
   dispatch_semaphore_wait(_inFlightSemaphore, DISPATCH_TIME_FOREVER);
 

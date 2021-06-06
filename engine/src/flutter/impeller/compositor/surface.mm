@@ -8,8 +8,8 @@
 
 namespace impeller {
 
-Surface::Surface(RenderPassDescriptor desc) {
-  if (desc.HasColorAttachment(0)) {
+Surface::Surface(RenderPassDescriptor desc) : desc_(std::move(desc)) {
+  if (!desc_.HasColorAttachment(0)) {
     return;
   }
   is_valid_ = true;
@@ -19,6 +19,10 @@ Surface::~Surface() = default;
 
 bool Surface::IsValid() const {
   return is_valid_;
+}
+
+const RenderPassDescriptor& Surface::GetRenderPassDescriptor() const {
+  return desc_;
 }
 
 }  // namespace impeller
