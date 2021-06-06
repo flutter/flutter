@@ -190,4 +190,18 @@ void main() {
     );
     expect(patient.currentContext!.size, equals(Size.zero));
   });
+
+  testWidgets('SizedBox.square tests', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        const SizedBox.square(
+          dimension: 100,
+          child: SizedBox.shrink(),
+        )
+    );
+
+    expect(
+      tester.renderObject<RenderConstrainedBox>(find.byType(SizedBox).first).additionalConstraints,
+      BoxConstraints.tight(const Size.square(100)),
+    );
+  });
 }
