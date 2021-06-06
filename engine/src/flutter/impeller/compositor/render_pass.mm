@@ -114,17 +114,11 @@ MTLRenderPassDescriptor* RenderPassDescriptor::ToMTLRenderPassDescriptor()
 }
 
 RenderPass::RenderPass(id<MTLCommandBuffer> buffer,
-                       const RenderPassDescriptor& desc) {
-  auto descriptor = desc.ToMTLRenderPassDescriptor();
-  if (!descriptor) {
+                       const RenderPassDescriptor& desc)
+    : buffer_(buffer), desc_(desc.ToMTLRenderPassDescriptor()) {
+  if (!buffer_ || !desc_) {
     return;
   }
-
-  pass_ = [buffer renderCommandEncoderWithDescriptor:descriptor];
-  if (!pass_) {
-    return;
-  }
-
   is_valid_ = true;
 }
 
@@ -132,6 +126,18 @@ RenderPass::~RenderPass() = default;
 
 bool RenderPass::IsValid() const {
   return is_valid_;
+}
+
+bool RenderPass::Encode() const {
+  if (!IsValid()) {
+    return false;
+  }
+  auto pass = [buffer_ renderCommandEncoderWithDescriptor:desc_];
+  if (!pass) {
+    return false;
+  }
+  [pass endEncoding];
+  return true;
 }
 
 }  // namespace impeller

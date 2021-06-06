@@ -68,10 +68,13 @@ class RenderPass {
 
   bool IsValid() const;
 
+  bool Encode() const;
+
  private:
   friend class CommandBuffer;
 
-  id<MTLRenderCommandEncoder> pass_ = nil;
+  id<MTLCommandBuffer> buffer_ = nil;
+  MTLRenderPassDescriptor* desc_ = nil;
   bool is_valid_ = false;
 
   RenderPass(id<MTLCommandBuffer> buffer, const RenderPassDescriptor& desc);
