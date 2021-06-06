@@ -6,6 +6,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
+#include "impeller/compositor/command_buffer.h"
 #include "impeller/compositor/shader_library.h"
 
 namespace impeller {
@@ -62,20 +63,25 @@ bool Context::IsValid() const {
   return is_valid_;
 }
 
-id<MTLCommandQueue> Context::GetRenderQueue() const {
-  return render_queue_;
-}
-
-id<MTLCommandQueue> Context::GetTransferQueue() const {
-  return transfer_queue_;
-}
-
 std::shared_ptr<ShaderLibrary> Context::GetShaderLibrary() const {
   return shader_library_;
 }
 
 std::shared_ptr<PipelineLibrary> Context::GetPipelineLibrary() const {
   return pipeline_library_;
+}
+
+std::shared_ptr<CommandBuffer> Context::CreateRenderCommandBuffer() const {
+  if (!IsValid()) {
+    return nullptr;
+  }
+
+  auto buffer =
+      std::shared_ptr<CommandBuffer>(new CommandBuffer(render_queue_));
+  if (!buffer->IsValid()) {
+    return nullptr;
+  }
+  return buffer;
 }
 
 }  // namespace impeller
