@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -445,7 +447,7 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
   ];
   final String gradle = path.join(workingDirectory, Platform.isWindows ? 'gradlew.bat' : './gradlew');
   print('┌── $gradle');
-  print('│ ' + File(path.join(workingDirectory, gradle)).readAsLinesSync().join('\n│ '));
+  print(File(path.join(workingDirectory, gradle)).readAsLinesSync().map((String line) => '| $line').join('\n'));
   print('└─────────────────────────────────────────────────────────────────────────────────────');
   print(
     'Running Gradle:\n'

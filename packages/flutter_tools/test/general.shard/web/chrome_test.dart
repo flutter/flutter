@@ -134,7 +134,7 @@ void main() {
       cacheDir: fileSystem.currentDirectory,
     );
 
-    // Create cache dir that the Chrome launcher will atttempt to persist, and a file
+    // Create cache dir that the Chrome launcher will attempt to persist, and a file
     // that will thrown an exception when it is read.
     const String directoryPrefix = '/.tmp_rand0/flutter_tools_chrome_device.rand0/Default';
     fileSystem.directory('$directoryPrefix/Local Storage')
@@ -187,7 +187,7 @@ void main() {
       cacheDir: fileSystem.currentDirectory,
     );
 
-    // Create cache dir that the Chrome launcher will atttempt to persist.
+    // Create cache dir that the Chrome launcher will attempt to persist.
     fileSystem.directory('/.tmp_rand0/flutter_tools_chrome_device.rand0/Default/Local Storage')
       .createSync(recursive: true);
 

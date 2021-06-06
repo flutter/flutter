@@ -279,7 +279,7 @@ class MouseTracker extends ChangeNotifier {
     _mouseCursorMixin.handleDeviceCursorUpdate(
       details.device,
       details.triggeringEvent,
-      details.nextAnnotations.keys.map((MouseTrackerAnnotation annotaion) => annotaion.cursor),
+      details.nextAnnotations.keys.map((MouseTrackerAnnotation annotation) => annotation.cursor),
     );
   }
 

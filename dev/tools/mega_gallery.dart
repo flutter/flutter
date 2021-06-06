@@ -192,6 +192,6 @@ int _lineCount(File file) {
 String _comma(int count) {
   final String str = count.toString();
   if (str.length > 3)
-    return str.substring(0, str.length - 3) + ',' + str.substring(str.length - 3);
+    return '${str.substring(0, str.length - 3)},${str.substring(str.length - 3)}';
   return str;
 }

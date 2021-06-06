@@ -4,9 +4,9 @@
 
 // @dart = 2.8
 
-import 'package:dev_tools/globals.dart';
-import 'package:dev_tools/repository.dart';
-import 'package:dev_tools/roll_dev.dart';
+import 'package:conductor/globals.dart';
+import 'package:conductor/repository.dart';
+import 'package:conductor/roll_dev.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 

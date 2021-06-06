@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:dev_tools/repository.dart';
+import 'package:conductor/repository.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';

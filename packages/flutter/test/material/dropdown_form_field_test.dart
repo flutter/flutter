@@ -70,7 +70,7 @@ Widget buildFormFrame({
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,
-                child: Text(item, key: ValueKey<String>(item + 'Text')),
+                child: Text(item, key: ValueKey<String>('${item}Text')),
               );
             }).toList(),
             alignment: buttonAlignment,
@@ -292,7 +292,7 @@ void main() {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,
-                child: Text(item, key: ValueKey<String>(item + 'Text')),
+                child: Text(item, key: ValueKey<String>('${item}Text')),
               );
             }).toList(),
           ),

@@ -224,10 +224,6 @@ targets:
       - packages/flutter_tools/
       - bin/
 
-  - name: linux_validate_ci_config
-    builder: Linux validate_ci_config
-    scheduler: luci
-
   - name: linux_web_tool_tests
     builder: Linux web_tool_tests
     scheduler: luci
@@ -803,7 +799,6 @@ targets:
 
   - name: linux_complex_layout_scroll_perf__devtools_memory
     builder: Linux complex_layout_scroll_perf__devtools_memory
-    bringup: true
     presubmit: false
     scheduler: luci
 
@@ -869,6 +864,7 @@ targets:
 
   - name: linux_flutter_gallery__transition_perf_e2e
     builder: Linux flutter_gallery__transition_perf_e2e
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
     presubmit: false
     scheduler: luci
 
@@ -894,6 +890,7 @@ targets:
 
   - name: linux_flutter_gallery_sksl_warmup__transition_perf_e2e
     builder: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
     presubmit: false
     scheduler: luci
 
@@ -939,7 +936,6 @@ targets:
 
   - name: linux_large_image_changer_perf_android
     builder: Linux large_image_changer_perf_android
-    bringup: true
     presubmit: false
     scheduler: luci
 
@@ -960,7 +956,6 @@ targets:
 
   - name: linux_new_gallery__crane_perf
     builder: Linux new_gallery__crane_perf
-    bringup: true
     presubmit: false
     scheduler: luci
 
@@ -971,7 +966,6 @@ targets:
 
   - name: linux_platform_channels_benchmarks
     builder: Linux platform_channels_benchmarks
-    bringup: true
     presubmit: false
     scheduler: luci
 
@@ -1177,6 +1171,7 @@ targets:
 
   - name: mac_android_microbenchmarks
     builder: Mac_android microbenchmarks
+    bringup: true
     presubmit: false
     scheduler: luci
 
