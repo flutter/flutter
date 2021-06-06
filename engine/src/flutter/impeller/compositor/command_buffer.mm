@@ -7,7 +7,12 @@
 namespace impeller {
 
 CommandBuffer::CommandBuffer(id<MTLCommandQueue> queue)
-    : buffer_([queue commandBuffer]) {}
+    : buffer_([queue commandBuffer]) {
+  if (!buffer_) {
+    return;
+  }
+  is_valid_ = true;
+}
 
 CommandBuffer::~CommandBuffer() = default;
 

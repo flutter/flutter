@@ -5,17 +5,17 @@
 #include "impeller/compositor/renderer.h"
 
 #include "flutter/fml/logging.h"
+#include "impeller/compositor/command_buffer.h"
+#include "impeller/compositor/surface.h"
 
 namespace impeller {
 
-Renderer::Renderer(std::string shaders_directory)
-    : context_(std::make_shared<Context>(std::move(shaders_directory))),
-      surface_(std::make_unique<Surface>(context_)) {
-  if (!context_->IsValid()) {
-    return;
-  }
+constexpr size_t kMaxFramesInFlight = 3u;
 
-  if (!surface_->IsValid()) {
+Renderer::Renderer(std::string shaders_directory)
+    : frames_in_flight_sema_(::dispatch_semaphore_create(kMaxFramesInFlight)),
+      context_(std::make_shared<Context>(std::move(shaders_directory))) {
+  if (!context_->IsValid()) {
     return;
   }
 
@@ -28,26 +28,28 @@ bool Renderer::IsValid() const {
   return is_valid_;
 }
 
-bool Renderer::ShouldRender() const {
-  return IsValid() && !size_.IsZero();
-}
-
-bool Renderer::SurfaceSizeDidChange(Size size) {
-  if (size_ == size) {
-    return true;
-  }
-
-  size_ = size;
-
-  return OnSurfaceSizeDidChange(size_);
-}
-
-bool Renderer::Render() {
-  if (!ShouldRender()) {
+bool Renderer::Render(const Surface& surface) {
+  if (!IsValid()) {
     return false;
   }
 
-  return surface_->Render();
+  if (!surface.IsValid()) {
+    return false;
+  }
+
+  auto command_buffer = context_->CreateRenderCommandBuffer();
+
+  if (!command_buffer) {
+    return false;
+  }
+
+  ::dispatch_semaphore_wait(frames_in_flight_sema_, DISPATCH_TIME_FOREVER);
+
+  command_buffer->Commit(
+      [sema = frames_in_flight_sema_](CommandBuffer::CommitResult) {
+        ::dispatch_semaphore_signal(sema);
+      });
+  return true;
 }
 
 std::shared_ptr<Context> Renderer::GetContext() const {

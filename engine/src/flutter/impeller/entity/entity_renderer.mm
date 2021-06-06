@@ -8,15 +8,13 @@ namespace impeller {
 
 EntityRenderer::EntityRenderer(std::string shaders_directory)
     : Renderer(std::move(shaders_directory)),
-      root_(std::make_shared<Entity>()) {}
+      root_(std::make_shared<Entity>()) {
+  root_->SetBackgroundColor(Color::DarkGray());
+}
 
 EntityRenderer::~EntityRenderer() = default;
 
 bool EntityRenderer::OnRender() {
-  return false;
-}
-
-bool EntityRenderer::OnSurfaceSizeDidChange(Size size) {
   return false;
 }
 

@@ -43,6 +43,8 @@ class RenderPassDescriptor {
 
   ~RenderPassDescriptor();
 
+  bool HasColorAttachment(size_t index) const;
+
   RenderPassDescriptor& SetColorAttachment(ColorRenderPassAttachment attachment,
                                            size_t index);
 

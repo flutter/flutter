@@ -12,7 +12,7 @@ namespace impeller {
 
 class Texture {
  public:
-  Texture();
+  Texture(id<MTLTexture> texture);
 
   ~Texture();
 

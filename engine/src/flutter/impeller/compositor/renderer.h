@@ -4,14 +4,17 @@
 
 #pragma once
 
+#include <dispatch/dispatch.h>
+
 #include <memory>
 
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/context.h"
-#include "impeller/compositor/surface.h"
 #include "impeller/geometry/size.h"
 
 namespace impeller {
+
+class Surface;
 
 class Renderer {
  public:
@@ -19,9 +22,7 @@ class Renderer {
 
   bool IsValid() const;
 
-  bool SurfaceSizeDidChange(Size size);
-
-  bool Render();
+  bool Render(const Surface& surface);
 
   std::shared_ptr<Context> GetContext() const;
 
@@ -30,15 +31,11 @@ class Renderer {
 
   virtual bool OnRender() = 0;
 
-  virtual bool OnSurfaceSizeDidChange(Size size) = 0;
-
  private:
+  dispatch_semaphore_t frames_in_flight_sema_ = nullptr;
   std::shared_ptr<Context> context_;
-  std::unique_ptr<Surface> surface_;
   Size size_;
   bool is_valid_ = false;
-
-  bool ShouldRender() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Renderer);
 };
