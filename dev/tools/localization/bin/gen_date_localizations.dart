@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 /// This program extracts localized date symbols and patterns from the intl
 /// package for the subset of locales supported by the flutter_localizations
 /// package.
@@ -42,7 +40,7 @@ const String _kCommandName = 'gen_date_localizations.dart';
 // Date symbols for the Kannada locale ('kn') are handled specially because
 // some of the strings contain characters that can crash Emacs on Linux.
 // See packages/flutter_localizations/lib/src/l10n/README for more information.
-String currentLocale;
+String? currentLocale;
 
 Future<void> main(List<String> rawArgs) async {
   checkCwdIsRepoRoot(_kCommandName);
@@ -66,16 +64,16 @@ Future<void> main(List<String> rawArgs) async {
       (String line) => line.startsWith('intl:'),
       orElse: () {
         exitWithError('intl dependency not found in ${dotPackagesFile.path}');
-        return null; // unreachable
+        return ''; // unreachable
       },
     )
     .split(':')
     .last;
 
   final Directory dateSymbolsDirectory = Directory(path.join(pathToIntl, 'src', 'data', 'dates', 'symbols'));
-  final Map<String, File> symbolFiles = _listIntlData(dateSymbolsDirectory);
+  final Map<String, File?> symbolFiles = _listIntlData(dateSymbolsDirectory);
   final Directory datePatternsDirectory = Directory(path.join(pathToIntl, 'src', 'data', 'dates', 'patterns'));
-  final Map<String, File> patternFiles = _listIntlData(datePatternsDirectory);
+  final Map<String, File?> patternFiles = _listIntlData(datePatternsDirectory);
   final StringBuffer buffer = StringBuffer();
   final Set<String> supportedLocales = _supportedLocales();
 
@@ -95,10 +93,10 @@ Future<void> main(List<String> rawArgs) async {
 /// The subset of date symbols supported by the intl package which are also
 /// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, dynamic> dateSymbols = <String, dynamic> {');
-  symbolFiles.forEach((String locale, File data) {
+  symbolFiles.forEach((String locale, File? data) {
     currentLocale = locale;
     if (supportedLocales.contains(locale))
-      buffer.writeln(_jsonToMapEntry(locale, json.decode(data.readAsStringSync())));
+      buffer.writeln(_jsonToMapEntry(locale, json.decode(data!.readAsStringSync())));
   });
   currentLocale = null;
   buffer.writeln('};');
@@ -109,9 +107,9 @@ Future<void> main(List<String> rawArgs) async {
 /// The subset of date patterns supported by the intl package which are also
 /// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = <String, Map<String, String>> {');
-  patternFiles.forEach((String locale, File data) {
+  patternFiles.forEach((String locale, File? data) {
     if (supportedLocales.contains(locale)) {
-      final Map<String, dynamic> patterns = json.decode(data.readAsStringSync()) as Map<String, dynamic>;
+      final Map<String, dynamic> patterns = json.decode(data!.readAsStringSync()) as Map<String, dynamic>;
       buffer.writeln("'$locale': <String, String>{");
       patterns.forEach((String key, dynamic value) {
         assert(value is String);
@@ -180,14 +178,14 @@ Set<String> _supportedLocales() {
   for (final FileSystemEntity entity in supportedLocalesDirectory.listSync()) {
     final String filePath = entity.path;
     if (FileSystemEntity.isFileSync(filePath) && filenameRE.hasMatch(filePath)) {
-      supportedLocales.add(filenameRE.firstMatch(filePath)[1]);
+      supportedLocales.add(filenameRE.firstMatch(filePath)![1]!);
     }
   }
 
   return supportedLocales;
 }
 
-Map<String, File> _listIntlData(Directory directory) {
+Map<String, File?> _listIntlData(Directory directory) {
   final Map<String, File> localeFiles = <String, File>{};
   final Iterable<File> files = directory
     .listSync()
@@ -200,5 +198,5 @@ Map<String, File> _listIntlData(Directory directory) {
 
   final List<String> locales = localeFiles.keys.toList(growable: false);
   locales.sort();
-  return Map<String, File>.fromIterable(locales, value: (dynamic locale) => localeFiles[locale]);
+  return Map<String, File?>.fromIterable(locales, value: (dynamic locale) => localeFiles[locale]);
 }
