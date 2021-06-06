@@ -12,41 +12,45 @@ struct Size {
   double width = 0.0;
   double height = 0.0;
 
-  Size() {}
+  constexpr Size() {}
 
-  Size(double width, double height) : width(width), height(height) {}
+  constexpr Size(double width, double height) : width(width), height(height) {}
 
   /*
    *  Operator overloads
    */
-  Size operator*(double scale) const { return {width * scale, height * scale}; }
+  constexpr Size operator*(double scale) const {
+    return {width * scale, height * scale};
+  }
 
-  bool operator==(const Size& s) const {
+  constexpr bool operator==(const Size& s) const {
     return s.width == width && s.height == height;
   }
 
-  bool operator!=(const Size& s) const {
+  constexpr bool operator!=(const Size& s) const {
     return s.width != width || s.height != height;
   }
 
-  Size operator+(const Size& s) const {
+  constexpr Size operator+(const Size& s) const {
     return {width + s.width, height + s.height};
   }
 
-  Size operator-(const Size& s) const {
+  constexpr Size operator-(const Size& s) const {
     return {width - s.width, height - s.height};
   }
 
-  Size Union(const Size& o) const {
+  constexpr Size Union(const Size& o) const {
     return {
         std::max(width, o.width),
         std::max(height, o.height),
     };
   }
 
-  bool IsZero() const { return width * height == 0.0; }
+  constexpr bool IsZero() const { return width * height == 0.0; }
 
-  bool IsPositive() const { return width > 0.0 && height > 0.0; }
+  constexpr bool IsPositive() const { return width * height > 0.0; }
+
+  constexpr bool IsEmpty() { return !IsPositive(); }
 
   std::string ToString() const;
 

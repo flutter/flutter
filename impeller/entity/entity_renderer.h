@@ -21,8 +21,6 @@ class EntityRenderer final : public Renderer {
 
   bool OnRender() override;
 
-  bool OnSurfaceSizeDidChange(Size size) override;
-
   FML_DISALLOW_COPY_AND_ASSIGN(EntityRenderer);
 };
 

@@ -8,6 +8,8 @@
 
 #include "assets_location.h"
 #include "flutter/fml/logging.h"
+#include "impeller/compositor/formats_metal.h"
+#include "impeller/compositor/surface.h"
 #include "impeller/entity/entity_renderer.h"
 #include "impeller/primitives/box_primitive.h"
 #include "impeller_renderer.h"
@@ -53,11 +55,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 
   renderer_ = std::make_unique<impeller::EntityRenderer>(
       impeller::ImpellerShadersDirectory());
-
-  if (!renderer_->IsValid()) {
-    FML_LOG(ERROR) << "Impeller Renderer is not valid.";
-  }
-
+  FML_CHECK(renderer_->IsValid()) << "Impeller Renderer is not valid.";
   return self;
 }
 
@@ -227,7 +225,9 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 }
 
 - (void)drawInMTKView:(nonnull MTKView*)view {
-  if (!renderer_->Render()) {
+  impeller::Surface surface(
+      impeller::FromMTLRenderPassDescriptor(view.currentRenderPassDescriptor));
+  if (!renderer_->Render(surface)) {
     FML_LOG(ERROR) << "Could not render.";
   }
   /// Per frame updates here
@@ -304,8 +304,6 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 }
 
 - (void)mtkView:(nonnull MTKView*)view drawableSizeWillChange:(CGSize)size {
-  renderer_->SurfaceSizeDidChange({size.width, size.height});
-
   float aspect = size.width / (float)size.height;
   _projectionMatrix = matrix_perspective_right_hand(65.0f * (M_PI / 180.0f),
                                                     aspect, 0.1f, 100.0f);

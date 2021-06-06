@@ -13,6 +13,13 @@ RenderPassDescriptor::RenderPassDescriptor() = default;
 
 RenderPassDescriptor::~RenderPassDescriptor() = default;
 
+bool RenderPassDescriptor::HasColorAttachment(size_t index) const {
+  if (auto found = colors_.find(index); found != colors_.end()) {
+    return true;
+  }
+  return false;
+}
+
 RenderPassDescriptor& RenderPassDescriptor::SetColorAttachment(
     ColorRenderPassAttachment attachment,
     size_t index) {

@@ -14,6 +14,8 @@
 
 namespace impeller {
 
+class RenderPassDescriptor;
+
 constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
@@ -156,6 +158,21 @@ constexpr MTLLoadAction ToMTLLoadAction(LoadAction action) {
   return MTLLoadActionDontCare;
 }
 
+constexpr LoadAction FromMTLLoadAction(MTLLoadAction action) {
+  switch (action) {
+    case MTLLoadActionDontCare:
+      return LoadAction::kDontCare;
+    case MTLLoadActionLoad:
+      return LoadAction::kLoad;
+    case MTLLoadActionClear:
+      return LoadAction::kClear;
+    default:
+      break;
+  }
+
+  return LoadAction::kDontCare;
+}
+
 constexpr MTLStoreAction ToMTLStoreAction(StoreAction action) {
   switch (action) {
     case StoreAction::kDontCare:
@@ -166,9 +183,23 @@ constexpr MTLStoreAction ToMTLStoreAction(StoreAction action) {
   return MTLStoreActionDontCare;
 }
 
+constexpr StoreAction FromMTLStoreAction(MTLStoreAction action) {
+  switch (action) {
+    case MTLStoreActionDontCare:
+      return StoreAction::kDontCare;
+    case MTLStoreActionStore:
+      return StoreAction::kStore;
+    default:
+      break;
+  }
+  return StoreAction::kDontCare;
+}
+
 constexpr MTLClearColor ToMTLClearColor(const Color& color) {
   return MTLClearColorMake(color.red, color.green, color.blue, color.alpha);
 }
+
+RenderPassDescriptor FromMTLRenderPassDescriptor(MTLRenderPassDescriptor*);
 
 MTLRenderPipelineColorAttachmentDescriptor*
 ToMTLRenderPipelineColorAttachmentDescriptor(
