@@ -22,6 +22,8 @@ class Surface {
 
   bool IsValid() const;
 
+  const RenderPassDescriptor& GetRenderPassDescriptor() const;
+
  private:
   RenderPassDescriptor desc_;
   bool is_valid_ = false;

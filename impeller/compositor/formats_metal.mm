@@ -80,19 +80,10 @@ MTLDepthStencilDescriptor* ToMTLDepthStencilDescriptor(
 static bool ConfigureRenderPassAttachment(
     RenderPassAttachment& attachment,
     MTLRenderPassAttachmentDescriptor* desc) {
-  if (!attachment) {
-    return false;
-  }
-
-  if (!desc.texture) {
-    return false;
-  }
-
   attachment.texture = std::make_shared<Texture>(desc.texture);
   attachment.load_action = FromMTLLoadAction(desc.loadAction);
   attachment.store_action = FromMTLStoreAction(desc.storeAction);
-
-  return true;
+  return attachment;
 }
 
 static ColorRenderPassAttachment FromMTLRenderPassColorAttachmentDescriptor(

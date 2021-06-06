@@ -43,6 +43,13 @@ bool Renderer::Render(const Surface& surface) {
     return false;
   }
 
+  auto render_pass =
+      command_buffer->CreateRenderPass(surface.GetRenderPassDescriptor());
+  if (!render_pass) {
+    return false;
+  }
+  render_pass->Encode();
+
   ::dispatch_semaphore_wait(frames_in_flight_sema_, DISPATCH_TIME_FOREVER);
 
   command_buffer->Commit(

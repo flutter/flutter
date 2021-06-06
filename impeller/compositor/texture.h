@@ -7,6 +7,7 @@
 #include <Metal/Metal.h>
 
 #include "flutter/fml/macros.h"
+#include "impeller/geometry/size.h"
 
 namespace impeller {
 
@@ -15,6 +16,8 @@ class Texture {
   Texture(id<MTLTexture> texture);
 
   ~Texture();
+
+  Size GetSize() const;
 
   id<MTLTexture> GetMTLTexture() const;
 
