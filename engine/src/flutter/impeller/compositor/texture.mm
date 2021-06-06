@@ -6,7 +6,7 @@
 
 namespace impeller {
 
-Texture::Texture() = default;
+Texture::Texture(id<MTLTexture> texture) : texture_(texture) {}
 
 Texture::~Texture() = default;
 
