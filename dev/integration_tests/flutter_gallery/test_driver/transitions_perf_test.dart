@@ -103,7 +103,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 /// home screen twice.
 Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
-  late String currentDemoCategory;
+  String? currentDemoCategory;
 
   for (final String demo in demos) {
     if (kSkippedDemos.contains(demo))
@@ -174,7 +174,6 @@ void main([List<String> args = const <String>[]]) {
     });
 
     tearDownAll(() async {
-      if (driver != null)
         await driver.close();
     });
 
