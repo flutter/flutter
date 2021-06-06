@@ -4,15 +4,23 @@
 
 #pragma once
 
+#include <Metal/Metal.h>
+
 #include <functional>
+#include <memory>
 
 #include "flutter/fml/macros.h"
+#include "impeller/compositor/render_pass.h"
 
 namespace impeller {
+
+class Context;
 
 class CommandBuffer {
  public:
   ~CommandBuffer();
+
+  bool IsValid() const;
 
   enum class CommitResult {
     kPending,
@@ -23,8 +31,16 @@ class CommandBuffer {
   using CommitCallback = std::function<void(CommitResult)>;
   void Commit(CommitCallback callback);
 
+  std::shared_ptr<RenderPass> CreateRenderPass(
+      const RenderPassDescriptor& desc) const;
+
  private:
-  CommandBuffer();
+  friend class Context;
+
+  id<MTLCommandBuffer> buffer_ = nullptr;
+  bool is_valid_ = false;
+
+  CommandBuffer(id<MTLCommandQueue> queue);
 
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);
 };

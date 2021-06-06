@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/formats.h"
+#include "impeller/geometry/color.h"
 
 namespace impeller {
 
@@ -141,6 +142,33 @@ constexpr MTLStencilOperation ToMTLStencilOperation(StencilOperation op) {
   }
   return MTLStencilOperationKeep;
 };
+
+constexpr MTLLoadAction ToMTLLoadAction(LoadAction action) {
+  switch (action) {
+    case LoadAction::kDontCare:
+      return MTLLoadActionDontCare;
+    case LoadAction::kLoad:
+      return MTLLoadActionLoad;
+    case LoadAction::kClear:
+      return MTLLoadActionClear;
+  }
+
+  return MTLLoadActionDontCare;
+}
+
+constexpr MTLStoreAction ToMTLStoreAction(StoreAction action) {
+  switch (action) {
+    case StoreAction::kDontCare:
+      return MTLStoreActionDontCare;
+    case StoreAction::kStore:
+      return MTLStoreActionStore;
+  }
+  return MTLStoreActionDontCare;
+}
+
+constexpr MTLClearColor ToMTLClearColor(const Color& color) {
+  return MTLClearColorMake(color.red, color.green, color.blue, color.alpha);
+}
 
 MTLRenderPipelineColorAttachmentDescriptor*
 ToMTLRenderPipelineColorAttachmentDescriptor(
