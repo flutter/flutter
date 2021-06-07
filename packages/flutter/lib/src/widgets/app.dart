@@ -237,7 +237,7 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 /// functionality for an app.
 ///
 /// If a [MediaQuery] is not available above [WidgetsApp] a [MediaQuery] is
-/// built using [MediaQueryFromWindow].
+/// built using [MediaQuery.fromWindow].
 ///
 /// Find references to many of the widgets that [WidgetsApp] wraps in the "See
 /// also" section.
@@ -250,7 +250,7 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 ///    without an explicit style.
 ///  * [MediaQuery], which establishes a subtree in which media queries resolve
 ///    to a [MediaQueryData].
-///  * [MediaQueryFromWindow], which builds a [MediaQuery] with data derived
+///  * [MediaQuery.fromWindow], which builds a [MediaQuery] with data derived
 ///    from [WidgetsBinding.window].
 ///  * [Localizations], which defines the [Locale] for its `child`.
 ///  * [Title], a widget that describes this app in the operating system.
@@ -1648,7 +1648,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     final MediaQueryData? data = MediaQuery.maybeOf(context);
     if (data == null) {
-      child = MediaQueryFromWindow(
+      child = MediaQuery.fromWindow(
         child: child,
       );
     }
