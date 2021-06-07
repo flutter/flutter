@@ -67,8 +67,8 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   ///
   /// Accepts an optional second named parameter, `onChanged`, which allows
   /// arbitrary functionality to be wired through the [MaterialStateMixin].
-  /// If supplied, the [onChanged] function is not called when child widgets
-  /// report events that make no changes to the current set of [MaterialState]s.
+  /// If supplied, the [onChanged] function is only called when child widgets
+  /// report events that make changes to the current set of [MaterialState]s.
   ///
   /// {@tool snippet}
   /// This example shows how to use the [updateMaterialState] callback factory
