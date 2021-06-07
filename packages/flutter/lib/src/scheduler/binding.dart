@@ -430,17 +430,10 @@ mixin SchedulerBinding on BindingBase {
   }
 
   // Scheduled by _ensureEventLoopCallback.
-  Future<void> _runTasks() async {
+  void _runTasks()  {
     _hasRequestedAnEventLoopCallback = false;
-    if (handleEventLoopCallback())
-      _ensureEventLoopCallback(); // runs next task when there's time
-    else {
-      if (_taskQueue.isNotEmpty) {
-        // Avoid continuously adding tasks to the underlying queue
-        await endOfFrame;
-        // When the task queue is not empty, the judgment is made again
-        _ensureEventLoopCallback();
-      }
+    if (handleEventLoopCallback() || _taskQueue.isNotEmpty) {
+      _ensureEventLoopCallback(); // runs next task when there's time.
     }
   }
 
@@ -1171,7 +1164,8 @@ mixin SchedulerBinding on BindingBase {
     }());
   }
 
-  /// Resets the relative state of EventLoop, which is used to schedule when an error occurs
+  /// When a scheduling error occurs, resets the relative state of EventLoop.
+  @visibleForTesting
   void resetEventLoop() {
     _hasRequestedAnEventLoopCallback = false;
     _taskQueue.clear();
