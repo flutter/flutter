@@ -18,23 +18,23 @@ import 'constants.dart';
 /// the Android accessibility bridge, and not the semantics object created by
 /// the Flutter framework.
 Matcher hasAndroidSemantics({
-  String text,
-  String contentDescription,
-  String className,
-  int id,
-  Rect rect,
-  Size size,
-  List<AndroidSemanticsAction> actions,
-  List<AndroidSemanticsNode> children,
-  bool isChecked,
-  bool isCheckable,
-  bool isEditable,
-  bool isEnabled,
-  bool isFocusable,
-  bool isFocused,
-  bool isHeading,
-  bool isPassword,
-  bool isLongClickable,
+  String? text,
+  String? contentDescription,
+  String? className,
+  int? id,
+  Rect? rect,
+  Size? size,
+  List<AndroidSemanticsAction>? actions,
+  List<AndroidSemanticsNode>? children,
+  bool? isChecked,
+  bool? isCheckable,
+  bool? isEditable,
+  bool? isEnabled,
+  bool? isFocusable,
+  bool? isFocused,
+  bool? isHeading,
+  bool? isPassword,
+  bool? isLongClickable,
 }) {
   return _AndroidSemanticsMatcher(
     text: text,
@@ -76,22 +76,22 @@ class _AndroidSemanticsMatcher extends Matcher {
     this.isLongClickable,
   });
 
-  final String text;
-  final String className;
-  final String contentDescription;
-  final int id;
-  final List<AndroidSemanticsAction> actions;
-  final Rect rect;
-  final Size size;
-  final bool isChecked;
-  final bool isCheckable;
-  final bool isEditable;
-  final bool isEnabled;
-  final bool isFocusable;
-  final bool isFocused;
-  final bool isHeading;
-  final bool isPassword;
-  final bool isLongClickable;
+  final String? text;
+  final String? className;
+  final String? contentDescription;
+  final int? id;
+  final List<AndroidSemanticsAction>? actions;
+  final Rect? rect;
+  final Size? size;
+  final bool? isChecked;
+  final bool? isCheckable;
+  final bool? isEditable;
+  final bool? isEnabled;
+  final bool? isFocusable;
+  final bool? isFocused;
+  final bool? isHeading;
+  final bool? isPassword;
+  final bool? isLongClickable;
 
   @override
   Description describe(Description description) {
@@ -130,7 +130,10 @@ class _AndroidSemanticsMatcher extends Matcher {
   }
 
   @override
-  bool matches(covariant AndroidSemanticsNode item, Map<Object, Object> matchState) {
+  bool matches(covariant AndroidSemanticsNode? item, Map<Object?, Object?> matchState) {
+    if (item == null) {
+      return false;
+    }
     if (text != null && text != item.text)
       return _failWithMessage('Expected text: $text', matchState);
     if (contentDescription != null && contentDescription != item.contentDescription)
@@ -145,8 +148,8 @@ class _AndroidSemanticsMatcher extends Matcher {
       return _failWithMessage('Expected size: $size', matchState);
     if (actions != null) {
       final List<AndroidSemanticsAction> itemActions = item.getActions();
-      if (!unorderedEquals(actions).matches(itemActions, matchState)) {
-        final List<String> actionsString = actions.map<String>((AndroidSemanticsAction action) => action.toString()).toList()..sort();
+      if (!unorderedEquals(actions!).matches(itemActions, matchState)) {
+        final List<String> actionsString = actions!.map<String>((AndroidSemanticsAction action) => action.toString()).toList()..sort();
         final List<String> itemActionsString = itemActions.map<String>((AndroidSemanticsAction action) => action.toString()).toList()..sort();
         final Set<String> unexpected = itemActionsString.toSet().difference(actionsString.toSet());
         final Set<String> missing = actionsString.toSet().difference(itemActionsString.toSet());
@@ -176,9 +179,14 @@ class _AndroidSemanticsMatcher extends Matcher {
   }
 
   @override
-  Description describeMismatch(Object item, Description mismatchDescription,
-      Map<Object, Object> matchState, bool verbose) {
-    return mismatchDescription.add(matchState['failure'] as String);
+  Description describeMismatch(
+    Object? item,
+    Description mismatchDescription,
+    Map<Object?, Object?> matchState,
+    bool verbose,
+  ) {
+    print(matchState);
+    return mismatchDescription.add(matchState['failure']! as String);
   }
 
   bool _failWithMessage(String value, Map<dynamic, dynamic> matchState) {
