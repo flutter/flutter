@@ -17,7 +17,7 @@ def main():
   parser.add_argument('--files', type=str, required=True, nargs='+')
   args = parser.parse_args()
 
-  open(args.stamp, 'wa').close()
+  open(args.stamp, 'a').close()
 
   bad_files = []
 
