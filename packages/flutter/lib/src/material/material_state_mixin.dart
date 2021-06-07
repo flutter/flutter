@@ -93,7 +93,11 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   ///       child: InkWell(
   ///         onHighlightChanged: updateMaterialState(
   ///           MaterialState.pressed,
-  ///           onChanged: (bool val) => val ? widget.onPressed() : null,
+  ///           onChanged: (bool val) {
+  ///             if (val) {
+  ///               widget.onPressed?.call();
+  ///             }
+  ///           },
   ///         ),
   ///       ),
   ///     );
