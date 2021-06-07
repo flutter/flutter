@@ -4,7 +4,7 @@
 
 // @dart = 2.8
 
-import 'package:flutter_devicelab/framework/adb.dart'
+import 'package:flutter_devicelab/framework/devices.dart'
     show DeviceOperatingSystem;
 import 'package:flutter_devicelab/framework/framework.dart' show task;
 import 'package:flutter_devicelab/tasks/platform_channels_benchmarks.dart'
