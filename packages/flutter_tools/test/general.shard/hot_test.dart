@@ -318,21 +318,6 @@ void main() {
         },
       );
 
-      final FakeReloadSourcesHelper fakeReloadSourcesHelper = FakeReloadSourcesHelper(
-        OperationResult.ok,
-        (Map<String, dynamic> firstReloadDetails) {
-          firstReloadDetails['finalLibraryCount'] = 2;
-          firstReloadDetails['receivedLibraryCount'] = 3;
-          firstReloadDetails['receivedClassesCount'] = 4;
-          firstReloadDetails['receivedProceduresCount'] = 5;
-        },
-      );
-
-      final FakeReassembleHelper fakeReassembleHelper = FakeReassembleHelper(ReassembleResult(
-        <FlutterView, FlutterVmService>{null: null},
-        false,
-        true));
-
       (fakeFlutterDevice.devFS as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
       final OperationResult result = await HotRunner(
@@ -341,8 +326,33 @@ void main() {
         target: 'main.dart',
         devtoolsHandler: createNoOpHandler,
         stopwatchFactory: fakeStopwatchFactory,
-        reloadSourcesHelper: fakeReloadSourcesHelper,
-        reassembleHelper: fakeReassembleHelper,
+        reloadSourcesHelper: (
+          HotRunner hotRunner,
+          List<FlutterDevice> flutterDevices,
+          bool pause,
+          Map<String, dynamic> firstReloadDetails,
+          String targetPlatform,
+          String sdkName,
+          bool emulator,
+          String reason,
+        ) async {
+          firstReloadDetails['finalLibraryCount'] = 2;
+          firstReloadDetails['receivedLibraryCount'] = 3;
+          firstReloadDetails['receivedClassesCount'] = 4;
+          firstReloadDetails['receivedProceduresCount'] = 5;
+          return OperationResult.ok;
+        },
+        reassembleHelper: (
+          List<FlutterDevice> flutterDevices,
+          Map<FlutterDevice, List<FlutterView>> viewCache,
+          void Function(String message) onSlow,
+          String reloadMessage,
+          String fastReassembleClassName,
+        ) async => ReassembleResult(
+            <FlutterView, FlutterVmService>{null: null},
+            false,
+            true,
+          ),
       ).restart(fullRestart: false);
 
       expect(result.isOk, true);
@@ -445,8 +455,6 @@ void main() {
 }
 
 class FakeDevFs extends Fake implements DevFS {
-  // UpdateFSReport updateReport;
-
   @override
   Future<void> destroy() async { }
 
@@ -615,41 +623,4 @@ class FakeVmService extends Fake implements vm_service.VmService {
 class FakeVm extends Fake implements vm_service.VM {
   @override
   List<vm_service.IsolateRef> get isolates => <vm_service.IsolateRef>[];
-}
-
-class FakeReloadSourcesHelper extends Fake implements ReloadSourcesHelper {
-  FakeReloadSourcesHelper(this.reloadResult, this.reloadCallback);
-
-  final OperationResult reloadResult;
-  void Function(Map<String, dynamic> firstReloadDetails) reloadCallback;
-
-  @override
-  Future<OperationResult> reload(
-    HotRunner hotRunner,
-    List<FlutterDevice> flutterDevices,
-    bool pause,
-    Map<String, dynamic> firstReloadDetails,
-    String targetPlatform,
-    String sdkName,
-    bool emulator,
-    String reason,
-  ) async {
-    reloadCallback(firstReloadDetails);
-    return reloadResult;
-  }
-}
-
-class FakeReassembleHelper extends Fake implements ReassembleHelper {
-  FakeReassembleHelper(this.reassembleResult);
-
-  final ReassembleResult reassembleResult;
-
-  @override
-  Future<ReassembleResult> reassemble(
-    List<FlutterDevice> flutterDevices,
-    Map<FlutterDevice, List<FlutterView>> viewCache,
-    void Function(String message) onSlow,
-    String reloadMessage,
-    String fastReassembleClassName,
-  ) async => reassembleResult;
 }
