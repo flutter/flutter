@@ -133,35 +133,27 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   }
 
   /// Getter for whether this class considers [MaterialState.disabled] to be active.
-  @protected
   bool get isDisabled => materialStates.contains(MaterialState.disabled);
 
   /// Getter for whether this class considers [MaterialState.dragged] to be active.
-  @protected
   bool get isDragged => materialStates.contains(MaterialState.dragged);
 
   /// Getter for whether this class considers [MaterialState.error] to be active.
-  @protected
   bool get isErrored => materialStates.contains(MaterialState.error);
 
   /// Getter for whether this class considers [MaterialState.focused] to be active.
-  @protected
   bool get isFocused => materialStates.contains(MaterialState.focused);
 
   /// Getter for whether this class considers [MaterialState.hovered] to be active.
-  @protected
   bool get isHovered => materialStates.contains(MaterialState.hovered);
 
   /// Getter for whether this class considers [MaterialState.pressed] to be active.
-  @protected
   bool get isPressed => materialStates.contains(MaterialState.pressed);
 
   /// Getter for whether this class considers [MaterialState.scrolledUnder] to be active.
-  @protected
   bool get isScrolledUnder => materialStates.contains(MaterialState.scrolledUnder);
 
   /// Getter for whether this class considers [MaterialState.selected] to be active.
-  @protected
   bool get isSelected => materialStates.contains(MaterialState.selected);
 
   @override
