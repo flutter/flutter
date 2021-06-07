@@ -226,6 +226,7 @@ targets:
 
   - name: linux_web_tool_tests
     builder: Linux web_tool_tests
+    bringup: true
     scheduler: luci
     runIf:
       - dev/
