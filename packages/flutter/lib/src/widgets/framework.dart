@@ -2056,7 +2056,8 @@ abstract class BuildContext {
   /// This method will only return a valid result after the build phase is
   /// complete. It is therefore not valid to call this from a build method.
   /// It should only be called from interaction event handlers (e.g.
-  /// gesture callbacks) or layout or paint callbacks.
+  /// gesture callbacks) or layout or paint callbacks. It is also not valid to
+  /// call if [State.mounted] returns false.
   ///
   /// If the render object is a [RenderBox], which is the common case, then the
   /// size of the render object can be obtained from the [size] getter. This is
@@ -3864,7 +3865,25 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  RenderObject? findRenderObject() => renderObject;
+  RenderObject? findRenderObject() {
+    assert(() {
+      if (_lifecycleState != _ElementLifecycle.active) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot get renderObject of inactive element.'),
+          ErrorDescription(
+            'In order for an element to have a valid renderObject, it must be '
+            'active, which means it is part of the tree.\n'
+            'Instead, this element is in the $_lifecycleState state.\n'
+            'If you called this method from a State object, consider guarding '
+            'it with State.mounted.',
+          ),
+          describeElement('The findRenderObject() method was called for the following element'),
+        ]);
+      }
+      return true;
+    }());
+    return renderObject;
+  }
 
   @override
   Size? get size {
