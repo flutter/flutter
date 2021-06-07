@@ -35,599 +35,601 @@ struct Color {
    */
   double alpha = 0.0;
 
-  Color() {}
+  constexpr Color() {}
 
   Color(const ColorHSB& hsbColor);
 
-  Color(double r, double g, double b, double a)
+  constexpr Color(double r, double g, double b, double a)
       : red(r), green(g), blue(b), alpha(a) {}
 
-  bool operator==(const Color& c) const {
+  constexpr bool operator==(const Color& c) const {
     return red == c.red && green == c.green && blue == c.blue &&
            alpha == c.alpha;
   }
-
-  Color operator+(const Color& other) const;
 
   std::string ToString() const;
 
   void FromString(const std::string& str);
 
-  static Color White() { return {1.0, 1.0, 1.0, 1.0}; }
+  static constexpr Color White() { return {1.0, 1.0, 1.0, 1.0}; }
 
-  static Color Black() { return {0.0, 0.0, 0.0, 1.0}; }
+  static constexpr Color Black() { return {0.0, 0.0, 0.0, 1.0}; }
 
-  static Color WhiteTransparent() { return {1.0, 1.0, 1.0, 0.0}; }
+  static constexpr Color WhiteTransparent() { return {1.0, 1.0, 1.0, 0.0}; }
 
-  static Color BlackTransparent() { return {0.0, 0.0, 0.0, 0.0}; }
+  static constexpr Color BlackTransparent() { return {0.0, 0.0, 0.0, 0.0}; }
 
-  static Color Red() { return {1.0, 0.0, 0.0, 1.0}; }
+  static constexpr Color Red() { return {1.0, 0.0, 0.0, 1.0}; }
 
-  static Color Green() { return {0.0, 1.0, 0.0, 1.0}; }
+  static constexpr Color Green() { return {0.0, 1.0, 0.0, 1.0}; }
 
-  static Color Blue() { return {0.0, 0.0, 1.0, 1.0}; }
+  static constexpr Color Blue() { return {0.0, 0.0, 1.0, 1.0}; }
 
-  static Color AliceBlue() {
+  static constexpr Color AliceBlue() {
     return {240.0 / 255.0, 248.0 / 255.0, 255.0 / 255.0, 1.0};
   }
 
-  static Color AntiqueWhite() {
+  static constexpr Color AntiqueWhite() {
     return {250.0 / 255.0, 235.0 / 255.0, 215.0 / 255.0, 1.0};
   }
 
-  static Color Aqua() {
+  static constexpr Color Aqua() {
     return {0.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0};
   }
 
-  static Color AquaMarine() {
+  static constexpr Color AquaMarine() {
     return {127.0 / 255.0, 255.0 / 255.0, 212.0 / 255.0, 1.0};
   }
 
-  static Color Azure() {
+  static constexpr Color Azure() {
     return {240.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0};
   }
 
-  static Color Beige() {
+  static constexpr Color Beige() {
     return {245.0 / 255.0, 245.0 / 255.0, 220.0 / 255.0, 1.0};
   }
 
-  static Color Bisque() {
+  static constexpr Color Bisque() {
     return {255.0 / 255.0, 228.0 / 255.0, 196.0 / 255.0, 1.0};
   }
 
-  static Color BlanchedAlmond() {
+  static constexpr Color BlanchedAlmond() {
     return {255.0 / 255.0, 235.0 / 255.0, 205.0 / 255.0, 1.0};
   }
 
-  static Color BlueViolet() {
+  static constexpr Color BlueViolet() {
     return {138.0 / 255.0, 43.0 / 255.0, 226.0 / 255.0, 1.0};
   }
 
-  static Color Brown() {
+  static constexpr Color Brown() {
     return {165.0 / 255.0, 42.0 / 255.0, 42.0 / 255.0, 1.0};
   }
 
-  static Color BurlyWood() {
+  static constexpr Color BurlyWood() {
     return {222.0 / 255.0, 184.0 / 255.0, 135.0 / 255.0, 1.0};
   }
 
-  static Color CadetBlue() {
+  static constexpr Color CadetBlue() {
     return {95.0 / 255.0, 158.0 / 255.0, 160.0 / 255.0, 1.0};
   }
 
-  static Color Chartreuse() {
+  static constexpr Color Chartreuse() {
     return {127.0 / 255.0, 255.0 / 255.0, 0.0 / 255.0, 1.0};
   }
 
-  static Color Chocolate() {
+  static constexpr Color Chocolate() {
     return {210.0 / 255.0, 105.0 / 255.0, 30.0 / 255.0, 1.0};
   }
 
-  static Color Coral() {
+  static constexpr Color Coral() {
     return {255.0 / 255.0, 127.0 / 255.0, 80.0 / 255.0, 1.0};
   }
 
-  static Color CornflowerBlue() {
+  static constexpr Color CornflowerBlue() {
     return {100.0 / 255.0, 149.0 / 255.0, 237.0 / 255.0, 1.0};
   }
 
-  static Color Cornsilk() {
+  static constexpr Color Cornsilk() {
     return {255.0 / 255.0, 248.0 / 255.0, 220.0 / 255.0, 1.0};
   }
 
-  static Color Crimson() {
+  static constexpr Color Crimson() {
     return {220.0 / 255.0, 20.0 / 255.0, 60.0 / 255.0, 1.0};
   }
 
-  static Color Cyan() {
+  static constexpr Color Cyan() {
     return {0.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0};
   }
 
-  static Color DarkBlue() {
+  static constexpr Color DarkBlue() {
     return {0.0 / 255.0, 0.0 / 255.0, 139.0 / 255.0, 1.0};
   }
 
-  static Color DarkCyan() {
+  static constexpr Color DarkCyan() {
     return {0.0 / 255.0, 139.0 / 255.0, 139.0 / 255.0, 1.0};
   }
 
-  static Color DarkGoldenrod() {
+  static constexpr Color DarkGoldenrod() {
     return {184.0 / 255.0, 134.0 / 255.0, 11.0 / 255.0, 1.0};
   }
 
-  static Color DarkGray() {
+  static constexpr Color DarkGray() {
     return {169.0 / 255.0, 169.0 / 255.0, 169.0 / 255.0, 1.0};
   }
 
-  static Color DarkGreen() {
+  static constexpr Color DarkGreen() {
     return {0.0 / 255.0, 100.0 / 255.0, 0.0 / 255.0, 1.0};
   }
 
-  static Color DarkGrey() {
+  static constexpr Color DarkGrey() {
     return {169.0 / 255.0, 169.0 / 255.0, 169.0 / 255.0, 1.0};
   }
 
-  static Color DarkKhaki() {
+  static constexpr Color DarkKhaki() {
     return {189.0 / 255.0, 183.0 / 255.0, 107.0 / 255.0, 1.0};
   }
 
-  static Color DarkMagenta() {
+  static constexpr Color DarkMagenta() {
     return {139.0 / 255.0, 0.0 / 255.0, 139.0 / 255.0, 1.0};
   }
 
-  static Color DarkOliveGreen() {
+  static constexpr Color DarkOliveGreen() {
     return {85.0 / 255.0, 107.0 / 255.0, 47.0 / 255.0, 1.0};
   }
 
-  static Color DarkOrange() {
+  static constexpr Color DarkOrange() {
     return {255.0 / 255.0, 140.0 / 255.0, 0.0 / 255.0, 1.0};
   }
 
-  static Color DarkOrchid() {
+  static constexpr Color DarkOrchid() {
     return {153.0 / 255.0, 50.0 / 255.0, 204.0 / 255.0, 1.0};
   }
 
-  static Color DarkRed() {
+  static constexpr Color DarkRed() {
     return {139.0 / 255.0, 0.0 / 255.0, 0.0 / 255.0, 1.0};
   }
 
-  static Color DarkSalmon() {
+  static constexpr Color DarkSalmon() {
     return {233.0 / 255.0, 150.0 / 255.0, 122.0 / 255.0, 1.0};
   }
 
-  static Color DarkSeagreen() {
+  static constexpr Color DarkSeagreen() {
     return {143.0 / 255.0, 188.0 / 255.0, 143.0 / 255.0, 1.0};
   }
 
-  static Color DarkSlateBlue() {
+  static constexpr Color DarkSlateBlue() {
     return {72.0 / 255.0, 61.0 / 255.0, 139.0 / 255.0, 1.0};
   }
 
-  static Color DarkSlateGray() {
+  static constexpr Color DarkSlateGray() {
     return {47.0 / 255.0, 79.0 / 255.0, 79.0 / 255.0, 1.0};
   }
 
-  static Color DarkSlateGrey() {
+  static constexpr Color DarkSlateGrey() {
     return {47.0 / 255.0, 79.0 / 255.0, 79.0 / 255.0, 1.0};
   }
 
-  static Color DarkTurquoise() {
+  static constexpr Color DarkTurquoise() {
     return {0.0 / 255.0, 206.0 / 255.0, 209.0 / 255.0, 1.0};
   }
 
-  static Color DarkViolet() {
+  static constexpr Color DarkViolet() {
     return {148.0 / 255.0, 0.0 / 255.0, 211.0 / 255.0, 1.0};
   }
 
-  static Color DeepPink() {
+  static constexpr Color DeepPink() {
     return {255.0 / 255.0, 20.0 / 255.0, 147.0 / 255.0, 1.0};
   }
 
-  static Color DeepSkyBlue() {
+  static constexpr Color DeepSkyBlue() {
     return {0.0 / 255.0, 191.0 / 255.0, 255.0 / 255.0, 1.0};
   }
 
-  static Color DimGray() {
+  static constexpr Color DimGray() {
     return {105.0 / 255.0, 105.0 / 255.0, 105.0 / 255.0, 1.0};
   }
 
-  static Color DimGrey() {
+  static constexpr Color DimGrey() {
     return {105.0 / 255.0, 105.0 / 255.0, 105.0 / 255.0, 1.0};
   }
 
-  static Color DodgerBlue() {
+  static constexpr Color DodgerBlue() {
     return {30.0 / 255.0, 144.0 / 255.0, 255.0 / 255.0, 1.0};
   }
 
-  static Color Firebrick() {
+  static constexpr Color Firebrick() {
     return {178.0 / 255.0, 34.0 / 255.0, 34.0 / 255.0, 1.0};
   }
 
-  static Color FloralWhite() {
+  static constexpr Color FloralWhite() {
     return {255.0 / 255.0, 250.0 / 255.0, 240.0 / 255.0, 1.0};
   }
 
-  static Color ForestGreen() {
+  static constexpr Color ForestGreen() {
     return {34.0 / 255.0, 139.0 / 255.0, 34.0 / 255.0, 1.0};
   }
 
-  static Color Fuchsia() {
+  static constexpr Color Fuchsia() {
     return {255.0 / 255.0, 0.0 / 255.0, 255.0 / 255.0, 1.0};
   }
 
-  static Color Gainsboro() {
+  static constexpr Color Gainsboro() {
     return {220.0 / 255.0, 220.0 / 255.0, 220.0 / 255.0, 1.0};
   }
 
-  static Color Ghostwhite() {
+  static constexpr Color Ghostwhite() {
     return {248.0 / 255.0, 248.0 / 255.0, 255.0 / 255.0, 1.0};
   }
 
-  static Color Gold() {
+  static constexpr Color Gold() {
     return {255.0 / 255.0, 215.0 / 255.0, 0.0 / 255.0, 1.0};
   }
 
-  static Color Goldenrod() {
+  static constexpr Color Goldenrod() {
     return {218.0 / 255.0, 165.0 / 255.0, 32.0 / 255.0, 1.0};
   }
 
-  static Color Gray() {
+  static constexpr Color Gray() {
     return {128.0 / 255.0, 128.0 / 255.0, 128.0 / 255.0, 1.0};
   }
 
-  static Color GreenYellow() {
+  static constexpr Color GreenYellow() {
     return {173.0 / 255.0, 255.0 / 255.0, 47.0 / 255.0, 1.0};
   }
 
-  static Color Grey() {
+  static constexpr Color Grey() {
     return {128.0 / 255.0, 128.0 / 255.0, 128.0 / 255.0, 1.0};
   }
 
-  static Color Honeydew() {
+  static constexpr Color Honeydew() {
     return {240.0 / 255.0, 255.0 / 255.0, 240.0 / 255.0, 1.0};
   }
 
-  static Color HotPink() {
+  static constexpr Color HotPink() {
     return {255.0 / 255.0, 105.0 / 255.0, 180.0 / 255.0, 1.0};
   }
 
-  static Color IndianRed() {
+  static constexpr Color IndianRed() {
     return {205.0 / 255.0, 92.0 / 255.0, 92.0 / 255.0, 1.0};
   }
 
-  static Color Indigo() {
+  static constexpr Color Indigo() {
     return {75.0 / 255.0, 0.0 / 255.0, 130.0 / 255.0, 1.0};
   }
 
-  static Color Ivory() {
+  static constexpr Color Ivory() {
     return {255.0 / 255.0, 255.0 / 255.0, 240.0 / 255.0, 1.0};
   }
 
-  static Color Khaki() {
+  static constexpr Color Khaki() {
     return {240.0 / 255.0, 230.0 / 255.0, 140.0 / 255.0, 1.0};
   }
 
-  static Color Lavender() {
+  static constexpr Color Lavender() {
     return {230.0 / 255.0, 230.0 / 255.0, 250.0 / 255.0, 1.0};
   }
 
-  static Color LavenderBlush() {
+  static constexpr Color LavenderBlush() {
     return {255.0 / 255.0, 240.0 / 255.0, 245.0 / 255.0, 1.0};
   }
 
-  static Color LawnGreen() {
+  static constexpr Color LawnGreen() {
     return {124.0 / 255.0, 252.0 / 255.0, 0.0 / 255.0, 1.0};
   }
 
-  static Color LemonChiffon() {
+  static constexpr Color LemonChiffon() {
     return {255.0 / 255.0, 250.0 / 255.0, 205.0 / 255.0, 1.0};
   }
 
-  static Color LightBlue() {
+  static constexpr Color LightBlue() {
     return {173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0, 1.0};
   }
 
-  static Color LightCoral() {
+  static constexpr Color LightCoral() {
     return {240.0 / 255.0, 128.0 / 255.0, 128.0 / 255.0, 1.0};
   }
 
-  static Color LightCyan() {
+  static constexpr Color LightCyan() {
     return {224.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0};
   }
 
-  static Color LightGoldenrodYellow() {
+  static constexpr Color LightGoldenrodYellow() {
     return {50.0 / 255.0, 250.0 / 255.0, 210.0 / 255.0, 1.0};
   }
 
-  static Color LightGray() {
+  static constexpr Color LightGray() {
     return {211.0 / 255.0, 211.0 / 255.0, 211.0 / 255.0, 1.0};
   }
 
-  static Color LightGreen() {
+  static constexpr Color LightGreen() {
     return {144.0 / 255.0, 238.0 / 255.0, 144.0 / 255.0, 1.0};
   }
 
-  static Color LightGrey() {
+  static constexpr Color LightGrey() {
     return {211.0 / 255.0, 211.0 / 255.0, 211.0 / 255.0, 1.0};
   }
 
-  static Color LightPink() {
+  static constexpr Color LightPink() {
     return {255.0 / 255.0, 182.0 / 255.0, 193.0 / 255.0, 1.0};
   }
 
-  static Color LightSalmon() {
+  static constexpr Color LightSalmon() {
     return {255.0 / 255.0, 160.0 / 255.0, 122.0 / 255.0, 1.0};
   }
 
-  static Color LightSeaGreen() {
+  static constexpr Color LightSeaGreen() {
     return {32.0 / 255.0, 178.0 / 255.0, 170.0 / 255.0, 1.0};
   }
 
-  static Color LightSkyBlue() {
+  static constexpr Color LightSkyBlue() {
     return {135.0 / 255.0, 206.0 / 255.0, 250.0 / 255.0, 1.0};
   }
 
-  static Color LightSlateGray() {
+  static constexpr Color LightSlateGray() {
     return {119.0 / 255.0, 136.0 / 255.0, 153.0 / 255.0, 1.0};
   }
 
-  static Color LightSlateGrey() {
+  static constexpr Color LightSlateGrey() {
     return {119.0 / 255.0, 136.0 / 255.0, 153.0 / 255.0, 1.0};
   }
 
-  static Color LightSteelBlue() {
+  static constexpr Color LightSteelBlue() {
     return {176.0 / 255.0, 196.0 / 255.0, 222.0 / 255.0, 1.0};
   }
 
-  static Color LightYellow() {
+  static constexpr Color LightYellow() {
     return {255.0 / 255.0, 255.0 / 255.0, 224.0 / 255.0, 1.0};
   }
 
-  static Color Lime() { return {0.0 / 255.0, 255.0 / 255.0, 0.0 / 255.0, 1.0}; }
+  static constexpr Color Lime() {
+    return {0.0 / 255.0, 255.0 / 255.0, 0.0 / 255.0, 1.0};
+  }
 
-  static Color LimeGreen() {
+  static constexpr Color LimeGreen() {
     return {50.0 / 255.0, 205.0 / 255.0, 50.0 / 255.0, 1.0};
   }
 
-  static Color Linen() {
+  static constexpr Color Linen() {
     return {250.0 / 255.0, 240.0 / 255.0, 230.0 / 255.0, 1.0};
   }
 
-  static Color Magenta() {
+  static constexpr Color Magenta() {
     return {255.0 / 255.0, 0.0 / 255.0, 255.0 / 255.0, 1.0};
   }
 
-  static Color Maroon() {
+  static constexpr Color Maroon() {
     return {128.0 / 255.0, 0.0 / 255.0, 0.0 / 255.0, 1.0};
   }
 
-  static Color MediumAquamarine() {
+  static constexpr Color MediumAquamarine() {
     return {102.0 / 255.0, 205.0 / 255.0, 170.0 / 255.0, 1.0};
   }
 
-  static Color MediumBlue() {
+  static constexpr Color MediumBlue() {
     return {0.0 / 255.0, 0.0 / 255.0, 205.0 / 255.0, 1.0};
   }
 
-  static Color MediumOrchid() {
+  static constexpr Color MediumOrchid() {
     return {186.0 / 255.0, 85.0 / 255.0, 211.0 / 255.0, 1.0};
   }
 
-  static Color MediumPurple() {
+  static constexpr Color MediumPurple() {
     return {147.0 / 255.0, 112.0 / 255.0, 219.0 / 255.0, 1.0};
   }
 
-  static Color MediumSeagreen() {
+  static constexpr Color MediumSeagreen() {
     return {60.0 / 255.0, 179.0 / 255.0, 113.0 / 255.0, 1.0};
   }
 
-  static Color MediumSlateBlue() {
+  static constexpr Color MediumSlateBlue() {
     return {123.0 / 255.0, 104.0 / 255.0, 238.0 / 255.0, 1.0};
   }
 
-  static Color MediumSpringGreen() {
+  static constexpr Color MediumSpringGreen() {
     return {0.0 / 255.0, 250.0 / 255.0, 154.0 / 255.0, 1.0};
   }
 
-  static Color MediumTurquoise() {
+  static constexpr Color MediumTurquoise() {
     return {72.0 / 255.0, 209.0 / 255.0, 204.0 / 255.0, 1.0};
   }
 
-  static Color MediumVioletRed() {
+  static constexpr Color MediumVioletRed() {
     return {199.0 / 255.0, 21.0 / 255.0, 133.0 / 255.0, 1.0};
   }
 
-  static Color MidnightBlue() {
+  static constexpr Color MidnightBlue() {
     return {25.0 / 255.0, 25.0 / 255.0, 112.0 / 255.0, 1.0};
   }
 
-  static Color MintCream() {
+  static constexpr Color MintCream() {
     return {245.0 / 255.0, 255.0 / 255.0, 250.0 / 255.0, 1.0};
   }
 
-  static Color MistyRose() {
+  static constexpr Color MistyRose() {
     return {255.0 / 255.0, 228.0 / 255.0, 225.0 / 255.0, 1.0};
   }
 
-  static Color Moccasin() {
+  static constexpr Color Moccasin() {
     return {255.0 / 255.0, 228.0 / 255.0, 181.0 / 255.0, 1.0};
   }
 
-  static Color NavajoWhite() {
+  static constexpr Color NavajoWhite() {
     return {255.0 / 255.0, 222.0 / 255.0, 173.0 / 255.0, 1.0};
   }
 
-  static Color Navy() { return {0.0 / 255.0, 0.0 / 255.0, 128.0 / 255.0, 1.0}; }
+  static constexpr Color Navy() {
+    return {0.0 / 255.0, 0.0 / 255.0, 128.0 / 255.0, 1.0};
+  }
 
-  static Color OldLace() {
+  static constexpr Color OldLace() {
     return {253.0 / 255.0, 245.0 / 255.0, 230.0 / 255.0, 1.0};
   }
 
-  static Color Olive() {
+  static constexpr Color Olive() {
     return {128.0 / 255.0, 128.0 / 255.0, 0.0 / 255.0, 1.0};
   }
 
-  static Color OliveDrab() {
+  static constexpr Color OliveDrab() {
     return {107.0 / 255.0, 142.0 / 255.0, 35.0 / 255.0, 1.0};
   }
 
-  static Color Orange() {
+  static constexpr Color Orange() {
     return {255.0 / 255.0, 165.0 / 255.0, 0.0 / 255.0, 1.0};
   }
 
-  static Color OrangeRed() {
+  static constexpr Color OrangeRed() {
     return {255.0 / 255.0, 69.0 / 255.0, 0.0 / 255.0, 1.0};
   }
 
-  static Color Orchid() {
+  static constexpr Color Orchid() {
     return {218.0 / 255.0, 112.0 / 255.0, 214.0 / 255.0, 1.0};
   }
 
-  static Color PaleGoldenrod() {
+  static constexpr Color PaleGoldenrod() {
     return {238.0 / 255.0, 232.0 / 255.0, 170.0 / 255.0, 1.0};
   }
 
-  static Color PaleGreen() {
+  static constexpr Color PaleGreen() {
     return {152.0 / 255.0, 251.0 / 255.0, 152.0 / 255.0, 1.0};
   }
 
-  static Color PaleTurquoise() {
+  static constexpr Color PaleTurquoise() {
     return {175.0 / 255.0, 238.0 / 255.0, 238.0 / 255.0, 1.0};
   }
 
-  static Color PaleVioletRed() {
+  static constexpr Color PaleVioletRed() {
     return {219.0 / 255.0, 112.0 / 255.0, 147.0 / 255.0, 1.0};
   }
 
-  static Color PapayaWhip() {
+  static constexpr Color PapayaWhip() {
     return {255.0 / 255.0, 239.0 / 255.0, 213.0 / 255.0, 1.0};
   }
 
-  static Color Peachpuff() {
+  static constexpr Color Peachpuff() {
     return {255.0 / 255.0, 218.0 / 255.0, 185.0 / 255.0, 1.0};
   }
 
-  static Color Peru() {
+  static constexpr Color Peru() {
     return {205.0 / 255.0, 133.0 / 255.0, 63.0 / 255.0, 1.0};
   }
 
-  static Color Pink() {
+  static constexpr Color Pink() {
     return {255.0 / 255.0, 192.0 / 255.0, 203.0 / 255.0, 1.0};
   }
 
-  static Color Plum() {
+  static constexpr Color Plum() {
     return {221.0 / 255.0, 160.0 / 255.0, 221.0 / 255.0, 1.0};
   }
 
-  static Color PowderBlue() {
+  static constexpr Color PowderBlue() {
     return {176.0 / 255.0, 224.0 / 255.0, 230.0 / 255.0, 1.0};
   }
 
-  static Color Purple() {
+  static constexpr Color Purple() {
     return {128.0 / 255.0, 0.0 / 255.0, 128.0 / 255.0, 1.0};
   }
 
-  static Color RosyBrown() {
+  static constexpr Color RosyBrown() {
     return {188.0 / 255.0, 143.0 / 255.0, 143.0 / 255.0, 1.0};
   }
 
-  static Color RoyalBlue() {
+  static constexpr Color RoyalBlue() {
     return {65.0 / 255.0, 105.0 / 255.0, 225.0 / 255.0, 1.0};
   }
 
-  static Color SaddleBrown() {
+  static constexpr Color SaddleBrown() {
     return {139.0 / 255.0, 69.0 / 255.0, 19.0 / 255.0, 1.0};
   }
 
-  static Color Salmon() {
+  static constexpr Color Salmon() {
     return {250.0 / 255.0, 128.0 / 255.0, 114.0 / 255.0, 1.0};
   }
 
-  static Color SandyBrown() {
+  static constexpr Color SandyBrown() {
     return {244.0 / 255.0, 164.0 / 255.0, 96.0 / 255.0, 1.0};
   }
 
-  static Color Seagreen() {
+  static constexpr Color Seagreen() {
     return {46.0 / 255.0, 139.0 / 255.0, 87.0 / 255.0, 1.0};
   }
 
-  static Color Seashell() {
+  static constexpr Color Seashell() {
     return {255.0 / 255.0, 245.0 / 255.0, 238.0 / 255.0, 1.0};
   }
 
-  static Color Sienna() {
+  static constexpr Color Sienna() {
     return {160.0 / 255.0, 82.0 / 255.0, 45.0 / 255.0, 1.0};
   }
 
-  static Color Silver() {
+  static constexpr Color Silver() {
     return {192.0 / 255.0, 192.0 / 255.0, 192.0 / 255.0, 1.0};
   }
 
-  static Color SkyBlue() {
+  static constexpr Color SkyBlue() {
     return {135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1.0};
   }
 
-  static Color SlateBlue() {
+  static constexpr Color SlateBlue() {
     return {106.0 / 255.0, 90.0 / 255.0, 205.0 / 255.0, 1.0};
   }
 
-  static Color SlateGray() {
+  static constexpr Color SlateGray() {
     return {112.0 / 255.0, 128.0 / 255.0, 144.0 / 255.0, 1.0};
   }
 
-  static Color SlateGrey() {
+  static constexpr Color SlateGrey() {
     return {112.0 / 255.0, 128.0 / 255.0, 144.0 / 255.0, 1.0};
   }
 
-  static Color Snow() {
+  static constexpr Color Snow() {
     return {255.0 / 255.0, 250.0 / 255.0, 250.0 / 255.0, 1.0};
   }
 
-  static Color SpringGreen() {
+  static constexpr Color SpringGreen() {
     return {0.0 / 255.0, 255.0 / 255.0, 127.0 / 255.0, 1.0};
   }
 
-  static Color SteelBlue() {
+  static constexpr Color SteelBlue() {
     return {70.0 / 255.0, 130.0 / 255.0, 180.0 / 255.0, 1.0};
   }
 
-  static Color Tan() {
+  static constexpr Color Tan() {
     return {210.0 / 255.0, 180.0 / 255.0, 140.0 / 255.0, 1.0};
   }
 
-  static Color Teal() {
+  static constexpr Color Teal() {
     return {0.0 / 255.0, 128.0 / 255.0, 128.0 / 255.0, 1.0};
   }
 
-  static Color Thistle() {
+  static constexpr Color Thistle() {
     return {216.0 / 255.0, 191.0 / 255.0, 216.0 / 255.0, 1.0};
   }
 
-  static Color Tomato() {
+  static constexpr Color Tomato() {
     return {255.0 / 255.0, 99.0 / 255.0, 71.0 / 255.0, 1.0};
   }
 
-  static Color Turquoise() {
+  static constexpr Color Turquoise() {
     return {64.0 / 255.0, 224.0 / 255.0, 208.0 / 255.0, 1.0};
   }
 
-  static Color Violet() {
+  static constexpr Color Violet() {
     return {238.0 / 255.0, 130.0 / 255.0, 238.0 / 255.0, 1.0};
   }
 
-  static Color Wheat() {
+  static constexpr Color Wheat() {
     return {245.0 / 255.0, 222.0 / 255.0, 179.0 / 255.0, 1.0};
   }
 
-  static Color Whitesmoke() {
+  static constexpr Color Whitesmoke() {
     return {245.0 / 255.0, 245.0 / 255.0, 245.0 / 255.0, 1.0};
   }
 
-  static Color Yellow() {
+  static constexpr Color Yellow() {
     return {255.0 / 255.0, 255.0 / 255.0, 0.0 / 255.0, 1.0};
   }
 
-  static Color YellowGreen() {
+  static constexpr Color YellowGreen() {
     return {154.0 / 255.0, 205.0 / 255.0, 50.0 / 255.0, 1.0};
   }
 };
