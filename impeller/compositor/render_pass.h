@@ -7,8 +7,10 @@
 #include <Metal/Metal.h>
 
 #include <map>
+#include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/compositor/command.h"
 #include "impeller/compositor/formats.h"
 #include "impeller/compositor/texture.h"
 #include "impeller/geometry/color.h"
@@ -68,6 +70,8 @@ class RenderPass {
 
   bool IsValid() const;
 
+  bool Record(Command command);
+
   bool Encode() const;
 
  private:
@@ -75,6 +79,7 @@ class RenderPass {
 
   id<MTLCommandBuffer> buffer_ = nil;
   MTLRenderPassDescriptor* desc_ = nil;
+  std::vector<Command> commands_;
   bool is_valid_ = false;
 
   RenderPass(id<MTLCommandBuffer> buffer, const RenderPassDescriptor& desc);
