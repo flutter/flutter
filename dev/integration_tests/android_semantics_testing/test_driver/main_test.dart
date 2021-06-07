@@ -658,6 +658,7 @@ void main() {
     group('Headings', () {
       setUpAll(() async {
         await driver.tap(find.text(headingsRoute));
+        await driver.waitFor(find.byValueKey(appBarTitleKeyValue));
       });
 
       test('AppBar title has correct Android heading semantics', () async {

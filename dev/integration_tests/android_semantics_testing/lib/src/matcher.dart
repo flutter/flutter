@@ -131,9 +131,8 @@ class _AndroidSemanticsMatcher extends Matcher {
 
   @override
   bool matches(covariant AndroidSemanticsNode? item, Map<Object?, Object?> matchState) {
-    if (item == null) {
-      return false;
-    }
+    if (item is! AndroidSemanticsNode)
+      return _failWithMessage('Expected an AndroidSemanticsNode, but got: $item', matchState);
     if (text != null && text != item.text)
       return _failWithMessage('Expected text: $text', matchState);
     if (contentDescription != null && contentDescription != item.contentDescription)
@@ -185,11 +184,10 @@ class _AndroidSemanticsMatcher extends Matcher {
     Map<Object?, Object?> matchState,
     bool verbose,
   ) {
-    print(matchState);
     return mismatchDescription.add(matchState['failure']! as String);
   }
 
-  bool _failWithMessage(String value, Map<dynamic, dynamic> matchState) {
+  bool _failWithMessage(String value, Map<Object?, Object?> matchState) {
     matchState['failure'] = value;
     return false;
   }
