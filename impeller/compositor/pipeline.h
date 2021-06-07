@@ -23,11 +23,15 @@ class Pipeline {
 
   bool IsValid() const;
 
+  id<MTLRenderPipelineState> GetMTLRenderPipelineState() const;
+
+  id<MTLDepthStencilState> GetMTLDepthStencilState() const;
+
  private:
   friend class PipelineLibrary;
 
   Type type_ = Type::kUnknown;
-  id<MTLRenderPipelineState> state_;
+  id<MTLRenderPipelineState> pipeline_state_;
   id<MTLDepthStencilState> depth_stencil_state_;
   bool is_valid_ = false;
 

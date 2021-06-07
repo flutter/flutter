@@ -84,6 +84,8 @@ class RenderPass {
 
   RenderPass(id<MTLCommandBuffer> buffer, const RenderPassDescriptor& desc);
 
+  bool EncodeCommands(id<MTLRenderCommandEncoder> pass) const;
+
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPass);
 };
 

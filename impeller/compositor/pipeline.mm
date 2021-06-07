@@ -8,8 +8,8 @@ namespace impeller {
 
 Pipeline::Pipeline(id<MTLRenderPipelineState> state,
                    id<MTLDepthStencilState> depth_stencil_state)
-    : state_(state), depth_stencil_state_(depth_stencil_state) {
-  if (!state_) {
+    : pipeline_state_(state), depth_stencil_state_(depth_stencil_state) {
+  if (!pipeline_state_) {
     return;
   }
   type_ = Type::kRender;
@@ -20,6 +20,14 @@ Pipeline::~Pipeline() = default;
 
 bool Pipeline::IsValid() const {
   return is_valid_;
+}
+
+id<MTLRenderPipelineState> Pipeline::GetMTLRenderPipelineState() const {
+  return pipeline_state_;
+}
+
+id<MTLDepthStencilState> Pipeline::GetMTLDepthStencilState() const {
+  return depth_stencil_state_;
 }
 
 }  // namespace impeller
