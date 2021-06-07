@@ -133,6 +133,57 @@ void testMain() {
     }, throwsAssertionError);
   });
 
+  test('handleNavigationMessage execute request in order.', () async {
+    // Start with multi entries.
+    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+      TestHistoryEntry('initial state', null, '/initial'),
+    ), useSingle: false);
+    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+    final List<String> executionOrder = <String>[];
+    window.handleNavigationMessage(
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'selectSingleEntryHistory',
+        null,
+      ))
+    ).then<void>((bool data) {
+      executionOrder.add('1');
+    });
+    window.handleNavigationMessage(
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'selectMultiEntryHistory',
+        null,
+      ))
+    ).then<void>((bool data) {
+      executionOrder.add('2');
+    });
+    window.handleNavigationMessage(
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'selectSingleEntryHistory',
+        null,
+      ))
+    ).then<void>((bool data) {
+      executionOrder.add('3');
+    });
+    await window.handleNavigationMessage(
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'routeInformationUpdated',
+        <String, dynamic>{
+          'location': '/baz',
+          'state': null,
+        }, // boom
+      ))
+    ).then<void>((bool data) {
+      executionOrder.add('4');
+    });
+    // The routeInformationUpdated should finish after the browser history
+    // has been set to single entry.
+    expect(executionOrder.length, 4);
+    expect(executionOrder[0], '1');
+    expect(executionOrder[1], '2');
+    expect(executionOrder[2], '3');
+    expect(executionOrder[3], '4');
+  });
+
   test('should not throw when using nav1 and nav2 together',
       () async {
     await window.debugInitializeHistory(TestUrlStrategy.fromEntry(

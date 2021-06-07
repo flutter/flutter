@@ -4,6 +4,8 @@
 
 part of engine;
 
+typedef _HandleMessageCallBack = Future<bool> Function();
+
 /// When set to true, all platform messages will be printed to the console.
 const bool /*!*/ _debugPrintPlatformMessages = false;
 
@@ -112,32 +114,50 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     _customUrlStrategy = null;
   }
 
-  Future<bool> handleNavigationMessage(ByteData? data) async {
-    final MethodCall decoded = JSONMethodCodec().decodeMethodCall(data);
-    final Map<String, dynamic>? arguments = decoded.arguments;
-    switch (decoded.method) {
-      case 'selectMultiEntryHistory':
-        await _useMultiEntryBrowserHistory();
-        return true;
-      case 'selectSingleEntryHistory':
-        await _useSingleEntryBrowserHistory();
-        return true;
-      // the following cases assert that arguments are not null
-      case 'routeUpdated': // deprecated
-        assert(arguments != null);
-        await _useSingleEntryBrowserHistory();
-        browserHistory.setRouteName(arguments!['routeName']);
-        return true;
-      case 'routeInformationUpdated':
-        assert(arguments != null);
-        browserHistory.setRouteName(
-          arguments!['location'],
-          state: arguments['state'],
-          replace: arguments['replace'] ?? false,
-        );
-        return true;
+  Future<void> _endOfTheLine = Future<void>.value(null);
+
+  Future<bool> _waitInTheLine(_HandleMessageCallBack callback) async {
+    final Future<void> currentPosition = _endOfTheLine;
+    final Completer<void> completer = Completer<void>();
+    _endOfTheLine = completer.future;
+    await currentPosition;
+    bool result = false;
+    try {
+      result = await callback();
+    } finally {
+      completer.complete();
     }
-    return false;
+    return result;
+  }
+
+  Future<bool> handleNavigationMessage(ByteData? data) async {
+    return _waitInTheLine(() async {
+      final MethodCall decoded = JSONMethodCodec().decodeMethodCall(data);
+      final Map<String, dynamic>? arguments = decoded.arguments;
+      switch (decoded.method) {
+        case 'selectMultiEntryHistory':
+          await _useMultiEntryBrowserHistory();
+          return true;
+        case 'selectSingleEntryHistory':
+          await _useSingleEntryBrowserHistory();
+          return true;
+        // the following cases assert that arguments are not null
+        case 'routeUpdated': // deprecated
+          assert(arguments != null);
+          await _useSingleEntryBrowserHistory();
+          browserHistory.setRouteName(arguments!['routeName']);
+          return true;
+        case 'routeInformationUpdated':
+          assert(arguments != null);
+          browserHistory.setRouteName(
+            arguments!['location'],
+            state: arguments['state'],
+            replace: arguments['replace'] ?? false,
+          );
+          return true;
+      }
+      return false;
+    });
   }
 
   @override
