@@ -192,12 +192,12 @@ void main() {
     });
 
     testWithoutContext('should not be up to date, if some cached artifact is not', () async {
-      final CachedArtifact artifact1 = MockCachedArtifact();
-      final CachedArtifact artifact2 = MockCachedArtifact();
+      final CachedArtifact artifact1 = FakeSecondayCachedArtifact()
+        ..upToDate = true;
+      final CachedArtifact artifact2 = FakeSecondayCachedArtifact()
+        ..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
 
-      when(artifact1.isUpToDate(fileSystem)).thenAnswer((Invocation _) => Future<bool>.value(true));
-      when(artifact2.isUpToDate(fileSystem)).thenAnswer((Invocation _) => Future<bool>.value(false));
       final Cache cache = Cache.test(
         fileSystem: fileSystem,
         artifacts: <CachedArtifact>[artifact1, artifact2],
@@ -208,12 +208,11 @@ void main() {
     });
 
     testWithoutContext('should be up to date, if all cached artifacts are', () async {
-      final CachedArtifact artifact1 = MockCachedArtifact();
-      final CachedArtifact artifact2 = MockCachedArtifact();
+      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+        ..upToDate = true;
+      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+        ..upToDate = true;
       final FileSystem fileSystem = MemoryFileSystem.test();
-
-      when(artifact1.isUpToDate(fileSystem)).thenAnswer((Invocation _) => Future<bool>.value(true));
-      when(artifact2.isUpToDate(fileSystem)).thenAnswer((Invocation _) => Future<bool>.value(true));
       final Cache cache = Cache.test(
         fileSystem: fileSystem,
         artifacts: <CachedArtifact>[artifact1, artifact2],
@@ -224,12 +223,12 @@ void main() {
     });
 
     testWithoutContext('should update cached artifacts which are not up to date', () async {
-      final CachedArtifact artifact1 = MockCachedArtifact();
-      final CachedArtifact artifact2 = MockCachedArtifact();
+      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+        ..upToDate = true;
+      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+        ..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
 
-      when(artifact1.isUpToDate(fileSystem)).thenAnswer((Invocation _) => Future<bool>.value(true));
-      when(artifact2.isUpToDate(fileSystem)).thenAnswer((Invocation _) => Future<bool>.value(false));
       final Cache cache = Cache.test(
         fileSystem: fileSystem,
         artifacts: <CachedArtifact>[artifact1, artifact2],
@@ -237,28 +236,25 @@ void main() {
       );
 
       await cache.updateAll(<DevelopmentArtifact>{
-        null,
+        DevelopmentArtifact.universal,
       });
-      verifyNever(artifact1.update(any, any, any, any));
-      verify(artifact2.update(any, any, any, any));
+      expect(artifact1.didUpdate, false);
+      expect(artifact2.didUpdate, true);
     });
 
     testWithoutContext("getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter", () async {
-      final IosUsbArtifacts artifact1 = MockIosUsbArtifacts();
-      final IosUsbArtifacts artifact2 = MockIosUsbArtifacts();
-      final IosUsbArtifacts artifact3 = MockIosUsbArtifacts();
-      when(artifact1.environment)
-          .thenReturn(<String, String>{
-            'DYLD_LIBRARY_PATH': '/path/to/alpha:/path/to/beta',
-          });
-      when(artifact2.environment)
-          .thenReturn(<String, String>{
-            'DYLD_LIBRARY_PATH': '/path/to/gamma:/path/to/delta:/path/to/epsilon',
-          });
-      when(artifact3.environment)
-          .thenReturn(<String, String>{
-            'DYLD_LIBRARY_PATH': '',
-          });
+      final FakeIosUsbArtifacts artifact1 = FakeIosUsbArtifacts();
+      final FakeIosUsbArtifacts artifact2 = FakeIosUsbArtifacts();
+      final FakeIosUsbArtifacts artifact3 = FakeIosUsbArtifacts();
+      artifact1.environment = <String, String>{
+        'DYLD_LIBRARY_PATH': '/path/to/alpha:/path/to/beta',
+      };
+      artifact2.environment = <String, String>{
+        'DYLD_LIBRARY_PATH': '/path/to/gamma:/path/to/delta:/path/to/epsilon',
+      };
+      artifact3.environment = <String, String>{
+        'DYLD_LIBRARY_PATH': '',
+      };
       final Cache cache = Cache.test(
         artifacts: <CachedArtifact>[artifact1, artifact2, artifact3],
         processManager: FakeProcessManager.any(),
@@ -272,15 +268,16 @@ void main() {
     });
 
     testWithoutContext('failed storage.googleapis.com download shows China warning', () async {
-      final CachedArtifact artifact1 = MockCachedArtifact();
-      final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate(any)).thenAnswer((Invocation _) => Future<bool>.value(false));
-      when(artifact2.isUpToDate(any)).thenAnswer((Invocation _) => Future<bool>.value(false));
       final InternetAddress address = (await InternetAddress.lookup('storage.googleapis.com')).first;
-      when(artifact1.update(any, any, any, any)).thenThrow(SocketException(
+      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+        ..upToDate = false;
+      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+        ..upToDate = false
+        ..updateException = SocketException(
         'Connection reset by peer',
         address: address,
-      ));
+      );
+
       final BufferLogger logger = BufferLogger.test();
       final Cache cache = Cache.test(
         artifacts: <CachedArtifact>[artifact1, artifact2],
@@ -288,12 +285,12 @@ void main() {
         logger: logger,
       );
       await expectLater(
-        () => cache.updateAll(<DevelopmentArtifact>{null}),
+        () => cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal}),
         throwsException,
       );
-      verify(artifact1.update(any, any, any, any));
+      expect(artifact1.didUpdate, true);
       // Don't continue when retrieval fails.
-      verifyNever(artifact2.update(any, any, any, any));
+      expect(artifact2.didUpdate, false);
       expect(
         logger.errorText,
         contains('https://flutter.dev/community/china'),
@@ -646,10 +643,10 @@ void main() {
 
   testWithoutContext('Cache can delete stampfiles of artifacts', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final FakeIosUsbArtifacts artifactSet = FakeIosUsbArtifacts();
     final BufferLogger logger = BufferLogger.test();
 
-    when(artifactSet.stampName).thenReturn('STAMP');
+    artifactSet.stampName = 'STAMP';
     final Cache cache = Cache(
       artifacts: <ArtifactSet>[
         artifactSet,
@@ -674,10 +671,10 @@ void main() {
 
    testWithoutContext('Cache does not attempt to delete already missing stamp files', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final FakeIosUsbArtifacts artifactSet = FakeIosUsbArtifacts();
     final BufferLogger logger = BufferLogger.test();
 
-    when(artifactSet.stampName).thenReturn('STAMP');
+    artifactSet.stampName = 'STAMP';
     final Cache cache = Cache(
       artifacts: <ArtifactSet>[
         artifactSet,
@@ -701,10 +698,10 @@ void main() {
 
   testWithoutContext('Cache catches file system exception from missing tool stamp file', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final FakeIosUsbArtifacts artifactSet = FakeIosUsbArtifacts();
     final BufferLogger logger = BufferLogger.test();
 
-    when(artifactSet.stampName).thenReturn('STAMP');
+    artifactSet.stampName = 'STAMP';
     final Cache cache = Cache(
       artifacts: <ArtifactSet>[
         artifactSet,
@@ -971,8 +968,33 @@ class FakeDownloadedArtifact extends CachedArtifact {
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
 }
 
-class MockCachedArtifact extends Mock implements CachedArtifact {}
-class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
+class FakeSecondayCachedArtifact extends Fake implements CachedArtifact {
+  bool upToDate = false;
+  bool didUpdate = false;
+  Exception updateException;
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
+
+  @override
+  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async {
+    if (updateException != null) {
+      throw updateException;
+    }
+    didUpdate = true;
+  }
+
+  @override
+  DevelopmentArtifact get developmentArtifact => DevelopmentArtifact.universal;
+}
+
+class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
+  @override
+  Map<String, String> environment =  <String, String>{};
+
+  @override
+  String stampName = 'ios-usb';
+}
 class MockCache extends Mock implements Cache {}
 
 class FakeVersionedPackageResolver extends Fake implements VersionedPackageResolver {
@@ -1015,6 +1037,7 @@ class FakeCache extends Cache {
     return stampFile;
   }
 }
+
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   bool reinitialized = false;
 

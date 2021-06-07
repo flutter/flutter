@@ -192,6 +192,22 @@ void main() {
     );
   });
 
+  testWithoutContext('serveAndAnnounceDevTools will bail if launching devtools fails', () async {
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher()..activeDevToolsServer = null,
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[], httpAddress: Uri.parse('http://localhost:1234'));
+
+    final FakeFlutterDevice device = FakeFlutterDevice()
+      ..vmService = fakeVmServiceHost.vmService;
+
+    await handler.serveAndAnnounceDevTools(
+      flutterDevices: <FlutterDevice>[device],
+    );
+  });
+
   testWithoutContext('serveAndAnnounceDevTools with web device', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),

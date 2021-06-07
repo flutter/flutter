@@ -40,6 +40,27 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
+  testWidgets('Changing query moves cursor to the end of query', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    delegate.query = 'Foo';
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
+    expect(
+      textField.controller!.selection,
+      TextSelection(
+        baseOffset: delegate.query.length,
+        extentOffset: delegate.query.length,
+      ),
+    );
+  });
+
   testWidgets('Can open and close search', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     final List<String> selectedResults = <String>[];

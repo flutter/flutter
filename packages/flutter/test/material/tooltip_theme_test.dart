@@ -865,7 +865,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(Duration.zero); // Should immediately disappear
+    await tester.pump(customWaitDuration);
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -909,7 +909,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(Duration.zero); // Should immediately disappear
+    await tester.pump(customWaitDuration); // Should disappear after customWaitDuration
     expect(find.text(tooltipText), findsNothing);
   });
 

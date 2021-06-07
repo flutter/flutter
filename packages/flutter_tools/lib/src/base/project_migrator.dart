@@ -21,7 +21,7 @@ abstract class ProjectMigrator {
 
   /// Return null if the line should be deleted.
   @protected
-  String migrateLine(String line) {
+  String? migrateLine(String line) {
     return line;
   }
 
@@ -41,7 +41,7 @@ abstract class ProjectMigrator {
 
     bool migrationRequired = false;
     for (final String line in lines) {
-      final String newProjectLine = migrateLine(line);
+      final String? newProjectLine = migrateLine(line);
       if (newProjectLine == null) {
         logger.printTrace('Migrating $basename, removing:');
         logger.printTrace('    $line');

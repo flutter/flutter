@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_devicelab/framework/host_agent.dart';
@@ -37,15 +39,7 @@ void main() {
       final FakePlatform fakePlatform = FakePlatform(environment: <String, String>{}, operatingSystem: 'windows');
       final HostAgent agent = HostAgent(platform: fakePlatform, fileSystem: fs);
 
-      expect(agent.dumpDirectory.existsSync(), isTrue);
-    });
-
-    test('is the same between host agent instances', () async {
-      final FakePlatform fakePlatform = FakePlatform(environment: <String, String>{}, operatingSystem: 'windows');
-      final HostAgent agent1 = HostAgent(platform: fakePlatform, fileSystem: fs);
-      final HostAgent agent2 = HostAgent(platform: fakePlatform, fileSystem: fs);
-
-      expect(agent1.dumpDirectory.path, agent2.dumpDirectory.path);
+      expect(agent.dumpDirectory, null);
     });
   });
 }
