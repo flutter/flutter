@@ -140,4 +140,13 @@ bool RenderPass::Encode() const {
   return true;
 }
 
+bool RenderPass::Record(Command command) {
+  if (!command) {
+    return false;
+  }
+
+  commands_.emplace_back(std::move(command));
+  return true;
+}
+
 }  // namespace impeller

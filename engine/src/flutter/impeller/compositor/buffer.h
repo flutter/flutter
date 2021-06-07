@@ -28,6 +28,8 @@ class BufferView final : public BufferBase {
   // |BufferBase|
   ~BufferView() = default;
 
+  const BufferBase* GetBuffer() const { return parent_.get(); }
+
   // |BufferBase|
   uint8_t* GetMapping() const override {
     return parent_->GetMapping() + range_in_parent_.offset;
@@ -44,8 +46,6 @@ class BufferView final : public BufferBase {
 
   BufferView(std::shared_ptr<BufferBase> parent, Range range_in_parent)
       : parent_(std::move(parent)), range_in_parent_(range_in_parent) {}
-
-  FML_DISALLOW_COPY_AND_ASSIGN(BufferView);
 };
 
 class Buffer {
