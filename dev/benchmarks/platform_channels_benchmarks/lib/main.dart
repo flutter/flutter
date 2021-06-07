@@ -126,8 +126,8 @@ Future<void> _runTests() async {
   /// `Large` tests.  Instead make a different test.  The size of largeBuffer
   /// serialized is 14214 bytes.
   final List<Object?> largeBuffer = _makeTestBuffer(1000);
-  final ByteData? largeBufferBytes =
-      const StandardMessageCodec().encodeMessage(largeBuffer);
+  final ByteData largeBufferBytes =
+      const StandardMessageCodec().encodeMessage(largeBuffer)!;
   final ByteData oneMB = ByteData(1024 * 1024);
 
   const int numMessages = 2500;
@@ -151,7 +151,7 @@ Future<void> _runTests() async {
     name: 'platform_channel_basic_standard_2host_large',
   );
   resetChannel.send(true);
-  await _runBasicBinary(basicBinary, largeBufferBytes!, 1); // Warmup.
+  await _runBasicBinary(basicBinary, largeBufferBytes, 1); // Warmup.
   printer.addResult(
     description: 'BasicMessageChannel/BinaryCodec/Flutter->Host/Large',
     value: await _runBasicBinary(basicBinary, largeBufferBytes, numMessages),
