@@ -10,7 +10,7 @@ export 'popup_constants.dart';
 
 /// A page with a popup menu, a dropdown menu, and a modal alert.
 class PopupControlsPage extends StatefulWidget {
-  const PopupControlsPage({Key? key}) : super(key: key);
+  const PopupControlsPage({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PopupControlsPageState();
@@ -22,7 +22,7 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
   final Key alertKey = const ValueKey<String>(alertKeyValue);
 
   String popupValue = popupItems.first;
-  String? dropdownValue = popupItems.first;
+  String dropdownValue = popupItems.first;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +60,7 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
                     child: Text(item),
                   );
                 }).toList(),
-                onChanged: (String? value) {
+                onChanged: (String value) {
                   setState(() {
                     dropdownValue = value;
                   });
