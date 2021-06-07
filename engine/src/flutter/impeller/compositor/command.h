@@ -27,6 +27,8 @@ struct Command {
   Bindings vertex_bindings;
   Bindings fragment_bindings;
   BufferView index_buffer;
+
+  constexpr operator bool() const { return pipeline && pipeline->IsValid(); }
 };
 
 }  // namespace impeller

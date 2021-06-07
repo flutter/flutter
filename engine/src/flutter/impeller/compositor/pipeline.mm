@@ -9,11 +9,17 @@ namespace impeller {
 Pipeline::Pipeline(id<MTLRenderPipelineState> state,
                    id<MTLDepthStencilState> depth_stencil_state)
     : state_(state), depth_stencil_state_(depth_stencil_state) {
-  if (state_ != nil) {
-    type_ = Type::kRender;
+  if (!state_) {
+    return;
   }
+  type_ = Type::kRender;
+  is_valid_ = true;
 }
 
 Pipeline::~Pipeline() = default;
+
+bool Pipeline::IsValid() const {
+  return is_valid_;
+}
 
 }  // namespace impeller
