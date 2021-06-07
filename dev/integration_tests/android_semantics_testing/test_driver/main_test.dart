@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart' hide isInstanceOf;
 
 String adbPath() {
-  final String? androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT'];
+  final String androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT'];
   if (androidHome == null) {
     return 'adb';
   } else {
@@ -21,7 +21,7 @@ String adbPath() {
 
 void main() {
   group('AccessibilityBridge', () {
-    late FlutterDriver driver;
+    FlutterDriver driver;
     Future<AndroidSemanticsNode> getSemantics(SerializableFinder finder) async {
       final int id = await driver.getSemanticsId(finder);
       final String data = await driver.requestData('getSemanticsNode#$id');
@@ -53,7 +53,7 @@ void main() {
         'null',
       ]);
       await run.exitCode;
-      driver.close();
+      driver?.close();
     });
 
     group('TextField', () {
