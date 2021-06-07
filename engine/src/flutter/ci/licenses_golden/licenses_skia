@@ -1,4 +1,4 @@
-Signature: 32da731ac6868b13d015d380da49ed94
+Signature: 04a59ef56c8304fca8dc0aeb9688abb8
 
 UNUSED LICENSES:
 
@@ -5767,6 +5767,7 @@ FILE: ../../../third_party/skia/experimental/ngatoy/SortKey.h
 FILE: ../../../third_party/skia/experimental/ngatoy/ngatoy.cpp
 FILE: ../../../third_party/skia/gm/destcolor.cpp
 FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
+FILE: ../../../third_party/skia/include/core/SkStringView.h
 FILE: ../../../third_party/skia/include/private/SkSLProgramKind.h
 FILE: ../../../third_party/skia/include/private/SkTOptional.h
 FILE: ../../../third_party/skia/include/sksl/DSLBlock.h
@@ -5777,6 +5778,7 @@ FILE: ../../../third_party/skia/include/sksl/DSLLayout.h
 FILE: ../../../third_party/skia/include/sksl/DSLRuntimeEffects.h
 FILE: ../../../third_party/skia/include/sksl/DSLStatement.h
 FILE: ../../../third_party/skia/include/sksl/DSLWrapper.h
+FILE: ../../../third_party/skia/src/core/SkStringView.cpp
 FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathCurveTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathCurveTessellator.h
