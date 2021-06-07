@@ -225,7 +225,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   // TODO(DanielEdrisian): Must make border radius continuous, see
   // https://github.com/flutter/flutter/issues/13914.
   final BorderRadius? borderRadius;
-  /// {@macro flutter.widgets.editableText.keyboardType}
+  /// Set keyboard type for the input field. Default to TextInputType.text.
   final TextInputType? keyboardType;
 
   /// Sets the padding insets for the text and placeholder.
