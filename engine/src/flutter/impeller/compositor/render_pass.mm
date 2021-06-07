@@ -4,8 +4,10 @@
 
 #include "impeller/compositor/render_pass.h"
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
 #include "impeller/compositor/formats_metal.h"
+#include "impeller/shader_glue/shader_types.h"
 
 namespace impeller {
 
@@ -136,7 +138,51 @@ bool RenderPass::Encode() const {
   if (!pass) {
     return false;
   }
-  [pass endEncoding];
+  // Success or failure, the pass must end. The buffer can only process one pass
+  // at a time.
+  fml::ScopedCleanupClosure auto_end([pass]() { [pass endEncoding]; });
+
+  return EncodeCommands(pass);
+}
+
+void Bind(ShaderStage stage, const BufferView& view) {}
+
+void Bind(ShaderStage stage, const Texture& view) {}
+
+void Bind(ShaderStage stage, const Sampler& view) {}
+
+bool RenderPass::EncodeCommands(id<MTLRenderCommandEncoder> pass) const {
+  // There a numerous opportunities here to ensure bindings are not repeated.
+  // Stuff like setting the vertex buffer bindings over and over when just the
+  // offsets could be updated (as recommended in best practices).
+
+  auto bind_stage_resources = [](const Bindings& bindings, ShaderStage stage) {
+    for (const auto buffer : bindings.buffers) {
+      Bind(stage, buffer.second);
+    }
+    for (const auto texture : bindings.textures) {
+      Bind(stage, *texture.second);
+    }
+    for (const auto sampler : bindings.samplers) {
+      Bind(stage, *sampler.second);
+    }
+  };
+  for (const auto& command : commands_) {
+    [pass setRenderPipelineState:command.pipeline->GetMTLRenderPipelineState()];
+    [pass setDepthStencilState:command.pipeline->GetMTLDepthStencilState()];
+    [pass setFrontFacingWinding:MTLWindingClockwise];
+    [pass setCullMode:MTLCullModeBack];
+    bind_stage_resources(command.vertex_bindings, ShaderStage::kVertex);
+    bind_stage_resources(command.fragment_bindings, ShaderStage::kFragment);
+    // [pass drawIndexedPrimitives:MTLPrimitiveTypeTriangleStrip
+    //                  indexCount:command.index_count
+    //                   indexType:MTLIndexTypeUInt32
+    //                 indexBuffer:command.index_buffer
+    //           indexBufferOffset:(NSUInteger)indexBufferOffset
+    //               instanceCount:1u
+    //                  baseVertex:0u
+    //                baseInstance:0u];
+  }
   return true;
 }
 

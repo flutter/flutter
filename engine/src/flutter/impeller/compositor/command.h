@@ -19,7 +19,7 @@ class Sampler;
 struct Bindings {
   std::map<size_t, BufferView> buffers;
   std::map<size_t, std::shared_ptr<Texture>> textures;
-  std::map<size_t, std::shared_ptr<Texture>> samplers;
+  std::map<size_t, std::shared_ptr<Sampler>> samplers;
 };
 
 struct Command {
@@ -27,6 +27,7 @@ struct Command {
   Bindings vertex_bindings;
   Bindings fragment_bindings;
   BufferView index_buffer;
+  size_t index_count = 0u;
 
   constexpr operator bool() const { return pipeline && pipeline->IsValid(); }
 };

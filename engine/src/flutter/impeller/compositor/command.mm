@@ -4,4 +4,10 @@
 
 #include "impeller/compositor/command.h"
 
-namespace impeller {}  // namespace impeller
+#include <Metal/Metal.h>
+
+namespace impeller {
+
+//
+
+}  // namespace impeller

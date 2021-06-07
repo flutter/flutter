@@ -5,6 +5,7 @@
 #include "impeller/compositor/allocator.h"
 
 #include "impeller/compositor/buffer.h"
+#include "impeller/compositor/device_buffer.h"
 
 namespace impeller {
 
