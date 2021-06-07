@@ -329,45 +329,6 @@ class FlutterVersion {
     return _branch!;
   }
 
-  /// The amount of time we wait before pinging the server to check for the
-  /// availability of a newer version of Flutter.
-  @visibleForTesting
-  static const Duration checkAgeConsideredUpToDate = Duration(days: 3);
-
-  /// We warn the user if the age of their Flutter installation is greater than
-  /// this duration. The durations are slightly longer than the expected release
-  /// cadence for each channel, to give the user a grace period before they get
-  /// notified.
-  ///
-  /// For example, for the beta channel, this is set to five weeks because
-  /// beta releases happen approximately every month.
-  @visibleForTesting
-  static Duration versionAgeConsideredUpToDate(String channel) {
-    switch (channel) {
-      case 'stable':
-        return const Duration(days: 365 ~/ 2); // Six months
-      case 'beta':
-        return const Duration(days: 7 * 8); // Eight weeks
-      case 'dev':
-        return const Duration(days: 7 * 4); // Four weeks
-      default:
-        return const Duration(days: 7 * 3); // Three weeks
-    }
-  }
-
-  /// The amount of time we wait between issuing a warning.
-  ///
-  /// This is to avoid annoying users who are unable to upgrade right away.
-  @visibleForTesting
-  static const Duration maxTimeSinceLastWarning = Duration(days: 1);
-
-  /// The amount of time we pause for to let the user read the message about
-  /// outdated Flutter installation.
-  ///
-  /// This can be customized in tests to speed them up.
-  @visibleForTesting
-  static Duration timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
-
   /// Reset the version freshness information by removing the stamp file.
   ///
   /// New version freshness information will be regenerated when

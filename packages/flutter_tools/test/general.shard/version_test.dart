@@ -20,8 +20,8 @@ import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
 final SystemClock _testClock = SystemClock.fixed(DateTime(2015, 1, 1));
-final DateTime _stampUpToDate = _testClock.ago(FlutterVersion.checkAgeConsideredUpToDate ~/ 2);
-final DateTime _stampOutOfDate = _testClock.ago(FlutterVersion.checkAgeConsideredUpToDate * 2);
+final DateTime _stampUpToDate = _testClock.ago(checkAgeConsideredUpToDate ~/ 2);
+final DateTime _stampOutOfDate = _testClock.ago(checkAgeConsideredUpToDate * 2);
 
 void main() {
   MockCache mockCache;
@@ -42,17 +42,17 @@ void main() {
 
   for (final String channel in kOfficialChannels) {
     DateTime getChannelUpToDateVersion() {
-      return _testClock.ago(FlutterVersion.versionAgeConsideredUpToDate(channel) ~/ 2);
+      return _testClock.ago(versionAgeConsideredUpToDate(channel) ~/ 2);
     }
 
     DateTime getChannelOutOfDateVersion() {
-      return _testClock.ago(FlutterVersion.versionAgeConsideredUpToDate(channel) * 2);
+      return _testClock.ago(versionAgeConsideredUpToDate(channel) * 2);
     }
 
     group('$FlutterVersion for $channel', () {
       setUpAll(() {
         Cache.disableLocking();
-        FlutterVersion.timeToPauseToLetUserReadTheMessage = Duration.zero;
+        timeToPauseToLetUserReadTheMessage = Duration.zero;
       });
 
       testUsingContext('prints nothing when Flutter installation looks fresh', () async {
