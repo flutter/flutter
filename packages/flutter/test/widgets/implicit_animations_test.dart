@@ -199,6 +199,9 @@ void main() {
       ),
     ));
 
+    final _TestAnimatedWidgetState state = tester.widget<TestAnimatedWidget>(
+      find.byType(TestAnimatedWidget)
+    ).state;
     final Finder switchFinder = find.byKey(switchKey);
     final ScaleTransition scaleWidget = tester.widget<ScaleTransition>(
       find.ancestor(
@@ -207,16 +210,23 @@ void main() {
       ).first,
     );
 
+    expect(state.builds, equals(1));
+
     await tester.tap(switchFinder);
+    expect(state.builds, equals(1));
     await tester.pump();
     expect(scaleWidget.scale.value, equals(1.0));
+    expect(state.builds, equals(2));
 
     await tester.pump(const Duration(milliseconds: 500));
     expect(scaleWidget.scale.value, equals(1.5));
+    expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
     expect(scaleWidget.scale.value, equals(1.75));
+    expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
     expect(scaleWidget.scale.value, equals(2.0));
+    expect(state.builds, equals(2));
   });
 
   testWidgets('AnimatedRotation onEnd callback test', (WidgetTester tester) async {
@@ -247,6 +257,9 @@ void main() {
       ),
     ));
 
+    final _TestAnimatedWidgetState state = tester.widget<TestAnimatedWidget>(
+        find.byType(TestAnimatedWidget)
+    ).state;
     final Finder switchFinder = find.byKey(switchKey);
     final RotationTransition rotationWidget = tester.widget<RotationTransition>(
       find.ancestor(
@@ -255,16 +268,23 @@ void main() {
       ).first,
     );
 
+    expect(state.builds, equals(1));
+
     await tester.tap(switchFinder);
+    expect(state.builds, equals(1));
     await tester.pump();
     expect(rotationWidget.turns.value, equals(0.0));
+    expect(state.builds, equals(2));
 
     await tester.pump(const Duration(milliseconds: 500));
     expect(rotationWidget.turns.value, equals(0.75));
+    expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
     expect(rotationWidget.turns.value, equals(1.125));
+    expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
     expect(rotationWidget.turns.value, equals(1.5));
+    expect(state.builds, equals(2));
   });
 
   testWidgets('AnimatedOpacity onEnd callback test', (WidgetTester tester) async {
@@ -295,6 +315,9 @@ void main() {
       ),
     ));
 
+    final _TestAnimatedWidgetState state = tester.widget<TestAnimatedWidget>(
+        find.byType(TestAnimatedWidget)
+    ).state;
     final Finder switchFinder = find.byKey(switchKey);
     final FadeTransition opacityWidget = tester.widget<FadeTransition>(
       find.ancestor(
@@ -303,16 +326,23 @@ void main() {
       ).first,
     );
 
+    expect(state.builds, equals(1));
+
     await tester.tap(switchFinder);
+    expect(state.builds, equals(1));
     await tester.pump();
     expect(opacityWidget.opacity.value, equals(0.0));
+    expect(state.builds, equals(2));
 
     await tester.pump(const Duration(milliseconds: 500));
     expect(opacityWidget.opacity.value, equals(0.5));
+    expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
     expect(opacityWidget.opacity.value, equals(0.75));
+    expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
     expect(opacityWidget.opacity.value, equals(1.0));
+    expect(state.builds, equals(2));
   });
 
 
@@ -343,6 +373,9 @@ void main() {
       ),
     ));
 
+    final _TestAnimatedWidgetState state = tester.widget<TestAnimatedWidget>(
+        find.byType(TestAnimatedWidget)
+    ).state;
     final Finder switchFinder = find.byKey(switchKey);
     final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
       find.ancestor(
@@ -351,16 +384,23 @@ void main() {
       ).first,
     );
 
+    expect(state.builds, equals(1));
+
     await tester.tap(switchFinder);
+    expect(state.builds, equals(1));
     await tester.pump();
     expect(opacityWidget.opacity.value, equals(0.0));
+    expect(state.builds, equals(2));
 
     await tester.pump(const Duration(milliseconds: 500));
     expect(opacityWidget.opacity.value, equals(0.5));
+    expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
     expect(opacityWidget.opacity.value, equals(0.75));
+    expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
     expect(opacityWidget.opacity.value, equals(1.0));
+    expect(state.builds, equals(2));
   });
 
   testWidgets('AnimatedDefaultTextStyle onEnd callback test', (WidgetTester tester) async {
@@ -519,7 +559,7 @@ class TestAnimatedWidget extends StatefulWidget {
   }) : super(key: key);
   final VoidCallback? callback;
   final Key switchKey;
-  final State<StatefulWidget> state;
+  final _TestAnimatedWidgetState state;
 
   @override
   State<StatefulWidget> createState() => state; // ignore: no_logic_in_create_state, this test predates the lint
@@ -527,6 +567,7 @@ class TestAnimatedWidget extends StatefulWidget {
 
 abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
   bool toggle = false;
+  int builds = 0;
   final Widget child = const Placeholder();
   final Duration duration = animationDuration;
 
@@ -540,6 +581,7 @@ abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
 
   @override
   Widget build(BuildContext context) {
+    builds++;
     final Widget animatedWidget = getAnimatedWidget();
 
     return Stack(
@@ -661,6 +703,7 @@ class _TestSliverAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
 
   @override
   Widget build(BuildContext context) {
+    builds++;
     final Widget animatedWidget = getAnimatedWidget();
 
     return Material(
