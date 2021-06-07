@@ -22,7 +22,7 @@ void RunLoop::Run() {
     MSG message;
     // All pending Windows messages must be processed; MsgWaitForMultipleObjects
     // won't return again for items left in the queue after PeekMessage.
-    while (::PeekMessage(&message, nullptr, 0, 0, PM_REMOVE)) {
+    while (::GetMessage(&message, nullptr, 0, 0)) {
       processed_events = true;
       if (message.message == WM_QUIT) {
         keep_running = false;
@@ -35,6 +35,8 @@ void RunLoop::Run() {
       next_flutter_event_time =
           std::min(next_flutter_event_time, ProcessFlutterMessages());
     }
+
+    keep_running = false;
     // If the PeekMessage loop didn't run, process Flutter messages.
     if (!processed_events) {
       next_flutter_event_time =
