@@ -261,7 +261,9 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
           /*shutdown_callback=*/
           reinterpret_cast<Dart_IsolateShutdownCallback>(
               DartIsolate::SpawnIsolateShutdownCallback),
-          /*cleanup_callback=*/nullptr,
+          /*cleanup_callback=*/
+          reinterpret_cast<Dart_IsolateCleanupCallback>(
+              DartIsolateCleanupCallback),
           /*child_isolate_data=*/isolate_data,
           /*error=*/error);
     };
