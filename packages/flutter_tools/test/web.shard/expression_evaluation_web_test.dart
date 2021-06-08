@@ -57,8 +57,7 @@ void main() {
       await start(expressionEvaluation: false);
       await breakInTopLevelFunction(flutter);
       await failToEvaluateExpression(flutter);
-    }, skip: true, // Flaky test: https://github.com/flutter/flutter/issues/84012
-    );
+    });
 
     testWithoutContext('shows no native javascript objects in static scope', () async {
       await start(expressionEvaluation: true);
@@ -76,8 +75,7 @@ void main() {
       await start(expressionEvaluation: true);
       await breakInTopLevelFunction(flutter);
       await evaluateTrivialExpressions(flutter);
-    }, skip: true, // Flaky test: https://github.com/flutter/flutter/issues/84012
-    );
+    });
 
     testWithoutContext('can evaluate trivial expressions in build method', () async {
       await start(expressionEvaluation: true);
@@ -106,8 +104,8 @@ void main() {
       await start(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
-  });
-
+  }, skip: true, // Flaky tests: https://github.com/flutter/flutter/issues/84012
+  );
 
   group('Flutter test for web', () {
     final TestsProject project = TestsProject();
@@ -172,7 +170,8 @@ void main() {
       await startPaused(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
-  });
+  }, skip: true, // Flaky tests: https://github.com/flutter/flutter/issues/84012
+  );
 }
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {
