@@ -6,6 +6,6 @@
 
 namespace impeller {
 
-//
+Buffer::~Buffer() = default;
 
 }  // namespace impeller
