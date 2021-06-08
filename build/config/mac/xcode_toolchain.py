@@ -18,7 +18,7 @@ def main(argv):
                       help='Whether to create a symlink in the buildroot to the SDK.')
   args = parser.parse_args()
 
-  path = subprocess.check_output(['/usr/bin/env', 'xcode-select', '-p']).strip()
+  path = subprocess.check_output(['/usr/bin/env', 'xcode-select', '-p']).decode('utf-8').strip()
   path = os.path.join(path, "Toolchains", "XcodeDefault.xctoolchain")
   assert os.path.exists(path)
 

@@ -38,7 +38,7 @@ def main():
         '. %s > /dev/null; %s -d' % (envsetup_cmd, os.path.abspath(__file__))
     ]
     try:
-      output = subprocess.check_output(full_cmd)
+      output = subprocess.check_output(full_cmd, universal_newlines=True)
     except Exception as e:
       sys.exit('Error running %s and dumping environment.' % envsetup_cmd)
 

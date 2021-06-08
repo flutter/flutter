@@ -237,7 +237,7 @@ def get_commit_range(start, finish):
   command = ['git', 'log', '--oneline', range_str]
   orig_dir = os.getcwd()
   os.chdir(dart_sdk_home())
-  result = subprocess.check_output(command)
+  result = subprocess.check_output(command).decode('utf-8')
   result = '\n'.join(['dart-lang/sdk@' + l for l in result.splitlines()])
   os.chdir(orig_dir)
   return result
@@ -247,7 +247,7 @@ def get_short_rev(rev):
   command = ['git', 'rev-parse', '--short', rev]
   orig_dir = os.getcwd()
   os.chdir(dart_sdk_home())
-  result = subprocess.check_output(command).rstrip()
+  result = subprocess.check_output(command).decode('utf-8').rstrip()
   os.chdir(orig_dir)
   return result
 

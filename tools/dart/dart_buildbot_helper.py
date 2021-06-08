@@ -87,7 +87,7 @@ def filter_builders(name, filter_by_list):
 
 
 def update_dart_sdk_repo():
-  subprocess.check_output(['git', 'pull', '--rebase'], cwd=DART_SDK_HOME)
+  subprocess.check_output(['git', 'pull', '--rebase'], cwd=DART_SDK_HOME).decode('utf-8')
 
 
 def get_builder_names(filter_by_list=['vm-', 'app-kernel', 'analyzer']):
@@ -115,14 +115,14 @@ def get_buildbot_states(builder_name):
 
 def get_dart_sdk_commits_in_range(start, end):
   args = ['git', 'log', '--pretty=oneline', '{}..{}'.format(start, end)]
-  output = subprocess.check_output(args, cwd=DART_SDK_HOME)
+  output = subprocess.check_output(args, cwd=DART_SDK_HOME).decode('utf-8')
   commits = [x.split(' ')[0] for x in output.splitlines()]
   return commits
 
 
 def get_commit_timestamp(commit):
   args = ['git', 'show', '-s', '--format=%at', commit]
-  return int(subprocess.check_output(args, cwd=DART_SDK_HOME))
+  return int(subprocess.check_output(args, cwd=DART_SDK_HOME)).decode('utf-8')
 
 
 def bucket_states_by_commit(builder_states):

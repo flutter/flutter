@@ -24,6 +24,6 @@ def CopyTool(source_path):
 
 # Find the tool source, it's the first argument, and copy it.
 if len(sys.argv) != 2:
-  print "Need one argument (mac_tool source path)."
+  print("Need one argument (mac_tool source path).")
   sys.exit(1)
 CopyTool(sys.argv[1])

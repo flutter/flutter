@@ -23,7 +23,7 @@ from pyutil.file_util import symlink
 
 def parse_version(version_str):
   """'10.6' => [10, 6]"""
-  return map(int, re.findall(r'(\d+)', version_str))
+  return [int(x) for x in re.findall(r'(\d+)', version_str)]
 
 
 def main():
@@ -44,6 +44,7 @@ def main():
   min_sdk_version = args[0]
 
   job = subprocess.Popen(['xcode-select', '-print-path'],
+                         universal_newlines=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
   out, err = job.communicate()
@@ -82,7 +83,7 @@ def main():
 
   if options.symlink or options.print_sdk_path:
     sdk_output = subprocess.check_output(['xcodebuild', '-version', '-sdk',
-                                          'macosx' + best_sdk, 'Path']).strip()
+                                          'macosx' + best_sdk, 'Path']).decode('utf-8').strip()
     if options.symlink:
       symlink_target = os.path.join(options.symlink, 'SDKs', os.path.basename(sdk_output))
       symlink(sdk_output, symlink_target)

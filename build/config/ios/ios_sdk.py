@@ -31,7 +31,7 @@ def main(argv):
     'Path'
   ]
 
-  sdk_output = subprocess.check_output(command).strip()
+  sdk_output = subprocess.check_output(command).decode('utf-8').strip()
   if args.symlink:
     symlink_target = os.path.join(args.symlink, 'SDKs', os.path.basename(sdk_output))
     symlink(sdk_output, symlink_target)
