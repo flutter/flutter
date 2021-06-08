@@ -6,6 +6,7 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
+#include "impeller/compositor/device_buffer.h"
 #include "impeller/compositor/formats_metal.h"
 #include "impeller/shader_glue/shader_types.h"
 
@@ -130,7 +131,7 @@ bool RenderPass::IsValid() const {
   return is_valid_;
 }
 
-bool RenderPass::Encode() const {
+bool RenderPass::Encode(Allocator& transients_allocator) const {
   if (!IsValid()) {
     return false;
   }
@@ -142,38 +143,85 @@ bool RenderPass::Encode() const {
   // at a time.
   fml::ScopedCleanupClosure auto_end([pass]() { [pass endEncoding]; });
 
-  return EncodeCommands(pass);
+  return EncodeCommands(transients_allocator, pass);
 }
 
-void Bind(ShaderStage stage, const BufferView& view) {}
+static bool Bind(id<MTLRenderCommandEncoder> pass,
+                 Allocator& allocator,
+                 ShaderStage stage,
+                 size_t bind_index,
+                 const BufferView& view) {
+  if (!view.buffer) {
+    return false;
+  }
 
-void Bind(ShaderStage stage, const Texture& view) {}
+  auto device_buffer = view.buffer->GetDeviceBuffer(allocator);
+  if (!device_buffer) {
+    return false;
+  }
 
-void Bind(ShaderStage stage, const Sampler& view) {}
+  auto buffer = device_buffer->GetMTLBuffer();
+  // The Metal call is a void return and we don't want to make it on nil.
+  if (!buffer) {
+    return false;
+  }
 
-bool RenderPass::EncodeCommands(id<MTLRenderCommandEncoder> pass) const {
+  [pass setVertexBuffer:buffer offset:view.range.offset atIndex:bind_index];
+  return true;
+}
+
+static bool Bind(Allocator& allocator,
+                 ShaderStage stage,
+                 size_t bind_index,
+                 const Texture& view) {
+  FML_CHECK(false);
+  return false;
+}
+
+static bool Bind(Allocator& allocator,
+                 ShaderStage stage,
+                 size_t bind_index,
+                 const Sampler& view) {
+  FML_CHECK(false);
+  return false;
+}
+
+bool RenderPass::EncodeCommands(Allocator& allocator,
+                                id<MTLRenderCommandEncoder> pass) const {
   // There a numerous opportunities here to ensure bindings are not repeated.
   // Stuff like setting the vertex buffer bindings over and over when just the
   // offsets could be updated (as recommended in best practices).
-
-  auto bind_stage_resources = [](const Bindings& bindings, ShaderStage stage) {
+  auto bind_stage_resources = [&allocator, pass](const Bindings& bindings,
+                                                 ShaderStage stage) -> bool {
     for (const auto buffer : bindings.buffers) {
-      Bind(stage, buffer.second);
+      if (!Bind(pass, allocator, stage, buffer.first, buffer.second)) {
+        return false;
+      }
     }
     for (const auto texture : bindings.textures) {
-      Bind(stage, *texture.second);
+      if (!Bind(allocator, stage, texture.first, *texture.second)) {
+        return false;
+      }
     }
     for (const auto sampler : bindings.samplers) {
-      Bind(stage, *sampler.second);
+      if (!Bind(allocator, stage, sampler.first, *sampler.second)) {
+        return false;
+      }
     }
+    return true;
   };
   for (const auto& command : commands_) {
     [pass setRenderPipelineState:command.pipeline->GetMTLRenderPipelineState()];
     [pass setDepthStencilState:command.pipeline->GetMTLDepthStencilState()];
     [pass setFrontFacingWinding:MTLWindingClockwise];
     [pass setCullMode:MTLCullModeBack];
-    bind_stage_resources(command.vertex_bindings, ShaderStage::kVertex);
-    bind_stage_resources(command.fragment_bindings, ShaderStage::kFragment);
+    if (!bind_stage_resources(command.vertex_bindings, ShaderStage::kVertex)) {
+      return false;
+    }
+    if (!bind_stage_resources(command.fragment_bindings,
+                              ShaderStage::kFragment)) {
+      return false;
+    }
     // [pass drawIndexedPrimitives:MTLPrimitiveTypeTriangleStrip
     //                  indexCount:command.index_count
     //                   indexType:MTLIndexTypeUInt32

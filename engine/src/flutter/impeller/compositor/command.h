@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "impeller/compositor/buffer.h"
+#include "impeller/compositor/buffer_view.h"
 #include "impeller/compositor/pipeline.h"
 
 namespace impeller {

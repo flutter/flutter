@@ -18,13 +18,18 @@ enum class StorageMode {
 };
 
 class Context;
-class Buffer;
+class DeviceBuffer;
 
 class Allocator {
  public:
   ~Allocator();
 
-  std::shared_ptr<Buffer> CreateBuffer(size_t length, std::string label);
+  bool IsValid() const;
+
+  std::shared_ptr<DeviceBuffer> CreateBuffer(StorageMode mode, size_t length);
+
+  std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(const uint8_t* buffer,
+                                                     size_t length);
 
  private:
   friend class Context;
@@ -33,10 +38,10 @@ class Allocator {
   // MTLDevice APIs. But, in the future, this could be backed by named heaps
   // with specific limits.
   id<MTLDevice> device_;
-  StorageMode mode_;
   std::string allocator_label_;
+  bool is_valid_ = false;
 
-  Allocator(id<MTLDevice> device, StorageMode type, std::string label);
+  Allocator(id<MTLDevice> device, std::string label);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Allocator);
 };

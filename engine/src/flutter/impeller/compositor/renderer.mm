@@ -48,7 +48,7 @@ bool Renderer::Render(const Surface& surface) {
   if (!render_pass) {
     return false;
   }
-  render_pass->Encode();
+  render_pass->Encode(*context_->GetTransientsAllocator());
 
   ::dispatch_semaphore_wait(frames_in_flight_sema_, DISPATCH_TIME_FOREVER);
 

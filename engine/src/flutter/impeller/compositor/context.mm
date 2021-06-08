@@ -6,6 +6,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
+#include "impeller/compositor/allocator.h"
 #include "impeller/compositor/command_buffer.h"
 #include "impeller/compositor/shader_library.h"
 
@@ -54,6 +55,14 @@ Context::Context(std::string shaders_directory)
         std::shared_ptr<PipelineLibrary>(new PipelineLibrary(device_));
   }
 
+  {
+    transients_allocator_ = std::shared_ptr<Allocator>(
+        new Allocator(device_, "Impeller Transients Allocator"));
+    if (!transients_allocator_) {
+      return;
+    }
+  }
+
   is_valid_ = true;
 }
 
@@ -82,6 +91,10 @@ std::shared_ptr<CommandBuffer> Context::CreateRenderCommandBuffer() const {
     return nullptr;
   }
   return buffer;
+}
+
+std::shared_ptr<Allocator> Context::GetTransientsAllocator() const {
+  return transients_allocator_;
 }
 
 }  // namespace impeller

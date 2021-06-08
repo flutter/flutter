@@ -6,16 +6,26 @@
 
 #include <Metal/Metal.h>
 
+#include <memory>
 #include <string>
 
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/allocator.h"
+#include "impeller/compositor/buffer.h"
+#include "impeller/compositor/range.h"
 
 namespace impeller {
 
-class Buffer {
+class DeviceBuffer final : public Buffer,
+                           public std::enable_shared_from_this<DeviceBuffer> {
  public:
-  ~Buffer();
+  ~DeviceBuffer();
+
+  [[nodiscard]] bool CopyHostBuffer(const uint8_t* source,
+                                    Range source_range,
+                                    size_t offset = 0u);
+
+  id<MTLBuffer> GetMTLBuffer() const;
 
  private:
   friend class Allocator;
@@ -23,14 +33,14 @@ class Buffer {
   const id<MTLBuffer> buffer_;
   const size_t size_;
   const StorageMode mode_;
-  const std::string label_;
 
-  Buffer(id<MTLBuffer> buffer,
-         size_t size,
-         StorageMode mode,
-         std::string label);
+  DeviceBuffer(id<MTLBuffer> buffer, size_t size, StorageMode mode);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Buffer);
+  // |Buffer|
+  std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
+      Allocator& allocator) const override;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(DeviceBuffer);
 };
 
 }  // namespace impeller
