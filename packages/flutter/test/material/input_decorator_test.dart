@@ -4119,7 +4119,6 @@ void main() {
       'helperMaxLines: 6',
       'hintStyle: TextStyle(<all styles inherited>)',
       'errorMaxLines: 5',
-      'hasFloatingPlaceholder: false',
       'floatingLabelBehavior: FloatingLabelBehavior.never',
       'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
       'prefixStyle: TextStyle(<all styles inherited>)',
