@@ -54,3 +54,31 @@ Upon successful completion of the release, the following command will remove the
 persistent state file:
 
 `conductor clean`
+
+## Steps
+
+### Initialize
+
+This step is triggered by the command `conductor start [...args]`
+
+### Apply Engine Cherrypicks
+### Codesign Engine Binaries
+
+Automated engine binary codesigning is not yet supported.
+
+The user must manually codesign engine binaries for the **merged** engine
+commit.
+
+### Apply Framework Cherrypicks
+### Publish Version
+
+This step will add a version git tag to the final Framework commit and push it
+to the upstream repository.
+
+No user intervention is necessary.
+
+### Publish Channel
+
+This step will update the upstream release branch.
+
+### Verify Release

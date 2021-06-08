@@ -304,10 +304,7 @@ class StartCommand extends Command<void> {
 
     state.logs.addAll(stdio.logs);
 
-    stateFile.writeAsStringSync(
-      jsonEncode(state.toProto3Json()),
-      flush: true,
-    );
+    writeStateToFile(stateFile, state);
 
     stdio.printStatus(presentState(state));
   }

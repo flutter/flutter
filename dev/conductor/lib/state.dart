@@ -4,6 +4,9 @@
 
 // @dart = 2.8
 
+import 'dart:convert' show jsonDecode, jsonEncode;
+
+import 'package:file/file.dart' show File;
 import 'package:platform/platform.dart';
 
 import './globals.dart';
@@ -169,4 +172,20 @@ ReleasePhase getNextPhase(ReleasePhase previousPhase) {
     throw ConductorException('There is no next ReleasePhase!');
   }
   return ReleasePhase.valueOf(previousPhase.value + 1);
+}
+
+void writeStateToFile(File file, pb.ConductorState state) {
+  file.writeAsStringSync(
+    jsonEncode(state.toProto3Json()),
+    flush: true,
+  );
+}
+
+pb.ConductorState readStateFromFile(File file) {
+  final pb.ConductorState state = pb.ConductorState();
+  final String stateAsString = file.readAsStringSync();
+  state.mergeFromProto3Json(
+    jsonDecode(stateAsString),
+  );
+  return state;
 }
