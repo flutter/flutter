@@ -550,7 +550,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           // Flush all past events
           handleTimeStampDiff.add(-timeDiff);
           for (final PointerEvent event in record.events) {
-            binding.handlePointerEvent(event, source: TestBindingEventSource.test);
+            binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
           }
         } else {
           await binding.pump();
@@ -559,7 +559,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
             binding.clock.now().difference(startTime) - record.timeDelay,
           );
           for (final PointerEvent event in record.events) {
-            binding.handlePointerEvent(event, source: TestBindingEventSource.test);
+            binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
           }
         }
       }
@@ -788,7 +788,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   Future<void> sendEventToBinding(PointerEvent event) {
     return TestAsyncUtils.guard<void>(() async {
-      binding.handlePointerEvent(event, source: TestBindingEventSource.test);
+      binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
     });
   }
 

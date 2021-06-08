@@ -85,8 +85,8 @@ void main() {
     expect(text.data, 'no-enter');
 
     // Focus on a TextFormField.
-    final Finder textFormFielsFinder = find.byKey(const Key('input2'));
-    expect(textFormFielsFinder, findsOneWidget);
+    final Finder textFormFieldsFinder = find.byKey(const Key('input2'));
+    expect(textFormFieldsFinder, findsOneWidget);
     await tester.tap(find.byKey(const Key('input2')));
 
     // // Press Tab. This should trigger `onFieldSubmitted` of TextField.

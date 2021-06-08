@@ -564,7 +564,8 @@ T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
 }
 
 String jsonEncode(dynamic data) {
-  return const JsonEncoder.withIndent('  ').convert(data) + '\n';
+  final String jsonValue = const JsonEncoder.withIndent('  ').convert(data);
+  return '$jsonValue\n';
 }
 
 Future<void> getNewGallery(String revision, Directory galleryDir) async {

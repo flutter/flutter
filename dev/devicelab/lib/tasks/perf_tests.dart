@@ -466,7 +466,7 @@ TaskFunction createFramePolicyIntegrationTest() {
       ) as Map<String, dynamic>;
       final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
       final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
-      final Map<String, dynamic> dataFormated = <String, dynamic>{
+      final Map<String, dynamic> dataFormatted = <String, dynamic>{
         'average_delay_fullyLive_millis':
           fullLiveData['average_delay_millis'],
         'average_delay_benchmarkLive_millis':
@@ -478,8 +478,8 @@ TaskFunction createFramePolicyIntegrationTest() {
       };
 
       return TaskResult.success(
-        dataFormated,
-        benchmarkScoreKeys: dataFormated.keys.toList(),
+        dataFormatted,
+        benchmarkScoreKeys: dataFormatted.keys.toList(),
       );
     });
   };
@@ -1004,7 +1004,7 @@ class WebCompileTest {
     sizeMetrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
 
     await Process.run('gzip',<String>['-k', '9', fileName]);
-    final ProcessResult resultGzip = await Process.run('du', <String>['-k', fileName + '.gz']);
+    final ProcessResult resultGzip = await Process.run('du', <String>['-k', '$fileName.gz']);
     sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
 
     return sizeMetrics;

@@ -43,7 +43,7 @@ void main() {
   test('debugPrint throttling', () {
     FakeAsync().run((FakeAsync async) {
       List<String> log = captureOutput(() {
-        debugPrintThrottled('A' * (22 * 1024) + '\nB');
+        debugPrintThrottled('${'A' * (22 * 1024)}\nB');
       });
       expect(log.length, 1);
       async.elapse(const Duration(seconds: 2));

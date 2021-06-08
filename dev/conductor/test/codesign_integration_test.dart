@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:dev_tools/codesign.dart' show CodesignCommand;
-import 'package:dev_tools/globals.dart';
-import 'package:dev_tools/repository.dart' show Checkouts;
+import 'package:conductor/codesign.dart' show CodesignCommand;
+import 'package:conductor/globals.dart';
+import 'package:conductor/repository.dart' show Checkouts;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
@@ -54,7 +54,7 @@ void main() {
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('codesign command is only supported on macos'),
     'linux': const Skip('codesign command is only supported on macos'),
-  });
+  }, skip: 'TODO(christopherfujino): https://github.com/flutter/flutter/issues/83448');
 }
 
 const String fixItInstructions = '''

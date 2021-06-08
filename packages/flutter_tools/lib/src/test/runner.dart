@@ -124,6 +124,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         '--total-shards=$totalShards',
       if (shardIndex != null)
         '--shard-index=$shardIndex',
+      '--chain-stack-traces',
     ];
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory

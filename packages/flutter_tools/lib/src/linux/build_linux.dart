@@ -131,7 +131,7 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
         '-G',
         'Ninja',
         '-DCMAKE_BUILD_TYPE=$buildFlag',
-        '-DFLUTTER_TARGET_PLATFORM=' + getNameForTargetPlatform(targetPlatform),
+        '-DFLUTTER_TARGET_PLATFORM=${getNameForTargetPlatform(targetPlatform)}',
         // Support cross-building for arm64 targets on x64 hosts.
         // (Cross-building for x64 on arm64 hosts isn't supported now.)
         if (needCrossBuild)

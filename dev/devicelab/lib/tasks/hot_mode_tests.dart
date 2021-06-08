@@ -95,7 +95,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
             if (hotReloadCount == 2) {
               // Trigger a framework invalidation (370 libraries) without modifying the source
               flutterFrameworkSource.writeAsStringSync(
-                flutterFrameworkSource.readAsStringSync() + '\n'
+                '${flutterFrameworkSource.readAsStringSync()}\n'
               );
               process.stdin.writeln('r');
               hotReloadCount += 1;

@@ -131,8 +131,8 @@ void main() {
       'Second line goes until\n'
       'Third line of stuff';
   const String kMoreThanFourLines =
-      kThreeLines +
-          "\nFourth line won't display and ends at";
+      '$kThreeLines\n'
+      "Fourth line won't display and ends at";
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {

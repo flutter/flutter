@@ -148,7 +148,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
       rawTime = '0$rawTime';
     }
     if (rawTime[4] == '/') {
-      rawTime = rawTime.substring(0, 3) + '0' + rawTime.substring(3);
+      rawTime = '${rawTime.substring(0, 3)}0${rawTime.substring(3)}';
     }
     final String year = rawTime.substring(6, 10);
     final String month = rawTime.substring(3, 5);
