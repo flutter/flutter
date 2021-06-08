@@ -488,7 +488,7 @@ void main() {
     await tester.tap(find.byKey(icon));
     await tester.pump();
     expect(controller.text, '');
-    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream));
   });
 
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
@@ -9717,5 +9717,44 @@ void main() {
       expect(state.currentTextEditingValue.text, '侬好啊旁友');
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
+  });
+
+  testWidgets('prefix/suffix buttons do not leak touch events', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/39376.
+
+    int textFieldTapCount = 0;
+    int prefixTapCount = 0;
+    int suffixTapCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            onTap: () { textFieldTapCount += 1; },
+            decoration: InputDecoration(
+              labelText: 'Label',
+              prefix: RaisedButton(
+                onPressed: () { prefixTapCount += 1; },
+                child: const Text('prefix'),
+              ),
+              suffix: RaisedButton(
+                onPressed: () { suffixTapCount += 1; },
+                child: const Text('suffix'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('prefix'));
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 0);
+
+    await tester.tap(find.text('suffix'));
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 1);
   });
 }

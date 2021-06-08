@@ -566,7 +566,7 @@ void main() {
                   padding: const EdgeInsets.symmetric(horizontal: 250),
                   child: FittedBox(
                     child: materialTextSelectionControls.buildHandle(
-                      context, TextSelectionHandleType.right, 10.0,
+                      context, TextSelectionHandleType.right, 10.0, null,
                     ),
                   ),
                 ),
