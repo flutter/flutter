@@ -23,18 +23,18 @@ void main() {
 
 const MethodChannel kSemanticsChannel = MethodChannel('semantics');
 
-Future<String> dataHandler(String? message) async {
-  if (message!.contains('getSemanticsNode')) {
+Future<String> dataHandler(String message) async {
+  if (message.contains('getSemanticsNode')) {
     final Completer<String> completer = Completer<String>();
     final int id = int.tryParse(message.split('#')[1]) ?? 0;
-    Future<void> completeSemantics([Object? _]) async {
+    Future<void> completeSemantics([Object _]) async {
       final dynamic result = await kSemanticsChannel.invokeMethod<dynamic>('getSemanticsNode', <String, dynamic>{
         'id': id,
       });
       completer.complete(json.encode(result));
     }
-    if (SchedulerBinding.instance!.hasScheduledFrame)
-      SchedulerBinding.instance!.addPostFrameCallback(completeSemantics);
+    if (SchedulerBinding.instance.hasScheduledFrame)
+      SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
     else
       completeSemantics();
     return completer.future;
@@ -50,7 +50,7 @@ Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
 };
 
 class TestApp extends StatelessWidget {
-  const TestApp({Key? key}) : super(key: key);
+  const TestApp({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
