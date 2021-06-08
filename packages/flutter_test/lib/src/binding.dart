@@ -457,22 +457,35 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// events from the device).
   Offset localToGlobal(Offset point) => point;
 
-  // The source of the current pointer event.
-  //
-  // The [pointerEventSource] is set as the `source` parameter of
-  // [handlePointerEvent] and can be used in the immediate enclosing
-  // [dispatchEvent].
+  /// The source of the current pointer event.
+  ///
+  /// The [pointerEventSource] is set as the `source` parameter of
+  /// [handlePointerEventForSource] and can be used in the immediate enclosing
+  /// [dispatchEvent].
+  TestBindingEventSource get pointerEventSource => _pointerEventSource;
   TestBindingEventSource _pointerEventSource = TestBindingEventSource.device;
 
-  @override
-  void handlePointerEvent(
+  /// Dispatch an event to the targets found by a hit test on its position,
+  /// and remember its source as [pointerEventSource].
+  ///
+  /// This method sets [pointerEventSource] to `source`, runs
+  /// [handlePointerEvent], then resets [pointerEventSource] to the previous
+  /// value.
+  void handlePointerEventForSource(
     PointerEvent event, {
     TestBindingEventSource source = TestBindingEventSource.device,
   }) {
+    withPointerEventSource(source, () => handlePointerEvent(event));
+  }
+
+  /// Sets [pointerEventSource] to `source`, runs `task`, then resets `source`
+  /// to the previous value.
+  @protected
+  void withPointerEventSource(TestBindingEventSource source, VoidCallback task) {
     final TestBindingEventSource previousSource = source;
     _pointerEventSource = source;
     try {
-      super.handlePointerEvent(event);
+      task();
     } finally {
       _pointerEventSource = previousSource;
     }
@@ -1490,11 +1503,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Apart from forwarding the event to [GestureBinding.dispatchEvent],
   /// This also paint all events that's down on the screen.
   @override
-  void handlePointerEvent(
-    PointerEvent event, {
-    TestBindingEventSource source = TestBindingEventSource.device,
-  }) {
-    switch (source) {
+  void handlePointerEvent(PointerEvent event) {
+    switch (pointerEventSource) {
       case TestBindingEventSource.test:
         final _LiveTestPointerRecord? record = _liveTestRenderView._pointers[event.pointer];
         if (record != null) {
@@ -1509,18 +1519,21 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           );
           _handleViewNeedsPaint();
         }
-        super.handlePointerEvent(event, source: TestBindingEventSource.test);
+        super.handlePointerEvent(event);
         break;
       case TestBindingEventSource.device:
-        if (deviceEventDispatcher != null)
-          super.handlePointerEvent(event, source: TestBindingEventSource.device);
+        if (deviceEventDispatcher != null) {
+          withPointerEventSource(TestBindingEventSource.device,
+            () => super.handlePointerEvent(event)
+          );
+        }
         break;
     }
   }
 
   @override
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
-    switch (_pointerEventSource) {
+    switch (pointerEventSource) {
       case TestBindingEventSource.test:
         super.dispatchEvent(event, hitTestResult);
         break;

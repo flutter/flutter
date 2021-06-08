@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -45,7 +44,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), null),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -94,7 +93,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), null),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -141,7 +140,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), null),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());

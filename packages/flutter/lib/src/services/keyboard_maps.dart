@@ -2880,7 +2880,7 @@ const Map<String, LogicalKeyboardKey> kWebNumPadMap = <String, LogicalKeyboardKe
 };
 
 /// A map of Web KeyboardEvent keys which needs to be decided based on location,
-/// typically for numpad kyes and modifier keys. Used to provide different key
+/// typically for numpad keys and modifier keys. Used to provide different key
 /// objects for keys like KEY_EQUALS and NUMPAD_EQUALS.
 const Map<String, List<LogicalKeyboardKey?>> kWebLocationMap = <String, List<LogicalKeyboardKey?>>{
   '0': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit0, null, null, LogicalKeyboardKey.numpad0],

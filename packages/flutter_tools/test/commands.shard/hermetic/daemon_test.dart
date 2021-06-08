@@ -298,6 +298,23 @@ void main() {
       await commands.close();
     });
 
+    testUsingContext('emulator.launch coldboot parameter must be boolean', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      final Map<String, dynamic> params = <String, dynamic>{'emulatorId': 'device', 'coldBoot': 1};
+      commands.add(<String, dynamic>{'id': 0, 'method': 'emulator.launch', 'params': params});
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      expect(response['error'], contains('coldBoot is not a bool'));
+      await responses.close();
+      await commands.close();
+    });
+
     testUsingContext('emulator.getEmulators should respond with list', () async {
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();

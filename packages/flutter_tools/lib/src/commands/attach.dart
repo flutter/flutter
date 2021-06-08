@@ -70,6 +70,7 @@ class AttachCommand extends FlutterCommand {
     usesDeviceUserOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesInitializeFromDillOption(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
