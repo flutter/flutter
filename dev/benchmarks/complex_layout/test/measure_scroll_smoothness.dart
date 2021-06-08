@@ -164,7 +164,7 @@ Future<void> main() async {
         } else if (delays.last < delay) {
           delays.last = delay;
         }
-        tester.binding.handlePointerEvent(event, source: TestBindingEventSource.test);
+        tester.binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
       }
     }
 
