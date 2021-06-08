@@ -1620,6 +1620,18 @@ void main() {
     expect(states, <String>['deactivate', 'dispose']);
   });
 
+  testWidgets('RenderObjectElement.unmount dispsoes of its renderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(const Placeholder());
+    final RenderObjectElement element = tester.allElements.whereType<RenderObjectElement>().first;
+    final RenderObject renderObject = element.renderObject;
+    expect(renderObject.debugDisposed, false);
+
+    await tester.pumpWidget(Container());
+
+    expect(() => element.renderObject, throwsAssertionError);
+    expect(renderObject.debugDisposed, true);
+  });
+
   testWidgets('Getting the render object of an unmounted element throws', (WidgetTester tester) async {
     await tester.pumpWidget(const _StatefulLeaf());
     final StatefulElement element = tester.element<StatefulElement>(find.byType(_StatefulLeaf));
