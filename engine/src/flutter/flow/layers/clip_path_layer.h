@@ -27,6 +27,10 @@ class ClipPathLayer : public ContainerLayer {
     return clip_behavior_ == Clip::antiAliasWithSaveLayer;
   }
 
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+  void UpdateScene(std::shared_ptr<SceneUpdateContext> context) override;
+#endif
+
  private:
   SkPath clip_path_;
   Clip clip_behavior_;

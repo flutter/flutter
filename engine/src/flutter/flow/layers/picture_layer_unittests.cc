@@ -53,6 +53,7 @@ TEST_F(PictureLayerTest, PaintingEmptyLayerDies) {
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
+  EXPECT_FALSE(layer->needs_system_composite());
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
                             "needs_painting\\(context\\)");
@@ -82,6 +83,7 @@ TEST_F(PictureLayerTest, SimplePicture) {
             picture_bounds.makeOffset(layer_offset.fX, layer_offset.fY));
   EXPECT_EQ(layer->picture(), mock_picture.get());
   EXPECT_TRUE(layer->needs_painting(paint_context()));
+  EXPECT_FALSE(layer->needs_system_composite());
 
   layer->Paint(paint_context());
   auto expected_draw_calls = std::vector(

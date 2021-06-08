@@ -22,6 +22,18 @@
 #include "third_party/skia/include/core/SkSurfaceCharacterization.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
+// When screenshotting we want to ensure we call the base method for
+// CompositorContext::AcquireFrame instead of the platform-specific method.
+// Specifically, Fuchsia's CompositorContext handles the rendering surface
+// itself which means that we will still continue to render to the onscreen
+// surface if we don't call the base method.
+// TODO(arbreng: fxb/55805)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+#define ACQUIRE_FRAME flutter::CompositorContext::AcquireFrame
+#else
+#define ACQUIRE_FRAME AcquireFrame
+#endif
+
 namespace flutter {
 
 // The rasterizer will tell Skia to purge cached resources that have not been
@@ -36,6 +48,19 @@ Rasterizer::Rasterizer(Delegate& delegate)
       weak_factory_(this) {
   FML_DCHECK(compositor_context_);
 }
+
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+// TODO(arbreng: fxb/55805)
+Rasterizer::Rasterizer(
+    Delegate& delegate,
+    std::unique_ptr<flutter::CompositorContext> compositor_context)
+    : delegate_(delegate),
+      compositor_context_(std::move(compositor_context)),
+      user_override_resource_cache_bytes_(false),
+      weak_factory_(this) {
+  FML_DCHECK(compositor_context_);
+}
+#endif
 
 Rasterizer::~Rasterizer() = default;
 
@@ -515,7 +540,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
 
   // TODO(amirh): figure out how to take a screenshot with embedded UIView.
   // https://github.com/flutter/flutter/issues/23435
-  auto frame = compositor_context.AcquireFrame(
+  auto frame = compositor_context.ACQUIRE_FRAME(
       nullptr, recorder.getRecordingCanvas(), nullptr,
       root_surface_transformation, false, true, nullptr);
   frame->Raster(*tree, true);
@@ -582,9 +607,9 @@ sk_sp<SkData> Rasterizer::ScreenshotLayerTreeAsImage(
     return nullptr;
   }
 
-  auto frame = compositor_context.AcquireFrame(surface_context, canvas, nullptr,
-                                               root_surface_transformation,
-                                               false, true, nullptr);
+  auto frame = compositor_context.ACQUIRE_FRAME(
+      surface_context, canvas, nullptr, root_surface_transformation, false,
+      true, nullptr);
   canvas->clear(SK_ColorTRANSPARENT);
   frame->Raster(*tree, true);
   canvas->flush();

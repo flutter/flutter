@@ -53,6 +53,19 @@ void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   context->cull_rect = previous_cull_rect;
 }
 
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+
+void ClipRectLayer::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
+  TRACE_EVENT0("flutter", "ClipRectLayer::UpdateScene");
+  FML_DCHECK(needs_system_composite());
+
+  // TODO(liyuqian): respect clip_behavior_
+  SceneUpdateContext::Clip clip(context, clip_rect_);
+  UpdateSceneChildren(context);
+}
+
+#endif
+
 void ClipRectLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ClipRectLayer::Paint");
   FML_DCHECK(needs_painting(context));

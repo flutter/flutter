@@ -34,6 +34,10 @@
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/logging/dart_error.h"
 
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+#include "flutter/lib/ui/compositing/scene_host.h"  // nogncheck
+#endif
+
 using tonic::ToDart;
 
 namespace flutter {
@@ -82,6 +86,9 @@ void DartUI::InitForGlobal() {
     SemanticsUpdateBuilder::RegisterNatives(g_natives);
     Vertices::RegisterNatives(g_natives);
     PlatformConfiguration::RegisterNatives(g_natives);
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+    SceneHost::RegisterNatives(g_natives);
+#endif
   }
 }
 

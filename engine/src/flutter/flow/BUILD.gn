@@ -80,6 +80,24 @@ source_set("flow") {
     "//flutter/fml",
     "//third_party/skia",
   ]
+
+  if (is_fuchsia && flutter_enable_legacy_fuchsia_embedder) {
+    sources += [
+      "layers/child_scene_layer.cc",
+      "layers/child_scene_layer.h",
+      "scene_update_context.cc",
+      "scene_update_context.h",
+      "view_holder.cc",
+      "view_holder.h",
+    ]
+
+    public_deps = [
+      "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
+      "$fuchsia_sdk_root/fidl:fuchsia.ui.gfx",
+      "$fuchsia_sdk_root/fidl:fuchsia.ui.views",
+      "$fuchsia_sdk_root/pkg:scenic_cpp",
+    ]
+  }
 }
 
 if (enable_unittests) {
@@ -175,6 +193,12 @@ if (enable_unittests) {
     if (is_win) {
       # Required for M_PI and others.
       defines += [ "_USE_MATH_DEFINES" ]
+    }
+
+    if (is_fuchsia && flutter_enable_legacy_fuchsia_embedder) {
+      sources += [ "layers/fuchsia_layer_unittests.cc" ]
+
+      deps += [ "//build/fuchsia/pkg:sys_cpp_testing" ]
     }
   }
 }

@@ -436,6 +436,30 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     _addSurface(PersistedPlatformView(viewId, dx, dy, width, height));
   }
 
+  /// (Fuchsia-only) Adds a scene rendered by another application to the scene
+  /// for this application.
+  @override
+  void addChildScene({
+    ui.Offset offset = ui.Offset.zero,
+    double width = 0.0,
+    double height = 0.0,
+    ui.SceneHost? sceneHost,
+    bool hitTestable = true,
+  }) {
+    _addChildScene(offset.dx, offset.dy, width, height, sceneHost, hitTestable);
+  }
+
+  void _addChildScene(
+    double dx,
+    double dy,
+    double width,
+    double height,
+    ui.SceneHost? sceneHost,
+    bool hitTestable,
+  ) {
+    throw UnimplementedError();
+  }
+
   /// Sets a threshold after which additional debugging information should be
   /// recorded.
   ///
