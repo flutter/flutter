@@ -21,19 +21,13 @@ class FlutterRunnerProductConfiguration {
   bool enable_shader_warmup_dart_hooks() {
     return enable_shader_warmup_dart_hooks_;
   }
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  bool use_legacy_renderer() { return use_legacy_renderer_; }
-#endif
 
  private:
   fml::TimeDelta vsync_offset_ = fml::TimeDelta::Zero();
   uint64_t max_frames_in_flight_ = 3;
   bool intercept_all_input_ = false;
-  bool enable_shader_warmup_ = true;
+  bool enable_shader_warmup_ = false;
   bool enable_shader_warmup_dart_hooks_ = true;
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  bool use_legacy_renderer_ = true;
-#endif
 };
 
 }  // namespace flutter_runner

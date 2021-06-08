@@ -10,7 +10,6 @@
 #include <lib/fidl/cpp/interface_handle.h>
 #include <lib/ui/scenic/cpp/session.h>
 
-#include "flutter/flow/scene_update_context.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 
@@ -40,7 +39,7 @@ static constexpr fml::TimeDelta kDefaultPresentationInterval =
 
 // The component residing on the raster thread that is responsible for
 // maintaining the Scenic session connection and presenting node updates.
-class DefaultSessionConnection final : public flutter::SessionWrapper {
+class DefaultSessionConnection final {
  public:
   static FlutterFrameTimes GetTargetTimes(fml::TimeDelta vsync_offset,
                                           fml::TimeDelta vsync_interval,
@@ -82,11 +81,11 @@ class DefaultSessionConnection final : public flutter::SessionWrapper {
 
   ~DefaultSessionConnection();
 
-  // |SessionWrapper|
-  scenic::Session* get() override { return &session_wrapper_; }
+  scenic::Session* get() { return &session_wrapper_; }
 
-  // |SessionWrapper|
-  void Present() override;
+  // Call to request that the all enqueued Session ops since the last |Present|
+  // be sent to Scenic.
+  void Present();
 
   // Used to implement VsyncWaiter functionality.
   void AwaitVsync(FireCallbackCallback callback);

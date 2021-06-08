@@ -86,12 +86,6 @@ template("runner_sources") {
       "vulkan_surface_producer.cc",
       "vulkan_surface_producer.h",
     ]
-    if (flutter_enable_legacy_fuchsia_embedder) {
-      sources += [
-        "compositor_context.cc",
-        "compositor_context.h",
-      ]
-    }
 
     public_configs = runner_configs
 

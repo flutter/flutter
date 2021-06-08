@@ -24,7 +24,6 @@ TEST_F(PhysicalShapeLayerTest, PaintingEmptyLayerDies) {
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
-  EXPECT_FALSE(layer->needs_system_composite());
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
                             "needs_painting\\(context\\)");
@@ -55,7 +54,6 @@ TEST_F(PhysicalShapeLayerTest, NonEmptyLayer) {
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), layer_path.getBounds());
   EXPECT_TRUE(layer->needs_painting(paint_context()));
-  EXPECT_FALSE(layer->needs_system_composite());
 
   SkPaint layer_paint;
   layer_paint.setColor(SK_ColorGREEN);
@@ -94,7 +92,6 @@ TEST_F(PhysicalShapeLayerTest, ChildrenLargerThanPath) {
   EXPECT_EQ(layer->paint_bounds(), layer_path.getBounds());
   EXPECT_NE(layer->paint_bounds(), child_paint_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
-  EXPECT_FALSE(layer->needs_system_composite());
 
   SkPaint layer_paint;
   layer_paint.setColor(SK_ColorGREEN);
@@ -130,12 +127,8 @@ TEST_F(PhysicalShapeLayerTest, ElevationSimple) {
             PhysicalShapeLayer::ComputeShadowBounds(layer_path.getBounds(),
                                                     initial_elevation, 1.0f));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
-  EXPECT_FALSE(layer->needs_system_composite());
   EXPECT_EQ(layer->elevation(), initial_elevation);
 
-  // The Fuchsia system compositor handles all elevated PhysicalShapeLayers and
-  // their shadows , so we do not use the direct |Paint()| path there.
-#if !defined(LEGACY_FUCHSIA_EMBEDDER)
   SkPaint layer_paint;
   layer_paint.setColor(SK_ColorGREEN);
   layer_paint.setAntiAlias(true);
@@ -146,7 +139,6 @@ TEST_F(PhysicalShapeLayerTest, ElevationSimple) {
           {MockCanvas::DrawCall{0, MockCanvas::DrawShadowData{layer_path}},
            MockCanvas::DrawCall{
                0, MockCanvas::DrawPathData{layer_path, layer_paint}}}));
-#endif
 }
 
 TEST_F(PhysicalShapeLayerTest, ElevationComplex) {
@@ -185,12 +177,8 @@ TEST_F(PhysicalShapeLayerTest, ElevationComplex) {
                   layer_path.getBounds(), initial_elevations[i],
                   1.0f /* pixel_ratio */)));
     EXPECT_TRUE(layers[i]->needs_painting(paint_context()));
-    EXPECT_FALSE(layers[i]->needs_system_composite());
   }
 
-  // The Fuchsia system compositor handles all elevated PhysicalShapeLayers and
-  // their shadows , so we do not use the direct |Paint()| path there.
-#if !defined(LEGACY_FUCHSIA_EMBEDDER)
   SkPaint layer_paint;
   layer_paint.setColor(SK_ColorBLACK);
   layer_paint.setAntiAlias(true);
@@ -210,7 +198,6 @@ TEST_F(PhysicalShapeLayerTest, ElevationComplex) {
            MockCanvas::DrawCall{0, MockCanvas::DrawShadowData{layer_path}},
            MockCanvas::DrawCall{
                0, MockCanvas::DrawPathData{layer_path, layer_paint}}}));
-#endif
 }
 
 static bool ReadbackResult(PrerollContext* context,
@@ -242,7 +229,7 @@ TEST_F(PhysicalShapeLayerTest, Readback) {
   const Clip save_layer = Clip::antiAliasWithSaveLayer;
 
   std::shared_ptr<MockLayer> nochild;
-  auto reader = std::make_shared<MockLayer>(path, paint, false, false, true);
+  auto reader = std::make_shared<MockLayer>(path, paint, false, true);
   auto nonreader = std::make_shared<MockLayer>(path, paint);
 
   // No children, no prior readback -> no readback after

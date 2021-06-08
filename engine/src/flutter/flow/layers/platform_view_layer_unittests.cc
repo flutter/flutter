@@ -29,11 +29,6 @@ TEST_F(PlatformViewLayerTest, NullViewEmbedderDoesntPrerollCompositeOrPaint) {
             SkRect::MakeSize(layer_size)
                 .makeOffset(layer_offset.fX, layer_offset.fY));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  EXPECT_TRUE(layer->needs_system_composite());
-#else
-  EXPECT_FALSE(layer->needs_system_composite());
-#endif  // LEGACY_FUCHSIA_EMBEDDER
   EXPECT_FALSE(layer->subtree_has_platform_view());
 
   layer->Paint(paint_context());
@@ -67,11 +62,6 @@ TEST_F(PlatformViewLayerTest, ClippedPlatformViewPrerollsAndPaintsNothing) {
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_TRUE(child_clip_layer->needs_painting(paint_context()));
   EXPECT_TRUE(parent_clip_layer->needs_painting(paint_context()));
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  EXPECT_TRUE(layer->needs_system_composite());
-#else
-  EXPECT_FALSE(layer->needs_system_composite());
-#endif  // LEGACY_FUCHSIA_EMBEDDER
   EXPECT_TRUE(layer->subtree_has_platform_view());
   EXPECT_TRUE(child_clip_layer->subtree_has_platform_view());
   EXPECT_TRUE(parent_clip_layer->subtree_has_platform_view());
