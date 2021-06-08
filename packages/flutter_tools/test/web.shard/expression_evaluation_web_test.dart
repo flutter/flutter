@@ -75,7 +75,8 @@ void main() {
       await start(expressionEvaluation: true);
       await breakInTopLevelFunction(flutter);
       await evaluateTrivialExpressions(flutter);
-    });
+    }, skip: true, // Flaky test: https://github.com/flutter/flutter/issues/84012
+    );
 
     testWithoutContext('can evaluate trivial expressions in build method', () async {
       await start(expressionEvaluation: true);
