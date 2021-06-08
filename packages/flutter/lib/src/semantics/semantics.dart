@@ -970,7 +970,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If a label is provided, there must either by an ambient [Directionality]
   /// or an explicit [textDirection] should be provided.
   ///
-  /// Only one of the [label] or [attributedLabel] should be provided.
+  /// Callers must not provide both [label] and [attributedLabel]. One or both
+  /// must be null.
   ///
   /// See also:
   ///
@@ -984,7 +985,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If a [attributedLabel] is provided, there must either by an ambient
   /// [Directionality] or an explicit [textDirection] should be provided.
   ///
-  /// Only one of the [label] or [attributedLabel] should be provided.
+  /// Callers must not provide both [label] and [attributedLabel]. One or both
+  /// must be null.
   ///
   /// See also:
   ///
@@ -998,7 +1000,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If a value is provided, there must either by an ambient [Directionality]
   /// or an explicit [textDirection] should be provided.
   ///
-  /// Only one of the [value] or [attributedValue] should be provided.
+  /// Callers must not provide both [value] and [attributedValue], One or both
+  /// must be null.
   ///
   /// See also:
   ///
@@ -1013,7 +1016,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If a [attributedValue] is provided, there must either by an ambient
   /// [Directionality] or an explicit [textDirection] should be provided.
   ///
-  /// Only one of the [value] or [attributedValue] should be provided.
+  /// Callers must not provide both [value] and [attributedValue], One or both
+  /// must be null.
   ///
   /// See also:
   ///
@@ -1029,8 +1033,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// either be an ambient [Directionality] or an explicit [textDirection]
   /// must be provided.
   ///
-  /// Only one of the [increasedValue] or [attributedIncreasedValue] should be
-  /// provided.
+  /// Callers must not provide both [increasedValue] and
+  /// [attributedIncreasedValue], One or both must be null.
   ///
   /// See also:
   ///
@@ -1047,8 +1051,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// and there must either be an ambient [Directionality] or an explicit
   /// [textDirection] must be provided.
   ///
-  /// Only one of the [increasedValue] or [attributedIncreasedValue] should be
-  /// provided.
+  /// Callers must not provide both [increasedValue] and
+  /// [attributedIncreasedValue], One or both must be null.
   ///
   /// See also:
   ///
@@ -1064,8 +1068,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// either be an ambient [Directionality] or an explicit [textDirection]
   /// must be provided.
   ///
-  /// Only one of the [decreasedValue] or [attributedDecreasedValue] should be
-  /// provided.
+  /// Callers must not provide both [decreasedValue] and
+  /// [attributedDecreasedValue], One or both must be null.
   ///
   /// See also:
   ///
@@ -1082,8 +1086,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// and there must either be an ambient [Directionality] or an explicit
   /// [textDirection] must be provided.
   ///
-  /// Only one of the [decreasedValue] or [attributedDecreasedValue] should be
-  /// provided.
+  /// Callers must not provide both [decreasedValue] and
+  /// [attributedDecreasedValue], One or both must be null/// provided.
   ///
   /// See also:
   ///
@@ -1098,7 +1102,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If a hint is provided, there must either be an ambient [Directionality]
   /// or an explicit [textDirection] should be provided.
   ///
-  /// Only one of the [hint] or [attributedHint] should be provided.
+  /// Callers must not provide both [hint] and [attributedHint], One or both
+  /// must be null.
   ///
   /// See also:
   ///
@@ -1113,7 +1118,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If a [attributedHint] is provided, there must either by an ambient
   /// [Directionality] or an explicit [textDirection] should be provided.
   ///
-  /// Only one of the [hint] or [attributedHint] should be provided.
+  /// Callers must not provide both [hint] and [attributedHint], One or both
+  /// must be null.
   ///
   /// See also:
   ///
