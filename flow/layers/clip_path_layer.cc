@@ -5,10 +5,6 @@
 #include "flutter/flow/layers/clip_path_layer.h"
 #include "flutter/flow/paint_utils.h"
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-#include "lib/ui/scenic/cpp/commands.h"
-#endif
-
 namespace flutter {
 
 ClipPathLayer::ClipPathLayer(const SkPath& clip_path, Clip clip_behavior)
@@ -57,19 +53,6 @@ void ClipPathLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   context->mutators_stack.Pop();
   context->cull_rect = previous_cull_rect;
 }
-
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-
-void ClipPathLayer::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
-  TRACE_EVENT0("flutter", "ClipPathLayer::UpdateScene");
-  FML_DCHECK(needs_system_composite());
-
-  // TODO(liyuqian): respect clip_behavior_
-  SceneUpdateContext::Clip clip(context, clip_path_.getBounds());
-  UpdateSceneChildren(context);
-}
-
-#endif
 
 void ClipPathLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ClipPathLayer::Paint");

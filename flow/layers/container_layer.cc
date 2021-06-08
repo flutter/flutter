@@ -127,14 +127,6 @@ void ContainerLayer::Paint(PaintContext& context) const {
 void ContainerLayer::PrerollChildren(PrerollContext* context,
                                      const SkMatrix& child_matrix,
                                      SkRect* child_paint_bounds) {
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  // If there is embedded Fuchsia content in the scene (a ChildSceneLayer),
-  // Layers that appear above the embedded content will be turned into their own
-  // Scenic layers.
-  child_layer_exists_below_ = context->child_scene_layer_exists_below;
-  context->child_scene_layer_exists_below = false;
-#endif
-
   // Platform views have no children, so context->has_platform_view should
   // always be false.
   FML_DCHECK(!context->has_platform_view);
@@ -147,10 +139,6 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
     context->has_platform_view = false;
 
     layer->Preroll(context, child_matrix);
-
-    if (layer->needs_system_composite()) {
-      set_needs_system_composite(true);
-    }
     child_paint_bounds->join(layer->paint_bounds());
 
     child_has_platform_view =
@@ -162,14 +150,6 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
   context->has_platform_view = child_has_platform_view;
   context->has_texture_layer = child_has_texture_layer;
   set_subtree_has_platform_view(child_has_platform_view);
-
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  if (child_layer_exists_below_) {
-    set_needs_system_composite(true);
-  }
-  context->child_scene_layer_exists_below =
-      context->child_scene_layer_exists_below || child_layer_exists_below_;
-#endif
 }
 
 void ContainerLayer::PaintChildren(PaintContext& context) const {
@@ -197,37 +177,6 @@ void ContainerLayer::TryToPrepareRasterCache(PrerollContext* context,
     context->raster_cache->Prepare(context, layer, matrix);
   }
 }
-
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-
-void ContainerLayer::CheckForChildLayerBelow(PrerollContext* context) {
-  // All ContainerLayers make the check in PrerollChildren.
-}
-
-void ContainerLayer::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
-  UpdateSceneChildren(context);
-}
-
-void ContainerLayer::UpdateSceneChildren(
-    std::shared_ptr<SceneUpdateContext> context) {
-  FML_DCHECK(needs_system_composite());
-
-  std::optional<SceneUpdateContext::Frame> frame;
-  if (child_layer_exists_below_) {
-    frame.emplace(
-        context, SkRRect::MakeRect(paint_bounds()), SK_ColorTRANSPARENT,
-        SkScalarRoundToInt(context->alphaf() * 255), "flutter::Layer");
-    frame->AddPaintLayer(this);
-  }
-
-  for (auto& layer : layers_) {
-    if (layer->needs_system_composite()) {
-      layer->UpdateScene(context);
-    }
-  }
-}
-
-#endif
 
 MergedContainerLayer::MergedContainerLayer() {
   // Ensure the layer has only one direct child.

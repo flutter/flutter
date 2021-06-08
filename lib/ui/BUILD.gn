@@ -152,19 +152,6 @@ source_set("ui") {
     # Required for M_PI and others.
     defines += [ "_USE_MATH_DEFINES" ]
   }
-
-  if (is_fuchsia && flutter_enable_legacy_fuchsia_embedder) {
-    sources += [
-      "compositing/scene_host.cc",
-      "compositing/scene_host.h",
-    ]
-
-    public_deps += [
-      "$fuchsia_sdk_root/pkg:async-cpp",
-      "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
-      "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
-    ]
-  }
 }
 
 if (enable_unittests) {
