@@ -128,7 +128,7 @@ class ProtocolDiscovery {
     } on FormatException catch (error, stackTrace) {
       _uriStreamController.addError(error, stackTrace);
     }
-    if (uri == null) {
+    if (uri == null || uri.host.isEmpty) {
       return;
     }
     if (devicePort != null && uri.port != devicePort) {

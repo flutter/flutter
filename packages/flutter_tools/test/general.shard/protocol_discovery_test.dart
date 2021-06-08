@@ -24,7 +24,7 @@ void main() {
         ipv6: false,
         hostPort: null,
         devicePort: null,
-        throttleDuration: const Duration(milliseconds: 200),
+        throttleDuration: const Duration(milliseconds: 5),
         logger: BufferLogger.test(),
       );
     });
@@ -43,6 +43,20 @@ void main() {
         logReader.addLine('HELLO WORLD');
         logReader.addLine('Observatory listening on http://127.0.0.1:9999');
         final Uri uri = await discoverer.uri;
+        expect(uri.port, 9999);
+        expect('$uri', 'http://127.0.0.1:9999');
+      });
+
+      testWithoutContext('does not discover uri with no host', () async {
+        final Future<Uri> pendingUri = discoverer.uri;
+        logReader.addLine('Observatory listening on http12asdasdsd9999');
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        logReader.addLine('Observatory listening on http://127.0.0.1:9999');
+
+        await Future<void>.delayed(Duration.zero);
+
+        final Uri uri = await pendingUri;
+        expect(uri, isNotNull);
         expect(uri.port, 9999);
         expect('$uri', 'http://127.0.0.1:9999');
       });

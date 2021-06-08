@@ -50,8 +50,8 @@ enum GradleBuildStatus {
   retryWithAarPlugins,
 }
 
-/// Returns a simple test function that evaluates to [true] if
-/// [errorMessage] is contained in the error message.
+/// Returns a simple test function that evaluates to `true` if at least one of
+/// `errorMessages` is contained in the error message.
 GradleErrorTest _lineMatcher(List<String> errorMessages) {
   return (String line) {
     return errorMessages.any((String errorMessage) => line.contains(errorMessage));
@@ -118,7 +118,7 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     'javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake',
     'java.net.SocketException: Connection reset',
     'java.io.FileNotFoundException',
-    'Gateway Time-out'
+    "> Could not get resource 'http",
   ]),
   handler: ({
     required String line,

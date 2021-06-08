@@ -993,7 +993,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha! > 0 && _alpha! < 255;
+      _currentlyNeedsCompositing = _alpha! > 0;
       if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
         markNeedsCompositingBitsUpdate();
       markNeedsPaint();
@@ -1008,12 +1008,6 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
       if (_alpha == 0) {
         // No need to keep the layer. We'll create a new one if necessary.
         layer = null;
-        return;
-      }
-      if (_alpha == 255) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        context.paintChild(child!, offset);
         return;
       }
       assert(needsCompositing);
@@ -3151,7 +3145,6 @@ class RenderRepaintBoundary extends RenderProxyBox {
     final OffsetLayer offsetLayer = layer! as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
-
 
   /// The number of times that this render object repainted at the same time as
   /// its parent. Repaint boundaries are only useful when the parent and child
