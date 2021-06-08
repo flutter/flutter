@@ -1678,6 +1678,8 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// this object applies its rotation prior to layout, which means the entire
 /// rotated box consumes only as much space as required by the rotated child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=BFE6_UglLfQ}
+///
 /// {@tool snippet}
 ///
 /// This snippet rotates the child (some [Text]) so that it renders from bottom
