@@ -453,7 +453,9 @@ abstract class CreateBase extends FlutterCommand {
         context: PubContext.create,
         directory: directory.path,
         offline: boolArg('offline'),
-        generateSyntheticPackage: false,
+        // For templates that use the l10n localization tooling, make sure
+        // importing the generated package works right after `flutter create`.
+        generateSyntheticPackage: true,
       );
 
       await project.ensureReadyForPlatformSpecificTooling(
