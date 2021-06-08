@@ -19,6 +19,7 @@ class MockLayer : public Layer {
   MockLayer(SkPath path,
             SkPaint paint = SkPaint(),
             bool fake_has_platform_view = false,
+            bool fake_needs_system_composite = false,
             bool fake_reads_surface = false);
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
@@ -45,6 +46,7 @@ class MockLayer : public Layer {
   SkPaint fake_paint_;
   bool parent_has_platform_view_ = false;
   bool fake_has_platform_view_ = false;
+  bool fake_needs_system_composite_ = false;
   bool fake_reads_surface_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(MockLayer);

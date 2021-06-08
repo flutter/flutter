@@ -113,6 +113,9 @@ TEST_F(LayerTreeTest, Multiple) {
   EXPECT_FALSE(mock_layer1->is_empty());
   EXPECT_FALSE(mock_layer2->is_empty());
   EXPECT_FALSE(layer->is_empty());
+  EXPECT_FALSE(mock_layer1->needs_system_composite());
+  EXPECT_FALSE(mock_layer2->needs_system_composite());
+  EXPECT_FALSE(layer->needs_system_composite());
   EXPECT_EQ(mock_layer1->parent_matrix(), root_transform());
   EXPECT_EQ(mock_layer2->parent_matrix(), root_transform());
   EXPECT_EQ(mock_layer1->parent_cull_rect(), kGiantRect);
@@ -146,6 +149,9 @@ TEST_F(LayerTreeTest, MultipleWithEmpty) {
   EXPECT_FALSE(mock_layer1->is_empty());
   EXPECT_TRUE(mock_layer2->is_empty());
   EXPECT_FALSE(layer->is_empty());
+  EXPECT_FALSE(mock_layer1->needs_system_composite());
+  EXPECT_FALSE(mock_layer2->needs_system_composite());
+  EXPECT_FALSE(layer->needs_system_composite());
   EXPECT_EQ(mock_layer1->parent_matrix(), root_transform());
   EXPECT_EQ(mock_layer2->parent_matrix(), root_transform());
   EXPECT_EQ(mock_layer1->parent_cull_rect(), kGiantRect);
@@ -163,7 +169,8 @@ TEST_F(LayerTreeTest, NeedsSystemComposite) {
   const SkPaint child_paint1(SkColors::kGray);
   const SkPaint child_paint2(SkColors::kGreen);
   auto mock_layer1 = std::make_shared<MockLayer>(
-      child_path1, child_paint1, false /* fake_has_platform_view */);
+      child_path1, child_paint1, false /* fake_has_platform_view */,
+      true /* fake_needs_system_composite */);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
   auto layer = std::make_shared<ContainerLayer>();
   layer->Add(mock_layer1);
@@ -179,6 +186,9 @@ TEST_F(LayerTreeTest, NeedsSystemComposite) {
   EXPECT_FALSE(mock_layer1->is_empty());
   EXPECT_FALSE(mock_layer2->is_empty());
   EXPECT_FALSE(layer->is_empty());
+  EXPECT_TRUE(mock_layer1->needs_system_composite());
+  EXPECT_FALSE(mock_layer2->needs_system_composite());
+  EXPECT_TRUE(layer->needs_system_composite());
   EXPECT_EQ(mock_layer1->parent_matrix(), root_transform());
   EXPECT_EQ(mock_layer2->parent_matrix(), root_transform());
   EXPECT_EQ(mock_layer1->parent_cull_rect(), kGiantRect);
