@@ -28,11 +28,10 @@ def main():
 def generate_gen_snapshot(directory, destination):
   gen_snapshot_dir = os.path.join(directory, 'clang_x64', 'gen_snapshot')
   if not os.path.isfile(gen_snapshot_dir):
-    print 'Cannot find gen_snapshot at', gen_snapshot_dir
+    print('Cannot find gen_snapshot at %s' % gen_snapshot_dir)
     sys.exit(1)
 
-  subprocess.check_call(['xcrun', 'bitcode_strip', '-r', gen_snapshot_dir,
-      '-o', destination])
+  subprocess.check_call(['xcrun', 'bitcode_strip', '-r', gen_snapshot_dir, '-o', destination])
 
 
 if __name__ == '__main__':
