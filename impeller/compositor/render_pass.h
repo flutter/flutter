@@ -72,7 +72,7 @@ class RenderPass {
 
   bool Record(Command command);
 
-  bool Encode() const;
+  bool Encode(Allocator& transients_allocator) const;
 
  private:
   friend class CommandBuffer;
@@ -84,7 +84,8 @@ class RenderPass {
 
   RenderPass(id<MTLCommandBuffer> buffer, const RenderPassDescriptor& desc);
 
-  bool EncodeCommands(id<MTLRenderCommandEncoder> pass) const;
+  bool EncodeCommands(Allocator& transients_allocator,
+                      id<MTLRenderCommandEncoder> pass) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPass);
 };

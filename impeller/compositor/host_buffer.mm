@@ -6,6 +6,9 @@
 
 #include "flutter/fml/logging.h"
 
+#include "impeller/compositor/allocator.h"
+#include "impeller/compositor/buffer_view.h"
+
 namespace impeller {
 
 std::shared_ptr<HostBuffer> HostBuffer::Create() {
@@ -18,13 +21,15 @@ HostBuffer::~HostBuffer() {
   ::free(buffer_);
 }
 
-std::shared_ptr<BufferView> HostBuffer::Emplace(size_t length) {
+BufferView HostBuffer::Emplace(const void* buffer, size_t length) {
   auto old_length = length_;
   if (!Truncate(length_ + length)) {
-    return nullptr;
+    return {};
   }
-  return std::shared_ptr<BufferView>(
-      new BufferView(shared_from_this(), Range{old_length, length}));
+  FML_DCHECK(buffer_);
+  generation_++;
+  ::memmove(buffer_, buffer, length);
+  return BufferView{shared_from_this(), Range{old_length, length}};
 }
 
 bool HostBuffer::Truncate(size_t length) {
@@ -70,6 +75,20 @@ bool HostBuffer::Reserve(size_t reserved) {
   buffer_ = static_cast<uint8_t*>(new_allocation);
   reserved_ = reserved;
   return true;
+}
+
+std::shared_ptr<const DeviceBuffer> HostBuffer::GetDeviceBuffer(
+    Allocator& allocator) const {
+  if (generation_ == device_buffer_generation_) {
+    return device_buffer_;
+  }
+  auto new_buffer = allocator.CreateBufferWithCopy(buffer_, length_);
+  if (!new_buffer) {
+    return nullptr;
+  }
+  device_buffer_generation_ = generation_;
+  device_buffer_ = std::move(new_buffer);
+  return device_buffer_;
 }
 
 }  // namespace impeller
