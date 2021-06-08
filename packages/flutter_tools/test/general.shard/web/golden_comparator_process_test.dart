@@ -39,7 +39,7 @@ void main() {
         'message': 'some message',
       };
 
-      final FakeProcess mockProcess = createFakeProcess(jsonEncode(expectedResponse) + '\n');
+      final FakeProcess mockProcess = createFakeProcess('${jsonEncode(expectedResponse)}\n');
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
       final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());
@@ -62,7 +62,7 @@ void main() {
         'message': 'some other message',
       };
 
-      final FakeProcess mockProcess = createFakeProcess(jsonEncode(expectedResponse1) + '\n' + jsonEncode(expectedResponse2) + '\n');
+      final FakeProcess mockProcess = createFakeProcess('${jsonEncode(expectedResponse1)}\n${jsonEncode(expectedResponse2)}\n');
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
       final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());

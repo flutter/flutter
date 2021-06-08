@@ -367,7 +367,7 @@ Review licenses that have not been accepted (y/N)?
     );
 
     // Test with valid SDK and valid build tools
-    // Will still be partial because AnroidSdk.findJavaBinary is static :(
+    // Will still be partial because AndroidSdk.findJavaBinary is static :(
     sdkVersion.sdkLevel = kAndroidSdkMinVersion;
     sdkVersion.buildToolsVersion = kAndroidSdkBuildToolsMinVersion;
 
@@ -395,11 +395,13 @@ Review licenses that have not been accepted (y/N)?
       userMessages: UserMessages(),
     );
 
+    final String errorMessage = UserMessages().androidMissingCmdTools;
+
     final ValidationResult validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.missing);
     expect(
       validationResult.messages.last.message,
-      'cmdline-tools component is missing',
+      errorMessage,
     );
   });
 

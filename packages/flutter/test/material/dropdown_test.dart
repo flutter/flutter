@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -61,7 +62,7 @@ Widget buildDropdown({
     return DropdownMenuItem<String>(
       key: ValueKey<String>(item),
       value: item,
-      child: Text(item, key: ValueKey<String>(item + 'Text')),
+      child: Text(item, key: ValueKey<String>('${item}Text')),
     );
   }).toList();
 
@@ -230,7 +231,7 @@ class _TestAppState extends State<TestApp> {
 // The RenderParagraphs should be aligned, i.e. they should have the same
 // size and location.
 void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
-  final List<RenderBox> boxes = tester.renderObjectList<RenderBox>(find.byKey(ValueKey<String>(value + 'Text'))).toList();
+  final List<RenderBox> boxes = tester.renderObjectList<RenderBox>(find.byKey(ValueKey<String>('${value}Text'))).toList();
   expect(boxes.length, equals(2));
   final RenderBox box0 = boxes[0];
   final RenderBox box1 = boxes[1];
@@ -2470,7 +2471,7 @@ void main() {
                     return DropdownMenuItem<String>(
                       key: ValueKey<String>(item),
                       value: item,
-                      child: Text(item, key: ValueKey<String>(item + 'Text')),
+                      child: Text(item, key: ValueKey<String>('${item}Text')),
                     );
                   }).toList(),
                 );
@@ -2566,7 +2567,7 @@ void main() {
                     return DropdownMenuItem<String>(
                       key: ValueKey<String>(item),
                       value: item,
-                      child: Text(item, key: ValueKey<String>(item + 'Text')),
+                      child: Text(item, key: ValueKey<String>('${item}Text')),
                     );
                   }).toList(),
                 );
@@ -2818,7 +2819,7 @@ void main() {
                     return DropdownMenuItem<String>(
                       key: ValueKey<String>(item),
                       value: item,
-                      child: Text(item, key: ValueKey<String>(item + 'Text')),
+                      child: Text(item, key: ValueKey<String>('${item}Text')),
                     );
                   }).toList(),
                 );
@@ -3449,4 +3450,26 @@ void main() {
     await gesture.moveTo(offDropdownButton);
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
+
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to Dropdown', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83819
+    // Open the dropdown menu
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      value: null, // nothing selected
+      items: List<String>.generate(100, (int index) => index.toString()),
+      onChanged: onChanged,
+    ));
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pump();
+    await tester.pumpAndSettle(); // finish the menu animation
+
+    // The inherited ScrollBehavior should not apply Scrollbars since they are
+    // already built in to the widget.
+    expect(find.byType(CupertinoScrollbar), findsNothing);
+    expect(find.byType(Scrollbar), findsOneWidget);
+    expect(find.byType(RawScrollbar), findsNothing);
+
+  }, variant: TargetPlatformVariant.all());
 }

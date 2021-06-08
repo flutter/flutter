@@ -23,7 +23,7 @@ void main() {
         driver.close();
     });
 
-    test('inital tree creation', () async {
+    test('initial tree creation', () async {
       // Let app become fully idle.
       await Future<void>.delayed(const Duration(seconds: 2));
 

@@ -798,44 +798,39 @@ void main() {
 
   group('toString() gives toString() of delegate', () {
     testWithoutContext('ErrorHandlingFileSystem', () {
-      final MockFileSystem mockFileSystem = MockFileSystem();
+      final MemoryFileSystem delegate = MemoryFileSystem.test();
       final FileSystem fs = ErrorHandlingFileSystem(
-        delegate: mockFileSystem,
+        delegate: delegate,
         platform: const LocalPlatform(),
       );
 
-      expect(mockFileSystem.toString(), isNotNull);
-      expect(fs.toString(), equals(mockFileSystem.toString()));
+      expect(delegate.toString(), isNotNull);
+      expect(fs.toString(), delegate.toString());
     });
 
     testWithoutContext('ErrorHandlingFile', () {
-      final MockFileSystem mockFileSystem = MockFileSystem();
+      final MemoryFileSystem delegate = MemoryFileSystem.test();
       final FileSystem fs = ErrorHandlingFileSystem(
-        delegate: mockFileSystem,
+        delegate: delegate,
         platform: const LocalPlatform(),
       );
-      final MockFile mockFile = MockFile();
-      when(mockFileSystem.file(any)).thenReturn(mockFile);
+      final File file = delegate.file('file');
 
-      expect(mockFile.toString(), isNotNull);
-      expect(fs.file('file').toString(), equals(mockFile.toString()));
+      expect(file.toString(), isNotNull);
+      expect(fs.file('file').toString(), file.toString());
     });
 
     testWithoutContext('ErrorHandlingDirectory', () {
-      final MockFileSystem mockFileSystem = MockFileSystem();
+      final MemoryFileSystem delegate = MemoryFileSystem.test();
       final FileSystem fs = ErrorHandlingFileSystem(
-        delegate: mockFileSystem,
+        delegate: delegate,
         platform: const LocalPlatform(),
       );
-      final MockDirectory mockDirectory = MockDirectory();
-      when(mockFileSystem.directory(any)).thenReturn(mockDirectory);
+      final Directory directory = delegate.directory('directory')..createSync();
+      expect(fs.directory('directory').toString(), directory.toString());
+      delegate.currentDirectory = directory;
 
-      expect(mockDirectory.toString(), isNotNull);
-      expect(fs.directory('directory').toString(), equals(mockDirectory.toString()));
-
-      when(mockFileSystem.currentDirectory).thenReturn(mockDirectory);
-
-      expect(fs.currentDirectory.toString(), equals(mockDirectory.toString()));
+      expect(fs.currentDirectory.toString(), delegate.currentDirectory.toString());
       expect(fs.currentDirectory, isA<ErrorHandlingDirectory>());
     });
   });

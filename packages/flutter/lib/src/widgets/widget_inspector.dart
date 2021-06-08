@@ -2455,6 +2455,11 @@ class InspectorSelection {
 
   Element? _currentElement;
   set currentElement(Element? element) {
+    if (element?.debugIsDefunct == true) {
+      _currentElement = null;
+      _current = null;
+      return;
+    }
     if (currentElement != element) {
       _currentElement = element;
       _current = element!.findRenderObject();

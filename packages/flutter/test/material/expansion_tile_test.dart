@@ -371,24 +371,23 @@ void main() {
   });
 
   testWidgets('CrossAxisAlignment.baseline is not allowed', (WidgetTester tester) async {
-    try {
-      MaterialApp(
-        home: Material(
-          child: ExpansionTile(
-            initiallyExpanded: true,
-            title: const Text('title'),
-            expandedCrossAxisAlignment: CrossAxisAlignment.baseline,
+    expect(
+      () {
+        MaterialApp(
+          home: Material(
+            child: ExpansionTile(
+              initiallyExpanded: true,
+              title: const Text('title'),
+              expandedCrossAxisAlignment: CrossAxisAlignment.baseline,
+            ),
           ),
-        ),
-      );
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains(
+        );
+      },
+      throwsA(isA<AssertionError>().having((AssertionError error) => error.toString(), '.toString()', contains(
         'CrossAxisAlignment.baseline is not supported since the expanded'
         ' children are aligned in a column, not a row. Try to use another constant.',
-      ));
-      return;
-    }
-    fail('AssertionError was not thrown when expandedCrossAxisAlignment is CrossAxisAlignment.baseline.');
+      ))),
+    );
   });
 
   testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {

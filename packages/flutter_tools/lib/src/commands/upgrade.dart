@@ -17,12 +17,6 @@ import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
-/// The flutter GitHub repository.
-String get _flutterGit => globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
-
-/// The official docs to install Flutter.
-String get _flutterInstallDocs => 'https://flutter.dev/docs/get-started/install';
-
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({
     @required bool verboseHelp,
@@ -119,7 +113,7 @@ class UpgradeCommandRunner {
     @required bool testFlow,
     @required bool verifyOnly,
   }) async {
-    final FlutterVersion upstreamVersion = await fetchLatestVersion(localVersion: flutterVersion);
+    final FlutterVersion upstreamVersion = await fetchLatestVersion();
     if (flutterVersion.frameworkRevision == upstreamVersion.frameworkRevision) {
       globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
       globals.printStatus('$flutterVersion');
@@ -228,80 +222,10 @@ class UpgradeCommandRunner {
     }
   }
 
-  /// Checks if the Flutter git repository is tracking a "standard remote".
-  ///
-  /// Using `flutter upgrade` is not supported from a non-standard remote. A git
-  /// remote should have the same url as [_flutterGit] to be considered as a
-  /// "standard" remote.
-  ///
-  /// Exits tool if the tracking remote is not standard.
-  void verifyStandardRemote(FlutterVersion localVersion) {
-    // If localVersion.repositoryUrl is null, exit
-    if (localVersion.repositoryUrl == null) {
-      throwToolExit(
-        'Unable to upgrade Flutter: The tool could not determine the url of '
-        'the remote upstream which is currently being tracked by the SDK.\n'
-        'Re-install Flutter by going to $_flutterInstallDocs.'
-      );
-    }
-
-    // Strip `.git` suffix from repository url and _flutterGit
-    final String trackingUrl = _stripDotGit(localVersion.repositoryUrl);
-    final String flutterGitUrl = _stripDotGit(_flutterGit);
-
-    // Exempt the flutter GitHub git SSH remote from this check
-    if (trackingUrl == 'git@github.com:flutter/flutter') {
-      return;
-    }
-
-    if (trackingUrl != flutterGitUrl) {
-      if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
-        // If `FLUTTER_GIT_URL` is set, inform the user to either remove the
-        // `FLUTTER_GIT_URL` environment variable or set it to the current
-        // tracking remote to continue.
-        throwToolExit(
-          'Unable to upgrade Flutter: The Flutter SDK is tracking '
-          '"${localVersion.repositoryUrl}" but "FLUTTER_GIT_URL" is set to '
-          '"$_flutterGit".\n'
-          'Either remove "FLUTTER_GIT_URL" from the environment or set '
-          '"FLUTTER_GIT_URL" to "${localVersion.repositoryUrl}", and retry. '
-          'Alternatively, re-install Flutter by going to $_flutterInstallDocs.\n'
-          'If this is intentional, it is recommended to use "git" directly to '
-          'keep Flutter SDK up-to date.'
-        );
-      }
-      // If `FLUTTER_GIT_URL` is unset, inform that the user has to set the
-      // environment variable to continue.
-      throwToolExit(
-        'Unable to upgrade Flutter: The Flutter SDK is tracking a non-standard '
-        'remote "${localVersion.repositoryUrl}".\n'
-        'Set the environment variable "FLUTTER_GIT_URL" to '
-        '"${localVersion.repositoryUrl}", and retry. '
-        'Alternatively, re-install Flutter by going to $_flutterInstallDocs.\n'
-        'If this is intentional, it is recommended to use "git" directly to '
-        'keep Flutter SDK up-to date.'
-      );
-    }
-  }
-
-  // Strips ".git" suffix from a given string, preferably an url.
-  // For example, changes 'https://github.com/flutter/flutter.git' to 'https://github.com/flutter/flutter'.
-  // URLs without ".git" suffix will be unaffected.
-  String _stripDotGit(String url) {
-    final RegExp pattern = RegExp(r'(.*)(\.git)$');
-    final RegExpMatch match = pattern.firstMatch(url);
-    if (match == null) {
-      return url;
-    }
-    return match.group(1);
-  }
-
   /// Returns the remote HEAD flutter version.
   ///
-  /// Exits tool if HEAD isn't pointing to a branch, or there is no upstream.
-  Future<FlutterVersion> fetchLatestVersion({
-    @required FlutterVersion localVersion,
-  }) async {
+  /// Exits tool if there is no upstream.
+  Future<FlutterVersion> fetchLatestVersion() async {
     String revision;
     try {
       // Fetch upstream branch's commits and tags
@@ -321,22 +245,20 @@ class UpgradeCommandRunner {
       final String errorString = e.toString();
       if (errorString.contains('fatal: HEAD does not point to a branch')) {
         throwToolExit(
-          'Unable to upgrade Flutter: HEAD does not point to a branch (Are you '
-          'in a detached HEAD state?).\n'
-          'Use "flutter channel" to switch to an official channel, and retry. '
-          'Alternatively, re-install Flutter by going to $_flutterInstallDocs.'
+          'You are not currently on a release branch. Use git to '
+          "check out an official branch ('stable', 'beta', 'dev', or 'master') "
+          'and retry, for example:\n'
+          '  git checkout stable'
         );
       } else if (errorString.contains('fatal: no upstream configured for branch')) {
         throwToolExit(
-          'Unable to upgrade Flutter: No upstream repository configured for '
-          'current branch.\n'
-          'Re-install Flutter by going to $_flutterInstallDocs.'
-        );
+          'Unable to upgrade Flutter: no origin repository configured. '
+          "Run 'git remote add origin "
+          "https://github.com/flutter/flutter' in $workingDirectory");
       } else {
         throwToolExit(errorString);
       }
     }
-    verifyStandardRemote(localVersion);
     return FlutterVersion(workingDirectory: workingDirectory, frameworkRevision: revision);
   }
 

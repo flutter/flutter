@@ -3817,7 +3817,7 @@ void main() {
     await tester.pump();
 
     expect(renderEditable.text!.children, isNull);
-    // Everything's just formated the same way now.
+    // Everything's just formatted the same way now.
     expect(renderEditable.text!.text, 'text composing text');
     expect(renderEditable.text!.style!.decoration, isNull);
   });

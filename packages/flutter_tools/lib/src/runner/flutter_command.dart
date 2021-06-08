@@ -119,6 +119,7 @@ class FlutterOptions {
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
+  static const String kInitializeFromDill = 'initialize-from-dill';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -788,7 +789,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addMultiOption(
       FlutterOptions.kAndroidProjectArgs,
       help: 'Additional arguments specified as key=value that are passed directly to the gradle '
-            'project via the -P flag. These can be accesed in build.gradle via the "project.property" API.',
+            'project via the -P flag. These can be accessed in build.gradle via the "project.property" API.',
       splitCommas: false,
       abbr: 'P',
     );
@@ -804,6 +805,14 @@ abstract class FlutterCommand extends Command<void> {
         'effect in sound mode. To report an issue with a null assertion failure in '
         'dart:html or the other dart web libraries, please file a bug at: '
         'https://github.com/dart-lang/sdk/issues/labels/web-libraries'
+    );
+  }
+
+  void usesInitializeFromDillOption({ @required bool hide }) {
+    argParser.addOption(FlutterOptions.kInitializeFromDill,
+      help: 'Initializes the resident compiler with a specific kernel file instead of '
+        'the default cached location.',
+      hide: hide,
     );
   }
 
@@ -888,7 +897,7 @@ abstract class FlutterCommand extends Command<void> {
             'ABI must be specified at a time with the "--target-platform" flag. When building for iOS, '
             'only the symbols from the arm64 architecture are used to analyze code size.\n'
             'By default, the intermediate output files will be placed in a transient directory in the '
-            'build directory. This can be overriden with the "--${FlutterOptions.kCodeSizeDirectory}" option.\n'
+            'build directory. This can be overridden with the "--${FlutterOptions.kCodeSizeDirectory}" option.\n'
             'This flag cannot be combined with "--${FlutterOptions.kSplitDebugInfoOption}".'
     );
 
@@ -933,7 +942,7 @@ abstract class FlutterCommand extends Command<void> {
 
     if (experiments.isNotEmpty) {
       for (final String expFlag in experiments) {
-        final String flag = '--enable-experiment=' + expFlag;
+        final String flag = '--enable-experiment=$expFlag';
         extraFrontEndOptions.add(flag);
         extraGenSnapshotOptions.add(flag);
       }
@@ -1067,6 +1076,9 @@ abstract class FlutterCommand extends Command<void> {
       androidGradleDaemon: androidGradleDaemon,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
+      initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
+          ? stringArg(FlutterOptions.kInitializeFromDill)
+          : null,
     );
   }
 

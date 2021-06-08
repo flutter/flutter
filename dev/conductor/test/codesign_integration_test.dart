@@ -54,7 +54,7 @@ void main() {
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('codesign command is only supported on macos'),
     'linux': const Skip('codesign command is only supported on macos'),
-  });
+  }, skip: 'TODO(christopherfujino): https://github.com/flutter/flutter/issues/83448');
 }
 
 const String fixItInstructions = '''

@@ -258,7 +258,7 @@ void main() {
     });
 
     testWidgets(
-        "waiting for NoPendingPlatformMessages returns immediately when there're no platform messages", (WidgetTester tester) async {
+        'waiting for NoPendingPlatformMessages returns immediately when there are no platform messages', (WidgetTester tester) async {
       driverExtension
           .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {

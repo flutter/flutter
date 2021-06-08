@@ -221,7 +221,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
 /// text.
 ///
-/// Tries to position itself as closesly as possible to [anchor] while remaining
+/// Tries to position itself as closely as possible to [anchor] while remaining
 /// fully on-screen.
 ///
 /// See also:

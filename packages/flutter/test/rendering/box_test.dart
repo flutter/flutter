@@ -313,11 +313,11 @@ void main() {
     expect(parentData.offset.dx, isNot(equals(0.0)));
     paddedBox.child = null;
 
-    final RenderConstrainedBox constraintedBox = RenderConstrainedBox(
+    final RenderConstrainedBox constrainedBox = RenderConstrainedBox(
       child: coloredBox,
       additionalConstraints: const BoxConstraints(),
     );
-    layout(constraintedBox);
+    layout(constrainedBox);
     expect(coloredBox.parentData?.runtimeType, ParentData);
   });
 
@@ -379,7 +379,7 @@ void main() {
     expect(unconstrained.getMaxIntrinsicWidth(100.0), equals(200.0));
   });
 
-  group('ConstraintsTransfromBox', () {
+  group('ConstraintsTransformBox', () {
     FlutterErrorDetails? firstErrorDetails;
     void exhaustErrors() {
       FlutterErrorDetails? next;
