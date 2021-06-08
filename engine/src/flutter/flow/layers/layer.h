@@ -28,12 +28,6 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/utils/SkNWayCanvas.h"
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-#include "flutter/flow/scene_update_context.h"  //nogncheck
-#include "lib/ui/scenic/cpp/resources.h"        //nogncheck
-#include "lib/ui/scenic/cpp/session.h"          //nogncheck
-#endif
-
 namespace flutter {
 
 namespace testing {
@@ -64,11 +58,6 @@ struct PrerollContext {
   // These allow us to track properties like elevation, opacity, and the
   // prescence of a platform view during Preroll.
   bool has_platform_view = false;
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  // True if, during the traversal so far, we have seen a child_scene_layer.
-  // Informs whether a layer needs to be system composited.
-  bool child_scene_layer_exists_below = false;
-#endif
   // These allow us to track properties like elevation, opacity, and the
   // prescence of a texture layer during Preroll.
   bool has_texture_layer = false;
@@ -191,17 +180,6 @@ class Layer {
 
   virtual void Paint(PaintContext& context) const = 0;
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  // Updates the system composited scene.
-  virtual void UpdateScene(std::shared_ptr<SceneUpdateContext> context);
-  virtual void CheckForChildLayerBelow(PrerollContext* context);
-#endif
-
-  bool needs_system_composite() const { return needs_system_composite_; }
-  void set_needs_system_composite(bool value) {
-    needs_system_composite_ = value;
-  }
-
   bool subtree_has_platform_view() const { return subtree_has_platform_view_; }
   void set_subtree_has_platform_view(bool value) {
     subtree_has_platform_view_ = value;
@@ -269,16 +247,10 @@ class Layer {
 
 #endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
- protected:
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  bool child_layer_exists_below_ = false;
-#endif
-
  private:
   SkRect paint_bounds_;
   uint64_t unique_id_;
   uint64_t original_layer_id_;
-  bool needs_system_composite_;
   bool subtree_has_platform_view_;
 
   static uint64_t NextUniqueID();

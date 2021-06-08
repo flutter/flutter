@@ -26,10 +26,6 @@
 #include "runtime/dart/utils/inlines.h"
 #include "vsync_waiter.h"
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-#include "flutter/lib/ui/compositing/scene_host.h"
-#endif
-
 namespace flutter_runner {
 
 static constexpr char kFlutterPlatformChannel[] = "flutter/platform";
@@ -289,41 +285,18 @@ void PlatformView::OnScenicEvent(
             break;
           }
           case fuchsia::ui::gfx::Event::Tag::kViewConnected:
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-            task_runners_.GetUITaskRunner()->PostTask(
-                [view_holder_id =
-                     event.gfx().view_connected().view_holder_id]() {
-                  flutter::SceneHost::OnViewConnected(view_holder_id);
-                });
-#endif  // LEGACY_FUCHSIA_EMBEDDER
             if (!OnChildViewConnected(
                     event.gfx().view_connected().view_holder_id)) {
               deferred_view_events.push_back(std::move(event.gfx()));
             }
             break;
           case fuchsia::ui::gfx::Event::Tag::kViewDisconnected:
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-            task_runners_.GetUITaskRunner()->PostTask(
-                [view_holder_id =
-                     event.gfx().view_disconnected().view_holder_id]() {
-                  flutter::SceneHost::OnViewDisconnected(view_holder_id);
-                });
-#endif  // LEGACY_FUCHSIA_EMBEDDER
             if (!OnChildViewDisconnected(
                     event.gfx().view_disconnected().view_holder_id)) {
               deferred_view_events.push_back(std::move(event.gfx()));
             }
             break;
           case fuchsia::ui::gfx::Event::Tag::kViewStateChanged:
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-            task_runners_.GetUITaskRunner()->PostTask(
-                [view_holder_id =
-                     event.gfx().view_state_changed().view_holder_id,
-                 state =
-                     event.gfx().view_state_changed().state.is_rendering]() {
-                  flutter::SceneHost::OnViewStateChanged(view_holder_id, state);
-                });
-#endif  // LEGACY_FUCHSIA_EMBEDDER
             if (!OnChildViewStateChanged(
                     event.gfx().view_state_changed().view_holder_id,
                     event.gfx().view_state_changed().state.is_rendering)) {

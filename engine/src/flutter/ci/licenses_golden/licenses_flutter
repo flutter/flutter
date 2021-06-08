@@ -52,8 +52,6 @@ FILE: ../../../flutter/flow/layers/backdrop_filter_layer.cc
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer.h
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer_unittests.cc
 FILE: ../../../flutter/flow/layers/checkerboard_layertree_unittests.cc
-FILE: ../../../flutter/flow/layers/child_scene_layer.cc
-FILE: ../../../flutter/flow/layers/child_scene_layer.h
 FILE: ../../../flutter/flow/layers/clip_path_layer.cc
 FILE: ../../../flutter/flow/layers/clip_path_layer.h
 FILE: ../../../flutter/flow/layers/clip_path_layer_unittests.cc
@@ -69,7 +67,6 @@ FILE: ../../../flutter/flow/layers/color_filter_layer_unittests.cc
 FILE: ../../../flutter/flow/layers/container_layer.cc
 FILE: ../../../flutter/flow/layers/container_layer.h
 FILE: ../../../flutter/flow/layers/container_layer_unittests.cc
-FILE: ../../../flutter/flow/layers/fuchsia_layer_unittests.cc
 FILE: ../../../flutter/flow/layers/image_filter_layer.cc
 FILE: ../../../flutter/flow/layers/image_filter_layer.h
 FILE: ../../../flutter/flow/layers/image_filter_layer_unittests.cc
@@ -118,8 +115,6 @@ FILE: ../../../flutter/flow/raster_cache_unittests.cc
 FILE: ../../../flutter/flow/rtree.cc
 FILE: ../../../flutter/flow/rtree.h
 FILE: ../../../flutter/flow/rtree_unittests.cc
-FILE: ../../../flutter/flow/scene_update_context.cc
-FILE: ../../../flutter/flow/scene_update_context.h
 FILE: ../../../flutter/flow/skia_gpu_object.cc
 FILE: ../../../flutter/flow/skia_gpu_object.h
 FILE: ../../../flutter/flow/skia_gpu_object_unittests.cc
@@ -128,8 +123,6 @@ FILE: ../../../flutter/flow/surface.h
 FILE: ../../../flutter/flow/surface_frame.cc
 FILE: ../../../flutter/flow/surface_frame.h
 FILE: ../../../flutter/flow/texture_unittests.cc
-FILE: ../../../flutter/flow/view_holder.cc
-FILE: ../../../flutter/flow/view_holder.h
 FILE: ../../../flutter/flutter_frontend_server/bin/starter.dart
 FILE: ../../../flutter/flutter_frontend_server/lib/server.dart
 FILE: ../../../flutter/fml/ascii_trie.cc
@@ -316,8 +309,6 @@ FILE: ../../../flutter/lib/ui/compositing/scene.h
 FILE: ../../../flutter/lib/ui/compositing/scene_builder.cc
 FILE: ../../../flutter/lib/ui/compositing/scene_builder.h
 FILE: ../../../flutter/lib/ui/compositing/scene_builder_unittests.cc
-FILE: ../../../flutter/lib/ui/compositing/scene_host.cc
-FILE: ../../../flutter/lib/ui/compositing/scene_host.h
 FILE: ../../../flutter/lib/ui/dart_runtime_hooks.cc
 FILE: ../../../flutter/lib/ui/dart_runtime_hooks.h
 FILE: ../../../flutter/lib/ui/dart_ui.cc
@@ -1340,8 +1331,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge_unitt
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_unittest.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/default_session_connection.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/default_session_connection.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
