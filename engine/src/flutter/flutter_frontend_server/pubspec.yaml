@@ -64,10 +64,14 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/cli_util
   collection:
     path: ../../third_party/dart/third_party/pkg/collection
+  compiler:
+    path: ../../third_party/dart/pkg/compiler
   convert:
     path: ../../third_party/dart/third_party/pkg/convert
   crypto:
     path: ../../third_party/dart/third_party/pkg/crypto
+  dart2js_info:
+    path: ../../third_party/dart/third_party/pkg/dart2js_info
   dev_compiler:
     path: ../../third_party/dart/pkg/dev_compiler
   expect:
@@ -78,6 +82,8 @@ dependency_overrides:
     path: ../../third_party/dart/pkg/front_end
   frontend_server:
     path: ../../third_party/dart/pkg/frontend_server
+  http_parser:
+    path: ../../third_party/dart/third_party/pkg/http_parser
   kernel:
     path: ../../third_party/dart/pkg/kernel
   litetest:
@@ -88,6 +94,8 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/matcher
   meta:
     path: ../../third_party/dart/pkg/meta
+  mime:
+    path: ../../third_party/dart/third_party/pkg/mime
   package_config:
     path: ../../third_party/dart/third_party/pkg_tested/package_config
   path:
@@ -96,12 +104,20 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/pedantic
   protobuf:
     path: ../../third_party/dart/third_party/pkg/protobuf/protobuf
+  shelf:
+    path: ../../third_party/dart/third_party/pkg/shelf
+  shelf_static:
+    path: ../../third_party/dart/third_party/pkg/shelf_static
   source_maps:
     path: ../../third_party/dart/third_party/pkg/source_maps
   source_span:
     path: ../../third_party/dart/third_party/pkg/source_span
   stack_trace:
     path: ../../third_party/dart/third_party/pkg/stack_trace
+  stream_channel:
+    path: ../../third_party/dart/third_party/pkg/stream_channel
+  string_scanner:
+    path: ../../third_party/dart/third_party/pkg/string_scanner
   term_glyph:
     path: ../../third_party/dart/third_party/pkg/term_glyph
   typed_data:
@@ -110,3 +126,5 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/usage
   vm:
     path: ../../third_party/dart/pkg/vm
+  yaml:
+    path: ../../third_party/dart/third_party/pkg/yaml
