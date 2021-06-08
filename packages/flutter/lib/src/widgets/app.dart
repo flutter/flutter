@@ -823,14 +823,14 @@ class WidgetsApp extends StatefulWidget {
   /// [localeListResolutionCallback]. If the callback or result is null, it will
   /// fallback to trying the [localeResolutionCallback]. If both
   /// [localeResolutionCallback] and [localeListResolutionCallback] are left
-  /// null or fail to resolve (return null), the a basic fallback algorithm will
+  /// null or fail to resolve (return null), basic fallback algorithm will
   /// be used.
   ///
   /// The priority of each available fallback is:
   ///
-  ///  1. [localeListResolutionCallback] is attempted first.
-  ///  1. [localeResolutionCallback] is attempted second.
-  ///  1. Flutter's basic resolution algorithm, as described in
+  ///  1. [localeListResolutionCallback] is attempted.
+  ///  2. [localeResolutionCallback] is attempted.
+  ///  3. Flutter's basic resolution algorithm, as described in
   ///     [supportedLocales], is attempted last.
   ///
   /// Properly localized projects should provide a more advanced algorithm than
@@ -1099,10 +1099,10 @@ class WidgetsApp extends StatefulWidget {
   /// Providing a restoration ID inserts a [RootRestorationScope] into the
   /// widget hierarchy, which enables state restoration for descendant widgets.
   ///
-  /// Providing a restoration ID also enables the [Navigator] built by the
-  /// [WidgetsApp] to restore its state (i.e. to restore the history stack of
-  /// active [Route]s). See the documentation on [Navigator] for more details
-  /// around state restoration of [Route]s.
+  /// Providing a restoration ID also enables the [Navigator] or [Router] built
+  /// by the [WidgetsApp] to restore its state (i.e. to restore the history
+  /// stack of active [Route]s). See the documentation on [Navigator] for more
+  /// details around state restoration of [Route]s.
   ///
   /// See also:
   ///
@@ -1518,6 +1518,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (_usesRouter) {
       assert(_effectiveRouteInformationProvider != null);
       routing = Router<Object>(
+        restorationScopeId: 'router',
         routeInformationProvider: _effectiveRouteInformationProvider,
         routeInformationParser: widget.routeInformationParser,
         routerDelegate: widget.routerDelegate!,

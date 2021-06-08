@@ -17,7 +17,7 @@ class BenchmarkingBinding extends LiveTestWidgetsFlutterBinding {
   final Stopwatch stopwatch;
 
   @override
-  void handleBeginFrame(Duration rawTimeStamp) {
+  void handleBeginFrame(Duration? rawTimeStamp) {
     stopwatch.start();
     super.handleBeginFrame(rawTimeStamp);
   }
@@ -68,7 +68,7 @@ Future<void> main() async {
 
       // Time how long each frame takes
       cpuWatch.reset();
-      while (SchedulerBinding.instance.hasScheduledFrame) {
+      while (SchedulerBinding.instance!.hasScheduledFrame) {
         await tester.pump();
         totalSubsequentFramesIterationCount += 1;
       }

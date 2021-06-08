@@ -16,7 +16,7 @@ void main() {
 }
 
 final RegExp globalImport = RegExp(r"import.*(?:globals|globals_null_migrated)\.dart' as globals;");
-final RegExp globalNullUnsafeImport = RegExp('import.*globals.dart\' as globals;');
+final RegExp globalNullUnsafeImport = RegExp("import.*globals.dart' as globals;");
 
 void countGlobalImports(Directory directory) {
   int count = 0;

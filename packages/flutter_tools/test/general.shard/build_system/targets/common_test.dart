@@ -78,17 +78,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
@@ -113,17 +114,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
@@ -149,17 +151,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
@@ -186,17 +189,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
@@ -225,17 +229,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.debug,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.debug,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.debug, <String>[]),
@@ -262,17 +267,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.debug,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.debug,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.debug, <String>[]),
@@ -311,17 +317,18 @@ void main() {
       logger: logger,
     );
     final String build = testEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.debug,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.debug,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.debug, <String>[]),

@@ -6,6 +6,8 @@ import 'package:process/process.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
+import 'android/gradle_utils.dart';
+import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
 import 'base/context.dart';
@@ -22,16 +24,23 @@ import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
+import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart';
+import 'macos/cocoapods.dart';
+import 'macos/cocoapods_validator.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
+import 'project.dart';
 import 'reporting/reporting.dart';
 import 'version.dart';
 
+Artifacts? get artifacts => context.get<Artifacts>();
+BuildSystem? get buildSystem => context.get<BuildSystem>();
 Cache get cache => context.get<Cache>()!;
+CocoaPodsValidator? get cocoapodsValidator => context.get<CocoaPodsValidator>();
 Config get config => context.get<Config>()!;
 HttpClientFactory? get httpClientFactory => context.get<HttpClientFactory>();
 Logger get logger => context.get<Logger>()!;
@@ -192,3 +201,15 @@ LocalFileSystem get localFileSystem => _instance ??= LocalFileSystem(
   Signals.defaultExitSignals,
   shutdownHooks,
 );
+
+/// Gradle utils in the current [AppContext].
+GradleUtils? get gradleUtils => context.get<GradleUtils>();
+
+CocoaPods? get cocoaPods => context.get<CocoaPods>();
+
+FlutterProjectFactory get projectFactory {
+  return context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(
+    logger: logger,
+    fileSystem: fs,
+  );
+}

@@ -639,7 +639,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// value is true.
   ///
   /// This is a temporary property. When setting it to false is no
-  /// longer considered a breaking change, it will be depreacted and
+  /// longer considered a breaking change, it will be deprecated and
   /// its default value will be changed to false. App developers are
   /// encouraged to opt into the new features by setting it to false
   /// and using the [foregroundColor] and [systemOverlayStyle]

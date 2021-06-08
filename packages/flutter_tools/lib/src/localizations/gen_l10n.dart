@@ -107,7 +107,7 @@ String generateDateFormattingLogic(Message message) {
           'the "${placeholder.type}" type. To properly resolve for the right '
           '${placeholder.type} format, the "format" attribute needs to be set '
           'to determine which DateFormat to use. \n'
-          'Check the intl library\'s DateFormat class constructors for allowed '
+          "Check the intl library's DateFormat class constructors for allowed "
           'date formats.'
         );
       }
@@ -115,7 +115,7 @@ String generateDateFormattingLogic(Message message) {
         throw L10nException(
           'Date format "$placeholderFormat" for placeholder '
           '${placeholder.name} does not have a corresponding DateFormat '
-          'constructor\n. Check the intl library\'s DateFormat class '
+          "constructor\n. Check the intl library's DateFormat class "
           'constructors for allowed date formats.'
         );
       }
@@ -140,7 +140,7 @@ String generateNumberFormattingLogic(Message message) {
         throw L10nException(
           'Number format $placeholderFormat for the ${placeholder.name} '
           'placeholder does not have a corresponding NumberFormat constructor.\n'
-          'Check the intl library\'s NumberFormat class constructors for allowed '
+          "Check the intl library's NumberFormat class constructors for allowed "
           'number formats.'
         );
       }
@@ -765,7 +765,7 @@ class LocalizationsGenerator {
     if (!directory.existsSync()) {
       throw L10nException(
         'Directory does not exist: $directory.\n'
-        'Please select a directory that contains the project\'s localizations '
+        "Please select a directory that contains the project's localizations "
         'resource files.'
       );
     }
@@ -1020,7 +1020,7 @@ class LocalizationsGenerator {
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
       .replaceAll('@(methods)', methods.join('\n\n'))
-      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '');
+      .replaceAll('@(requiresIntlImport)', _requiresIntlImport() ? "import 'package:intl/intl.dart' as intl;" : '');
   }
 
   String _generateSubclass(
@@ -1078,18 +1078,18 @@ class LocalizationsGenerator {
       final String? scriptCode = locale.scriptCode;
 
       if (countryCode == null && scriptCode == null) {
-        return 'Locale(\'$languageCode\')';
+        return "Locale('$languageCode')";
       } else if (countryCode != null && scriptCode == null) {
-        return 'Locale(\'$languageCode\', \'$countryCode\')';
+        return "Locale('$languageCode', '$countryCode')";
       } else if (countryCode != null && scriptCode != null) {
-        return 'Locale.fromSubtags(languageCode: \'$languageCode\', countryCode: \'$countryCode\', scriptCode: \'$scriptCode\')';
+        return "Locale.fromSubtags(languageCode: '$languageCode', countryCode: '$countryCode', scriptCode: '$scriptCode')";
       } else {
-        return 'Locale.fromSubtags(languageCode: \'$languageCode\', scriptCode: \'$scriptCode\')';
+        return "Locale.fromSubtags(languageCode: '$languageCode', scriptCode: '$scriptCode')";
       }
     });
 
     final Set<String> supportedLanguageCodes = Set<String>.from(
-      _allBundles.locales.map<String>((LocaleInfo locale) => '\'${locale.languageCode}\'')
+      _allBundles.locales.map<String>((LocaleInfo locale) => "'${locale.languageCode}'")
     );
 
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
@@ -1159,7 +1159,7 @@ class LocalizationsGenerator {
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
       .replaceAll('@(delegateClass)', delegateClass)
       .replaceAll('@(requiresFoundationImport)', useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
-      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '')
+      .replaceAll('@(requiresIntlImport)', _requiresIntlImport() ? "import 'package:intl/intl.dart' as intl;" : '')
       .replaceAll('@(canBeNullable)', usesNullableGetter ? '?' : '')
       .replaceAll('@(needsNullCheck)', usesNullableGetter ? '' : '!')
       // Removes all trailing whitespace from the generated file.
@@ -1168,7 +1168,7 @@ class LocalizationsGenerator {
       .replaceAll('\n\n\n', '\n\n');
   }
 
-  bool _containsPluralMessage() => _allMessages.any((Message message) => message.isPlural);
+  bool _requiresIntlImport() => _allMessages.any((Message message) => message.isPlural || message.placeholdersRequireFormatting);
 
   void writeOutputFiles(Logger logger, { bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
