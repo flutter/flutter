@@ -1620,7 +1620,6 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    print(controller.selection);
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
@@ -1707,8 +1706,9 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, testValue.indexOf('g'));
-    expect(controller.selection.extentOffset, testValue.indexOf('e'));
+    // 'f' through 'g' are selected. 'e' is not.
+    expect(controller.selection.baseOffset, testValue.indexOf('g') + 1);
+    expect(controller.selection.extentOffset, testValue.indexOf('e') + 1);
   });
 
   testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {

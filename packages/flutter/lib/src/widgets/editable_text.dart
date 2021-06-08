@@ -2700,9 +2700,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextSelection newSelection;
     switch (intent.textBoundaryType) {
       case TextBoundary.character:
+        assert(range.isNormalized);
+        assert(!range.isCollapsed);
+        // Expand the selection conservatively.
+        // When adjusting the selection via gestures, we want the baseOffset to
+        // be inclusive.
+        final int currentBaseOffset = currentSelection.baseOffset;
+        final int baseOffset = range.end < currentBaseOffset ? currentBaseOffset + 1 : currentBaseOffset;
+        final int extentOffset = currentBaseOffset.clamp(range.start, range.end);
         newSelection = currentSelection.copyWith(
-          // Be conservative about the selected range. Feel free to tweak.
-          extentOffset: currentSelection.baseOffset.clamp(range.start, range.end),
+          baseOffset: baseOffset,
+          extentOffset: extentOffset,
         );
         break;
       case TextBoundary.word:

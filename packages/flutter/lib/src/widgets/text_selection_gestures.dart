@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/services/text_input.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -160,7 +160,15 @@ class TextEditingGestures extends StatefulWidget {
   );
 
   static final ContextGestureRecognizerFactory<LongPressGestureRecognizer> iOSMacOSlongPressRecognizer = ContextGestureRecognizerFactory<LongPressGestureRecognizer>.withFunctions(
-    constructor: (BuildContext context) => LongPressGestureRecognizer(debugOwner: context),
+    constructor: (BuildContext context) => LongPressGestureRecognizer(
+      debugOwner: context,
+      supportedDevices: <PointerDeviceKind>{
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.invertedStylus,
+        PointerDeviceKind.touch,
+        PointerDeviceKind.unknown,
+      },
+    ),
     initializer: (LongPressGestureRecognizer recognizer, BuildContext context) {
       recognizer
         ..onLongPressStart = (LongPressStartDetails details) {
@@ -187,10 +195,36 @@ class TextEditingGestures extends StatefulWidget {
     },
   );
 
+  static final ContextGestureRecognizerFactory<MouseDragTextGestureRecognizer> mouseDragRecognizer = ContextGestureRecognizerFactory<MouseDragTextGestureRecognizer>.withFunctions(
+    constructor: (BuildContext context) => MouseDragTextGestureRecognizer(debugOwner: context),
+    initializer: (MouseDragTextGestureRecognizer recognizer, BuildContext context) {
+      recognizer
+        ..onLongPressStart = (LongPressStartDetails details) {
+          Actions.invoke(
+            context,
+            SelectTextAtPositionIntent(
+              fromPosition: details.globalPosition,
+              cause: SelectionChangedCause.longPress,
+            ),
+          );
+        }
+        ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+          Actions.invoke(
+            context,
+            ExtendSelectionToPointIntent(
+              toPosition: details.globalPosition,
+              cause: SelectionChangedCause.longPress,
+            ),
+          );
+        };
+    },
+  );
+
   static final ContextGestureRecognizerFactory<HorizontalDragGestureRecognizer> horizontalDragRecognizer = ContextGestureRecognizerFactory<HorizontalDragGestureRecognizer>.withFunctions(
     constructor: (BuildContext context) => HorizontalDragGestureRecognizer(debugOwner: context),
     initializer: (HorizontalDragGestureRecognizer recognizer, BuildContext context) {
       recognizer
+        ..dragStartBehavior = DragStartBehavior.down
         ..onStart = (DragStartDetails details) {
           Actions.invoke(
             context,
@@ -201,7 +235,7 @@ class TextEditingGestures extends StatefulWidget {
           );
           Actions.maybeInvoke(context, SelectionHandleControlIntent(
             deviceKind: details.kind,
-            cause: SelectionChangedCause.longPress,
+            cause: SelectionChangedCause.drag,
           ));
         }
         ..onUpdate = (DragUpdateDetails details) {
@@ -240,7 +274,7 @@ class TextEditingGestures extends StatefulWidget {
           ));
         }
         ..onTapUp = (TapUpDetails details, int tapDownCount) {
-          if (tapDownCount %2 != 1) {
+          if (tapDownCount % 2 != 1) {
             return;
           }
           Actions.maybeInvoke(context, SelectionToolbarControlIntent.hide);
@@ -370,6 +404,7 @@ class TextEditingGestures extends StatefulWidget {
           TextEditingTapGestureRecognizer: iOSMacOStapRecognizer,
           TapGestureRecognizer: secondaryTapRecognizer,
           ForcePressGestureRecognizer: forcePressRecognizer,
+          //MouseDragTextGestureRecognizer: mouseDragRecognizer,
         };
       case TargetPlatform.linux:
       case TargetPlatform.windows:
@@ -381,6 +416,7 @@ class TextEditingGestures extends StatefulWidget {
           TextEditingTapGestureRecognizer: tapRecognizer,
           TapGestureRecognizer: secondaryTapRecognizer,
           ForcePressGestureRecognizer: forcePressRecognizer,
+          //MouseDragTextGestureRecognizer: mouseDragRecognizer,
         };
     }
   }
@@ -634,4 +670,12 @@ class TextEditingTapGestureRecognizer extends BaseTapGestureRecognizer {
     _tapSequenceTimer = null;
     super.dispose();
   }
+}
+
+class MouseDragTextGestureRecognizer extends LongPressGestureRecognizer {
+  MouseDragTextGestureRecognizer({ Object? debugOwner })
+    : super(
+      supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse },
+      debugOwner: debugOwner,
+    );
 }
