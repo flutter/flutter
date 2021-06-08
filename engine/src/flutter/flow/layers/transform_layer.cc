@@ -70,6 +70,22 @@ void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   context->mutators_stack.Pop();
 }
 
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+
+void TransformLayer::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
+  TRACE_EVENT0("flutter", "TransformLayer::UpdateScene");
+  FML_DCHECK(needs_system_composite());
+
+  std::optional<SceneUpdateContext::Transform> transform;
+  if (!transform_.isIdentity()) {
+    transform.emplace(context, transform_);
+  }
+
+  UpdateSceneChildren(context);
+}
+
+#endif
+
 void TransformLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "TransformLayer::Paint");
   FML_DCHECK(needs_painting(context));

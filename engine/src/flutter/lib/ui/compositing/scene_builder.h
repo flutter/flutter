@@ -21,6 +21,10 @@
 #include "flutter/lib/ui/painting/shader.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+#include "flutter/lib/ui/compositing/scene_host.h"  // nogncheck
+#endif
+
 namespace flutter {
 
 class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
@@ -112,6 +116,15 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                        double width,
                        double height,
                        int64_t viewId);
+
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+  void addChildScene(double dx,
+                     double dy,
+                     double width,
+                     double height,
+                     SceneHost* sceneHost,
+                     bool hitTestable);
+#endif
 
   void setRasterizerTracingThreshold(uint32_t frameInterval);
   void setCheckerboardRasterCacheImages(bool checkerboard);

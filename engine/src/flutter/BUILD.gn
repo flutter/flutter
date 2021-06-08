@@ -23,6 +23,14 @@ config("config") {
 
   defines = []
 
+  # This define is transitional and will be removed after the embedder API
+  # transition is complete.
+  #
+  # TODO(bugs.fuchsia.dev/54041): Remove when no longer necessary.
+  if (is_fuchsia && flutter_enable_legacy_fuchsia_embedder) {
+    defines += [ "LEGACY_FUCHSIA_EMBEDDER" ]
+  }
+
   if (is_debug) {
     defines += [ "FLUTTER_ENABLE_DIFF_CONTEXT" ]
   }

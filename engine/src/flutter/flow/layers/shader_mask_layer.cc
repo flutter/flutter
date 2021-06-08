@@ -32,6 +32,10 @@ void ShaderMaskLayer::Diff(DiffContext* context, const Layer* old_layer) {
 #endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
 void ShaderMaskLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+  CheckForChildLayerBelow(context);
+#endif
+
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
   ContainerLayer::Preroll(context, matrix);
