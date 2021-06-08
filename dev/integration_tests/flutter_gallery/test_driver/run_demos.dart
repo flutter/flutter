@@ -30,7 +30,7 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
     final String demoName = demo.substring(0, demo.indexOf('@'));
     final String demoCategory = demo.substring(demo.indexOf('@') + 1);
     print('> $demo');
-    await controller.pump(const Duration(milliseconds: 250));
+    await controller.pump(const Duration(milliseconds: 500));
 
     final Finder demoCategoryItem = find.text(demoCategory);
     if (currentDemoCategory == null) {
@@ -45,7 +45,7 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
       await controller.pumpAndSettle();
       // Scroll back to the top
       await controller.drag(demoList, const Offset(0.0, 10000.0));
-      await controller.pumpAndSettle(const Duration(milliseconds: 100));
+      await controller.pumpAndSettle(const Duration(milliseconds: 200));
     }
     currentDemoCategory = demoCategory;
 
@@ -67,7 +67,7 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
       if (kUnsynchronizedDemos.contains(demo)) {
         // These tests have animation, pumpAndSettle cannot be used.
         // This time is questionable. 400ms is the tested reasonable result.
-        await controller.pump(const Duration(milliseconds: 400));
+        await controller.pump(const Duration(milliseconds: 800));
         await controller.pump();
         await pageBack();
       } else {
