@@ -57,7 +57,8 @@ void main() {
       await start(expressionEvaluation: false);
       await breakInTopLevelFunction(flutter);
       await failToEvaluateExpression(flutter);
-    });
+    }, skip: true, // Flaky test: https://github.com/flutter/flutter/issues/84012
+    );
 
     testWithoutContext('shows no native javascript objects in static scope', () async {
       await start(expressionEvaluation: true);
