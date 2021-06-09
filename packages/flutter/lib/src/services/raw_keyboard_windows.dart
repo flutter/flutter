@@ -196,7 +196,20 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     // keyCode. This event, as well as the following key up event (which uses a
     // normal keyCode), should be skipped, because the effect of IME operations
     // will be handled by the text input API.
-    return keyCode != _vkProcessKey;
+    //
+    // The window key (both left and right) should also be skipped, because the
+    // following window key up event at present will not be captured by flutter
+    // when it loses focus, which will cause the window key to be considered as
+    // still being pressed, and will result in confusing bugs. For example, the
+    // backspace key will be ineffective after user changed IME by pressing the
+    // "window + space" system hotkey (or other hotkeys like "window + r").
+    //
+    // In addition, the window key should be handled by the system, so it is OK
+    // to skip it here. And the accompanying key will be hijacked by the system
+    // completely, so no additional character will be entered in this case.
+    return keyCode != _vkProcessKey &&
+        logicalKey != LogicalKeyboardKey.metaLeft &&
+        logicalKey != LogicalKeyboardKey.metaRight;
   }
 
   // These are not the values defined by the Windows header for each modifier. Since they
