@@ -623,7 +623,7 @@ class GalleryDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScrollMode? currentMode = ComplexLayoutApp.of(context)?.scrollMode;
+    final ScrollMode currentMode = ComplexLayoutApp.of(context)!.scrollMode;
     return Drawer(
       // Note: for real apps, see the Gallery material Drawer demo. More
       // typically, a drawer would have a fixed header with a scrolling body
@@ -649,7 +649,7 @@ class GalleryDrawer extends StatelessWidget {
             selected: ComplexLayoutApp.of(context)!.lightTheme,
             trailing: Radio<bool>(
               value: true,
-              groupValue: ComplexLayoutApp.of(context)?.lightTheme,
+              groupValue: ComplexLayoutApp.of(context)!.lightTheme,
               onChanged: (bool? value) { _changeTheme(context, value!); },
             ),
           ),
@@ -669,10 +669,10 @@ class GalleryDrawer extends StatelessWidget {
             leading: const Icon(Icons.hourglass_empty),
             title: const Text('Animate Slowly'),
             selected: timeDilation != 1.0,
-            onTap: () { ComplexLayoutApp.of(context)?.toggleAnimationSpeed(); },
+            onTap: () { ComplexLayoutApp.of(context)!.toggleAnimationSpeed(); },
             trailing: Checkbox(
               value: timeDilation != 1.0,
-              onChanged: (bool? value) { ComplexLayoutApp.of(context)?.toggleAnimationSpeed(); },
+              onChanged: (bool? value) { ComplexLayoutApp.of(context)!.toggleAnimationSpeed(); },
             ),
           ),
         ],
