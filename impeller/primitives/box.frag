@@ -5,8 +5,8 @@
 in vec3 color;
 in vec3 color2;
 
-out vec3 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 void main() {
-  fragColor = color * color2;
+  fragColor = vec4(color * color2, 1.0);
 }

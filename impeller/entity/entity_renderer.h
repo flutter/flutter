@@ -7,6 +7,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/renderer.h"
 #include "impeller/entity/entity.h"
+#include "impeller/primitives/box_primitive.h"
 
 namespace impeller {
 
@@ -18,8 +19,14 @@ class EntityRenderer final : public Renderer {
 
  private:
   std::shared_ptr<Entity> root_;
+  std::shared_ptr<BoxPrimitive> box_primitive_;
+  bool is_valid_ = false;
 
-  bool OnRender() override;
+  // |Renderer|
+  bool OnIsValid() const override;
+
+  // |Renderer|
+  bool OnRender(RenderPass& pass) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EntityRenderer);
 };
