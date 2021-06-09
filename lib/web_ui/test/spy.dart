@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:quiver/testing/async.dart';
 import 'package:ui/src/engine.dart' hide window;
 import 'package:ui/ui.dart';
 
@@ -65,5 +67,24 @@ class PlatformMessagesSpy {
     _callback = null;
     messages.clear();
     window.onPlatformMessage = _backup;
+  }
+}
+
+/// Runs code in a [FakeAsync] zone and spies on what's going on in it.
+class ZoneSpy {
+  final FakeAsync fakeAsync = FakeAsync();
+  final List<String> printLog = <String>[];
+
+  dynamic run(dynamic Function() function) {
+    final ZoneSpecification printInterceptor = ZoneSpecification(
+      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+        printLog.add(line);
+      },
+    );
+    return Zone.current.fork(specification: printInterceptor).run<dynamic>(() {
+      return fakeAsync.run((FakeAsync self) {
+        return function();
+      });
+    });
   }
 }

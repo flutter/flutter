@@ -12,11 +12,23 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
+import '../spy.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
+  group('$Profiler', () {
+    _profilerTests();
+  });
+
+  group('$Instrumentation', () {
+    _instrumentationTests();
+  });
+}
+
+void _profilerTests() {
   setUp(() {
     Profiler.isBenchmarkMode = true;
     Profiler.ensureInitialized();
@@ -70,6 +82,52 @@ void testMain() {
       () => jsOnBenchmark('string'),
       throwsA(isA<TypeError>()),
     );
+  });
+}
+
+void _instrumentationTests() {
+  setUp(() {
+    Instrumentation.enabled = false;
+  });
+
+  tearDown(() {
+    Instrumentation.enabled = false;
+  });
+
+  test('when disabled throws instead of initializing', () {
+    expect(() => Instrumentation.instance, throwsStateError);
+  });
+
+  test('when disabled throws instead of incrementing counter', () {
+    Instrumentation.enabled = true;
+    final Instrumentation instrumentation = Instrumentation.instance;
+    Instrumentation.enabled = false;
+    expect(() => instrumentation.incrementCounter('test'), throwsStateError);
+  });
+
+  test('when enabled increments counter', () {
+    final ZoneSpy spy = ZoneSpy();
+    spy.run(() {
+      Instrumentation.enabled = true;
+      final Instrumentation instrumentation = Instrumentation.instance;
+      expect(instrumentation.debugPrintTimer, isNull);
+      instrumentation.incrementCounter('foo');
+      expect(instrumentation.debugPrintTimer, isNotNull);
+      instrumentation.incrementCounter('foo');
+      instrumentation.incrementCounter('bar');
+      expect(spy.printLog, isEmpty);
+
+      expect(instrumentation.debugPrintTimer, isNotNull);
+      spy.fakeAsync.elapse(const Duration(seconds: 2));
+      expect(instrumentation.debugPrintTimer, isNull);
+      expect(spy.printLog, hasLength(1));
+      expect(
+        spy.printLog.single,
+        'Engine counters:\n'
+        '  bar: 1\n'
+        '  foo: 2\n',
+      );
+    });
   });
 }
 

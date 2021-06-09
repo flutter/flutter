@@ -11,6 +11,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
 import '../matchers.dart';
+import '../spy.dart';
 import 'common.dart';
 
 void main() {
@@ -114,44 +115,64 @@ void _tests() {
 
   group(SkiaObjectBox, () {
     test('Records stack traces and respects refcounts', () async {
-      TestSkDeletable.deleteCount = 0;
-      TestBoxWrapper.resurrectCount = 0;
-      final TestBoxWrapper original = TestBoxWrapper();
+      final ZoneSpy spy = ZoneSpy();
+      spy.run(() {
+        Instrumentation.enabled = true;
+        TestSkDeletable.deleteCount = 0;
+        TestBoxWrapper.resurrectCount = 0;
+        final TestBoxWrapper original = TestBoxWrapper();
 
-      expect(original.box.debugGetStackTraces().length, 1);
-      expect(original.box.refCount, 1);
-      expect(original.box.isDeletedPermanently, false);
+        expect(original.box.debugGetStackTraces().length, 1);
+        expect(original.box.refCount, 1);
+        expect(original.box.isDeletedPermanently, false);
 
-      final TestBoxWrapper clone = original.clone();
-      expect(clone.box, same(original.box));
-      expect(clone.box.debugGetStackTraces().length, 2);
-      expect(clone.box.refCount, 2);
-      expect(original.box.debugGetStackTraces().length, 2);
-      expect(original.box.refCount, 2);
-      expect(original.box.isDeletedPermanently, false);
+        final TestBoxWrapper clone = original.clone();
+        expect(clone.box, same(original.box));
+        expect(clone.box.debugGetStackTraces().length, 2);
+        expect(clone.box.refCount, 2);
+        expect(original.box.debugGetStackTraces().length, 2);
+        expect(original.box.refCount, 2);
+        expect(original.box.isDeletedPermanently, false);
 
-      original.dispose();
+        original.dispose();
 
-      testCollector.collectNow();
-      expect(TestSkDeletable.deleteCount, 0);
+        testCollector.collectNow();
+        expect(TestSkDeletable.deleteCount, 0);
 
-      expect(clone.box.debugGetStackTraces().length, 1);
-      expect(clone.box.refCount, 1);
-      expect(original.box.debugGetStackTraces().length, 1);
-      expect(original.box.refCount, 1);
+        spy.fakeAsync.elapse(const Duration(seconds: 2));
+        expect(
+          spy.printLog,
+          ['Engine counters:\n'
+           '  TestSkDeletable created: 1\n'],
+        );
 
-      clone.dispose();
-      expect(clone.box.debugGetStackTraces().length, 0);
-      expect(clone.box.refCount, 0);
-      expect(original.box.debugGetStackTraces().length, 0);
-      expect(original.box.refCount, 0);
-      expect(original.box.isDeletedPermanently, true);
+        expect(clone.box.debugGetStackTraces().length, 1);
+        expect(clone.box.refCount, 1);
+        expect(original.box.debugGetStackTraces().length, 1);
+        expect(original.box.refCount, 1);
 
-      testCollector.collectNow();
-      expect(TestSkDeletable.deleteCount, 1);
-      expect(TestBoxWrapper.resurrectCount, 0);
+        clone.dispose();
+        expect(clone.box.debugGetStackTraces().length, 0);
+        expect(clone.box.refCount, 0);
+        expect(original.box.debugGetStackTraces().length, 0);
+        expect(original.box.refCount, 0);
+        expect(original.box.isDeletedPermanently, true);
 
-      expect(() => clone.box.unref(clone), throwsAssertionError);
+        testCollector.collectNow();
+        expect(TestSkDeletable.deleteCount, 1);
+        expect(TestBoxWrapper.resurrectCount, 0);
+
+        expect(() => clone.box.unref(clone), throwsAssertionError);
+        spy.printLog.clear();
+        spy.fakeAsync.elapse(const Duration(seconds: 2));
+        expect(
+          spy.printLog,
+          ['Engine counters:\n'
+           '  TestSkDeletable created: 1\n'
+           '  TestSkDeletable deleted: 1\n'],
+        );
+        Instrumentation.enabled = false;
+      });
     });
 
     test('Can resurrect Skia objects', () async {
