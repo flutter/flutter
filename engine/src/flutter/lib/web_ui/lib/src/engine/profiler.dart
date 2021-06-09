@@ -230,7 +230,20 @@ class Instrumentation {
   /// Whether instrumentation is enabled.
   ///
   /// Check this value before calling any other methods in this class.
-  static const bool enabled = const bool.fromEnvironment(
+  static bool get enabled => _enabled;
+  static set enabled(bool value) {
+    if (_enabled == value) {
+      return;
+    }
+
+    if (!value) {
+      _instance._counters.clear();
+      _instance._printTimer = null;
+    }
+
+    _enabled = value;
+  }
+  static bool _enabled = const bool.fromEnvironment(
     'FLUTTER_WEB_ENABLE_INSTRUMENTATION',
     defaultValue: false,
   );
@@ -245,7 +258,7 @@ class Instrumentation {
 
   static void _checkInstrumentationEnabled() {
     if (!enabled) {
-      throw Exception(
+      throw StateError(
         'Cannot use Instrumentation unless it is enabled. '
         'You can enable it by setting the `FLUTTER_WEB_ENABLE_INSTRUMENTATION` '
         'environment variable to true, or by passing '
@@ -255,7 +268,10 @@ class Instrumentation {
     }
   }
 
+  Map<String, int> get debugCounters => _counters;
   final Map<String, int> _counters = <String, int>{};
+
+  Timer? get debugPrintTimer => _printTimer;
   Timer? _printTimer;
 
   /// Increments the count of a particular event by one.
@@ -266,7 +282,11 @@ class Instrumentation {
     _printTimer ??= Timer(
       const Duration(seconds: 2),
       () {
+        if (_printTimer == null || !_enabled) {
+          return;
+        }
         final StringBuffer message = StringBuffer('Engine counters:\n');
+        // Entries are sorted for readability and testability.
         final List<MapEntry<String, int>> entries = _counters.entries.toList()
           ..sort((MapEntry<String, int> a, MapEntry<String, int> b) {
             return a.key.compareTo(b.key);
