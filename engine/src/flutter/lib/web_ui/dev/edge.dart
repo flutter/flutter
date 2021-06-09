@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:io';
 
@@ -21,14 +20,11 @@ class Edge extends Browser {
   @override
   final name = 'Edge';
 
-  static String version;
-
   /// Starts a new instance of Safari open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Edge(Uri url, {bool debug = false}) {
-    version = EdgeArgParser.instance.version;
+    final String version = EdgeArgParser.instance.version;
 
-    assert(version != null);
     return Edge._(() async {
       // TODO(nurhan): Configure info log for LUCI.
       final BrowserInstallation installation = await getEdgeInstallation(

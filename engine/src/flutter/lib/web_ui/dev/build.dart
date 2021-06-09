@@ -17,9 +17,10 @@ class BuildCommand extends Command<bool> with ArgUtils {
     argParser
       ..addFlag(
         'watch',
+        defaultsTo: false,
         abbr: 'w',
         help: 'Run the build in watch mode so it rebuilds whenever a change'
-            'is made.',
+            'is made. Disabled by default.',
       );
   }
 
@@ -29,7 +30,7 @@ class BuildCommand extends Command<bool> with ArgUtils {
   @override
   String get description => 'Build the Flutter web engine.';
 
-  bool get isWatchMode => boolArg('watch') ?? false;
+  bool get isWatchMode => boolArg('watch')!;
 
   @override
   FutureOr<bool> run() async {

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:io';
 
@@ -21,16 +20,11 @@ class Safari extends Browser {
   @override
   final name = 'Safari';
 
-  static String version;
-
-  static bool isMobileBrowser;
-
   /// Starts a new instance of Safari open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Safari(Uri url, {bool debug = false}) {
-    version = SafariArgParser.instance.version;
-    isMobileBrowser = SafariArgParser.instance.isMobileBrowser;
-    assert(version != null);
+    final String version = SafariArgParser.instance.version;
+    final bool isMobileBrowser = SafariArgParser.instance.isMobileBrowser;
     return Safari._(() async {
       if (isMobileBrowser) {
         // iOS-Safari

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -35,8 +34,8 @@ class CreateSimulatorCommand extends Command<bool> with ArgUtils {
 
   @override
   FutureOr<bool> run() async {
-    IosSafariArgParser.instance.parseOptions(argResults);
-    final String simulatorType = argResults['type'] as String;
+    IosSafariArgParser.instance.parseOptions(argResults!);
+    final String simulatorType = argResults!['type'] as String;
     if (simulatorType.toUpperCase() != 'IOS') {
       throw Exception('Currently the only iOS Simulators are supported');
     }

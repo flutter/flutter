@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:io' as io;
 import 'dart:convert';
 import 'dart:math';
@@ -32,14 +31,19 @@ class ChromeScreenshotManager extends ScreenshotManager {
   /// [region] is used to decide which part of the web content will be used in
   /// test image. It includes starting coordinate x,y as well as height and
   /// width of the area to capture.
-  Future<Image> capture(Rectangle region) async {
+  Future<Image> capture(Rectangle? region) async {
     final wip.ChromeConnection chromeConnection =
         wip.ChromeConnection('localhost', kDevtoolsPort);
-    final wip.ChromeTab chromeTab = await chromeConnection.getTab(
+    final wip.ChromeTab? chromeTab = await chromeConnection.getTab(
         (wip.ChromeTab chromeTab) => chromeTab.url.contains('localhost'));
+    if (chromeTab == null) {
+      throw StateError(
+        'Failed locate Chrome tab with the test page',
+      );
+    }
     final wip.WipConnection wipConnection = await chromeTab.connect();
 
-    Map<String, dynamic> captureScreenshotParameters = null;
+    Map<String, dynamic>? captureScreenshotParameters = null;
     if (region != null) {
       captureScreenshotParameters = <String, dynamic>{
         'format': 'png',
@@ -68,7 +72,7 @@ class ChromeScreenshotManager extends ScreenshotManager {
         'Page.captureScreenshot', captureScreenshotParameters);
 
     final Image screenshot =
-        decodePng(base64.decode(response.result['data'] as String));
+        decodePng(base64.decode(response.result!['data'] as String))!;
 
     return screenshot;
   }
@@ -99,7 +103,7 @@ class IosSafariScreenshotManager extends ScreenshotManager {
   /// This scale factor is used to enlarge/shrink the screenshot region
   /// sent from the tests.
   /// For more details see [_scaleScreenshotRegion(region)].
-  double _scaleFactor;
+  late final double _scaleFactor;
 
   /// Height of the part to crop from the top of the image.
   ///
@@ -108,13 +112,13 @@ class IosSafariScreenshotManager extends ScreenshotManager {
   /// the screen, the screenshot will differ between each run.
   /// Note that this gap can change per phone and per iOS version. For more
   /// details refer to `browser_lock.yaml` file.
-  int _heightOfHeader;
+  late final int _heightOfHeader;
 
   /// Height of the part to crop from the bottom of the image.
   ///
   /// This area is the footer navigation bar of the phone, it is not the area
   /// used by tests (which is inside the browser).
-  int _heightOfFooter;
+  late final int _heightOfFooter;
 
   /// Used as a suffix for the temporary file names used for screenshots.
   int _fileNameCounter = 0;
@@ -153,7 +157,7 @@ class IosSafariScreenshotManager extends ScreenshotManager {
   /// width of the area to capture.
   ///
   /// Uses simulator tool `xcrun simctl`'s 'screenshot' command.
-  Future<Image> capture(Rectangle region) async {
+  Future<Image> capture(Rectangle? region) async {
     final String filename = 'screenshot${_fileNameCounter}.png';
     _fileNameCounter++;
 
@@ -170,7 +174,7 @@ class IosSafariScreenshotManager extends ScreenshotManager {
     imageBytes = await file.readAsBytes();
     file.deleteSync();
 
-    final Image screenshot = decodePng(imageBytes);
+    final Image screenshot = decodePng(imageBytes)!;
     // Create an image with no footer and header. The _heightOfHeader,
     // _heightOfFooter values are already in real coordinates therefore
     // they don't need to be scaled.
@@ -227,7 +231,7 @@ abstract class ScreenshotManager {
 
   static ScreenshotManager choose(String browser) {
     if (isBrowserSupported(browser)) {
-      return _browserFactories[browser]();
+      return _browserFactories[browser]!();
     }
     throw StateError('Screenshot tests are only supported on Chrome and on '
         'iOS Safari');

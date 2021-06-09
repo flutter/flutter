@@ -18,23 +18,22 @@ const double kMaxDiffRateFailure = 0.28 / 100; // 0.28%
 
 abstract class PlatformBinding {
   static PlatformBinding get instance {
-    PlatformBinding? binding = _instance;
-    if (binding == null) {
-      if (io.Platform.isLinux) {
-        binding = _LinuxBinding();
-      } else if (io.Platform.isMacOS) {
-        binding = _MacBinding();
-      } else if (io.Platform.isWindows) {
-        binding = _WindowsBinding();
-      } else {
-        throw '${io.Platform.operatingSystem} is not supported';
-      }
-      _instance = binding;
-    }
-    return binding;
+    return _instance ??= _createInstance();
   }
-
   static PlatformBinding? _instance;
+
+  static PlatformBinding _createInstance() {
+    if (io.Platform.isLinux) {
+      return _LinuxBinding();
+    }
+    if (io.Platform.isMacOS) {
+      return _MacBinding();
+    }
+    if (io.Platform.isWindows) {
+      return _WindowsBinding();
+    }
+    throw '${io.Platform.operatingSystem} is not supported';
+  }
 
   int getChromeBuild(YamlMap chromeLock);
   String getChromeDownloadUrl(String version);
