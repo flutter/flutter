@@ -1,10 +1,12 @@
-###**Documentation Guidance for Flutter**
+# **Documentation Guidance for Flutter**
 
-###**Introduction**
+**Introduction**
+------------------------------------------------------------------------------------------------------------------
 
 This document contains points to consider before submitting a documentation PR, general documentation rules, and pull request guidance for various documentation change proposals for anyone who wishes to contribute or make changes to Flutter’s current list of documentation. 
 
-###**Table of Contents**
+**Table of Contents**
+------------------------------------------------------------------------------------------------------------------
 
 - **Points to consider**
   - Are there existing documentation that can be utilized?
@@ -37,7 +39,7 @@ This document contains points to consider before submitting a documentation PR, 
   - API document
   - Document on Flutter.dev
 
-###**Points to consider**
+**Points to consider**
 ------------------------------------------------------------------------------------------------------------------
 
 The Flutter team sincerely welcomes anyone who wishes to contribute or make changes to our current list of documentation. Not only it helps us to identify potential flaws that may exist in our current documentation but also lets us know alternative ways that we can change our documentation to further benefit our users and developers. 
@@ -66,46 +68,46 @@ For more info on design document and design document examples, please visit the 
 
 If the change that you would like to make is a change for the flutter website documents or to add in additional documents for flutter website, please make the appropriate pull request to [Flutter/website](https://github.com/flutter/website) repo and proposed the change there. We also suggest viewing the “general rules to consider for documentation” below even when proposing document changes for the website. For additional details, please refer to [contributing guidance](https://github.com/flutter/website/blob/master/CONTRIBUTING.md) for flutter website. 
 
-###**General rules to consider for documentation**
-----------------------------------------------------------------------------------------------------------------------------------------------------------
-### **Answer your own questions straight away**
+**General rules to consider for documentation**
+----------------------------------------------------------------------------------
+**Answer your own questions straight away**
 When working on Flutter, if you find yourself asking a question about our systems, please place whatever answer you subsequently discover into the documentation in the same place where you first looked for the answer. That way, the documentation will consist of answers to real questions, where people would look to find them. Do this right away; it’s fine if your otherwise-unrelated PR has a bunch of documentation fixes in it to answer questions you had while you were working on your PR.
 
 We try to avoid reliance on "oral tradition". It should be possible for anyone to begin contributing without having had to learn all the secrets from existing team members. To that end, all processes should be documented (typically on the wiki), code should be self-explanatory or commented, and conventions should be written down, e.g. in our style guide.
 
 There is one exception: it’s better to *not* document something in our API docs than to document it poorly. This is because if you don’t document it, it still appears on our list of things to document. Feel free to remove documentation that violates the rules below (especially the next one), so as to make it reappear on the list.
-### **Avoid useless documentation**
+
+**Avoid useless documentation**
 If someone could have written the same documentation without knowing anything about the class other than its name, then it’s useless.
 
 Avoid checking in such documentation, because it is no better than no documentation but will prevent us from noticing that the identifier is not actually documented.
 
 Example (from [CircleAvatar](http://docs.flutter.io/flutter/material/CircleAvatar-class.html)):
 
+<pre><code>
 // BAD:
 
 /// The background color.
-
 final Color backgroundColor;
 
 /// Half the diameter of the circle.
-
 final double radius;
 
 
 // GOOD:
 
 /// The color with which to fill the circle. Changing the background
-
 /// color will cause the avatar to animate to the new color.
-
 final Color backgroundColor;
 
 /// The size of the avatar. Changing the radius will cause the
-
 /// avatar to animate to the new size.
-
 final double radius;
-### **Writing prompts for good documentation**
+</code></pre>
+
+
+**Writing prompts for good documentation**
+
 If you are having trouble coming up with useful documentation, here are some prompts that might help you write more detailed prose:
 
 - If someone is looking at this documentation, it means that they have a question which they couldn’t answer by guesswork or by looking at the code. What could that question be? Try to answer all questions you can come up with.
@@ -117,9 +119,10 @@ If you are having trouble coming up with useful documentation, here are some pro
 - Are there lifecycle considerations? For example, who owns the object that this property is set to? Who should dispose() it, if that’s relevant?
 - What is the contract for this property/method? Can it be called at any time? Are there limits on what values are valid? If it’s a final property set from a constructor, does the constructor have any limits on what the property can be set to? If this is a constructor, are any of the arguments not nullable?
 - If there are Future values involved, what are the guarantees around those? Consider whether they can complete with an error, whether they can never complete at all, what happens if the underlying operation is canceled, and so forth.
-### **Avoid empty prose**
+**Avoid empty prose**
 It’s easy to use more words than necessary. Avoid doing so where possible, even if the result is somewhat terse.
 
+<pre><code>
 // BAD:
 
 /// Note: It is important to be aware of the fact that in the
@@ -129,9 +132,10 @@ It’s easy to use more words than necessary. Avoid doing so where possible, eve
 // GOOD:
 
 /// Defaults to 2.
+</code></pre>
 
 In particular, avoid saying "Note:". It adds nothing.
-### **Leave breadcrumbs in the comments**
+ **Leave breadcrumbs in the comments**
 This is especially important for documentation at the level of classes.
 
 If a class is constructed using a builder of some sort or can be obtained via some mechanism other than merely calling the constructor, then include this information in the documentation for the class.
@@ -144,6 +148,7 @@ Typedefs should mention at least one place where the signature is used.
 
 These rules result in a chain of breadcrumbs that a reader can follow to get from any class or method that they might think is relevant to their task all the way up to the class or method they actually need.
 
+<pre><code>
 Example:
 
 // GOOD:
@@ -163,9 +168,11 @@ Example:
 /// drawn into a [Canvas], using the [Canvas.drawPicture] method.
 
 abstract class Picture ...
+</code></pre>
 
 You can also use "See also" links, is in:
 
+<pre><code>
 /// See also:
 
 ///
@@ -173,13 +180,14 @@ You can also use "See also" links, is in:
 /// \* [FooBar], which is another way to peel oranges.
 
 /// \* [Baz], which quuxes the wibble.
+</code></pre>
 
 Each line should end with a period. Prefer "which…​" rather than parentheticals on such lines. There should be a blank line between "See also:" and the first item in the bulleted list.
 
-**Refactor the code when the documentation would be incomprehensible**
-
+**Refactor the code when the documentation would be incomprehensible**<br>
 If writing the documentation proves to be difficult because the API is convoluted, then rewrite the API rather than trying to document it.
-### Canonical terminology
+
+#### Canonical terminology
 The documentation should use consistent terminology:
 
 - *method* - a member of a class that is a non-anonymous closure
@@ -192,9 +200,10 @@ Prefer the term "call" to the term "invoke" when talking about jumping to a clos
 Prefer the term "member variable" to the term "instance variable" when talking about variables associated with a specific object.
 
 Typedef dartdocs should usually start with the phrase "Signature for…​".
-### **Use correct grammar**
-Avoid starting a sentence with a lowercase letter.
 
+**Use correct grammar**<br>
+Avoid starting a sentence with a lowercase letter.
+<pre><code>
 // BAD
 
 /// [foo] must not be null.
@@ -202,21 +211,23 @@ Avoid starting a sentence with a lowercase letter.
 // GOOD
 
 /// The [foo] argument must not be null.
-
+</pre></code>
 Similarly, end all sentences with a period.
-### **Use the passive voice; recommend, do not require**
+
+**Use the passive voice; recommend, do not require**<br>
 Never use "you" or "we". Avoid the imperative voice. Avoid value judgements.
 
 Rather than telling someone to do something, use "Consider", as in “To obtain the foo, consider using [bar].”.
 
 In general, you don’t know who is reading the documentation or why. Someone could have inherited a terrible codebase and be reading our documentation to find out how to fix it; by saying "you should not do X" or "avoid Y" or "if you want Z", you will put the reader in a defensive state of mind when they find code that contradicts the documentation (after all, they inherited this codebase, who are we to say that they’re doing it wrong, it’s not their fault).
-### **Provide sample code**
+
+**Provide sample code**
 Sample code helps developers learn your API quickly. Writing sample code also helps you think through how your API is going to be used by app developers.
 
 Sample code should go in a section of the documentation that begins with {@tool snippet}, and ends with {@end-tool}. This will then be checked by automated tools, and extracted and formatted for display on the API documentation web site [docs.flutter.io](https://docs.flutter.io/). For details on how to write sample code, see [the API documentation documentation](https://github.com/flutter/flutter/blob/master/dev/snippets/README.md).
 
 For example, below is the sample code for building an infinite list of children with the ListView widget, as it would appear in the Flutter source code for the ListView widget:
-
+<pre><code><span style="color:gray">
 /// A scrollable list of widgets arranged linearly.
 
 /// 
@@ -233,7 +244,7 @@ For example, below is the sample code for building an infinite list of children 
 
 /// ```dart
 
-/// ListView.builder(
+<span style="color:black">/// ListView.builder(
 
 ///   padding: EdgeInsets.all(8.0),
 
@@ -245,16 +256,17 @@ For example, below is the sample code for building an infinite list of children 
 
 ///   },
 
-/// )
+/// )</span>
 
 /// ```
 
 /// {@end-tool}
 
-class ListView {
+<span style="color:red">class</span><span style="color:blue"> ListView</span> {
+	// ...
+</span></pre></code>
+**Provide full application samples.**<br>
 
-`  `// ...
-#### *Provide full application samples.*
 Our UI research has shown that developers prefer to see examples that are in the context of an entire app. So, whenever it makes sense, provide an example that can be presented as part of an entire application instead of just a simple sample like the one above.
 
 This can be done using the {@tool dartpad --template=<template>} …​ {@end-tool} or {@tool sample --template=<template>} …​ {@end-tool} dartdoc indicators, where <template> is the name of a template that the given blocks of dart code can be inserted into. See [here](https://github.com/flutter/flutter/blob/master/dev/snippets/README.md) for more details about writing these kinds of examples, and [here](https://github.com/flutter/flutter/blob/master/dev/snippets/config/templates/README.md) for a list and description of the available templates.
@@ -278,31 +290,34 @@ Examples:
 ![28338544 2c3681b8 6bbe 11e7 967d fcd7c830bf53](https://user-images.githubusercontent.com/348942/28338544-2c3681b8-6bbe-11e7-967d-fcd7c830bf53.png)
 
 When creating diagrams, make sure to provide alternative text [as described in the HTML specification](https://html.spec.whatwg.org/multipage/images.html#alt).
-### **Clearly mark deprecated APIs**
+**Clearly mark deprecated APIs**<br>
 We have conventions around deprecation. See the [Tree Hygiene](https://github.com/flutter/flutter/wiki/Tree-hygiene#deprecation) page for more details.
-### **Use /// for public-quality private documentation**
+**Use /// for public-quality private documentation**<br>
 In general, private code can and should also be documented. If that documentation is of good enough quality that we could include it verbatim when making the class public (i.e. it satisfies all the style guidelines above), then you can use /// for those docs, even though they’re private.
 
 Documentation of private APIs that is not of sufficient quality should only use //. That way, if we ever make the corresponding class public, those documentation comments will be flagged as missing, and we will know to examine them more carefully.
 
 Feel free to be conservative in what you consider "sufficient quality". It’s ok to use // even if you have multiple paragraphs of documentation; that’s a sign that we should carefully rereview the documentation when making the code public.
-### **Dartdoc templates and macros**
+**Dartdoc templates and macros**<br>
 Dartdoc supports creating templates that can be reused in other parts of the code. They are defined like so:
-
+<pre><code><span style="color:gray">
 /// {@template <id>}
 
 /// ...
 
 /// {@endtemplate}
+</span></pre></code>
 
 and used via:
 
+<pre><code><span style="color:gray">
 /// {@macro <id>}
+</span></pre></code>
 
 The <id> should be a unique identifier that is of the form flutter.library.Class.member[.optionalDescription].
 
 For example:
-
+<pre><code>
 // GOOD:
 
 /// {@template flutter.rendering.Layer.findAnnotations.aboutAnnotations}
@@ -318,30 +333,34 @@ For example:
 /// This is some great stuff!
 
 /// {@endtemplate}
+<pre><code>
 
 The optionalDescription component of the identifier is only necessary if there is more than one template defined in one Dartdoc block. If a symbol is not part of a library, or not part of a class, then just omit those parts from the ID.
-### **Dartdoc-specific requirements**
+**Dartdoc-specific requirements**<br>
 The first paragraph of any dartdoc section must be a short self-contained sentence that explains the purpose and meaning of the item being documented. Subsequent paragraphs then must elaborate. Avoid having the first paragraph have multiple sentences. (This is because the first paragraph gets extracted and used in tables of contents, etc, and so has to be able to stand alone and not take up a lot of room.)
 
 When referencing a parameter, use backticks. However, when referencing a parameter that also corresponds to a property, use square brackets instead. (This contradicts the Dart style guide, which says to use square brackets for both. We do this because of [dartdoc issue 1486](https://github.com/dart-lang/dartdoc/issues/1486). Currently, there’s no way to unambiguously reference a parameter. We want to avoid cases where a parameter that happens to be named the same as a property despite having no relationship to that property gets linked to the property.)
 
+<pre><code><span style="color:gray">
 // GOOD
 
-`  `/// Creates a foobar, which allows a baz to quux the bar.
+	/// Creates a foobar, which allows a baz to quux the bar.
 
-`  `///
+	///
 
-`  `/// The [bar] argument must not be null.
+	/// The [bar] argument must not be null.
 
-`  `///
+	///
 
-`  `/// The `baz` argument must be greater than zero.
+	/// The `baz` argument must be greater than zero.
 
-`  `Foo({ this.bar, int baz }) : assert(bar != null), assert(baz > 0);
+	Foo({ this.bar, int baz }) : assert(bar != null), assert(baz > 0);
+</span></pre></code>
 
 Avoid using terms like "above" or "below" to reference one dartdoc section from another. Dartdoc sections are often shown alone on a Web page, the full context of the class is not present.
 
-![](Aspose.Words.5f3c8810-92cd-49cc-9c5b-a26895ea5bb7.001.png)**Documentation pull request**
+**Documentation pull request**
+----------------------------------------------------------------------------------
 
 **1. If there is an existing document that you would like to make change to, when making your pull request, please include** 
 
