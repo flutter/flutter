@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:io';
 
@@ -30,14 +29,10 @@ class Firefox extends Browser {
   @override
   final Future<Uri> remoteDebuggerUrl;
 
-  static String version;
-
   /// Starts a new instance of Firefox open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Firefox(Uri url, {bool debug = false}) {
-    version = FirefoxArgParser.instance.version;
-
-    assert(version != null);
+    final String version = FirefoxArgParser.instance.version;
     var remoteDebuggerCompleter = Completer<Uri>.sync();
     return Firefox._(() async {
       final BrowserInstallation installation = await getOrInstallFirefox(

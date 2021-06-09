@@ -2,18 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:pedantic/pedantic.dart';
 
-import 'package:test_core/src/util/io.dart';
-
 import 'browser.dart';
 import 'chrome_installer.dart';
 import 'common.dart';
+import 'environment.dart';
 
 /// A class for running an instance of Chrome.
 ///
@@ -29,14 +27,10 @@ class Chrome extends Browser {
   @override
   final Future<Uri> remoteDebuggerUrl;
 
-  static String version;
-
   /// Starts a new instance of Chrome open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Chrome(Uri url, {bool debug = false}) {
-    version = ChromeArgParser.instance.version;
-
-    assert(version != null);
+    String version = ChromeArgParser.instance.version;
     var remoteDebuggerCompleter = Completer<Uri>.sync();
     return Chrome._(() async {
       final BrowserInstallation installation = await getOrInstallChrome(
@@ -56,7 +50,7 @@ class Chrome extends Browser {
       // --disable-font-subpixel-positioning
       final bool isChromeNoSandbox =
           Platform.environment['CHROME_NO_SANDBOX'] == 'true';
-      var dir = createTempDir();
+      final String dir = environment.webUiDartToolDir.createTempSync('test_chrome_user_data_').resolveSymbolicLinksSync();
       var args = [
         '--user-data-dir=$dir',
         url.toString(),
@@ -105,7 +99,7 @@ class Chrome extends Browser {
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
 const String _kGlibcError = 'Inconsistency detected by ld.so';
 
-Future<Process> _spawnChromiumProcess(String executable, List<String> args, { String workingDirectory }) async {
+Future<Process> _spawnChromiumProcess(String executable, List<String> args, { String? workingDirectory }) async {
   // Keep attempting to launch the browser until one of:
   // - Chrome launched successfully, in which case we just return from the loop.
   // - The tool detected an unretriable Chrome error, in which case we throw ToolExit.
@@ -134,11 +128,10 @@ Future<Process> _spawnChromiumProcess(String executable, List<String> args, { St
       })
       .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
         if (hitGlibcBug) {
-          print(
-            'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
-            'Will try launching browser again.',
-          );
-          return null;
+          final String message = 'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
+            'Will try launching browser again.';
+          print(message);
+          return message;
         }
         print('Failed to launch browser. Command used to launch it: ${args.join(' ')}');
         throw Exception(
@@ -157,7 +150,27 @@ Future<Process> _spawnChromiumProcess(String executable, List<String> args, { St
     // launching more processes.
     process.exitCode.timeout(const Duration(seconds: 1), onTimeout: () {
       process.kill();
-      return null;
+      return -1;
     });
+  }
+}
+
+/// Returns the full URL of the Chrome remote debugger for the main page.
+///
+/// This takes the [base] remote debugger URL (which points to a browser-wide
+/// page) and uses its JSON API to find the resolved URL for debugging the host
+/// page.
+Future<Uri> getRemoteDebuggerUrl(Uri base) async {
+  try {
+    final HttpClient client = HttpClient();
+    final HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
+    final HttpClientResponse response = await request.close();
+    final List<dynamic> jsonObject =
+        await json.fuse(utf8).decoder.bind(response).single as List<dynamic>;
+    return base.resolve(jsonObject.first['devtoolsFrontendUrl'] as String);
+  } catch (_) {
+    // If we fail to talk to the remote debugger protocol, give up and return
+    // the raw URL rather than crashing.
+    return base;
   }
 }

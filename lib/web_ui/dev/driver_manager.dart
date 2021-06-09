@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:io' as io;
 
 import 'package:path/path.dart' as pathlib;
@@ -29,7 +28,7 @@ class ChromeDriverManager extends DriverManager {
   /// Initialized to the current first to avoid the `Non-nullable` error.
   // TODO: https://github.com/flutter/flutter/issues/53179. Local integration
   // tests are still using the system Chrome.
-  io.Directory _browserDriverDirWithVersion;
+  late final io.Directory _browserDriverDirWithVersion;
 
   ChromeDriverManager(String browser) : super(browser) {
     final io.File lockFile = io.File(pathlib.join(
