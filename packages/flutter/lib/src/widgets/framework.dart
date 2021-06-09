@@ -5452,15 +5452,7 @@ abstract class RenderObjectElement extends Element {
   /// If this element has been [unmount]ed, this getter will throw.
   @override
   RenderObject get renderObject {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    assert(_renderObject != null, 'Object disposed');
-=======
     assert(_renderObject != null, '$runtimeType unmounted');
->>>>>>> disp_ro
-=======
-    assert(_renderObject != null, '$runtimeType unmounted');
->>>>>>> upstream/master
     return _renderObject!;
   }
   RenderObject? _renderObject;
