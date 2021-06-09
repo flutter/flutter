@@ -21,7 +21,7 @@ const List<String> kModifiersOfInterest = <String>[
   'MetaRight',
 ];
 
-const Map<String, String> sidedModifierToAny = <String, String> {
+const Map<String, String> sidedModifierToAny = <String, String>{
   'ShiftLeft': 'ShiftAny',
   'ShiftRight': 'ShiftAny',
   'ControlLeft': 'ControlAny',
@@ -32,7 +32,7 @@ const Map<String, String> sidedModifierToAny = <String, String> {
   'MetaRight': 'MetaAny',
 };
 
-const Map<String, String> unsidedModifierToLeft = <String, String> {
+const Map<String, String> unsidedModifierToLeft = <String, String>{
   'ShiftAny': 'ShiftLeft',
   'ControlAny': 'ControlLeft',
   'AltAny': 'AltLeft',
