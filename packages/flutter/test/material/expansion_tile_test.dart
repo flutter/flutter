@@ -560,4 +560,64 @@ void main() {
     expect(getIconColor(), iconColor);
     expect(getTextColor(), textColor);
   });
+
+  testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading, isNull);
+    expect(listTile.trailing.runtimeType, RotationTransition);
+  });
+
+  testWidgets('ExpansionTile trailing controlAffinity test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+          controlAffinity: ListTileControlAffinity.trailing,
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading, isNull);
+    expect(listTile.trailing.runtimeType, RotationTransition);
+  });
+
+  testWidgets('ExpansionTile leading controlAffinity test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+          controlAffinity: ListTileControlAffinity.leading,
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading.runtimeType, RotationTransition);
+    expect(listTile.trailing, isNull);
+  });
+
+  testWidgets('ExpansionTile override rotating icon test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+          leading: Icon(Icons.info),
+          controlAffinity: ListTileControlAffinity.leading,
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading.runtimeType, Icon);
+    expect(listTile.trailing, isNull);
+  });
 }
