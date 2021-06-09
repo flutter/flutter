@@ -660,7 +660,7 @@ class GalleryDrawer extends StatelessWidget {
             selected: !ComplexLayoutApp.of(context)!.lightTheme,
             trailing: Radio<bool>(
               value: false,
-              groupValue: ComplexLayoutApp.of(context)?.lightTheme,
+              groupValue: ComplexLayoutApp.of(context)!.lightTheme,
               onChanged: (bool? value) { _changeTheme(context, value!); },
             ),
           ),
