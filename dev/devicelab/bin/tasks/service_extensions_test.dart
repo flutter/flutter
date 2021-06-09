@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/common.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -50,7 +53,7 @@ void main() {
           .listen((String line) {
         stderr.writeln('run:stderr: $line');
       });
-      run.exitCode.then<void>((int exitCode) { ok = false; });
+      unawaited(run.exitCode.then<void>((int exitCode) { ok = false; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (!ok)
         throw 'Failed to run test app.';
@@ -101,7 +104,7 @@ void main() {
 
       final Future<Event> navigationFuture = navigationEvents.first;
       // This tap triggers a navigation event.
-      device.tap(100, 200);
+      unawaited(device.tap(100, 200));
 
       final Event navigationEvent = await navigationFuture;
       // validate the fields

@@ -24,7 +24,8 @@ class BuildInfo {
     this.trackWidgetCreation = false,
     List<String>? extraFrontEndOptions,
     List<String>? extraGenSnapshotOptions,
-    this.fileSystemRoots,
+    List<String>? fileSystemRoots,
+    this.androidProjectArgs = const <String>[],
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
@@ -40,8 +41,10 @@ class BuildInfo {
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.packageConfig = PackageConfig.empty,
+    this.initializeFromDill,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
+       fileSystemRoots = fileSystemRoots ?? const <String>[],
        dartDefines = dartDefines ?? const <String>[],
        dartExperiments = dartExperiments ?? const <String>[];
 
@@ -69,7 +72,7 @@ class BuildInfo {
   /// file. If not provided, defaults to `.packages`.
   final String packagesPath;
 
-  final List<String>? fileSystemRoots;
+  final List<String> fileSystemRoots;
   final String? fileSystemScheme;
 
   /// Whether the build should track widget creation locations.
@@ -141,11 +144,20 @@ class BuildInfo {
   /// The Gradle daemon may also be disabled in the Android application's properties file.
   final bool androidGradleDaemon;
 
+  /// Additional key value pairs that are passed directly to the gradle project via the `-P`
+  /// flag.
+  final List<String> androidProjectArgs;
+
   /// The package configuration for the loaded application.
   ///
   /// This is captured once during startup, but the actual package configuration
   /// may change during a 'flutter run` workflow.
   final PackageConfig packageConfig;
+
+  /// The kernel file that the resident compiler will be initialized with.
+  ///
+  /// If this is null, it will be initialized from the default cached location.
+  final String? initializeFromDill;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -184,6 +196,40 @@ class BuildInfo {
   /// the flavor name in the output files is lower-cased (see flutter.gradle),
   /// so the lower cased flavor name is used to compute the output file name
   String? get lowerCasedFlavor => flavor?.toLowerCase();
+
+  /// Convert to a structured string encoded structure appropriate for usage
+  /// in build system [Environment.defines].
+  ///
+  /// Fields that are `null` are excluded from this configuration.
+  Map<String, String> toBuildSystemEnvironment() {
+    // packagesPath and performanceMeasurementFile are not passed into
+    // the Environment map.
+    return <String, String>{
+      kBuildMode: getNameForBuildMode(mode),
+      if (dartDefines.isNotEmpty)
+        kDartDefines: encodeDartDefines(dartDefines),
+      if (dartObfuscation != null)
+        kDartObfuscation: dartObfuscation.toString(),
+      if (extraFrontEndOptions.isNotEmpty)
+        kExtraFrontEndOptions: extraFrontEndOptions.join(','),
+      if (extraGenSnapshotOptions.isNotEmpty)
+        kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
+      if (splitDebugInfoPath != null)
+        kSplitDebugInfo: splitDebugInfoPath!,
+      if (trackWidgetCreation != null)
+        kTrackWidgetCreation: trackWidgetCreation.toString(),
+      if (treeShakeIcons != null)
+        kIconTreeShakerFlag: treeShakeIcons.toString(),
+      if (bundleSkSLPath != null)
+        kBundleSkSLPath: bundleSkSLPath!,
+      if (codeSizeDirectory != null)
+        kCodeSizeDirectory: codeSizeDirectory!,
+      if (fileSystemRoots.isNotEmpty)
+        kFileSystemRoots: fileSystemRoots.join(','),
+      if (fileSystemScheme != null)
+        kFileSystemScheme: fileSystemScheme!,
+    };
+  }
 
   /// Convert to a structured string encoded structure appropriate for usage as
   /// environment variables or to embed in other scripts.
@@ -241,6 +287,8 @@ class BuildInfo {
         '-Pbundle-sksl-path=$bundleSkSLPath',
       if (codeSizeDirectory != null)
         '-Pcode-size-directory=$codeSizeDirectory',
+      for (String projectArg in androidProjectArgs)
+        '-P$projectArg',
     ];
   }
 }
@@ -355,7 +403,7 @@ enum EnvironmentType {
   simulator,
 }
 
-String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber, Logger logger) {
+String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String? buildNumber, Logger logger) {
   if (buildNumber == null) {
     return null;
   }
@@ -402,7 +450,7 @@ String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bu
   return buildNumber;
 }
 
-String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName, Logger logger) {
+String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? buildName, Logger logger) {
   if (buildName == null) {
     return null;
   }
@@ -750,7 +798,7 @@ String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
   final String arch = (targetPlatform == null) ?
       _getCurrentHostPlatformArchName() :
       getNameForTargetPlatformArch(targetPlatform);
-  final String subDirs = 'linux/' + arch;
+  final String subDirs = 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
@@ -773,6 +821,87 @@ String getFuchsiaBuildDirectory() {
 ///
 /// These values are URI-encoded and then combined into a comma-separated string.
 const String kDartDefines = 'DartDefines';
+
+/// The define to pass a [BuildMode].
+const String kBuildMode = 'BuildMode';
+
+/// The define to pass whether we compile 64-bit android-arm code.
+const String kTargetPlatform = 'TargetPlatform';
+
+/// The define to control what target file is used.
+const String kTargetFile = 'TargetFile';
+
+/// The define to control whether the AOT snapshot is built with bitcode.
+const String kBitcodeFlag = 'EnableBitcode';
+
+/// Whether to enable or disable track widget creation.
+const String kTrackWidgetCreation = 'TrackWidgetCreation';
+
+/// Additional configuration passed to the dart front end.
+///
+/// This is expected to be a comma separated list of strings.
+const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
+
+/// Additional configuration passed to gen_snapshot.
+///
+/// This is expected to be a comma separated list of strings.
+const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
+
+/// Whether the build should run gen_snapshot as a split aot build for deferred
+/// components.
+const String kDeferredComponents = 'DeferredComponents';
+
+/// Whether to strip source code information out of release builds and where to save it.
+const String kSplitDebugInfo = 'SplitDebugInfo';
+
+/// Alternative scheme for file URIs.
+///
+/// May be used along with [kFileSystemRoots] to support a multi-root
+/// filesystem.
+const String kFileSystemScheme = 'FileSystemScheme';
+
+/// Additional filesystem roots.
+///
+/// If provided, must be used along with [kFileSystemScheme].
+const String kFileSystemRoots = 'FileSystemRoots';
+
+/// The define to control what iOS architectures are built for.
+///
+/// This is expected to be a space-delimited list of architectures. If not
+/// provided, defaults to arm64.
+///
+/// The other supported value is armv7, the 32-bit iOS architecture.
+const String kIosArchs = 'IosArchs';
+
+/// The define to control what macOS architectures are built for.
+///
+/// This is expected to be a space-delimited list of architectures. If not
+/// provided, defautls to x86_64.
+///
+/// Supported values are x86_64 and arm64.
+const String kDarwinArchs = 'DarwinArchs';
+
+/// Path to the SDK root to be used as the isysroot.
+const String kSdkRoot = 'SdkRoot';
+
+/// Whether to enable Dart obfuscation and where to save the symbol map.
+const String kDartObfuscation = 'DartObfuscation';
+
+/// An output directory where one or more code-size measurements may be written.
+const String kCodeSizeDirectory = 'CodeSizeDirectory';
+
+/// SHA identifier of the Apple developer code signing identity.
+///
+/// Same as EXPANDED_CODE_SIGN_IDENTITY Xcode build setting.
+/// Also discoverable via `security find-identity -p codesigning`.
+const String kCodesignIdentity = 'CodesignIdentity';
+
+/// The build define controlling whether icon fonts should be stripped down to
+/// only the glyphs used by the application.
+const String kIconTreeShakerFlag = 'TreeShakeIcons';
+
+/// The input key for an SkSL bundle path.
+const String kBundleSkSLPath = 'BundleSkSLPath';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);

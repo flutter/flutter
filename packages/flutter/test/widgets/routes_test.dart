@@ -979,7 +979,7 @@ void main() {
       expect(find.byType(ModalBarrier), findsNWidgets(1));
     });
 
-    testWidgets('showGeneralDialog adds non-dismissable barrier when barrierDismissable is false', (WidgetTester tester) async {
+    testWidgets('showGeneralDialog adds non-dismissible barrier when barrierDismissible is false', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
@@ -1937,9 +1937,9 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return Semantics(
-      child: _child,
       scopesRoute: true,
       explicitChildNodes: true,
+      child: _child,
     );
   }
 }

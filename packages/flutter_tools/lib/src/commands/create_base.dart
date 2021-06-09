@@ -332,7 +332,7 @@ abstract class CreateBase extends FlutterCommand {
     final String pluginDartClass = _createPluginClassName(projectName);
     final String pluginClass = pluginDartClass.endsWith('Plugin')
         ? pluginDartClass
-        : pluginDartClass + 'Plugin';
+        : '${pluginDartClass}Plugin';
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase =
         pluginClassSnakeCase.toUpperCase();
@@ -340,6 +340,8 @@ abstract class CreateBase extends FlutterCommand {
         createUTIIdentifier(organization, projectName);
     final String androidIdentifier =
         createAndroidIdentifier(organization, projectName);
+    final String windowsIdentifier =
+        createWindowsIdentifier(organization, projectName);
     // Linux uses the same scheme as the Android identifier.
     // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
     final String linuxIdentifier = androidIdentifier;
@@ -351,6 +353,7 @@ abstract class CreateBase extends FlutterCommand {
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,
       'linuxIdentifier': linuxIdentifier,
+      'windowsIdentifier': windowsIdentifier,
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android_common.minApiLevel,
@@ -444,8 +447,7 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// Android application ID is specified in: https://developer.android.com/studio/build/application-id
   /// All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
-  @protected
-  String createAndroidIdentifier(String organization, String name) {
+  static String createAndroidIdentifier(String organization, String name) {
     String tmpIdentifier = '$organization.$name';
     final RegExp disallowed = RegExp(r'[^\w\.]');
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
@@ -463,11 +465,18 @@ abstract class CreateBase extends FlutterCommand {
     final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
     final List<String> prefixedSegments = segments.map((String segment) {
       if (!segmentPatternRegex.hasMatch(segment)) {
-        return 'u' + segment;
+        return 'u$segment';
       }
       return segment;
     }).toList();
     return prefixedSegments.join('.');
+  }
+
+  /// Creates a Windows package name.
+  ///
+  /// Package names must be a globally unique, commonly a GUID.
+  static String createWindowsIdentifier(String organization, String name) {
+    return const Uuid().v4().toUpperCase();
   }
 
   String _createPluginClassName(String name) {
@@ -476,8 +485,7 @@ abstract class CreateBase extends FlutterCommand {
   }
 
   /// Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
-  @protected
-  String createUTIIdentifier(String organization, String name) {
+  static String createUTIIdentifier(String organization, String name) {
     name = camelCase(name);
     String tmpIdentifier = '$organization.$name';
     final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');

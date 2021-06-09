@@ -5,13 +5,11 @@
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'framework.dart';
 import 'image.dart';
 import 'implicit_animations.dart';
-import 'transitions.dart';
 
 // Examples can assume:
 // late Uint8List bytes;
@@ -62,7 +60,7 @@ import 'transitions.dart';
 /// )
 /// ```
 /// {@end-tool}
-class FadeInImage extends StatelessWidget {
+class FadeInImage extends StatefulWidget {
   /// Creates a widget that displays a [placeholder] while an [image] is loading,
   /// then fades-out the placeholder and fades-in the image.
   ///
@@ -356,22 +354,42 @@ class FadeInImage extends StatelessWidget {
   /// once the image has loaded.
   final String? imageSemanticLabel;
 
+  @override
+  State<FadeInImage> createState() => _FadeInImageState();
+}
+
+class _FadeInImageState extends State<FadeInImage> {
+  static const Animation<double> _kOpaqueAnimation = AlwaysStoppedAnimation<double>(1.0);
+
+  // These ProxyAnimations are changed to the fade in animation by
+  // [_AnimatedFadeOutFadeInState]. Otherwise these animations are reset to
+  // their defaults by [_resetAnimations].
+  final ProxyAnimation _imageAnimation = ProxyAnimation(_kOpaqueAnimation);
+  final ProxyAnimation _placeholderAnimation = ProxyAnimation(_kOpaqueAnimation);
+
+  void _resetAnimations() {
+    _imageAnimation.parent = _kOpaqueAnimation;
+    _placeholderAnimation.parent = _kOpaqueAnimation;
+  }
+
   Image _image({
     required ImageProvider image,
     ImageErrorWidgetBuilder? errorBuilder,
     ImageFrameBuilder? frameBuilder,
+    required Animation<double> opacity,
   }) {
     assert(image != null);
     return Image(
       image: image,
       errorBuilder: errorBuilder,
       frameBuilder: frameBuilder,
-      width: width,
-      height: height,
-      fit: fit,
-      alignment: alignment,
-      repeat: repeat,
-      matchTextDirection: matchTextDirection,
+      opacity: opacity,
+      width: widget.width,
+      height: widget.height,
+      fit: widget.fit,
+      alignment: widget.alignment,
+      repeat: widget.repeat,
+      matchTextDirection: widget.matchTextDirection,
       gaplessPlayback: true,
       excludeFromSemantics: true,
     );
@@ -380,28 +398,37 @@ class FadeInImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget result = _image(
-      image: image,
-      errorBuilder: imageErrorBuilder,
+      image: widget.image,
+      errorBuilder: widget.imageErrorBuilder,
+      opacity: _imageAnimation,
       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded)
+        if (wasSynchronouslyLoaded) {
+          _resetAnimations();
           return child;
+        }
         return _AnimatedFadeOutFadeIn(
           target: child,
-          placeholder: _image(image: placeholder, errorBuilder: placeholderErrorBuilder),
+          targetProxyAnimation: _imageAnimation,
+          placeholder: _image(
+            image: widget.placeholder,
+            errorBuilder: widget.placeholderErrorBuilder,
+            opacity: _placeholderAnimation,
+          ),
+          placeholderProxyAnimation: _placeholderAnimation,
           isTargetLoaded: frame != null,
-          fadeInDuration: fadeInDuration,
-          fadeOutDuration: fadeOutDuration,
-          fadeInCurve: fadeInCurve,
-          fadeOutCurve: fadeOutCurve,
+          fadeInDuration: widget.fadeInDuration,
+          fadeOutDuration: widget.fadeOutDuration,
+          fadeInCurve: widget.fadeInCurve,
+          fadeOutCurve: widget.fadeOutCurve,
         );
       },
     );
 
-    if (!excludeFromSemantics) {
+    if (!widget.excludeFromSemantics) {
       result = Semantics(
-        container: imageSemanticLabel != null,
+        container: widget.imageSemanticLabel != null,
         image: true,
-        label: imageSemanticLabel ?? '',
+        label: widget.imageSemanticLabel ?? '',
         child: result,
       );
     }
@@ -414,7 +441,9 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
   const _AnimatedFadeOutFadeIn({
     Key? key,
     required this.target,
+    required this.targetProxyAnimation,
     required this.placeholder,
+    required this.placeholderProxyAnimation,
     required this.isTargetLoaded,
     required this.fadeOutDuration,
     required this.fadeOutCurve,
@@ -430,7 +459,9 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
        super(key: key, duration: fadeInDuration + fadeOutDuration);
 
   final Widget target;
+  final ProxyAnimation targetProxyAnimation;
   final Widget placeholder;
+  final ProxyAnimation placeholderProxyAnimation;
   final bool isTargetLoaded;
   final Duration fadeInDuration;
   final Duration fadeOutDuration;
@@ -494,6 +525,9 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       // for the full animation when the new target image becomes ready.
       controller.value = controller.upperBound;
     }
+
+    widget.targetProxyAnimation.parent = _targetOpacityAnimation;
+    widget.placeholderProxyAnimation.parent = _placeholderOpacityAnimation;
   }
 
   bool _isValid(Tween<double> tween) {
@@ -502,13 +536,8 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
 
   @override
   Widget build(BuildContext context) {
-    final Widget target = FadeTransition(
-      opacity: _targetOpacityAnimation!,
-      child: widget.target,
-    );
-
     if (_placeholderOpacityAnimation!.isCompleted) {
-      return target;
+      return widget.target;
     }
 
     return Stack(
@@ -518,11 +547,8 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       // but it allows the Stack to avoid a call to Directionality.of()
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        target,
-        FadeTransition(
-          opacity: _placeholderOpacityAnimation!,
-          child: widget.placeholder,
-        ),
+        widget.target,
+        widget.placeholder,
       ],
     );
   }

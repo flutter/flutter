@@ -791,9 +791,9 @@ void main() {
                   ),
                   builder: (BuildContext context) {
                     return MaterialButton(
-                      child: const Text('BottomSheet'),
                       onPressed: () => Navigator.pop(context),
                       key: tapTargetToClose,
+                      child: const Text('BottomSheet'),
                     );
                   },
                 );
@@ -910,9 +910,10 @@ void main() {
             constraints: BoxConstraints(maxWidth: 80),
           ),
         ),
-        home: const Scaffold(
-          body: Center(child: Text('body')),
-          bottomSheet: Text('BottomSheet'),
+        home: Scaffold(
+          body: const Center(child: Text('body')),
+          bottomSheet: const Text('BottomSheet'),
+          floatingActionButton: FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
         ),
       ));
       expect(find.text('BottomSheet'), findsOneWidget);
@@ -920,6 +921,12 @@ void main() {
       expect(
         tester.getRect(find.text('BottomSheet')),
         const Rect.fromLTRB(360, 558, 440, 600),
+      );
+      // Ensure the FAB is overlapping the top of the sheet
+      expect(find.byIcon(Icons.add), findsOneWidget);
+      expect(
+        tester.getRect(find.byIcon(Icons.add)),
+        const Rect.fromLTRB(744, 544, 768, 568),
       );
     });
 

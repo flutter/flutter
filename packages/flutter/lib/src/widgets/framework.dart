@@ -664,7 +664,7 @@ abstract class StatelessWidget extends Widget {
 ///   const YellowBird({ Key? key }) : super(key: key);
 ///
 ///   @override
-///   _YellowBirdState createState() => _YellowBirdState();
+///   State<YellowBird> createState() => _YellowBirdState();
 /// }
 ///
 /// class _YellowBirdState extends State<YellowBird> {
@@ -693,7 +693,7 @@ abstract class StatelessWidget extends Widget {
 ///   final Widget? child;
 ///
 ///   @override
-///   _BirdState createState() => _BirdState();
+///   State<Bird> createState() => _BirdState();
 /// }
 ///
 /// class _BirdState extends State<Bird> {
@@ -743,7 +743,7 @@ abstract class StatefulWidget extends Widget {
   ///
   /// ```dart
   /// @override
-  /// _MyState createState() => _MyState();
+  /// State<MyWidget> createState() => _MyWidgetState();
   /// ```
   ///
   /// The framework can call this method multiple times over the lifetime of
@@ -1113,9 +1113,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// The framework calls this method whenever it removes this [State] object
   /// from the tree. In some cases, the framework will reinsert the [State]
   /// object into another part of the tree (e.g., if the subtree containing this
-  /// [State] object is grafted from one location in the tree to another). If
-  /// that happens, the framework will ensure that it calls [build] to give the
-  /// [State] object a chance to adapt to its new location in the tree. If
+  /// [State] object is grafted from one location in the tree to another due to
+  /// the use of a [GlobalKey]). If that happens, the framework will call
+  /// [activate] to give the [State] object a chance to reacquire any resources
+  /// that it released in [deactivate]. It will then also call [build] to give
+  /// the [State] object a chance to adapt to its new location in the tree. If
   /// the framework does reinsert this subtree, it will do so before the end of
   /// the animation frame in which the subtree was removed from the tree. For
   /// this reason, [State] objects can defer releasing most resources until the
@@ -1135,6 +1137,40 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   @mustCallSuper
   void deactivate() { }
+
+  /// Called when this object is reinserted into the tree after having been
+  /// removed via [deactivate].
+  ///
+  /// In most cases, after a [State] object has been deactivated, it is _not_
+  /// reinserted into the tree, and its [dispose] method will be called to
+  /// signal that it is ready to be garbage collected.
+  ///
+  /// In some cases, however, after a [State] object has been deactivated, the
+  /// framework will reinsert it into another part of the tree (e.g., if the
+  /// subtree containing this [State] object is grafted from one location in
+  /// the tree to another due to the use of a [GlobalKey]). If that happens,
+  /// the framework will call [activate] to give the [State] object a chance to
+  /// reacquire any resources that it released in [deactivate]. It will then
+  /// also call [build] to give the object a chance to adapt to its new
+  /// location in the tree. If the framework does reinsert this subtree, it
+  /// will do so before the end of the animation frame in which the subtree was
+  /// removed from the tree. For this reason, [State] objects can defer
+  /// releasing most resources until the framework calls their [dispose] method.
+  ///
+  /// The framework does not call this method the first time a [State] object
+  /// is inserted into the tree. Instead, the framework calls [initState] in
+  /// that situation.
+  ///
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.activate()`.
+  ///
+  /// See also:
+  ///
+  ///  * [Element.activate], the corresponding method when an element
+  ///    transitions from the "inactive" to the "active" lifecycle state.
+  @protected
+  @mustCallSuper
+  void activate() { }
 
   /// Called when this object is removed from the tree permanently.
   ///
@@ -2020,7 +2056,8 @@ abstract class BuildContext {
   /// This method will only return a valid result after the build phase is
   /// complete. It is therefore not valid to call this from a build method.
   /// It should only be called from interaction event handlers (e.g.
-  /// gesture callbacks) or layout or paint callbacks.
+  /// gesture callbacks) or layout or paint callbacks. It is also not valid to
+  /// call if [State.mounted] returns false.
   ///
   /// If the render object is a [RenderBox], which is the common case, then the
   /// size of the render object can be obtained from the [size] getter. This is
@@ -2296,8 +2333,8 @@ abstract class BuildContext {
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to build an off-screen widget tree used to measure
-/// the size of the rendered tree. For some use cases, the simpler [Offstage]
-/// widget may be a better alternative to this approach.
+/// the layout size of the rendered tree. For some use cases, the simpler
+/// [Offstage] widget may be a better alternative to this approach.
 ///
 /// ```dart imports
 /// import 'package:flutter/rendering.dart';
@@ -3163,10 +3200,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     RenderObject? result;
     void visit(Element element) {
       assert(result == null); // this verifies that there's only one child
-      if (element is RenderObjectElement)
+      if (element._lifecycleState == _ElementLifecycle.defunct) {
+        return;
+      } else if (element is RenderObjectElement) {
         result = element.renderObject;
-      else
+      } else {
         element.visitChildren(visit);
+      }
     }
     visit(this);
     return result;
@@ -3805,6 +3845,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// After this function is called, the element will not be incorporated into
   /// the tree again.
   ///
+  /// Any resources this element holds should be released at this point. For
+  /// example, [RenderObjectElement.unmount] calls [RenderObject.dispose] and
+  /// nulls out its reference to the render object.
+  ///
   /// See the lifecycle documentation for [Element] for additional information.
   ///
   /// Implementations of this method should end with a call to the inherited
@@ -3828,7 +3872,25 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  RenderObject? findRenderObject() => renderObject;
+  RenderObject? findRenderObject() {
+    assert(() {
+      if (_lifecycleState != _ElementLifecycle.active) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot get renderObject of inactive element.'),
+          ErrorDescription(
+            'In order for an element to have a valid renderObject, it must be '
+            'active, which means it is part of the tree.\n'
+            'Instead, this element is in the $_lifecycleState state.\n'
+            'If you called this method from a State object, consider guarding '
+            'it with State.mounted.',
+          ),
+          describeElement('The findRenderObject() method was called for the following element'),
+        ]);
+      }
+      return true;
+    }());
+    return renderObject;
+  }
 
   @override
   Size? get size {
@@ -4443,7 +4505,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
   static Widget _defaultErrorWidgetBuilder(FlutterErrorDetails details) {
     String message = '';
     assert(() {
-      message = _stringify(details.exception) + '\nSee also: https://flutter.dev/docs/testing/errors';
+      message = '${_stringify(details.exception)}\nSee also: https://flutter.dev/docs/testing/errors';
       return true;
     }());
     final Object exception = details.exception;
@@ -4804,6 +4866,7 @@ class StatefulElement extends ComponentElement {
   @override
   void activate() {
     super.activate();
+    state.activate();
     // Since the State could have observed the deactivate() and thus disposed of
     // resources allocated in the build method, we have to rebuild the widget
     // so that its State can reallocate its resources.
@@ -5385,8 +5448,13 @@ abstract class RenderObjectElement extends Element {
   RenderObjectWidget get widget => super.widget as RenderObjectWidget;
 
   /// The underlying [RenderObject] for this element.
+  ///
+  /// If this element has been [unmount]ed, this getter will throw.
   @override
-  RenderObject get renderObject => _renderObject!;
+  RenderObject get renderObject {
+    assert(_renderObject != null, '$runtimeType unmounted');
+    return _renderObject!;
+  }
   RenderObject? _renderObject;
 
   bool _debugDoingBuild = false;
@@ -5454,6 +5522,7 @@ abstract class RenderObjectElement extends Element {
       return true;
     }());
     _renderObject = widget.createRenderObject(this);
+    assert(!_renderObject!.debugDisposed!);
     assert(() {
       _debugDoingBuild = false;
       return true;
@@ -5731,6 +5800,11 @@ abstract class RenderObjectElement extends Element {
 
   @override
   void unmount() {
+    assert(
+      !renderObject.debugDisposed!,
+      'A RenderObject was disposed prior to its owning element being unmounted: '
+      '$renderObject',
+    );
     final RenderObjectWidget oldWidget = widget;
     super.unmount();
     assert(
@@ -5739,6 +5813,8 @@ abstract class RenderObjectElement extends Element {
       'RenderObjectElement: $renderObject',
     );
     oldWidget.didUnmountRenderObject(renderObject);
+    _renderObject!.dispose();
+    _renderObject = null;
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
@@ -6267,6 +6343,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   void update(MultiChildRenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
+    assert(!debugChildrenHaveDuplicateKeys(widget, widget.children));
     _children = updateChildren(_children, widget.children, forgottenChildren: _forgottenChildren);
     _forgottenChildren.clear();
   }

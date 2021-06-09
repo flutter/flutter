@@ -512,11 +512,9 @@ void main() {
     expect(
       exception.toString(),
       equalsIgnoringHashCodes(
-        'Multiple widgets used the same GlobalKey.\n'
-        'The key [GlobalKey#00000 problematic] was used by 2 widgets:\n'
-        '  SizedBox-[GlobalKey#00000 problematic]\n'
-        '  Placeholder-[GlobalKey#00000 problematic]\n'
-        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
+        'Duplicate keys found.\n'
+        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
       ),
     );
   });
@@ -541,11 +539,9 @@ void main() {
     expect(
       exception.toString(),
       equalsIgnoringHashCodes(
-        'Multiple widgets used the same GlobalKey.\n'
-        'The key [GlobalKey#00000 problematic] was used by 2 widgets:\n'
-        '  Container-[GlobalKey#00000 problematic]\n'
-        '  Placeholder-[GlobalKey#00000 problematic]\n'
-        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
+        'Duplicate keys found.\n'
+        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
       ),
     );
   });
@@ -1589,6 +1585,76 @@ void main() {
     expect(() => element.state, throwsA(isA<TypeError>()));
     expect(() => element.widget, throwsA(isA<TypeError>()));
   }, skip: kIsWeb);
+
+  testWidgets('Deactivate and activate are called correctly', (WidgetTester tester) async {
+    final List<String> states = <String>[];
+    Widget build([Key? key]) {
+      return StatefulWidgetSpy(
+        key: key,
+        onInitState: (BuildContext context) { states.add('initState'); },
+        onDidUpdateWidget: (BuildContext context) { states.add('didUpdateWidget'); },
+        onDeactivate: (BuildContext context) { states.add('deactivate'); },
+        onActivate: (BuildContext context) { states.add('activate'); },
+        onBuild: (BuildContext context) { states.add('build'); },
+        onDispose: (BuildContext context) { states.add('dispose'); },
+      );
+    }
+    Future<void> pumpWidget(Widget widget) {
+      states.clear();
+      return tester.pumpWidget(widget);
+    }
+
+    await pumpWidget(build());
+    expect(states, <String>['initState', 'build']);
+    await pumpWidget(Container(child: build()));
+    expect(states, <String>['deactivate', 'initState', 'build', 'dispose']);
+    await pumpWidget(Container());
+    expect(states, <String>['deactivate', 'dispose']);
+
+    final GlobalKey key = GlobalKey();
+    await pumpWidget(build(key));
+    expect(states, <String>['initState', 'build']);
+    await pumpWidget(Container(child: build(key)));
+    expect(states, <String>['deactivate', 'activate', 'didUpdateWidget', 'build']);
+    await pumpWidget(Container());
+    expect(states, <String>['deactivate', 'dispose']);
+  });
+
+  testWidgets('RenderObjectElement.unmount dispsoes of its renderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(const Placeholder());
+    final RenderObjectElement element = tester.allElements.whereType<RenderObjectElement>().first;
+    final RenderObject renderObject = element.renderObject;
+    expect(renderObject.debugDisposed, false);
+
+    await tester.pumpWidget(Container());
+
+    expect(() => element.renderObject, throwsAssertionError);
+    expect(renderObject.debugDisposed, true);
+  });
+
+  testWidgets('Getting the render object of an unmounted element throws', (WidgetTester tester) async {
+    await tester.pumpWidget(const _StatefulLeaf());
+    final StatefulElement element = tester.element<StatefulElement>(find.byType(_StatefulLeaf));
+    expect(element.state, isA<State<_StatefulLeaf>>());
+    expect(element.widget, isA<_StatefulLeaf>());
+    // Replace the widget tree to unmount the element.
+    await tester.pumpWidget(Container());
+
+  expect(
+    () => element.findRenderObject(),
+    throwsA(isA<FlutterError>().having(
+      (FlutterError error) => error.message,
+      'message',
+      equalsIgnoringHashCodes('''
+Cannot get renderObject of inactive element.
+In order for an element to have a valid renderObject, it must be active, which means it is part of the tree.
+Instead, this element is in the _ElementLifecycle.defunct state.
+If you called this method from a State object, consider guarding it with State.mounted.
+The findRenderObject() method was called for the following element:
+  StatefulElement#00000(DEFUNCT)'''),
+      )),
+    );
+  });
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
@@ -1648,7 +1714,7 @@ class Decorate extends StatefulWidget {
   final void Function(bool isInBuild) build;
 
   @override
-  _DecorateState createState() => _DecorateState();
+  State<Decorate> createState() => _DecorateState();
 
   @override
   DecorateElement createElement() => DecorateElement(this);
@@ -1827,6 +1893,7 @@ class StatefulWidgetSpy extends StatefulWidget {
     this.onDidChangeDependencies,
     this.onDispose,
     this.onDeactivate,
+    this.onActivate,
     this.onDidUpdateWidget,
   })  : super(key: key);
 
@@ -1835,10 +1902,11 @@ class StatefulWidgetSpy extends StatefulWidget {
   final void Function(BuildContext)? onDidChangeDependencies;
   final void Function(BuildContext)? onDispose;
   final void Function(BuildContext)? onDeactivate;
+  final void Function(BuildContext)? onActivate;
   final void Function(BuildContext)? onDidUpdateWidget;
 
   @override
-  _StatefulWidgetSpyState createState() => _StatefulWidgetSpyState();
+  State<StatefulWidgetSpy> createState() => _StatefulWidgetSpyState();
 }
 
 class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
@@ -1852,6 +1920,12 @@ class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
   void deactivate() {
     super.deactivate();
     widget.onDeactivate?.call(context);
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    widget.onActivate?.call(context);
   }
 
   @override

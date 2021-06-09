@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -56,7 +57,7 @@ import 'tooltip_theme.dart';
 /// above the widget.
 /// `textStyle` has been used to set the font size of the 'message'.
 /// `showDuration` accepts a Duration to continue showing the message after the long
-/// press has been released.
+/// press has been released or the mouse pointer exits the child widget.
 /// `waitDuration` accepts a Duration for which a mouse pointer has to hover over the child
 /// widget before the tooltip is shown.
 ///
@@ -190,20 +191,36 @@ class Tooltip extends StatefulWidget {
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
   ///
-  /// Once the pointer leaves the widget, the tooltip will immediately
-  /// disappear.
-  ///
   /// Defaults to 0 milliseconds (tooltips are shown immediately upon hover).
   final Duration? waitDuration;
 
   /// The length of time that the tooltip will be shown after a long press
-  /// is released.
+  /// is released or mouse pointer exits the widget.
   ///
-  /// Defaults to 1.5 seconds.
+  /// Defaults to 1.5 seconds for long press released or 0.1 seconds for mouse
+  /// pointer exits the widget.
   final Duration? showDuration;
 
+  static final Set<_TooltipState> _openedToolTips = <_TooltipState>{};
+
+  /// Dismiss all of the tooltips that are currently shown on the screen.
+  ///
+  /// This method returns true if it successfully dismisses the tooltips. It
+  /// returns false if there is no tooltip shown on the screen.
+  static bool dismissAllToolTips() {
+    if (_openedToolTips.isNotEmpty) {
+      // Avoid concurrent modification.
+      final List<_TooltipState> openedToolTips = List<_TooltipState>.from(_openedToolTips);
+      for (final _TooltipState state in openedToolTips) {
+        state._hideTooltip(immediately: true);
+      }
+      return true;
+    }
+    return false;
+  }
+
   @override
-  _TooltipState createState() => _TooltipState();
+  State<Tooltip> createState() => _TooltipState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -227,6 +244,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
   static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
+  static const Duration _defaultHoverShowDuration = Duration(milliseconds: 100);
   static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
 
@@ -243,6 +261,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   Timer? _hideTimer;
   Timer? _showTimer;
   late Duration showDuration;
+  late Duration hoverShowDuration;
   late Duration waitDuration;
   late bool _mouseIsConnected;
   bool _longPressActivated = false;
@@ -328,12 +347,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       return;
     }
     if (_longPressActivated) {
-      // Tool tips activated by long press should stay around for the showDuration.
       _hideTimer ??= Timer(showDuration, _controller.reverse);
     } else {
-      // Tool tips activated by hover should disappear as soon as the mouse
-      // leaves the control.
-      _controller.reverse();
+      _hideTimer ??= Timer(hoverShowDuration, _controller.reverse);
     }
     _longPressActivated = false;
   }
@@ -389,6 +405,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         height: height,
         padding: padding,
         margin: margin,
+        onEnter: _mouseIsConnected ? (PointerEnterEvent event) => _showTooltip() : null,
+        onExit: _mouseIsConnected ? (PointerExitEvent event) => _hideTooltip() : null,
         decoration: decoration,
         textStyle: textStyle,
         animation: CurvedAnimation(
@@ -403,9 +421,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     overlayState.insert(_entry!);
     SemanticsService.tooltip(widget.message);
+    Tooltip._openedToolTips.add(this);
   }
 
   void _removeEntry() {
+    Tooltip._openedToolTips.remove(this);
     _hideTimer?.cancel();
     _hideTimer = null;
     _showTimer?.cancel();
@@ -438,8 +458,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void dispose() {
     GestureBinding.instance!.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     RendererBinding.instance!.mouseTracker.removeListener(_handleMouseTrackerChange);
-    if (_entry != null)
-      _removeEntry();
+    _removeEntry();
     _controller.dispose();
     super.dispose();
   }
@@ -488,6 +507,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     textStyle = widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle;
     waitDuration = widget.waitDuration ?? tooltipTheme.waitDuration ?? _defaultWaitDuration;
     showDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultShowDuration;
+    hoverShowDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultHoverShowDuration;
 
     Widget result = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -575,6 +595,8 @@ class _TooltipOverlay extends StatelessWidget {
     required this.target,
     required this.verticalOffset,
     required this.preferBelow,
+    this.onEnter,
+    this.onExit,
   }) : super(key: key);
 
   final String message;
@@ -587,40 +609,50 @@ class _TooltipOverlay extends StatelessWidget {
   final Offset target;
   final double verticalOffset;
   final bool preferBelow;
+  final PointerEnterEventListener? onEnter;
+  final PointerExitEventListener? onExit;
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: CustomSingleChildLayout(
-          delegate: _TooltipPositionDelegate(
-            target: target,
-            verticalOffset: verticalOffset,
-            preferBelow: preferBelow,
-          ),
-          child: FadeTransition(
-            opacity: animation,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: height),
-              child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.bodyText2!,
-                child: Container(
-                  decoration: decoration,
-                  padding: padding,
-                  margin: margin,
-                  child: Center(
-                    widthFactor: 1.0,
-                    heightFactor: 1.0,
-                    child: Text(
-                      message,
-                      style: textStyle,
-                    ),
-                  ),
+    Widget result = IgnorePointer(
+      child: FadeTransition(
+        opacity: animation,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: height),
+          child: DefaultTextStyle(
+            style: Theme.of(context).textTheme.bodyText2!,
+            child: Container(
+              decoration: decoration,
+              padding: padding,
+              margin: margin,
+              child: Center(
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: Text(
+                  message,
+                  style: textStyle,
                 ),
               ),
             ),
           ),
         ),
+      )
+    );
+    if (onEnter != null || onExit != null) {
+      result = MouseRegion(
+        onEnter: onEnter,
+        onExit: onExit,
+        child: result,
+      );
+    }
+    return Positioned.fill(
+      child: CustomSingleChildLayout(
+        delegate: _TooltipPositionDelegate(
+          target: target,
+          verticalOffset: verticalOffset,
+          preferBelow: preferBelow,
+        ),
+        child: result,
       ),
     );
   }

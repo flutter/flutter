@@ -18,7 +18,6 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../build_info.dart';
-import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import 'android_sdk.dart';
 import 'gradle.dart';
@@ -42,6 +41,7 @@ class AndroidApk extends ApplicationPackage {
     @required ProcessManager processManager,
     @required UserMessages userMessages,
     @required Logger logger,
+    @required ProcessUtils processUtils,
   }) {
     final String aaptPath = androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null || !processManager.canRun(aaptPath)) {
@@ -51,7 +51,7 @@ class AndroidApk extends ApplicationPackage {
 
     String apptStdout;
     try {
-      apptStdout = globals.processUtils.runSync(
+      apptStdout = processUtils.runSync(
         <String>[
           aaptPath,
           'dump',
@@ -62,7 +62,7 @@ class AndroidApk extends ApplicationPackage {
         throwOnError: true,
       ).stdout.trim();
     } on ProcessException catch (error) {
-      globals.printError('Failed to extract manifest from APK: $error.');
+      logger.printError('Failed to extract manifest from APK: $error.');
       return null;
     }
 
@@ -117,6 +117,7 @@ class AndroidApk extends ApplicationPackage {
           processManager: processManager,
           logger: logger,
           userMessages: userMessages,
+          processUtils: processUtils,
         );
       }
       // The .apk hasn't been built yet, so we work with what we have. The run
@@ -209,24 +210,24 @@ class AndroidApk extends ApplicationPackage {
   String get name => file.basename;
 }
 
+abstract class _Entry {
+  const _Entry(this.parent, this.level);
 
-class _Entry {
-  _Element parent;
-  int level;
+  final _Element parent;
+  final int level;
 }
 
 class _Element extends _Entry {
-  _Element.fromLine(String line, _Element parent) {
+  _Element._(this.name, _Element parent, int level) : super(parent, level);
+
+  factory _Element.fromLine(String line, _Element parent) {
     //      E: application (line=29)
     final List<String> parts = line.trimLeft().split(' ');
-    name = parts[1];
-    level = line.length - line.trimLeft().length;
-    this.parent = parent;
-    children = <_Entry>[];
+    return _Element._(parts[1], parent, line.length - line.trimLeft().length);
   }
 
-  List<_Entry> children;
-  String name;
+  final List<_Entry> children = <_Entry>[];
+  final String name;
 
   void addChild(_Entry child) {
     children.add(child);
@@ -252,26 +253,23 @@ class _Element extends _Entry {
 }
 
 class _Attribute extends _Entry {
-  _Attribute.fromLine(String line, _Element parent) {
+  const _Attribute._(this.key, this.value, _Element parent, int level) : super(parent, level);
+
+  factory _Attribute.fromLine(String line, _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
     const String attributePrefix = 'A: ';
-    final List<String> keyVal = line
-        .substring(line.indexOf(attributePrefix) + attributePrefix.length)
-        .split('=');
-    key = keyVal[0];
-    value = keyVal[1];
-    level = line.length - line.trimLeft().length;
-    this.parent = parent;
+    final List<String> keyVal = line.substring(line.indexOf(attributePrefix) + attributePrefix.length).split('=');
+    return _Attribute._(keyVal[0], keyVal[1], parent, line.length - line.trimLeft().length);
   }
 
-  String key;
-  String value;
+  final String key;
+  final String value;
 }
 
 class ApkManifestData {
   ApkManifestData._(this._data);
 
-  static bool isAttributeWithValuePresent(_Element baseElement,
+  static bool _isAttributeWithValuePresent(_Element baseElement,
       String childElement, String attributeName, String attributeValue) {
     final Iterable<_Element> allElements = baseElement.allElements(childElement);
     for (final _Element oneElement in allElements) {
@@ -339,12 +337,12 @@ class ApkManifestData {
       }
 
       for (final _Element element in intentFilters) {
-        final bool isMainAction = isAttributeWithValuePresent(
+        final bool isMainAction = _isAttributeWithValuePresent(
             element, 'action', 'android:name', '"android.intent.action.MAIN"');
         if (!isMainAction) {
           continue;
         }
-        final bool isLauncherCategory = isAttributeWithValuePresent(
+        final bool isLauncherCategory = _isAttributeWithValuePresent(
             element, 'category', 'android:name',
             '"android.intent.category.LAUNCHER"');
         if (!isLauncherCategory) {
@@ -388,10 +386,13 @@ class ApkManifestData {
       return null;
     }
 
-    final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
-    map['package'] = <String, String>{'name': packageName};
-    map['version-code'] = <String, String>{'name': versionCode.toString()};
-    map['launchable-activity'] = <String, String>{'name': activityName};
+    final Map<String, Map<String, String>> map = <String, Map<String, String>>{
+      if (packageName != null)
+        'package': <String, String>{'name': packageName},
+      'version-code': <String, String>{'name': versionCode.toString()},
+      if (activityName != null)
+        'launchable-activity': <String, String>{'name': activityName},
+    };
 
     return ApkManifestData._(map);
   }

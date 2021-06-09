@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -15,7 +18,7 @@ Future<void> main() async {
     try {
       await runProjectTest((FlutterProject flutterProject) async {
         section('APK contains plugin classes');
-        flutterProject.addPlugin('google_maps_flutter', value: '^1.0.10');
+        unawaited(flutterProject.addPlugin('google_maps_flutter', value: '^1.0.10'));
 
         await inDirectory(flutterProject.rootPath, () async {
           await flutter('build', options: <String>[
@@ -25,7 +28,7 @@ Future<void> main() async {
           ]);
           final File apk = File('${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-debug.apk');
           if (!apk.existsSync()) {
-            throw TaskResult.failure('Expected ${apk.path} to exist, but it doesn\'t');
+            throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
           }
           // https://github.com/flutter/flutter/issues/72185
           await checkApkContainsMethods(apk, <String>[
