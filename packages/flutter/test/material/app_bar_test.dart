@@ -2910,6 +2910,56 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('AppBar scrolledUnder does not trigger on horizontal scroll', (WidgetTester tester) async {
+    const Color scrolledColor = Color(0xff00ff00);
+    const Color defaultColor = Color(0xff0000ff);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            backwardsCompatibility: false,
+            elevation: 0,
+            backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+              return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+            }),
+            title: const Text('AppBar'),
+          ),
+          body: ListView(
+            scrollDirection: Axis.horizontal,
+            children: <Widget>[
+              Container(height: 600.0, width: 1200.0, color: Colors.teal),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    Finder findAppBarMaterial() {
+      return find.descendant(of: find.byType(AppBar), matching: find.byType(Material));
+    }
+
+    Color? getAppBarBackgroundColor() {
+      return tester.widget<Material>(findAppBarMaterial()).color;
+    }
+
+    expect(getAppBarBackgroundColor(), defaultColor);
+
+    TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+    await gesture.moveBy(const Offset(-100.0, 0.0));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(getAppBarBackgroundColor(), defaultColor);
+
+    gesture = await tester.startGesture(const Offset(50.0, 400.0));
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(getAppBarBackgroundColor(), defaultColor);
+  });
+
   testWidgets('AppBar.preferredHeightFor', (WidgetTester tester) async {
     late double preferredHeight;
     late Size preferredSize;

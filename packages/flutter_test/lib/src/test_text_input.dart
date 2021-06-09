@@ -8,10 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'binding.dart' show TestDefaultBinaryMessengerBinding;
-import 'deprecated.dart';
-import 'test_async_utils.dart';
-
 export 'package:flutter/services.dart' show TextEditingValue, TextInputAction;
 
 /// A testing stub for the system's onscreen keyboard.
