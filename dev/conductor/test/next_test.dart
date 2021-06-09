@@ -102,7 +102,7 @@ void main() {
       );
     });
 
-    test('updates state.lastPhase from INITIALIZE to APPLY_ENGINE_CHERRYPICKS', () async {
+    test('updates state.lastPhase from INITIALIZE to APPLY_ENGINE_CHERRYPICKS on linux', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
       );
