@@ -42,7 +42,7 @@ String toTitleCase(String str) {
 }
 
 /// Return the plural of the given word (`cat(s)`).
-String pluralize(String word, int count) => count == 1 ? word : word + 's';
+String pluralize(String word, int count) => count == 1 ? word : '${word}s';
 
 /// Return the name of an enum item.
 String getEnumName(dynamic enumItem) {
@@ -52,7 +52,8 @@ String getEnumName(dynamic enumItem) {
 }
 
 String toPrettyJson(Object jsonable) {
-  return const JsonEncoder.withIndent('  ').convert(jsonable) + '\n';
+  final String value = const JsonEncoder.withIndent('  ').convert(jsonable);
+  return '$value\n';
 }
 
 final NumberFormat kSecondsFormat = NumberFormat('0.0');

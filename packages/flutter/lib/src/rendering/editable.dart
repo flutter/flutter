@@ -1307,7 +1307,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes in the foward direction, from the current selection in
+  /// Deletes in the forward direction, from the current selection in
   /// [textSelectionDelegate].
   ///
   /// This method operates on the text/selection contained in
@@ -1358,7 +1358,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a word in the foward direction from the current selection.
+  /// Deletes a word in the forward direction from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a word after the cursor.
   ///
@@ -1407,7 +1407,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a line in the foward direction from the current selection.
+  /// Deletes a line in the forward direction from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a line after the cursor.
   ///

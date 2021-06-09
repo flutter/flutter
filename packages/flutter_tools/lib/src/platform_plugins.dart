@@ -101,15 +101,15 @@ class AndroidPlugin extends PluginPlatform {
       'package': package,
       'class': pluginClass,
       // Mustache doesn't support complex types.
-      'supportsEmbeddingV1': _supportedEmbedings.contains('1'),
-      'supportsEmbeddingV2': _supportedEmbedings.contains('2'),
+      'supportsEmbeddingV1': _supportedEmbeddings.contains('1'),
+      'supportsEmbeddingV2': _supportedEmbeddings.contains('2'),
     };
   }
 
   Set<String>? _cachedEmbeddingVersion;
 
   /// Returns the version of the Android embedding.
-  Set<String> get _supportedEmbedings => _cachedEmbeddingVersion ??= _getSupportedEmbeddings();
+  Set<String> get _supportedEmbeddings => _cachedEmbeddingVersion ??= _getSupportedEmbeddings();
 
   Set<String> _getSupportedEmbeddings() {
     assert(pluginPath != null);

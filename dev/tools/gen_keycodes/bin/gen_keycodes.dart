@@ -185,8 +185,10 @@ Future<void> main(List<String> rawArguments) async {
 
     // Write data files
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    File(parsedArguments['physical-data'] as String).writeAsStringSync(encoder.convert(physicalData.toJson()) + '\n');
-    File(parsedArguments['logical-data'] as String).writeAsStringSync(encoder.convert(logicalData.toJson()) + '\n');
+    final String physicalJson = encoder.convert(physicalData.toJson());
+    File(parsedArguments['physical-data'] as String).writeAsStringSync('$physicalJson\n');
+    final String logicalJson = encoder.convert(logicalData.toJson());
+    File(parsedArguments['logical-data'] as String).writeAsStringSync('$logicalJson\n');
   } else {
     physicalData = PhysicalKeyData.fromJson(json.decode(await File(parsedArguments['physical-data'] as String).readAsString()) as Map<String, dynamic>);
     logicalData = LogicalKeyData.fromJson(json.decode(await File(parsedArguments['logical-data'] as String).readAsString()) as Map<String, dynamic>);
