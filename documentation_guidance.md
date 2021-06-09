@@ -70,14 +70,14 @@ If the change that you would like to make is a change for the flutter website do
 
 **General rules to consider for documentation**
 ----------------------------------------------------------------------------------
-**Answer your own questions straight away**
+**Answer your own questions straight away**<br>
 When working on Flutter, if you find yourself asking a question about our systems, please place whatever answer you subsequently discover into the documentation in the same place where you first looked for the answer. That way, the documentation will consist of answers to real questions, where people would look to find them. Do this right away; it’s fine if your otherwise-unrelated PR has a bunch of documentation fixes in it to answer questions you had while you were working on your PR.
 
 We try to avoid reliance on "oral tradition". It should be possible for anyone to begin contributing without having had to learn all the secrets from existing team members. To that end, all processes should be documented (typically on the wiki), code should be self-explanatory or commented, and conventions should be written down, e.g. in our style guide.
 
 There is one exception: it’s better to *not* document something in our API docs than to document it poorly. This is because if you don’t document it, it still appears on our list of things to document. Feel free to remove documentation that violates the rules below (especially the next one), so as to make it reappear on the list.
 
-**Avoid useless documentation**
+**Avoid useless documentation**<br>
 If someone could have written the same documentation without knowing anything about the class other than its name, then it’s useless.
 
 Avoid checking in such documentation, because it is no better than no documentation but will prevent us from noticing that the identifier is not actually documented.
@@ -106,8 +106,7 @@ final double radius;
 </code></pre>
 
 
-**Writing prompts for good documentation**
-
+**Writing prompts for good documentation**<br>
 If you are having trouble coming up with useful documentation, here are some prompts that might help you write more detailed prose:
 
 - If someone is looking at this documentation, it means that they have a question which they couldn’t answer by guesswork or by looking at the code. What could that question be? Try to answer all questions you can come up with.
@@ -119,7 +118,8 @@ If you are having trouble coming up with useful documentation, here are some pro
 - Are there lifecycle considerations? For example, who owns the object that this property is set to? Who should dispose() it, if that’s relevant?
 - What is the contract for this property/method? Can it be called at any time? Are there limits on what values are valid? If it’s a final property set from a constructor, does the constructor have any limits on what the property can be set to? If this is a constructor, are any of the arguments not nullable?
 - If there are Future values involved, what are the guarantees around those? Consider whether they can complete with an error, whether they can never complete at all, what happens if the underlying operation is canceled, and so forth.
-**Avoid empty prose**
+
+**Avoid empty prose**<br>
 It’s easy to use more words than necessary. Avoid doing so where possible, even if the result is somewhat terse.
 
 <pre><code>
@@ -211,7 +211,7 @@ Avoid starting a sentence with a lowercase letter.
 // GOOD
 
 /// The [foo] argument must not be null.
-</pre></code>
+</code></pre>
 Similarly, end all sentences with a period.
 
 **Use the passive voice; recommend, do not require**<br>
@@ -221,7 +221,7 @@ Rather than telling someone to do something, use "Consider", as in “To obtain 
 
 In general, you don’t know who is reading the documentation or why. Someone could have inherited a terrible codebase and be reading our documentation to find out how to fix it; by saying "you should not do X" or "avoid Y" or "if you want Z", you will put the reader in a defensive state of mind when they find code that contradicts the documentation (after all, they inherited this codebase, who are we to say that they’re doing it wrong, it’s not their fault).
 
-**Provide sample code**
+**Provide sample code**<br>
 Sample code helps developers learn your API quickly. Writing sample code also helps you think through how your API is going to be used by app developers.
 
 Sample code should go in a section of the documentation that begins with {@tool snippet}, and ends with {@end-tool}. This will then be checked by automated tools, and extracted and formatted for display on the API documentation web site [docs.flutter.io](https://docs.flutter.io/). For details on how to write sample code, see [the API documentation documentation](https://github.com/flutter/flutter/blob/master/dev/snippets/README.md).
@@ -264,7 +264,7 @@ For example, below is the sample code for building an infinite list of children 
 
 <span style="color:red">class</span><span style="color:blue"> ListView</span> {
 	// ...
-</span></pre></code>
+</span></code></pre>
 **Provide full application samples.**<br>
 
 Our UI research has shown that developers prefer to see examples that are in the context of an entire app. So, whenever it makes sense, provide an example that can be presented as part of an entire application instead of just a simple sample like the one above.
@@ -306,13 +306,13 @@ Dartdoc supports creating templates that can be reused in other parts of the cod
 /// ...
 
 /// {@endtemplate}
-</span></pre></code>
+</span></code></pre>
 
 and used via:
 
 <pre><code><span style="color:gray">
 /// {@macro <id>}
-</span></pre></code>
+</span></code></pre>
 
 The <id> should be a unique identifier that is of the form flutter.library.Class.member[.optionalDescription].
 
@@ -333,7 +333,7 @@ For example:
 /// This is some great stuff!
 
 /// {@endtemplate}
-<pre><code>
+</code></pre>
 
 The optionalDescription component of the identifier is only necessary if there is more than one template defined in one Dartdoc block. If a symbol is not part of a library, or not part of a class, then just omit those parts from the ID.
 **Dartdoc-specific requirements**<br>
@@ -341,7 +341,7 @@ The first paragraph of any dartdoc section must be a short self-contained senten
 
 When referencing a parameter, use backticks. However, when referencing a parameter that also corresponds to a property, use square brackets instead. (This contradicts the Dart style guide, which says to use square brackets for both. We do this because of [dartdoc issue 1486](https://github.com/dart-lang/dartdoc/issues/1486). Currently, there’s no way to unambiguously reference a parameter. We want to avoid cases where a parameter that happens to be named the same as a property despite having no relationship to that property gets linked to the property.)
 
-<pre><code><span style="color:gray">
+<pre><code>
 // GOOD
 
 	/// Creates a foobar, which allows a baz to quux the bar.
@@ -355,7 +355,7 @@ When referencing a parameter, use backticks. However, when referencing a paramet
 	/// The `baz` argument must be greater than zero.
 
 	Foo({ this.bar, int baz }) : assert(bar != null), assert(baz > 0);
-</span></pre></code>
+</code></pre>
 
 Avoid using terms like "above" or "below" to reference one dartdoc section from another. Dartdoc sections are often shown alone on a Web page, the full context of the class is not present.
 
