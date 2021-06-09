@@ -1,7 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// @dart = 2.6
+
 import 'dart:io' as io;
 import 'package:image/image.dart';
 import 'package:meta/meta.dart';
@@ -26,8 +26,8 @@ enum PixelComparison {
 void main(List<String> args) {
   final io.File fileA = io.File(args[0]);
   final io.File fileB = io.File(args[1]);
-  final Image imageA = decodeNamedImage(fileA.readAsBytesSync(), 'a.png');
-  final Image imageB = decodeNamedImage(fileB.readAsBytesSync(), 'b.png');
+  final Image imageA = decodeNamedImage(fileA.readAsBytesSync(), 'a.png')!;
+  final Image imageB = decodeNamedImage(fileB.readAsBytesSync(), 'b.png')!;
   final ImageDiff diff = ImageDiff(
       golden: imageA, other: imageB, pixelComparison: PixelComparison.fuzzy);
   print('Diff: ${(diff.rate * 100).toStringAsFixed(4)}%');
@@ -51,7 +51,7 @@ class ImageDiff {
   ///  * white: when both pixels are the same
   ///  * red: when a pixel is found in other, but not in golden
   ///  * green: when a pixel is found in golden, but not in other
-  Image diff;
+  late Image diff;
 
   /// The ratio of wrong pixels to all pixels in golden (between 0 and 1)
   /// This gets set to 1 (100% difference) when golden and other aren't the same size.
@@ -60,9 +60,9 @@ class ImageDiff {
   /// Image diff constructor which requires two [Image]s to compare and
   /// [PixelComparison] algorithm.
   ImageDiff({
-    @required this.golden,
-    @required this.other,
-    @required this.pixelComparison,
+    required this.golden,
+    required this.other,
+    required this.pixelComparison,
   }) {
     _computeDiff();
   }
@@ -196,8 +196,6 @@ String getPrintableDiffFilesInfo(double diffRate, double maxRate) =>
 /// Reads the url of the repo and `commit no` to sync to, from
 /// `goldens_lock.yaml`.
 class GoldensRepoFetcher {
-  String _repository;
-  String _revision;
   final io.Directory _webUiGoldensRepositoryDirectory;
   final String _lockFilePath;
 
@@ -212,15 +210,15 @@ class GoldensRepoFetcher {
   Future<void> fetch() async {
     final io.File lockFile = io.File(path.join(_lockFilePath));
     final YamlMap lock = loadYaml(lockFile.readAsStringSync()) as YamlMap;
-    _repository = lock['repository'] as String;
-    _revision = lock['revision'] as String;
+    final String repository = lock['repository'] as String;
+    final String revision = lock['revision'] as String;
 
-    final String localRevision = await _getLocalRevision();
-    if (localRevision == _revision) {
+    final String? localRevision = await _getLocalRevision();
+    if (localRevision == revision) {
       return;
     }
 
-    print('Fetching $_repository@$_revision');
+    print('Fetching $repository@$revision');
 
     if (!_webUiGoldensRepositoryDirectory.existsSync()) {
       _webUiGoldensRepositoryDirectory.createSync(recursive: true);
@@ -230,7 +228,7 @@ class GoldensRepoFetcher {
       );
 
       await _runGit(
-        <String>['remote', 'add', 'origin', _repository],
+        <String>['remote', 'add', 'origin', repository],
         _webUiGoldensRepositoryDirectory.path,
       );
     }
@@ -240,12 +238,12 @@ class GoldensRepoFetcher {
       _webUiGoldensRepositoryDirectory.path,
     );
     await _runGit(
-      <String>['checkout', _revision],
+      <String>['checkout', revision],
       _webUiGoldensRepositoryDirectory.path,
     );
   }
 
-  Future<String> _getLocalRevision() async {
+  Future<String?> _getLocalRevision() async {
     final io.File head = io.File(
         path.join(_webUiGoldensRepositoryDirectory.path, '.git', 'HEAD'));
 
