@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright 2014 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,8 +12,6 @@
 # To update to a new MSVC toolchain, copy the updated script from the Chromium
 # tree, and edit to make it work in the Dart tree by updating paths in the original script.
 
-from __future__ import print_function
-
 import collections
 import glob
 import json
@@ -24,7 +23,6 @@ import shutil
 import stat
 import subprocess
 import sys
-
 
 from gn_helpers import ToGNString
 
@@ -124,12 +122,12 @@ def _RegistryGetValueUsingWinReg(key, value):
     contents of the registry key's value, or None on failure.  Throws
     ImportError if _winreg is unavailable.
   """
-  import _winreg
+  import winreg
   try:
     root, subkey = key.split('\\', 1)
     assert root == 'HKLM'  # Only need HKLM for now.
-    with _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, subkey) as hkey:
-      return _winreg.QueryValueEx(hkey, value)[0]
+    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, subkey) as hkey:
+      return winreg.QueryValueEx(hkey, value)[0]
   except WindowsError:
     return None
 
@@ -149,7 +147,7 @@ def GetVisualStudioVersion():
   if env_version:
     return env_version
 
-  supported_versions = MSVS_VERSIONS.keys()
+  supported_versions = list(MSVS_VERSIONS.keys())
 
   # VS installed in depot_tools for Googlers
   if bool(int(os.environ.get('DEPOT_TOOLS_WIN_TOOLCHAIN', '1'))):
@@ -157,7 +155,7 @@ def GetVisualStudioVersion():
 
   # VS installed in system for external developers
   supported_versions_str = ', '.join('{} ({})'.format(v,k)
-      for k,v in MSVS_VERSIONS.items())
+      for k, v in list(MSVS_VERSIONS.items()))
   available_versions = []
   for version in supported_versions:
     for path in (

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -59,7 +59,7 @@ def main():
     args.json
   ]
 
-  for _, fidl_files in fidl_files_by_name.iteritems():
+  for _, fidl_files in fidl_files_by_name.items():
     fidlc_command.append('--files')
     for fidl_file in fidl_files:
       fidl_abspath = os.path.abspath('%s/%s' % (args.sdk_base, fidl_file))

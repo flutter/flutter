@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright (c) 2012 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -17,12 +18,12 @@ def run_quiet(*args):
   out, _ = popen.communicate()
   if popen.returncode:
     # expand emits errors to stdout, so if we fail, then print that out.
-    print out
+    print(out)
   return popen.returncode
 
 def main():
   if len(sys.argv) != 4:
-    print 'Usage: extract_from_cab.py cab_path archived_file output_dir'
+    print('Usage: extract_from_cab.py cab_path archived_file output_dir')
     return 1
 
   [cab_path, archived_file, output_dir] = sys.argv[1:]

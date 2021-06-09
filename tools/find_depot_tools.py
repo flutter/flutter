@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+#
 # Copyright (c) 2011 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -36,7 +38,7 @@ def add_depot_tools_to_path():
       return i
     previous_dir = root_dir
     root_dir = os.path.dirname(root_dir)
-  print >> sys.stderr, 'Failed to find depot_tools'
+  print('Failed to find depot_tools', file=sys.stderr)
   return None
 
 add_depot_tools_to_path()

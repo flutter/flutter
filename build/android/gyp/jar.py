@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2013 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -48,8 +48,7 @@ def Jar(class_files, classes_dir, jar_path, manifest_file=None, additional_jar_f
 def JarDirectory(classes_dir, excluded_classes, jar_path, manifest_file=None, additional_jar_files=None):
   class_files = build_utils.FindInDirectory(classes_dir, '*.class')
   for exclude in excluded_classes:
-    class_files = filter(
-        lambda f: not fnmatch.fnmatch(f, exclude), class_files)
+    class_files = [f for f in class_files if not fnmatch.fnmatch(f, exclude)]
 
   Jar(class_files, classes_dir, jar_path, manifest_file=manifest_file,
       additional_jar_files=additional_jar_files)

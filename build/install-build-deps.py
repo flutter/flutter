@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright 2015 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -375,7 +376,7 @@ def quick_check(packages):
       'dpkg-query', '-W', '-f', '${PackageSpec}:${Status}\n'] + list(packages))
   if rc == 0 and not stderr:
     return 0
-  print stderr
+  print(stderr)
   return 1
 
 
@@ -391,8 +392,8 @@ def main(argv):
 
   lsb_codename = lsb_release_short_codename()
   if not args.unsupported and not args.quick_check:
-    if lsb_codename not in map(
-        operator.itemgetter('codename'), SUPPORTED_UBUNTU_VERSIONS):
+    if lsb_codename not in list(map(
+        operator.itemgetter('codename'), SUPPORTED_UBUNTU_VERSIONS)):
       supported_ubuntus = ['%(number)s (%(codename)s)' % v
                            for v in SUPPORTED_UBUNTU_VERSIONS]
       write_error('Only Ubuntu %s are currently supported.' %
@@ -404,10 +405,10 @@ def main(argv):
       return 1
 
   if os.geteuid() != 0 and not args.quick_check:
-    print 'Running as non-root user.'
-    print 'You might have to enter your password one or more times'
-    print 'for \'sudo\'.'
-    print
+    print('Running as non-root user.')
+    print('You might have to enter your password one or more times')
+    print('for \'sudo\'.')
+    print()
 
   compute_dynamic_package_lists()
 

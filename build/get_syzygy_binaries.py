@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright 2014 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -86,18 +87,18 @@ def _StateIsValid(state):
     _LOGGER.debug('State must be a dict.')
     return False
   r = state.get('revision', None)
-  if not isinstance(r, basestring) or not _REVISION_RE.match(r):
+  if not isinstance(r, str) or not _REVISION_RE.match(r):
     _LOGGER.debug('State contains an invalid revision.')
     return False
   c = state.get('contents', None)
   if not isinstance(c, dict):
     _LOGGER.debug('State must contain a contents dict.')
     return False
-  for (relpath, md5) in c.iteritems():
-    if not isinstance(relpath, basestring) or len(relpath) == 0:
+  for (relpath, md5) in c.items():
+    if not isinstance(relpath, str) or len(relpath) == 0:
       _LOGGER.debug('State contents dict contains an invalid path.')
       return False
-    if not isinstance(md5, basestring) or not _MD5_RE.match(md5):
+    if not isinstance(md5, str) or not _MD5_RE.match(md5):
       _LOGGER.debug('State contents dict contains an invalid MD5 digest.')
       return False
   return True
@@ -111,7 +112,7 @@ def _BuildActualState(stored, revision, output_dir):
   """
   contents = {}
   state = { 'revision': revision, 'contents': contents }
-  for relpath, md5 in stored['contents'].iteritems():
+  for relpath, md5 in stored['contents'].items():
     abspath = os.path.abspath(os.path.join(output_dir, relpath))
     if os.path.isfile(abspath):
       m = _Md5(abspath)
@@ -129,7 +130,7 @@ def _StatesAreConsistent(stored, actual):
     return False
   cont_stored = stored['contents']
   cont_actual = actual['contents']
-  for relpath, md5 in cont_stored.iteritems():
+  for relpath, md5 in cont_stored.items():
     if relpath not in cont_actual:
       _LOGGER.debug('Missing content: %s', relpath)
       return False
@@ -226,7 +227,7 @@ def _CleanState(output_dir, state, dry_run=False):
 
   # Sort directories from longest name to shortest. This lets us remove empty
   # directories from the most nested paths first.
-  dirs = sorted(dirs.keys(), key=lambda x: len(x), reverse=True)
+  dirs = sorted(list(dirs.keys()), key=lambda x: len(x), reverse=True)
   for p in dirs:
     if os.path.exists(p) and _DirIsEmpty(p):
       _LOGGER.debug('Deleting empty directory "%s".', p)

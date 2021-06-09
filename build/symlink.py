@@ -1,13 +1,17 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright (c) 2013 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 """Make a symlink and optionally touch a file (to handle dependencies)."""
+
 import errno
 import optparse
 import os.path
 import shutil
 import sys
+
+
 def Main(argv):
   parser = optparse.OptionParser()
   parser.add_option('-f', '--force', action='store_true')
@@ -23,7 +27,7 @@ def Main(argv):
       t = target
     try:
       os.symlink(s, t)
-    except OSError, e:
+    except OSError as e:
       if e.errno == errno.EEXIST and options.force:
         if os.path.isdir(t):
           shutil.rmtree(t, ignore_errors=True)

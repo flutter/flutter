@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright 2017 The Dart project authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -104,7 +105,7 @@ def Main(argv):
         i = i + 1
       for (k, v) in sorted(old_deps.items()):
         if (k.startswith('src/third_party/dart/')):
-          for (dart_k, dart_v) in (new_deps.items()):
+          for (dart_k, dart_v) in (list(new_deps.items())):
             dart_k_suffix = dart_k[len('sdk/') if dart_k.startswith('sdk/') else 0:]
             if (k.endswith(dart_k_suffix)):
               if (isinstance(dart_v, str)):

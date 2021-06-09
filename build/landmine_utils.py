@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
+#
 # Copyright 2013 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 
 import functools
 import logging
@@ -20,7 +21,7 @@ def memoize(default=None):
         ret = func()
         val.append(ret if ret is not None else default)
         if logging.getLogger().isEnabledFor(logging.INFO):
-          print '%s -> %r' % (func.__name__, val[0])
+          print('%s -> %r' % (func.__name__, val[0]))
       return val[0]
     return inner
   return memoizer

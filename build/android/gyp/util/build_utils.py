@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+#
 # Copyright 2013 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -297,10 +299,10 @@ def GetSortedTransitiveDependencies(top, deps_func):
 
   # Then: simple, slow topological sort.
   sorted_deps = []
-  unsorted_deps = dict(map(Node, all_deps))
+  unsorted_deps = dict(list(map(Node, all_deps)))
   while unsorted_deps:
-    for library, dependencies in unsorted_deps.items():
-      if not dependencies.intersection(unsorted_deps.keys()):
+    for library, dependencies in list(unsorted_deps.items()):
+      if not dependencies.intersection(list(unsorted_deps.keys())):
         sorted_deps.append(library)
         del unsorted_deps[library]
 
@@ -314,9 +316,9 @@ def GetPythonDependencies():
   src/. The paths will be relative to the current directory.
   """
   _ForceLazyModulesToLoad()
-  module_paths = (m.__file__ for m in sys.modules.values()
+  module_paths = (m.__file__ for m in list(sys.modules.values())
                   if m is not None and hasattr(m, '__file__'))
-  abs_module_paths = map(os.path.abspath, module_paths)
+  abs_module_paths = list(map(os.path.abspath, module_paths))
 
   assert os.path.isabs(DIR_SOURCE_ROOT)
   non_system_module_paths = [
@@ -326,8 +328,8 @@ def GetPythonDependencies():
       return s[:-1]
     return s
 
-  non_system_module_paths = map(ConvertPycToPy, non_system_module_paths)
-  non_system_module_paths = map(os.path.relpath, non_system_module_paths)
+  non_system_module_paths = list(map(ConvertPycToPy, non_system_module_paths))
+  non_system_module_paths = list(map(os.path.relpath, non_system_module_paths))
   return sorted(set(non_system_module_paths))
 
 
@@ -339,11 +341,11 @@ def _ForceLazyModulesToLoad():
   over the values until sys.modules stabilizes so that no modules are missed.
   """
   while True:
-    num_modules_before = len(sys.modules.keys())
-    for m in sys.modules.values():
+    num_modules_before = len(list(sys.modules.keys()))
+    for m in list(sys.modules.values()):
       if m is not None and hasattr(m, '__file__'):
         _ = m.__file__
-    num_modules_after = len(sys.modules.keys())
+    num_modules_after = len(list(sys.modules.keys()))
     if num_modules_before == num_modules_after:
       break
 

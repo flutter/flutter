@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright (c) 2012 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -37,7 +38,7 @@ def main(argv):
 
   build_utils.CheckOptions(options, parser, ['protoc', 'proto_path'])
   if not options.java_out_dir and not options.srcjar:
-    print 'One of --java-out-dir or --srcjar must be specified.'
+    print('One of --java-out-dir or --srcjar must be specified.')
     return 1
 
   with build_utils.TempDir() as temp_dir:

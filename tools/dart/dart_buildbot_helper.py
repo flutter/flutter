@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+#
 # Copyright 2019 The Dart project authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,6 +10,7 @@ import pprint
 import requests
 import subprocess
 import sys
+from functools import reduce
 
 BUILDBUCKET_LIST_BUILDERS = 'https://cr-buildbucket.appspot.com/_ah/api/swarmbucket/v1/builders'
 BUILDBUCKET_SEARCH        = 'https://cr-buildbucket.appspot.com/_ah/api/buildbucket/v1/search'
@@ -146,11 +149,11 @@ def bucket_states_by_commit(builder_states):
         else:
           commit_buckets[rev].append(state)
       previous_revision = state.revision
-  bots_completed = max([len(v) for k,v in commit_buckets.items()])
+  bots_completed = max([len(v) for k,v in list(commit_buckets.items())])
 
   # We only care about commits that have been built and tested on all
   # configurations.
-  commit_buckets = { k: v for k, v in commit_buckets.items() if len(v) == bots_completed }
+  commit_buckets = { k: v for k, v in list(commit_buckets.items()) if len(v) == bots_completed }
   return commit_buckets
 
 
@@ -159,8 +162,8 @@ def get_most_recent_green_build(success_threshold=0.95):
   builders = [get_buildbot_states(name) for name in names]
   states_by_commit = bucket_states_by_commit(builders)
 
-  commit_timestamps = {commit: get_commit_timestamp(commit) for commit in states_by_commit.iterkeys()}
-  sorted_commits = [x[0] for x in reversed(sorted(commit_timestamps.items(), key=lambda x: x[1]))]
+  commit_timestamps = {commit: get_commit_timestamp(commit) for commit in states_by_commit.keys()}
+  sorted_commits = [x[0] for x in reversed(sorted(list(commit_timestamps.items()), key=lambda x: x[1]))]
 
   for commit in sorted_commits:
     commit_states = states_by_commit[commit]
@@ -175,7 +178,7 @@ def get_most_recent_green_build(success_threshold=0.95):
     if in_progress > 0:
       continue
 
-    successes = map((lambda state: int(state.is_success())), commit_states)
+    successes = list(map((lambda state: int(state.is_success())), commit_states))
     percent_success = float(sum(successes)) / len(commit_states)
     if percent_success >= success_threshold:
       print_status('Choosing {} for Dart SDK roll (% green: {} threshold: {}).'
