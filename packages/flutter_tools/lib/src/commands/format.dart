@@ -45,7 +45,13 @@ class FormatCommand extends FlutterCommand {
       );
       command.add('-h');
     } else {
-      command.addAll(argResults.rest);
+      command.addAll(<String>[
+        for (String arg in argResults.rest)
+          if (arg == '--dry-run')
+            '--output=show'
+          else
+            arg
+      ]);
     }
 
     final int result = await globals.processUtils.stream(command);
