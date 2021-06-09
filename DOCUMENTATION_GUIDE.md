@@ -395,8 +395,6 @@ Please also make sure to review the [pull_request_template](https://github.com/f
 
 You can find the docs relevant to the flutter website on the repository through [src/docs](https://github.com/flutter/website/tree/master/src/docs) or if you are unable to find them, you can simply include the URL to where you find the document and suggest the change in the pull request.
 
-They are also happy to accept your PRs to the [Flutter website](https://github.com/flutter/website/) repo, even if it's just to fix a typo. The following is the contributing guidance for the Flutter website: [CONTRIBUTING.md](https://github.com/flutter/website/blob/master/CONTRIBUTING.md) 
+They are also happy to accept your PRs to the [Flutter website](https://github.com/flutter/website/) repo, even if it's just to fix a typo. The following is the contributing guidance for the Flutter website: [CONTRIBUTING.md](https://github.com/flutter/website/blob/master/CONTRIBUTING.md)
 
 If you need additional help, consider asking for advice on the #hackers-new channel on [Discord](https://github.com/flutter/flutter/wiki/Chat).
-
-
