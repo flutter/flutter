@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:io' as io;
 
@@ -10,7 +9,6 @@ import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
 import 'package:args/args.dart';
 import 'package:http/http.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
@@ -24,8 +22,8 @@ class ChromeArgParser extends BrowserArgParser {
   /// The [ChromeArgParser] singleton.
   static ChromeArgParser get instance => _singletonInstance;
 
-  String _version;
-  int _pinnedChromeBuildNumber;
+  late String _version;
+  late int _pinnedChromeBuildNumber;
 
   ChromeArgParser._();
 
@@ -73,7 +71,7 @@ class ChromeArgParser extends BrowserArgParser {
 /// https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=Linux_x64/
 Future<BrowserInstallation> getOrInstallChrome(
   String requestedVersion, {
-  StringSink infoLog,
+  StringSink? infoLog,
 }) async {
   infoLog ??= io.stdout;
 
@@ -84,7 +82,7 @@ Future<BrowserInstallation> getOrInstallChrome(
     );
   }
 
-  ChromeInstaller installer;
+  ChromeInstaller? installer;
   try {
     installer = requestedVersion == 'latest'
         ? await ChromeInstaller.latest()
@@ -96,11 +94,11 @@ Future<BrowserInstallation> getOrInstallChrome(
     } else {
       infoLog.writeln('Installing Chrome version: ${installer.version}');
       await installer.install();
-      final BrowserInstallation installation = installer.getInstallation();
+      final BrowserInstallation installation = installer.getInstallation()!;
       infoLog.writeln(
           'Installations complete. To launch it run ${installation.executable}');
     }
-    return installer.getInstallation();
+    return installer.getInstallation()!;
   } finally {
     installer?.close();
   }
@@ -121,7 +119,7 @@ Future<String> _findSystemChromeExecutable() async {
 /// Manages the installation of a particular [version] of Chrome.
 class ChromeInstaller {
   factory ChromeInstaller({
-    @required String version,
+    required String version,
   }) {
     if (version == 'system') {
       throw BrowserInstallerException(
@@ -150,9 +148,9 @@ class ChromeInstaller {
   }
 
   ChromeInstaller._({
-    @required this.version,
-    @required this.chromeInstallationDir,
-    @required this.versionDir,
+    required this.version,
+    required this.chromeInstallationDir,
+    required this.versionDir,
   });
 
   /// Chrome version managed by this installer.
@@ -171,7 +169,7 @@ class ChromeInstaller {
     return versionDir.existsSync();
   }
 
-  BrowserInstallation getInstallation() {
+  BrowserInstallation? getInstallation() {
     if (!isInstalled) {
       return null;
     }
@@ -304,12 +302,13 @@ String preinstalledChromeExecutable() {
   final String buildNumber = ChromeArgParser.instance.pinnedChromeBuildNumber;
   final ChromeInstaller chromeInstaller = ChromeInstaller(version: buildNumber);
   if (chromeInstaller.isInstalled) {
-    print('INFO: Found chrome executable for LUCI: '
-        '${chromeInstaller.getInstallation().executable}');
-    return chromeInstaller.getInstallation().executable;
+    final String executable = chromeInstaller.getInstallation()!.executable;
+    print('INFO: Found chrome executable for LUCI: $executable');
+    return executable;
   } else {
     throw StateError(
-        'Failed to locate pinned Chrome build: $buildNumber on LUCI.');
+      'Failed to locate pinned Chrome build: $buildNumber on LUCI.',
+    );
   }
 }
 

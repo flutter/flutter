@@ -17,21 +17,21 @@ class CleanCommand extends Command<bool> with ArgUtils {
       ..addFlag(
         'flutter',
         defaultsTo: true,
-        help: 'Cleans up the .dart_tool directory under engine/src/flutter.',
+        help: 'Cleans up the .dart_tool directory under engine/src/flutter. Enabled by default.',
       )
       ..addFlag(
         'ninja',
         defaultsTo: false,
-        help: 'Also clean up the engine out directory with ninja output.',
+        help: 'Also clean up the engine out directory with ninja output. Disabled by default.',
       );
   }
 
   @override
   String get name => 'clean';
 
-  bool get _alsoCleanNinja => boolArg('ninja') ?? false;
+  bool get _alsoCleanNinja => boolArg('ninja')!;
 
-  bool get _alsoCleanFlutterRepo => boolArg('flutter') ?? true;
+  bool get _alsoCleanFlutterRepo => boolArg('flutter')!;
 
   @override
   String get description => 'Deletes build caches and artifacts.';

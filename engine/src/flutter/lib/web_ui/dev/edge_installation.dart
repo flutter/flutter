@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:io' as io;
 
@@ -19,7 +18,7 @@ class EdgeArgParser extends BrowserArgParser {
   /// The [EdgeArgParser] singleton.
   static EdgeArgParser get instance => _singletonInstance;
 
-  String _version;
+  late String _version;
 
   EdgeArgParser._();
 
@@ -56,7 +55,7 @@ class EdgeArgParser extends BrowserArgParser {
 // from the beta channel.
 Future<BrowserInstallation> getEdgeInstallation(
   String requestedVersion, {
-  StringSink infoLog,
+  StringSink? infoLog,
 }) async {
   // For now these tests are aimed to run only on Windows machines local or on LUCI/CI.
   // In the future we can investigate to run them on Android or on MacOS.
@@ -127,7 +126,7 @@ class EdgeLauncher {
             BrowserLock.instance.configuration['edge']['launcher_version'] as String;
 
   /// Install the launcher if it does not exist in this system.
-  void install() async {
+  Future<void> install() async {
     // Checks if the  `MicrosoftEdgeLauncher` executable exists.
     if (isInstalled) {
       return;
