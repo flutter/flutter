@@ -69,7 +69,7 @@ class LicensesCommand extends Command<bool> {
     );
     _expect(
       head[2] == '// found in the LICENSE file.',
-      'Invalid second line of license header in file ${file.path}',
+      'Invalid third line of license header in file ${file.path}',
     );
   }
 
