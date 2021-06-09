@@ -91,7 +91,7 @@ class VisualStudio {
     return _bestVisualStudioDetails[_isLaunchableKey] as bool? ?? true;
   }
 
-    /// True if the Visual Studio installation is as pre-release version.
+  /// True if the Visual Studio installation is as pre-release version.
   bool get isPrerelease => _bestVisualStudioDetails[_isPrereleaseKey] as bool? ?? false;
 
   /// True if a reboot is required to complete the Visual Studio installation.
