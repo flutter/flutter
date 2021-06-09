@@ -351,16 +351,16 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object>
       R debugReferrer, T initialValue, this._resurrector) {
     assert(!browserSupportsFinalizationRegistry);
     _initialize(debugReferrer, initialValue);
-    SkiaObjects.manageExpensive(this);
-  }
-
-  void _initialize(R debugReferrer, T initialValue) {
-    _update(initialValue);
     if (Instrumentation.enabled) {
       Instrumentation.instance.incrementCounter(
         '${_skDeletable?.constructor.name} created',
       );
     }
+    SkiaObjects.manageExpensive(this);
+  }
+
+  void _initialize(R debugReferrer, T initialValue) {
+    _update(initialValue);
     if (assertionsEnabled) {
       debugReferrers.add(debugReferrer);
     }
