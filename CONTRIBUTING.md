@@ -114,7 +114,7 @@ change/revision to the list of documents when needed.
    handle post-commit test failures.It is important to view this so that you
    can set up the right environment before making a documentation pull request.
    
- 3. [Documentation guidance](documentation_guidance.pdf) which covers points 
+ 3. [Documentation guidance](DOCUMENTATION_GUIDE.md) which covers points 
     to consider before submitting a documentation PR, general documentation rules, 
     and pull request guidance for various documentation change proposals for anyone 
     who wishes to contribute to documentation. 
