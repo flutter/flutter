@@ -93,15 +93,15 @@ presented.
 
 8. [Flutter design doc template](https://flutter.dev/go/template),
    which should be used when proposing a new technical design.  This is a good
-   practice to do before coding more intricate changes.  
+   practice to do before coding more intricate changes.
 
 Documentation for Flutter
 -------------------------------
 
 To contribute to documentation, the following are some guidance for you to get started.
-We recommend that you go through all these documents to get a good grasp of how to 
-contribute, what to consider before making a pull request, and to make the best possible 
-change/revision to the list of documents when needed. 
+We recommend that you go through all these documents to get a good grasp of how to
+contribute, what to consider before making a pull request, and to make the best possible
+change/revision to the list of documents when needed.
 
 1. [Our code of conduct](CODE_OF_CONDUCT.md), which stipulates explicitly
    that everyone must be gracious, respectful, and professional. This
@@ -114,19 +114,19 @@ change/revision to the list of documents when needed.
    handle post-commit test failures.It is important to view this so that you
    can set up the right environment before making a documentation pull request.
 
-3. [Documentation guidance](DOCUMENTATION_GUIDE.md) which covers points 
-    to consider before submitting a documentation PR, general documentation rules, 
-    and pull request guidance for various documentation change proposals for anyone 
-    who wishes to contribute to documentation. 
- 
+3. [Documentation guidance](DOCUMENTATION_GUIDE.md) which covers points
+    to consider before submitting a documentation PR, general documentation rules,
+    and pull request guidance for various documentation change proposals for anyone
+    who wishes to contribute to documentation.
+
 4. [Our style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo),
    which includes advice for designing APIs for Flutter, and how to
-   format code in the framework.It is important to view our style guide 
+   format code in the framework.It is important to view our style guide
    whether if you are developing for flutter or making contribution to API documentation.
-   
+
 5. [Flutter design doc template](https://flutter.dev/go/template),
    which should be used when proposing a new technical design. This is a good
-   practice to do before coding more intricate changes.For more information, check 
+   practice to do before coding more intricate changes.For more information, check
    out our the Design Document section under our wiki page.
 
 If you need any additional help, consider asking for advice on [Discord](https://github.com/flutter/flutter/wiki/Chat).
