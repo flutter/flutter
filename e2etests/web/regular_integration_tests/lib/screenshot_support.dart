@@ -6,13 +6,13 @@ import 'dart:io' as io;
 import 'dart:math';
 
 import 'package:flutter_driver/flutter_driver.dart';
+import 'package:image/image.dart';
+// TODO(yjbanov): this depends on integration_test that's not null-safe yet
+//                https://github.com/flutter/flutter/issues/84014
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:integration_test/integration_test_driver_extended.dart' as test;
-
 import 'package:web_test_utils/goldens.dart';
 import 'package:web_test_utils/image_compare.dart';
-import 'package:webdriver/src/async/window.dart';
-
-import 'package:image/image.dart';
 
 /// Tolerable pixel difference ratio between the goldens and the screenshots.
 ///
@@ -49,15 +49,14 @@ Future<void> runTestWithScreenshots(
   // Learn the browser in use from the webDriver.
   final String browser = driver.webDriver.capabilities['browserName'] as String;
 
-  final Window window = await driver.webDriver.window;
-  window.setSize(Rectangle<int>(0, 0, browserWidth, browserHeight));
+  (await driver.webDriver.window).setSize(Rectangle<int>(0, 0, browserWidth, browserHeight));
 
   bool updateGoldens = false;
   // We are using an environment variable instead of an argument, since
   // this code is not invoked from the shell but from the `flutter drive`
   // tool itself, we do not have control on the command line arguments.
   // Please read the README, further info on how to update the goldens.
-  final String updateGoldensFlag = io.Platform.environment['UPDATE_GOLDENS'];
+  final String? updateGoldensFlag = io.Platform.environment['UPDATE_GOLDENS'];
   // Validate if the environment variable is set correctly.
   if (updateGoldensFlag != null &&
       !(updateGoldensFlag.toLowerCase() == 'true' ||
@@ -72,14 +71,13 @@ Future<void> runTestWithScreenshots(
   test.integrationDriver(
     driver: driver,
     onScreenshot: (String screenshotName, List<int> screenshotBytes) async {
-      final Image screenshot = decodePng(screenshotBytes);
+      final Image screenshot = decodePng(screenshotBytes)!;
       final String result = compareImage(
         screenshot,
         updateGoldens,
         '$screenshotName-$browser.png',
         PixelComparison.fuzzy,
         diffRateFailure,
-        forIntegrationTests: true,
         write: updateGoldens,
       );
       if (result == 'OK') {

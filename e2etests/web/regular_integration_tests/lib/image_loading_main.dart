@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   const MethodChannel channel =
       OptionalMethodChannel('flutter/web_test_e2e', JSONMethodCodec());

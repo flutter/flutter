@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 
 final GlobalKey<NavigatorState> navKey = GlobalKey(debugLabel: 'mainNavigator');
-Map<String, WidgetBuilder> appRoutes;
+Map<String, WidgetBuilder>? appRoutes;
 
 final Map<String, WidgetBuilder> _defaultAppRoutes = <String, WidgetBuilder>{
-  '/': (context) => Container(),
+  '/': (BuildContext context) => Container(),
 };
 
 void main() {
@@ -16,7 +16,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  MyApp(this.routes);
+  const MyApp(this.routes, {Key? key}) : super(key: key);
 
   final Map<String, WidgetBuilder> routes;
 

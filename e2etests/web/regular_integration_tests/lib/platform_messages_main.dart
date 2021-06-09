@@ -3,17 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-void main() => runApp(MyApp());
-
-Future<ClipboardData> dataFuture;
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      key: const Key('mainapp'),
+    return const MaterialApp(
+      key: Key('mainapp'),
       title: 'Integration Test App For Platform Messages',
       home: MyHomePage(title: 'Integration Test App For Platform Messages'),
     );
@@ -21,7 +20,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 

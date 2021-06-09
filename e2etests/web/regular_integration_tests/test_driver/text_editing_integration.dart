@@ -2,16 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(yjbanov): this depends on integration_test that's not null-safe yet
+//                https://github.com/flutter/flutter/issues/84014
+// @dart=2.6
+
 import 'dart:html';
 import 'dart:js_util' as js_util;
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import 'package:integration_test/integration_test.dart';
 
-import 'package:regular_integration_tests/text_editing_main.dart' as app;
 import 'package:regular_integration_tests/common.dart';
+import 'package:regular_integration_tests/text_editing_main.dart' as app;
 
 void main() {
   final IntegrationTestWidgetsFlutterBinding binding =

@@ -2,15 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(yjbanov): this depends on integration_test that's not null-safe yet
+//                https://github.com/flutter/flutter/issues/84014
+// @dart=2.6
+
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:regular_integration_tests/url_strategy_main.dart' as app;
-import 'package:flutter/material.dart';
-
 import 'package:integration_test/integration_test.dart';
+import 'package:regular_integration_tests/url_strategy_main.dart' as app;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;

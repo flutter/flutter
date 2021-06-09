@@ -2,16 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(yjbanov): this depends on integration_test that's not null-safe yet
+//                https://github.com/flutter/flutter/issues/84014
+// @dart=2.6
+
 import 'dart:html' as html;
-import 'dart:ui' as ui show platformViewRegistry;
+// platformViewRegistry is exposed in the web version
+import 'dart:ui' as ui show platformViewRegistry; // ignore: undefined_shown_name
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:regular_integration_tests/platform_messages_main.dart' as app;
 
-import 'package:integration_test/integration_test.dart';
-
-void main() async {
+void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('platform message for Clipboard.setData reply with future',
@@ -36,6 +41,7 @@ void main() async {
     int viewInstanceCount = 0;
 
     platformViewsRegistry.getNextPlatformViewId();
+    // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory('MyView', (int viewId) {
       ++viewInstanceCount;
       return html.DivElement();

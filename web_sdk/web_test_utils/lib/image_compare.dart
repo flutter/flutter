@@ -25,11 +25,9 @@ String compareImage(
   PixelComparison pixelComparison,
   double maxDiffRateFailure, {
   String goldensDirectory = '',
-  bool forIntegrationTests = false,
   bool write = false,
 }) {
-  final Environment environment =
-      forIntegrationTests ? Environment.forIntegrationTests() : Environment();
+  final Environment environment = Environment();
   if (goldensDirectory.isEmpty) {
     goldensDirectory = p.join(
       environment.webUiGoldensRepositoryDirectory.path,
@@ -62,7 +60,7 @@ To automatically create this file call matchGoldenFile('$filename', write: true)
     }
   }
 
-  final Image golden = decodeNamedImage(file.readAsBytesSync(), filename);
+  final Image golden = decodeNamedImage(file.readAsBytesSync(), filename)!;
 
   // Compare screenshots.
   final ImageDiff diff = ImageDiff(

@@ -4,22 +4,24 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       key: const Key('mainapp'),
       theme: ThemeData(fontFamily: 'RobotoMono'),
       title: 'Integration Test App',
-      home: MyHomePage(title: 'Integration Test App'),
+      home: const MyHomePage(title: 'Integration Test App'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 

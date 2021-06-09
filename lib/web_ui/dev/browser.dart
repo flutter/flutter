@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -12,8 +11,6 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:typed_data/typed_buffers.dart';
 
 import 'package:test_api/src/utils.dart' show getErrorMessage;
-
-import 'common.dart'; // ignore: unused_import
 
 /// An interface for running browser instances.
 ///
@@ -28,15 +25,15 @@ abstract class Browser {
 
   /// The Observatory URL for this browser.
   ///
-  /// This will return `null` for browsers that aren't running the Dart VM, or
+  /// Returns `null` for browsers that aren't running the Dart VM, or
   /// if the Observatory URL can't be found.
-  Future<Uri> get observatoryUrl => null;
+  Future<Uri>? get observatoryUrl => null;
 
   /// The remote debugger URL for this browser.
   ///
-  /// This will return `null` for browsers that don't support remote debugging,
+  /// Returns `null` for browsers that don't support remote debugging,
   /// or if the remote debugging URL can't be found.
-  Future<Uri> get remoteDebuggerUrl => null;
+  Future<Uri>? get remoteDebuggerUrl => null;
 
   /// The underlying process.
   ///
@@ -110,7 +107,7 @@ abstract class Browser {
       }
 
       _onExitCompleter.complete();
-    }, (dynamic error, StackTrace stackTrace) {
+    }, (dynamic error, StackTrace? stackTrace) {
       // Ignore any errors after the browser has been closed.
       if (_closed) {
         return;
