@@ -15,5 +15,6 @@ impeller_component("entity") {
   public_deps = [
     "../compositor",
     "../image",
+    "../primitives",
   ]
 }

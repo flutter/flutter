@@ -15,6 +15,8 @@ namespace impeller {
 
 enum class PixelFormat {
   kUnknown,
+  kPixelFormat_B8G8R8A8_UNormInt_SRGB,
+  kPixelFormat_D32_Float_S8_UNormInt,
 };
 
 enum class BlendFactor {

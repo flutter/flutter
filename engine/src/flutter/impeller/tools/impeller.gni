@@ -107,7 +107,7 @@ template("impeller_shaders") {
     ]
 
     depfile_path = "$target_gen_dir/{{source_file_part}}.d"
-    source_path = "{{source}}"
+
     metal_intermediate_path = rebase_path(metal_intermediate, root_build_dir)
     spirv_intermediate_path = rebase_path(spirv_intermediate, root_build_dir)
     depfile_intermediate_path = rebase_path(depfile_path, root_build_dir)
@@ -121,7 +121,7 @@ template("impeller_shaders") {
     depfile = depfile_path
 
     args = [
-      "--input=$source_path",
+      "--input={{source}}",
       "--metal=$metal_intermediate_path",
       "--spirv=$spirv_intermediate_path",
       "--reflection-json=$reflection_json_path",
@@ -144,8 +144,15 @@ template("impeller_shaders") {
   shader_glue_config_name = "glue_config_$target_name"
 
   config(shader_glue_config_name) {
+    impeller_root_gen_dir = get_path_info(
+            get_label_info("//flutter/impeller:impeller", "target_gen_dir"),
+            "dir")
+
     # Contains the generated header headers.
-    include_dirs = [ target_gen_dir ]
+    include_dirs = [
+      target_gen_dir,
+      impeller_root_gen_dir,
+    ]
   }
 
   source_set(shader_glue_target_name) {
@@ -158,6 +165,7 @@ template("impeller_shaders") {
                                "*.h",
                                "*.cc",
                              ])
+
     deps = [
       ":$impellerc_target_name",
       "//flutter/impeller/shader_glue",

@@ -26,11 +26,11 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
 
  private:
   mutable std::shared_ptr<DeviceBuffer> device_buffer_;
+  mutable size_t device_buffer_generation_ = 0u;
   uint8_t* buffer_ = nullptr;
   size_t length_ = 0;
   size_t reserved_ = 0;
   size_t generation_ = 1u;
-  mutable size_t device_buffer_generation_ = 0u;
 
   // |Buffer|
   std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(

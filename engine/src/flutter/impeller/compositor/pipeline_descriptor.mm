@@ -32,7 +32,8 @@ std::size_t PipelineDescriptor::GetHash() const {
   if (vertex_descriptor_) {
     fml::HashCombineSeed(seed, vertex_descriptor_->GetHash());
   }
-  fml::HashCombineSeed(seed, depth_stencil_pixel_format_);
+  fml::HashCombineSeed(seed, depth_pixel_format_);
+  fml::HashCombineSeed(seed, stencil_pixel_format_);
   fml::HashCombineSeed(seed, depth_attachment_descriptor_);
   fml::HashCombineSeed(seed, front_stencil_attachment_descriptor_);
   fml::HashCombineSeed(seed, back_stencil_attachment_descriptor_);
@@ -45,7 +46,8 @@ bool PipelineDescriptor::IsEqual(const PipelineDescriptor& other) const {
          DeepCompareMap(entrypoints_, other.entrypoints_) &&
          color_attachment_descriptors_ == other.color_attachment_descriptors_ &&
          DeepComparePointer(vertex_descriptor_, other.vertex_descriptor_) &&
-         depth_stencil_pixel_format_ == other.depth_stencil_pixel_format_ &&
+         stencil_pixel_format_ == other.stencil_pixel_format_ &&
+         depth_pixel_format_ == other.depth_pixel_format_ &&
          depth_attachment_descriptor_ == other.depth_attachment_descriptor_ &&
          front_stencil_attachment_descriptor_ ==
              other.front_stencil_attachment_descriptor_ &&
@@ -92,9 +94,15 @@ PipelineDescriptor& PipelineDescriptor::SetColorAttachmentDescriptor(
   return *this;
 }
 
-PipelineDescriptor& PipelineDescriptor::SetDepthStencilPixelFormat(
+PipelineDescriptor& PipelineDescriptor::SetDepthPixelFormat(
     PixelFormat format) {
-  depth_stencil_pixel_format_ = format;
+  depth_pixel_format_ = format;
+  return *this;
+}
+
+PipelineDescriptor& PipelineDescriptor::SetStencilPixelFormat(
+    PixelFormat format) {
+  stencil_pixel_format_ = format;
   return *this;
 }
 
@@ -141,10 +149,9 @@ PipelineDescriptor::GetMTLRenderPipelineDescriptor() const {
         ToMTLRenderPipelineColorAttachmentDescriptor(item.second);
   }
 
-  descriptor.depthAttachmentPixelFormat =
-      ToMTLPixelFormat(depth_stencil_pixel_format_);
+  descriptor.depthAttachmentPixelFormat = ToMTLPixelFormat(depth_pixel_format_);
   descriptor.stencilAttachmentPixelFormat =
-      ToMTLPixelFormat(depth_stencil_pixel_format_);
+      ToMTLPixelFormat(stencil_pixel_format_);
 
   return descriptor;
 }

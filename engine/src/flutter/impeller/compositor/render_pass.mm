@@ -131,7 +131,7 @@ bool RenderPass::IsValid() const {
   return is_valid_;
 }
 
-bool RenderPass::Encode(Allocator& transients_allocator) const {
+bool RenderPass::FinishEncoding(Allocator& transients_allocator) const {
   if (!IsValid()) {
     return false;
   }
@@ -234,7 +234,7 @@ bool RenderPass::EncodeCommands(Allocator& allocator,
   return true;
 }
 
-bool RenderPass::Record(Command command) {
+bool RenderPass::RecordCommand(Command command) {
   if (!command) {
     return false;
   }

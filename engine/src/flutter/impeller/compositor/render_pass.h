@@ -70,9 +70,9 @@ class RenderPass {
 
   bool IsValid() const;
 
-  bool Record(Command command);
+  bool RecordCommand(Command command);
 
-  bool Encode(Allocator& transients_allocator) const;
+  bool FinishEncoding(Allocator& transients_allocator) const;
 
  private:
   friend class CommandBuffer;

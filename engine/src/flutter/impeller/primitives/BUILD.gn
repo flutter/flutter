@@ -20,7 +20,8 @@ impeller_component("primitives") {
     "primitive.mm",
   ]
 
-  public_deps = [ "../compositor" ]
-
-  deps = [ ":impeller_shaders" ]
+  public_deps = [
+    ":impeller_shaders",
+    "../compositor",
+  ]
 }
