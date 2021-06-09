@@ -62,9 +62,15 @@ class _RotatingWidget extends StatefulWidget {
 
 class _RotatingWidgetState extends State<_RotatingWidget> with SingleTickerProviderStateMixin {
   late final AnimationController controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    )..repeat();
+    duration: const Duration(milliseconds: 200),
+    vsync: this,
+  );
+
+  @override
+  void initState(){
+    super.initState();
+    controller.repeat();
+  }
 
   @override
   Widget build(BuildContext context) {

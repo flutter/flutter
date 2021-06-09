@@ -18,11 +18,6 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
   late final AnimationController animation = AnimationController(vsync: this, duration: const Duration(seconds: 1));
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     animation.dispose();
     super.dispose();
@@ -82,7 +77,7 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
                       Checkbox(
                         key: const Key('bdf-checkbox'), // this key is used by the driver test
                         value: _includeBackdropFilter,
-                        onChanged: (bool? v) => setState(() { _includeBackdropFilter = v!; }),
+                        onChanged: (bool? v) => setState(() { _includeBackdropFilter = v == true; }),
                       ),
                       MaterialButton(
                         key: const Key('bdf-animate'), // this key is used by the driver test

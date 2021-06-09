@@ -116,17 +116,8 @@ class AnimatedBezierState extends State<AnimatedBezier>
   double? scale;
   late final AnimationController controller = AnimationController(
       vsync: this, duration: const Duration(milliseconds: 1000));
-  late final CurvedAnimation curve = CurvedAnimation(parent: controller, curve: Curves.linear)
-    ..addListener(() {
-      setState(() {});
-    })
-    ..addStatusListener((AnimationStatus state) {
-      if (state == AnimationStatus.completed) {
-        reverseAnimation();
-      } else if (state == AnimationStatus.dismissed) {
-        playAnimation();
-      }
-    });
+  late final CurvedAnimation curve = CurvedAnimation(parent: controller, curve: Curves.linear);
+
   bool isPlaying = false;
   List<List<Point>> pointList = <List<Point>>[
     <Point>[],
@@ -327,6 +318,16 @@ class AnimatedBezierState extends State<AnimatedBezier>
     // this benchmark.
 
     playAnimation();
+    curve..addListener(() {
+      setState(() {});
+    })
+    ..addStatusListener((AnimationStatus state) {
+      if (state == AnimationStatus.completed) {
+        reverseAnimation();
+      } else if (state == AnimationStatus.dismissed) {
+        playAnimation();
+      }
+    });
   }
 
   @override

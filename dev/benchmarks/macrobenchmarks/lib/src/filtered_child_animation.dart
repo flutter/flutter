@@ -32,8 +32,8 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
   Offset _childCenter = Offset.zero;
 
   late FilterType? _filterType = widget.initialFilterType;
-  late bool _complexChild = widget.initialComplexChild;
-  late bool _useRepaintBoundary = widget.initialUseRepaintBoundary;
+  bool _complexChild = false;
+  bool _useRepaintBoundary = false;
 
   @override
   void initState() {
@@ -42,6 +42,8 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
       final RenderBox? childBox = _childKey.currentContext?.findRenderObject() as RenderBox?;
       _childCenter = childBox!.paintBounds.center;
     });
+    _complexChild = widget.initialComplexChild;
+    _useRepaintBoundary = widget.initialUseRepaintBoundary;
     _controller.repeat();
   }
 
@@ -171,17 +173,17 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
                 const Text('Opacity:'),
                 Checkbox(
                   value: _filterType == FilterType.opacity,
-                  onChanged: (bool? b) => _setFilterType(FilterType.opacity, b!),
+                  onChanged: (bool? b) => _setFilterType(FilterType.opacity, b == true),
                 ),
                 const Text('Tx Rotate:'),
                 Checkbox(
                   value: _filterType == FilterType.rotateTransform,
-                  onChanged: (bool? b) => _setFilterType(FilterType.rotateTransform, b!),
+                  onChanged: (bool? b) => _setFilterType(FilterType.rotateTransform, b == true),
                 ),
                 const Text('IF Rotate:'),
                 Checkbox(
                   value: _filterType == FilterType.rotateFilter,
-                  onChanged: (bool? b) => _setFilterType(FilterType.rotateFilter, b!),
+                  onChanged: (bool? b) => _setFilterType(FilterType.rotateFilter, b == true),
                 ),
               ],
             ),
@@ -191,12 +193,12 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
                 const Text('Complex child:'),
                 Checkbox(
                   value: _complexChild,
-                  onChanged: (bool? b) => setState(() => _complexChild = b!),
+                  onChanged: (bool? b) => setState(() => _complexChild = b == true),
                 ),
                 const Text('RPB on child:'),
                 Checkbox(
                   value: _useRepaintBoundary,
-                  onChanged: (bool? b) => setState(() => _useRepaintBoundary = b!),
+                  onChanged: (bool? b) => setState(() => _useRepaintBoundary = b == true),
                 ),
               ],
             ),

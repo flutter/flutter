@@ -81,7 +81,7 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
                   value: _useColorFilter,
                   onChanged: (bool? value) {
                     setState(() {
-                      _useColorFilter = value!;
+                      _useColorFilter = value == true;
                     });
                   },
                 ),

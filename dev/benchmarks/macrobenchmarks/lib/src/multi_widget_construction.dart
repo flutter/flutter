@@ -29,7 +29,13 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
     duration: const Duration(milliseconds: 10000),
     lowerBound: 0,
     upperBound: colorList.length + 1.0,
-  )..repeat();
+  );
+
+  @override
+  void initState(){
+    super.initState();
+    _controller.repeat();
+  }
 
   @override
   void dispose() {

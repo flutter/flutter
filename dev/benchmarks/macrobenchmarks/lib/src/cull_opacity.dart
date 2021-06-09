@@ -16,14 +16,15 @@ class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProv
   // This code uses a manual listener for historical reasons and will remain
   // in order to preserve compatibility with the history of measurements for
   // this benchmark.
-  late final Animation<double> _offsetY = Tween<double>(begin: 0, end: -1000.0).animate(_controller)..addListener((){
-    setState(() {});
-  });
+  late final Animation<double> _offsetY = Tween<double>(begin: 0, end: -1000.0).animate(_controller);
   late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2));
 
   @override
   void initState() {
     super.initState();
+    _offsetY.addListener((){
+    setState(() {});
+    });
     _controller.repeat();
   }
 
