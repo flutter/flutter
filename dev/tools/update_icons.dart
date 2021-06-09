@@ -330,14 +330,14 @@ class _Icon {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
-    if (id!.endsWith('_outlined') && id!='insert_chart_outlined') {
-      shortId = _replaceLast(id!, '_outlined');
+    if (id.endsWith('_outlined') && id != 'insert_chart_outlined') {
+      shortId = _replaceLast(id, '_outlined');
       htmlSuffix = '-outlined';
-    } else if (id!.endsWith('_rounded')) {
-      shortId = _replaceLast(id!, '_rounded');
+    } else if (id.endsWith('_rounded')) {
+      shortId = _replaceLast(id, '_rounded');
       htmlSuffix = '-round';
-    } else if (id!.endsWith('_sharp')) {
-      shortId = _replaceLast(id!, '_sharp');
+    } else if (id.endsWith('_sharp')) {
+      shortId = _replaceLast(id, '_sharp');
       htmlSuffix = '-sharp';
     } else {
       shortId = id;
@@ -346,24 +346,24 @@ class _Icon {
 
     flutterId = id;
     for (final MapEntry<String, String> rewritePair in identifierRewrites.entries) {
-      if (id!.startsWith(rewritePair.key)) {
-        flutterId = id!.replaceFirst(rewritePair.key, identifierRewrites[rewritePair.key]!);
+      if (id.startsWith(rewritePair.key)) {
+        flutterId = id.replaceFirst(rewritePair.key, identifierRewrites[rewritePair.key]!);
       }
     }
 
-    name = id!.replaceAll('_', ' ');
+    name = id.replaceAll('_', ' ');
   }
 
   static const List<String> styleSuffixes = <String>['', '_outlined', '_rounded', '_sharp'];
 
-  String? id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
-  String? shortId;       // e.g. 5g
-  String? flutterId;     // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
-  String? name;          // e.g. five g, five g outlined, five g rounded, five g sharp
-  String? hexCodepoint;  // e.g. e547
+  late String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
+  late String shortId;       // e.g. 5g
+  late String flutterId;     // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
+  late String name;          // e.g. five g, five g outlined, five g rounded, five g sharp
+  late String hexCodepoint;  // e.g. e547
 
   // The suffix for the 'material-icons' HTML class.
-  String? htmlSuffix;
+  late String htmlSuffix;
 
   String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId) ? ', matchTextDirection: true' : '';
 
@@ -385,16 +385,15 @@ class _Icon {
 ''';
 
   @override
-  String toString() => id!;
+  String toString() => id;
 
   /// Analogous to [String.compareTo]
   int _compareTo(_Icon b) {
     // Sort a regular icon before its variants.
     if (shortId == b.shortId) {
-      return id!.length - b.id!.length;
-    } else {
-      return flutterId!.compareTo(b.flutterId!);
+      return id.length - b.id.length;
     }
+    return flutterId.compareTo(b.flutterId);
   }
 
   String _replaceLast(String string, String toReplace) {
