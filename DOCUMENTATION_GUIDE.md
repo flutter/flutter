@@ -3,7 +3,7 @@
 **Introduction**
 ------------------------------------------------------------------------------------------------------------------
 
-This document contains points to consider before submitting a documentation PR, general documentation rules, and pull request guidance for various documentation change proposals for anyone who wishes to contribute or make changes to Flutter’s current list of documentation. 
+This document contains points to consider before submitting a documentation PR, general documentation rules, and pull request guidance for various documentation change proposals for anyone who wishes to contribute or make changes to Flutter’s current list of documentation.
 
 **Table of Contents**
 ------------------------------------------------------------------------------------------------------------------
@@ -11,7 +11,7 @@ This document contains points to consider before submitting a documentation PR, 
 - **Points to consider**
   - Are there existing documentation that can be utilized?
   - Have you considered the general rules for documentation listed below?
-  - Is the proposed change a major update that is prevalent throughout Flutter documentation? 
+  - Is the proposed change a major update that is prevalent throughout Flutter documentation?
   - Is the proposed change a document on the website rather than API documents (api.flutter.dev)?
 
 - **General rules to consider for documentation**
@@ -32,7 +32,7 @@ This document contains points to consider before submitting a documentation PR, 
   - Dartdoc templates and macros
   - Dartdoc-specific requirements
 
-- **Documentation pull request** 
+- **Documentation pull request**
   - Existing document
   - New document
   - Wiki pages or GitHub page
@@ -42,31 +42,31 @@ This document contains points to consider before submitting a documentation PR, 
 **Points to consider**
 ------------------------------------------------------------------------------------------------------------------
 
-The Flutter team sincerely welcomes anyone who wishes to contribute or make changes to our current list of documentation. Not only it helps us to identify potential flaws that may exist in our current documentation but also lets us know alternative ways that we can change our documentation to further benefit our users and developers. 
+The Flutter team sincerely welcomes anyone who wishes to contribute or make changes to our current list of documentation. Not only it helps us to identify potential flaws that may exist in our current documentation but also lets us know alternative ways that we can change our documentation to further benefit our users and developers.
 
 Before you submit a documentation pull request for us to review, please consider the following points.
 
 **Are there existing documentation that can be utilized?**
 
-When proposing a new documentation, are there existing Flutter documentation that can be utilized? It is always better to revise existing documentation to make it more useful to the user rather than replicating duplicate materials. 
+When proposing a new documentation, are there existing Flutter documentation that can be utilized? It is always better to revise existing documentation to make it more useful to the user rather than replicating duplicate materials.
 
 **Have you considered the general rules for documentation listed below?**
 
 In general, we use “dartdoc" for our Dart documentation, and similar technologies for the documentation of our APIs in other languages, such as ObjectiveC and Java. All public members in Flutter libraries should have a documentation. We typically follow the [Dart documentation guide](https://www.dartlang.org/effective-dart/documentation/#doc-comments) except where that would contradict this page.
 
-We always encourage people to document immediately the answer they found when working on Flutter and finding themselves still asking for the same question even when looking at those answers so that we can get a good sense of how the answers work for real questions.  Additionally, it is fine that if your otherwise-unrelated PR has a bunch of documentation fixes in it to answer questions you had while you were working on your PR. 
+We always encourage people to document immediately the answer they found when working on Flutter and finding themselves still asking for the same question even when looking at those answers so that we can get a good sense of how the answers work for real questions.  Additionally, it is fine that if your otherwise-unrelated PR has a bunch of documentation fixes in it to answer questions you had while you were working on your PR.
 
 However, there is one exception. It is better not to document something in our API than to document it poorly. Even if you don’t document it, it will still appear on our list of things to document. Feel free to contact us to remove documentation that violates this. See sections “Answer your own questions straight away” and “Avoid useless documentation” below for further details.
 
-**Is the proposed change a major update that is prevalent throughout Flutter documentation?** 
+**Is the proposed change a major update that is prevalent throughout Flutter documentation?**
 
-If the proposed change is a major update/change that is prevalent throughout Flutter documentation (e.g., proposing adding medium sized samples throughout the Flutter API documentation), please use the [Flutter design doc template](https://flutter.dev/go/template) instead and follow the instructions from there. 
+If the proposed change is a major update/change that is prevalent throughout Flutter documentation (e.g., proposing adding medium sized samples throughout the Flutter API documentation), please use the [Flutter design doc template](https://flutter.dev/go/template) instead and follow the instructions from there.
 
 For more info on design document and design document examples, please visit the section called Design documents under our [wiki page](https://github.com/flutter/flutter/wiki/Chat#design-documents).
 
 **Is the proposed change a document on the website rather than API documents (api.flutter.dev)?**
 
-If the change that you would like to make is a change for the flutter website documents or to add in additional documents for flutter website, please make the appropriate pull request to [Flutter/website](https://github.com/flutter/website) repo and proposed the change there. We also suggest viewing the “general rules to consider for documentation” below even when proposing document changes for the website. For additional details, please refer to [contributing guidance](https://github.com/flutter/website/blob/master/CONTRIBUTING.md) for flutter website. 
+If the change that you would like to make is a change for the flutter website documents or to add in additional documents for flutter website, please make the appropriate pull request to [Flutter/website](https://github.com/flutter/website) repo and proposed the change there. We also suggest viewing the “general rules to consider for documentation” below even when proposing document changes for the website. For additional details, please refer to [contributing guidance](https://github.com/flutter/website/blob/master/CONTRIBUTING.md) for flutter website.
 
 **General rules to consider for documentation**
 ----------------------------------------------------------------------------------
@@ -230,11 +230,11 @@ For example, below is the sample code for building an infinite list of children 
 <pre><code><span style="color:gray">
 /// A scrollable list of widgets arranged linearly.
 
-/// 
+///
 
 /// ...
 
-/// 
+///
 
 /// {@tool snippet}
 
@@ -362,13 +362,13 @@ Avoid using terms like "above" or "below" to reference one dartdoc section from 
 **Documentation pull request**
 ----------------------------------------------------------------------------------
 
-**1. If there is an existing document that you would like to make change to, when making your pull request, please include** 
+**1. If there is an existing document that you would like to make change to, when making your pull request, please include**
 
 - Goal and short description of the request
 - The URL or screenshot of where you would like to make the changes
 - What changes you are making
 - The reason for the change
-- Submit the changed file 
+- Submit the changed file
 
 Please also make sure to review the [pull_request_template](https://github.com/flutter/flutter/blob/master/.github/PULL_REQUEST_TEMPLATE.md) doc and go through the checklist before submission.
 
@@ -376,7 +376,7 @@ Please also make sure to review the [pull_request_template](https://github.com/f
 
 - Goal and short description of the request
 - The reason for the new document
-- Submit the file 
+- Submit the file
 
 Please also make sure to review the [pull_request_template](https://github.com/flutter/flutter/blob/master/.github/PULL_REQUEST_TEMPLATE.md) doc and go through the checklist before submission.
 
@@ -391,7 +391,7 @@ Please also make sure to review the [pull_request_template](https://github.com/f
 
 **4. If the change is for API documents (on api.flutter.dev), you should follow step 1 and edit the relevant .dart files in the packages folder under src to be submitted for PR.**
 
-**5. If the documents that you would like to change are those on the website (i.e., flutter.dev), you should go to [flutter/website](https://github.com/flutter/website) and make the appropriate documentation pull request.** 
+**5. If the documents that you would like to change are those on the website (i.e., flutter.dev), you should go to [flutter/website](https://github.com/flutter/website) and make the appropriate documentation pull request.**
 
 You can find the docs relevant to the flutter website on the repository through [src/docs](https://github.com/flutter/website/tree/master/src/docs) or if you are unable to find them, you can simply include the URL to where you find the document and suggest the change in the pull request.
 
