@@ -1100,9 +1100,8 @@ void main() {
 
         final Process process = await Process.start(
           globals.fs.path.join(
-            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
+            globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+            'format',
           ),
           <String>[file.path],
           workingDirectory: projectDir.path,
@@ -1206,9 +1205,8 @@ void main() {
 
         final Process process = await Process.start(
           globals.fs.path.join(
-            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
+            globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+            'format',
           ),
           <String>[file.path],
           workingDirectory: projectDir.path,
