@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:watcher/watcher.dart';
 
@@ -28,11 +26,11 @@ typedef PipelineStep = Future<void> Function();
 /// When a pipeline is stopped, it switches to the [PipelineStatus.stopping]
 /// state and waits until the current task finishes.
 class Pipeline {
-  Pipeline({@required this.steps});
+  Pipeline({required this.steps});
 
   final Iterable<PipelineStep> steps;
 
-  Future<dynamic> _currentStepFuture;
+  Future<dynamic>? _currentStepFuture;
 
   PipelineStatus get status => _status;
   PipelineStatus _status = PipelineStatus.idle;
@@ -81,8 +79,8 @@ typedef WatchEventPredicate = bool Function(WatchEvent event);
 /// ignore certain files.
 class PipelineWatcher {
   PipelineWatcher({
-    @required this.dir,
-    @required this.pipeline,
+    required this.dir,
+    required this.pipeline,
     this.ignore,
   }) : watcher = DirectoryWatcher(dir);
 
@@ -97,7 +95,7 @@ class PipelineWatcher {
 
   /// A callback that determines whether to rerun the pipeline or not for a
   /// given [WatchEvent] instance.
-  final WatchEventPredicate ignore;
+  final WatchEventPredicate? ignore;
 
   /// Activates the watcher.
   void start() {
@@ -105,10 +103,10 @@ class PipelineWatcher {
   }
 
   int _pipelineRunCount = 0;
-  Timer _scheduledPipeline;
+  Timer? _scheduledPipeline;
 
   void _onEvent(WatchEvent event) {
-    if (ignore != null && ignore(event)) {
+    if (ignore?.call(event) == true) {
       return;
     }
 

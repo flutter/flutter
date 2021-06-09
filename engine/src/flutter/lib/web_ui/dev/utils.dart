@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:io' as io;
 
@@ -50,7 +49,7 @@ class FilePath {
 Future<int> runProcess(
   String executable,
   List<String> arguments, {
-  String workingDirectory,
+  String? workingDirectory,
   bool mustSucceed: false,
   Map<String, String> environment = const <String, String>{},
 }) async {
@@ -81,7 +80,7 @@ Future<int> runProcess(
 Future<void> startProcess(
   String executable,
   List<String> arguments, {
-  String workingDirectory,
+  String? workingDirectory,
   bool mustSucceed: false,
 }) async {
   final io.Process process = await io.Process.start(
@@ -102,7 +101,7 @@ Future<void> startProcess(
 Future<String> evalProcess(
   String executable,
   List<String> arguments, {
-  String workingDirectory,
+  String? workingDirectory,
 }) async {
   final io.ProcessResult result = await io.Process.run(
     executable,
@@ -144,17 +143,17 @@ Future<void> runFlutter(
 @immutable
 class ProcessException implements Exception {
   ProcessException({
-    @required this.description,
-    @required this.executable,
-    @required this.arguments,
-    @required this.workingDirectory,
-    @required this.exitCode,
+    required this.description,
+    required this.executable,
+    required this.arguments,
+    required this.workingDirectory,
+    required this.exitCode,
   });
 
   final String description;
   final String executable;
   final List<String> arguments;
-  final String workingDirectory;
+  final String? workingDirectory;
   final int exitCode;
 
   @override
@@ -173,20 +172,20 @@ class ProcessException implements Exception {
 /// Adds utility methods
 mixin ArgUtils<T> on Command<T> {
   /// Extracts a boolean argument from [argResults].
-  bool boolArg(String name) => argResults[name] as bool;
+  bool? boolArg(String name) => argResults?[name] as bool?;
 
   /// Extracts a string argument from [argResults].
-  String stringArg(String name) => argResults[name] as String;
+  String? stringArg(String name) => argResults?[name] as String?;
 
   /// Extracts a integer argument from [argResults].
   ///
   /// If the argument value cannot be parsed as [int] throws an [ArgumentError].
-  int intArg(String name) {
-    final String rawValue = stringArg(name);
+  int? intArg(String name) {
+    final String? rawValue = stringArg(name);
     if (rawValue == null) {
       return null;
     }
-    final int value = int.tryParse(rawValue);
+    final int? value = int.tryParse(rawValue);
     if (value == null) {
       throw ArgumentError(
         'Argument $name should be an integer value but was "$rawValue"',
