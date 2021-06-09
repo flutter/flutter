@@ -1100,12 +1100,12 @@ void main() {
 
         final Process process = await Process.start(
           globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
-          <String>['format', file.path],
+          <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
 
-        expect(original, formatted, reason: file.path);
+        expect(formatted, contains(original), reason: file.path);
       }
     }
 
@@ -1202,12 +1202,12 @@ void main() {
 
         final Process process = await Process.start(
           globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
-          <String>['format', file.path],
+          <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
 
-        expect(original, formatted, reason: file.path);
+        expect(formatted, contains(original), reason: file.path);
       }
     }
 
