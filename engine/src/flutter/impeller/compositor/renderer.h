@@ -15,6 +15,7 @@
 namespace impeller {
 
 class Surface;
+class RenderPass;
 
 class Renderer {
  public:
@@ -29,12 +30,13 @@ class Renderer {
  protected:
   Renderer(std::string shaders_directory);
 
-  virtual bool OnRender() = 0;
+  virtual bool OnIsValid() const = 0;
+
+  virtual bool OnRender(RenderPass& pass) = 0;
 
  private:
   dispatch_semaphore_t frames_in_flight_sema_ = nullptr;
   std::shared_ptr<Context> context_;
-  Size size_;
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Renderer);

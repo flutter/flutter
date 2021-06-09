@@ -25,7 +25,7 @@ Renderer::Renderer(std::string shaders_directory)
 Renderer::~Renderer() = default;
 
 bool Renderer::IsValid() const {
-  return is_valid_;
+  return is_valid_ && OnIsValid();
 }
 
 bool Renderer::Render(const Surface& surface) {
@@ -48,7 +48,12 @@ bool Renderer::Render(const Surface& surface) {
   if (!render_pass) {
     return false;
   }
-  render_pass->Encode(*context_->GetTransientsAllocator());
+
+  if (!OnRender(*render_pass)) {
+    return false;
+  }
+
+  render_pass->FinishEncoding(*GetContext()->GetTransientsAllocator());
 
   ::dispatch_semaphore_wait(frames_in_flight_sema_, DISPATCH_TIME_FOREVER);
 
@@ -56,6 +61,7 @@ bool Renderer::Render(const Surface& surface) {
       [sema = frames_in_flight_sema_](CommandBuffer::CommitResult) {
         ::dispatch_semaphore_signal(sema);
       });
+
   return true;
 }
 

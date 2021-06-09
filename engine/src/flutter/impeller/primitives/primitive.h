@@ -8,6 +8,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/context.h"
+#include "impeller/compositor/pipeline.h"
 #include "impeller/compositor/render_pass.h"
 
 namespace impeller {
@@ -16,7 +17,11 @@ class Primitive {
  public:
   Primitive(std::shared_ptr<Context>);
 
+  virtual std::shared_ptr<Pipeline> GetPipeline() const = 0;
+
   virtual ~Primitive();
+
+  virtual bool IsValid() const = 0;
 
   std::shared_ptr<Context> GetContext() const;
 
