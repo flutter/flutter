@@ -1,10 +1,10 @@
-﻿**Documentation Guidance for Flutter**
+###**Documentation Guidance for Flutter**
 
-![](Aspose.Words.5f3c8810-92cd-49cc-9c5b-a26895ea5bb7.001.png)**Introduction**
+###**Introduction**
 
 This document contains points to consider before submitting a documentation PR, general documentation rules, and pull request guidance for various documentation change proposals for anyone who wishes to contribute or make changes to Flutter’s current list of documentation. 
 
-![](Aspose.Words.5f3c8810-92cd-49cc-9c5b-a26895ea5bb7.001.png)**Table of Contents**
+###**Table of Contents**
 
 - **Points to consider**
   - Are there existing documentation that can be utilized?
@@ -37,7 +37,8 @@ This document contains points to consider before submitting a documentation PR, 
   - API document
   - Document on Flutter.dev
 
-![](Aspose.Words.5f3c8810-92cd-49cc-9c5b-a26895ea5bb7.002.png)**Points to consider**
+###**Points to consider**
+------------------------------------------------------------------------------------------------------------------
 
 The Flutter team sincerely welcomes anyone who wishes to contribute or make changes to our current list of documentation. Not only it helps us to identify potential flaws that may exist in our current documentation but also lets us know alternative ways that we can change our documentation to further benefit our users and developers. 
 
@@ -65,7 +66,8 @@ For more info on design document and design document examples, please visit the 
 
 If the change that you would like to make is a change for the flutter website documents or to add in additional documents for flutter website, please make the appropriate pull request to [Flutter/website](https://github.com/flutter/website) repo and proposed the change there. We also suggest viewing the “general rules to consider for documentation” below even when proposing document changes for the website. For additional details, please refer to [contributing guidance](https://github.com/flutter/website/blob/master/CONTRIBUTING.md) for flutter website. 
 
-![](Aspose.Words.5f3c8810-92cd-49cc-9c5b-a26895ea5bb7.001.png)**General rules to consider for documentation**
+###**General rules to consider for documentation**
+----------------------------------------------------------------------------------------------------------------------------------------------------------
 ### **Answer your own questions straight away**
 When working on Flutter, if you find yourself asking a question about our systems, please place whatever answer you subsequently discover into the documentation in the same place where you first looked for the answer. That way, the documentation will consist of answers to real questions, where people would look to find them. Do this right away; it’s fine if your otherwise-unrelated PR has a bunch of documentation fixes in it to answer questions you had while you were working on your PR.
 
