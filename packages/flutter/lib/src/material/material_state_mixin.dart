@@ -10,7 +10,7 @@ import 'material_state.dart';
 /// Mixin for [State] classes that require knowledge of changing [MaterialState]
 /// values for their child widgets.
 ///
-/// This mixin does nothing by mere application it to a [State] class, but is
+/// This mixin does nothing by mere application to a [State] class, but is
 /// helpful when writing `build` methods that include child [InkWell],
 /// [GestureDetector], [MouseRegion], or [Focus] widgets. Instead of manually
 /// creating handlers for each type of user interaction, such [State] classes can
@@ -82,7 +82,7 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   ///   final VoidCallback? onPressed;
   ///
   ///   @override
-  ///   State createState() => MyWidgetState();
+  ///   State<MyWidget> createState() => MyWidgetState();
   /// }
   ///
   /// class MyWidgetState extends State<MyWidget> with MaterialStateMixin<MyWidget> {
@@ -120,7 +120,6 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   void setMaterialState(MaterialState _state, bool isSet) {
     return isSet ? addMaterialState(_state) : removeMaterialState(_state);
   }
-
 
   /// Mutator to mark a [MaterialState] value as active.
   @protected
