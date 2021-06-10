@@ -382,71 +382,8 @@ class TestCommand extends Command<bool> with ArgUtils {
           targets: canvasKitTargets, forCanvasKit: true);
     }
 
-    _copyFilesFromTestToBuild();
-    _copyFilesFromLibToBuild();
-
     stopwatch.stop();
     print('The build took ${stopwatch.elapsedMilliseconds ~/ 1000} seconds.');
-
-    _cleanupExtraFilesUnderTestDir();
-  }
-
-  /// Copy image files from test/ to build/test/.
-  ///
-  /// By copying all the files helps with the following:
-  /// - Tests using on an asset/image are able to reach these files.
-  /// - Source maps can locate test files.
-  ///
-  /// A side effect is this file copies all the images even when only one
-  /// target test is asked to run.
-  void _copyFilesFromTestToBuild() {
-    final List<io.FileSystemEntity> contents =
-        environment.webUiTestDir.listSync(recursive: true);
-    _copyFiles(contents);
-  }
-
-  /// Copy contents of /lib under /build.
-  ///
-  /// Since the source map are created to assume library files are under
-  /// `../../../../lib/src/`. Unless these files are copied under /build,
-  /// they are not visible during debug.
-  ///
-  /// This operation was handled by `build_runner` before we started using
-  /// plain `dart2js`.
-  void _copyFilesFromLibToBuild() {
-    final List<io.FileSystemEntity> contents =
-        environment.webUiLibDir.listSync(recursive: true);
-    _copyFiles(contents);
-  }
-
-  void _copyFiles(List<io.FileSystemEntity> contents) {
-    contents.whereType<io.File>().forEach((final io.File entity) {
-      final String directoryPath = path.relative(path.dirname(entity.path),
-          from: environment.webUiRootDir.path);
-      final io.Directory directory = io.Directory(
-          path.join(environment.webUiBuildDir.path, directoryPath));
-      if (!directory.existsSync()) {
-        directory.createSync(recursive: true);
-      }
-      final String pathRelativeToWebUi = path.relative(entity.absolute.path,
-          from: environment.webUiRootDir.path);
-      entity.copySync(
-          path.join(environment.webUiBuildDir.path, pathRelativeToWebUi));
-    });
-  }
-
-  /// Dart2js initially run under /test directory.
-  ///
-  /// The following files are copied under /build directory after that.
-  ///
-  void _cleanupExtraFilesUnderTestDir() {
-    final List<io.FileSystemEntity> contents =
-        environment.webUiTestDir.listSync(recursive: true);
-    contents.whereType<io.File>().forEach((final io.File entity) {
-      if (path.basename(entity.path).contains('.browser_test.dart.js')) {
-        entity.deleteSync();
-      }
-    });
   }
 
   /// Whether to start the browser in debug mode.
@@ -695,11 +632,7 @@ class TestCommand extends Command<bool> with ArgUtils {
     }
   }
 
-  /// Builds the specific test [targets].
-  ///
-  /// [targets] must not be null.
-  ///
-  /// Uses `dart2js` for building the test.
+  /// Compiles one test using `dart2js`.
   ///
   /// When building for CanvasKit we have to use extra argument
   /// `DFLUTTER_WEB_USE_SKIA=true`.
@@ -717,7 +650,10 @@ class TestCommand extends Command<bool> with ArgUtils {
   ///
   /// Later the extra files will be deleted in [_cleanupExtraFilesUnderTestDir].
   Future<bool> _buildTest(TestBuildInput input) async {
-    final targetFileName = '${input.path.relativeToWebUi}.browser_test.dart.js';
+    String targetFileName = path.join(
+      environment.webUiBuildDir.path,
+      '${input.path.relativeToWebUi}.browser_test.dart.js',
+    );
 
     final io.Directory directoryToTarget = io.Directory(path.join(
         environment.webUiBuildDir.path,
@@ -778,7 +714,7 @@ class TestCommand extends Command<bool> with ArgUtils {
       if (expectFailure)
         '--reporter=name-only',
       '--platform=${SupportedBrowsers.instance.supportedBrowserToPlatform[browser]}',
-      '--precompiled=${environment.webUiRootDir.path}/build',
+      '--precompiled=${environment.webUiBuildDir.path}',
       SupportedBrowsers.instance.browserToConfiguration[browser]!,
       '--',
       ...testFiles.map((f) => f.relativeToWebUi).toList(),
@@ -797,8 +733,7 @@ class TestCommand extends Command<bool> with ArgUtils {
       SupportedBrowsers.instance.supportedBrowsersToRuntimes[browser]!
     ], () {
       return BrowserPlatform.start(
-        browser,
-        root: io.Directory.current.path,
+        browserName: browser,
         // It doesn't make sense to update a screenshot for a test that is
         // expected to fail.
         doUpdateScreenshotGoldens: !expectFailure && doUpdateScreenshotGoldens,
