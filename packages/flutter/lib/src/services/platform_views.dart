@@ -554,6 +554,9 @@ class _AndroidMotionEventConverter {
   }
 
   void handlePointerCancelEvent(PointerCancelEvent event) {
+    // The pointer cancel event is handled like pointer up. Normally,
+    // the difference is that pointer cancel doesn't perform any action,
+    // but in this case neither up or cancel perform any action.
     _remove(event.pointer);
   }
 

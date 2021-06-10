@@ -103,13 +103,12 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/69431
   test('multi-finger touch test', () {
-    renderer; // Initialize bindings
+    renderer; // Initialize bindings.
     final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
     viewsController.registerViewType('webview');
     final AndroidViewController viewController =
       PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
-    final PlatformViewRenderBox platformViewRenderBox;
-    platformViewRenderBox = PlatformViewRenderBox(
+    final PlatformViewRenderBox platformViewRenderBox = PlatformViewRenderBox(
       controller: viewController,
       hitTestBehavior: PlatformViewHitTestBehavior.opaque,
       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
@@ -124,6 +123,7 @@ void main() {
     viewController.pointTransformer = (Offset offset) => platformViewRenderBox.globalToLocal(offset);
 
     FakeAsync().run((FakeAsync async) {
+      // Put one pointer down.
       ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.down, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
@@ -131,6 +131,7 @@ void main() {
       ]));
       async.flushMicrotasks();
 
+      // Put another pointer down and then cancel it.
       ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero, pointer: 2, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.down, const Offset(20, 10), pointer: 2, kind: PointerDeviceKind.touch),
@@ -138,6 +139,7 @@ void main() {
       ]));
       async.flushMicrotasks();
 
+      // The first pointer can still moving without crashing.
       ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.move, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
@@ -145,6 +147,8 @@ void main() {
       ]));
       async.flushMicrotasks();
     });
+
+    // Passes if no crashes.
   });
 }
 
