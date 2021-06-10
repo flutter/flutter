@@ -7,6 +7,7 @@
 #  * https://github.com/flutter/cocoon/blob/master/scheduler/README.md
 enabled_branches:
   - master
+  - flutter-2.3-candidate.24
 
 targets:
   - name: linux_analyze
