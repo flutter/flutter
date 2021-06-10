@@ -1,4 +1,4 @@
-Signature: e9bc1aec88411347309196cd25a0fe09
+Signature: 70a55bbcc4d894595bdba7e1cc5f7838
 
 UNUSED LICENSES:
 
@@ -9428,6 +9428,20 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128byte
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/x64_macos.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/x64_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/arm64_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/arm64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/arm64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/arm64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/arm_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/arm_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/arm_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/ia32_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/ia32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/x64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/x64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/x64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/x64_win.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesHomogenousx10/arm64_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesHomogenousx10/arm64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesHomogenousx10/arm64_linux.expect
@@ -10689,8 +10703,6 @@ FILE: ../../../third_party/dart/runtime/vm/thread_registry.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_registry.h
 FILE: ../../../third_party/dart/runtime/vm/timeline.cc
 FILE: ../../../third_party/dart/runtime/vm/timeline.h
-FILE: ../../../third_party/dart/runtime/vm/timeline_analysis.cc
-FILE: ../../../third_party/dart/runtime/vm/timeline_analysis.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_test.cc
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/developer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/classes.dart
