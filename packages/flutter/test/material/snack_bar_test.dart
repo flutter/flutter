@@ -2282,6 +2282,63 @@ void main() {
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('snack_bar.goldenTest.workWithBottomSheet.png'));
   });
 
+  testWidgets('ScaffoldMessenger does not duplicate a SnackBar when presenting a MaterialBanner.', (WidgetTester tester) async {
+    const Key materialBannerTapTarget = Key('materialbanner-tap-target');
+    const Key snackBarTapTarget = Key('snackbar-tap-target');
+    const String snackBarText = 'SnackBar';
+    const String materialBannerText = 'MaterialBanner';
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              children: <Widget>[
+                GestureDetector(
+                  key: snackBarTapTarget,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text(snackBarText),
+                    ));
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: const SizedBox(
+                    height: 100.0,
+                    width: 100.0,
+                  ),
+                ),
+                GestureDetector(
+                  key: materialBannerTapTarget,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                      content: const Text(materialBannerText),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('DISMISS'),
+                          onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                        ),
+                      ],
+                    ));
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: const SizedBox(
+                    height: 100.0,
+                    width: 100.0,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ));
+    await tester.tap(find.byKey(snackBarTapTarget));
+    await tester.tap(find.byKey(materialBannerTapTarget));
+    await tester.pumpAndSettle();
+
+    expect(find.text(snackBarText), findsOneWidget);
+    expect(find.text(materialBannerText), findsOneWidget);
+  });
+
   testWidgets('ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(

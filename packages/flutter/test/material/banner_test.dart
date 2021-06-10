@@ -393,6 +393,63 @@ void main() {
     expect(find.text('banner2'), findsNothing);
   });
 
+  testWidgets('ScaffoldMessenger does not duplicate a MaterialBanner when presenting a SnackBar.', (WidgetTester tester) async {
+    const Key materialBannerTapTarget = Key('materialbanner-tap-target');
+    const Key snackBarTapTarget = Key('snackbar-tap-target');
+    const String snackBarText = 'SnackBar';
+    const String materialBannerText = 'MaterialBanner';
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              children: <Widget>[
+                GestureDetector(
+                  key: snackBarTapTarget,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text(snackBarText),
+                    ));
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: const SizedBox(
+                    height: 100.0,
+                    width: 100.0,
+                  ),
+                ),
+                GestureDetector(
+                  key: materialBannerTapTarget,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                      content: const Text(materialBannerText),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('DISMISS'),
+                          onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                        ),
+                      ],
+                    ));
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: const SizedBox(
+                    height: 100.0,
+                    width: 100.0,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ));
+    await tester.tap(find.byKey(snackBarTapTarget));
+    await tester.tap(find.byKey(materialBannerTapTarget));
+    await tester.pumpAndSettle();
+
+    expect(find.text(snackBarText), findsOneWidget);
+    expect(find.text(materialBannerText), findsOneWidget);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/39574
   testWidgets('Single action laid out beside content but aligned to the trailing edge', (WidgetTester tester) async {
     await tester.pumpWidget(
