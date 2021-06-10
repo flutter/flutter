@@ -24,22 +24,14 @@ void main() {
       ..removeWhere((String line) => line.startsWith('Analyzer output:') || line.startsWith('Building flutter tool...'));
     expect(process.exitCode, isNot(equals(0)));
     expect(stderrLines, <String>[
-      'In sample starting at dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:117:bool? _visible = true;',
-      '>>> info: Use late for private members with non-nullable type (use_late_for_private_fields_and_variables)',
       'In sample starting at dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:117:      child: Text(title),',
       ">>> error: The final variable 'title' can't be read because it is potentially unassigned at this point (read_potentially_unassigned_final)",
       'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:30:9: new Opacity(',
       '>>> info: Unnecessary new keyword (unnecessary_new)',
       'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:62:9: new Opacity(',
       '>>> info: Unnecessary new keyword (unnecessary_new)',
-      "dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:95:9: const text0 = Text('Poor wandering ones!');",
-      '>>> info: Specify type annotations (always_specify_types)',
-      "dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:103:9: const text1 = _Text('Poor wandering ones!');",
-      '>>> info: Specify type annotations (always_specify_types)',
       "dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:111:9: final String? bar = 'Hello';",
       '>>> info: Prefer const over final for declarations (prefer_const_declarations)',
-      "dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:111:23: final String? bar = 'Hello';",
-      '>>> info: Use a non-nullable type for a final variable initialized with a non-nullable value (unnecessary_nullable_for_final_variable_declarations)',
       'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:112:9: final int foo = null;',
       '>>> info: Prefer const over final for declarations (prefer_const_declarations)',
       'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:112:25: final int foo = null;',
