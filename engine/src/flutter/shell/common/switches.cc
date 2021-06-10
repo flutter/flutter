@@ -296,13 +296,18 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.trace_startup =
       command_line.HasOption(FlagForSwitch(Switch::TraceStartup));
 
-  settings.trace_skia =
-      command_line.HasOption(FlagForSwitch(Switch::TraceSkia));
+#if !FLUTTER_RELEASE
+  settings.trace_skia = true;
 
   std::string trace_skia_allowlist;
   command_line.GetOptionValue(FlagForSwitch(Switch::TraceSkiaAllowlist),
                               &trace_skia_allowlist);
-  settings.trace_skia_allowlist = ParseCommaDelimited(trace_skia_allowlist);
+  if (trace_skia_allowlist.size()) {
+    settings.trace_skia_allowlist = ParseCommaDelimited(trace_skia_allowlist);
+  } else {
+    settings.trace_skia_allowlist = {"skia.shaders"};
+  }
+#endif  // !FLUTTER_RELEASE
 
   std::string trace_allowlist;
   command_line.GetOptionValue(FlagForSwitch(Switch::TraceAllowlist),
