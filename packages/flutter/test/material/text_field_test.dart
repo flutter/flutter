@@ -1056,12 +1056,12 @@ void main() {
 
     await tester.pump();
 
-    String editText = findRenderEditable(tester).text!.text!;
+    String editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), newChar);
 
     await tester.pump(const Duration(seconds: 2));
 
-    editText = findRenderEditable(tester).text!.text!;
+    editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), '\u2022');
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
@@ -1096,7 +1096,7 @@ void main() {
 
     await tester.pump();
 
-    final String editText = findRenderEditable(tester).text!.text!;
+    final String editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), '\u2022');
   }, variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.macOS,
@@ -4536,6 +4536,69 @@ void main() {
       );
       await tester.pump();
     }
+
+    // Regression test for https://github.com/flutter/flutter/issues/81233
+    testWidgets('TextField should terminate the `space` and `enter` raw key events by default', (WidgetTester tester) async {
+      final Set<FocusNode> outerReceivedAnEvent = <FocusNode>{};
+      final FocusNode outerFocusNode = FocusNode();
+      KeyEventResult outerHandleEvent(FocusNode node, RawKeyEvent event) {
+        outerReceivedAnEvent.add(node);
+        return KeyEventResult.handled;
+      }
+      outerFocusNode.onKey = outerHandleEvent;
+
+      final Set<FocusNode> innerReceivedAnEvent = <FocusNode>{};
+      final FocusNode innerFocusNode = FocusNode();
+
+      Future<void> sendEvent(LogicalKeyboardKey key) async {
+        await tester.sendKeyEvent(key, platform: 'windows');
+      }
+
+      Widget buildFrame() {
+        return MaterialApp(
+          home: Material(
+            child: Focus(
+              onKey: outerFocusNode.onKey,
+              focusNode: outerFocusNode,
+              child: TextField(
+                focusNode: innerFocusNode,
+              ),
+            ),
+          ),
+        );
+      }
+      await tester.pumpWidget(buildFrame());
+      innerFocusNode.requestFocus();
+      await tester.pump();
+
+      // The inner TextField's focus node terminal the raw key event by default.
+      await sendEvent(LogicalKeyboardKey.space);
+      expect(outerReceivedAnEvent.length, 0);
+
+      await sendEvent(LogicalKeyboardKey.enter);
+      expect(outerReceivedAnEvent.length, 0);
+
+      // The `onKey` of the focus node of the TextField can be customized.
+      KeyEventResult innerHandleEvent(FocusNode node, RawKeyEvent event) {
+        innerReceivedAnEvent.add(node);
+        // The key event has not been handled, and the event should continue to be
+        // propagated to the outer key event handlers.
+        return KeyEventResult.ignored;
+      }
+      innerFocusNode.onKey = innerHandleEvent;
+      await tester.pumpWidget(buildFrame());
+
+      await sendEvent(LogicalKeyboardKey.space);
+      expect(outerReceivedAnEvent.length, 1);
+      expect(innerReceivedAnEvent.length, 1);
+
+      outerReceivedAnEvent.clear();
+      innerReceivedAnEvent.clear();
+
+      await sendEvent(LogicalKeyboardKey.enter);
+      expect(outerReceivedAnEvent.length, 1);
+      expect(innerReceivedAnEvent.length, 1);
+    }, skip: areKeyEventsHandledByPlatform);
 
     testWidgets('Shift test 1', (WidgetTester tester) async {
       await setupWidget(tester);

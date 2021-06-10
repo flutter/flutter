@@ -151,8 +151,7 @@ class FlutterDevice {
       extraFrontEndOptions = <String>[
         if (featureFlags.isSingleWidgetReloadEnabled)
          '--flutter-widget-cache',
-        if (featureFlags.isExperimentalInvalidationStrategyEnabled)
-          '--enable-experiment=alternative-invalidation-strategy',
+        '--enable-experiment=alternative-invalidation-strategy',
         ...?extraFrontEndOptions,
       ];
       generator = ResidentCompiler(

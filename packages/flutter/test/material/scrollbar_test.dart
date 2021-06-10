@@ -1051,8 +1051,9 @@ void main() {
           ),
           child: Scrollbar(
             controller: controller,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0),
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),

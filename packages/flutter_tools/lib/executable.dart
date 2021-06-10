@@ -160,7 +160,7 @@ List<FlutterCommand> generateCommands({
     platform: globals.platform,
   ),
   EmulatorsCommand(),
-  FormatCommand(),
+  FormatCommand(verboseHelp: verboseHelp),
   GenerateCommand(),
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,

@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -24,12 +24,12 @@ final DateTime _stampUpToDate = _testClock.ago(checkAgeConsideredUpToDate ~/ 2);
 final DateTime _stampOutOfDate = _testClock.ago(checkAgeConsideredUpToDate * 2);
 
 void main() {
-  MockCache mockCache;
+  FakeCache cache;
   FakeProcessManager processManager;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
-    mockCache = MockCache();
+    cache = FakeCache();
   });
 
   testUsingContext('Channel enum and string transform to each other', () {
@@ -125,8 +125,8 @@ void main() {
           flutterVersion.toString(),
           'Flutter • channel $channel • unknown source\n'
           'Framework • revision 1234abcd (1 second ago) • ${getChannelUpToDateVersion()}\n'
-          'Engine • revision \n'
-          'Tools • Dart null',
+          'Engine • revision abcdefg\n'
+          'Tools • Dart 2.12.0',
         );
         expect(flutterVersion.frameworkAge, '1 second ago');
         expect(flutterVersion.getVersionString(), '$channel/1234abcd');
@@ -139,7 +139,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => processManager,
-        Cache: () => mockCache,
+        Cache: () => cache,
       });
 
       testWithoutContext('prints nothing when Flutter installation looks out-of-date but is actually up-to-date', () async {
@@ -149,13 +149,11 @@ void main() {
           lastTimeVersionWasChecked: _stampOutOfDate,
           lastKnownRemoteVersion: getChannelOutOfDateVersion(),
         );
-
-        when(mockCache.getStampFor(VersionCheckStamp.flutterVersionCheckStampFile))
-          .thenReturn(json.encode(stamp));
+        cache.versionStamp = json.encode(stamp);
 
         await checkVersionFreshness(
           flutterVersion,
-          cache: mockCache,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -172,13 +170,11 @@ void main() {
           lastTimeVersionWasChecked: _stampUpToDate,
           lastKnownRemoteVersion: getChannelUpToDateVersion(),
         );
-
-        when(mockCache.getStampFor(VersionCheckStamp.flutterVersionCheckStampFile))
-          .thenReturn(json.encode(stamp));
+        cache.versionStamp = json.encode(stamp);
 
         await checkVersionFreshness(
           flutterVersion,
-          cache: mockCache,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -186,7 +182,7 @@ void main() {
         );
 
         _expectVersionMessage(newVersionAvailableMessage(), logger);
-        verify(mockCache.setStampFor(VersionCheckStamp.flutterVersionCheckStampFile, any)).called(1);
+        expect(cache.setVersionStamp, true);
       });
 
       testWithoutContext('does not print warning if printed recently', () async {
@@ -197,13 +193,11 @@ void main() {
           lastKnownRemoteVersion: getChannelUpToDateVersion(),
           lastTimeWarningWasPrinted: _testClock.now(),
         );
-
-        when(mockCache.getStampFor(VersionCheckStamp.flutterVersionCheckStampFile))
-          .thenReturn(json.encode(stamp));
+        cache.versionStamp = json.encode(stamp);
 
         await checkVersionFreshness(
           flutterVersion,
-          cache: mockCache,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -216,12 +210,11 @@ void main() {
       testWithoutContext('pings server when version stamp is missing', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel);
         final BufferLogger logger = BufferLogger.test();
-        when(mockCache.getStampFor(VersionCheckStamp.flutterVersionCheckStampFile))
-          .thenReturn('{}');
+        cache.versionStamp = '{}';
 
         await checkVersionFreshness(
           flutterVersion,
-          cache: mockCache,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -229,23 +222,21 @@ void main() {
         );
 
         _expectVersionMessage(newVersionAvailableMessage(), logger);
-        verify(mockCache.setStampFor(VersionCheckStamp.flutterVersionCheckStampFile, any)).called(1);
+        expect(cache.setVersionStamp, true);
       });
 
       testWithoutContext('pings server when version stamp is out-of-date', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
-            lastTimeVersionWasChecked: _stampOutOfDate,
-            lastKnownRemoteVersion: _testClock.ago(const Duration(days: 2)),
-          );
-
-        when(mockCache.getStampFor(VersionCheckStamp.flutterVersionCheckStampFile))
-          .thenReturn(json.encode(stamp));
+          lastTimeVersionWasChecked: _stampOutOfDate,
+          lastKnownRemoteVersion: _testClock.ago(const Duration(days: 2)),
+        );
+        cache.versionStamp = json.encode(stamp);
 
         await checkVersionFreshness(
           flutterVersion,
-          cache: mockCache,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -258,13 +249,11 @@ void main() {
       testWithoutContext('does not print warning when unable to connect to server if not out of date', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel);
         final BufferLogger logger = BufferLogger.test();
-
-        when(mockCache.getStampFor(VersionCheckStamp.flutterVersionCheckStampFile))
-          .thenReturn('{}');
+        cache.versionStamp = '{}';
 
         await checkVersionFreshness(
           flutterVersion,
-          cache: mockCache,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelUpToDateVersion(),
@@ -278,16 +267,14 @@ void main() {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
-            lastTimeVersionWasChecked: _stampOutOfDate,
-            lastKnownRemoteVersion: _testClock.ago(const Duration(days: 2)),
-          );
-
-        when(mockCache.getStampFor(VersionCheckStamp.flutterVersionCheckStampFile))
-          .thenReturn(json.encode(stamp));
+          lastTimeVersionWasChecked: _stampOutOfDate,
+          lastKnownRemoteVersion: _testClock.ago(const Duration(days: 2)),
+        );
+        cache.versionStamp = json.encode(stamp);
 
         await checkVersionFreshness(
           flutterVersion,
-          cache: mockCache,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -305,24 +292,21 @@ void main() {
         }
 
         testWithoutContext('loads blank when stamp file missing', () async {
-          when(mockCache.getStampFor(VersionCheckStamp.flutterVersionCheckStampFile))
-            .thenReturn(null);
+          cache.versionStamp = null;
 
-          _expectDefault(await VersionCheckStamp.load(mockCache, BufferLogger.test()));
+          _expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads blank when stamp file is malformed JSON', () async {
-          when(mockCache.getStampFor(VersionCheckStamp.flutterVersionCheckStampFile))
-            .thenReturn('<');
+          cache.versionStamp = '<';
 
-          _expectDefault(await VersionCheckStamp.load(mockCache, BufferLogger.test()));
+          _expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads blank when stamp file is well-formed but invalid JSON', () async {
-          when(mockCache.getStampFor(VersionCheckStamp.flutterVersionCheckStampFile))
-            .thenReturn('[]');
+          cache.versionStamp = '[]';
 
-          _expectDefault(await VersionCheckStamp.load(mockCache, BufferLogger.test()));
+          _expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads valid JSON', () async {
@@ -333,10 +317,9 @@ void main() {
           "lastTimeWarningWasPrinted": "${_testClock.now()}"
         }
         ''';
-          when(mockCache.getStampFor(VersionCheckStamp.flutterVersionCheckStampFile))
-            .thenReturn(value);
+          cache.versionStamp = value;
 
-          final VersionCheckStamp stamp = await VersionCheckStamp.load(mockCache, BufferLogger.test());
+          final VersionCheckStamp stamp = await VersionCheckStamp.load(cache, BufferLogger.test());
 
           expect(stamp.lastKnownRemoteVersion, _testClock.ago(const Duration(days: 1)));
           expect(stamp.lastTimeVersionWasChecked, _testClock.ago(const Duration(days: 2)));
@@ -379,7 +362,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FlutterVersion: () => FlutterVersion(clock: _testClock),
     ProcessManager: () => processManager,
-    Cache: () => mockCache,
+    Cache: () => cache,
   });
 
   testUsingContext('GitTagVersion', () {
@@ -615,7 +598,34 @@ void _expectVersionMessage(String message, BufferLogger logger) {
   logger.clear();
 }
 
-class MockCache extends Mock implements Cache {}
+class FakeCache extends Fake implements Cache {
+  String versionStamp;
+  bool setVersionStamp = false;
+
+  @override
+  String get engineRevision => 'abcdefg';
+
+  @override
+  String get dartSdkVersion => '2.12.0';
+
+  @override
+  void checkLockAcquired() { }
+
+  @override
+  String getStampFor(String artifactName) {
+    if (artifactName == VersionCheckStamp.flutterVersionCheckStampFile) {
+      return versionStamp;
+    }
+    return null;
+  }
+
+  @override
+  void setStampFor(String artifactName, String version) {
+    if (artifactName == VersionCheckStamp.flutterVersionCheckStampFile) {
+      setVersionStamp = true;
+    }
+  }
+}
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
   FakeFlutterVersion(this.channel);

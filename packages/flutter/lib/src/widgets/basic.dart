@@ -1678,6 +1678,8 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// this object applies its rotation prior to layout, which means the entire
 /// rotated box consumes only as much space as required by the rotated child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=BFE6_UglLfQ}
+///
 /// {@tool snippet}
 ///
 /// This snippet rotates the child (some [Text]) so that it renders from bottom
@@ -2246,6 +2248,12 @@ class SizedBox extends SingleChildRenderObjectWidget {
   SizedBox.fromSize({ Key? key, Widget? child, Size? size })
     : width = size?.width,
       height = size?.height,
+      super(key: key, child: child);
+
+  /// Creates a box whose [width] and [height] are equal.
+  const SizedBox.square({Key? key, Widget? child, double? dimension})
+    : width = dimension,
+      height = dimension,
       super(key: key, child: child);
 
   /// If non-null, requires the child to have exactly this width.
@@ -6162,8 +6170,9 @@ class RawImage extends LeafRenderObjectWidget {
 /// class TestAssetBundle extends CachingAssetBundle {
 ///   @override
 ///   Future<ByteData> load(String key) async {
-///     if (key == 'resources/test')
+///     if (key == 'resources/test') {
 ///       return ByteData.view(Uint8List.fromList(utf8.encode('Hello World!')).buffer);
+///     }
 ///     return ByteData(0);
 ///   }
 /// }
