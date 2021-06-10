@@ -60,10 +60,10 @@ class TestServiceExtensionsBinding extends BindingBase
   int reassembled = 0;
   bool pendingReassemble = false;
   @override
-  Future<void> performReassemble() {
+  Future<void> performReassemble(DebugReassembleConfig reassembleConfig) {
     reassembled += 1;
     pendingReassemble = true;
-    return super.performReassemble();
+    return super.performReassemble(reassembleConfig);
   }
 
   bool frameScheduled = false;

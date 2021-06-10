@@ -444,16 +444,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
           final String? className = params['className'] as String?;
-          void markElementsDirty(Element element) {
-            if (element.widget.runtimeType.toString() == className) {
-              element.markNeedsBuild();
-            }
-            element.visitChildElements(markElementsDirty);
-          }
-          if (renderViewElement != null) {
-            markElementsDirty(renderViewElement!);
-          }
-          await endOfFrame;
+          print('reassemble for $className');
+          final DebugReassembleConfig reassembleConfig = DebugReassembleConfig(widgetName: className);
+          await reassembleApplication(reassembleConfig);
           return <String, String>{'type': 'Success'};
         },
       );
@@ -502,7 +495,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   Future<void> _forceRebuild() {
     if (renderViewElement != null) {
-      buildOwner!.reassemble(renderViewElement!);
+      buildOwner!.reassemble(renderViewElement!, DebugReassembleConfig());
       return endOfFrame;
     }
     return Future<void>.value();
@@ -950,15 +943,16 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   bool get isRootWidgetAttached => _renderViewElement != null;
 
   @override
-  Future<void> performReassemble() {
+  Future<void> performReassemble(DebugReassembleConfig reassembleConfig) {
     assert(() {
       WidgetInspectorService.instance.performReassemble();
       return true;
     }());
 
-    if (renderViewElement != null)
-      buildOwner!.reassemble(renderViewElement!);
-    return super.performReassemble();
+    if (renderViewElement != null) {
+      buildOwner!.reassemble(renderViewElement!, reassembleConfig);
+    }
+    return super.performReassemble(reassembleConfig);
   }
 
   /// Computes the locale the current platform would resolve to.

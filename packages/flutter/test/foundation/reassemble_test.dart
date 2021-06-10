@@ -9,9 +9,9 @@ class TestFoundationFlutterBinding extends BindingBase {
   bool? wasLocked;
 
   @override
-  Future<void> performReassemble() async {
+  Future<void> performReassemble(DebugReassembleConfig reassembleConfig) async {
     wasLocked = locked;
-    return super.performReassemble();
+    return super.performReassemble(reassembleConfig);
   }
 }
 
@@ -19,7 +19,8 @@ TestFoundationFlutterBinding binding = TestFoundationFlutterBinding();
 
 void main() {
   test('Pointer events are locked during reassemble', () async {
-    await binding.reassembleApplication();
+    final DebugReassembleConfig reassembleConfig = DebugReassembleConfig();
+    await binding.reassembleApplication(reassembleConfig);
     expect(binding.wasLocked, isTrue);
   });
 }

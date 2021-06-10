@@ -341,7 +341,8 @@ void main() {
     );
     // Check that we can update the constrained axis to null.
     unconstrained.constrainedAxis = null;
-    renderer.reassembleApplication();
+    final DebugReassembleConfig reassembleConfig = DebugReassembleConfig();
+    renderer.reassembleApplication(reassembleConfig);
 
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');
     expect(unconstrained.size.height, equals(200.0), reason: 'unconstrained height');

@@ -2978,14 +2978,16 @@ class BuildOwner {
   /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
-  void reassemble(Element root) {
+  void reassemble(Element root, DebugReassembleConfig reassembleConfig) {
     Timeline.startSync('Dirty Element Tree');
     try {
+      Element._debugReassembleConfig = reassembleConfig;
       assert(root._parent == null);
       assert(root.owner == this);
       root.reassemble();
     } finally {
       Timeline.finishSync();
+      Element._debugReassembleConfig = null;
     }
   }
 }
@@ -3049,6 +3051,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       _widget = widget;
 
   Element? _parent;
+  static DebugReassembleConfig? _debugReassembleConfig;
 
   // Custom implementation of `operator ==` optimized for the ".of" pattern
   // used with `InheritedWidgets`.
@@ -3175,7 +3178,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   @protected
   void reassemble() {
-    markNeedsBuild();
+    final DebugReassembleConfig? config = _debugReassembleConfig;
+    if (config == null || config.widgetName == _widget?.runtimeType.toString()) {
+      markNeedsBuild();
+      _debugReassembleConfig = null;
+    }
     visitChildren((Element child) {
       child.reassemble();
     });

@@ -164,7 +164,10 @@ abstract class BindingBase {
     assert(() {
       registerSignalServiceExtension(
         name: 'reassemble',
-        callback: reassembleApplication,
+        callback: () async {
+          final DebugReassembleConfig reassembleConfig = DebugReassembleConfig();
+          return reassembleApplication(reassembleConfig);
+        },
       );
       return true;
     }());
@@ -226,7 +229,8 @@ abstract class BindingBase {
               platformOverrideExtensionName,
               defaultTargetPlatform.toString().substring('$TargetPlatform.'.length),
             );
-            await reassembleApplication();
+            final DebugReassembleConfig reassembleConfig = DebugReassembleConfig();
+            await reassembleApplication(reassembleConfig);
           }
           return <String, dynamic>{
             'value': defaultTargetPlatform
@@ -255,7 +259,8 @@ abstract class BindingBase {
               brightnessOverrideExtensionName,
               (debugBrightnessOverride ?? window.platformBrightness).toString(),
             );
-            await reassembleApplication();
+            final DebugReassembleConfig reassembleConfig = DebugReassembleConfig();
+            await reassembleApplication(reassembleConfig);
           }
           return <String, dynamic>{
             'value': (debugBrightnessOverride ?? window.platformBrightness).toString(),
@@ -334,8 +339,8 @@ abstract class BindingBase {
   ///
   /// Subclasses (binding classes) should override [performReassemble] to react
   /// to this method being called. This method itself should not be overridden.
-  Future<void> reassembleApplication() {
-    return lockEvents(performReassemble);
+  Future<void> reassembleApplication(DebugReassembleConfig reassembleConfig) {
+    return lockEvents(() => performReassemble(reassembleConfig));
   }
 
   /// This method is called by [reassembleApplication] to actually cause the
@@ -350,7 +355,7 @@ abstract class BindingBase {
   /// Do not call this method directly. Instead, use [reassembleApplication].
   @mustCallSuper
   @protected
-  Future<void> performReassemble() {
+  Future<void> performReassemble(DebugReassembleConfig reassembleConfig) {
     FlutterError.resetErrorCount();
     return Future<void>.value();
   }
@@ -628,4 +633,24 @@ abstract class BindingBase {
 /// Terminate the Flutter application.
 Future<void> _exitApplication() async {
   exit(0);
+}
+
+/// Additional configuration used for [BindingBase.reassemble] optimizations.
+///
+/// Do not extend, implement, or mixin this class. This may only be instantiated
+/// in debug mode.
+class DebugReassembleConfig {
+  /// Create a new [DebugReassembleConfig].
+  ///
+  /// Throws a [FlutterError] if this is called in profile or debug mode.
+  DebugReassembleConfig({
+    this.widgetName,
+  }) {
+    if (!kDebugMode) {
+      throw FlutterError('Cannot instaniate DebugReassembleConfig in profile or release mode.');
+    }
+  }
+
+  /// The name of the widget that was modified, or `null` if the change was elsewhere.
+  final String? widgetName;
 }
