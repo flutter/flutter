@@ -693,8 +693,15 @@ class FutureBuilder<T> extends StatefulWidget {
     this.future,
     this.initialData,
     required this.builder,
+    this.rethrowError = false,
   }) : assert(builder != null),
        super(key: key);
+
+  /// Whether the latest error received by the asynchronous computation should
+  /// be rethrown or swallowed.
+  ///
+  /// Defaults to `false`.
+  final bool rethrowError;
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null.
@@ -794,6 +801,9 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
           setState(() {
             _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace);
           });
+        }
+        if(widget.rethrowError) {
+          Future<Object>.error(error, stackTrace);
         }
       });
       _snapshot = _snapshot.inState(ConnectionState.waiting);

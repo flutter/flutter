@@ -165,6 +165,23 @@ void main() {
       ));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, I, null, null)'), findsOneWidget);
     });
+    testWidgets('rethrowError rethrows received error', (WidgetTester tester) async {
+      final Completer<void> caughtError = Completer<void>();
+      await runZonedGuarded(() async {
+        final Completer<String> completer = Completer<String>();
+        await tester.pumpWidget(FutureBuilder<String>(
+          rethrowError: true,
+          future: completer.future,
+          builder: snapshotText,
+        ), const Duration(seconds: 1));
+        completer.completeError('bad');
+      }, (Object error, StackTrace stack) {
+        expectSync(error, equals('bad'));
+        caughtError.complete();
+      });
+      await tester.pumpAndSettle();
+      expectSync(caughtError.isCompleted, isTrue);
+    });
   });
   group('StreamBuilder', () {
     testWidgets('gracefully handles transition from null stream', (WidgetTester tester) async {
