@@ -1,4 +1,4 @@
-Signature: eb4e4256e2fc35126050b4993885d5b2
+Signature: 4d1e30cad2ce0fa58ce7b1e1bac7bd02
 
 UNUSED LICENSES:
 
@@ -5767,6 +5767,7 @@ FILE: ../../../third_party/skia/experimental/ngatoy/Fake.cpp
 FILE: ../../../third_party/skia/experimental/ngatoy/Fake.h
 FILE: ../../../third_party/skia/experimental/ngatoy/SortKey.h
 FILE: ../../../third_party/skia/experimental/ngatoy/ngatoy.cpp
+FILE: ../../../third_party/skia/experimental/ngatoy/ngatypes.h
 FILE: ../../../third_party/skia/gm/destcolor.cpp
 FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
 FILE: ../../../third_party/skia/include/core/SkStringView.h
