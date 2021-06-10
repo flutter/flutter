@@ -23,7 +23,7 @@ class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProv
   void initState() {
     super.initState();
     _offsetY.addListener((){
-    setState(() {});
+      setState(() {});
     });
     _controller.repeat();
   }
