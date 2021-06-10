@@ -742,5 +742,8 @@ class MockProcessManager implements ProcessManager {
   }
 
   @override
+  bool canRun(dynamic executable, {String workingDirectory}) => true;
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
