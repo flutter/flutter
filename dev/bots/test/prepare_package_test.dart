@@ -24,14 +24,15 @@ void main() {
           return processRunner.runProcess(commandLine);
         })(<String>['this_executable_better_not_exist_2857632534321']),
         throwsA(isA<PreparePackageException>()));
-    try {
-      await processRunner.runProcess(<String>['this_executable_better_not_exist_2857632534321']);
-    } on PreparePackageException catch (e) {
-      expect(
-        e.message,
+
+    await expectLater(
+      () => processRunner.runProcess(<String>['this_executable_better_not_exist_2857632534321']),
+      throwsA(isA<PreparePackageException>().having(
+        (PreparePackageException error) => error.message,
+        'message',
         contains('ProcessException: Failed to find "this_executable_better_not_exist_2857632534321" in the search path'),
-      );
-    }
+      )),
+    );
   });
   for (final String platformName in <String>['macos', 'linux', 'windows']) {
     final FakePlatform platform = FakePlatform(
@@ -273,14 +274,14 @@ void main() {
         );
         await creator.initializeRepo();
 
-        try {
-          await creator.createArchive();
-          fail('failed to throw');
-        } on Exception catch (e) {
-          expect(e is PreparePackageException, true);
-          final PreparePackageException exception = e as PreparePackageException;
-          expect(exception.message, contains('The binary $binPath was not codesigned!'));
-        }
+        await expectLater(
+          () => creator.createArchive(),
+          throwsA(isA<PreparePackageException>().having(
+            (PreparePackageException exception) => exception.message,
+            'message',
+            contains('The binary $binPath was not codesigned!'),
+          )),
+        );
       }, skip: !platform.isMacOS);
     });
 
@@ -293,8 +294,7 @@ void main() {
       final String releasesName = 'releases_$platformName.json';
       final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
       final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
-      final String gsArchivePath = 'gs://flutter_infra/releases/stable/$platformName/$archiveName';
-      final String newGsArchivePath = 'gs://flutter_infra_release/releases/stable/$platformName/$archiveName';
+      final String gsArchivePath = 'gs://flutter_infra_release/releases/stable/$platformName/$archiveName';
 
       setUp(() async {
         processManager = FakeProcessManager.list(<FakeCommand>[]);
@@ -308,11 +308,10 @@ void main() {
       test('calls the right processes', () async {
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
-        final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
-        final String newGsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
+        final String gsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
         final String releasesJson = '''
 {
-  "base_url": "https://storage.googleapis.com/flutter_infra/releases",
+  "base_url": "https://storage.googleapis.com/flutter_infra_release/releases",
   "current_release": {
     "beta": "3ea4d06340a97a1e9d7cae97567c64e0569dcaa2",
     "dev": "5a58b36e36b8d7aace89d3950e6deb307956a6a0"
@@ -355,12 +354,6 @@ void main() {
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
           '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
-          '$gsutilCall -- stat $newGsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
-          '$gsutilCall -- rm $newGsArchivePath': null,
-          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $newGsArchivePath': null,
-          '$gsutilCall -- cp $newGsJsonPath $jsonPath': null,
-          '$gsutilCall -- rm $newGsJsonPath': null,
-          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $newGsJsonPath': null,
         };
         processManager.addCommands(convertResults(calls));
         final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
@@ -408,6 +401,81 @@ void main() {
         expect(contents, equals(encoder.convert(jsonData)));
       });
 
+      test('updates base_url from old bucket to new bucket', () async {
+        final String archivePath = path.join(tempDir.absolute.path, archiveName);
+        final String jsonPath = path.join(tempDir.absolute.path, releasesName);
+        final String gsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
+        final String releasesJson = '''
+{
+  "base_url": "https://storage.googleapis.com/flutter_infra_release/releases",
+  "current_release": {
+    "beta": "3ea4d06340a97a1e9d7cae97567c64e0569dcaa2",
+    "dev": "5a58b36e36b8d7aace89d3950e6deb307956a6a0"
+  },
+  "releases": [
+    {
+      "hash": "5a58b36e36b8d7aace89d3950e6deb307956a6a0",
+      "channel": "dev",
+      "version": "v0.2.3",
+      "release_date": "2018-03-20T01:47:02.851729Z",
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.3-dev.zip",
+      "sha256": "4fe85a822093e81cb5a66c7fc263f68de39b5797b294191b6d75e7afcc86aff8"
+    },
+    {
+      "hash": "b9bd51cc36b706215915711e580851901faebb40",
+      "channel": "beta",
+      "version": "v0.2.2",
+      "release_date": "2018-03-16T18:48:13.375013Z",
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.2-dev.zip",
+      "sha256": "6073331168cdb37a4637a5dc073d6a7ef4e466321effa2c529fa27d2253a4d4b"
+    },
+    {
+      "hash": "$testRef",
+      "channel": "stable",
+      "version": "v0.0.0",
+      "release_date": "2018-03-20T01:47:02.851729Z",
+      "archive": "stable/$platformName/flutter_${platformName}_v0.0.0-dev.zip",
+      "sha256": "5dd34873b3a3e214a32fd30c2c319a0f46e608afb72f0d450b2d621a6d02aebd"
+    }
+  ]
+}
+''';
+        File(jsonPath).writeAsStringSync(releasesJson);
+        File(archivePath).writeAsStringSync('archive contents');
+        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+          // This process fails because the file does NOT already exist
+          '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
+          '$gsutilCall -- rm $gsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
+          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
+          '$gsutilCall -- rm $gsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
+        };
+        processManager.addCommands(convertResults(calls));
+        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        outputFile.createSync();
+        assert(tempDir.existsSync());
+        final ArchivePublisher publisher = ArchivePublisher(
+          tempDir,
+          testRef,
+          Branch.stable,
+          'v1.2.3',
+          outputFile,
+          false,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+        );
+        assert(tempDir.existsSync());
+        await publisher.publishArchive();
+
+        final File releaseFile = File(jsonPath);
+        expect(releaseFile.existsSync(), isTrue);
+        final String contents = releaseFile.readAsStringSync();
+        final Map<String, dynamic> jsonData = json.decode(contents) as Map<String, dynamic>;
+        expect(jsonData['base_url'], 'https://storage.googleapis.com/flutter_infra_release/releases');
+      });
+
       test('publishArchive throws if forceUpload is false and artifact already exists on cloud storage', () async {
         final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
         final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
@@ -446,11 +514,10 @@ void main() {
         );
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
-        final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
-        final String newGsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
+        final String gsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
         final String releasesJson = '''
 {
-  "base_url": "https://storage.googleapis.com/flutter_infra/releases",
+  "base_url": "https://storage.googleapis.com/flutter_infra_release/releases",
   "current_release": {
     "beta": "3ea4d06340a97a1e9d7cae97567c64e0569dcaa2",
     "dev": "5a58b36e36b8d7aace89d3950e6deb307956a6a0"
@@ -491,11 +558,6 @@ void main() {
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
           '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
-          '$gsutilCall -- rm $newGsArchivePath': null,
-          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $newGsArchivePath': null,
-          '$gsutilCall -- cp $newGsJsonPath $jsonPath': null,
-          '$gsutilCall -- rm $newGsJsonPath': null,
-          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $newGsJsonPath': null,
         };
         processManager.addCommands(convertResults(calls));
         assert(tempDir.existsSync());

@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 
 /// A result of running a single task.
 class TaskResult {
-   TaskResult.buildOnly()
-       : succeeded = true,
+  TaskResult.buildOnly()
+      : succeeded = true,
         data = null,
         detailFiles = null,
         benchmarkScoreKeys = null,

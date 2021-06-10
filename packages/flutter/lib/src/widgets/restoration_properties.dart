@@ -71,12 +71,13 @@ import 'restoration.dart';
 /// ```dart
 /// class RestorableDuration extends RestorableValue<Duration> {
 ///   @override
-///   Duration createDefaultValue() => const Duration();
+///   Duration createDefaultValue() => Duration.zero;
 ///
 ///   @override
 ///   void didUpdateValue(Duration? oldValue) {
-///     if (oldValue == null || oldValue.inMicroseconds != value.inMicroseconds)
+///     if (oldValue == null || oldValue.inMicroseconds != value.inMicroseconds) {
 ///       notifyListeners();
+///     }
 ///   }
 ///
 ///   @override
@@ -84,7 +85,7 @@ import 'restoration.dart';
 ///     if (data != null) {
 ///       return Duration(microseconds: data as int);
 ///     }
-///     return const Duration();
+///     return Duration.zero;
 ///   }
 ///
 ///   @override

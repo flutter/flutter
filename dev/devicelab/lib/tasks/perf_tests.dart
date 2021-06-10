@@ -2,18 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+
+import '../common.dart';
 
 /// Must match flutter_driver/lib/src/common.dart.
 ///
@@ -466,7 +470,7 @@ TaskFunction createFramePolicyIntegrationTest() {
       ) as Map<String, dynamic>;
       final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
       final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
-      final Map<String, dynamic> dataFormated = <String, dynamic>{
+      final Map<String, dynamic> dataFormatted = <String, dynamic>{
         'average_delay_fullyLive_millis':
           fullLiveData['average_delay_millis'],
         'average_delay_benchmarkLive_millis':
@@ -478,8 +482,8 @@ TaskFunction createFramePolicyIntegrationTest() {
       };
 
       return TaskResult.success(
-        dataFormated,
-        benchmarkScoreKeys: dataFormated.keys.toList(),
+        dataFormatted,
+        benchmarkScoreKeys: dataFormatted.keys.toList(),
       );
     });
   };
@@ -615,6 +619,106 @@ class StartupTest {
   }
 }
 
+/// A one-off test to verify that devtools starts in profile mode.
+class DevtoolsStartupTest {
+  const DevtoolsStartupTest(this.testDirectory);
+
+  final String testDirectory;
+
+  Future<TaskResult> run() async {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+
+      section('Building application');
+      String applicationBinaryPath;
+      switch (deviceOperatingSystem) {
+        case DeviceOperatingSystem.android:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm,android-arm64',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.androidArm:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.androidArm64:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm64',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.ios:
+          await flutter('build', options: <String>[
+            'ios',
+             '-v',
+            '--profile',
+          ]);
+          applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
+          break;
+        case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.fake:
+          break;
+      }
+
+      final Process process = await startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+        'run',
+        '--no-android-gradle-daemon',
+        '--no-publish-port',
+        '--verbose',
+        '--profile',
+        '-d',
+        device.deviceId,
+        if (applicationBinaryPath != null)
+          '--use-application-binary=$applicationBinaryPath',
+       ]);
+      final Completer<void> completer = Completer<void>();
+      bool sawLine = false;
+      process.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
+          print('[STDOUT]: $line');
+        // Wait for devtools output.
+        if (line.contains('The Flutter DevTools debugger and profiler')) {
+          sawLine = true;
+          completer.complete();
+        }
+      });
+      bool didExit = false;
+      unawaited(process.exitCode.whenComplete(() {
+        didExit = true;
+      }));
+      await Future.any(<Future<void>>[completer.future, Future<void>.delayed(const Duration(minutes: 5)), process.exitCode]);
+      if (!didExit) {
+        process.stdin.writeln('q');
+        await process.exitCode;
+      }
+
+      await flutter('install', options: <String>[
+        '--uninstall-only',
+        '-d',
+        device.deviceId,
+      ]);
+
+      if (sawLine)
+        return TaskResult.success(null, benchmarkScoreKeys: <String>[]);
+      return TaskResult.failure('Did not see line "The Flutter DevTools debugger and profiler" in output');
+    });
+  }
+}
+
 /// Measures application runtime performance, specifically per-frame
 /// performance.
 class PerfTest {
@@ -705,6 +809,7 @@ class PerfTest {
       final String deviceId = device.deviceId;
 
       await flutter('drive', options: <String>[
+        '--no-dds',
         '--no-android-gradle-daemon',
         '-v',
         '--verbose-system-logs',
@@ -777,6 +882,8 @@ const List<String> _kCommonScoreKeys = <String>[
   'worst_frame_rasterizer_time_millis',
   '90th_percentile_frame_rasterizer_time_millis',
   '99th_percentile_frame_rasterizer_time_millis',
+  'new_gen_gc_count',
+  'old_gen_gc_count',
 ];
 
 class PerfTestWithSkSL extends PerfTest {
@@ -868,6 +975,7 @@ class PerfTestWithSkSL extends PerfTest {
       _flutterPath,
       <String>[
         'run',
+        '--no-dds',
         if (deviceOperatingSystem == DeviceOperatingSystem.ios)
           ...<String>[
             '--device-timeout', '5',
@@ -1000,7 +1108,7 @@ class WebCompileTest {
     sizeMetrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
 
     await Process.run('gzip',<String>['-k', '9', fileName]);
-    final ProcessResult resultGzip = await Process.run('du', <String>['-k', fileName + '.gz']);
+    final ProcessResult resultGzip = await Process.run('du', <String>['-k', '$fileName.gz']);
     sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
 
     return sizeMetrics;
@@ -1347,30 +1455,19 @@ class DevToolsMemoryTest {
       _device = await devices.workingDevice;
       await _device.unlock();
 
-      await _launchApp();
-      if (_observatoryUri == null) {
-        return  TaskResult.failure('Observatory URI not found.');
-      }
-
-      await _launchDevTools();
-
       await flutter(
         'drive',
         options: <String>[
-          '--use-existing-app', _observatoryUri,
           '-d', _device.deviceId,
           '--screenshot',
           hostAgent.dumpDirectory.path,
           '--profile',
+          '--profile-memory', _kJsonFileName,
+          '--no-publish-port',
+          '-v',
           driverTest,
         ],
       );
-
-      _devToolsProcess.kill();
-      await _devToolsProcess.exitCode;
-
-      _runProcess.kill();
-      await _runProcess.exitCode;
 
       final Map<String, dynamic> data = json.decode(
         file('$project/$_kJsonFileName').readAsStringSync(),
@@ -1387,10 +1484,6 @@ class DevToolsMemoryTest {
         }
       }
 
-      await flutter('install', options: <String>[
-        '--uninstall-only',
-      ]);
-
       return TaskResult.success(
         <String, dynamic>{'maxRss': maxRss, 'maxAdbTotal': maxAdbTotal},
         benchmarkScoreKeys: <String>['maxRss', 'maxAdbTotal'],
@@ -1398,82 +1491,7 @@ class DevToolsMemoryTest {
     });
   }
 
-  Future<void> _launchApp() async {
-    print('launching $project$driverTest on device...');
-    final String flutterPath = path.join(flutterDirectory.path, 'bin', 'flutter');
-    _runProcess = await startProcess(
-      flutterPath,
-      <String>[
-        'run',
-        '--verbose',
-        '--profile',
-        '--no-publish-port',
-        '-d', _device.deviceId,
-        driverTest,
-      ],
-    );
-
-    // Listen for Observatory URI and forward stdout/stderr
-    final Completer<String> observatoryUri = Completer<String>();
-    _runProcess.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          print('run stdout: $line');
-          final RegExpMatch match = RegExp(r'An Observatory debugger and profiler on .+ is available at: ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)').firstMatch(line);
-          if (match != null && !observatoryUri.isCompleted) {
-            observatoryUri.complete(match[1]);
-            _observatoryUri = match[1];
-          }
-        }, onDone: () {
-          if (!observatoryUri.isCompleted) {
-            observatoryUri.complete();
-          }
-        });
-    _forwardStream(_runProcess.stderr, 'run stderr');
-
-    _observatoryUri = await observatoryUri.future;
-  }
-
-  Future<void> _launchDevTools() async {
-    // The version of devtools is pinned. If we pub global activate devtools and an
-    // upstream devtools release breaks our CI, it will manifest on an unrelated
-    // commit, making it more difficult to determine the cause.
-    //
-    // Also, for release branches, all external test dependencies need to be pinned.
-    await exec(pubBin, <String>[
-      'global',
-      'activate',
-      'devtools',
-      '2.1.1',
-    ]);
-    _devToolsProcess = await startProcess(
-      pubBin,
-      <String>[
-        'global',
-        'run',
-        'devtools',
-        '--vm-uri', _observatoryUri,
-        '--profile-memory', _kJsonFileName,
-      ],
-    );
-    _forwardStream(_devToolsProcess.stdout, 'devtools stdout');
-    _forwardStream(_devToolsProcess.stderr, 'devtools stderr');
-  }
-
-  void _forwardStream(Stream<List<int>> stream, String label) {
-    stream
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          print('$label: $line');
-        });
-  }
-
   Device _device;
-  String _observatoryUri;
-  Process _runProcess;
-  Process _devToolsProcess;
 
   static const String _kJsonFileName = 'devtools_memory.json';
 }

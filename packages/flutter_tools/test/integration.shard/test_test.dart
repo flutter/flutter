@@ -194,7 +194,7 @@ void main() {
   });
 
   testWithoutContext('flutter test should run all tests inside of a directory with no trailing slash', () async {
-    final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, flutterTestDirectory + '/child_directory',
+    final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, '$flutterTestDirectory/child_directory',
       extraArguments: const <String>['--verbose']);
     final String stdout = result.stdout as String;
     if ((!stdout.contains('+2: All tests passed')) ||
@@ -208,10 +208,6 @@ void main() {
       fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
     }
     expect(result.exitCode, 0);
-  });
-
-  testWithoutContext('integration test can show the license page', () async {
-    return _testFile('license', automatedTestsDirectory, integrationTestDirectory, exitCode: isZero, extraArguments: integrationTestExtraArgs);
   });
 }
 
