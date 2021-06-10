@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert' show Encoding, json;
 import 'dart:io';
@@ -29,7 +31,7 @@ typedef ProcessRunSync = ProcessResult Function(
 /// Class for test runner to interact with Flutter's infrastructure service, Cocoon.
 ///
 /// Cocoon assigns bots to run these devicelab tasks on real devices.
-/// To retrieve these results, the test runner needs to send results back so so the database can be updated.
+/// To retrieve these results, the test runner needs to send results back so the database can be updated.
 class Cocoon {
   Cocoon({
     String serviceAccountTokenPath,
@@ -73,7 +75,7 @@ class Cocoon {
   /// Flutter infrastructure's workflow is:
   /// 1. Run DeviceLab test, writing results to a known path
   /// 2. Request service account token from luci auth (valid for at least 3 minutes)
-  /// 3. Upload results from (1) to Cocooon
+  /// 3. Upload results from (1) to Cocoon
   Future<void> sendResultsPath(String resultsPath) async {
     final File resultFile = fs.file(resultsPath);
     final Map<String, dynamic> resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
@@ -126,7 +128,7 @@ class Cocoon {
     if (resultFile.existsSync()) {
       resultFile.deleteSync();
     }
-    logger.fine('Writing results: ' + json.encode(updateRequest));
+    logger.fine('Writing results: ${json.encode(updateRequest)}');
     resultFile.createSync();
     resultFile.writeAsStringSync(json.encode(updateRequest));
   }

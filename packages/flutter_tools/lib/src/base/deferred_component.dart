@@ -111,7 +111,7 @@ class LoadingUnit {
   /// Constructs a [LoadingUnit].
   ///
   /// Loading units must include an [id] and [libraries]. The [path] is only present when
-  /// parsing the loading unit from a laoding unit manifest produced by gen_snapshot.
+  /// parsing the loading unit from a loading unit manifest produced by gen_snapshot.
   LoadingUnit({
     required this.id,
     required this.libraries,

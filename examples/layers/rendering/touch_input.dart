@@ -132,5 +132,5 @@ void main() {
     ..left = 20.0;
 
   // Finally, we attach the render tree we've built to the screen.
-  RenderingFlutterBinding(root: stack);
+  RenderingFlutterBinding(root: stack).scheduleFrame();
 }

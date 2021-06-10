@@ -235,6 +235,9 @@ class XcodeProjectInterpreter {
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
     const int missingProjectExitCode = 66;
+    // The exit code returned by 'xcodebuild -list' when the project is corrupted.
+    const int corruptedProjectExitCode = 74;
+    bool _allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
         ...xcrunCommand(),
@@ -243,10 +246,11 @@ class XcodeProjectInterpreter {
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
       throwOnError: true,
-      allowedFailures: (int c) => c == missingProjectExitCode,
+      allowedFailures: _allowedFailures,
       workingDirectory: projectPath,
     );
-    if (result.exitCode == missingProjectExitCode) {
+    if (_allowedFailures(result.exitCode)) {
+      // User configuration error, tool exit instead of crashing.
       throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
     }
     return XcodeProjectInfo.fromXcodeBuildOutput(result.toString(), _logger);
@@ -369,7 +373,7 @@ class XcodeProjectInfo {
     if (buildInfo.flavor == null) {
       return baseConfiguration;
     }
-    return baseConfiguration + '-$scheme';
+    return '$baseConfiguration-$scheme';
   }
 
   /// Checks whether the [buildConfigurations] contains the specified string, without
@@ -385,7 +389,7 @@ class XcodeProjectInfo {
   }
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
-  String? schemeFor(BuildInfo buildInfo) {
+  String? schemeFor(BuildInfo? buildInfo) {
     final String expectedScheme = expectedSchemeFor(buildInfo);
     if (schemes.contains(expectedScheme)) {
       return expectedScheme;

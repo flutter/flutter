@@ -482,7 +482,7 @@ class LicensePage extends StatefulWidget {
   final String? applicationLegalese;
 
   @override
-  _LicensePageState createState() => _LicensePageState();
+  State<LicensePage> createState() => _LicensePageState();
 }
 
 class _LicensePageState extends State<LicensePage> {
@@ -925,8 +925,12 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
               child: Localizations.override(
                 locale: const Locale('en', 'US'),
                 context: context,
-                child: Scrollbar(
-                  child: ListView(padding: padding, children: listWidgets),
+                child: ScrollConfiguration(
+                  // A Scrollbar is built-in below.
+                  behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                  child: Scrollbar(
+                    child: ListView(padding: padding, children: listWidgets),
+                  ),
                 ),
               ),
             ),

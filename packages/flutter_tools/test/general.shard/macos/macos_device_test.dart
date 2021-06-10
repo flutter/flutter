@@ -20,7 +20,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 final FakePlatform macOS = FakePlatform(
@@ -196,7 +196,7 @@ void main() {
     expect(await device.targetPlatformDisplayName, 'darwin-arm64');
   });
 
-  testUsingContext('isSupportedForProject is false with no host app', () async {
+  testWithoutContext('isSupportedForProject is false with no host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final MacOSDevice device = MacOSDevice(
       fileSystem: fileSystem,
@@ -211,7 +211,7 @@ void main() {
     expect(device.isSupportedForProject(flutterProject), false);
   });
 
-  testUsingContext('executablePathForDevice uses the correct package executable', () async {
+  testWithoutContext('executablePathForDevice uses the correct package executable', () async {
     final FakeMacOSApp package = FakeMacOSApp();
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),

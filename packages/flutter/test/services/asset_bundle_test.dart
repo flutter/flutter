@@ -75,4 +75,11 @@ void main() {
       '   HTTP status code: 404\n',
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+
+  test('toString works as intended', () {
+    final Uri uri = Uri.http('example.org', '/path');
+    final NetworkAssetBundle bundle = NetworkAssetBundle(uri);
+
+    expect(bundle.toString(), 'NetworkAssetBundle#${shortHash(bundle)}($uri)');
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }

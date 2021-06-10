@@ -13,12 +13,14 @@ import 'package:flutter_tools/src/features.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
+// This test file does not use [getLocalEngineArguments] because it is testing
+// command output and not using cached artifacts.
+
 void main() {
   testWithoutContext('All development tools and deprecated commands are hidden and help text is not verbose', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       '-h',
       '-v',
     ]);
@@ -37,7 +39,6 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       '-?',
     ]);
 
@@ -52,7 +53,6 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       'doctor',
       '-v',
     ]);
@@ -65,7 +65,6 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       'doctor',
       '-vv',
     ]);
@@ -78,7 +77,6 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       'config',
     ]);
 
@@ -108,7 +106,6 @@ void main() {
       final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
-        ...getLocalEngineArguments(),
         'run',
         '--show-test-device', // ensure command can fail to run and hit injection of correct logger.
         '--machine',
@@ -125,7 +122,6 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       'attach',
       '--machine',
       '-v',
@@ -138,7 +134,6 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       '--version',
       '--machine',
     ]);
@@ -158,7 +153,6 @@ void main() {
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       '--show-test-device',
       'attach',
       '-d',
@@ -176,7 +170,6 @@ void main() {
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       '--show-test-device',
       'attach',
       '-d',
@@ -202,7 +195,6 @@ void main() {
       bootstrap.writeAsStringSync('echo TESTING 1 2 3');
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
-        ...getLocalEngineArguments(),
       ]);
 
       expect(result.stdout, contains('TESTING 1 2 3'));
@@ -216,7 +208,6 @@ void main() {
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       'build',
       'apk',
       '--bundle-sksl-path=foo/bar/baz.json', // This file does not exist.
@@ -231,7 +222,6 @@ void main() {
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       '--show-test-device',
       'attach',
       '--release',
@@ -245,7 +235,6 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       'update-packages',
       '--crash',
     ], environment: <String, String>{

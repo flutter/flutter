@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -408,7 +407,7 @@ class CupertinoApp extends StatefulWidget {
   final ScrollBehavior? scrollBehavior;
 
   @override
-  _CupertinoAppState createState() => _CupertinoAppState();
+  State<CupertinoApp> createState() => _CupertinoAppState();
 
   /// The [HeroController] used for Cupertino page transitions.
   ///
@@ -443,8 +442,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return CupertinoScrollbar(
-          child: child,
           controller: details.controller,
+          child: child,
         );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -490,13 +489,13 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
     return CupertinoButton.filled(
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
       child: const Icon(
         CupertinoIcons.search,
         size: 28.0,
         color: CupertinoColors.white,
       ),
-      padding: EdgeInsets.zero,
-      onPressed: onPressed,
     );
   }
 

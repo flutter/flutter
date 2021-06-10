@@ -37,8 +37,8 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) => _ImageFilterRenderObject(imageFilter);
 
   @override
-  void updateRenderObject(BuildContext context, _ImageFilterRenderObject renderObject) {
-    renderObject.imageFilter = imageFilter;
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _ImageFilterRenderObject).imageFilter = imageFilter;
   }
 
   @override

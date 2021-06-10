@@ -55,7 +55,7 @@ Widget toStyledText(String name, String text) {
   );
 }
 
-Widget toPlainText(String name, String text) => Text(name + ':' + text);
+Widget toPlainText(String name, String text) => Text('$name:$text');
 
 class SpeakerSeparator extends StatelessWidget {
   const SpeakerSeparator({Key? key}) : super(key: key);
@@ -78,7 +78,7 @@ class StyledTextDemo extends StatefulWidget {
   const StyledTextDemo({Key? key}) : super(key: key);
 
   @override
-  _StyledTextDemoState createState() => _StyledTextDemoState();
+  State<StyledTextDemo> createState() => _StyledTextDemoState();
 }
 
 class _StyledTextDemoState extends State<StyledTextDemo> {

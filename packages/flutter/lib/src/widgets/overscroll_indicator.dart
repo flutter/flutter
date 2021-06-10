@@ -194,7 +194,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   final Widget? child;
 
   @override
-  _GlowingOverscrollIndicatorState createState() => _GlowingOverscrollIndicatorState();
+  State<GlowingOverscrollIndicator> createState() => _GlowingOverscrollIndicatorState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

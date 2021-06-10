@@ -48,9 +48,32 @@ void main() {
   });
 
   group('layout', () {
+    // Regression test for https://github.com/flutter/flutter/issues/22999
+    testWidgets('CupertinoPicker.builder test', (WidgetTester tester) async {
+      Widget buildFrame(int childCount) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: CupertinoPicker.builder(
+            itemExtent: 50.0,
+            onSelectedItemChanged: (_) { },
+            itemBuilder: (BuildContext context, int index) {
+              return Text('$index');
+            },
+            childCount: childCount,
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(1));
+      expect(tester.renderObject(find.text('0')).attached, true);
+
+      await tester.pumpWidget(buildFrame(2));
+      expect(tester.renderObject(find.text('0')).attached, true);
+      expect(tester.renderObject(find.text('1')).attached, true);
+    });
+
     testWidgets('selected item is in the middle', (WidgetTester tester) async {
-      final FixedExtentScrollController controller =
-          FixedExtentScrollController(initialItem: 1);
+      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 1);
 
       await tester.pumpWidget(
         Directionality(
@@ -182,9 +205,9 @@ void main() {
             width: 300.0,
             child: CupertinoPicker(
               itemExtent: 15.0,
-              children: const <Widget>[Text('1'), Text('1')],
               onSelectedItemChanged: (int i) {},
               selectionOverlay: null,
+              children: const <Widget>[Text('1'), Text('1')],
             ),
           ),
         ),
@@ -201,7 +224,7 @@ void main() {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
 
-        SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
         });
 
@@ -254,7 +277,7 @@ void main() {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
 
-        SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
         });
 
@@ -285,8 +308,7 @@ void main() {
     );
 
     testWidgets('a drag in between items settles back', (WidgetTester tester) async {
-      final FixedExtentScrollController controller =
-          FixedExtentScrollController(initialItem: 10);
+      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
       final List<int> selectedItems = <int>[];
 
       await tester.pumpWidget(

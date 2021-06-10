@@ -21,7 +21,7 @@ class ToolExit implements Exception {
   final int? exitCode;
 
   @override
-  String toString() => 'Exception: $message';
+  String toString() => 'Exception: $message'; // TODO(ianh): Really this should say "Error".
 }
 
 /// Indicates to the linter that the given future is intentionally not awaited.

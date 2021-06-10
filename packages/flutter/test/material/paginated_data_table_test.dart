@@ -974,4 +974,32 @@ void main() {
 
     await binding.setSurfaceSize(null);
   });
+
+  testWidgets('PaginatedDataTable arrowHeadColor set properly', (WidgetTester tester) async {
+    await binding.setSurfaceSize(const Size(800, 800));
+    const Color arrowHeadColor = Color(0xFFE53935);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PaginatedDataTable(
+          arrowHeadColor: arrowHeadColor,
+          showFirstLastButtons: true,
+          header: const Text('Test table'),
+          source: TestDataSource(),
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+        ),
+      )
+    );
+
+    final Iterable<Icon> icons = tester.widgetList(find.byType(Icon));
+
+    expect(icons.elementAt(0).color, arrowHeadColor);
+    expect(icons.elementAt(1).color, arrowHeadColor);
+    expect(icons.elementAt(2).color, arrowHeadColor);
+    expect(icons.elementAt(3).color, arrowHeadColor);
+  });
 }

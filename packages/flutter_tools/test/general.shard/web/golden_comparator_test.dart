@@ -45,7 +45,7 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ], stdout: jsonEncode(expectedResponse) + '\n',
+        ], stdout: '${jsonEncode(expectedResponse)}\n',
       ));
 
       final TestGoldenComparator comparator = TestGoldenComparator(
@@ -73,7 +73,7 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ], stdout: jsonEncode(expectedResponse) + '\n',
+        ], stdout: '${jsonEncode(expectedResponse)}\n',
       ));
 
       final TestGoldenComparator comparator = TestGoldenComparator(
@@ -105,7 +105,7 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ], stdout: jsonEncode(expectedResponse1) + '\n' + jsonEncode(expectedResponse2) + '\n',
+        ], stdout: '${jsonEncode(expectedResponse1)}\n${jsonEncode(expectedResponse2)}\n',
       ));
 
       final TestGoldenComparator comparator = TestGoldenComparator(
@@ -140,7 +140,7 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ], stdout: jsonEncode(expectedResponse1) + '\n',
+        ], stdout: '${jsonEncode(expectedResponse1)}\n',
       ));
       processManager.addCommand(FakeCommand(
         command: const <String>[
@@ -149,7 +149,7 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ], stdout: jsonEncode(expectedResponse2) + '\n',
+        ], stdout: '${jsonEncode(expectedResponse2)}\n',
       ));
 
       final TestGoldenComparator comparator = TestGoldenComparator(
@@ -182,7 +182,7 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ], stdout: jsonEncode(expectedResponse) + '\n',
+        ], stdout: '${jsonEncode(expectedResponse)}\n',
         stdin: stdin,
       ));
 

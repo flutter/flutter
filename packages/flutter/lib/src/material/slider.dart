@@ -447,7 +447,7 @@ class Slider extends StatefulWidget {
   final _SliderType _sliderType ;
 
   @override
-  _SliderState createState() => _SliderState();
+  State<Slider> createState() => _SliderState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -914,8 +914,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _tap = TapGestureRecognizer()
       ..team = team
       ..onTapDown = _handleTapDown
-      ..onTapUp = _handleTapUp
-      ..onTapCancel = _endInteraction;
+      ..onTapUp = _handleTapUp;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
@@ -1235,7 +1234,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void _startInteraction(Offset globalPosition) {
     _state.showValueIndicator();
-    if (isInteractive) {
+    if (!_active && isInteractive) {
       _active = true;
       // We supply the *current* value as the start location, so that if we have
       // a tap, it consists of a call to onChangeStart with the previous value and

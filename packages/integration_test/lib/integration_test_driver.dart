@@ -23,7 +23,7 @@ String testOutputsDirectory =
 /// succeeds.
 typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?);
 
-/// Writes a json-serializable json data to to
+/// Writes a json-serializable data to
 /// [testOutputsDirectory]/`testOutputFilename.json`.
 ///
 /// This is the default `responseDataCallback` in [integrationDriver].

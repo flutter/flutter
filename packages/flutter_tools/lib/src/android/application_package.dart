@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -18,7 +16,6 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../build_info.dart';
-import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import 'android_sdk.dart';
 import 'gradle.dart';
@@ -26,10 +23,10 @@ import 'gradle.dart';
 /// An application package created from an already built Android APK.
 class AndroidApk extends ApplicationPackage {
   AndroidApk({
-    String id,
-    @required this.file,
-    @required this.versionCode,
-    @required this.launchActivity,
+    required String id,
+    required this.file,
+    required this.versionCode,
+    required this.launchActivity,
   }) : assert(file != null),
        assert(launchActivity != null),
        super(id: id);
@@ -37,13 +34,15 @@ class AndroidApk extends ApplicationPackage {
   /// Creates a new AndroidApk from an existing APK.
   ///
   /// Returns `null` if the APK was invalid or any required tooling was missing.
-  factory AndroidApk.fromApk(File apk, {
-    @required AndroidSdk androidSdk,
-    @required ProcessManager processManager,
-    @required UserMessages userMessages,
-    @required Logger logger,
+  static AndroidApk? fromApk(
+    File apk, {
+    required AndroidSdk androidSdk,
+    required ProcessManager processManager,
+    required UserMessages userMessages,
+    required Logger logger,
+    required ProcessUtils processUtils,
   }) {
-    final String aaptPath = androidSdk?.latestVersion?.aaptPath;
+    final String? aaptPath = androidSdk.latestVersion?.aaptPath;
     if (aaptPath == null || !processManager.canRun(aaptPath)) {
       logger.printError(userMessages.aaptNotFound);
       return null;
@@ -51,7 +50,7 @@ class AndroidApk extends ApplicationPackage {
 
     String apptStdout;
     try {
-      apptStdout = globals.processUtils.runSync(
+      apptStdout = processUtils.runSync(
         <String>[
           aaptPath,
           'dump',
@@ -62,26 +61,27 @@ class AndroidApk extends ApplicationPackage {
         throwOnError: true,
       ).stdout.trim();
     } on ProcessException catch (error) {
-      globals.printError('Failed to extract manifest from APK: $error.');
+      logger.printError('Failed to extract manifest from APK: $error.');
       return null;
     }
 
-    final ApkManifestData data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
+    final ApkManifestData? data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
 
     if (data == null) {
       logger.printError('Unable to read manifest info from ${apk.path}.');
       return null;
     }
 
-    if (data.packageName == null || data.launchableActivityName == null) {
+    final String? packageName = data.packageName;
+    if (packageName == null || data.launchableActivityName == null) {
       logger.printError('Unable to read manifest info from ${apk.path}.');
       return null;
     }
 
     return AndroidApk(
-      id: data.packageName,
+      id: packageName,
       file: apk,
-      versionCode: int.tryParse(data.versionCode),
+      versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
       launchActivity: '${data.packageName}/${data.launchableActivityName}',
     );
   }
@@ -93,16 +93,17 @@ class AndroidApk extends ApplicationPackage {
   final String launchActivity;
 
   /// The version code of the APK.
-  final int versionCode;
+  final int? versionCode;
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
-  static Future<AndroidApk> fromAndroidProject(AndroidProject androidProject, {
-    @required AndroidSdk androidSdk,
-    @required ProcessManager processManager,
-    @required UserMessages userMessages,
-    @required ProcessUtils processUtils,
-    @required Logger logger,
-    @required FileSystem fileSystem,
+  static Future<AndroidApk?> fromAndroidProject(
+    AndroidProject androidProject, {
+    required AndroidSdk androidSdk,
+    required ProcessManager processManager,
+    required UserMessages userMessages,
+    required ProcessUtils processUtils,
+    required Logger logger,
+    required FileSystem fileSystem,
   }) async {
     File apkFile;
 
@@ -117,6 +118,7 @@ class AndroidApk extends ApplicationPackage {
           processManager: processManager,
           logger: logger,
           userMessages: userMessages,
+          processUtils: processUtils,
         );
       }
       // The .apk hasn't been built yet, so we work with what we have. The run
@@ -156,32 +158,31 @@ class AndroidApk extends ApplicationPackage {
       logger.printError('Please check ${manifest.path} for errors.');
       return null;
     }
-    final String packageId = manifests.first.getAttribute('package');
+    final String? packageId = manifests.first.getAttribute('package');
 
-    String launchActivity;
+    String? launchActivity;
     for (final XmlElement activity in document.findAllElements('activity')) {
-      final String enabled = activity.getAttribute('android:enabled');
+      final String? enabled = activity.getAttribute('android:enabled');
       if (enabled != null && enabled == 'false') {
         continue;
       }
 
       for (final XmlElement element in activity.findElements('intent-filter')) {
-        String actionName = '';
-        String categoryName = '';
+        String? actionName = '';
+        String? categoryName = '';
         for (final XmlNode node in element.children) {
           if (node is! XmlElement) {
             continue;
           }
-          final XmlElement xmlElement = node as XmlElement;
-          final String name = xmlElement.getAttribute('android:name');
+          final String? name = node.getAttribute('android:name');
           if (name == 'android.intent.action.MAIN') {
             actionName = name;
           } else if (name == 'android.intent.category.LAUNCHER') {
             categoryName = name;
           }
         }
-        if (actionName.isNotEmpty && categoryName.isNotEmpty) {
-          final String activityName = activity.getAttribute('android:name');
+        if (actionName != null && categoryName != null && actionName.isNotEmpty && categoryName.isNotEmpty) {
+          final String? activityName = activity.getAttribute('android:name');
           launchActivity = '$packageId/$activityName';
           break;
         }
@@ -209,74 +210,75 @@ class AndroidApk extends ApplicationPackage {
   String get name => file.basename;
 }
 
+abstract class _Entry {
+  const _Entry(this.parent, this.level);
 
-class _Entry {
-  _Element parent;
-  int level;
+  final _Element? parent;
+  final int level;
 }
 
 class _Element extends _Entry {
-  _Element.fromLine(String line, _Element parent) {
+  _Element._(this.name, _Element? parent, int level) : super(parent, level);
+
+  factory _Element.fromLine(String line, _Element? parent) {
     //      E: application (line=29)
     final List<String> parts = line.trimLeft().split(' ');
-    name = parts[1];
-    level = line.length - line.trimLeft().length;
-    this.parent = parent;
-    children = <_Entry>[];
+    return _Element._(parts[1], parent, line.length - line.trimLeft().length);
   }
 
-  List<_Entry> children;
-  String name;
+  final List<_Entry> children = <_Entry>[];
+  final String? name;
 
   void addChild(_Entry child) {
     children.add(child);
   }
 
-  _Attribute firstAttribute(String name) {
-    return children.whereType<_Attribute>().firstWhere(
-        (_Attribute e) => e.key.startsWith(name),
-        orElse: () => null,
-    );
+  _Attribute? firstAttribute(String name) {
+    for (final _Attribute child in children.whereType<_Attribute>()) {
+      if (child.key?.startsWith(name) == true) {
+        return child;
+      }
+    }
+    return null;
   }
 
-  _Element firstElement(String name) {
-    return children.whereType<_Element>().firstWhere(
-        (_Element e) => e.name.startsWith(name),
-        orElse: () => null,
-    );
+  _Element? firstElement(String name) {
+    for (final _Element child in children.whereType<_Element>()) {
+      if (child.name?.startsWith(name) == true) {
+        return child;
+      }
+    }
+    return null;
   }
 
   Iterable<_Element> allElements(String name) {
-    return children.whereType<_Element>().where((_Element e) => e.name.startsWith(name));
+    return children.whereType<_Element>().where((_Element e) => e.name?.startsWith(name) == true);
   }
 }
 
 class _Attribute extends _Entry {
-  _Attribute.fromLine(String line, _Element parent) {
+  const _Attribute._(this.key, this.value, _Element? parent, int level) : super(parent, level);
+
+  factory _Attribute.fromLine(String line, _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
     const String attributePrefix = 'A: ';
-    final List<String> keyVal = line
-        .substring(line.indexOf(attributePrefix) + attributePrefix.length)
-        .split('=');
-    key = keyVal[0];
-    value = keyVal[1];
-    level = line.length - line.trimLeft().length;
-    this.parent = parent;
+    final List<String> keyVal = line.substring(line.indexOf(attributePrefix) + attributePrefix.length).split('=');
+    return _Attribute._(keyVal[0], keyVal[1], parent, line.length - line.trimLeft().length);
   }
 
-  String key;
-  String value;
+  final String? key;
+  final String? value;
 }
 
 class ApkManifestData {
   ApkManifestData._(this._data);
 
-  static bool isAttributeWithValuePresent(_Element baseElement,
-      String childElement, String attributeName, String attributeValue) {
+  static bool _isAttributeWithValuePresent(
+      _Element baseElement, String childElement, String attributeName, String attributeValue) {
     final Iterable<_Element> allElements = baseElement.allElements(childElement);
     for (final _Element oneElement in allElements) {
-      final String elementAttributeValue = oneElement
-          ?.firstAttribute(attributeName)
+      final String? elementAttributeValue = oneElement
+          .firstAttribute(attributeName)
           ?.value;
       if (elementAttributeValue != null &&
           elementAttributeValue.startsWith(attributeValue)) {
@@ -286,7 +288,7 @@ class ApkManifestData {
     return false;
   }
 
-  static ApkManifestData parseFromXmlDump(String data, Logger logger) {
+  static ApkManifestData? parseFromXmlDump(String data, Logger logger) {
     if (data == null || data.trim().isEmpty) {
       return null;
     }
@@ -304,7 +306,7 @@ class ApkManifestData {
 
       // Handle level out
       while (currentElement.parent != null && level <= currentElement.level) {
-        currentElement = currentElement.parent;
+        currentElement = currentElement.parent!;
       }
 
       if (level > currentElement.level) {
@@ -321,30 +323,30 @@ class ApkManifestData {
       }
     }
 
-    final _Element application = manifest.firstElement('application');
+    final _Element? application = manifest.firstElement('application');
     if (application == null) {
       return null;
     }
 
     final Iterable<_Element> activities = application.allElements('activity');
 
-    _Element launchActivity;
+    _Element? launchActivity;
     for (final _Element activity in activities) {
-      final _Attribute enabled = activity.firstAttribute('android:enabled');
+      final _Attribute? enabled = activity.firstAttribute('android:enabled');
       final Iterable<_Element> intentFilters = activity.allElements('intent-filter');
       final bool isEnabledByDefault = enabled == null;
-      final bool isExplicitlyEnabled = enabled != null && enabled.value.contains('0xffffffff');
+      final bool isExplicitlyEnabled = enabled != null && enabled.value?.contains('0xffffffff') == true;
       if (!(isEnabledByDefault || isExplicitlyEnabled)) {
         continue;
       }
 
       for (final _Element element in intentFilters) {
-        final bool isMainAction = isAttributeWithValuePresent(
+        final bool isMainAction = _isAttributeWithValuePresent(
             element, 'action', 'android:name', '"android.intent.action.MAIN"');
         if (!isMainAction) {
           continue;
         }
-        final bool isLauncherCategory = isAttributeWithValuePresent(
+        final bool isLauncherCategory = _isAttributeWithValuePresent(
             element, 'category', 'android:name',
             '"android.intent.category.LAUNCHER"');
         if (!isLauncherCategory) {
@@ -358,40 +360,42 @@ class ApkManifestData {
       }
     }
 
-    final _Attribute package = manifest.firstAttribute('package');
+    final _Attribute? package = manifest.firstAttribute('package');
     // "io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
-    final String packageName = package.value.substring(1, package.value.indexOf('" '));
+    final String? packageName = package?.value?.substring(1, package.value?.indexOf('" '));
 
     if (launchActivity == null) {
       logger.printError('Error running $packageName. Default activity not found');
       return null;
     }
 
-    final _Attribute nameAttribute = launchActivity.firstAttribute('android:name');
+    final _Attribute? nameAttribute = launchActivity.firstAttribute('android:name');
     // "io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
-    final String activityName = nameAttribute
-        .value.substring(1, nameAttribute.value.indexOf('" '));
+    final String? activityName = nameAttribute?.value?.substring(1, nameAttribute.value?.indexOf('" '));
 
     // Example format: (type 0x10)0x1
-    final _Attribute versionCodeAttr = manifest.firstAttribute('android:versionCode');
+    final _Attribute? versionCodeAttr = manifest.firstAttribute('android:versionCode');
     if (versionCodeAttr == null) {
       logger.printError('Error running $packageName. Manifest versionCode not found');
       return null;
     }
-    if (!versionCodeAttr.value.startsWith('(type 0x10)')) {
+    if (versionCodeAttr.value?.startsWith('(type 0x10)') != true) {
       logger.printError('Error running $packageName. Manifest versionCode invalid');
       return null;
     }
-    final int versionCode = int.tryParse(versionCodeAttr.value.substring(11));
+    final int? versionCode = versionCodeAttr.value == null ? null : int.tryParse(versionCodeAttr.value!.substring(11));
     if (versionCode == null) {
       logger.printError('Error running $packageName. Manifest versionCode invalid');
       return null;
     }
 
-    final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
-    map['package'] = <String, String>{'name': packageName};
-    map['version-code'] = <String, String>{'name': versionCode.toString()};
-    map['launchable-activity'] = <String, String>{'name': activityName};
+    final Map<String, Map<String, String>> map = <String, Map<String, String>>{
+      if (packageName != null)
+        'package': <String, String>{'name': packageName},
+      'version-code': <String, String>{'name': versionCode.toString()},
+      if (activityName != null)
+        'launchable-activity': <String, String>{'name': activityName},
+    };
 
     return ApkManifestData._(map);
   }
@@ -402,12 +406,12 @@ class ApkManifestData {
   Map<String, Map<String, String>> get data =>
       UnmodifiableMapView<String, Map<String, String>>(_data);
 
-  String get packageName => _data['package'] == null ? null : _data['package']['name'];
+  String? get packageName => _data['package'] == null ? null : _data['package']?['name'];
 
-  String get versionCode => _data['version-code'] == null ? null : _data['version-code']['name'];
+  String? get versionCode => _data['version-code'] == null ? null : _data['version-code']?['name'];
 
-  String get launchableActivityName {
-    return _data['launchable-activity'] == null ? null : _data['launchable-activity']['name'];
+  String? get launchableActivityName {
+    return _data['launchable-activity'] == null ? null : _data['launchable-activity']?['name'];
   }
 
   @override

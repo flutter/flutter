@@ -18,9 +18,6 @@ import '../depfile.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
 
-/// The input key for an SkSL bundle path.
-const String kBundleSkSLPath = 'BundleSkSLPath';
-
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
 ///

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -102,7 +104,9 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       options: <String>[
         'ios-framework',
         '--verbose',
-        '--output=$outputDirectoryName'
+        '--output=$outputDirectoryName',
+        '--obfuscate',
+        '--split-debug-info=symbols',
       ],
     );
   });
@@ -187,6 +191,20 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     'App.framework',
     'flutter_assets',
     'vm_snapshot_data',
+  ));
+
+  section('Check obfuscation symbols');
+
+  checkFileExists(path.join(
+    projectDir.path,
+    'symbols',
+    'app.ios-arm64.symbols',
+  ));
+
+  checkFileExists(path.join(
+    projectDir.path,
+    'symbols',
+    'app.ios-armv7.symbols',
   ));
 
   section('Check debug build has no Dart AOT');

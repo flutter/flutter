@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,6 @@
 // Edit the template dev/tools/gen_keycodes/data/web_key_map_dart.tmpl instead.
 // See dev/tools/gen_keycodes/README.md for more information.
 
-// @dart = 2.12
 part of engine;
 
 /// Maps Web KeyboardEvent codes to the matching LogicalKeyboardKey id.

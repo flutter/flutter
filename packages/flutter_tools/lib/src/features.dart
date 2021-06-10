@@ -47,9 +47,6 @@ abstract class FeatureFlags {
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
-  /// Whether the CFE experimental invalidation strategy is enabled.
-  bool get isExperimentalInvalidationStrategyEnabled => true;
-
   /// Whether the windows UWP embedding is enabled.
   bool get isWindowsUwpEnabled => false;
 
@@ -71,7 +68,6 @@ const List<Feature> allFeatures = <Feature>[
   flutterIOSFeature,
   flutterFuchsiaFeature,
   flutterCustomDevicesFeature,
-  experimentalInvalidationStrategy,
 ];
 
 /// The [Feature] for flutter web.
@@ -270,34 +266,15 @@ const Feature singleWidgetReload = Feature(
   ),
 );
 
-/// The CFE experimental invalidation strategy.
-const Feature experimentalInvalidationStrategy = Feature(
-  name: 'Hot reload optimization that reduces incremental artifact size',
-  configSetting: 'experimental-invalidation-strategy',
-  environmentOverride: 'FLUTTER_CFE_EXPERIMENTAL_INVALIDATION',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  dev: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-);
-
-/// The feature for enabling the Windows UWP embeding.
+/// The feature for enabling the Windows UWP embedding.
 const Feature windowsUwpEmbedding = Feature(
   name: 'Flutter for Windows UWP',
   configSetting: 'enable-windows-uwp-desktop',
   master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  dev: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),

@@ -316,7 +316,7 @@ enum UnfocusDisposition {
 ///   const ColorfulButton({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _ColorfulButtonState createState() => _ColorfulButtonState();
+///   State<ColorfulButton> createState() => _ColorfulButtonState();
 /// }
 ///
 /// class _ColorfulButtonState extends State<ColorfulButton> {

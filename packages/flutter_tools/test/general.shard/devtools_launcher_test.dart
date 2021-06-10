@@ -275,6 +275,45 @@ void main() {
     await launcher.serve();
   });
 
+  testWithoutContext('DevtoolsLauncher can launch devtools with a memory profile', () async {
+    persistentToolState.lastDevToolsActivation = DateTime.now();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'pub',
+          'global',
+          'list',
+        ],
+        stdout: 'devtools 0.9.6',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'pub',
+          'global',
+          'run',
+          'devtools',
+          '--no-launch-browser',
+          '--vm-uri=localhost:8181/abcdefg',
+          '--profile-memory=foo'
+        ],
+        stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
+      ),
+    ]);
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      pubExecutable: 'pub',
+      logger: logger,
+      platform: platform,
+      persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient.any(),
+      processManager: processManager,
+    );
+
+    await launcher.launch(Uri.parse('localhost:8181/abcdefg'), additionalArguments: <String>['--profile-memory=foo']);
+
+    expect(launcher.processStart, completes);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('DevtoolsLauncher prints error if exception is thrown during activate', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',

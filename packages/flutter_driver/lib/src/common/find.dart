@@ -83,9 +83,9 @@ class WaitForAbsent extends CommandWithTarget {
 /// A Flutter Driver command that waits until [finder] can be tapped.
 class WaitForTappable extends CommandWithTarget {
   /// Creates a command that waits for the widget identified by [finder] to
-  /// be tappable within the [timeout] amiount of time.
+  /// be tappable within the [timeout] amount of time.
   ///
-  /// If [timeout] is not specified, the command defuts to no timeout.
+  /// If [timeout] is not specified, the command defaults to no timeout.
   WaitForTappable(SerializableFinder finder, {Duration? timeout})
       : super(finder, timeout: timeout);
 
@@ -248,7 +248,7 @@ class ByValueKey extends SerializableFinder {
 
 /// A Flutter Driver finder that finds widgets by their [runtimeType].
 class ByType extends SerializableFinder {
-  /// Creates a finder that given the runtime type in string form.
+  /// Creates a finder given the runtime type in string form.
   const ByType(this.type);
 
   /// The widget's [runtimeType], in string form.
