@@ -1,4 +1,4 @@
-Signature: 07bfa8f2dc4492a5753f6a1023db74f5
+Signature: 005785c2fb0970a038fb397721c17fe7
 
 UNUSED LICENSES:
 
@@ -2071,6 +2071,7 @@ FILE: ../../../third_party/skia/gm/patheffects.cpp
 FILE: ../../../third_party/skia/gm/pathinterior.cpp
 FILE: ../../../third_party/skia/gm/rrect.cpp
 FILE: ../../../third_party/skia/gm/rrects.cpp
+FILE: ../../../third_party/skia/gm/runtimeimagefilter.cpp
 FILE: ../../../third_party/skia/gm/samplerstress.cpp
 FILE: ../../../third_party/skia/gm/simpleaaclip.cpp
 FILE: ../../../third_party/skia/gm/srcmode.cpp
@@ -5247,6 +5248,8 @@ FILE: ../../../third_party/skia/include/gpu/gl/egl/GrGLMakeEGLInterface.h
 FILE: ../../../third_party/skia/include/gpu/gl/glx/GrGLMakeGLXInterface.h
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings_gen.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkRuntimeImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkRuntimeImageFilter.h
 FILE: ../../../third_party/skia/src/gpu/GrDstProxyView.h
 FILE: ../../../third_party/skia/src/gpu/GrInnerFanTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.cpp
