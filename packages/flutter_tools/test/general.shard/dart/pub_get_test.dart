@@ -27,7 +27,7 @@ void main() {
   });
 
   testWithoutContext('Throws a tool exit if pub cannot be run', () async {
-    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final FakeProcessManager processManager = FakeProcessManager.any();
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/pub');
