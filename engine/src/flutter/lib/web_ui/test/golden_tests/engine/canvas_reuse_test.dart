@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
@@ -20,7 +19,7 @@ void testMain() async {
   const double screenWidth = 600.0;
   const double screenHeight = 800.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
-  final Paint testPaint = Paint()
+  final SurfacePaint testPaint = SurfacePaint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 2.0
     ..color = const Color(0xFFFF00FF);
@@ -51,9 +50,9 @@ void testMain() async {
 
     html.Element sceneElement = html.Element.tag('flt-scene');
     sceneElement.append(engineCanvas.rootElement);
-    html.document.body.append(sceneElement);
+    html.document.body!.append(sceneElement);
 
-    final html.CanvasElement canvas = html.document.querySelector('canvas');
+    final html.CanvasElement canvas = html.document.querySelector('canvas') as html.CanvasElement;
     // ! Since canvas is first element, it should have zIndex = -1 for correct
     // paint order.
     expect(canvas.style.zIndex , '-1');
@@ -74,16 +73,16 @@ void testMain() async {
     final Path path2 = Path()
       ..moveTo(3, 0)
       ..quadraticBezierTo(100, 0, 100, 100);
-    rc2.drawImage(_createRealTestImage(), Offset(0, 0), Paint());
+    rc2.drawImage(_createRealTestImage(), Offset(0, 0), SurfacePaint());
     rc2.drawPath(path2, testPaint);
     rc2.endRecording();
     rc2.apply(engineCanvas, screenRect);
 
     sceneElement = html.Element.tag('flt-scene');
     sceneElement.append(engineCanvas.rootElement);
-    html.document.body.append(sceneElement);
+    html.document.body!.append(sceneElement);
 
-    final html.CanvasElement canvas2 = html.document.querySelector('canvas');
+    final html.CanvasElement canvas2 = html.document.querySelector('canvas') as html.CanvasElement;
     // ZIndex should have been cleared since we have image element preceding
     // canvas.
     expect(canvas.style.zIndex != '-1', true);

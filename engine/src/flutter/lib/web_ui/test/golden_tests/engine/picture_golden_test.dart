@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
@@ -19,18 +18,18 @@ void main() {
 void testMain() {
   group('Picture', () {
     test('toImage produces an image', () async {
-      final EnginePictureRecorder recorder = ui.PictureRecorder();
+      final EnginePictureRecorder recorder = EnginePictureRecorder();
       final RecordingCanvas canvas = recorder.beginRecording(ui.Rect.fromLTRB(0, 0, 200, 100));
       canvas.drawCircle(
         const ui.Offset(100, 50),
         40,
-        ui.Paint()
+        SurfacePaint()
           ..color = ui.Color.fromARGB(255, 255, 100, 100),
       );
       final ui.Picture picture = recorder.endRecording();
-      final HtmlImage image = await picture.toImage(200, 100);
+      final HtmlImage image = (await picture.toImage(200, 100)) as HtmlImage;
       expect(image, isNotNull);
-      html.document.body
+      html.document.body!
         ..style.margin = '0'
         ..append(image.imgElement);
       try {

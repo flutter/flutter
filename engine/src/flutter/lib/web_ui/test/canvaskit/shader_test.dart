@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -25,7 +24,7 @@ void testMain() {
       final CkGradientSweep gradient = ui.Gradient.sweep(
         ui.Offset.zero,
         testColors,
-      );
+      ) as CkGradientSweep;
       expect(gradient.createDefault(), isNotNull);
     });
 
@@ -34,7 +33,7 @@ void testMain() {
         ui.Offset.zero,
         const ui.Offset(0, 1),
         testColors,
-      );
+      ) as CkGradientLinear;
       expect(gradient.createDefault(), isNotNull);
     });
 
@@ -43,7 +42,7 @@ void testMain() {
         ui.Offset.zero,
         10,
         testColors,
-      );
+      ) as CkGradientRadial;
       expect(gradient.createDefault(), isNotNull);
     });
 
@@ -57,19 +56,19 @@ void testMain() {
         null,
         const ui.Offset(10, 10),
         40,
-      );
+      ) as CkGradientConical;
       expect(gradient.createDefault(), isNotNull);
     });
 
     test('Image shader', () {
-      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage).makeImageAtCurrentFrame();
+      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!.makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       final CkImageShader imageShader = ui.ImageShader(
         image,
         ui.TileMode.clamp,
         ui.TileMode.repeated,
         Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
-      );
+      ) as CkImageShader;
       expect(imageShader, isA<CkImageShader>());
     });
   // TODO: https://github.com/flutter/flutter/issues/60040

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 
 import 'package:test/bootstrap/browser.dart';
@@ -31,7 +30,7 @@ void testMain() async {
     final double padding = 20.0;
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
+      EngineParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
       (builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem ');
@@ -43,7 +42,7 @@ void testMain() async {
     offset = offset.translate(0, paragraph.height + padding);
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
+      EngineParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
       (builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem\n');
@@ -57,7 +56,7 @@ void testMain() async {
     offset = offset.translate(0, paragraph.height + padding);
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
+      EngineParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
       (builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem\n');
@@ -87,7 +86,7 @@ void testMain() async {
     offset = offset.translate(0, paragraph.height + padding);
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, maxLines: 2, ellipsis: '...'),
+      EngineParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, maxLines: 2, ellipsis: '...'),
       (builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem');

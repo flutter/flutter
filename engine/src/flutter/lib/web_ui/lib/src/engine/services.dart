@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.12
 export 'services/buffers.dart';
 export 'services/message_codec.dart';
 export 'services/message_codecs.dart';

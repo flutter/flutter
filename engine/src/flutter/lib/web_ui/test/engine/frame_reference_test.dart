@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'package:ui/src/engine.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -16,7 +15,7 @@ void testMain() {
     test('Reuse returns no object when cache empty', () {
       final CrossFrameCache<TestItem> cache = CrossFrameCache();
       cache.commitFrame();
-      TestItem requestedItem = cache.reuse('item1');
+      TestItem? requestedItem = cache.reuse('item1');
       expect(requestedItem, null);
     });
 
@@ -25,7 +24,7 @@ void testMain() {
       final TestItem testItem1 = TestItem('item1');
       cache.cache(testItem1.label, testItem1);
       cache.commitFrame();
-      TestItem requestedItem = cache.reuse('item1');
+      TestItem? requestedItem = cache.reuse('item1');
       expect(requestedItem, testItem1);
       requestedItem = cache.reuse('item1');
       expect(requestedItem, null);
@@ -40,7 +39,7 @@ void testMain() {
       cache.cache(testItemX.label, testItemX);
       cache.cache(testItem2.label, testItem2);
       cache.commitFrame();
-      TestItem requestedItem = cache.reuse('sameLabel');
+      TestItem? requestedItem = cache.reuse('sameLabel');
       expect(requestedItem, testItem1);
       requestedItem = cache.reuse('sameLabel');
       expect(requestedItem, testItem2);
@@ -54,7 +53,7 @@ void testMain() {
       cache.cache(testItem1.label, testItem1);
       cache.commitFrame();
       cache.commitFrame();
-      TestItem requestedItem = cache.reuse('item1');
+      TestItem? requestedItem = cache.reuse('item1');
       expect(requestedItem, null);
     });
 
