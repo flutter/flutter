@@ -51,11 +51,6 @@ void notifyNative() native 'NotifyNative';
 @pragma('vm:entry-point')
 void testIsolateShutdown() {  }
 
-@pragma('vm:entry-point')
-void testCanSaveCompilationTrace() {
-  notifyResult(saveCompilationTrace().isNotEmpty);
-}
-
 void notifyResult(bool success) native 'NotifyNative';
 void passMessage(String message) native 'PassMessage';
 
