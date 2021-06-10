@@ -2981,13 +2981,12 @@ class BuildOwner {
   void reassemble(Element root, DebugReassembleConfig? reassembleConfig) {
     Timeline.startSync('Dirty Element Tree');
     try {
-      Element._debugReassembleConfig = reassembleConfig;
       assert(root._parent == null);
       assert(root.owner == this);
+      root._debugReassembleConfig = reassembleConfig;
       root.reassemble();
     } finally {
       Timeline.finishSync();
-      Element._debugReassembleConfig = null;
     }
   }
 }
@@ -3051,7 +3050,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       _widget = widget;
 
   Element? _parent;
-  static DebugReassembleConfig? _debugReassembleConfig;
+  DebugReassembleConfig? _debugReassembleConfig;
 
   // Custom implementation of `operator ==` optimized for the ".of" pattern
   // used with `InheritedWidgets`.
@@ -3184,8 +3183,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       _debugReassembleConfig = null;
     }
     visitChildren((Element child) {
+      child._debugReassembleConfig = config;
       child.reassemble();
     });
+    _debugReassembleConfig = null;
   }
 
   bool _debugIsInScope(Element target) {
