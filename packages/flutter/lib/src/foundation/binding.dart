@@ -637,14 +637,14 @@ Future<void> _exitApplication() async {
   exit(0);
 }
 
-/// Additional configuration used for [BindingBase.reassemble] optimizations.
+/// Additional configuration used for hot reload reassemble optimizations.
 ///
 /// Do not extend, implement, or mixin this class. This may only be instantiated
 /// in debug mode.
 class DebugReassembleConfig {
   /// Create a new [DebugReassembleConfig].
   ///
-  /// Throws a [FlutterError] if this is called in profile or debug mode.
+  /// Throws a [FlutterError] if this is called in profile or release mode.
   DebugReassembleConfig({
     this.widgetName,
   }) {
