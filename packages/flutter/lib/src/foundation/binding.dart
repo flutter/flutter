@@ -68,7 +68,7 @@ abstract class BindingBase {
   static bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
 
-  /// Additional configuration used by the framework during [BindingBase.reassemble]
+  /// Additional configuration used by the framework during hot reload.
   ///
   /// See also:
   ///
