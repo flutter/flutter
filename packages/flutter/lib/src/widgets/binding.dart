@@ -444,7 +444,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
           final String? className = params['className'] as String?;
-          print('reassemble for $className');
           final DebugReassembleConfig reassembleConfig = DebugReassembleConfig(widgetName: className);
           await reassembleApplication(reassembleConfig);
           return <String, String>{'type': 'Success'};
