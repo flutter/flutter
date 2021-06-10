@@ -216,9 +216,10 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   void _handleTapDown(TapDownDetails details) {
-    if (isInteractive)
+    if (isInteractive) {
       needsPositionAnimation = false;
       _reactionController.forward();
+    }
   }
 
   void _handleTap() {

@@ -1738,7 +1738,7 @@ class Navigator extends StatefulWidget {
     BuildContext context,
     String routeName, {
     Object? arguments,
-   }) {
+  }) {
     return Navigator.of(context).pushNamed<T>(routeName, arguments: arguments);
   }
 
@@ -1950,7 +1950,7 @@ class Navigator extends StatefulWidget {
     String routeName, {
     TO? result,
     Object? arguments,
-   }) {
+  }) {
     return Navigator.of(context).popAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
@@ -1981,11 +1981,11 @@ class Navigator extends StatefulWidget {
   /// {@end-tool}
   @optionalTypeArgs
   static String restorablePopAndPushNamed<T extends Object?, TO extends Object?>(
-      BuildContext context,
-      String routeName, {
-      TO? result,
-      Object? arguments,
-    }) {
+    BuildContext context,
+    String routeName, {
+    TO? result,
+    Object? arguments,
+  }) {
     return Navigator.of(context).restorablePopAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
@@ -2086,11 +2086,11 @@ class Navigator extends StatefulWidget {
   /// {@end-tool}
   @optionalTypeArgs
   static String restorablePushNamedAndRemoveUntil<T extends Object?>(
-      BuildContext context,
-      String newRouteName,
-      RoutePredicate predicate, {
-      Object? arguments,
-    }) {
+    BuildContext context,
+    String newRouteName,
+    RoutePredicate predicate, {
+    Object? arguments,
+  }) {
     return Navigator.of(context).restorablePushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
   }
 
@@ -2728,7 +2728,7 @@ class Navigator extends StatefulWidget {
     // Handles the case where the input context is a navigator element.
     NavigatorState? navigator;
     if (context is StatefulElement && context.state is NavigatorState) {
-        navigator = context.state as NavigatorState;
+      navigator = context.state as NavigatorState;
     }
     if (rootNavigator) {
       navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
@@ -2772,9 +2772,9 @@ class Navigator extends StatefulWidget {
   ///
   /// This method can be expensive (it walks the element tree).
   static NavigatorState? maybeOf(
-      BuildContext context, {
-        bool rootNavigator = false,
-      }) {
+    BuildContext context, {
+    bool rootNavigator = false,
+  }) {
     // Handles the case where the input context is a navigator element.
     NavigatorState? navigator;
     if (context is StatefulElement && context.state is NavigatorState) {

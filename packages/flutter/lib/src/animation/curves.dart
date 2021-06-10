@@ -745,11 +745,11 @@ class CatmullRomSpline extends Curve2D {
 
 
   static List<List<Offset>> _computeSegments(
-      List<Offset> controlPoints,
-      double tension, {
-      Offset? startHandle,
-      Offset? endHandle,
-    }) {
+    List<Offset> controlPoints,
+    double tension, {
+    Offset? startHandle,
+    Offset? endHandle,
+  }) {
     // If not specified, select the first and last control points (which are
     // handles: they are not intersected by the resulting curve) so that they
     // extend the first and last segments, respectively.
@@ -989,10 +989,10 @@ class CatmullRomCurve extends Curve {
   /// In release mode, this function can be used to decide if a proposed
   /// modification to the curve will result in a valid curve.
   static bool validateControlPoints(
-      List<Offset>? controlPoints, {
-      double tension = 0.0,
-      List<String>? reasons,
-    }) {
+    List<Offset>? controlPoints, {
+    double tension = 0.0,
+    List<String>? reasons,
+  }) {
     assert(tension != null);
     if (controlPoints == null) {
       assert(() {
