@@ -270,37 +270,6 @@ TEST_F(DartIsolateTest, CanRegisterNativeCallback) {
   Wait();
 }
 
-TEST_F(DartIsolateTest, CanSaveCompilationTrace) {
-  if (DartVM::IsRunningPrecompiledCode()) {
-    // Can only save compilation traces in JIT modes.
-    GTEST_SKIP();
-    return;
-  }
-  AddNativeCallback("NotifyNative",
-                    CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
-                      ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(
-                          Dart_GetNativeArgument(args, 0)));
-                      Signal();
-                    })));
-
-  const auto settings = CreateSettingsForFixture();
-  auto vm_ref = DartVMRef::Create(settings);
-  auto thread = CreateNewThread();
-  TaskRunners task_runners(GetCurrentTestName(),  //
-                           thread,                //
-                           thread,                //
-                           thread,                //
-                           thread                 //
-  );
-  auto isolate = RunDartCodeInIsolate(vm_ref, settings, task_runners,
-                                      "testCanSaveCompilationTrace", {},
-                                      GetDefaultKernelFilePath());
-  ASSERT_TRUE(isolate);
-  ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
-
-  Wait();
-}
-
 class DartSecondaryIsolateTest : public FixtureTest {
  public:
   DartSecondaryIsolateTest() : latch_(3) {}
