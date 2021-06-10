@@ -104,7 +104,7 @@ void main() {
       await start(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
-  }, skip: true, // Flaky tests: https://github.com/flutter/flutter/issues/84012
+  }, //skip: true, // Flaky tests: https://github.com/flutter/flutter/issues/84012
   );
 
   group('Flutter test for web', () {
