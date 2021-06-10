@@ -81,16 +81,8 @@ void main() {
   });
 
   group('which on Windows', () {
-    testWithoutContext('throws tool exit if where throws an argument error', () async {
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: const <String>[
-            'where',
-            kExecutable,
-          ],
-          exception: ArgumentError('Cannot find executable for where'),
-        ),
-      );
+    testWithoutContext('throws tool exit if where.exe cannot be run', () async {
+      fakeProcessManager.excludedExecutables.add('where');
 
       final OperatingSystemUtils utils = OperatingSystemUtils(
         fileSystem: MemoryFileSystem.test(),
@@ -544,17 +536,10 @@ void main() {
     );
   });
 
-  group('display an install message when unzip throws an ArgumentError', () {
+  group('display an install message when unzip cannot be run', () {
     testWithoutContext('Linux', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            'unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path,
-          ],
-          exception: ArgumentError(),
-        ),
-      );
+      fakeProcessManager.excludedExecutables.add('unzip');
 
       final OperatingSystemUtils linuxOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
@@ -573,14 +558,7 @@ void main() {
 
     testWithoutContext('macOS', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            'unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path,
-          ],
-          exception: ArgumentError(),
-        ),
-      );
+      fakeProcessManager.excludedExecutables.add('unzip');
 
       final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
@@ -590,7 +568,7 @@ void main() {
       );
 
       expect(
-            () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+        () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
         throwsToolExit
           (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
             'Consider running "brew install unzip".'),
@@ -599,14 +577,7 @@ void main() {
 
     testWithoutContext('unknown OS', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            'unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path,
-          ],
-          exception: ArgumentError(),
-        ),
-      );
+      fakeProcessManager.excludedExecutables.add('unzip');
 
       final OperatingSystemUtils unknownOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,

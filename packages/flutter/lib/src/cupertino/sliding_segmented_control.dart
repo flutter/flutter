@@ -993,7 +993,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     assert(rightMost > leftMost);
 
     // Ignore the horizontal position and the height of `thumbRect`, and
-    // calcuates them from `children`.
+    // calculates them from `children`.
     return Rect.fromLTRB(
       math.max(thumbRect.left, leftMost - _kThumbInsets.left),
       firstChildOffset.dy - _kThumbInsets.top,

@@ -686,16 +686,20 @@ void main() {
         };
       }
 
-      try {
-        await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-          SystemChannels.keyEvent.name,
-          SystemChannels.keyEvent.codec.encodeMessage(keyEventMessage),
-          (ByteData? data) { },
-        );
-        fail('Expected an exception, but did not get one.');
-      } on AssertionError catch (error) {
-        expect(error.toString(), contains('Attempted to send a key down event when no keys are in keysPressed'));
-      }
+      expect(
+        () async {
+          await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+            SystemChannels.keyEvent.name,
+            SystemChannels.keyEvent.codec.encodeMessage(keyEventMessage),
+            (ByteData? data) { },
+          );
+        },
+        throwsA(isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          '.toString()',
+          contains('Attempted to send a key down event when no keys are in keysPressed'),
+        )),
+      );
     });
   });
 
@@ -1773,7 +1777,7 @@ void main() {
     int keyCodeForModifier(int modifier, {required bool isLeft}) {
       switch (modifier) {
         case GtkKeyHelper.modifierMod1:
-          return isLeft ? 65513 : 65513;
+          return 65513;
         case GtkKeyHelper.modifierShift:
           return isLeft ? 65505 : 65506;
         case GtkKeyHelper.modifierControl:

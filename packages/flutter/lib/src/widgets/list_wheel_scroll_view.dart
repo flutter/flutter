@@ -843,8 +843,10 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
     final ListWheelChildDelegate newDelegate = newWidget.childDelegate;
     final ListWheelChildDelegate oldDelegate = oldWidget.childDelegate;
     if (newDelegate != oldDelegate &&
-        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
+        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate))) {
       performRebuild();
+      renderObject.markNeedsLayout();
+    }
   }
 
   @override

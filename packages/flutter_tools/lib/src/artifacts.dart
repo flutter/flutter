@@ -68,7 +68,7 @@ enum HostArtifact {
   dart2jsSnapshot,
   /// The dart snapshot of the dartdev compiler.
   dartdevcSnapshot,
-  /// The dart snpashot of the kernel worker compiler.
+  /// The dart snapshot of the kernel worker compiler.
   kernelWorkerSnapshot,
   /// The root of the web implementation of the dart SDK.
   flutterWebSdk,

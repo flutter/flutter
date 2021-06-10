@@ -62,7 +62,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   @override
   PhysicalKeyboardKey get physicalKey => kWindowsToPhysicalKey[scanCode] ?? PhysicalKeyboardKey.none;
 
- @override
+  @override
   LogicalKeyboardKey get logicalKey {
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
@@ -286,7 +286,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   /// {@macro flutter.services.RawKeyEventDataWindows.modifierShift}
   static const int modifierNumLock = 1 << 12;
 
-    /// This mask is used to check the [modifiers] field to test whether the SCROLL LOCK key
+  /// This mask is used to check the [modifiers] field to test whether the SCROLL LOCK key
   /// is pressed.
   ///
   /// {@macro flutter.services.RawKeyEventDataWindows.modifierShift}

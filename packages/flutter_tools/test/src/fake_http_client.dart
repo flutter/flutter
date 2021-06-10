@@ -410,7 +410,7 @@ class _FakeHttpClientRequest implements HttpClientRequest {
 
   @override
   void writeln([Object? object = '']) {
-    _body.addAll(utf8.encode(object.toString() + '\n'));
+    _body.addAll(utf8.encode('$object\n'));
   }
 }
 

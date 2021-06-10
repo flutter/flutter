@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'text_form_field.dart';
+import 'theme.dart';
 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
 ///
@@ -291,11 +292,13 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
             itemCount: options.length,
             itemBuilder: (BuildContext context, int index) {
               final T option = options.elementAt(index);
+              final bool highlight = AutocompleteHighlightedOption.of(context) == index;
               return InkWell(
                 onTap: () {
                   onSelected(option);
                 },
-                child: Padding(
+                child: Container(
+                  color: highlight ? Theme.of(context).focusColor : null,
                   padding: const EdgeInsets.all(16.0),
                   child: Text(displayStringForOption(option)),
                 ),

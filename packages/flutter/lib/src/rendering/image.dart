@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui show Image;
 
+import 'package:flutter/animation.dart';
+
 import 'box.dart';
 import 'object.dart';
 
@@ -31,6 +33,7 @@ class RenderImage extends RenderBox {
     double? height,
     double scale = 1.0,
     Color? color,
+    Animation<double>? opacity,
     BlendMode? colorBlendMode,
     BoxFit? fit,
     AlignmentGeometry alignment = Alignment.center,
@@ -52,6 +55,7 @@ class RenderImage extends RenderBox {
        _height = height,
        _scale = scale,
        _color = color,
+       _opacity = opacity,
        _colorBlendMode = colorBlendMode,
        _fit = fit,
        _alignment = alignment,
@@ -161,6 +165,21 @@ class RenderImage extends RenderBox {
     _color = value;
     _updateColorFilter();
     markNeedsPaint();
+  }
+
+  /// If non-null, the value from the [Animation] is multiplied with the opacity
+  /// of each image pixel before painting onto the canvas.
+  Animation<double>? get opacity => _opacity;
+  Animation<double>? _opacity;
+  set opacity(Animation<double>? value) {
+    if (value == _opacity)
+      return;
+
+    if (attached)
+      _opacity?.removeListener(markNeedsPaint);
+    _opacity = value;
+    if (attached)
+      value?.addListener(markNeedsPaint);
   }
 
   /// Used to set the filterQuality of the image
@@ -382,6 +401,18 @@ class RenderImage extends RenderBox {
   }
 
   @override
+  void attach(covariant PipelineOwner owner) {
+    super.attach(owner);
+    _opacity?.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    _opacity?.removeListener(markNeedsPaint);
+    super.detach();
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (_image == null)
       return;
@@ -394,6 +425,7 @@ class RenderImage extends RenderBox {
       image: _image!,
       debugImageLabel: debugImageLabel,
       scale: _scale,
+      opacity: _opacity?.value ?? 1.0,
       colorFilter: _colorFilter,
       fit: _fit,
       alignment: _resolvedAlignment!,
@@ -407,6 +439,13 @@ class RenderImage extends RenderBox {
   }
 
   @override
+  void dispose() {
+    _image?.dispose();
+    _image = null;
+    super.dispose();
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ui.Image>('image', image));
@@ -414,6 +453,7 @@ class RenderImage extends RenderBox {
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DoubleProperty('scale', scale, defaultValue: 1.0));
     properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Animation<double>?>('opacity', opacity, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));

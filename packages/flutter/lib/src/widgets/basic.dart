@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -67,6 +68,8 @@ export 'package:flutter/rendering.dart' show
   ValueGetter,
   WrapAlignment,
   WrapCrossAlignment;
+export 'package:flutter/services.dart' show
+  AssetBundle;
 
 // Examples can assume:
 // class TestWidget extends StatelessWidget { const TestWidget({Key? key}) : super(key: key); @override Widget build(BuildContext context) => const Placeholder(); }
@@ -5915,6 +5918,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.height,
     this.scale = 1.0,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -5960,6 +5964,13 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color? color;
+
+  /// If non-null, the value from the [Animation] is multiplied with the opacity
+  /// of each image pixel before painting onto the canvas.
+  ///
+  /// This is more efficient than using [FadeTransition] to change the opacity
+  /// of an image.
+  final Animation<double>? opacity;
 
   /// Used to set the filterQuality of the image
   /// Use the "low" quality setting to scale the image, which corresponds to
@@ -6070,6 +6081,7 @@ class RawImage extends LeafRenderObjectWidget {
       height: height,
       scale: scale,
       color: color,
+      opacity: opacity,
       colorBlendMode: colorBlendMode,
       fit: fit,
       alignment: alignment,
@@ -6122,6 +6134,7 @@ class RawImage extends LeafRenderObjectWidget {
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DoubleProperty('scale', scale, defaultValue: 1.0));
     properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Animation<double>?>('opacity', opacity, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
@@ -6149,8 +6162,9 @@ class RawImage extends LeafRenderObjectWidget {
 /// class TestAssetBundle extends CachingAssetBundle {
 ///   @override
 ///   Future<ByteData> load(String key) async {
-///     if (key == 'resources/test')
+///     if (key == 'resources/test') {
 ///       return ByteData.view(Uint8List.fromList(utf8.encode('Hello World!')).buffer);
+///     }
 ///     return ByteData(0);
 ///   }
 /// }
@@ -6221,6 +6235,11 @@ class DefaultAssetBundle extends InheritedWidget {
 /// A given render object can be placed at most once in the widget tree. This
 /// widget enforces that restriction by keying itself using a [GlobalObjectKey]
 /// for the given render object.
+///
+/// This widget will call [RenderObject.dispose] on the [renderBox] when it is
+/// unmounted. After that point, the [renderBox] will be unusable. If any
+/// children have been added to the [renderBox], they must be disposed in the
+/// [onUnmount] callback.
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// Creates an adapter for placing a specific [RenderBox] in the widget tree.
   ///
@@ -6228,6 +6247,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   WidgetToRenderBoxAdapter({
     required this.renderBox,
     this.onBuild,
+    this.onUnmount,
   }) : assert(renderBox != null),
        // WidgetToRenderBoxAdapter objects are keyed to their render box. This
        // prevents the widget being used in the widget hierarchy in two different
@@ -6236,6 +6256,9 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
        super(key: GlobalObjectKey(renderBox));
 
   /// The render box to place in the widget tree.
+  ///
+  /// This widget takes ownership of the render object. When it is unmounted,
+  /// it also calls [RenderObject.dispose].
   final RenderBox renderBox;
 
   /// Called when it is safe to update the render box and its descendants. If
@@ -6244,12 +6267,37 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// tree will be dirty.
   final VoidCallback? onBuild;
 
+  /// Called when it is safe to dispose of children that were manually added to
+  /// the [renderBox].
+  ///
+  /// Do not dispose the [renderBox] itself, as it will be disposed by the
+  /// framework automatically. However, during that process the framework will
+  /// check that all children of the [renderBox] have also been disposed.
+  /// Typically, child [RenderObject]s are disposed by corresponding [Element]s
+  /// when they are unmounted. However, child render objects that were manually
+  /// added do not have corresponding [Element]s to manage their lifecycle, and
+  /// need to be manually disposed here.
+  ///
+  /// See also:
+  ///
+  ///   * [RenderObjectElement.unmount], which invokes this callback before
+  ///     disposing of its render object.
+  ///   * [RenderObject.dispose], which instructs a render object to release
+  ///     any resources it may be holding.
+  final VoidCallback? onUnmount;
+
   @override
   RenderBox createRenderObject(BuildContext context) => renderBox;
 
   @override
   void updateRenderObject(BuildContext context, RenderBox renderObject) {
     onBuild?.call();
+  }
+
+  @override
+  void didUnmountRenderObject(RenderObject renderObject) {
+    assert(renderObject == renderBox);
+    onUnmount?.call();
   }
 }
 

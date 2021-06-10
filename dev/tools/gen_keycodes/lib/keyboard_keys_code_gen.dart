@@ -42,7 +42,7 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
       final String firstComment = _wrapString('Represents the location of the '
         '"${entry.commentName}" key on a generalized keyboard.');
       final String otherComments = _wrapString('See the function '
-        '[RawKeyEvent.physicalKey] for more information.');
+        '[KeyEvent.physical] for more information.');
       definitions.write('''
 
 $firstComment  ///
@@ -67,7 +67,7 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
     final StringBuffer definitions = StringBuffer();
     void printKey(int flutterId, String constantName, String commentName, {String? otherComments}) {
       final String firstComment = _wrapString('Represents the logical "$commentName" key on the keyboard.');
-      otherComments ??= _wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
+      otherComments ??= _wrapString('See the function [KeyEvent.logical] for more information.');
       definitions.write('''
 
 $firstComment  ///

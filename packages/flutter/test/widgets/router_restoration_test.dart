@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Router state restoration without RouteInfomrationProvider', (WidgetTester tester) async {
+  testWidgets('Router state restoration without RouteInformationProvider', (WidgetTester tester) async {
     final UniqueKey router = UniqueKey();
     _TestRouterDelegate delegate() => tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
 
@@ -41,7 +41,7 @@ void main() {
     expect(delegate().restoredRoutePaths, <String>['/foo', '/foo']);
   });
 
-  testWidgets('Router state restoration with RouteInfomrationProvider', (WidgetTester tester) async {
+  testWidgets('Router state restoration with RouteInformationProvider', (WidgetTester tester) async {
     final UniqueKey router = UniqueKey();
     _TestRouterDelegate delegate() => tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
     _TestRouteInformationProvider provider() => tester.widget<Router<Object?>>(find.byKey(router)).routeInformationProvider! as _TestRouteInformationProvider;

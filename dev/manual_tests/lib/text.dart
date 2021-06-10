@@ -457,7 +457,8 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 65: // random emoji
         return String.fromCharCode(0x1F000 + _random.nextInt(0x9FF));
       case 66:
-        return 'Z{' + zalgo(_random, _random.nextInt(4) + 2) + '}Z';
+        final String value = zalgo(_random, _random.nextInt(4) + 2);
+        return 'Z{$value}Z';
       case 67:
         return 'Οὐχὶ ταὐτὰ παρίσταταί μοι γιγνώσκειν';
       case 68:
@@ -963,7 +964,10 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
       if (mounted && intrinsicKey.currentContext?.size?.height != controlKey.currentContext?.size?.height) {
         debugPrint('Found some text that unexpectedly renders at different heights.');
         debugPrint('Text: $_text');
-        debugPrint(_text?.runes.map<String>((int index) => 'U+' + index.toRadixString(16).padLeft(4, '0')).join(' '));
+        debugPrint(_text?.runes.map<String>((int index) {
+          final String hexa = index.toRadixString(16).padLeft(4, '0');
+          return 'U+$hexa';
+        }).join(' '));
         setState(() {
           _ticker.stop();
         });

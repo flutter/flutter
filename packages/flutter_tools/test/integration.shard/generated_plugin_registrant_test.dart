@@ -126,7 +126,7 @@ Future<void> _ensureFlutterToolsSnapshot() async {
 
   final File snapshotFile = globals.fs.file(flutterToolsSnapshotPath);
   if (snapshotFile.existsSync()) {
-    snapshotFile.renameSync(flutterToolsSnapshotPath + '.bak');
+    snapshotFile.renameSync('$flutterToolsSnapshotPath.bak');
   }
 
   final List<String> snapshotArgs = <String>[
@@ -157,7 +157,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
   );
 
   final File snapshotBackup =
-      globals.fs.file(flutterToolsSnapshotPath + '.bak');
+      globals.fs.file('$flutterToolsSnapshotPath.bak');
   if (!snapshotBackup.existsSync()) {
     // No backup to restore.
     return;
