@@ -176,6 +176,8 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterEmbedderExternalTextureUnittests.mm",
     "framework/Source/FlutterEmbedderKeyResponderUnittests.mm",
     "framework/Source/FlutterEngineTest.mm",
+    "framework/Source/FlutterEngineTestUtils.h",
+    "framework/Source/FlutterEngineTestUtils.mm",
     "framework/Source/FlutterGLCompositorUnittests.mm",
     "framework/Source/FlutterKeyboardManagerUnittests.mm",
     "framework/Source/FlutterMetalCompositorUnittests.mm",
