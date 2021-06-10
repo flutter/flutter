@@ -71,9 +71,9 @@ Future<void> main(List<String> rawArgs) async {
     .last;
 
   final Directory dateSymbolsDirectory = Directory(path.join(pathToIntl, 'src', 'data', 'dates', 'symbols'));
-  final Map<String, File?> symbolFiles = _listIntlData(dateSymbolsDirectory);
+  final Map<String, File> symbolFiles = _listIntlData(dateSymbolsDirectory);
   final Directory datePatternsDirectory = Directory(path.join(pathToIntl, 'src', 'data', 'dates', 'patterns'));
-  final Map<String, File?> patternFiles = _listIntlData(datePatternsDirectory);
+  final Map<String, File> patternFiles = _listIntlData(datePatternsDirectory);
   final StringBuffer buffer = StringBuffer();
   final Set<String> supportedLocales = _supportedLocales();
 
@@ -141,7 +141,7 @@ String _jsonToMap(dynamic json) {
     return '$json';
 
   if (json is String)
-    return generateEncodedString(currentLocale, json);
+    return generateEncodedString(currentLocale!, json);
 
   if (json is Iterable) {
     final StringBuffer buffer = StringBuffer('<dynamic>[');
@@ -185,7 +185,7 @@ Set<String> _supportedLocales() {
   return supportedLocales;
 }
 
-Map<String, File?> _listIntlData(Directory directory) {
+Map<String, File> _listIntlData(Directory directory) {
   final Map<String, File> localeFiles = <String, File>{};
   final Iterable<File> files = directory
     .listSync()
@@ -198,5 +198,5 @@ Map<String, File?> _listIntlData(Directory directory) {
 
   final List<String> locales = localeFiles.keys.toList(growable: false);
   locales.sort();
-  return Map<String, File?>.fromIterable(locales, value: (dynamic locale) => localeFiles[locale]);
+  return Map<String, File>.fromIterable(locales, value: (dynamic locale) => localeFiles[locale]!);
 }
