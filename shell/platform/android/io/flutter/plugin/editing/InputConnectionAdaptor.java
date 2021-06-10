@@ -4,13 +4,11 @@
 
 package io.flutter.plugin.editing;
 
-import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.InputType;
@@ -25,7 +23,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InputMethodSubtype;
 import io.flutter.Log;
 import io.flutter.embedding.android.KeyboardManager;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -48,6 +45,7 @@ class InputConnectionAdaptor extends BaseInputConnection
   private final Layout mLayout;
   private FlutterTextUtils flutterTextUtils;
   private final KeyboardManager keyboardManager;
+  private int batchEditNestDepth = 0;
 
   @SuppressWarnings("deprecation")
   public InputConnectionAdaptor(
@@ -135,12 +133,14 @@ class InputConnectionAdaptor extends BaseInputConnection
   @Override
   public boolean beginBatchEdit() {
     mEditable.beginBatchEdit();
+    batchEditNestDepth += 1;
     return super.beginBatchEdit();
   }
 
   @Override
   public boolean endBatchEdit() {
     boolean result = super.endBatchEdit();
+    batchEditNestDepth -= 1;
     mEditable.endBatchEdit();
     return result;
   }
@@ -238,27 +238,9 @@ class InputConnectionAdaptor extends BaseInputConnection
   public void closeConnection() {
     super.closeConnection();
     mEditable.removeEditingStateListener(this);
-  }
-
-  // Detect if the keyboard is a Samsung keyboard, where we apply Samsung-specific hacks to
-  // fix critical bugs that make the keyboard otherwise unusable. See finishComposingText() for
-  // more details.
-  @SuppressLint("NewApi") // New API guard is inline, the linter can't see it.
-  @SuppressWarnings("deprecation")
-  private boolean isSamsung() {
-    InputMethodSubtype subtype = mImm.getCurrentInputMethodSubtype();
-    // Impacted devices all shipped with Android Lollipop or newer.
-    if (subtype == null
-        || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
-        || !Build.MANUFACTURER.equals("samsung")) {
-      return false;
+    for (; batchEditNestDepth > 0; batchEditNestDepth--) {
+      endBatchEdit();
     }
-    String keyboardName =
-        Settings.Secure.getString(
-            mFlutterView.getContext().getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-    // The Samsung keyboard is called "com.sec.android.inputmethod/.SamsungKeypad" but look
-    // for "Samsung" just in case Samsung changes the name of the keyboard.
-    return keyboardName.contains("Samsung");
   }
 
   @Override

@@ -433,9 +433,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       // to reset their internal states.
       mRestartInputPending = composingChanged(mLastKnownFrameworkTextEditingState, state);
       if (mRestartInputPending) {
-        Log.w(
-            TAG,
-            "Changing the content within the the composing region may cause the input method to behave strangely, and is therefore discouraged. See https://github.com/flutter/flutter/issues/78827 for more details");
+        Log.i(TAG, "Composing region changed by the framework. Restarting the input method.");
       }
     }
 
