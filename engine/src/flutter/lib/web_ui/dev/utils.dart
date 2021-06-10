@@ -246,7 +246,7 @@ typedef AsyncCallback = Future<void> Function();
 final List<AsyncCallback> cleanupCallbacks = <AsyncCallback>[];
 
 /// Cleanup the remaning processes, close open browsers, delete temp files.
-void cleanup() async {
+Future<void> cleanup() async {
   // Cleanup remaining processes if any.
   if (processesToCleanUp.length > 0) {
     for (io.Process process in processesToCleanUp) {
