@@ -6,12 +6,12 @@
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
-#include "flutter/testing/test_dart_native_resolver.h"
+#include "flutter/testing/testing.h"
 
 @interface FlutterEngine (Test)
 /**
@@ -25,14 +25,26 @@
 
 namespace flutter::testing {
 
-TEST_F(FlutterEngineTest, CanLaunch) {
-  FlutterEngine* engine = GetFlutterEngine();
+namespace {
+// Returns an engine configured for the test fixture resource configuration.
+FlutterEngine* CreateTestEngine() {
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  return [[FlutterEngine alloc] initWithName:@"test" project:project allowHeadlessExecution:true];
+}
+}  // namespace
+
+TEST(FlutterEngine, CanLaunch) {
+  FlutterEngine* engine = CreateTestEngine();
   EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
   EXPECT_TRUE(engine.running);
+  [engine shutDownEngine];
 }
 
-TEST_F(FlutterEngineTest, MessengerSend) {
-  FlutterEngine* engine = GetFlutterEngine();
+TEST(FlutterEngine, MessengerSend) {
+  FlutterEngine* engine = CreateTestEngine();
   EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
 
   NSData* test_message = [@"a message" dataUsingEncoding:NSUTF8StringEncoding];
@@ -48,10 +60,12 @@ TEST_F(FlutterEngineTest, MessengerSend) {
 
   [engine.binaryMessenger sendOnChannel:@"test" message:test_message];
   EXPECT_TRUE(called);
+
+  [engine shutDownEngine];
 }
 
-TEST_F(FlutterEngineTest, CanToggleAccessibility) {
-  FlutterEngine* engine = GetFlutterEngine();
+TEST(FlutterEngine, CanToggleAccessibility) {
+  FlutterEngine* engine = CreateTestEngine();
   // Capture the update callbacks before the embedder API initializes.
   auto original_init = engine.embedderAPI.Initialize;
   std::function<void(const FlutterSemanticsNode*, void*)> update_node_callback;
@@ -148,10 +162,11 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   EXPECT_EQ([engine.viewController.flutterView.accessibilityChildren count], 0u);
 
   [engine setViewController:nil];
+  [engine shutDownEngine];
 }
 
-TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
-  FlutterEngine* engine = GetFlutterEngine();
+TEST(FlutterEngine, CanToggleAccessibilityWhenHeadless) {
+  FlutterEngine* engine = CreateTestEngine();
   // Capture the update callbacks before the embedder API initializes.
   auto original_init = engine.embedderAPI.Initialize;
   std::function<void(const FlutterSemanticsNode*, void*)> update_node_callback;
@@ -230,10 +245,11 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   EXPECT_FALSE(semanticsEnabled);
   // Still no crashes
   EXPECT_EQ(engine.viewController, nil);
+  [engine shutDownEngine];
 }
 
-TEST_F(FlutterEngineTest, ResetsAccessibilityBridgeWhenSetsNewViewController) {
-  FlutterEngine* engine = GetFlutterEngine();
+TEST(FlutterEngine, ResetsAccessibilityBridgeWhenSetsNewViewController) {
+  FlutterEngine* engine = CreateTestEngine();
   // Capture the update callbacks before the embedder API initializes.
   auto original_init = engine.embedderAPI.Initialize;
   std::function<void(const FlutterSemanticsNode*, void*)> update_node_callback;
@@ -320,22 +336,7 @@ TEST_F(FlutterEngineTest, ResetsAccessibilityBridgeWhenSetsNewViewController) {
   EXPECT_TRUE(native_root.expired());
 
   [engine setViewController:nil];
-}
-
-TEST_F(FlutterEngineTest, NativeCallbacks) {
-  FlutterEngine* engine = GetFlutterEngine();
-  EXPECT_TRUE([engine runWithEntrypoint:@"native_callback"]);
-  EXPECT_TRUE(engine.running);
-
-  fml::AutoResetWaitableEvent latch;
-  bool latch_called = false;
-
-  AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      latch_called = true;
-                      latch.Signal();
-                    }));
-  latch.Wait();
-  ASSERT_TRUE(latch_called);
+  [engine shutDownEngine];
 }
 
 TEST(FlutterEngine, Compositor) {
