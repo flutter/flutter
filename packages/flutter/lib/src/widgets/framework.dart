@@ -2978,7 +2978,7 @@ class BuildOwner {
   /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
-  void reassemble(Element root, DebugReassembleConfig reassembleConfig) {
+  void reassemble(Element root, DebugReassembleConfig? reassembleConfig) {
     Timeline.startSync('Dirty Element Tree');
     try {
       Element._debugReassembleConfig = reassembleConfig;

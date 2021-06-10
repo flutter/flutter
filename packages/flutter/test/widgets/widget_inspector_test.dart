@@ -2602,8 +2602,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
         // We need the runTest to setup the fake async in the test binding.
         await binding.runTest(() async {
-          final DebugReassembleConfig reassembleConfig = DebugReassembleConfig();
-          binding.reassembleApplication(reassembleConfig);
+          binding.reassembleApplication();
           await binding.pump();
         }, () { });
         // The run test overrides the flutter error handler, so we should

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,8 +30,7 @@ void main() {
       matchesGoldenFile('shadow.BoxDecoration.disabled.png'),
     );
     debugDisableShadows = false;
-    final DebugReassembleConfig reassembleConfig = DebugReassembleConfig();
-    tester.binding.reassembleApplication(reassembleConfig);
+    tester.binding.reassembleApplication();
     await tester.pump();
     await expectLater(
       find.byType(Container),
@@ -94,8 +92,7 @@ void main() {
       matchesGoldenFile('shadow.PhysicalModel.disabled.png'),
     );
     debugDisableShadows = false;
-    final DebugReassembleConfig reassembleConfig = DebugReassembleConfig();
-    tester.binding.reassembleApplication(reassembleConfig);
+    tester.binding.reassembleApplication();
     await tester.pump();
     await expectLater(
       find.byType(Container),

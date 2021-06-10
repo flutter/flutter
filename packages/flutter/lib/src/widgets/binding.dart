@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/foundation/binding.dart';
 
 import 'app.dart';
 import 'debug.dart';
@@ -444,8 +445,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
           final String? className = params['className'] as String?;
-          final DebugReassembleConfig reassembleConfig = DebugReassembleConfig(widgetName: className);
-          await reassembleApplication(reassembleConfig);
+          BindingBase.debugReassembleConfig = DebugReassembleConfig(widgetName: className);
+          try {
+            await reassembleApplication();
+          } finally {
+            BindingBase.debugReassembleConfig = null;
+          }
           return <String, String>{'type': 'Success'};
         },
       );
@@ -942,16 +947,16 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   bool get isRootWidgetAttached => _renderViewElement != null;
 
   @override
-  Future<void> performReassemble(DebugReassembleConfig reassembleConfig) {
+  Future<void> performReassemble() {
     assert(() {
       WidgetInspectorService.instance.performReassemble();
       return true;
     }());
 
     if (renderViewElement != null) {
-      buildOwner!.reassemble(renderViewElement!, reassembleConfig);
+      buildOwner!.reassemble(renderViewElement!, BindingBase.debugReassembleConfig);
     }
-    return super.performReassemble(reassembleConfig);
+    return super.performReassemble();
   }
 
   /// Computes the locale the current platform would resolve to.

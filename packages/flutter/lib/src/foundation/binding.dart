@@ -68,6 +68,9 @@ abstract class BindingBase {
   static bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
 
+  ///
+  static DebugReassembleConfig? debugReassembleConfig;
+
   /// The main window to which this binding is bound.
   ///
   /// A number of additional bindings are defined as extensions of
@@ -164,10 +167,7 @@ abstract class BindingBase {
     assert(() {
       registerSignalServiceExtension(
         name: 'reassemble',
-        callback: () async {
-          final DebugReassembleConfig reassembleConfig = DebugReassembleConfig();
-          return reassembleApplication(reassembleConfig);
-        },
+        callback: reassembleApplication,
       );
       return true;
     }());
@@ -229,8 +229,7 @@ abstract class BindingBase {
               platformOverrideExtensionName,
               defaultTargetPlatform.toString().substring('$TargetPlatform.'.length),
             );
-            final DebugReassembleConfig reassembleConfig = DebugReassembleConfig();
-            await reassembleApplication(reassembleConfig);
+            await reassembleApplication();
           }
           return <String, dynamic>{
             'value': defaultTargetPlatform
@@ -259,8 +258,7 @@ abstract class BindingBase {
               brightnessOverrideExtensionName,
               (debugBrightnessOverride ?? window.platformBrightness).toString(),
             );
-            final DebugReassembleConfig reassembleConfig = DebugReassembleConfig();
-            await reassembleApplication(reassembleConfig);
+            await reassembleApplication();
           }
           return <String, dynamic>{
             'value': (debugBrightnessOverride ?? window.platformBrightness).toString(),
@@ -339,8 +337,8 @@ abstract class BindingBase {
   ///
   /// Subclasses (binding classes) should override [performReassemble] to react
   /// to this method being called. This method itself should not be overridden.
-  Future<void> reassembleApplication(DebugReassembleConfig reassembleConfig) {
-    return lockEvents(() => performReassemble(reassembleConfig));
+  Future<void> reassembleApplication() {
+    return lockEvents(performReassemble);
   }
 
   /// This method is called by [reassembleApplication] to actually cause the
@@ -355,7 +353,7 @@ abstract class BindingBase {
   /// Do not call this method directly. Instead, use [reassembleApplication].
   @mustCallSuper
   @protected
-  Future<void> performReassemble(DebugReassembleConfig reassembleConfig) {
+  Future<void> performReassemble() {
     FlutterError.resetErrorCount();
     return Future<void>.value();
   }

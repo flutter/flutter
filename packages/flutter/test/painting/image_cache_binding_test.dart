@@ -40,7 +40,7 @@ class TestBindingBase implements BindingBase {
   bool get locked => throw UnimplementedError();
 
   @override
-  Future<void> performReassemble(DebugReassembleConfig reassembleConfig) {
+  Future<void> performReassemble() {
     throw UnimplementedError();
   }
 
@@ -48,7 +48,7 @@ class TestBindingBase implements BindingBase {
   void postEvent(String eventKind, Map<String, dynamic> eventData) {}
 
   @override
-  Future<void> reassembleApplication(DebugReassembleConfig reassembleConfig) {
+  Future<void> reassembleApplication() {
     throw UnimplementedError();
   }
 
