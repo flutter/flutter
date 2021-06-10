@@ -28,10 +28,3 @@ void can_composite_platform_views() {
   };
   PlatformDispatcher.instance.scheduleFrame();
 }
-
-void signalNativeTest() native 'SignalNativeTest';
-
-@pragma('vm:entry-point')
-void native_callback() {
-  signalNativeTest();
-}

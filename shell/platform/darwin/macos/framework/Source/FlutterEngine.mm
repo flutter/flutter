@@ -235,7 +235,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   flutterArguments.shutdown_dart_vm_when_done = true;
   flutterArguments.dart_entrypoint_argc = dartEntrypointArgs.size();
   flutterArguments.dart_entrypoint_argv = dartEntrypointArgs.data();
-  flutterArguments.root_isolate_create_callback = _project.rootIsolateCreateCallback;
 
   static size_t sTaskRunnerIdentifiers = 0;
   const FlutterTaskRunnerDescription cocoa_task_runner_description = {

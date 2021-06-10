@@ -31,11 +31,6 @@
 @property(nonatomic, readonly) std::vector<std::string> switches;
 
 /**
- * The callback invoked by the engine in root isolate scope.
- */
-@property(nonatomic, nullable) void (*rootIsolateCreateCallback)(void* _Nullable);
-
-/**
  * Instead of looking up the assets and ICU data path in the application bundle, this initializer
  * allows callers to create a Dart project with custom locations specified for the both.
  */
