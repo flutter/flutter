@@ -3926,7 +3926,7 @@ void main() {
       result = BoxHitTestResult();
       editable.hitTest(result, position: const Offset(5.0, 15.0));
       expect(result.path, hasLength(0));
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
   });
 }
 
