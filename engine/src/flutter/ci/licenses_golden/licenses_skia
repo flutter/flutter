@@ -1,4 +1,4 @@
-Signature: 04a371232b834bac82c67be195929526
+Signature: 56898c6929bc206cd5017f223a43308c
 
 UNUSED LICENSES:
 
@@ -670,6 +670,8 @@ FILE: ../../../third_party/skia/experimental/skottiekit/postamble.js
 FILE: ../../../third_party/skia/experimental/skottiekit/preamble.js
 FILE: ../../../third_party/skia/experimental/skottiekit/release.js
 FILE: ../../../third_party/skia/experimental/skottiekit/skottiekit/package.json
+FILE: ../../../third_party/skia/experimental/sktext/editor/Editor.cpp
+FILE: ../../../third_party/skia/experimental/sktext/editor/Editor.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Layout.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Text.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Types.h
@@ -5153,6 +5155,7 @@ FILE: ../../../third_party/skia/docs/examples/Typeface_Methods.cpp
 FILE: ../../../third_party/skia/docs/examples/Xor.cpp
 FILE: ../../../third_party/skia/docs/examples/incomplete.cpp
 FILE: ../../../third_party/skia/experimental/minimal_ios_mtl_skia_app/main.mm
+FILE: ../../../third_party/skia/experimental/sktext/editor/App.cpp
 FILE: ../../../third_party/skia/experimental/xform/SkShape.cpp
 FILE: ../../../third_party/skia/experimental/xform/SkShape.h
 FILE: ../../../third_party/skia/experimental/xform/SkXform.cpp
@@ -5788,6 +5791,8 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathCurveTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathCurveTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilCoverOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilCoverOp.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellateOp.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellateOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathWedgeTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathWedgeTessellator.h
