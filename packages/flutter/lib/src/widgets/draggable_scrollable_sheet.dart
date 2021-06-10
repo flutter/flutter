@@ -270,7 +270,6 @@ class _DraggableSheetExtent {
   double availablePixels;
 
   bool get isAtMin => minExtent >= _currentExtent.value;
-
   bool get isAtMax => maxExtent <= _currentExtent.value;
 
   set currentExtent(double value) {
@@ -281,7 +280,6 @@ class _DraggableSheetExtent {
   double get currentExtent => _currentExtent.value;
 
   double get additionalMinExtent => isAtMin ? 0.0 : 1.0;
-
   double get additionalMaxExtent => isAtMax ? 0.0 : 1.0;
 
   /// The scroll position gets inputs in terms of pixels, but the extent is
@@ -527,11 +525,14 @@ class _DraggableScrollableSheetScrollPosition
       } else if (ballisticController.isCompleted) {
         if (extent.snapPoints.isNotEmpty) {
           // We've stopped moving, find the closet snap point and snap to it.
-          final double targetPoint = extent.snapPoints.reduce(
-              (double a, double b) => (extent.currentExtent - a).abs() <
-                      (extent.currentExtent - b).abs()
-                  ? a
-                  : b);
+          final double targetPoint =
+              extent.snapPoints.reduce((double snapA, double snapB) {
+            if ((extent.currentExtent - snapA).abs() <
+                (extent.currentExtent - snapB).abs()) {
+              return snapA;
+            }
+            return snapB;
+          });
           final AnimationController snapController = AnimationController(
             vsync: context.vsync,
             value: extent.currentExtent,
@@ -545,8 +546,8 @@ class _DraggableScrollableSheetScrollPosition
           });
           snapController
               .animateTo(targetPoint,
-                  duration: const Duration(milliseconds: 200))
-              .then((_) => super.goBallistic(0));
+                  duration: const Duration(milliseconds: 100))
+              .then((void value) => super.goBallistic(0));
         } else {
           super.goBallistic(0);
         }
