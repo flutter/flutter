@@ -23,7 +23,7 @@ extension TestBinaryMessengerExtension on BinaryMessenger {
   // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.setMockMessageHandler or '
-  //   'TestDefaultBinaryMessenger.instance.defaultBinaryMessenger.setMockMessageHandler instead. '
+  //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler instead. '
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   void setMockMessageHandler(String channel, MessageHandler? handler) {
@@ -34,7 +34,7 @@ extension TestBinaryMessengerExtension on BinaryMessenger {
   // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.checkMockMessageHandler or '
-  //   'TestDefaultBinaryMessenger.instance.defaultBinaryMessenger.checkMockMessageHandler instead.'
+  //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler instead.'
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   bool checkMockMessageHandler(String channel, Object? handler) {
@@ -55,7 +55,7 @@ extension TestBasicMessageChannelExtension<T> on BasicMessageChannel<T> {
   // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler or '
-  //   'TestDefaultBinaryMessenger.instance.defaultBinaryMessenger.setMockDecodedMessageHandler instead. '
+  //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockDecodedMessageHandler instead. '
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   void setMockMessageHandler(Future<T> Function(T? message)? handler) {
@@ -66,7 +66,7 @@ extension TestBasicMessageChannelExtension<T> on BasicMessageChannel<T> {
   // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.checkMockMessageHandler or '
-  //   'TestDefaultBinaryMessenger.instance.defaultBinaryMessenger.checkMockMessageHandler instead. '
+  //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler instead. '
   //   'For the first argument, pass channel.name. '
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
@@ -88,7 +88,7 @@ extension TestMethodChannelExtension on MethodChannel {
   // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.setMockMethodCallHandler or '
-  //   'TestDefaultBinaryMessenger.instance.defaultBinaryMessenger.setMockMethodCallHandler instead. '
+  //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler instead. '
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   void setMockMethodCallHandler(Future<dynamic>? Function(MethodCall call)? handler) {
@@ -99,7 +99,7 @@ extension TestMethodChannelExtension on MethodChannel {
   // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.checkMockMessageHandler or '
-  //   'TestDefaultBinaryMessenger.instance.defaultBinaryMessenger.checkMockMessageHandler instead. '
+  //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler instead. '
   //   'For the first argument, pass channel.name. '
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
