@@ -1914,22 +1914,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             widget.focusNode.previousFocus();
             break;
         }
-        if (widget.onSubmitted != null) {
-          // Create a new TextInputConnection to replace the current one. This
-          // on iOS switches to a new input view and on Android restarts the
-          // input method. In both cases this call resets the IME.
-          //
-          // We do this for fidelity reasons, in case the developer calls
-          // requestFocus in the onSubmitted callback to undo the focus change.
-          // See https://github.com/flutter/flutter/issues/84240.
-          _restartConnectionIfNeeded();
-        }
       }
+    }
+
+    final ValueChanged<String>? onSubmitted = widget.onSubmitted;
+    if (onSubmitted == null) {
+      return;
     }
 
     // Invoke optional callback with the user's submitted content.
     try {
-      widget.onSubmitted?.call(_value.text);
+      onSubmitted(_value.text);
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
@@ -1937,6 +1932,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         library: 'widgets',
         context: ErrorDescription('while calling onSubmitted for $action'),
       ));
+    }
+
+    // Create a new TextInputConnection to replace the current one. This
+    // on iOS switches to a new input view and on Android restarts the
+    // input method. In both cases this call resets the IME.
+    //
+    // We do this for fidelity reasons, in case the developer calls
+    // requestFocus in the onSubmitted callback to undo the focus change.
+    // See https://github.com/flutter/flutter/issues/84240.
+    if (shouldUnfocus) {
+      _restartConnectionIfNeeded();
     }
   }
 
