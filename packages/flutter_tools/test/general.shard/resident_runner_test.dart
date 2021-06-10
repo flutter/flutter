@@ -2037,7 +2037,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true)
   });
 
-   testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag when feature is enabled', () async {
+   testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice mockDevice = FakeDevice(targetPlatform: TargetPlatform.android_arm);
 
@@ -2059,7 +2059,6 @@ void main() {
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isExperimentalInvalidationStrategyEnabled: true)
   });
 
    testUsingContext('FlutterDevice passes initializeFromDill parameter if specified', () async {
