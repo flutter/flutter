@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -50,7 +49,7 @@ class BrowserPlatform extends PlatformPlugin {
   /// [root] is the root directory that the server should serve. It defaults to
   /// the working directory.
   static Future<BrowserPlatform> start(String name,
-      {String root, bool doUpdateScreenshotGoldens: false}) async {
+      {required String root, bool doUpdateScreenshotGoldens = false}) async {
     assert(SupportedBrowsers.instance.supportedBrowserNames.contains(name));
     var server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     return BrowserPlatform._(
@@ -96,12 +95,12 @@ class BrowserPlatform extends PlatformPlugin {
   final String _root;
 
   /// The HTTP client to use when caching JS files in `pub serve`.
-  final HttpClient _http;
+  final HttpClient? _http;
 
   /// Handles taking screenshots during tests.
   ///
   /// Implementation will differ depending on the browser.
-  ScreenshotManager _screenshotManager;
+  ScreenshotManager? _screenshotManager;
 
   /// Whether [close] has been called.
   bool get _closed => _closeMemo.hasRun;
@@ -111,10 +110,10 @@ class BrowserPlatform extends PlatformPlugin {
 
   BrowserPlatform._(
       String name, this._server, Configuration config, String faviconPath,
-      {String root, this.doUpdateScreenshotGoldens})
+      {required String root, required this.doUpdateScreenshotGoldens})
       : this.browserName = name,
         _config = config,
-        _root = root == null ? p.current : root,
+        _root = root,
         _http = config.pubServeUrl == null ? null : HttpClient() {
     var cascade = shelf.Cascade().add(_webSocketHandler.handler);
 
@@ -187,7 +186,7 @@ class BrowserPlatform extends PlatformPlugin {
     }
 
     filename =
-        filename.replaceAll('.png', '${_screenshotManager.filenameSuffix}.png');
+        filename.replaceAll('.png', '${_screenshotManager!.filenameSuffix}.png');
 
     String goldensDirectory;
     if (filename.startsWith('__local__')) {
@@ -213,7 +212,7 @@ class BrowserPlatform extends PlatformPlugin {
     );
 
     // Take screenshot.
-    final Image screenshot = await _screenshotManager.capture(regionAsRectange);
+    final Image screenshot = await _screenshotManager!.capture(regionAsRectange);
 
     return compareImage(
         screenshot,
@@ -227,14 +226,14 @@ class BrowserPlatform extends PlatformPlugin {
 
   /// A handler that serves wrapper files used to bootstrap tests.
   shelf.Response _wrapperHandler(shelf.Request request) {
-    var path = p.fromUri(request.url);
+    final String path = p.fromUri(request.url);
 
     if (path.endsWith('.html')) {
-      var test = p.withoutExtension(path) + '.dart';
+      final String test = p.withoutExtension(path) + '.dart';
 
       // Link to the Dart wrapper.
-      var scriptBase = htmlEscape.convert(p.basename(test));
-      var link = '<link rel="x-dart-test" href="$scriptBase">';
+      final String scriptBase = htmlEscape.convert(p.basename(test));
+      final String link = '<link rel="x-dart-test" href="$scriptBase">';
 
       return shelf.Response.ok('''
         <!DOCTYPE html>
@@ -251,68 +250,70 @@ class BrowserPlatform extends PlatformPlugin {
     return shelf.Response.notFound('Not found.');
   }
 
+  void _checkNotClosed() {
+    if (_closed) {
+      throw StateError('Cannot load test suite. Test platform is closed.');
+    }
+  }
+
   /// Loads the test suite at [path] on the platform [platform].
   ///
   /// This will start a browser to load the suite if one isn't already running.
   /// Throws an [ArgumentError] if `platform.platform` isn't a browser.
+  @override
   Future<RunnerSuite> load(String path, SuitePlatform platform,
       SuiteConfiguration suiteConfig, Object message) async {
+    _checkNotClosed();
     if (suiteConfig.precompiledPath == null) {
       throw Exception('This test platform only supports precompiled JS.');
     }
-    var browser = platform.runtime;
+    final Runtime browser = platform.runtime;
     assert(suiteConfig.runtimes.contains(browser.identifier));
 
     if (!browser.isBrowser) {
       throw ArgumentError('$browser is not a browser.');
     }
+    _checkNotClosed();
 
-    if (_closed) {
-      return null;
-    }
-    Uri suiteUrl = url.resolveUri(
+    final Uri suiteUrl = url.resolveUri(
         p.toUri(p.withoutExtension(p.relative(path, from: _root)) + '.html'));
+    _checkNotClosed();
 
-    if (_closed) {
-      return null;
+    final BrowserManager? browserManager = await _browserManagerFor(browser);
+    if (browserManager == null) {
+      throw StateError('Failed to initialize browser manager for ${browser.name}');
     }
+    _checkNotClosed();
 
-    var browserManager = await _browserManagerFor(browser);
-    if (_closed || browserManager == null) {
-      return null;
-    }
-
-    var suite = await browserManager.load(path, suiteUrl, suiteConfig, message);
-    if (_closed) {
-      return null;
-    }
+    final RunnerSuite suite = await browserManager.load(path, suiteUrl, suiteConfig, message);
+    _checkNotClosed();
     return suite;
   }
 
   StreamChannel loadChannel(String path, SuitePlatform platform) =>
       throw UnimplementedError();
 
-  Future<BrowserManager> _browserManager;
+  Future<BrowserManager?>? _browserManager;
 
   /// Returns the [BrowserManager] for [runtime], which should be a browser.
   ///
   /// If no browser manager is running yet, starts one.
-  Future<BrowserManager> _browserManagerFor(Runtime browser) {
+  Future<BrowserManager?> _browserManagerFor(Runtime browser) {
     if (_browserManager != null) {
-      return _browserManager;
+      return _browserManager!;
     }
 
-    var completer = Completer<WebSocketChannel>.sync();
-    var path = _webSocketHandler.create(webSocketHandler(completer.complete));
-    var webSocketUrl = url.replace(scheme: 'ws').resolve(path);
-    var hostUrl = (_config.pubServeUrl == null ? url : _config.pubServeUrl)
+    final Completer<WebSocketChannel> completer = Completer<WebSocketChannel>.sync();
+    final String path = _webSocketHandler.create(webSocketHandler(completer.complete));
+    final Uri webSocketUrl = url.replace(scheme: 'ws').resolve(path);
+    final Uri hostUrl = (_config.pubServeUrl ?? url)
         .resolve('packages/web_engine_tester/static/index.html')
         .replace(queryParameters: <String, dynamic>{
       'managerUrl': webSocketUrl.toString(),
       'debug': _config.pauseAfterLoad.toString()
     });
 
-    var future = BrowserManager.start(browser, hostUrl, completer.future,
+    final Future<BrowserManager?> future = BrowserManager.start(browser, hostUrl, completer.future,
         debug: _config.pauseAfterLoad);
 
     // Store null values for browsers that error out so we know not to load them
@@ -327,9 +328,9 @@ class BrowserPlatform extends PlatformPlugin {
   /// Note that this doesn't close the server itself. Browser tests can still be
   /// loaded, they'll just spawn new browsers.
   Future<void> closeEphemeral() async {
-    final BrowserManager result = await _browserManager;
-    if (result != null) {
-      await result.close();
+    if (_browserManager != null) {
+      final BrowserManager? result = await _browserManager!;
+      await result?.close();
     }
   }
 
@@ -341,9 +342,9 @@ class BrowserPlatform extends PlatformPlugin {
     return _closeMemo.runOnce(() async {
       final List<Future<void>> futures = <Future<void>>[];
       futures.add(Future<void>.microtask(() async {
-        final BrowserManager result = await _browserManager;
-        if (result != null) {
-          await result.close();
+        if (_browserManager != null) {
+          final BrowserManager? result = await _browserManager!;
+          await result?.close();
         }
       }));
       futures.add(_server.close());
@@ -351,7 +352,7 @@ class BrowserPlatform extends PlatformPlugin {
       await Future.wait(futures);
 
       if (_config.pubServeUrl != null) {
-        _http.close();
+        _http!.close();
       }
     });
   }
@@ -432,12 +433,12 @@ class PathHandler {
   }
 
   FutureOr<shelf.Response> _onRequest(shelf.Request request) {
-    shelf.Handler handler;
-    int handlerIndex;
-    var node = _paths;
+    shelf.Handler? handler;
+    int handlerIndex = -1;
+    _Node? node = _paths;
     var components = p.url.split(request.url.path);
     for (var i = 0; i < components.length; i++) {
-      node = node.children[components[i]];
+      node = node?.children[components[i]];
       if (node == null) {
         break;
       }
@@ -459,7 +460,7 @@ class PathHandler {
 
 /// A trie node.
 class _Node {
-  shelf.Handler handler;
+  shelf.Handler? handler;
   final children = Map<String, _Node>();
 }
 
@@ -477,7 +478,7 @@ class BrowserManager {
   /// The channel used to communicate with the browser.
   ///
   /// This is connected to a page running `static/host.dart`.
-  MultiChannel _channel;
+  late final MultiChannel _channel;
 
   /// A pool that ensures that limits the number of initial connections the
   /// manager will wait for at once.
@@ -501,13 +502,13 @@ class BrowserManager {
   ///
   /// This will be `null` as long as the browser isn't displaying a pause
   /// screen.
-  CancelableCompleter _pauseCompleter;
+  CancelableCompleter? _pauseCompleter;
 
   /// The controller for [_BrowserEnvironment.onRestart].
   final _onRestartController = StreamController<dynamic>.broadcast();
 
   /// The environment to attach to each suite.
-  Future<_BrowserEnvironment> _environment;
+  late final Future<_BrowserEnvironment> _environment;
 
   /// Controllers for every suite in this browser.
   ///
@@ -519,7 +520,7 @@ class BrowserManager {
   //
   // Because the browser stops running code when the user is actively debugging,
   // this lets us detect whether they're debugging reasonably accurately.
-  RestartableTimer _timer;
+  late final RestartableTimer _timer;
 
   /// Starts the browser identified by [runtime] and has it connect to [url].
   ///
@@ -532,7 +533,7 @@ class BrowserManager {
   ///
   /// Returns the browser manager, or throws an [Exception] if a
   /// connection fails to be established.
-  static Future<BrowserManager> start(
+  static Future<BrowserManager?> start(
       Runtime runtime, Uri url, Future<WebSocketChannel> future,
       {bool debug = false}) {
     var browser = _newBrowser(url, runtime, debug: debug);
@@ -544,7 +545,7 @@ class BrowserManager {
     // websocket is available. Therefore do not throw an error if process
     // exits with exitCode 0. Note that `browser` will throw and error if the
     // exit code was not 0, which will be processed by the next callback.
-    browser.onExit.catchError((dynamic error, StackTrace stackTrace) {
+    browser.onExit.catchError((Object error, StackTrace stackTrace) {
       if (completer.isCompleted) {
         return;
       }
@@ -556,7 +557,7 @@ class BrowserManager {
         return;
       }
       completer.complete(BrowserManager._(browser, runtime, webSocket));
-    }).catchError((dynamic error, StackTrace stackTrace) {
+    }).catchError((Object error, StackTrace stackTrace) {
       browser.close();
       if (completer.isCompleted) {
         return null;
@@ -631,7 +632,7 @@ class BrowserManager {
     })));
 
     var suiteID = _suiteID++;
-    RunnerSuiteController controller;
+    RunnerSuiteController? controller;
     void closeIframe() {
       if (_closed) {
         return;
@@ -670,7 +671,7 @@ class BrowserManager {
             'build', pathToTest, sourceMapFileName);
 
         PackageConfig packageConfig =
-            await loadPackageConfigUri(await Isolate.packageConfig);
+            await loadPackageConfigUri((await Isolate.packageConfig)!);
         Map<String, Uri> packageMap = {
           for (var p in packageConfig.packages) p.name: p.packageUriRoot
         };
@@ -681,10 +682,10 @@ class BrowserManager {
           sdkRoot: p.toUri(sdkDir),
         );
 
-        controller.channel('test.browser.mapper').sink.add(mapper.serialize());
+        controller!.channel('test.browser.mapper').sink.add(mapper.serialize());
 
-        _controllers.add(controller);
-        return await controller.suite;
+        _controllers.add(controller!);
+        return await controller!.suite;
       } catch (_) {
         closeIframe();
         rethrow;
@@ -694,22 +695,24 @@ class BrowserManager {
 
   /// An implementation of [Environment.displayPause].
   CancelableOperation _displayPause() {
-    if (_pauseCompleter != null) {
-      return _pauseCompleter.operation;
+    CancelableCompleter? pauseCompleter = _pauseCompleter;
+    if (pauseCompleter != null) {
+      return pauseCompleter.operation;
     }
 
-    _pauseCompleter = CancelableCompleter<void>(onCancel: () {
+    pauseCompleter = CancelableCompleter<void>(onCancel: () {
       _channel.sink.add({'command': 'resume'});
       _pauseCompleter = null;
     });
+    _pauseCompleter = pauseCompleter;
 
-    _pauseCompleter.operation.value.whenComplete(() {
+    pauseCompleter.operation.value.whenComplete(() {
       _pauseCompleter = null;
     });
 
     _channel.sink.add({'command': 'displayPause'});
 
-    return _pauseCompleter.operation;
+    return pauseCompleter.operation;
   }
 
   /// The callback for handling messages received from the host page.
@@ -723,9 +726,7 @@ class BrowserManager {
         break;
 
       case 'resume':
-        if (_pauseCompleter != null) {
-          _pauseCompleter.complete();
-        }
+        _pauseCompleter?.complete();
         break;
 
       default:
@@ -740,9 +741,7 @@ class BrowserManager {
   Future close() => _closeMemoizer.runOnce(() {
         _closed = true;
         _timer.cancel();
-        if (_pauseCompleter != null) {
-          _pauseCompleter.complete();
-        }
+        _pauseCompleter?.complete();
         _pauseCompleter = null;
         _controllers.clear();
         return _browser.close();
@@ -758,9 +757,9 @@ class _BrowserEnvironment implements Environment {
 
   final supportsDebugging = true;
 
-  final Uri observatoryUrl;
+  final Uri? observatoryUrl;
 
-  final Uri remoteDebuggerUrl;
+  final Uri? remoteDebuggerUrl;
 
   final Stream onRestart;
 
