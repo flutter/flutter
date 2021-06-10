@@ -49,7 +49,7 @@ void testMain() async {
           }),
           callback);
 
-      expect(await completer.future, true);
+      expect(await completer.future, isTrue);
     });
 
     test('set data error', () async {

@@ -705,8 +705,8 @@ void _pathTests() {
 
   test('contains', () {
     final SkPath testPath = _testClosedSkPath();
-    expect(testPath.contains(15, 15), true);
-    expect(testPath.contains(100, 100), false);
+    expect(testPath.contains(15, 15), isTrue);
+    expect(testPath.contains(100, 100), isFalse);
   });
 
   test('cubicTo', () {
@@ -777,8 +777,8 @@ void _pathTests() {
   });
 
   test('isEmpty', () {
-    expect(SkPath().isEmpty(), true);
-    expect(_testClosedSkPath().isEmpty(), false);
+    expect(SkPath().isEmpty(), isTrue);
+    expect(_testClosedSkPath().isEmpty(), isFalse);
   });
 
   test('copy', () {
@@ -802,7 +802,7 @@ void _pathTests() {
     expect(measure1.getPosTan(5), Float32List.fromList(<double>[15, 10, 1, 0]));
     expect(
         measure1.getPosTan(15), Float32List.fromList(<double>[20, 15, 0, 1]));
-    expect(measure1.isClosed(), true);
+    expect(measure1.isClosed(), isTrue);
 
     // Starting with a box path:
     //
@@ -1341,7 +1341,7 @@ void _paragraphTests() {
     paragraph.layout(55);
     expect(paragraph.getAlphabeticBaseline(),
         within<double>(distance: 0.5, from: 20.7));
-    expect(paragraph.didExceedMaxLines(), false);
+    expect(paragraph.didExceedMaxLines(), isFalse);
     expect(paragraph.getHeight(), 25);
     expect(paragraph.getIdeographicBaseline(),
         within<double>(distance: 0.5, from: 25));
@@ -1359,7 +1359,7 @@ void _paragraphTests() {
     final SkLineMetrics lineMetrics = paragraph.getLineMetrics().single;
     expect(lineMetrics.ascent, within<double>(distance: 0.5, from: 20.7));
     expect(lineMetrics.descent, within<double>(distance: 0.2, from: 4.3));
-    expect(lineMetrics.isHardBreak, true);
+    expect(lineMetrics.isHardBreak, isTrue);
     expect(lineMetrics.baseline, within<double>(distance: 0.5, from: 20.7));
     expect(lineMetrics.height, 25);
     expect(lineMetrics.left, 2.5);

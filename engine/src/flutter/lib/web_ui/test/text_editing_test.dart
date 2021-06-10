@@ -746,7 +746,7 @@ void testMain() {
       sendFrameworkMessage(codec.encodeMethodCall(finishAutofillContext));
 
       // `submit` action is called on form.
-      await expectLater(await submittedForm.future, true);
+      await expectLater(await submittedForm.future, isTrue);
     },
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
         skip: browserEngine == BrowserEngine.edge);
@@ -802,7 +802,7 @@ void testMain() {
       expect(spy.messages[0].methodName, 'TextInputClient.onConnectionClosed');
 
       // `submit` action is called on form.
-      await expectLater(await submittedForm.future, true);
+      await expectLater(await submittedForm.future, isTrue);
       // Form element is removed from DOM.
       expect(defaultTextEditingRoot.querySelectorAll('form'), hasLength(0));
       expect(formsOnTheDom, hasLength(0));
@@ -1980,8 +1980,8 @@ void testMain() {
 
       EditingState editingState3 = EditingState.fromDomElement(input);
 
-      expect(editingState1 == editingState2, true);
-      expect(editingState1 != editingState3, true);
+      expect(editingState1 == editingState2, isTrue);
+      expect(editingState1 != editingState3, isTrue);
     });
   });
 }
