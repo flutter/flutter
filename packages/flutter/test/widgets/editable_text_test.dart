@@ -1857,6 +1857,44 @@ void main() {
     assert(!onEditingCompleteCalled);
   });
 
+  testWidgets('finalizeEditing should reset the input connection when shouldUnfocus is true', (WidgetTester tester) async {
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+        cursorColor: Colors.blue,
+        focusNode: focusNode,
+        controller: controller,
+        onSubmitted: (String value) {
+          focusNode.requestFocus();
+        },
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Select EditableText to give it focus.
+    final Finder textFinder = find.byType(EditableText);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    assert(focusNode.hasFocus);
+    tester.testTextInput.log.clear();
+
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    expect(tester.testTextInput.log, containsAllInOrder(<Matcher>[
+      matchesMethodCall('TextInput.clearClient'),
+      matchesMethodCall('TextInput.setClient'),
+    ]));
+
+    tester.testTextInput.log.clear();
+    // TextInputAction.unspecified does not unfocus the input field by default.
+    await tester.testTextInput.receiveAction(TextInputAction.unspecified);
+    expect(tester.testTextInput.log, isNot(containsAllInOrder(<Matcher>[
+      matchesMethodCall('TextInput.clearClient'),
+      matchesMethodCall('TextInput.setClient'),
+    ])));
+  });
+
   testWidgets(
     'iOS autocorrection rectangle should appear on demand and dismiss when the text changes or when focus is lost',
     (WidgetTester tester) async {
