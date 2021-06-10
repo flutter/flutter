@@ -6,70 +6,6 @@ part of reporting;
 
 const String _kFlutterUA = 'UA-67589403-6';
 
-/// The collection of custom dimensions understood by the analytics backend.
-/// When adding to this list, first ensure that the custom dimension is
-/// defined in the backend, or will be defined shortly after the relevant PR
-/// lands.
-enum CustomDimensions {
-  sessionHostOsDetails,  // cd1
-  sessionChannelName,  // cd2
-  commandRunIsEmulator, // cd3
-  commandRunTargetName, // cd4
-  hotEventReason,  // cd5
-  hotEventFinalLibraryCount,  // cd6
-  hotEventSyncedLibraryCount,  // cd7
-  hotEventSyncedClassesCount,  // cd8
-  hotEventSyncedProceduresCount,  // cd9
-  hotEventSyncedBytes,  // cd10
-  hotEventInvalidatedSourcesCount,  // cd11
-  hotEventTransferTimeInMs,  // cd12
-  hotEventOverallTimeInMs,  // cd13
-  commandRunProjectType,  // cd14
-  commandRunProjectHostLanguage,  // cd15
-  commandCreateAndroidLanguage,  // cd16
-  commandCreateIosLanguage,  // cd17
-  commandRunProjectModule,  // cd18
-  commandCreateProjectType,  // cd19
-  commandPackagesNumberPlugins,  // cd20
-  commandPackagesProjectModule,  // cd21
-  commandRunTargetOsVersion,  // cd22
-  commandRunModeName,  // cd23
-  commandBuildBundleTargetPlatform,  // cd24
-  commandBuildBundleIsModule,  // cd25
-  commandResult,  // cd26
-  hotEventTargetPlatform,  // cd27
-  hotEventSdkName,  // cd28
-  hotEventEmulator,  // cd29
-  hotEventFullRestart,  // cd30
-  commandHasTerminal,  // cd31
-  enabledFlutterFeatures,  // cd32
-  localTime,  // cd33
-  commandBuildAarTargetPlatform,  // cd34
-  commandBuildAarProjectType,  // cd35
-  buildEventCommand,  // cd36
-  buildEventSettings,  // cd37
-  commandBuildApkTargetPlatform, // cd38
-  commandBuildApkBuildMode, // cd39
-  commandBuildApkSplitPerAbi, // cd40
-  commandBuildAppBundleTargetPlatform, // cd41
-  commandBuildAppBundleBuildMode, // cd42
-  buildEventError,  // cd43
-  commandResultEventMaxRss,  // cd44
-  commandRunAndroidEmbeddingVersion, // cd45
-  commandPackagesAndroidEmbeddingVersion, // cd46
-  nullSafety, // cd47
-  fastReassemble, // cd48
-  nullSafeMigratedLibraries, // cd49
-  nullSafeTotalLibraries, // cd 50
-}
-
-String cdKey(CustomDimensions cd) => 'cd${cd.index + 1}';
-
-Map<String, String> _useCdKeys(Map<CustomDimensions, Object> parameters) {
-  return parameters.map((CustomDimensions k, Object v) =>
-      MapEntry<String, String>(cdKey(k), v.toString()));
-}
-
 abstract class Usage {
   /// Create a new Usage instance; [versionOverride], [configDirOverride], and
   /// [logFile] are used for testing.
@@ -94,8 +30,8 @@ abstract class Usage {
 
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
-    Map<CustomDimensions, Object>? parameters,
-  }) => globals.flutterUsage.sendCommand(command, parameters: parameters == null ? null : _useCdKeys(parameters));
+    CustomDimensions? parameters,
+  }) => globals.flutterUsage.sendCommand(command, parameters: parameters);
 
   /// Whether analytics reporting should be suppressed.
   bool get suppressAnalytics;
@@ -119,7 +55,7 @@ abstract class Usage {
   /// keys are well-defined in [CustomDimensions] above.
   void sendCommand(
     String command, {
-    Map<String, String>? parameters,
+    CustomDimensions? parameters,
   });
 
   /// Sends an 'event' to the underlying analytics implementation.
@@ -133,7 +69,7 @@ abstract class Usage {
     String parameter, {
     String? label,
     int? value,
-    Map<String, String>? parameters,
+    CustomDimensions? parameters,
   });
 
   /// Sends timing information to the underlying analytics implementation.
@@ -256,12 +192,12 @@ class _DefaultUsage implements Usage {
     if (!skipAnalyticsSessionSetup) {
       // Report a more detailed OS version string than package:usage does by default.
       analytics.setSessionValue(
-        cdKey(CustomDimensions.sessionHostOsDetails),
+        cdKey(CustomDimensionsEnum.sessionHostOsDetails),
         globals.os.name,
       );
       // Send the branch name as the "channel".
       analytics.setSessionValue(
-        cdKey(CustomDimensions.sessionChannelName),
+        cdKey(CustomDimensionsEnum.sessionChannelName),
         flutterVersion.getBranchName(redactUnknownBranches: true),
       );
       // For each flutter experimental feature, record a session value in a comma
@@ -274,7 +210,7 @@ class _DefaultUsage implements Usage {
           .map((Feature feature) => feature.configSetting)
           .join(',');
       analytics.setSessionValue(
-        cdKey(CustomDimensions.enabledFlutterFeatures),
+        cdKey(CustomDimensionsEnum.enabledFlutterFeatures),
         enabledFeatures,
       );
 
@@ -320,16 +256,17 @@ class _DefaultUsage implements Usage {
   String get clientId => _analytics.clientId;
 
   @override
-  void sendCommand(String command, { Map<String, String>? parameters }) {
+  void sendCommand(String command, { CustomDimensions? parameters }) {
     if (suppressAnalytics) {
       return;
     }
 
-    final Map<String, String> paramsWithLocalTime = <String, String>{
-      ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(_clock.now()),
-    };
-    _analytics.sendScreenView(command, parameters: paramsWithLocalTime);
+    _analytics.sendScreenView(
+      command,
+      parameters: CustomDimensions(localTime: formatDateTime(_clock.now()))
+          .merge(parameters)
+          .toMap(),
+    );
   }
 
   @override
@@ -338,23 +275,20 @@ class _DefaultUsage implements Usage {
     String parameter, {
     String? label,
     int? value,
-    Map<String, String>? parameters,
+    CustomDimensions? parameters,
   }) {
     if (suppressAnalytics) {
       return;
     }
-
-    final Map<String, String> paramsWithLocalTime = <String, String>{
-      ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(_clock.now()),
-    };
 
     _analytics.sendEvent(
       category,
       parameter,
       label: label,
       value: value,
-      parameters: paramsWithLocalTime,
+      parameters: CustomDimensions(localTime: formatDateTime(_clock.now()))
+          .merge(parameters)
+          .toMap(),
     );
   }
 
@@ -516,12 +450,12 @@ class TestUsage implements Usage {
   void printWelcome() { }
 
   @override
-  void sendCommand(String command, {Map<String, String>? parameters}) {
+  void sendCommand(String command, {CustomDimensions? parameters}) {
     commands.add(TestUsageCommand(command, parameters: parameters));
   }
 
   @override
-  void sendEvent(String category, String parameter, {String? label, int? value, Map<String, String>? parameters}) {
+  void sendEvent(String category, String parameter, {String? label, int? value, CustomDimensions? parameters}) {
     events.add(TestUsageEvent(category, parameter, label: label, value: value, parameters: parameters));
   }
 
@@ -542,13 +476,13 @@ class TestUsageCommand {
   const TestUsageCommand(this.command, {this.parameters});
 
   final String command;
-  final Map<String, String>? parameters;
+  final CustomDimensions? parameters;
 
   @override
   bool operator ==(Object other) {
     return other is TestUsageCommand &&
       other.command == command &&
-      _mapsEqual(other.parameters, parameters);
+      other.parameters == parameters;
   }
 
   @override
@@ -567,7 +501,7 @@ class TestUsageEvent {
   final String parameter;
   final String? label;
   final int? value;
-  final Map<String, String>? parameters;
+  final CustomDimensions? parameters;
 
   @override
   bool operator ==(Object other) {
@@ -576,7 +510,7 @@ class TestUsageEvent {
       other.parameter == parameter &&
       other.label == label &&
       other.value == value &&
-      _mapsEqual(other.parameters, parameters);
+      other.parameters == parameters;
   }
 
   @override

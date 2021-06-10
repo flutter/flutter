@@ -60,10 +60,10 @@ class ScaleStartDetails {
   ///    coordinates.
   final Offset localFocalPoint;
 
-  /// The number of pointers being tracked by the gesture recognizer.
-  ///
-  /// Typically this is the number of fingers being used to pan the widget using the gesture
-  /// recognizer.
+ /// The number of pointers being tracked by the gesture recognizer.
+ ///
+ /// Typically this is the number of fingers being used to pan the widget using the gesture
+ /// recognizer.
  final int pointerCount;
 
   @override
@@ -350,8 +350,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void addAllowedPointer(PointerEvent event) {
-    startTrackingPointer(event.pointer, event.transform);
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
     _velocityTrackers[event.pointer] = VelocityTracker.withKind(event.kind);
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
