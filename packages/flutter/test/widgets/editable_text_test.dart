@@ -2841,7 +2841,7 @@ void main() {
       ),
     ));
 
-    expect(findRenderEditable(tester).text!.text, expectedValue);
+    expect((findRenderEditable(tester).text! as TextSpan).text, expectedValue);
 
     expect(
       semantics,
@@ -2906,7 +2906,7 @@ void main() {
     ));
 
     final String expectedValue = obscuringCharacter * originalText.length;
-    expect(findRenderEditable(tester).text!.text, expectedValue);
+    expect((findRenderEditable(tester).text! as TextSpan).text, expectedValue);
   });
 
   group('a11y copy/cut/paste', () {
@@ -3808,17 +3808,17 @@ void main() {
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     // The actual text span is split into 3 parts with the middle part underlined.
-    expect(renderEditable.text!.children!.length, 3);
-    final TextSpan textSpan = renderEditable.text!.children![1] as TextSpan;
+    expect((renderEditable.text! as TextSpan).children!.length, 3);
+    final TextSpan textSpan = (renderEditable.text! as TextSpan).children![1] as TextSpan;
     expect(textSpan.text, 'composing');
     expect(textSpan.style!.decoration, TextDecoration.underline);
 
     focusNode.unfocus();
     await tester.pump();
 
-    expect(renderEditable.text!.children, isNull);
-    // Everything's just formatted the same way now.
-    expect(renderEditable.text!.text, 'text composing text');
+    expect((renderEditable.text! as TextSpan).children, isNull);
+    // Everything's just formated the same way now.
+    expect((renderEditable.text! as TextSpan).text, 'text composing text');
     expect(renderEditable.text!.style!.decoration, isNull);
   });
 
@@ -6137,7 +6137,7 @@ void main() {
       ));
 
       final RenderEditable renderEditable = findRenderEditable(tester);
-      final TextSpan textSpan = renderEditable.text!;
+      final TextSpan textSpan = renderEditable.text! as TextSpan;
       expect(textSpan.style!.color, color);
     });
   });
