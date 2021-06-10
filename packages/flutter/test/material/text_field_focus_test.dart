@@ -275,14 +275,17 @@ void main() {
     tester.testTextInput.hide();
     expect(tester.testTextInput.isVisible, isFalse);
 
+    await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.byKey(textField1));
     await tester.idle();
     expect(tester.testTextInput.isVisible, isTrue);
 
+    await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.byKey(textField0));
     await tester.idle();
     expect(tester.testTextInput.isVisible, isTrue);
 
+    await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.byKey(textField1));
     await tester.idle();
     expect(tester.testTextInput.isVisible, isTrue);
@@ -290,6 +293,8 @@ void main() {
     tester.testTextInput.hide();
     expect(tester.testTextInput.isVisible, isFalse);
 
+    // Break the consecutive tap sequence.
+    await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.byKey(textField0));
     await tester.idle();
     expect(tester.testTextInput.isVisible, isTrue);

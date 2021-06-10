@@ -878,8 +878,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool _showSelectionHandles = false;
 
-  late _TextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
-
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
   late bool forcePressEnabled;
@@ -970,7 +968,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
     if (widget.controller == null) {
       _createLocalController();
     }
@@ -1049,38 +1046,38 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _editableText?.requestKeyboard();
   }
 
-  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
-    // When the text field is activated by something that doesn't trigger the
-    // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
+  bool _shouldShowSelectionHandles(SelectionHandleControlIntent intent) {
+    if (!_isEnabled)
       return false;
-
-    if (cause == SelectionChangedCause.keyboard)
-      return false;
-
     if (widget.readOnly && _effectiveController.selection.isCollapsed)
       return false;
 
-    if (!_isEnabled)
-      return false;
+    switch (intent.deviceKind) {
+      case null:
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.stylus:
+        break;
+      case PointerDeviceKind.unknown:
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.invertedStylus:
+        return false;
+    }
 
-    if (cause == SelectionChangedCause.longPress)
-      return true;
-
-    if (_effectiveController.text.isNotEmpty)
-      return true;
-
-    return false;
+    switch (intent.cause) {
+      case SelectionChangedCause.forcePress:
+      case SelectionChangedCause.tap:
+      case SelectionChangedCause.doubleTap:
+      case SelectionChangedCause.drag:
+      case SelectionChangedCause.toolBar:
+        return _effectiveController.text.isNotEmpty;
+      case SelectionChangedCause.longPress:
+        return true;
+      case SelectionChangedCause.keyboard:
+        return false;
+    }
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
-    final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
-    if (willShowSelectionHandles != _showSelectionHandles) {
-      setState(() {
-        _showSelectionHandles = willShowSelectionHandles;
-      });
-    }
-
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -1093,6 +1090,24 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         // Do nothing.
+    }
+
+    switch (cause) {
+      case null:
+      case SelectionChangedCause.toolBar:
+      case SelectionChangedCause.tap:
+      case SelectionChangedCause.doubleTap:
+      case SelectionChangedCause.longPress:
+      case SelectionChangedCause.drag:
+      case SelectionChangedCause.forcePress:
+        return;
+      case SelectionChangedCause.keyboard:
+        if (_showSelectionHandles) {
+          setState(() {
+            _showSelectionHandles = false;
+          });
+        }
+        return;
     }
   }
 
@@ -1302,30 +1317,71 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
-    return MouseRegion(
-      cursor: effectiveMouseCursor,
-      onEnter: (PointerEnterEvent event) => _handleHover(true),
-      onExit: (PointerExitEvent event) => _handleHover(false),
-      child: IgnorePointer(
-        ignoring: !_isEnabled,
-        child: AnimatedBuilder(
-          animation: controller, // changes the _currentLength
-          builder: (BuildContext context, Widget? child) {
-            return Semantics(
-              maxValueLength: semanticsMaxValueLength,
-              currentValueLength: _currentLength,
-              onTap: widget.readOnly ? null : () {
-                if (!_effectiveController.selection.isValid)
-                  _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-                _requestKeyboard();
-              },
-              onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-              child: child,
-            );
+    final VoidCallback? onTap = _isEnabled ? widget.onTap : null;
+    return Actions(
+      actions: <Type, Action<Intent>> {
+        SelectTextAtPositionIntent: TextEditingCallbackAction<SelectTextAtPositionIntent>(
+          (SelectTextAtPositionIntent intent) => _editableText!.selectPositionAt(intent),
+          enabledPredicate: (SelectTextAtPositionIntent intent) => widget.selectionEnabled,
+        ),
+        SelectWordEdgeIntent: TextEditingCallbackAction<SelectWordEdgeIntent>(
+          (SelectWordEdgeIntent intent) => _editableText!.selectWordEdge(intent),
+          enabledPredicate: (SelectWordEdgeIntent intent) => widget.selectionEnabled,
+        ),
+        ExtendSelectionToPointIntent: TextEditingCallbackAction<ExtendSelectionToPointIntent>(
+          (ExtendSelectionToPointIntent intent) => _editableText!.extendSelection(intent),
+          enabledPredicate: (ExtendSelectionToPointIntent intent) => widget.selectionEnabled && _effectiveController.value.selection.isValid,
+        ),
+        SelectionToolbarControlIntent: TextEditingCallbackAction<SelectionToolbarControlIntent>(
+          (SelectionToolbarControlIntent intent) {
+            if (!intent.showSelectionToolbar) {
+              _editableText!.hideToolbar();
+            } else {
+              _editableText!.showToolbar(intent.toolbarLocation);
+            }
+          } ,
+          enabledPredicate: (SelectionToolbarControlIntent intent) => widget.selectionEnabled,
+        ),
+        SelectionHandleControlIntent: TextEditingCallbackAction<SelectionHandleControlIntent>(
+          (SelectionHandleControlIntent intent) {
+            final bool willShowSelectionHandles = _shouldShowSelectionHandles(intent);
+            if (willShowSelectionHandles != _showSelectionHandles) {
+              setState(() {
+                _showSelectionHandles = willShowSelectionHandles;
+              });
+            }
           },
-          child: _selectionGestureDetectorBuilder.buildGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: child,
+          enabledPredicate: (SelectionHandleControlIntent intent) => widget.selectionEnabled,
+        ),
+        KeyboardControlIntent: TextEditingCallbackAction<KeyboardControlIntent>(
+          (KeyboardControlIntent intent) { _requestKeyboard(); },
+        ),
+        if (onTap != null) InvokeTextEditingComponentOnTapCallbackIntent: TextEditingCallbackAction<InvokeTextEditingComponentOnTapCallbackIntent>(
+          (InvokeTextEditingComponentOnTapCallbackIntent intent) => onTap(),
+        ),
+      },
+      child: MouseRegion(
+        cursor: effectiveMouseCursor,
+        onEnter: (PointerEnterEvent event) => _handleHover(true),
+        onExit: (PointerExitEvent event) => _handleHover(false),
+        child: IgnorePointer(
+          ignoring: !_isEnabled,
+          child: AnimatedBuilder(
+            animation: controller, // changes the _currentLength
+            builder: (BuildContext context, Widget? child) {
+              return Semantics(
+                maxValueLength: semanticsMaxValueLength,
+                currentValueLength: _currentLength,
+                onTap: widget.readOnly ? null : () {
+                  if (!_effectiveController.selection.isValid)
+                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                  _requestKeyboard();
+                },
+                onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+                child: child,
+              );
+            },
+            child: TextEditingGestureDetector(child: child),
           ),
         ),
       ),

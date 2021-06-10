@@ -832,8 +832,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   bool _showSelectionHandles = false;
 
-  late _CupertinoTextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
-
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
   bool get forcePressEnabled => true;
@@ -848,7 +846,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _CupertinoTextFieldSelectionGestureDetectorBuilder(state: this);
     if (widget.controller == null) {
       _createLocalController();
     }
@@ -907,34 +904,58 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     _editableText.requestKeyboard();
   }
 
-  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
-    // When the text field is activated by something that doesn't trigger the
-    // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
+  bool _shouldShowSelectionHandles(SelectionHandleControlIntent intent) {
+    final bool enabled = widget.enabled ?? true;
+    if (!enabled)
+      return false;
+    if (widget.readOnly && _effectiveController.selection.isCollapsed)
       return false;
 
-    // On iOS, we don't show handles when the selection is collapsed.
-    if (_effectiveController.selection.isCollapsed)
-      return false;
+    switch (intent.deviceKind) {
+      case null:
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.stylus:
+        break;
+      case PointerDeviceKind.unknown:
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.invertedStylus:
+        return false;
+    }
 
-    if (cause == SelectionChangedCause.keyboard)
-      return false;
-
-    if (_effectiveController.text.isNotEmpty)
-      return true;
-
-    return false;
+    switch (intent.cause) {
+      case SelectionChangedCause.forcePress:
+      case SelectionChangedCause.tap:
+      case SelectionChangedCause.doubleTap:
+      case SelectionChangedCause.drag:
+      case SelectionChangedCause.toolBar:
+        return _effectiveController.text.isNotEmpty;
+      case SelectionChangedCause.longPress:
+        return true;
+      case SelectionChangedCause.keyboard:
+        return false;
+    }
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     if (cause == SelectionChangedCause.longPress) {
       _editableText.bringIntoView(selection.base);
     }
-    final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
-    if (willShowSelectionHandles != _showSelectionHandles) {
-      setState(() {
-        _showSelectionHandles = willShowSelectionHandles;
-      });
+    switch (cause) {
+      case null:
+      case SelectionChangedCause.toolBar:
+      case SelectionChangedCause.tap:
+      case SelectionChangedCause.doubleTap:
+      case SelectionChangedCause.longPress:
+      case SelectionChangedCause.drag:
+      case SelectionChangedCause.forcePress:
+        return;
+      case SelectionChangedCause.keyboard:
+        if (_showSelectionHandles) {
+          setState(() {
+            _showSelectionHandles = false;
+          });
+        }
+        return;
     }
   }
 
@@ -1215,27 +1236,70 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       ),
     );
 
-    return Semantics(
-      enabled: enabled,
-      onTap: !enabled || widget.readOnly ? null : () {
-        if (!controller.selection.isValid) {
-          controller.selection = TextSelection.collapsed(offset: controller.text.length);
-        }
-        _requestKeyboard();
+    final VoidCallback? onTap = enabled ? widget.onTap : null;
+    return Actions(
+      actions: <Type, Action<Intent>> {
+        SelectTextAtPositionIntent: TextEditingCallbackAction<SelectTextAtPositionIntent>(
+          (SelectTextAtPositionIntent intent) => _editableText.selectPositionAt(intent),
+          enabledPredicate: (SelectTextAtPositionIntent intent) => widget.selectionEnabled,
+        ),
+        SelectWordEdgeIntent: TextEditingCallbackAction<SelectWordEdgeIntent>(
+          (SelectWordEdgeIntent intent) => _editableText.selectWordEdge(intent),
+          enabledPredicate: (SelectWordEdgeIntent intent) => widget.selectionEnabled,
+        ),
+        ExtendSelectionToPointIntent: TextEditingCallbackAction<ExtendSelectionToPointIntent>(
+          (ExtendSelectionToPointIntent intent) => _editableText.extendSelection(intent),
+          enabledPredicate: (ExtendSelectionToPointIntent intent) => widget.selectionEnabled && _effectiveController.value.selection.isValid,
+        ),
+        SelectionToolbarControlIntent: TextEditingCallbackAction<SelectionToolbarControlIntent>(
+          (SelectionToolbarControlIntent intent) {
+            if (!intent.showSelectionToolbar) {
+              _editableText.hideToolbar();
+            } else {
+              _editableText.showToolbar(intent.toolbarLocation);
+            }
+          } ,
+          enabledPredicate: (SelectionToolbarControlIntent intent) => widget.selectionEnabled,
+        ),
+        SelectionHandleControlIntent: TextEditingCallbackAction<SelectionHandleControlIntent>(
+          (SelectionHandleControlIntent intent) {
+            final bool willShowSelectionHandles = _shouldShowSelectionHandles(intent);
+            if (willShowSelectionHandles != _showSelectionHandles) {
+              setState(() {
+                _showSelectionHandles = willShowSelectionHandles;
+              });
+            }
+          },
+          enabledPredicate: (SelectionHandleControlIntent intent) => widget.selectionEnabled,
+        ),
+        KeyboardControlIntent: TextEditingCallbackAction<KeyboardControlIntent>(
+          (KeyboardControlIntent intent) { _requestKeyboard(); },
+        ),
+        if (onTap != null) InvokeTextEditingComponentOnTapCallbackIntent: TextEditingCallbackAction<InvokeTextEditingComponentOnTapCallbackIntent>(
+          (InvokeTextEditingComponentOnTapCallbackIntent intent) => onTap(),
+        ),
       },
-      onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: Container(
-          decoration: effectiveDecoration,
-          color: !enabled && effectiveDecoration == null ? disabledColor : null,
-          child: _selectionGestureDetectorBuilder.buildGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: Align(
-              alignment: Alignment(-1.0, _textAlignVertical.y),
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+      child: Semantics(
+        enabled: enabled,
+        onTap: !enabled || widget.readOnly ? null : () {
+          if (!controller.selection.isValid) {
+            controller.selection = TextSelection.collapsed(offset: controller.text.length);
+          }
+          _requestKeyboard();
+        },
+        onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+        child: IgnorePointer(
+          ignoring: !enabled,
+          child: Container(
+            decoration: effectiveDecoration,
+            color: !enabled && effectiveDecoration == null ? disabledColor : null,
+            child: TextEditingGestureDetector(
+              child: Align(
+                alignment: Alignment(-1.0, _textAlignVertical.y),
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+              ),
             ),
           ),
         ),

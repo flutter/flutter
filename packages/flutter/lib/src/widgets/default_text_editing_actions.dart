@@ -20,7 +20,7 @@ import 'text_editing_intents.dart';
 ///   * [DefaultTextEditingShortcuts], which maps keyboard keys to many of the
 ///     [Intent]s that are handled here.
 ///   * [WidgetsApp], which creates a DefaultTextEditingShortcuts.
-class DefaultTextEditingActions extends Actions{
+class DefaultTextEditingActions extends Actions {
   /// Creates an instance of DefaultTextEditingActions.
   DefaultTextEditingActions({
     Key? key,
@@ -67,6 +67,19 @@ class DefaultTextEditingActions extends Actions{
     MoveSelectionToStartTextIntent: _MoveSelectionToStartTextAction(),
     MoveSelectionUpTextIntent: _MoveSelectionUpTextAction(),
   };
+}
+
+class TextEditingCallbackAction<T extends Intent> extends Action<T> {
+  TextEditingCallbackAction(this._onInvoke, { this.enabledPredicate });
+
+  final void Function(T intent) _onInvoke;
+  final bool Function(T)? enabledPredicate;
+
+  @override
+  void invoke(T intent) => _onInvoke(intent);
+
+  @override
+  bool isEnabled(T intent) => enabledPredicate?.call(intent) ?? true;
 }
 
 // This allows the web engine to handle text editing events natively while using

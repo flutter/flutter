@@ -503,9 +503,9 @@ class TextSelectionOverlay {
   }
 
   /// Shows the toolbar by inserting it into the [context]'s overlay.
-  void showToolbar() {
+  void showToolbar([Offset? globalLocation]) {
     assert(_toolbar == null);
-    _toolbar = OverlayEntry(builder: _buildToolbar);
+    _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(globalLocation));
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
     _toolbarController.forward(from: 0.0);
   }
@@ -609,9 +609,11 @@ class TextSelectionOverlay {
     );
   }
 
-  Widget _buildToolbar(BuildContext context) {
-    if (selectionControls == null)
+  Widget _buildToolbar(Offset? toolbarAnchor) {
+    final TextSelectionControls? selectionControls = this.selectionControls;
+    if (selectionControls == null) {
       return Container();
+    }
 
     // Find the horizontal midpoint, just above the selected text.
     final List<TextSelectionPoint> endpoints =
@@ -638,7 +640,7 @@ class TextSelectionOverlay {
     );
 
     return Directionality(
-      textDirection: Directionality.of(this.context),
+      textDirection: Directionality.of(context),
       child: FadeTransition(
         opacity: _toolbarOpacity,
         child: CompositedTransformFollower(
@@ -647,7 +649,7 @@ class TextSelectionOverlay {
           offset: -editingRegion.topLeft,
           child: Builder(
             builder: (BuildContext context) {
-              return selectionControls!.buildToolbar(
+              return selectionControls.buildToolbar(
                 context,
                 editingRegion,
                 renderObject.preferredLineHeight,
@@ -655,7 +657,7 @@ class TextSelectionOverlay {
                 endpoints,
                 selectionDelegate!,
                 clipboardStatus!,
-                renderObject.lastSecondaryTapDownPosition,
+                toolbarAnchor,
               );
             },
           ),
@@ -966,7 +968,8 @@ class TextSelectionGestureDetectorBuilder {
   /// Returns true if lastSecondaryTapDownPosition was on selection.
   bool get _lastSecondaryTapWasOnSelection {
     assert(renderEditable.lastSecondaryTapDownPosition != null);
-    if (renderEditable.selection == null) {
+    final TextSelection? selection = renderEditable.selection;
+    if (selection == null) {
       return false;
     }
 
@@ -974,8 +977,8 @@ class TextSelectionGestureDetectorBuilder {
       renderEditable.lastSecondaryTapDownPosition!,
     );
 
-    return renderEditable.selection!.start <= textPosition.offset
-        && renderEditable.selection!.end >= textPosition.offset;
+    return selection.start <= textPosition.offset
+        && selection.end >= textPosition.offset;
   }
 
   /// Whether to show the selection toolbar.
