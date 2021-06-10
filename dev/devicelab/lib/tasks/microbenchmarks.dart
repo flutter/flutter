@@ -7,7 +7,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -37,8 +37,8 @@ TaskFunction createMicrobenchmarkTask() {
           ];
           options.add(benchmarkPath);
           return startFlutter(
+            'run',
             options: options,
-            canFail: false,
           );
         });
 

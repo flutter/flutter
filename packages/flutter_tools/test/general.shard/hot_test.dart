@@ -7,6 +7,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -14,17 +15,20 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -146,9 +150,11 @@ void main() {
   group('hotRestart', () {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     FileSystem fileSystem;
+    TestUsage testUsage;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
+      testUsage = TestUsage();
     });
 
     testUsingContext('setup function fails', () async {
@@ -228,6 +234,158 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
     });
+
+    testUsingContext('correctly tracks time spent for analytics for hot restart', () async {
+      final FakeDevice device = FakeDevice();
+      final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
+      final List<FlutterDevice> devices = <FlutterDevice>[
+        fakeFlutterDevice,
+      ];
+
+      fakeFlutterDevice.updateDevFSReport = UpdateFSReport(
+        success: true,
+        invalidatedSourcesCount: 2,
+        syncedBytes: 4,
+        scannedSourcesCount: 8,
+        compileDuration: const Duration(seconds: 16),
+        transferDuration: const Duration(seconds: 32),
+      );
+
+      final FakeStopwatchFactory fakeStopwatchFactory = FakeStopwatchFactory(
+        stopwatches: <String, Stopwatch>{
+          'fullRestartHelper': FakeStopwatch()..elapsed = const Duration(seconds: 64),
+          'updateDevFS': FakeStopwatch()..elapsed = const Duration(seconds: 128),
+        },
+      );
+
+      (fakeFlutterDevice.devFS as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
+
+      final OperationResult result = await HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
+        devtoolsHandler: createNoOpHandler,
+        stopwatchFactory: fakeStopwatchFactory,
+      ).restart(fullRestart: true);
+
+      expect(result.isOk, true);
+      expect(testUsage.events, <TestUsageEvent>[
+        const TestUsageEvent('hot', 'restart', parameters: CustomDimensions(
+          hotEventTargetPlatform: 'flutter-tester',
+          hotEventSdkName: 'Tester',
+          hotEventEmulator: false,
+          hotEventFullRestart: true,
+          hotEventOverallTimeInMs: 64000,
+          hotEventSyncedBytes: 4,
+          hotEventInvalidatedSourcesCount: 2,
+          hotEventTransferTimeInMs: 32000,
+          hotEventCompileTimeInMs: 16000,
+          hotEventFindInvalidatedTimeInMs: 128000,
+          hotEventScannedSourcesCount: 8,
+        )),
+      ]);
+    }, overrides: <Type, Generator>{
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      ProcessManager: () => FakeProcessManager.any(),
+      Usage: () => testUsage,
+    });
+
+    testUsingContext('correctly tracks time spent for analytics for hot reload', () async {
+      final FakeDevice device = FakeDevice();
+      final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
+      final List<FlutterDevice> devices = <FlutterDevice>[
+        fakeFlutterDevice,
+      ];
+
+      fakeFlutterDevice.updateDevFSReport = UpdateFSReport(
+        success: true,
+        invalidatedSourcesCount: 6,
+        syncedBytes: 8,
+        scannedSourcesCount: 16,
+        compileDuration: const Duration(seconds: 16),
+        transferDuration: const Duration(seconds: 32),
+      );
+
+      final FakeStopwatchFactory fakeStopwatchFactory = FakeStopwatchFactory(
+        stopwatches: <String, Stopwatch>{
+          'updateDevFS': FakeStopwatch()..elapsed = const Duration(seconds: 64),
+          'reloadSources:reload': FakeStopwatch()..elapsed = const Duration(seconds: 128),
+          'reloadSources:reassemble': FakeStopwatch()..elapsed = const Duration(seconds: 256),
+          'reloadSources:vm': FakeStopwatch()..elapsed = const Duration(seconds: 512),
+        },
+      );
+
+      (fakeFlutterDevice.devFS as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
+
+      final OperationResult result = await HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
+        devtoolsHandler: createNoOpHandler,
+        stopwatchFactory: fakeStopwatchFactory,
+        reloadSourcesHelper: (
+          HotRunner hotRunner,
+          List<FlutterDevice> flutterDevices,
+          bool pause,
+          Map<String, dynamic> firstReloadDetails,
+          String targetPlatform,
+          String sdkName,
+          bool emulator,
+          String reason,
+        ) async {
+          firstReloadDetails['finalLibraryCount'] = 2;
+          firstReloadDetails['receivedLibraryCount'] = 3;
+          firstReloadDetails['receivedClassesCount'] = 4;
+          firstReloadDetails['receivedProceduresCount'] = 5;
+          return OperationResult.ok;
+        },
+        reassembleHelper: (
+          List<FlutterDevice> flutterDevices,
+          Map<FlutterDevice, List<FlutterView>> viewCache,
+          void Function(String message) onSlow,
+          String reloadMessage,
+          String fastReassembleClassName,
+        ) async => ReassembleResult(
+            <FlutterView, FlutterVmService>{null: null},
+            false,
+            true,
+          ),
+      ).restart(fullRestart: false);
+
+      expect(result.isOk, true);
+      expect(testUsage.events, <TestUsageEvent>[
+        const TestUsageEvent('hot', 'reload', parameters: CustomDimensions(
+          hotEventFinalLibraryCount: 2,
+          hotEventSyncedLibraryCount: 3,
+          hotEventSyncedClassesCount: 4,
+          hotEventSyncedProceduresCount: 5,
+          hotEventSyncedBytes: 8,
+          hotEventInvalidatedSourcesCount: 6,
+          hotEventTransferTimeInMs: 32000,
+          hotEventOverallTimeInMs: 128000,
+          hotEventTargetPlatform: 'flutter-tester',
+          hotEventSdkName: 'Tester',
+          hotEventEmulator: false,
+          hotEventFullRestart: false,
+          fastReassemble: false,
+          hotEventCompileTimeInMs: 16000,
+          hotEventFindInvalidatedTimeInMs: 64000,
+          hotEventScannedSourcesCount: 16,
+          hotEventReassembleTimeInMs: 256000,
+          hotEventReloadVMTimeInMs: 512000,
+        )),
+      ]);
+    }, overrides: <Type, Generator>{
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      ProcessManager: () => FakeProcessManager.any(),
+      Usage: () => testUsage,
+    });
   });
 
   group('hot attach', () {
@@ -299,6 +457,21 @@ void main() {
 class FakeDevFs extends Fake implements DevFS {
   @override
   Future<void> destroy() async { }
+
+  @override
+  List<Uri> sources = <Uri>[];
+
+  @override
+  DateTime lastCompiled;
+
+  @override
+  PackageConfig lastPackageConfig;
+
+  @override
+  Set<String> assetPathsToEvict = <String>{};
+
+  @override
+  Uri baseUri;
 }
 
 class FakeDevice extends Fake implements Device {
@@ -326,6 +499,9 @@ class FakeDevice extends Fake implements Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
+  String get name => 'Fake Device';
+
+  @override
   Future<bool> stopApp(
     covariant ApplicationPackage app, {
     String userIdentifier,
@@ -343,6 +519,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
   bool stoppedEchoingDeviceLog = false;
+  UpdateFSReport updateDevFSReport;
 
   @override
   final FakeDevice device;
@@ -354,6 +531,28 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   DevFS devFS = FakeDevFs();
+
+  @override
+  FlutterVmService get vmService => FakeFlutterVmService();
+
+  @override
+  ResidentCompiler generator;
+
+  @override
+  Future<UpdateFSReport> updateDevFS({
+    Uri mainUri,
+    String target,
+    AssetBundle bundle,
+    DateTime firstBuildTime,
+    bool bundleFirstUpload = false,
+    bool bundleDirty = false,
+    bool fullRestart = false,
+    String projectRootPath,
+    String pathToReload,
+    @required String dillOutputPath,
+    @required List<Uri> invalidatedFiles,
+    @required PackageConfig packageConfig,
+  }) async => updateDevFSReport;
 }
 
 class TestFlutterDevice extends FlutterDevice {
@@ -404,4 +603,24 @@ class TestHotRunnerConfig extends HotRunnerConfig {
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
   @override
   void accept() {}
+}
+
+class FakeFlutterVmService extends Fake implements FlutterVmService {
+  @override
+  vm_service.VmService get service => FakeVmService();
+
+  @override
+  Future<List<FlutterView>> getFlutterViews({bool returnEarly = false, Duration delay = const Duration(milliseconds: 50)}) async {
+    return <FlutterView>[];
+  }
+}
+
+class FakeVmService extends Fake implements vm_service.VmService {
+  @override
+  Future<vm_service.VM> getVM() async => FakeVm();
+}
+
+class FakeVm extends Fake implements vm_service.VM {
+  @override
+  List<vm_service.IsolateRef> get isolates => <vm_service.IsolateRef>[];
 }

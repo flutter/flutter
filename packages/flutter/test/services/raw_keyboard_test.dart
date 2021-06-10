@@ -1777,7 +1777,7 @@ void main() {
     int keyCodeForModifier(int modifier, {required bool isLeft}) {
       switch (modifier) {
         case GtkKeyHelper.modifierMod1:
-          return isLeft ? 65513 : 65513;
+          return 65513;
         case GtkKeyHelper.modifierShift:
           return isLeft ? 65505 : 65506;
         case GtkKeyHelper.modifierControl:

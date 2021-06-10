@@ -478,7 +478,7 @@ class Cache {
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
-    /// Delete all stamp files maintained by the cache.
+  /// Delete all stamp files maintained by the cache.
   void clearStampFiles() {
     try {
       getStampFileFor('flutter_tools').deleteSync();
@@ -1072,7 +1072,7 @@ class ArtifactUpdater {
     }
   }
 
-    /// Clear any zip/gzip files downloaded.
+  /// Clear any zip/gzip files downloaded.
   void removeDownloadedFiles() {
     for (final File file in downloadedFiles) {
       if (!file.existsSync()) {
