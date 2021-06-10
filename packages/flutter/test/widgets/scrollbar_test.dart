@@ -1171,6 +1171,41 @@ void main() {
     );
   });
 
+  testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
+    final ScrollController primaryScrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: primaryScrollController,
+              child: RawScrollbar(
+                child: SingleChildScrollView(
+                controller: scrollController,
+                child: const SizedBox(
+                  height: 1000.0,
+                  width: 1000.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(
+      (exception as AssertionError).message,
+      contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
+    );
+  });
+
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();

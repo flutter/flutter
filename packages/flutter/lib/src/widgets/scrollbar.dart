@@ -1026,82 +1026,103 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   // A scroll event is required in order to paint the thumb.
   void _maybeTriggerScrollbar() {
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
+      final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
       if (showScrollbar) {
         _fadeoutTimer?.cancel();
         // Wait one frame and cause an empty scroll event.  This allows the
         // thumb to show immediately when isAlwaysShown is true. A scroll
         // event is required in order to paint the thumb.
-        final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
-        final bool tryPrimary = widget.controller == null;
-        final String controllerForError = tryPrimary
-          ? 'provided ScrollController'
-          : 'PrimaryScrollController';
-        assert(
-          scrollController != null,
-          'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
-          '${tryPrimary ? 'The Scrollbar was not provided a ScrollController, '
-          'and attempted to use the PrimaryScrollController, but none was found.' :''}',
-        );
-        assert (() {
-          if (!scrollController!.hasClients) {
-            throw FlutterError.fromParts(<DiagnosticsNode>[
-              ErrorSummary(
-                "The Scrollbar's ScrollController has no ScrollPosition attached.",
-              ),
-              ErrorDescription(
-                'A Scrollbar cannot be painted without a ScrollPosition. ',
-              ),
-              ErrorHint(
-                'The Scrollbar attempted to use the $controllerForError. This '
-                'ScrollController should be associated with the ScrollView that '
-                'the Scrollbar is being applied to. '
-                '${tryPrimary
-                  ? 'A ScrollView with an Axis.vertical '
-                    'ScrollDirection will automatically use the '
-                    'PrimaryScrollController if the user has not provided a '
-                    'ScrollController, but a ScrollDirection of Axis.horizontal will '
-                    'not. To use the PrimaryScrollController explicitly, set ScrollView.primary '
-                    'to true for the Scrollable widget.'
-                  : 'When providing your own ScrollController, ensure both the '
-                    'Scrollbar and the Scrollable widget use the same one.'
-                }',
-              ),
-            ]);
-          }
-          return true;
-        }());
-        assert (() {
-          try {
-            scrollController!.position;
-          } catch (_) {
-            throw FlutterError.fromParts(<DiagnosticsNode>[
-              ErrorSummary(
-                'The $controllerForError is currently attached to more than one '
-                'ScrollPosition.',
-              ),
-              ErrorDescription(
-                'The Scrollbar requires a single ScrollPosition in order to be painted.',
-              ),
-              ErrorHint(
-                'When Scrollbar.isAlwaysShown is true, the associated Scrollable '
-                'widgets must have unique ScrollControllers. '
-                '${tryPrimary
-                  ? 'The PrimaryScrollController is used by default for '
-                    'ScrollViews with an Axis.vertical ScrollDirection, '
-                    'unless the ScrollView has been provided its own '
-                    'ScrollController. More than one Scrollable may have tried '
-                    'to use the PrimaryScrollController of the current context.'
-                  : 'The provided ScrollController must be unique to a '
-                    'Scrollable widget.'
-                }',
-              ),
-            ]);
-          }
-          return true;
-        }());
+        _checkForValidScrollPosition();
         scrollController!.position.didUpdateScrollPositionBy(0);
       }
+
+      // Interactive scrollbars need to be properly configured.
+      // If there is no scroll controller, there will not be gestures at all.
+      if (scrollController != null && enableGestures) {
+        _checkForValidScrollPosition();
+      }
     });
+  }
+
+  void _checkForValidScrollPosition() {
+    final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
+    final bool tryPrimary = widget.controller == null;
+    final String controllerForError = tryPrimary
+      ? 'provided ScrollController'
+      : 'PrimaryScrollController';
+
+    String when = '';
+    if (showScrollbar) {
+      when = 'Scrollbar.isAlwaysShown is true';
+    } else if (enableGestures) {
+      when = 'the scrollbar is interactive';
+    } else {
+      when = 'using the Scrollbar';
+    }
+
+    assert(
+      scrollController != null,
+      'A ScrollController is required when $when. '
+      '${tryPrimary ? 'The Scrollbar was not provided a ScrollController, '
+      'and attempted to use the PrimaryScrollController, but none was found.' :''}',
+    );
+    assert (() {
+      if (!scrollController!.hasClients) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            "The Scrollbar's ScrollController has no ScrollPosition attached.",
+          ),
+          ErrorDescription(
+            'A Scrollbar cannot be painted without a ScrollPosition. ',
+          ),
+          ErrorHint(
+            'The Scrollbar attempted to use the $controllerForError. This '
+            'ScrollController should be associated with the ScrollView that '
+            'the Scrollbar is being applied to. '
+            '${tryPrimary
+              ? 'A ScrollView with an Axis.vertical '
+                'ScrollDirection will automatically use the '
+                'PrimaryScrollController if the user has not provided a '
+                'ScrollController, but a ScrollDirection of Axis.horizontal will '
+                'not. To use the PrimaryScrollController explicitly, set ScrollView.primary '
+                'to true for the Scrollable widget.'
+              : 'When providing your own ScrollController, ensure both the '
+                'Scrollbar and the Scrollable widget use the same one.'
+            }',
+          ),
+        ]);
+      }
+      return true;
+    }());
+    assert (() {
+      try {
+        scrollController!.position;
+      } catch (_) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'The $controllerForError is currently attached to more than one '
+            'ScrollPosition.',
+          ),
+          ErrorDescription(
+            'The Scrollbar requires a single ScrollPosition in order to be painted.',
+          ),
+          ErrorHint(
+            'When $when, the associated Scrollable '
+            'widgets must have unique ScrollControllers. '
+            '${tryPrimary
+              ? 'The PrimaryScrollController is used by default for '
+                'ScrollViews with an Axis.vertical ScrollDirection, '
+                'unless the ScrollView has been provided its own '
+                'ScrollController. More than one Scrollable may have tried '
+                'to use the PrimaryScrollController of the current context.'
+              : 'The provided ScrollController must be unique to a '
+                'Scrollable widget.'
+            }',
+          ),
+        ]);
+      }
+      return true;
+    }());
   }
 
   /// This method is responsible for configuring the [scrollbarPainter]
@@ -1191,6 +1212,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPress() {
+    _checkForValidScrollPosition();
     if (getScrollbarDirection() == null) {
       return;
     }
@@ -1203,6 +1225,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPressStart(Offset localPosition) {
+    _checkForValidScrollPosition();
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
@@ -1219,6 +1242,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPressUpdate(Offset localPosition) {
+    _checkForValidScrollPosition();
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
@@ -1231,9 +1255,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
+    _checkForValidScrollPosition();
     final Axis? direction = getScrollbarDirection();
-    if (direction == null)
+    if (direction == null) {
       return;
+    }
     _maybeStartFadeoutTimer();
     _dragScrollbarAxisOffset = null;
     _currentController = null;
@@ -1241,6 +1267,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   void _handleTrackTapDown(TapDownDetails details) {
     // The Scrollbar should page towards the position of the tap on the track.
+    _checkForValidScrollPosition();
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
 
     double scrollIncrement;
