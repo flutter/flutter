@@ -472,7 +472,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   Future<void> performReassemble() async {
     await super.performReassemble();
-    if (BindingBase?.debugReassembleConfig?.widgetName == null) {
+    if (BindingBase.debugReassembleConfig?.widgetName == null) {
       Timeline.startSync('Dirty Render Tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
       try {
         renderView.reassemble();

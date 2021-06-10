@@ -11,7 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/foundation/binding.dart';
 
 import 'app.dart';
 import 'debug.dart';
@@ -499,7 +498,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   Future<void> _forceRebuild() {
     if (renderViewElement != null) {
-      buildOwner!.reassemble(renderViewElement!, DebugReassembleConfig());
+      buildOwner!.reassemble(renderViewElement!, null);
       return endOfFrame;
     }
     return Future<void>.value();

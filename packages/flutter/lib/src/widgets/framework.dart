@@ -3177,13 +3177,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   @protected
   void reassemble() {
-    final DebugReassembleConfig? config = _debugReassembleConfig;
-    if (config == null || config.widgetName == _widget?.runtimeType.toString()) {
+    if (_debugReassembleConfig == null || _debugReassembleConfig?.widgetName == _widget?.runtimeType.toString()) {
       markNeedsBuild();
       _debugReassembleConfig = null;
     }
     visitChildren((Element child) {
-      child._debugReassembleConfig = config;
+      child._debugReassembleConfig = _debugReassembleConfig;
       child.reassemble();
     });
     _debugReassembleConfig = null;
