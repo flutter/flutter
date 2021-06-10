@@ -29,9 +29,9 @@ void testMain() {
 
     test('CkAnimatedImage can be explicitly disposed of', () {
       final CkAnimatedImage image = CkAnimatedImage.decodeFromBytes(kTransparentImage, 'test');
-      expect(image.debugDisposed, false);
+      expect(image.debugDisposed, isFalse);
       image.dispose();
-      expect(image.debugDisposed, true);
+      expect(image.debugDisposed, isTrue);
 
       // Disallow usage after disposal
       expect(() => image.frameCount, throwsAssertionError);
@@ -86,11 +86,11 @@ void testMain() {
           canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)
               .makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
-      expect(image.debugDisposed, false);
-      expect(image.box.isDeletedPermanently, false);
+      expect(image.debugDisposed, isFalse);
+      expect(image.box.isDeletedPermanently, isFalse);
       image.dispose();
-      expect(image.debugDisposed, true);
-      expect(image.box.isDeletedPermanently, true);
+      expect(image.debugDisposed, isTrue);
+      expect(image.box.isDeletedPermanently, isTrue);
 
       // Disallow double-dispose.
       expect(() => image.dispose(), throwsAssertionError);
@@ -110,23 +110,23 @@ void testMain() {
       expect(box.refCount, 2);
       expect(box.debugGetStackTraces().length, 2);
 
-      expect(image.isCloneOf(clone), true);
-      expect(box.isDeletedPermanently, false);
+      expect(image.isCloneOf(clone), isTrue);
+      expect(box.isDeletedPermanently, isFalse);
 
       testCollector.collectNow();
-      expect(skImage.isDeleted(), false);
+      expect(skImage.isDeleted(), isFalse);
       image.dispose();
       expect(box.refCount, 1);
-      expect(box.isDeletedPermanently, false);
+      expect(box.isDeletedPermanently, isFalse);
 
       testCollector.collectNow();
-      expect(skImage.isDeleted(), false);
+      expect(skImage.isDeleted(), isFalse);
       clone.dispose();
       expect(box.refCount, 0);
-      expect(box.isDeletedPermanently, true);
+      expect(box.isDeletedPermanently, isTrue);
 
       testCollector.collectNow();
-      expect(skImage.isDeleted(), true);
+      expect(skImage.isDeleted(), isTrue);
       expect(box.debugGetStackTraces().length, 0);
       testCollector.collectNow();
     });

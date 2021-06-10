@@ -85,7 +85,7 @@ void testMain() async {
     final html.CanvasElement canvas2 = html.document.querySelector('canvas') as html.CanvasElement;
     // ZIndex should have been cleared since we have image element preceding
     // canvas.
-    expect(canvas.style.zIndex != '-1', true);
+    expect(canvas.style.zIndex != '-1', isTrue);
     expect(canvas2.id, kTestId);
     await matchGoldenFile('bitmap_canvas_reuse_zindex.png', region: region);
   });

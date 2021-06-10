@@ -44,12 +44,12 @@ void testMain() {
 
       expect(opacityLayer, isNotNull);
       expect(opacityLayer.rootElement, isNull);
-      expect(opacityLayer.isCreated, true);
+      expect(opacityLayer.isCreated, isTrue);
 
       builder.build();
 
       expect(opacityLayer.rootElement.tagName.toLowerCase(), 'flt-opacity');
-      expect(opacityLayer.isActive, true);
+      expect(opacityLayer.isActive, isTrue);
     });
 
     test('is released', () {
@@ -57,10 +57,10 @@ void testMain() {
       final PersistedOpacity opacityLayer = builder1.pushOpacity(100);
       builder1.pop();
       builder1.build();
-      expect(opacityLayer.isActive, true);
+      expect(opacityLayer.isActive, isTrue);
 
       SceneBuilder().build();
-      expect(opacityLayer.isReleased, true);
+      expect(opacityLayer.isReleased, isTrue);
       expect(opacityLayer.rootElement, isNull);
     });
 
@@ -72,12 +72,12 @@ void testMain() {
       builder1.pop();
       builder1.pop();
       builder1.build();
-      expect(opacityLayer.isActive, true);
-      expect(transformLayer.isActive, true);
+      expect(opacityLayer.isActive, isTrue);
+      expect(transformLayer.isActive, isTrue);
 
       SceneBuilder().build();
-      expect(opacityLayer.isReleased, true);
-      expect(transformLayer.isReleased, true);
+      expect(opacityLayer.isReleased, isTrue);
+      expect(transformLayer.isReleased, isTrue);
       expect(opacityLayer.rootElement, isNull);
       expect(transformLayer.rootElement, isNull);
     });
@@ -87,21 +87,21 @@ void testMain() {
       final PersistedOpacity opacityLayer1 = builder1.pushOpacity(100);
       builder1.pop();
       builder1.build();
-      expect(opacityLayer1.isActive, true);
+      expect(opacityLayer1.isActive, isTrue);
       final html.Element element = opacityLayer1.rootElement;
 
       final SceneBuilder builder2 = SceneBuilder();
       final PersistedOpacity opacityLayer2 =
           builder2.pushOpacity(200, oldLayer: opacityLayer1);
-      expect(opacityLayer1.isPendingUpdate, true);
-      expect(opacityLayer2.isCreated, true);
+      expect(opacityLayer1.isPendingUpdate, isTrue);
+      expect(opacityLayer2.isCreated, isTrue);
       expect(opacityLayer2.oldLayer, same(opacityLayer1));
       builder2.pop();
 
       builder2.build();
-      expect(opacityLayer1.isReleased, true);
+      expect(opacityLayer1.isReleased, isTrue);
       expect(opacityLayer1.rootElement, isNull);
-      expect(opacityLayer2.isActive, true);
+      expect(opacityLayer2.isActive, isTrue);
       expect(
           opacityLayer2.rootElement, element); // adopts old surface's element
       expect(opacityLayer2.oldLayer, isNull);
@@ -113,12 +113,12 @@ void testMain() {
       final PersistedOpacity opacityLayer1 = builder1.pushOpacity(100);
       builder1.pop();
       builder1.build();
-      expect(opacityLayer1.isActive, true);
+      expect(opacityLayer1.isActive, isTrue);
       final html.Element element = opacityLayer1.rootElement;
 
       // Release it
       SceneBuilder().build();
-      expect(opacityLayer1.isReleased, true);
+      expect(opacityLayer1.isReleased, isTrue);
       expect(opacityLayer1.rootElement, isNull);
 
       // Attempt to update it
@@ -126,12 +126,12 @@ void testMain() {
       final PersistedOpacity opacityLayer2 =
           builder2.pushOpacity(200, oldLayer: opacityLayer1);
       builder2.pop();
-      expect(opacityLayer1.isReleased, true);
-      expect(opacityLayer2.isCreated, true);
+      expect(opacityLayer1.isReleased, isTrue);
+      expect(opacityLayer2.isCreated, isTrue);
 
       builder2.build();
-      expect(opacityLayer1.isReleased, true);
-      expect(opacityLayer2.isActive, true);
+      expect(opacityLayer1.isReleased, isTrue);
+      expect(opacityLayer2.isActive, isTrue);
       expect(opacityLayer2.rootElement, isNot(equals(element)));
     });
 
@@ -189,12 +189,12 @@ void testMain() {
       builder2.pop();
       builder2.pop();
 
-      expect(c1.isPendingUpdate, true);
-      expect(c2.isCreated, true);
+      expect(c1.isPendingUpdate, isTrue);
+      expect(c2.isCreated, isTrue);
       builder2.build();
       expect(logger.log, <String>['build', 'createElement', 'apply', 'retain']);
-      expect(c1.isReleased, true);
-      expect(c2.isActive, true);
+      expect(c1.isReleased, isTrue);
+      expect(c2.isActive, isTrue);
 
       expect(a2.rootElement, elementA);
       expect(b1.rootElement, isNull);
@@ -213,17 +213,17 @@ void testMain() {
       final PersistedOpacity opacityLayer = builder1.pushOpacity(100);
       builder1.pop();
       builder1.build();
-      expect(opacityLayer.isActive, true);
+      expect(opacityLayer.isActive, isTrue);
       final html.Element element = opacityLayer.rootElement;
 
       final SceneBuilder builder2 = SceneBuilder();
 
-      expect(opacityLayer.isActive, true);
+      expect(opacityLayer.isActive, isTrue);
       builder2.addRetained(opacityLayer);
-      expect(opacityLayer.isPendingRetention, true);
+      expect(opacityLayer.isPendingRetention, isTrue);
 
       builder2.build();
-      expect(opacityLayer.isActive, true);
+      expect(opacityLayer.isActive, isTrue);
       expect(opacityLayer.rootElement, element);
     });
 
@@ -234,22 +234,22 @@ void testMain() {
       builder1.debugAddSurface(logger);
       builder1.pop();
       builder1.build();
-      expect(opacityLayer.isActive, true);
+      expect(opacityLayer.isActive, isTrue);
       expect(logger.log, <String>['build', 'createElement', 'apply']);
       final html.Element element = opacityLayer.rootElement;
 
       SceneBuilder().build();
-      expect(opacityLayer.isReleased, true);
+      expect(opacityLayer.isReleased, isTrue);
       expect(opacityLayer.rootElement, isNull);
       expect(logger.log, <String>['build', 'createElement', 'apply', 'discard']);
 
       final SceneBuilder builder2 = SceneBuilder();
       builder2.addRetained(opacityLayer);
-      expect(opacityLayer.isCreated, true); // revived
+      expect(opacityLayer.isCreated, isTrue); // revived
       expect(logger.log, <String>['build', 'createElement', 'apply', 'discard', 'revive']);
 
       builder2.build();
-      expect(opacityLayer.isActive, true);
+      expect(opacityLayer.isActive, isTrue);
       expect(opacityLayer.rootElement, isNot(equals(element)));
     });
 
@@ -261,8 +261,8 @@ void testMain() {
       builder1.pop();
       builder1.pop();
       builder1.build();
-      expect(opacityLayer.isActive, true);
-      expect(transformLayer.isActive, true);
+      expect(opacityLayer.isActive, isTrue);
+      expect(transformLayer.isActive, isTrue);
       final html.Element opacityElement = opacityLayer.rootElement;
       final html.Element transformElement = transformLayer.rootElement;
 
@@ -270,12 +270,12 @@ void testMain() {
 
       final SceneBuilder builder2 = SceneBuilder();
       builder2.addRetained(opacityLayer);
-      expect(opacityLayer.isCreated, true); // revived
-      expect(transformLayer.isCreated, true); // revived
+      expect(opacityLayer.isCreated, isTrue); // revived
+      expect(transformLayer.isCreated, isTrue); // revived
 
       builder2.build();
-      expect(opacityLayer.isActive, true);
-      expect(transformLayer.isActive, true);
+      expect(opacityLayer.isActive, isTrue);
+      expect(transformLayer.isActive, isTrue);
       expect(opacityLayer.rootElement, isNot(equals(opacityElement)));
       expect(transformLayer.rootElement, isNot(equals(transformElement)));
     });
@@ -346,19 +346,19 @@ void testMain() {
       final PersistedOpacity opacityLayer1 = builder1.pushOpacity(100);
       builder1.pop();
       builder1.build();
-      expect(opacityLayer1.isActive, true);
+      expect(opacityLayer1.isActive, isTrue);
       final html.Element element = opacityLayer1.rootElement;
 
       final SceneBuilder builder2 = SceneBuilder();
       final PersistedOpacity opacityLayer2 = builder2.pushOpacity(200);
-      expect(opacityLayer1.isActive, true);
-      expect(opacityLayer2.isCreated, true);
+      expect(opacityLayer1.isActive, isTrue);
+      expect(opacityLayer2.isCreated, isTrue);
       builder2.pop();
 
       builder2.build();
-      expect(opacityLayer1.isReleased, true);
+      expect(opacityLayer1.isReleased, isTrue);
       expect(opacityLayer1.rootElement, isNull);
-      expect(opacityLayer2.isActive, true);
+      expect(opacityLayer2.isActive, isTrue);
       expect(
           opacityLayer2.rootElement, element); // adopts old surface's element
     });

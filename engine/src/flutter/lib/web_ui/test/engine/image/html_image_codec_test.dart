@@ -67,9 +67,9 @@ void testMain() async {
       final HtmlCodec codec = HtmlCodec('sample_image1.png');
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       expect(frameInfo.image, isNotNull);
-      expect(frameInfo.image.debugDisposed, false);
+      expect(frameInfo.image.debugDisposed, isFalse);
       frameInfo.image.dispose();
-      expect(frameInfo.image.debugDisposed, true);
+      expect(frameInfo.image.debugDisposed, isTrue);
     });
     test('provides image loading progress', () async {
       StringBuffer buffer = new StringBuffer();

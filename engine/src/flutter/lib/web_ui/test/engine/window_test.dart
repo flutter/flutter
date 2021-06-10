@@ -317,7 +317,7 @@ void testMain() {
       },
     );
     await completer.future;
-    expect(responded, true);
+    expect(responded, isTrue);
   });
 
   test('SingletonFlutterWindow implements locale, locales, and locale change notifications', () async {

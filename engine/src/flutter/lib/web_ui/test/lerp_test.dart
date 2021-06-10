@@ -153,9 +153,9 @@ void expectAssertion(Function callback) {
     try {
       callback();
     } catch (e) {
-      expect(e is AssertionError, true);
+      expect(e is AssertionError, isTrue);
       threw = true;
     }
-    expect(threw, true);
+    expect(threw, isTrue);
   }
 }

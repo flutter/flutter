@@ -68,8 +68,8 @@ void testMain() {
       expect(_evictedItems.length, 0);
       cache.reuse('item2');
       cache.commitFrame();
-      expect(_evictedItems.contains(testItem1), true);
-      expect(_evictedItems.contains(testItem2), false);
+      expect(_evictedItems.contains(testItem1), isTrue);
+      expect(_evictedItems.contains(testItem2), isFalse);
     });
   });
 }

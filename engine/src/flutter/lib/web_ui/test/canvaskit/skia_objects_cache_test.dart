@@ -122,7 +122,7 @@ void _tests() {
 
         expect(original.box.debugGetStackTraces().length, 1);
         expect(original.box.refCount, 1);
-        expect(original.box.isDeletedPermanently, false);
+        expect(original.box.isDeletedPermanently, isFalse);
 
         final TestBoxWrapper clone = original.clone();
         expect(clone.box, same(original.box));
@@ -130,7 +130,7 @@ void _tests() {
         expect(clone.box.refCount, 2);
         expect(original.box.debugGetStackTraces().length, 2);
         expect(original.box.refCount, 2);
-        expect(original.box.isDeletedPermanently, false);
+        expect(original.box.isDeletedPermanently, isFalse);
 
         original.dispose();
 
@@ -154,7 +154,7 @@ void _tests() {
         expect(clone.box.refCount, 0);
         expect(original.box.debugGetStackTraces().length, 0);
         expect(original.box.refCount, 0);
-        expect(original.box.isDeletedPermanently, true);
+        expect(original.box.isDeletedPermanently, isTrue);
 
         testCollector.collectNow();
         expect(TestSkDeletable.deleteCount, 1);
@@ -186,18 +186,18 @@ void _tests() {
         object.box.didDelete();
         expect(TestSkDeletable.deleteCount, i + 1);
         expect(TestBoxWrapper.resurrectCount, i);
-        expect(object.box.isDeletedTemporarily, true);
-        expect(object.box.isDeletedPermanently, false);
+        expect(object.box.isDeletedTemporarily, isTrue);
+        expect(object.box.isDeletedPermanently, isFalse);
 
         expect(object.box.skiaObject, isNotNull);
         expect(TestSkDeletable.deleteCount, i + 1);
         expect(TestBoxWrapper.resurrectCount, i + 1);
-        expect(object.box.isDeletedTemporarily, false);
-        expect(object.box.isDeletedPermanently, false);
+        expect(object.box.isDeletedTemporarily, isFalse);
+        expect(object.box.isDeletedPermanently, isFalse);
       }
 
       object.dispose();
-      expect(object.box.isDeletedPermanently, true);
+      expect(object.box.isDeletedPermanently, isTrue);
     });
 
     test('Can dispose temporarily deleted object', () async {
@@ -211,11 +211,11 @@ void _tests() {
       object.box.didDelete();
       expect(TestSkDeletable.deleteCount, 1);
       expect(TestBoxWrapper.resurrectCount, 0);
-      expect(object.box.isDeletedTemporarily, true);
-      expect(object.box.isDeletedPermanently, false);
+      expect(object.box.isDeletedTemporarily, isTrue);
+      expect(object.box.isDeletedPermanently, isFalse);
 
       object.dispose();
-      expect(object.box.isDeletedPermanently, true);
+      expect(object.box.isDeletedPermanently, isTrue);
     });
   });
 

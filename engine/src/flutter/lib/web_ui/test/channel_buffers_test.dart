@@ -90,7 +90,7 @@ void testMain() {
       didCall = true;
       return Future<void>.value();
     });
-    expect(didCall, equals(false));
+    expect(didCall, isFalse);
   });
 
   test('drain when empty', () async {
@@ -101,7 +101,7 @@ void testMain() {
       didCall = true;
       return Future<void>.value();
     });
-    expect(didCall, equals(false));
+    expect(didCall, isFalse);
   });
 
   test('overflow', () async {
@@ -174,9 +174,9 @@ void testMain() {
     _resize(buffers, channel, 100);
     buffers.push(channel, one, oneCallback);
     buffers.push(channel, two, twoCallback);
-    expect(didCallCallback, equals(false));
+    expect(didCallCallback, isFalse);
     _resize(buffers, channel, 1);
-    expect(didCallCallback, equals(true));
+    expect(didCallCallback, isTrue);
   });
 
   test('overflow calls callback', () async {
@@ -195,7 +195,7 @@ void testMain() {
     _resize(buffers, channel, 1);
     buffers.push(channel, one, oneCallback);
     buffers.push(channel, two, twoCallback);
-    expect(didCallCallback, equals(true));
+    expect(didCallCallback, isTrue);
   });
 
   test('handle garbage', () async {

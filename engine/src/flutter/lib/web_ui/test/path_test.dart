@@ -21,7 +21,7 @@ void testMain() {
   group('Path', () {
     test('Should have no subpaths when created', () {
       final SurfacePath path = SurfacePath();
-      expect(path.isEmpty, true);
+      expect(path.isEmpty, isTrue);
     });
 
     test('LineTo should add command', () {
@@ -375,10 +375,10 @@ void testMain() {
       path.lineTo(110, 190);
       path.lineTo(50, 190);
       path.close();
-      expect(path.contains(Offset(80, 190)), true);
-      expect(path.contains(Offset(110, 80)), true);
-      expect(path.contains(Offset(110, 190)), true);
-      expect(path.contains(Offset(110, 191)), false);
+      expect(path.contains(Offset(80, 190)), isTrue);
+      expect(path.contains(Offset(110, 80)), isTrue);
+      expect(path.contains(Offset(110, 190)), isTrue);
+      expect(path.contains(Offset(110, 191)), isFalse);
     });
 
     test('Should not contain top-left of beveled border', () {
@@ -392,7 +392,7 @@ void testMain() {
       path.lineTo(15, 40);
       path.lineTo(10, 35);
       path.close();
-      expect(path.contains(Offset(10, 20)), false);
+      expect(path.contains(Offset(10, 20)), isFalse);
     });
 
     test('Computes contains for cubic curves', () {
@@ -406,8 +406,8 @@ void testMain() {
       path.lineTo(15, 40);
       path.cubicTo(10, 40, 10,  40, 10, 35);
       path.close();
-      expect(path.contains(Offset(10, 20)), false);
-      expect(path.contains(Offset(30, 40)), false);
+      expect(path.contains(Offset(10, 20)), isFalse);
+      expect(path.contains(Offset(30, 40)), isFalse);
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/44470
@@ -476,20 +476,20 @@ void testMain() {
     test('Should be able to construct from empty path', () {
       final SurfacePath path = SurfacePath();
       final SurfacePath? path2 = SurfacePath.from(path);
-      assert(path2 != null, true);
+      expect(path2, isNotNull);
     });
   });
 
   group('PathRef', () {
     test('Should return empty when created', () {
       final PathRef pathRef = PathRef();
-      expect(pathRef.isEmpty, true);
+      expect(pathRef.isEmpty, isTrue);
     });
 
     test('Should return non-empty when mutated', () {
       final PathRef pathRef = PathRef();
       pathRef.growForVerb(SPath.kMoveVerb, 0);
-      expect(pathRef.isEmpty, false);
+      expect(pathRef.isEmpty, isFalse);
     });
   });
   group('PathRefIterator', () {

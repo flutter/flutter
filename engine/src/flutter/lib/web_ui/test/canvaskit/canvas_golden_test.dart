@@ -39,12 +39,12 @@ void testMain() {
 
     setUp(() {
       expect(notoDownloadQueue.downloader.debugActiveDownloadCount, 0);
-      expect(notoDownloadQueue.isPending, false);
+      expect(notoDownloadQueue.isPending, isFalse);
     });
 
     tearDown(() {
       expect(notoDownloadQueue.downloader.debugActiveDownloadCount, 0);
-      expect(notoDownloadQueue.isPending, false);
+      expect(notoDownloadQueue.isPending, isFalse);
     });
 
     test('renders using non-recording canvas if weak refs are supported',

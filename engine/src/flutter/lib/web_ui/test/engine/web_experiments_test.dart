@@ -33,13 +33,13 @@ void testMain() {
   test('can turn on/off web experiments', () {
     WebExperiments.instance!.updateExperiment('useCanvasText', true);
     WebExperiments.instance!.updateExperiment('useCanvasRichText', true);
-    expect(WebExperiments.instance!.useCanvasText, true);
-    expect(WebExperiments.instance!.useCanvasRichText, true);
+    expect(WebExperiments.instance!.useCanvasText, isTrue);
+    expect(WebExperiments.instance!.useCanvasRichText, isTrue);
 
     WebExperiments.instance!.updateExperiment('useCanvasText', false);
     WebExperiments.instance!.updateExperiment('useCanvasRichText', false);
-    expect(WebExperiments.instance!.useCanvasText, false);
-    expect(WebExperiments.instance!.useCanvasRichText, false);
+    expect(WebExperiments.instance!.useCanvasText, isFalse);
+    expect(WebExperiments.instance!.useCanvasRichText, isFalse);
 
     WebExperiments.instance!.updateExperiment('useCanvasText', null);
     WebExperiments.instance!.updateExperiment('useCanvasRichText', null);
@@ -80,8 +80,8 @@ void testMain() {
 
     expect(() => jsUpdateExperiment('useCanvasText', true), returnsNormally);
     expect(() => jsUpdateExperiment('useCanvasRichText', true), returnsNormally);
-    expect(WebExperiments.instance!.useCanvasText, true);
-    expect(WebExperiments.instance!.useCanvasRichText, true);
+    expect(WebExperiments.instance!.useCanvasText, isTrue);
+    expect(WebExperiments.instance!.useCanvasRichText, isTrue);
 
     expect(() => jsUpdateExperiment('useCanvasText', null), returnsNormally);
     expect(() => jsUpdateExperiment('useCanvasRichText', null), returnsNormally);
