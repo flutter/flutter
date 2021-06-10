@@ -143,7 +143,6 @@ final Uri testUri = Uri.parse('foo://bar');
 void main() {
   Testbed testbed;
   MockFlutterDevice mockFlutterDevice;
-  MockVMService mockVMService;
   FakeDevFS mockDevFS;
   ResidentRunner residentRunner;
   FakeDevice mockDevice;
@@ -168,7 +167,6 @@ void main() {
     });
     mockFlutterDevice = MockFlutterDevice();
     mockDevice = FakeDevice();
-    mockVMService = MockVMService();
     mockDevFS = FakeDevFS();
     // FlutterDevice Mocks.
     when(mockFlutterDevice.updateDevFS(
@@ -2123,12 +2121,11 @@ void main() {
       io.CompressionOptions compression,
       Device device,
       Logger logger,
-    }) async => mockVMService,
+    }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
   testUsingContext('Failed DDS start outputs error message', () => testbed.run(() async {
     // See https://github.com/flutter/flutter/issues/72385 for context.
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice mockDevice = FakeDevice()
       ..dds = DartDevelopmentService();
     ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
@@ -2165,7 +2162,7 @@ void main() {
       io.CompressionOptions compression,
       Device device,
       Logger logger,
-    }) async => mockVMService,
+    }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
   testUsingContext('nextPlatform moves through expected platforms', () {
@@ -2193,8 +2190,6 @@ void main() {
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
-class MockVMService extends Mock implements FlutterVmService {}
-class MockDevFS extends Mock implements DevFS {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
 
 class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceException {

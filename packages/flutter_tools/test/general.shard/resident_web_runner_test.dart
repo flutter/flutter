@@ -10,6 +10,7 @@ import 'dart:io';
 
 import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -28,14 +29,16 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config.dart';
+import 'package:package_config/package_config_types.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_vm_services.dart';
-import '../src/fakes.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(
@@ -95,11 +98,11 @@ const List<VmServiceExpectation> kAttachExpectations = <VmServiceExpectation>[
 
 void main() {
   MockDebugConnection mockDebugConnection;
-  MockChromeDevice mockChromeDevice;
+  FakeChromeDevice chromeDevice;
   MockAppConnection mockAppConnection;
   MockFlutterDevice mockFlutterDevice;
-  MockWebDevFS mockWebDevFS;
-  MockResidentCompiler mockResidentCompiler;
+  FakeWebDevFS webDevFS;
+  FakeResidentCompiler residentCompiler;
   FakeChromeConnection chromeConnection;
   FakeChromeTab chromeTab;
   MockWebServerDevice mockWebServerDevice;
@@ -117,20 +120,13 @@ void main() {
     mockDevice = MockDevice();
     mockAppConnection = MockAppConnection();
     mockFlutterDevice = MockFlutterDevice();
-    mockWebDevFS = MockWebDevFS();
-    mockResidentCompiler = MockResidentCompiler();
+    webDevFS = FakeWebDevFS();
+    residentCompiler = FakeResidentCompiler();
     chromeConnection = FakeChromeConnection();
     chromeTab = FakeChromeTab('index.html');
     mockWebServerDevice = MockWebServerDevice();
-    when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
+    when(mockFlutterDevice.devFS).thenReturn(webDevFS);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
-    when(mockWebDevFS.connect(any)).thenAnswer((Invocation invocation) async {
-      return ConnectionResult(
-        mockAppConnection,
-        mockDebugConnection,
-        mockDebugConnection.vmService,
-      );
-    });
     fileSystem.file('.packages').writeAsStringSync('\n');
   });
 
@@ -138,34 +134,21 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('lib/main.dart').createSync(recursive: true);
     fileSystem.file('web/index.html').createSync(recursive: true);
-    when(mockWebDevFS.update(
-      mainUri: anyNamed('mainUri'),
-      target: anyNamed('target'),
-      bundle: anyNamed('bundle'),
-      firstBuildTime: anyNamed('firstBuildTime'),
-      bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      generator: anyNamed('generator'),
-      fullRestart: anyNamed('fullRestart'),
-      dillOutputPath: anyNamed('dillOutputPath'),
-      projectRootPath: anyNamed('projectRootPath'),
-      pathToReload: anyNamed('pathToReload'),
-      invalidatedFiles: anyNamed('invalidatedFiles'),
-      trackWidgetCreation: anyNamed('trackWidgetCreation'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation _) async {
-      return UpdateFSReport(success: true,  syncedBytes: 0);
-    });
+    webDevFS.report = UpdateFSReport(success: true, syncedBytes: 0);
     when(mockDebugConnection.vmService).thenAnswer((Invocation invocation) {
       return fakeVmServiceHost.vmService.service;
     });
     when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
       return Completer<void>().future;
     });
+    webDevFS.result = ConnectionResult(
+      mockAppConnection,
+      mockDebugConnection,
+      mockDebugConnection.vmService,
+    );
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
-    when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
-    when(mockWebDevFS.sources).thenReturn(<Uri>[]);
-    when(mockWebDevFS.baseUri).thenReturn(Uri.parse('http://localhost:12345'));
-    when(mockFlutterDevice.generator).thenReturn(mockResidentCompiler);
+    when(mockFlutterDevice.devFS).thenReturn(webDevFS);
+    when(mockFlutterDevice.generator).thenReturn(residentCompiler);
     chromeConnection.tabs.add(chromeTab);
   }
 
@@ -190,7 +173,7 @@ void main() {
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
 
-    when(mockFlutterDevice.device).thenReturn(MockChromeDevice());
+    when(mockFlutterDevice.device).thenReturn(FakeChromeDevice());
 
     expect(residentWebRunner.debuggingEnabled, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -200,9 +183,6 @@ void main() {
   });
 
   testUsingContext('runner with web server device supports debugging with --start-paused', () {
-    fileSystem.file('.packages')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('\n');
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
     when(mockFlutterDevice.device).thenReturn(WebServerDevice(
@@ -221,16 +201,13 @@ void main() {
       systemClock: globals.systemClock,
     );
 
-    expect(profileResidentWebRunner.uri, mockWebDevFS.baseUri);
+    expect(profileResidentWebRunner.uri, webDevFS.baseUri);
     expect(profileResidentWebRunner.debuggingEnabled, true);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
   testUsingContext('profile does not supportsServiceProtocol', () {
-    fileSystem.file('.packages')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('\n');
     final ResidentRunner residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
@@ -244,7 +221,7 @@ void main() {
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
+    when(mockFlutterDevice.device).thenReturn(chromeDevice);
     final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
@@ -266,16 +243,11 @@ void main() {
   });
 
   testUsingContext('Can successfully run and connect to vmservice', () async {
-    final BufferLogger bufferLogger = BufferLogger.test();
-    final FakeStatusLogger logger = FakeStatusLogger(bufferLogger);
-    fileSystem.file('.packages')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('\n');
+    final BufferLogger logger = BufferLogger.test();
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
-    final MockStatus status = MockStatus();
-    logger.status = status;
+
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -283,11 +255,9 @@ void main() {
     final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
     verify(mockAppConnection.runMain()).called(1);
-    verify(status.stop()).called(1);
-    expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
+    expect(logger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }, overrides: <Type, Generator>{
-    Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -317,23 +287,7 @@ void main() {
     fileSystem.file(globals.fs.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
-    when(mockWebDevFS.update(
-      mainUri: anyNamed('mainUri'),
-      target: anyNamed('target'),
-      bundle: anyNamed('bundle'),
-      firstBuildTime: anyNamed('firstBuildTime'),
-      bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      generator: anyNamed('generator'),
-      fullRestart: anyNamed('fullRestart'),
-      dillOutputPath: anyNamed('dillOutputPath'),
-      projectRootPath: anyNamed('projectRootPath'),
-      pathToReload: anyNamed('pathToReload'),
-      invalidatedFiles: anyNamed('invalidatedFiles'),
-      trackWidgetCreation: anyNamed('trackWidgetCreation'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation _) async {
-      return UpdateFSReport(success: false, syncedBytes: 0);
-    });
+    webDevFS.report = UpdateFSReport(success: false, syncedBytes: 0);
 
     expect(await residentWebRunner.run(), 1);
     // Completing this future ensures that the daemon can exit correctly.
@@ -546,25 +500,8 @@ void main() {
       platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
     ));
-    when(mockWebDevFS.update(
-      mainUri: anyNamed('mainUri'),
-      target: anyNamed('target'),
-      bundle: anyNamed('bundle'),
-      firstBuildTime: anyNamed('firstBuildTime'),
-      bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      generator: anyNamed('generator'),
-      fullRestart: anyNamed('fullRestart'),
-      dillOutputPath: anyNamed('dillOutputPath'),
-      trackWidgetCreation: anyNamed('trackWidgetCreation'),
-      projectRootPath: anyNamed('projectRootPath'),
-      pathToReload: anyNamed('pathToReload'),
-      invalidatedFiles: anyNamed('invalidatedFiles'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation invocation) async {
-      // Generated entrypoint file in temp dir.
-      expect(invocation.namedArguments[#mainUri].toString(), contains('entrypoint.dart'));
-      return UpdateFSReport(success: true);
-    });
+    webDevFS.report = UpdateFSReport(success: true);
+
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -577,7 +514,7 @@ void main() {
 
     expect(logger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
-    verify(mockResidentCompiler.accept()).called(2);
+    expect(webDevFS.mainUri.toString(), contains('entrypoint.dart'));
 
     // ensure that analytics are sent.
     expect(testUsage.events, <TestUsageEvent>[
@@ -620,25 +557,8 @@ void main() {
       platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
     ));
-    Uri entrypointFileUri;
-    when(mockWebDevFS.update(
-      mainUri: anyNamed('mainUri'),
-      target: anyNamed('target'),
-      bundle: anyNamed('bundle'),
-      firstBuildTime: anyNamed('firstBuildTime'),
-      bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      generator: anyNamed('generator'),
-      fullRestart: anyNamed('fullRestart'),
-      dillOutputPath: anyNamed('dillOutputPath'),
-      trackWidgetCreation: anyNamed('trackWidgetCreation'),
-      projectRootPath: anyNamed('projectRootPath'),
-      pathToReload: anyNamed('pathToReload'),
-      invalidatedFiles: anyNamed('invalidatedFiles'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation invocation) async {
-      entrypointFileUri = invocation.namedArguments[#mainUri] as Uri;
-      return UpdateFSReport(success: true);
-    });
+    webDevFS.report = UpdateFSReport(success: true);
+
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -647,15 +567,14 @@ void main() {
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
     // Ensure that generated entrypoint is generated correctly.
-    expect(entrypointFileUri, isNotNull);
-    final String entrypointContents = fileSystem.file(entrypointFileUri).readAsStringSync();
+    expect(webDevFS.mainUri, isNotNull);
+    final String entrypointContents = fileSystem.file(webDevFS.mainUri).readAsStringSync();
     expect(entrypointContents, contains('// Flutter web bootstrap script'));
     expect(entrypointContents, contains("import 'dart:ui' as ui;"));
     expect(entrypointContents, contains('await ui.webOnlyInitializePlatform();'));
 
     expect(logger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
-    verify(mockResidentCompiler.accept()).called(2);
 
 	  // ensure that analytics are sent.
     expect(testUsage.events, <TestUsageEvent>[
@@ -680,23 +599,8 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests :kAttachExpectations);
     _setupMocks();
     when(mockFlutterDevice.device).thenReturn(mockWebServerDevice);
-    when(mockWebDevFS.update(
-      mainUri: anyNamed('mainUri'),
-      target: anyNamed('target'),
-      bundle: anyNamed('bundle'),
-      firstBuildTime: anyNamed('firstBuildTime'),
-      bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      generator: anyNamed('generator'),
-      fullRestart: anyNamed('fullRestart'),
-      dillOutputPath: anyNamed('dillOutputPath'),
-      trackWidgetCreation: anyNamed('trackWidgetCreation'),
-      projectRootPath: anyNamed('projectRootPath'),
-      pathToReload: anyNamed('pathToReload'),
-      invalidatedFiles: anyNamed('invalidatedFiles'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation invocation) async {
-      return UpdateFSReport(success: true);
-    });
+    webDevFS.report = UpdateFSReport(success: true);
+
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -706,7 +610,6 @@ void main() {
 
     expect(logger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
-    verify(mockResidentCompiler.accept()).called(2);
 
 	  // web-server device does not send restart analytics
     expect(testUsage.events, isEmpty);
@@ -731,23 +634,8 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
-    when(mockWebDevFS.update(
-      mainUri: anyNamed('mainUri'),
-      target: anyNamed('target'),
-      bundle: anyNamed('bundle'),
-      firstBuildTime: anyNamed('firstBuildTime'),
-      bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      generator: anyNamed('generator'),
-      fullRestart: anyNamed('fullRestart'),
-      dillOutputPath: anyNamed('dillOutputPath'),
-      projectRootPath: anyNamed('projectRootPath'),
-      pathToReload: anyNamed('pathToReload'),
-      invalidatedFiles: anyNamed('invalidatedFiles'),
-      packageConfig: anyNamed('packageConfig'),
-      trackWidgetCreation: anyNamed('trackWidgetCreation'),
-    )).thenAnswer((Invocation _) async {
-      return UpdateFSReport(success: false,  syncedBytes: 0);
-    });
+    webDevFS.report = UpdateFSReport(success: false,  syncedBytes: 0);
+
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -803,23 +691,7 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    when(mockWebDevFS.update(
-      mainUri: anyNamed('mainUri'),
-      target: anyNamed('target'),
-      bundle: anyNamed('bundle'),
-      firstBuildTime: anyNamed('firstBuildTime'),
-      bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      generator: anyNamed('generator'),
-      fullRestart: anyNamed('fullRestart'),
-      dillOutputPath: anyNamed('dillOutputPath'),
-      projectRootPath: anyNamed('projectRootPath'),
-      pathToReload: anyNamed('pathToReload'),
-      invalidatedFiles: anyNamed('invalidatedFiles'),
-      packageConfig: anyNamed('packageConfig'),
-      trackWidgetCreation: anyNamed('trackWidgetCreation'),
-    )).thenAnswer((Invocation _) async {
-      return UpdateFSReport(success: false,  syncedBytes: 0);
-    });
+    webDevFS.report = UpdateFSReport(success: false,  syncedBytes: 0);
 
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
@@ -994,9 +866,8 @@ void main() {
       platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
     ));
-    when(mockWebDevFS.create()).thenAnswer((Invocation invocation) async {
-      return Uri.parse('http://localhost:8765/app/');
-    });
+    webDevFS.baseUri = Uri.parse('http://localhost:8765/app/');
+
     final FakeChromeTab chromeTab = FakeChromeTab('index.html');
     chromeConnection.tabs.add(chromeTab);
 
@@ -1031,7 +902,6 @@ void main() {
     )));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -1043,9 +913,7 @@ void main() {
     when(mockFlutterDevice.device).thenReturn(WebServerDevice(
       logger: logger,
     ));
-    when(mockWebDevFS.create()).thenAnswer((Invocation invocation) async {
-      return Uri.parse('http://localhost:8765/app/');
-    });
+    webDevFS.baseUri = Uri.parse('http://localhost:8765/app/');
 
     final ResidentWebRunner runner = ResidentWebRunner(
       mockFlutterDevice,
@@ -1086,9 +954,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
-
-    when(mockWebDevFS.connect(any))
-      .thenThrow(const WebSocketException());
+    webDevFS.exception = const WebSocketException();
 
     await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -1101,9 +967,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
-
-    when(mockWebDevFS.connect(any))
-      .thenThrow(AppConnectionException(''));
+    webDevFS.exception = AppConnectionException('');
 
     await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -1117,8 +981,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
 
-    when(mockWebDevFS.connect(any))
-      .thenThrow(ChromeDebugException(<String, dynamic>{}));
+    webDevFS.exception = ChromeDebugException(<String, dynamic>{});
 
     await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -1131,7 +994,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
-    when(mockWebDevFS.connect(any)).thenThrow(Exception());
+    webDevFS.exception = Exception();
 
     await expectLater(residentWebRunner.run, throwsException);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -1142,17 +1005,12 @@ void main() {
 
   testUsingContext('Rethrows unknown Error type from dwds tooling', () async {
     final BufferLogger logger = BufferLogger.test();
-    final FakeStatusLogger fakeStatusLogger = FakeStatusLogger(logger);
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: fakeStatusLogger);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
-    final MockStatus mockStatus = MockStatus();
-    fakeStatusLogger.status = mockStatus;
-
-    when(mockWebDevFS.connect(any)).thenThrow(StateError(''));
+    webDevFS.exception = StateError('');
 
     await expectLater(residentWebRunner.run, throwsStateError);
-    verify(mockStatus.stop()).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1178,13 +1036,97 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
   );
 }
 
-class MockChromeDevice extends Mock implements ChromiumDevice {}
 class MockDebugConnection extends Mock implements DebugConnection {}
 class MockAppConnection extends Mock implements AppConnection {}
-class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
-class MockWebDevFS extends Mock implements WebDevFS {}
-class MockResidentCompiler extends Mock implements ResidentCompiler {}
+class MockWebServerDevice extends Mock implements WebServerDevice {}
+class MockDevice extends Mock implements Device {}
+
+class FakeChromeDevice extends Fake implements ChromiumDevice {}
+class FakeWipDebugger extends Fake implements WipDebugger {}
+
+class FakeResidentCompiler extends Fake implements ResidentCompiler {
+  @override
+  Future<CompilerOutput> recompile(
+    Uri mainUri,
+    List<Uri> invalidatedFiles, {
+    @required String outputPath,
+    @required PackageConfig packageConfig,
+    @required String projectRootPath,
+    @required FileSystem fs,
+    bool suppressErrors = false,
+  }) async {
+    return const CompilerOutput('foo.dill', 0, <Uri>[]);
+  }
+
+  @override
+  void accept() { }
+
+  @override
+  void reset() { }
+
+  @override
+  Future<CompilerOutput> reject() async {
+    return const CompilerOutput('foo.dill', 0, <Uri>[]);
+  }
+
+  @override
+  void addFileSystemRoot(String root) { }
+}
+
+class FakeWebDevFS extends Fake implements WebDevFS {
+  Object exception;
+  ConnectionResult result;
+  UpdateFSReport report;
+
+  Uri mainUri;
+
+  @override
+  List<Uri> sources = <Uri>[];
+
+  @override
+  Uri baseUri = Uri.parse('http://localhost:12345');
+
+  @override
+  DateTime lastCompiled = DateTime.now();
+
+  @override
+  PackageConfig lastPackageConfig = PackageConfig.empty;
+
+  @override
+  Future<Uri> create() async {
+    return baseUri;
+  }
+
+  @override
+  Future<UpdateFSReport> update({
+    @required Uri mainUri,
+    @required ResidentCompiler generator,
+    @required bool trackWidgetCreation,
+    @required String pathToReload,
+    @required List<Uri> invalidatedFiles,
+    @required PackageConfig packageConfig,
+    @required String dillOutputPath,
+    DevFSWriter devFSWriter,
+    String target,
+    AssetBundle bundle,
+    DateTime firstBuildTime,
+    bool bundleFirstUpload = false,
+    bool fullRestart = false,
+    String projectRootPath,
+  }) async {
+    this.mainUri = mainUri;
+    return report;
+  }
+
+  @override
+  Future<ConnectionResult> connect(bool useDebugExtension) async {
+    if (exception != null) {
+      throw exception;
+    }
+    return result;
+  }
+}
 
 class FakeChromeConnection extends Fake implements ChromeConnection {
   final List<ChromeTab> tabs = <ChromeTab>[];
@@ -1212,11 +1154,6 @@ class FakeWipConnection extends Fake implements WipConnection {
   @override
   final WipDebugger debugger = FakeWipDebugger();
 }
-
-class FakeWipDebugger extends Fake implements WipDebugger {}
-
-class MockWebServerDevice extends Mock implements WebServerDevice {}
-class MockDevice extends Mock implements Device {}
 
 /// A test implementation of the [ChromiumLauncher] that launches a fixed instance.
 class TestChromiumLauncher implements ChromiumLauncher {
