@@ -150,7 +150,7 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// A list of points that the widget should snap to. [minChildSize] and
   /// [maxChildSize] are implicitly snapped to and should not be specified here-
   /// pass an empty list to snap the widget between min and max.
-  final List<double>? snapPoints;
+  final Set<double>? snapPoints;
 
   /// The builder that creates a child to display in this widget, which will
   /// use the provided [ScrollController] to enable dragging and scrolling
@@ -290,12 +290,14 @@ class _DraggableSheetExtent {
     if (availablePixels == 0) {
       return;
     }
-    addExtentDelta(availablePixels * maxExtent, context);
+    updateExtent(
+        currentExtent + pixelDelta / availablePixels * maxExtent, context);
   }
 
-  /// Modify extent by the given delta is a number between 0..1.
-  void addExtentDelta(double delta, BuildContext context) {
-    currentExtent += delta;
+  /// Set the extent to the give new value. [newExtent] should be a number
+  /// between 0..1.
+  void updateExtent(double newExtent, BuildContext context) {
+    currentExtent = newExtent;
     DraggableScrollableNotification(
       minExtent: minExtent,
       maxExtent: maxExtent,
@@ -533,13 +535,17 @@ class _DraggableScrollableSheetScrollPosition
           final AnimationController snapController = AnimationController(
             vsync: context.vsync,
             value: extent.currentExtent,
-            duration: const Duration(milliseconds: 100),
           );
-          snapController.addListener(() {
-            extent.addExtentDelta(delta, context.notificationContext!);
+          CurvedAnimation(
+            parent: snapController,
+            curve: Curves.easeInOut,
+          ).addListener(() {
+            extent.updateExtent(
+                snapController.value, context.notificationContext!);
           });
           snapController
-              .animateTo(targetPoint)
+              .animateTo(targetPoint,
+                  duration: const Duration(milliseconds: 200))
               .then((_) => super.goBallistic(0));
         } else {
           super.goBallistic(0);
