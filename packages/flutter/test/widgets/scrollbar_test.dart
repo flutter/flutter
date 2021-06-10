@@ -1339,6 +1339,61 @@ void main() {
     );
   });
 
+  testWidgets('Scrollbar thumb can be dragged in reverse', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              isAlwaysShown: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                reverse: true,
+                child: SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 510.0, 800.0, 600.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Drag the thumb up to scroll up.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 550.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    // The view has scrolled more than it would have by a swipe gesture of the
+    // same distance.
+    expect(scrollController.offset, greaterThan(scrollAmount * 2));
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 500.0, 800.0, 590.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  });
   testWidgets('ScrollbarPainter asserts if scrollbarOrientation is used with wrong axisDirection', (WidgetTester tester) async {
     final ScrollbarPainter painter = ScrollbarPainter(
       color: _kScrollbarColor,

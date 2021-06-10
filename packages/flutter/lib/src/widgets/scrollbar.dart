@@ -951,7 +951,7 @@ class RawScrollbar extends StatefulWidget {
 /// Provides defaults gestures for dragging the scrollbar thumb and tapping on the
 /// scrollbar track.
 class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProviderStateMixin<T> {
-  double? _dragScrollbarAxisPosition;
+  Offset? _dragScrollbarAxisOffset;
   ScrollController? _currentController;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
@@ -1133,9 +1133,25 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
-  void _updateScrollPosition(double primaryDelta) {
+  void _updateScrollPosition(Offset updatedOffset) {
     assert(_currentController != null);
+    assert(_dragScrollbarAxisOffset != null);
     final ScrollPosition position = _currentController!.position;
+    late double primaryDelta;
+    switch (position.axisDirection) {
+      case AxisDirection.up:
+        primaryDelta = _dragScrollbarAxisOffset!.dy - updatedOffset.dy;
+        break;
+      case AxisDirection.right:
+        primaryDelta = updatedOffset.dx -_dragScrollbarAxisOffset!.dx;
+        break;
+      case AxisDirection.down:
+        primaryDelta = updatedOffset.dy -_dragScrollbarAxisOffset!.dy;
+        break;
+      case AxisDirection.left:
+        primaryDelta = _dragScrollbarAxisOffset!.dx - updatedOffset.dx;
+        break;
+    }
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
     // time _updateScrollPosition was called, into the coordinate space of the scroll
@@ -1159,8 +1175,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
-  /// Returns the [Axis] of the child scroll view, or null if the current scroll
-  /// controller does not have any attached positions.
+  /// Returns the [Axis] of the child scroll view, or null if the
+  /// current scroll controller does not have any attached positions.
   @protected
   Axis? getScrollbarDirection() {
     assert(_currentController != null);
@@ -1194,14 +1210,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
-    switch (direction) {
-      case Axis.vertical:
-        _dragScrollbarAxisPosition = localPosition.dy;
-        break;
-      case Axis.horizontal:
-        _dragScrollbarAxisPosition = localPosition.dx;
-        break;
-    }
+    _dragScrollbarAxisOffset = localPosition;
   }
 
   /// Handler called when a currently active long press gesture moves.
@@ -1214,16 +1223,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (direction == null) {
       return;
     }
-    switch(direction) {
-      case Axis.vertical:
-        _updateScrollPosition(localPosition.dy - _dragScrollbarAxisPosition!);
-        _dragScrollbarAxisPosition = localPosition.dy;
-        break;
-      case Axis.horizontal:
-        _updateScrollPosition(localPosition.dx - _dragScrollbarAxisPosition!);
-        _dragScrollbarAxisPosition = localPosition.dx;
-        break;
-    }
+    _updateScrollPosition(localPosition);
+    _dragScrollbarAxisOffset = localPosition;
   }
 
   /// Handler called when a long press has ended.
@@ -1234,7 +1235,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (direction == null)
       return;
     _maybeStartFadeoutTimer();
-    _dragScrollbarAxisPosition = null;
+    _dragScrollbarAxisOffset = null;
     _currentController = null;
   }
 
@@ -1303,7 +1304,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       _fadeoutTimer?.cancel();
       scrollbarPainter.update(notification.metrics, notification.metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {
-      if (_dragScrollbarAxisPosition == null)
+      if (_dragScrollbarAxisOffset == null)
         _maybeStartFadeoutTimer();
     }
     return false;
