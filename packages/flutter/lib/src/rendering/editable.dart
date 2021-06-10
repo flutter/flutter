@@ -2503,6 +2503,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (maxLines == value)
       return;
     _maxLines = value;
+    _textPainter.maxLines = value;
     markNeedsTextLayout();
   }
 
