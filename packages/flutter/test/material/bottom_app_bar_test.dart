@@ -68,12 +68,12 @@ void main() {
         ),
       );
     }
-    await pump(FloatingActionButtonLocation.endDocked);
+    await pump(FloatingActionButtonLocation.centerDocked);
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.1.png'),
     );
-    await pump(FloatingActionButtonLocation.centerDocked);
+    await pump(FloatingActionButtonLocation.endDocked);
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(key),
