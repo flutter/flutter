@@ -1163,6 +1163,19 @@ public class InputConnectionAdaptorTest {
     assertFalse(didConsume);
   }
 
+  @Test
+  public void testCleanUpBatchEndsOnCloseConnection() {
+    final ListenableEditingState editable = sampleEditable(0, 0);
+    InputConnectionAdaptor adaptor = spy(sampleInputConnectionAdaptor(editable));
+    for (int i = 0; i < 5; i++) {
+      adaptor.beginBatchEdit();
+    }
+    adaptor.endBatchEdit();
+    verify(adaptor, times(1)).endBatchEdit();
+    adaptor.closeConnection();
+    verify(adaptor, times(4)).endBatchEdit();
+  }
+
   private static final String SAMPLE_TEXT =
       "Lorem ipsum dolor sit amet," + "\nconsectetur adipiscing elit.";
 
