@@ -198,8 +198,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     if (!value.isComposingRangeValid || !withComposing) {
       return TextSpan(style: style, text: text);
     }
-    final TextStyle composingStyle = style != null ? style.merge(const TextStyle(decoration: TextDecoration.underline))
-        : const TextStyle(decoration: TextDecoration.underline);
+    final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
+        ?? const TextStyle(decoration: TextDecoration.underline);
     return TextSpan(
       style: style,
       children: <TextSpan>[
