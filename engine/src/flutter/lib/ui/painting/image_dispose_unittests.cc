@@ -40,7 +40,13 @@ class ImageDisposeTest : public ShellTest {
   sk_sp<SkImage> current_image_;
 };
 
-TEST_F(ImageDisposeTest, ImageReleasedAfterFrame) {
+TEST_F(ImageDisposeTest,
+#if defined(OS_FUCHSIA)
+       DISABLED_ImageReleasedAfterFrame
+#else
+       ImageReleasedAfterFrame
+#endif  // defined(OS_FUCHSIA)
+) {
   auto native_capture_image_and_picture = [&](Dart_NativeArguments args) {
     auto image_handle = Dart_GetNativeArgument(args, 0);
     auto native_image_handle =
