@@ -9,14 +9,14 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// An example that sets up local http server for serving single
-/// image, creates single flutter widget with five copies of requested
+/// An example that sets up a local http server for serving a single
+/// image, creates a single flutter widget with five copies of the requested
 /// image and prints how long the loading took.
 ///
 /// This is used in [$FH/flutter/devicelab/bin/tasks/image_list_reported_duration.dart] test.
 ///
 ///
-/// To generate new certificate:
+/// To generate a new certificate:
 ///
 /// $ openssl req -new -out image_list.csr
 ///   Generating a 2048 bit RSA private key
@@ -24,10 +24,10 @@ import 'package:flutter/services.dart';
 ///   ...
 ///   Common Name (eg, fully qualified host name) []:localhost
 ///
-/// Copy content of the privateKey below into image_list.key file, then
+/// Copy the contents of the privateKey below into the image_list.key file, then
 /// $ openssl x509 -req -sha256 -days 3650 -in image_list.csr -signkey image_list.key -out image_list.crt
 ///
-/// Copy content of the image_list.crt into certificate string below.
+/// Copy the contents of the image_list.crt into certificate string below.
 String certificate = '''
 -----BEGIN CERTIFICATE-----
 MIICpDCCAYwCCQD1kfAz8IhbazANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls
