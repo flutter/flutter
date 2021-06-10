@@ -337,6 +337,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
         @Override
         public void clearFocus(int viewId) {
+          final PlatformView platformView = platformViews.get(viewId);
+          if (platformView != null) {
+            platformView.getView().clearFocus();
+            return;
+          }
           ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
           View view = vdControllers.get(viewId).getView();
           view.clearFocus();
@@ -732,6 +737,16 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     final FlutterMutatorView parentView =
         new FlutterMutatorView(
             context, context.getResources().getDisplayMetrics().density, androidTouchProcessor);
+
+    parentView.addOnFocusChangeListener(
+        (view, hasFocus) -> {
+          if (hasFocus) {
+            platformViewsChannel.invokeViewFocused(viewId);
+          } else {
+            textInputPlugin.clearPlatformViewClient(viewId);
+          }
+        });
+
     platformViewParent.put(viewId, parentView);
     parentView.addView(platformView.getView());
     ((FlutterView) flutterView).addView(parentView);
