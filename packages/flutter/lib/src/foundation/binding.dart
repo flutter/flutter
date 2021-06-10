@@ -68,7 +68,11 @@ abstract class BindingBase {
   static bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
 
+  /// Additional configuration used by the framework during [BindingBase.reassemble]
   ///
+  /// See also:
+  ///
+  ///  * [DebugReassembleConfig], which describes the configuration.
   static DebugReassembleConfig? debugReassembleConfig;
 
   /// The main window to which this binding is bound.
