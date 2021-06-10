@@ -31,6 +31,7 @@ import 'text.dart';
 import 'text_editing_action.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
+import 'widget_span.dart';
 
 export 'package:flutter/services.dart' show SelectionChangedCause, TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 
@@ -197,9 +198,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     if (!value.isComposingRangeValid || !withComposing) {
       return TextSpan(style: style, text: text);
     }
-    final TextStyle composingStyle = style!.merge(
-      const TextStyle(decoration: TextDecoration.underline),
-    );
+    final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
+        ?? const TextStyle(decoration: TextDecoration.underline);
     return TextSpan(
       style: style,
       children: <TextSpan>[
@@ -2651,7 +2651,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 key: _editableKey,
                 startHandleLayerLink: _startHandleLayerLink,
                 endHandleLayerLink: _endHandleLayerLink,
-                textSpan: buildTextSpan(),
+                inlineSpan: buildTextSpan(),
                 value: _value,
                 cursorColor: _cursorColor,
                 backgroundCursorColor: widget.backgroundCursorColor,
@@ -2730,10 +2730,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 }
 
-class _Editable extends LeafRenderObjectWidget {
-  const _Editable({
+class _Editable extends MultiChildRenderObjectWidget {
+  _Editable({
     Key? key,
-    required this.textSpan,
+    required this.inlineSpan,
     required this.value,
     required this.startHandleLayerLink,
     required this.endHandleLayerLink,
@@ -2778,9 +2778,22 @@ class _Editable extends LeafRenderObjectWidget {
     required this.clipBehavior,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
-       super(key: key);
+       super(key: key, children: _extractChildren(inlineSpan));
 
-  final TextSpan textSpan;
+  // Traverses the InlineSpan tree and depth-first collects the list of
+  // child widgets that are created in WidgetSpans.
+  static List<Widget> _extractChildren(InlineSpan span) {
+    final List<Widget> result = <Widget>[];
+    span.visitChildren((InlineSpan span) {
+      if (span is WidgetSpan) {
+        result.add(span.child);
+      }
+      return true;
+    });
+    return result;
+  }
+
+  final InlineSpan inlineSpan;
   final TextEditingValue value;
   final Color? cursorColor;
   final LayerLink startHandleLayerLink;
@@ -2827,7 +2840,7 @@ class _Editable extends LeafRenderObjectWidget {
   @override
   RenderEditable createRenderObject(BuildContext context) {
     return RenderEditable(
-      text: textSpan,
+      text: inlineSpan,
       cursorColor: cursorColor,
       startHandleLayerLink: startHandleLayerLink,
       endHandleLayerLink: endHandleLayerLink,
@@ -2872,7 +2885,7 @@ class _Editable extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderEditable renderObject) {
     renderObject
-      ..text = textSpan
+      ..text = inlineSpan
       ..cursorColor = cursorColor
       ..startHandleLayerLink = startHandleLayerLink
       ..endHandleLayerLink = endHandleLayerLink

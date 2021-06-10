@@ -1099,17 +1099,13 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.fs.path.join(
-            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
-          ),
-          <String>[file.path],
+          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
 
-        expect(original, formatted, reason: file.path);
+        expect(formatted, contains(original), reason: file.path);
       }
     }
 
@@ -1205,17 +1201,13 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.fs.path.join(
-            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
-          ),
-          <String>[file.path],
+          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
 
-        expect(original, formatted, reason: file.path);
+        expect(formatted, contains(original), reason: file.path);
       }
     }
 
@@ -2201,6 +2193,25 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('flutter create . on and existing plugin should show "Your example app code in"', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
+    final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
+    final String relativeExamplePath = globals.fs.path.normalize(globals.fs.path.join(relativePluginPath, 'example/lib/main.dart'));
+
+    await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platforms=android', projectDir.path]);
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+    await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platforms=ios', projectDir.path]);
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+  }, overrides: <Type, Generator> {
+    Logger: () => logger,
   });
 
   testUsingContext('flutter create -t plugin in an empty folder should not show pubspec.yaml updating suggestion', () async {
