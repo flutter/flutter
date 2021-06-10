@@ -62,6 +62,13 @@ persistent state file:
 This step is triggered by the command `conductor start [...args]`
 
 ### Apply Engine Cherrypicks
+
+Once a PR is opened, the user must validate CI builds. If there are regressions
+(or if the `licenses_check` fails, then
+`//engine/ci/licenses_golden/licenses_third_party` must be updated to match the
+output of the failing test), then the user must fix these tests in their local
+checkout and push their changes again.
+
 ### Codesign Engine Binaries
 
 Automated engine binary codesigning is not yet supported.
