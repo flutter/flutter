@@ -727,12 +727,12 @@ $_glassPaneTagName * {
   /// defer to the operating system default.
   ///
   /// See w3c screen api: https://www.w3.org/TR/screen-orientation/
-  Future<bool> setPreferredOrientation(List<dynamic>? orientations) {
+  Future<bool> setPreferredOrientation(List<dynamic> orientations) {
     final html.Screen screen = html.window.screen!;
     if (!_unsafeIsNull(screen)) {
       final html.ScreenOrientation? screenOrientation = screen.orientation;
       if (!_unsafeIsNull(screenOrientation)) {
-        if (orientations!.isEmpty) {
+        if (orientations.isEmpty) {
           screenOrientation!.unlock();
           return Future.value(true);
         } else {
@@ -760,7 +760,7 @@ $_glassPaneTagName * {
   }
 
   // Converts device orientation to w3c OrientationLockType enum.
-  static String? _deviceOrientationToLockType(String deviceOrientation) {
+  static String? _deviceOrientationToLockType(String? deviceOrientation) {
     switch (deviceOrientation) {
       case 'DeviceOrientation.portraitUp':
         return orientationLockTypePortraitPrimary;

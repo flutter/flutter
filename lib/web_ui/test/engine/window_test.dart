@@ -301,9 +301,8 @@ void testMain() {
   test('setPreferredOrientation responds even if browser doesn\'t support api', () async {
     final html.Screen screen = html.window.screen;
     js_util.setProperty(screen, 'orientation', null);
-    bool responded = false;
 
-    final Completer<void> completer = Completer<void>();
+    final Completer<bool> completer = Completer<bool>();
     final ByteData inputData = JSONMethodCodec().encodeMethodCall(MethodCall(
         'SystemChrome.setPreferredOrientations',
         <dynamic>[]));
@@ -312,12 +311,11 @@ void testMain() {
       'flutter/platform',
           inputData,
           (outputData) {
-        responded = true;
-        completer.complete();
+        completer.complete(true);
       },
     );
-    await completer.future;
-    expect(responded, isTrue);
+
+    expect(await completer.future, isTrue);
   });
 
   test('SingletonFlutterWindow implements locale, locales, and locale change notifications', () async {
