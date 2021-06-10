@@ -58,7 +58,7 @@ class WebExperiments {
   }
 
   /// Used to enable/disable experimental flags in the web engine.
-  void updateExperiment(String name, bool enabled) {
+  void updateExperiment(String name, bool? enabled) {
     switch (name) {
       case 'useCanvasText':
         useCanvasText = enabled;

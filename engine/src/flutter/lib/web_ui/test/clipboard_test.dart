@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:mockito/mockito.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' as ui;
@@ -21,14 +19,10 @@ void testMain() async {
   group('message handler', () {
     const String testText = 'test text';
 
-    final Future<bool> success = Future.value(true);
-    final Future<bool> failure = Future.value(false);
-    final Future<String> pasteTest = Future.value(testText);
-
-    ClipboardMessageHandler clipboardMessageHandler;
-    ClipboardAPICopyStrategy clipboardAPICopyStrategy =
+    late ClipboardMessageHandler clipboardMessageHandler;
+    MockClipboardAPICopyStrategy clipboardAPICopyStrategy =
         MockClipboardAPICopyStrategy();
-    ClipboardAPIPasteStrategy clipboardAPIPasteStrategy =
+    MockClipboardAPIPasteStrategy clipboardAPIPasteStrategy =
         MockClipboardAPIPasteStrategy();
 
     setUp(() {
@@ -42,62 +36,73 @@ void testMain() async {
     });
 
     test('set data successful', () async {
-      when(clipboardAPICopyStrategy.setData(testText))
-          .thenAnswer((_) => success);
+      clipboardAPICopyStrategy.testResult = true;
       const MethodCodec codec = JSONMethodCodec();
-      bool result = false;
-      ui.PlatformMessageResponseCallback callback = (ByteData data) {
-        result = codec.decodeEnvelope(data);
+      final Completer<bool> completer = Completer<bool>();
+      ui.PlatformMessageResponseCallback callback = (ByteData? data) {
+        completer.complete(codec.decodeEnvelope(data!));
       };
 
-      await clipboardMessageHandler.setDataMethodCall(
+      clipboardMessageHandler.setDataMethodCall(
           const MethodCall('Clipboard.setData', <String, dynamic>{
             'text': testText,
           }),
           callback);
 
-      await expectLater(result, true);
+      expect(await completer.future, true);
     });
 
     test('set data error', () async {
-      when(clipboardAPICopyStrategy.setData(testText))
-          .thenAnswer((_) => failure);
+      clipboardAPICopyStrategy.testResult = false;
       const MethodCodec codec = JSONMethodCodec();
-      ByteData result;
-      ui.PlatformMessageResponseCallback callback = (ByteData data) {
-        result = data;
+      final Completer<ByteData> completer = Completer<ByteData>();
+      ui.PlatformMessageResponseCallback callback = (ByteData? data) {
+        completer.complete(data!);
       };
 
-      await clipboardMessageHandler.setDataMethodCall(
+      clipboardMessageHandler.setDataMethodCall(
           const MethodCall('Clipboard.setData', <String, dynamic>{
             'text': testText,
           }),
           callback);
 
-      expect(() async {
-        codec.decodeEnvelope(result);
-      }, throwsA(TypeMatcher<PlatformException>()
+      final ByteData result = await completer.future;
+      expect(
+        () =>codec.decodeEnvelope(result),
+        throwsA(TypeMatcher<PlatformException>()
           .having((e) => e.code, 'code', equals('copy_fail'))));
     });
 
     test('get data successful', () async {
-      when(clipboardAPIPasteStrategy.getData())
-          .thenAnswer((_) => pasteTest);
+      clipboardAPIPasteStrategy.testResult = testText;
       const MethodCodec codec = JSONMethodCodec();
-      Map<String, dynamic> result;
-      ui.PlatformMessageResponseCallback callback = (ByteData data) {
-        result = codec.decodeEnvelope(data);
+      final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
+      ui.PlatformMessageResponseCallback callback = (ByteData? data) {
+        completer.complete(codec.decodeEnvelope(data!));
       };
 
-      await clipboardMessageHandler.getDataMethodCall(callback);
+      clipboardMessageHandler.getDataMethodCall(callback);
 
-      await expectLater(result['text'], testText);
+      final Map<String, dynamic> result = await completer.future;
+      expect(result['text'], testText);
     });
   });
 }
 
-class MockClipboardAPICopyStrategy extends Mock
-    implements ClipboardAPICopyStrategy {}
+class MockClipboardAPICopyStrategy implements ClipboardAPICopyStrategy {
+  bool testResult = true;
 
-class MockClipboardAPIPasteStrategy extends Mock
-    implements ClipboardAPIPasteStrategy {}
+  @override
+  Future<bool> setData(String? text) {
+    return Future<bool>.value(testResult);
+  }
+}
+
+class MockClipboardAPIPasteStrategy implements ClipboardAPIPasteStrategy {
+  String testResult = '';
+
+  @override
+  Future<String> getData() {
+    return Future<String>.value(testResult);
+  }
+}

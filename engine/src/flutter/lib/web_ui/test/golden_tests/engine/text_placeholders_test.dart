@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'package:test/bootstrap/browser.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
@@ -94,8 +93,8 @@ const Size placeholderSize = Size(80.0, 50.0);
 void _paintTextWithPlaceholder(
   RecordingCanvas canvas,
   Offset offset, {
-  String before,
-  String after,
+  required String before,
+  required String after,
   PlaceholderAlignment placeholderAlignment = PlaceholderAlignment.baseline,
   TextAlign textAlignment = TextAlign.left,
 }) {
@@ -112,7 +111,7 @@ void _paintTextWithPlaceholder(
   final TextBox placeholderBox = paragraph.getBoxesForPlaceholders().single;
   canvas.drawRect(
     placeholderBox.toRect().shift(offset),
-    Paint()..color = red,
+    SurfacePaint()..color = red,
   );
 }
 

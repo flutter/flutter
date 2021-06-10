@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide window;
@@ -25,7 +23,7 @@ void testMain() async {
     final canvas = BitmapCanvas(bounds, RenderStrategy());
 
     final CanvasParagraph paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto'),
+      EngineParagraphStyle(fontFamily: 'Roboto'),
       (builder) {
         builder.pushStyle(EngineTextStyle.only(
           fontSize: 32.0,

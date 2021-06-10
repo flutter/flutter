@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -84,7 +83,7 @@ void testMain() {
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
 
       final ManagedSkiaObject managedFilter = paint.imageFilter as ManagedSkiaObject;
-      final Object skiaFilter = managedFilter?.skiaObject;
+      final Object skiaFilter = managedFilter.skiaObject;
 
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
       expect((paint.imageFilter as ManagedSkiaObject).skiaObject, same(skiaFilter));

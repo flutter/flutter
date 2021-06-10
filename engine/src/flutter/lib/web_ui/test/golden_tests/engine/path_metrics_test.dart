@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
@@ -37,7 +36,7 @@ void testMain() async {
     final html.Element sceneElement = html.Element.tag('flt-scene');
     try {
       sceneElement.append(engineCanvas.rootElement);
-      html.document.body.append(sceneElement);
+      html.document.body!.append(sceneElement);
       await matchGoldenFile('$fileName.png', region: region);
     } finally {
       // The page is reused across tests, so remove the element after taking the
@@ -59,7 +58,7 @@ void testMain() async {
     path.lineTo(150, 20);
 
     PathMetric metric = path.computeMetrics().first;
-    Tangent t = metric.getTangentForOffset(50.0);
+    Tangent t = metric.getTangentForOffset(50.0)!;
     expect(t.position.dx, within(from: 83.633, distance: 0.01));
     expect(t.position.dy, within(from: 93.0, distance: 0.01));
     expect(t.vector.dx, within(from: 0.672, distance: 0.01));
@@ -75,7 +74,7 @@ void testMain() async {
     path.moveTo(150, 20);
     path.quadraticBezierTo(p1x, p1y, p2x, p2y);
     PathMetric metric = path.computeMetrics().first;
-    Tangent t = metric.getTangentForOffset(50.0);
+    Tangent t = metric.getTangentForOffset(50.0)!;
     expect(t.position.dx, within(from: 187.25, distance: 0.01));
     expect(t.position.dy, within(from: 53.33, distance: 0.01));
     expect(t.vector.dx, within(from: 0.82, distance: 0.01));
@@ -91,7 +90,7 @@ void testMain() async {
     path.moveTo(150, 20);
     path.quadraticBezierTo(p0x, p0y, p1x, p1y);
     PathMetric metric = path.computeMetrics().first;
-    Tangent t = metric.getTangentForOffset(50.0);
+    Tangent t = metric.getTangentForOffset(50.0)!;
     expect(t.position.dx, within(from: 199.82, distance: 0.01));
     expect(t.position.dy, within(from: 21.46, distance: 0.01));
     expect(t.vector.dx, within(from: 0.99, distance: 0.01));
@@ -103,16 +102,16 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
 
-    final Paint paint = Paint()
+    final SurfacePaint paint = SurfacePaint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3
       ..color = black12Color;
-    final Paint redPaint = Paint()
+    final SurfacePaint redPaint = SurfacePaint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..color = redAccentColor;
 
-    final Path path = Path();
+    final SurfacePath path = SurfacePath();
     path.moveTo(50, 130);
     path.lineTo(150, 20);
     double p1x = 240;
@@ -155,11 +154,11 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
 
-    final Paint paint = Paint()
+    final SurfacePaint paint = SurfacePaint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3
       ..color = black12Color;
-    final Paint redPaint = Paint()
+    final SurfacePaint redPaint = SurfacePaint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..color = redAccentColor;

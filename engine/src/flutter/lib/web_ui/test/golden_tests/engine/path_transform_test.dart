@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 import 'dart:math' as math;
 
@@ -25,7 +24,7 @@ void testMain() async {
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
       {Rect region = const Rect.fromLTWH(0, 0, 500, 500),
-      double maxDiffRatePercent = null}) async {
+      double? maxDiffRatePercent = null}) async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
         RenderStrategy());
     rc.endRecording();
@@ -35,7 +34,7 @@ void testMain() async {
     final html.Element sceneElement = html.Element.tag('flt-scene');
     try {
       sceneElement.append(engineCanvas.rootElement);
-      html.document.body.append(sceneElement);
+      html.document.body!.append(sceneElement);
       await matchGoldenFile('$fileName.png', region: region, maxDiffRatePercent: maxDiffRatePercent);
     } finally {
       // The page is reused across tests, so remove the element after taking the
@@ -59,7 +58,7 @@ void testMain() async {
     path.lineTo(300, 200);
     rc.drawPath(
         path,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color(0xFF404000));
@@ -70,7 +69,7 @@ void testMain() async {
         matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color.fromRGBO(0, 128, 255, 1.0));
@@ -84,7 +83,7 @@ void testMain() async {
     path.addRect(Rect.fromLTRB(50, 40, 300, 100));
     rc.drawPath(
         path,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color(0xFF404000));
@@ -95,7 +94,7 @@ void testMain() async {
         matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color.fromRGBO(0, 128, 255, 1.0));
@@ -110,7 +109,7 @@ void testMain() async {
     path.quadraticBezierTo(100, 300, 400, 300);
     rc.drawPath(
         path,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color(0xFF404000));
@@ -121,7 +120,7 @@ void testMain() async {
         matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color.fromRGBO(0, 128, 255, 1.0));
@@ -147,7 +146,7 @@ void testMain() async {
 
     rc.drawPath(
         path,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color(0xFF404000));
@@ -158,7 +157,7 @@ void testMain() async {
         matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color.fromRGBO(0, 128, 255, 1.0));
@@ -180,7 +179,7 @@ void testMain() async {
 
     rc.drawPath(
         path,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color(0xFF404000));
@@ -192,7 +191,7 @@ void testMain() async {
         matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color.fromRGBO(0, 128, 255, 1.0));
@@ -209,7 +208,7 @@ void testMain() async {
 
     rc.drawPath(
         path,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color(0xFF404000));
@@ -221,7 +220,7 @@ void testMain() async {
         matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color.fromRGBO(0, 128, 255, 1.0));

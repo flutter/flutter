@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
@@ -97,26 +96,26 @@ void testMain() async {
 
 Picture _drawTestPictureWithCircles(
     Rect region, double offsetX, double offsetY) {
-  final EnginePictureRecorder recorder = PictureRecorder();
+  final EnginePictureRecorder recorder = EnginePictureRecorder();
   final RecordingCanvas canvas = recorder.beginRecording(region);
   canvas.drawCircle(Offset(offsetX + 30, offsetY + 30), 30,
-      Paint()..style = PaintingStyle.fill);
+      SurfacePaint()..style = PaintingStyle.fill);
   canvas.drawCircle(
       Offset(offsetX + 110, offsetY + 30),
       30,
-      Paint()
+      SurfacePaint()
         ..style = PaintingStyle.fill
         ..color = const Color(0xFFFF0000));
   canvas.drawCircle(
       Offset(offsetX + 30, offsetY + 110),
       30,
-      Paint()
+      SurfacePaint()
         ..style = PaintingStyle.fill
         ..color = const Color(0xFF00FF00));
   canvas.drawCircle(
       Offset(offsetX + 110, offsetY + 110),
       30,
-      Paint()
+      SurfacePaint()
         ..style = PaintingStyle.fill
         ..color = const Color(0xFF0000FF));
   return recorder.endRecording();
@@ -148,5 +147,5 @@ void _renderScene(BlendMode blendMode) {
   builder.addPicture(Offset.zero, circles2);
   builder.pop();
 
-  html.document.body.append(builder.build().webOnlyRootElement);
+  html.document.body!.append(builder.build().webOnlyRootElement!);
 }

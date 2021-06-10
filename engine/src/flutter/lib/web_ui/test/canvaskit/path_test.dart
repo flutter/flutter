@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
@@ -33,11 +32,11 @@ void testMain() {
       expect(metric.contourIndex, 0);
       expect(metric.extractPath(0, 0.5).computeMetrics().length, 1);
 
-      final ui.Tangent tangent1 = metric.getTangentForOffset(5);
+      final ui.Tangent tangent1 = metric.getTangentForOffset(5)!;
       expect(tangent1.position, ui.Offset(5, 0));
       expect(tangent1.vector, ui.Offset(1, 0));
 
-      final ui.Tangent tangent2 = metric.getTangentForOffset(15);
+      final ui.Tangent tangent2 = metric.getTangentForOffset(15)!;
       expect(tangent2.position, ui.Offset(10, 5));
       expect(tangent2.vector, ui.Offset(0, 1));
 
@@ -105,7 +104,7 @@ void testMain() {
       path.addRect(ui.Rect.fromLTRB(40, 40, 50, 50));
 
       final ui.PathMetrics metrics = path.computeMetrics();
-      final CkContourMeasureIter iterator = metrics.iterator;
+      final CkContourMeasureIter iterator = metrics.iterator as CkContourMeasureIter;
 
       expect(iterator.moveNext(), true);
       expect(iterator.current.contourIndex, 0);
@@ -131,15 +130,15 @@ void testMain() {
       path.addRect(ui.Rect.fromLTRB(40, 40, 50, 50));
 
       final ui.PathMetrics metrics = path.computeMetrics();
-      final CkContourMeasureIter iterator = metrics.iterator;
+      final CkContourMeasureIter iterator = metrics.iterator as CkContourMeasureIter;
 
       expect(iterator.moveNext(), true);
-      final CkContourMeasure measure0 = iterator.current;
+      final CkContourMeasure measure0 = iterator.current as CkContourMeasure;
       expect(measure0.contourIndex, 0);
       expect(measure0.extractPath(0, 15).getBounds(), ui.Rect.fromLTRB(0, 0, 10, 5));
 
       expect(iterator.moveNext(), true);
-      final CkContourMeasure measure1 = iterator.current;
+      final CkContourMeasure measure1 = iterator.current as CkContourMeasure;
       expect(measure1.contourIndex, 1);
       expect(measure1.extractPath(0, 15).getBounds(), ui.Rect.fromLTRB(20, 20, 30, 25));
 

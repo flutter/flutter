@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -286,7 +285,7 @@ void _vertexModeTests() {
 void _imageTests() {
   test('MakeAnimatedImageFromEncoded makes a non-animated image', () {
     final SkAnimatedImage nonAnimated =
-        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     expect(nonAnimated.getFrameCount(), 1);
     expect(nonAnimated.getRepetitionCount(), 0);
     expect(nonAnimated.width(), 1);
@@ -311,7 +310,7 @@ void _imageTests() {
 
   test('MakeAnimatedImageFromEncoded makes an animated image', () {
     final SkAnimatedImage animated =
-        canvasKit.MakeAnimatedImageFromEncoded(kAnimatedGif);
+        canvasKit.MakeAnimatedImageFromEncoded(kAnimatedGif)!;
     expect(animated.getFrameCount(), 3);
     expect(animated.getRepetitionCount(), -1); // animates forever
     expect(animated.width(), 1);
@@ -621,7 +620,7 @@ SkPath _testClosedSkPath() {
 }
 
 void _pathTests() {
-  SkPath path;
+  late SkPath path;
 
   setUp(() {
     path = SkPath();
@@ -798,7 +797,7 @@ void _pathTests() {
   test('SkContourMeasureIter/SkContourMeasure', () {
     final SkContourMeasureIter iter =
         SkContourMeasureIter(_testClosedSkPath(), false, 1.0);
-    final SkContourMeasure measure1 = iter.next();
+    final SkContourMeasure measure1 = iter.next()!;
     expect(measure1.length(), 40);
     expect(measure1.getPosTan(5), Float32List.fromList(<double>[15, 10, 1, 0]));
     expect(
@@ -829,7 +828,7 @@ void _pathTests() {
     final SkPath segment = measure1.getSegment(5, 15, true);
     expect(fromSkRect(segment.getBounds()), ui.Rect.fromLTRB(15, 10, 20, 15));
 
-    final SkContourMeasure measure2 = iter.next();
+    final SkContourMeasure? measure2 = iter.next();
     expect(measure2, isNull);
   });
 
@@ -867,8 +866,8 @@ void _skVerticesTests() {
 }
 
 void _canvasTests() {
-  SkPictureRecorder recorder;
-  SkCanvas canvas;
+  late SkPictureRecorder recorder;
+  late SkCanvas canvas;
 
   setUp(() {
     recorder = SkPictureRecorder();
@@ -954,7 +953,7 @@ void _canvasTests() {
 
   test('drawAtlas', () {
     final SkAnimatedImage image =
-        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawAtlas(
       image.makeImageAtCurrentFrame(),
       Float32List.fromList([0, 0, 1, 1]),
@@ -983,7 +982,7 @@ void _canvasTests() {
 
   test('drawImageOptions', () {
     final SkAnimatedImage image =
-        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageOptions(
       image.makeImageAtCurrentFrame(),
       10,
@@ -996,7 +995,7 @@ void _canvasTests() {
 
   test('drawImageCubic', () {
     final SkAnimatedImage image =
-        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageCubic(
       image.makeImageAtCurrentFrame(),
       10,
@@ -1009,7 +1008,7 @@ void _canvasTests() {
 
   test('drawImageRectOptions', () {
     final SkAnimatedImage image =
-        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageRectOptions(
       image.makeImageAtCurrentFrame(),
       Float32List.fromList([0, 0, 1, 1]),
@@ -1022,7 +1021,7 @@ void _canvasTests() {
 
   test('drawImageRectCubic', () {
     final SkAnimatedImage image =
-        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageRectCubic(
       image.makeImageAtCurrentFrame(),
       Float32List.fromList([0, 0, 1, 1]),
@@ -1035,7 +1034,7 @@ void _canvasTests() {
 
   test('drawImageNine', () {
     final SkAnimatedImage image =
-        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageNine(
       image.makeImageAtCurrentFrame(),
       Float32List.fromList([0, 0, 1, 1]),
@@ -1190,7 +1189,7 @@ void _canvasTests() {
     );
     final CkPicture picture =
         CkPicture(otherRecorder.finishRecordingAsPicture(), null, null);
-    final CkImage image = await picture.toImage(1, 1);
+    final CkImage image = (await picture.toImage(1, 1)) as CkImage;
     final ByteData rawData =
         await image.toByteData(format: ui.ImageByteFormat.rawRgba);
     expect(rawData.lengthInBytes, greaterThan(0));

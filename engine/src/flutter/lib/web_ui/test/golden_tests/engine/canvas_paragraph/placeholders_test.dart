@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 
 import 'package:test/bootstrap/browser.dart';
@@ -30,7 +29,7 @@ void testMain() async {
     Offset offset = Offset.zero;
     for (PlaceholderAlignment placeholderAlignment in PlaceholderAlignment.values) {
       final CanvasParagraph paragraph = rich(
-        ParagraphStyle(fontFamily: 'Roboto', fontSize: 14.0),
+        EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 14.0),
         (builder) {
           builder.pushStyle(TextStyle(color: black));
           builder.addText('Lorem ipsum');
@@ -70,7 +69,7 @@ void testMain() async {
     Offset offset = Offset.zero;
     for (TextAlign align in aligns) {
       final CanvasParagraph paragraph = rich(
-        ParagraphStyle(fontFamily: 'Roboto', fontSize: 14.0, textAlign: align),
+        EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 14.0, textAlign: align),
         (builder) {
           builder.pushStyle(TextStyle(color: black));
           builder.addText('Lorem');
@@ -104,7 +103,7 @@ void testMain() async {
     Offset offset = Offset.zero;
     for (TextAlign align in aligns) {
       final CanvasParagraph paragraph = rich(
-        ParagraphStyle(fontFamily: 'Roboto', fontSize: 14.0, textAlign: align),
+        EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 14.0, textAlign: align),
         (builder) {
           builder.pushStyle(TextStyle(color: black));
           builder.addText('Lorem');
@@ -134,7 +133,7 @@ void testMain() async {
 
     // First paragraph with a placeholder at the beginning.
     final CanvasParagraph paragraph1 = rich(
-      ParagraphStyle(fontFamily: 'Roboto', fontSize: 24.0, textAlign: TextAlign.center),
+      EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 24.0, textAlign: TextAlign.center),
       (builder) {
         builder.addPlaceholder(80.0, 50.0, PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic);
         builder.pushStyle(TextStyle(color: black));
@@ -151,7 +150,7 @@ void testMain() async {
 
     // Second paragraph with a placeholder at the end.
     final CanvasParagraph paragraph2 = rich(
-      ParagraphStyle(fontFamily: 'Roboto', fontSize: 24.0, textAlign: TextAlign.center),
+      EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 24.0, textAlign: TextAlign.center),
       (builder) {
         builder.pushStyle(TextStyle(color: black));
         builder.addText('Lorem ipsum ');
@@ -168,7 +167,7 @@ void testMain() async {
 
     // Third paragraph with a placeholder alone in the second line.
     final CanvasParagraph paragraph3 = rich(
-      ParagraphStyle(fontFamily: 'Roboto', fontSize: 24.0, textAlign: TextAlign.center),
+      EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 24.0, textAlign: TextAlign.center),
       (builder) {
         builder.pushStyle(TextStyle(color: black));
         builder.addText('Lorem ipsum ');
@@ -191,7 +190,7 @@ void surroundParagraph(
   CanvasParagraph paragraph,
 ) {
   final Rect rect = offset & Size(paragraph.width, paragraph.height);
-  final SurfacePaint paint = Paint()..color = blue..style = PaintingStyle.stroke;
+  final SurfacePaint paint = SurfacePaint()..color = blue..style = PaintingStyle.stroke;
   canvas.drawRect(rect, paint.paintData);
 }
 
@@ -201,6 +200,6 @@ void fillPlaceholder(
   CanvasParagraph paragraph,
 ) {
   final TextBox placeholderBox = paragraph.getBoxesForPlaceholders().single;
-  final SurfacePaint paint = Paint()..color = red;
+  final SurfacePaint paint = SurfacePaint()..color = red;
   canvas.drawRect(placeholderBox.toRect().shift(offset), paint.paintData);
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide TextStyle;
@@ -30,7 +28,7 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     for (int blurSigma = 1; blurSigma < 10; blurSigma += 2) {
-      final Paint paint = Paint()
+      final SurfacePaint paint = SurfacePaint()
         ..color = Color(0xFF2fdfd2)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma.toDouble());
       rc.drawRect(Rect.fromLTWH(15.0, 15.0 + blurSigma * 40, 200, 20), paint);

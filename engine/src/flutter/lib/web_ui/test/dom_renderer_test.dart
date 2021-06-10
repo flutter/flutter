@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
@@ -16,8 +15,8 @@ void main() {
 void testMain() {
   test('populates flt-renderer and flt-build-mode', () {
     DomRenderer();
-    expect(html.document.body.attributes['flt-renderer'], 'html (requested explicitly)');
-    expect(html.document.body.attributes['flt-build-mode'], 'debug');
+    expect(html.document.body!.attributes['flt-renderer'], 'html (requested explicitly)');
+    expect(html.document.body!.attributes['flt-build-mode'], 'debug');
   });
   test('creating elements works', () {
     final DomRenderer renderer = DomRenderer();
@@ -90,8 +89,8 @@ void testMain() {
   test('innerHeight/innerWidth are equal to visualViewport height and width',
       () {
     if (html.window.visualViewport != null) {
-      expect(html.window.visualViewport.width, html.window.innerWidth);
-      expect(html.window.visualViewport.height, html.window.innerHeight);
+      expect(html.window.visualViewport!.width, html.window.innerWidth);
+      expect(html.window.visualViewport!.height, html.window.innerHeight);
     }
   });
 
@@ -99,7 +98,7 @@ void testMain() {
     final html.MetaElement existingMeta = html.MetaElement()
       ..name = 'viewport'
       ..content = 'foo=bar';
-    html.document.head.append(existingMeta);
+    html.document.head!.append(existingMeta);
     expect(existingMeta.isConnected, true);
 
     final DomRenderer renderer = DomRenderer();
