@@ -25,7 +25,7 @@ Iterable<Element> collectAllElementsFrom(
 
 /// Provides a recursive, efficient, depth first search of an element tree.
 ///
-/// [Element.visitChildren] does not guarnatee order, but does guarnatee stable
+/// [Element.visitChildren] does not guarantee order, but does guarantee stable
 /// order. This iterator also guarantees stable order, and iterates in a left
 /// to right order:
 ///

@@ -495,22 +495,41 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         }
         break;
       case 'assets':
-        if (yamlValue is! YamlList || yamlValue[0] is! String) {
+        if (yamlValue is! YamlList) {
+
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
+        } else if (yamlValue.isEmpty) {
+          break;
+        } else if (yamlValue[0] is! String) {
+          errors.add(
+            'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
+          );
         }
         break;
       case 'fonts':
-        if (yamlValue is! YamlList || yamlValue[0] is! YamlMap) {
+        if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
+        } else if (yamlValue.isEmpty) {
+          break;
+        } else if (yamlValue.first is! YamlMap) {
+          errors.add(
+            'Expected "$yamlKey" to contain maps, but the first element is $yamlValue (${yamlValue.runtimeType}).',
+          );
         } else {
           _validateFonts(yamlValue, errors);
         }
         break;
       case 'licenses':
-        if (yamlValue is YamlList) {
-          _validateListType<String>(yamlValue, errors, '"$yamlKey"', 'files');
-        } else {
+        if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list of files, but got $yamlValue (${yamlValue.runtimeType})');
+        } else if (yamlValue.isEmpty) {
+          break;
+        } else if (yamlValue.first is! String) {
+          errors.add(
+            'Expected "$yamlKey" to contain strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
+          );
+        } else {
+          _validateListType<String>(yamlValue, errors, '"$yamlKey"', 'files');
         }
         break;
       case 'module':

@@ -256,7 +256,7 @@ class ResidentWebRunner extends ResidentRunner {
       return await asyncGuard(() async {
         final ExpressionCompiler expressionCompiler =
           debuggingOptions.webEnableExpressionEvaluation
-              ? WebExpressionCompiler(device.generator)
+              ? WebExpressionCompiler(device.generator, fileSystem: _fileSystem)
               : null;
         device.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
@@ -297,6 +297,7 @@ class ResidentWebRunner extends ResidentRunner {
             kNoneWorker,
             true,
             debuggingOptions.nativeNullAssertions,
+            null,
           );
         }
         await device.device.startApp(
@@ -365,6 +366,7 @@ class ResidentWebRunner extends ResidentRunner {
           kNoneWorker,
           true,
           debuggingOptions.nativeNullAssertions,
+          kBaseHref,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -438,7 +440,7 @@ class ResidentWebRunner extends ResidentRunner {
         flutterDevices.first.generator.addFileSystemRoot(_fileSystem.directory('test').absolute.path);
         importedEntrypoint = Uri(
           scheme: 'org-dartlang-app',
-          path: '/' + mainUri.pathSegments.last,
+          path: '/${mainUri.pathSegments.last}',
         );
       }
       final LanguageVersion languageVersion =  determineLanguageVersion(

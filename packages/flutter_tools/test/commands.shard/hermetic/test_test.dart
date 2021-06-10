@@ -211,8 +211,7 @@ dev_dependencies:
       '--coverage',
       '--',
       'test/fake_test.dart',
-    ]), throwsA(isA<ToolExit>()
-      .having((ToolExit toolExit) => toolExit.message, 'message', isNull)));
+    ]), throwsA(isA<ToolExit>().having((ToolExit toolExit) => toolExit.message, 'message', isNull)));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -603,6 +602,47 @@ dev_dependencies:
     DeviceManager: () => _FakeDeviceManager(<Device>[
       FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.android),
     ]),
+  });
+
+  testUsingContext('Builds the asset manifest by default', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    final bool fileExists = await fs.isFile('build/unit_test_assets/AssetManifest.json');
+    expect(fileExists, true);
+
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
+  testUsingContext("Don't build the asset manifest if --no-test-assets if informed", () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--no-test-assets',
+    ]);
+
+    final bool fileExists = await fs.isFile('build/unit_test_assets/AssetManifest.json');
+    expect(fileExists, false);
+
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 }
 

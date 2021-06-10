@@ -39,7 +39,7 @@ void main() {
     templateDir.childFile('$imageName.img.tmpl').createSync(recursive: true);
     final File sourceImage = imageSourceDir.childFile(imageName);
     sourceImage.createSync(recursive: true);
-    sourceImage.writeAsStringSync('Ceci n\'est pas une pipe');
+    sourceImage.writeAsStringSync("Ceci n'est pas une pipe");
 
     final Template template = Template(
       templateDir,

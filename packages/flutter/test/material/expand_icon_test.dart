@@ -24,7 +24,7 @@ void main() {
       child: ExpandIcon(
         onPressed: (bool isExpanded) {
           expanded = !expanded;
-        }
+        },
       ),
     ));
     await tester.pumpAndSettle();
@@ -140,7 +140,7 @@ void main() {
     );
 
     await tester.pumpWidget(wrap(
-      child: expandIcon
+      child: expandIcon,
     ));
 
     final ExpandIcon icon = tester.firstWidget(find.byWidget(expandIcon));
@@ -154,7 +154,7 @@ void main() {
     );
 
     await tester.pumpWidget(wrap(
-      child: expandIcon
+      child: expandIcon,
     ));
 
     ExpandIcon icon = tester.firstWidget(find.byWidget(expandIcon));
@@ -166,7 +166,7 @@ void main() {
     );
 
     await tester.pumpWidget(wrap(
-      child: expandIcon
+      child: expandIcon,
     ));
 
     icon = tester.firstWidget(find.byWidget(expandIcon));

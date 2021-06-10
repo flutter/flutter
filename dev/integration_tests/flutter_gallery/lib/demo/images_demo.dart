@@ -34,7 +34,7 @@ class ImagesDemo extends StatelessWidget {
           exampleCodeTag: 'animated_image',
           demoWidget: Semantics(
             label: 'Example of animated GIF',
-            child:Image.asset(
+            child: Image.asset(
               'animated_images/animated_flutter_lgtm.gif',
               package: 'flutter_gallery_assets',
             ),

@@ -1913,7 +1913,7 @@ class InputDecorator extends StatefulWidget {
   bool get _labelShouldWithdraw => !isEmpty || (isFocused && decoration.enabled);
 
   @override
-  _InputDecoratorState createState() => _InputDecoratorState();
+  State<InputDecorator> createState() => _InputDecoratorState();
 
   /// The RenderBox that defines this decorator's "container". That's the
   /// area which is filled if [InputDecoration.filled] is true. It's the area

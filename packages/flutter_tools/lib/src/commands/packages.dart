@@ -14,7 +14,7 @@ import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -23,7 +23,7 @@ import '../runner/flutter_command.dart';
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
     addSubcommand(PackagesGetCommand('get', false));
-    addSubcommand(PackagesInteractiveGetCommand('upgrade', 'Upgrade the current package\'s dependencies to latest versions.'));
+    addSubcommand(PackagesInteractiveGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions."));
     addSubcommand(PackagesInteractiveGetCommand('add', 'Add a dependency to pubspec.yaml.'));
     addSubcommand(PackagesInteractiveGetCommand('remove', 'Removes a dependency from the current package.'));
     addSubcommand(PackagesTestCommand());
@@ -81,13 +81,15 @@ class PackagesGetCommand extends FlutterCommand {
   /// The pub packages usage values are incorrect since these are calculated/sent
   /// before pub get completes. This needs to be performed after dependency resolution.
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
-    final Map<CustomDimensions, String> usageValues = <CustomDimensions, String>{};
+  Future<CustomDimensions> get usageValues async {
     final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
     final String target = findProjectRoot(globals.fs, workingDirectory);
     if (target == null) {
-      return usageValues;
+      return const CustomDimensions();
     }
+
+    int numberPlugins;
+
     final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
     // Do not send plugin analytics if pub has not run before.
     final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
@@ -97,14 +99,16 @@ class PackagesGetCommand extends FlutterCommand {
       // Do not fail pub get if package config files are invalid before pub has
       // had a chance to run.
       final List<Plugin> plugins = await findPlugins(rootProject, throwOnError: false);
-      usageValues[CustomDimensions.commandPackagesNumberPlugins] = plugins.length.toString();
+      numberPlugins = plugins.length;
     } else {
-      usageValues[CustomDimensions.commandPackagesNumberPlugins] = '0';
+      numberPlugins = 0;
     }
-    usageValues[CustomDimensions.commandPackagesProjectModule] = '${rootProject.isModule}';
-    usageValues[CustomDimensions.commandPackagesAndroidEmbeddingVersion] =
-        rootProject.android.getEmbeddingVersion().toString().split('.').last;
-    return usageValues;
+
+    return CustomDimensions(
+      commandPackagesNumberPlugins: numberPlugins,
+      commandPackagesProjectModule: rootProject.isModule,
+      commandPackagesAndroidEmbeddingVersion: rootProject.android.getEmbeddingVersion().toString().split('.').last,
+    );
   }
 
   Future<void> _runPubGet(String directory, FlutterProject flutterProject) async {

@@ -679,7 +679,7 @@ void main() {
         confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
           confirmDismissDirection = dismissDirection;
           return Future<bool?>.value(confirmDismissValue);
-        }
+        },
       );
     }
 
@@ -761,7 +761,7 @@ void main() {
                   child: Text(1.toString()),
                 ),
               ),
-            ]
+            ],
           );
         },
       ),

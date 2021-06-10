@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -148,7 +150,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
       rawTime = '0$rawTime';
     }
     if (rawTime[4] == '/') {
-      rawTime = rawTime.substring(0, 3) + '0' + rawTime.substring(3);
+      rawTime = '${rawTime.substring(0, 3)}0${rawTime.substring(3)}';
     }
     final String year = rawTime.substring(6, 10);
     final String month = rawTime.substring(3, 5);

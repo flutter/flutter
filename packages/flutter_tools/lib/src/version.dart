@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
+import 'base/logger.dart';
 import 'base/process.dart';
 import 'base/time.dart';
 import 'cache.dart';
@@ -221,6 +222,38 @@ class FlutterVersion {
     }
   }
 
+  /// Checks if the currently installed version of Flutter is up-to-date, and
+  /// warns the user if it isn't.
+  ///
+  /// This function must run while [Cache.lock] is acquired because it reads and
+  /// writes shared cache files.
+  Future<void> checkFlutterVersionFreshness() async {
+    // Don't perform update checks if we're not on an official channel.
+    if (!kOfficialChannels.contains(channel)) {
+      return;
+    }
+    DateTime localFrameworkCommitDate;
+    try {
+      localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate(
+        lenient: false
+      ));
+    } on VersionCheckError {
+      // Don't perform the update check if the version check failed.
+      return;
+    }
+    final DateTime? latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
+
+    await checkVersionFreshness(
+      this,
+      clock: _clock,
+      localFrameworkCommitDate: localFrameworkCommitDate,
+      latestFlutterCommitDate: latestFlutterCommitDate,
+      logger: globals.logger,
+      cache: globals.cache,
+      pauseTime: timeToPauseToLetUserReadTheMessage,
+    );
+  }
+
   /// The name of the temporary git remote used to check for the latest
   /// available Flutter framework version.
   ///
@@ -296,45 +329,6 @@ class FlutterVersion {
     return _branch!;
   }
 
-  /// The amount of time we wait before pinging the server to check for the
-  /// availability of a newer version of Flutter.
-  @visibleForTesting
-  static const Duration checkAgeConsideredUpToDate = Duration(days: 3);
-
-  /// We warn the user if the age of their Flutter installation is greater than
-  /// this duration. The durations are slightly longer than the expected release
-  /// cadence for each channel, to give the user a grace period before they get
-  /// notified.
-  ///
-  /// For example, for the beta channel, this is set to five weeks because
-  /// beta releases happen approximately every month.
-  @visibleForTesting
-  static Duration versionAgeConsideredUpToDate(String channel) {
-    switch (channel) {
-      case 'stable':
-        return const Duration(days: 365 ~/ 2); // Six months
-      case 'beta':
-        return const Duration(days: 7 * 8); // Eight weeks
-      case 'dev':
-        return const Duration(days: 7 * 4); // Four weeks
-      default:
-        return const Duration(days: 7 * 3); // Three weeks
-    }
-  }
-
-  /// The amount of time we wait between issuing a warning.
-  ///
-  /// This is to avoid annoying users who are unable to upgrade right away.
-  @visibleForTesting
-  static const Duration maxTimeSinceLastWarning = Duration(days: 1);
-
-  /// The amount of time we pause for to let the user read the message about
-  /// outdated Flutter installation.
-  ///
-  /// This can be customized in tests to speed them up.
-  @visibleForTesting
-  static Duration timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
-
   /// Reset the version freshness information by removing the stamp file.
   ///
   /// New version freshness information will be regenerated when
@@ -351,99 +345,12 @@ class FlutterVersion {
     }
   }
 
-  /// Checks if the currently installed version of Flutter is up-to-date, and
-  /// warns the user if it isn't.
-  ///
-  /// This function must run while [Cache.lock] is acquired because it reads and
-  /// writes shared cache files.
-  Future<void> checkFlutterVersionFreshness() async {
-    // Don't perform update checks if we're not on an official channel.
-    if (!kOfficialChannels.contains(channel)) {
-      return;
-    }
-
-    DateTime localFrameworkCommitDate;
-    try {
-      localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate(
-        lenient: false
-      ));
-    } on VersionCheckError {
-      // Don't perform the update check if the version check failed.
-      return;
-    }
-
-    final Duration frameworkAge = _clock.now().difference(localFrameworkCommitDate);
-    final bool installationSeemsOutdated = frameworkAge > versionAgeConsideredUpToDate(channel);
-
-    // Get whether there's a newer version on the remote. This only goes
-    // to the server if we haven't checked recently so won't happen on every
-    // command.
-    final DateTime? latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
-    final VersionCheckResult remoteVersionStatus = latestFlutterCommitDate == null
-        ? VersionCheckResult.unknown
-        : latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
-          ? VersionCheckResult.newVersionAvailable
-          : VersionCheckResult.versionIsCurrent;
-
-    // Do not load the stamp before the above server check as it may modify the stamp file.
-    final VersionCheckStamp stamp = await VersionCheckStamp.load();
-    final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.ago(maxTimeSinceLastWarning * 2);
-    final bool beenAWhileSinceWarningWasPrinted = _clock.now().difference(lastTimeWarningWasPrinted) > maxTimeSinceLastWarning;
-
-    // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
-    // version is outdated.
-    final bool canShowWarning =
-      remoteVersionStatus == VersionCheckResult.newVersionAvailable ||
-        (remoteVersionStatus == VersionCheckResult.unknown &&
-          installationSeemsOutdated);
-
-    if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
-      final String updateMessage =
-        remoteVersionStatus == VersionCheckResult.newVersionAvailable
-          ? newVersionAvailableMessage()
-          : versionOutOfDateMessage(frameworkAge);
-      globals.printStatus(updateMessage, emphasis: true);
-      await Future.wait<void>(<Future<void>>[
-        stamp.store(
-          newTimeWarningWasPrinted: _clock.now(),
-        ),
-        Future<void>.delayed(timeToPauseToLetUserReadTheMessage),
-      ]);
-    }
-  }
-
   /// log.showSignature=false is a user setting and it will break things,
   /// so we want to disable it for every git log call.  This is a convenience
   /// wrapper that does that.
   @visibleForTesting
   static List<String> gitLog(List<String> args) {
     return <String>['git', '-c', 'log.showSignature=false', 'log'] + args;
-  }
-
-  @visibleForTesting
-  static String versionOutOfDateMessage(Duration frameworkAge) {
-    String warning = 'WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.';
-    // Append enough spaces to match the message box width.
-    warning += ' ' * (74 - warning.length);
-
-    return '''
-  ╔════════════════════════════════════════════════════════════════════════════╗
-  ║ $warning ║
-  ║                                                                            ║
-  ║ To update to the latest version, run "flutter upgrade".                    ║
-  ╚════════════════════════════════════════════════════════════════════════════╝
-''';
-  }
-
-  @visibleForTesting
-  static String newVersionAvailableMessage() {
-    return '''
-  ╔════════════════════════════════════════════════════════════════════════════╗
-  ║ A new version of Flutter is available!                                     ║
-  ║                                                                            ║
-  ║ To update to the latest version, run "flutter upgrade".                    ║
-  ╚════════════════════════════════════════════════════════════════════════════╝
-''';
   }
 
   /// Gets the release date of the latest available Flutter version.
@@ -455,7 +362,7 @@ class FlutterVersion {
   /// unable to reach the server to get the latest version.
   Future<DateTime?> _getLatestAvailableFlutterDate() async {
     globals.cache.checkLockAcquired();
-    final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load();
+    final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load(globals.cache, globals.logger);
 
     if (versionCheckStamp.lastTimeVersionWasChecked != null) {
       final Duration timeSinceLastCheck = _clock.now().difference(
@@ -510,8 +417,8 @@ class VersionCheckStamp {
   @visibleForTesting
   static const String flutterVersionCheckStampFile = 'flutter_version_check';
 
-  static Future<VersionCheckStamp> load() async {
-    final String? versionCheckStamp = globals.cache.getStampFor(flutterVersionCheckStampFile);
+  static Future<VersionCheckStamp> load(Cache cache, Logger logger) async {
+    final String? versionCheckStamp = cache.getStampFor(flutterVersionCheckStampFile);
 
     if (versionCheckStamp != null) {
       // Attempt to parse stamp JSON.
@@ -520,11 +427,11 @@ class VersionCheckStamp {
         if (jsonObject is Map<String, dynamic>) {
           return fromJson(jsonObject);
         } else {
-          globals.printTrace('Warning: expected version stamp to be a Map but found: $jsonObject');
+          logger.printTrace('Warning: expected version stamp to be a Map but found: $jsonObject');
         }
       } on Exception catch (error, stackTrace) {
         // Do not crash if JSON is malformed.
-        globals.printTrace('${error.runtimeType}: $error\n$stackTrace');
+        logger.printTrace('${error.runtimeType}: $error\n$stackTrace');
       }
     }
 
@@ -550,6 +457,7 @@ class VersionCheckStamp {
     DateTime? newTimeVersionWasChecked,
     DateTime? newKnownRemoteVersion,
     DateTime? newTimeWarningWasPrinted,
+    Cache? cache,
   }) async {
     final Map<String, String> jsonData = toJson();
 
@@ -566,7 +474,7 @@ class VersionCheckStamp {
     }
 
     const JsonEncoder prettyJsonEncoder = JsonEncoder.withIndent('  ');
-    globals.cache.setStampFor(flutterVersionCheckStampFile, prettyJsonEncoder.convert(jsonData));
+    (cache ?? globals.cache).setStampFor(flutterVersionCheckStampFile, prettyJsonEncoder.convert(jsonData));
   }
 
   Map<String, String> toJson({
@@ -836,4 +744,123 @@ enum VersionCheckResult {
   versionIsCurrent,
   /// A newer version is available.
   newVersionAvailable,
+}
+
+@visibleForTesting
+Future<void> checkVersionFreshness(FlutterVersion version, {
+  required DateTime localFrameworkCommitDate,
+  required DateTime? latestFlutterCommitDate,
+  required SystemClock clock,
+  required Cache cache,
+  required Logger logger,
+  Duration pauseTime = Duration.zero,
+}) async {
+  // Don't perform update checks if we're not on an official channel.
+  if (!kOfficialChannels.contains(version.channel)) {
+    return;
+  }
+
+  final Duration frameworkAge = clock.now().difference(localFrameworkCommitDate);
+  final bool installationSeemsOutdated = frameworkAge > versionAgeConsideredUpToDate(version.channel);
+
+  // Get whether there's a newer version on the remote. This only goes
+  // to the server if we haven't checked recently so won't happen on every
+  // command.
+  final VersionCheckResult remoteVersionStatus = latestFlutterCommitDate == null
+      ? VersionCheckResult.unknown
+      : latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
+        ? VersionCheckResult.newVersionAvailable
+        : VersionCheckResult.versionIsCurrent;
+
+  // Do not load the stamp before the above server check as it may modify the stamp file.
+  final VersionCheckStamp stamp = await VersionCheckStamp.load(cache, logger);
+  final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? clock.ago(maxTimeSinceLastWarning * 2);
+  final bool beenAWhileSinceWarningWasPrinted = clock.now().difference(lastTimeWarningWasPrinted) > maxTimeSinceLastWarning;
+
+  // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
+  // version is outdated.
+  final bool canShowWarning =
+    remoteVersionStatus == VersionCheckResult.newVersionAvailable ||
+      (remoteVersionStatus == VersionCheckResult.unknown &&
+        installationSeemsOutdated);
+
+  if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
+    final String updateMessage =
+      remoteVersionStatus == VersionCheckResult.newVersionAvailable
+        ? newVersionAvailableMessage()
+        : versionOutOfDateMessage(frameworkAge);
+    logger.printStatus(updateMessage, emphasis: true);
+    await Future.wait<void>(<Future<void>>[
+      stamp.store(
+        newTimeWarningWasPrinted: clock.now(),
+        cache: cache,
+      ),
+      Future<void>.delayed(pauseTime),
+    ]);
+  }
+}
+
+/// The amount of time we wait before pinging the server to check for the
+/// availability of a newer version of Flutter.
+@visibleForTesting
+const Duration checkAgeConsideredUpToDate = Duration(days: 3);
+
+/// We warn the user if the age of their Flutter installation is greater than
+/// this duration. The durations are slightly longer than the expected release
+/// cadence for each channel, to give the user a grace period before they get
+/// notified.
+///
+/// For example, for the beta channel, this is set to five weeks because
+/// beta releases happen approximately every month.
+@visibleForTesting
+Duration versionAgeConsideredUpToDate(String channel) {
+  switch (channel) {
+    case 'stable':
+      return const Duration(days: 365 ~/ 2); // Six months
+    case 'beta':
+      return const Duration(days: 7 * 8); // Eight weeks
+    case 'dev':
+      return const Duration(days: 7 * 4); // Four weeks
+    default:
+      return const Duration(days: 7 * 3); // Three weeks
+  }
+}
+
+/// The amount of time we wait between issuing a warning.
+///
+/// This is to avoid annoying users who are unable to upgrade right away.
+@visibleForTesting
+const Duration maxTimeSinceLastWarning = Duration(days: 1);
+
+/// The amount of time we pause for to let the user read the message about
+/// outdated Flutter installation.
+///
+/// This can be customized in tests to speed them up.
+@visibleForTesting
+Duration timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
+
+@visibleForTesting
+String versionOutOfDateMessage(Duration frameworkAge) {
+  String warning = 'WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.';
+  // Append enough spaces to match the message box width.
+  warning += ' ' * (74 - warning.length);
+
+  return '''
+╔════════════════════════════════════════════════════════════════════════════╗
+║ $warning ║
+║                                                                            ║
+║ To update to the latest version, run "flutter upgrade".                    ║
+╚════════════════════════════════════════════════════════════════════════════╝
+''';
+}
+
+@visibleForTesting
+String newVersionAvailableMessage() {
+  return '''
+╔════════════════════════════════════════════════════════════════════════════╗
+║ A new version of Flutter is available!                                     ║
+║                                                                            ║
+║ To update to the latest version, run "flutter upgrade".                    ║
+╚════════════════════════════════════════════════════════════════════════════╝
+''';
 }

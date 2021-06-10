@@ -126,8 +126,8 @@ void main() {
     );
 
     final RichText iconText = tester.firstWidget(find.descendant(
-        of: find.byType(BackButton),
-        matching: find.byType(RichText)
+      of: find.byType(BackButton),
+      matching: find.byType(RichText),
     ));
     expect(iconText.text.style!.color, Colors.blue);
   });
@@ -176,8 +176,8 @@ void main() {
     );
 
     final RichText iconText = tester.firstWidget(find.descendant(
-        of: find.byType(CloseButton),
-        matching: find.byType(RichText)
+      of: find.byType(CloseButton),
+      matching: find.byType(RichText),
     ));
     expect(iconText.text.style!.color, Colors.red);
   });

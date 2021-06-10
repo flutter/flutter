@@ -75,7 +75,7 @@ void main() {
             style: TextStyle(
               foreground: Paint()
                 ..color = black
-                ..shader = linearGradient
+                ..shader = linearGradient,
             ),
           ),
         ),
@@ -97,7 +97,7 @@ void main() {
               foreground: Paint()
                 ..color = black
                 ..style = PaintingStyle.stroke
-                ..strokeWidth = 2.0
+                ..strokeWidth = 2.0,
             ),
           ),
         ),
@@ -120,7 +120,7 @@ void main() {
                 ..color = black
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 2.0
-                ..shader = linearGradient
+                ..shader = linearGradient,
             ),
           ),
         ),

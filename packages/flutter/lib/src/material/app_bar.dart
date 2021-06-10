@@ -287,7 +287,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The primary widget displayed in the app bar.
   ///
   /// Becomes the middle component of the [NavigationToolbar] built by this widget.
-  //.
+  ///
   /// Typically a [Text] widget that contains a description of the current
   /// contents of the app.
   /// {@endtemplate}
@@ -402,7 +402,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final double? elevation;
 
   /// {@template flutter.material.appbar.shadowColor}
-  /// The of the shadow below the app bar.
+  /// The color of the shadow below the app bar.
   ///
   /// If this property is null, then [AppBarTheme.shadowColor] of
   /// [ThemeData.appBarTheme] is used. If that is also null, the default value
@@ -639,7 +639,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// value is true.
   ///
   /// This is a temporary property. When setting it to false is no
-  /// longer considered a breaking change, it will be depreacted and
+  /// longer considered a breaking change, it will be deprecated and
   /// its default value will be changed to false. App developers are
   /// encouraged to opt into the new features by setting it to false
   /// and using the [foregroundColor] and [systemOverlayStyle]
@@ -722,7 +722,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   }
 
   @override
-  _AppBarState createState() => _AppBarState();
+  State<AppBar> createState() => _AppBarState();
 }
 
 class _AppBarState extends State<AppBar> {
@@ -762,7 +762,9 @@ class _AppBarState extends State<AppBar> {
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification) {
       final bool oldScrolledUnder = _scrolledUnder;
-      _scrolledUnder = notification.depth == 0 && notification.metrics.extentBefore > 0;
+      _scrolledUnder = notification.depth == 0
+          && notification.metrics.extentBefore > 0
+          && notification.metrics.axis == Axis.vertical;
       if (_scrolledUnder != oldScrolledUnder) {
         setState(() {
           // React to a change in MaterialState.scrolledUnder
@@ -812,7 +814,8 @@ class _AppBarState extends State<AppBar> {
           states,
           widget.backgroundColor,
           appBarTheme.backgroundColor,
-          colorScheme.brightness == Brightness.dark ? colorScheme.surface : colorScheme.primary);
+          colorScheme.brightness == Brightness.dark ? colorScheme.surface : colorScheme.primary,
+        );
 
     final Color foregroundColor = widget.foregroundColor
       ?? appBarTheme.foregroundColor
@@ -900,8 +903,8 @@ class _AppBarState extends State<AppBar> {
       if (!widget.excludeHeaderSemantics) {
         title = Semantics(
           namesRoute: namesRoute,
-          child: title,
           header: true,
+          child: title,
         );
       }
 
@@ -1066,58 +1069,6 @@ class _AppBarState extends State<AppBar> {
   }
 }
 
-class _FloatingAppBar extends StatefulWidget {
-  const _FloatingAppBar({ Key? key, required this.child }) : super(key: key);
-
-  final Widget child;
-
-  @override
-  _FloatingAppBarState createState() => _FloatingAppBarState();
-}
-
-// A wrapper for the widget created by _SliverAppBarDelegate that starts and
-// stops the floating app bar's snap-into-view or snap-out-of-view animation.
-class _FloatingAppBarState extends State<_FloatingAppBar> {
-  ScrollPosition? _position;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_position != null)
-      _position!.isScrollingNotifier.removeListener(_isScrollingListener);
-    _position = Scrollable.of(context)?.position;
-    if (_position != null)
-      _position!.isScrollingNotifier.addListener(_isScrollingListener);
-  }
-
-  @override
-  void dispose() {
-    if (_position != null)
-      _position!.isScrollingNotifier.removeListener(_isScrollingListener);
-    super.dispose();
-  }
-
-  RenderSliverFloatingPersistentHeader? _headerRenderer() {
-    return context.findAncestorRenderObjectOfType<RenderSliverFloatingPersistentHeader>();
-  }
-
-  void _isScrollingListener() {
-    if (_position == null)
-      return;
-
-    // When a scroll stops, then maybe snap the appbar into view.
-    // Similarly, when a scroll starts, then maybe stop the snap animation.
-    final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
-    if (_position!.isScrollingNotifier.value)
-      header?.maybeStopSnapAnimation(_position!.userScrollDirection);
-    else
-      header?.maybeStartSnapAnimation(_position!.userScrollDirection);
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
-}
-
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate({
     required this.leading,
@@ -1237,7 +1188,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         title: title,
         actions: actions,
         flexibleSpace: (title == null && flexibleSpace != null && !excludeHeaderSemantics)
-          ? Semantics(child: flexibleSpace, header: true)
+          ? Semantics(
+              header: true,
+              child: flexibleSpace,
+            )
           : flexibleSpace,
         bottom: bottom,
         elevation: forceElevated || isScrolledUnder ? elevation : 0.0,
@@ -1263,7 +1217,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         systemOverlayStyle: systemOverlayStyle,
       ),
     );
-    return floating ? _FloatingAppBar(child: appBar) : appBar;
+    return appBar;
   }
 
   @override
@@ -1798,7 +1752,7 @@ class SliverAppBar extends StatefulWidget {
   final SystemUiOverlayStyle? systemOverlayStyle;
 
   @override
-  _SliverAppBarState createState() => _SliverAppBarState();
+  State<SliverAppBar> createState() => _SliverAppBarState();
 }
 
 // This class is only Stateful because it owns the TickerProvider used

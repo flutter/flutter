@@ -414,10 +414,16 @@ void _tests() {
     await mediaQueryBoilerplate(tester, true);
 
     expect(semantics, isNot(includesNodeWith(label: ':')));
-    expect(semantics.nodesWith(value: 'Select minutes 00'), hasLength(1),
-        reason: '00 appears once in the header');
-    expect(semantics.nodesWith(value: 'Select hours 07'), hasLength(1),
-        reason: '07 appears once in the header');
+    expect(
+      semantics.nodesWith(value: 'Select minutes 00'),
+      hasLength(1),
+      reason: '00 appears once in the header',
+    );
+    expect(
+      semantics.nodesWith(value: 'Select hours 07'),
+      hasLength(1),
+      reason: '07 appears once in the header',
+    );
     expect(semantics, includesNodeWith(label: 'CANCEL'));
     expect(semantics, includesNodeWith(label: 'OK'));
 
@@ -715,26 +721,26 @@ void _tests() {
     const String confirmText = 'Custom OK';
     const String helperText = 'Custom Help';
     await tester.pumpWidget(MaterialApp(
-        home: Material(
-          child: Center(
-            child: Builder(
-                builder: (BuildContext context) {
-                  return ElevatedButton(
-                    child: const Text('X'),
-                    onPressed: () async {
-                      await showTimePicker(
-                        context: context,
-                        initialTime: const TimeOfDay(hour: 7, minute: 0),
-                        cancelText: cancelText,
-                        confirmText: confirmText,
-                        helpText: helperText,
-                      );
-                    },
+      home: Material(
+        child: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                child: const Text('X'),
+                onPressed: () async {
+                  await showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
+                    cancelText: cancelText,
+                    confirmText: confirmText,
+                    helpText: helperText,
                   );
-                }
-            ),
+                },
+              );
+            },
           ),
-        )
+        ),
+      ),
     ));
 
     // Open the picker.

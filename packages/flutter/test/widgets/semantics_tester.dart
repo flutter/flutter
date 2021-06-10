@@ -734,7 +734,7 @@ class _IncludesNodeWith extends Matcher {
        scrollExtentMax != null ||
        scrollExtentMin != null ||
        maxValueLength != null ||
-       currentValueLength != null
+       currentValueLength != null,
      );
 
   final String? label;

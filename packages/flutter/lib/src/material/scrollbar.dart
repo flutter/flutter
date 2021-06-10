@@ -117,6 +117,7 @@ class Scrollbar extends StatefulWidget {
     this.radius,
     this.notificationPredicate,
     this.interactive,
+    this.scrollbarOrientation,
   }) : super(key: key);
 
   /// {@macro flutter.widgets.Scrollbar.child}
@@ -165,8 +166,11 @@ class Scrollbar extends StatefulWidget {
   /// {@macro flutter.widgets.Scrollbar.notificationPredicate}
   final ScrollNotificationPredicate? notificationPredicate;
 
+  /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
+  final ScrollbarOrientation? scrollbarOrientation;
+
   @override
-  _ScrollbarState createState() => _ScrollbarState();
+  State<Scrollbar> createState() => _ScrollbarState();
 }
 
 class _ScrollbarState extends State<Scrollbar> {
@@ -176,7 +180,6 @@ class _ScrollbarState extends State<Scrollbar> {
   Widget build(BuildContext context) {
     if (_useCupertinoScrollbar) {
       return CupertinoScrollbar(
-        child: widget.child,
         isAlwaysShown: widget.isAlwaysShown ?? false,
         thickness: widget.thickness ?? CupertinoScrollbar.defaultThickness,
         thicknessWhileDragging: widget.thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
@@ -184,10 +187,11 @@ class _ScrollbarState extends State<Scrollbar> {
         radiusWhileDragging: widget.radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
         controller: widget.controller,
         notificationPredicate: widget.notificationPredicate,
+        scrollbarOrientation: widget.scrollbarOrientation,
+        child: widget.child,
       );
     }
     return _MaterialScrollbar(
-      child: widget.child,
       controller: widget.controller,
       isAlwaysShown: widget.isAlwaysShown,
       showTrackOnHover: widget.showTrackOnHover,
@@ -196,6 +200,8 @@ class _ScrollbarState extends State<Scrollbar> {
       radius: widget.radius,
       notificationPredicate: widget.notificationPredicate,
       interactive: widget.interactive,
+      scrollbarOrientation: widget.scrollbarOrientation,
+      child: widget.child,
     );
   }
 }
@@ -212,6 +218,7 @@ class _MaterialScrollbar extends RawScrollbar {
     Radius? radius,
     ScrollNotificationPredicate? notificationPredicate,
     bool? interactive,
+    ScrollbarOrientation? scrollbarOrientation,
   }) : super(
          key: key,
          child: child,
@@ -224,6 +231,7 @@ class _MaterialScrollbar extends RawScrollbar {
          pressDuration: Duration.zero,
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
          interactive: interactive,
+         scrollbarOrientation: scrollbarOrientation,
        );
 
   final bool? showTrackOnHover;
@@ -380,7 +388,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..crossAxisMargin = _scrollbarTheme.crossAxisMargin ?? (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
-      ..padding = MediaQuery.of(context).padding;
+      ..padding = MediaQuery.of(context).padding
+      ..scrollbarOrientation = widget.scrollbarOrientation;
   }
 
   @override
@@ -399,7 +408,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   void handleHover(PointerHoverEvent event) {
     super.handleHover(event);
     // Check if the position of the pointer falls over the painted scrollbar
-    if (isPointerOverScrollbar(event.position, event.kind)) {
+    if (isPointerOverScrollbar(event.position, event.kind, forHover: true)) {
       // Pointer is hovering over the scrollbar
       setState(() { _hoverIsActive = true; });
       _hoverAnimationController.forward();

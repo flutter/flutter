@@ -7,6 +7,7 @@ import '../base/io.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
+import '../convert.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../ios/plist_parser.dart';
 
@@ -44,7 +45,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
     // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
     // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
-    final String jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'] as String;
+    final String? jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'] as String?;
     if (jetBrainsToolboxAppBundlePath != null) {
       studioPath = globals.fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
       plistFile = globals.fs.path.join(studioPath, 'Info.plist');
@@ -295,9 +296,28 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       }
     }
 
+    // Query Spotlight for unexpected installation locations.
+    String spotlightQueryResult = '';
+    try {
+      final ProcessResult spotlightResult = globals.processManager.runSync(<String>[
+        'mdfind',
+        // com.google.android.studio, com.google.android.studio-EAP
+        'kMDItemCFBundleIdentifier="com.google.android.studio*"',
+      ]);
+      spotlightQueryResult = spotlightResult.stdout as String;
+    } on ProcessException {
+      // The Spotlight query is a nice-to-have, continue checking known installation locations.
+    }
+    for (final String studioPath in LineSplitter.split(spotlightQueryResult)) {
+      final Directory appBundle = globals.fs.directory(studioPath);
+      if (!candidatePaths.any((FileSystemEntity e) => e.path == studioPath)) {
+        candidatePaths.add(appBundle);
+      }
+    }
+
     return candidatePaths
         .map<AndroidStudio>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
-        .where((AndroidStudio s) => s != null)
+        .whereType<AndroidStudio>()
         .toList();
   }
 
@@ -368,6 +388,30 @@ class AndroidStudio implements Comparable<AndroidStudio> {
             installPath,
             version: Version(4, 1, 0),
             studioAppName: 'Android Studio 4.1',
+          );
+          if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
+            studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
+            studios.add(studio);
+          }
+        }
+      }
+    }
+
+    // 4.2 has a different location for AndroidStudio installs on Windows.
+    if (globals.platform.isWindows && globals.platform.environment.containsKey('LOCALAPPDATA')) {
+      final File homeDot = globals.fs.file(globals.fs.path.join(
+        globals.platform.environment['LOCALAPPDATA']!,
+        'Google',
+        'AndroidStudio4.2',
+        '.home',
+      ));
+      if (homeDot.existsSync()) {
+        final String installPath = homeDot.readAsStringSync();
+        if (globals.fs.isDirectorySync(installPath)) {
+          final AndroidStudio studio = AndroidStudio(
+            installPath,
+            version: Version(4, 2, 0),
+            studioAppName: 'Android Studio 4.2',
           );
           if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
             studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);

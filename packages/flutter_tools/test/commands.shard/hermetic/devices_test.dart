@@ -50,7 +50,7 @@ void main() {
       Artifacts: () => Artifacts.test(),
     });
 
-    testUsingContext('get devices\' platform types', () async {
+    testUsingContext("get devices' platform types", () async {
       final List<String> platformTypes = Device.devicesPlatformTypes(
         await globals.deviceManager.getAllConnectedDevices(),
       );
@@ -160,6 +160,6 @@ class NoDevicesManager extends DeviceManager {
   Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
     getAllConnectedDevices();
 
-@override
+  @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 }

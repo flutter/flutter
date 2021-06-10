@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../base/file_system.dart';
+import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../project.dart';
 import '../build_system.dart';
-import 'common.dart';
 
 /// Generates a new `./dart_tool/flutter_build/generated_main.dart`
 /// based on the current dependency map in `pubspec.lock`.
@@ -30,7 +28,7 @@ class DartPluginRegistrantTarget extends Target {
 
   DartPluginRegistrantTarget._(this._project);
 
-  final FlutterProject _project;
+  final FlutterProject? _project;
 
   @override
   Future<void> build(Environment environment) async {
@@ -45,9 +43,8 @@ class DartPluginRegistrantTarget extends Target {
     final String targetFile = environment.defines[kTargetFile] ??
         environment.fileSystem.path.join('lib', 'main.dart');
     final File mainFile = environment.fileSystem.file(targetFile);
-    final Uri mainFileUri = mainFile.uri;
-    assert(packagesFile.path != null);
-    final String mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
+    final Uri mainFileUri = mainFile.absolute.uri;
+    final String mainUri = packageConfig.toPackageUri(mainFileUri)?.toString() ?? mainFileUri.toString();
     final File newMainDart = environment.projectDir
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build')
@@ -64,7 +61,21 @@ class DartPluginRegistrantTarget extends Target {
 
   @override
   bool canSkip(Environment environment) {
-    return !environment.generateDartPluginRegistry;
+    if (!environment.generateDartPluginRegistry) {
+      return true;
+    }
+    final String? platformName = environment.defines[kTargetPlatform];
+    if (platformName == null) {
+      return true;
+    }
+    final TargetPlatform? targetPlatform = getTargetPlatformForName(platformName);
+    // TODO(egarciad): Support Android and iOS.
+    // https://github.com/flutter/flutter/issues/52267
+    return targetPlatform != TargetPlatform.darwin &&
+           targetPlatform != TargetPlatform.linux_x64 &&
+           targetPlatform != TargetPlatform.linux_arm64 &&
+           targetPlatform != TargetPlatform.windows_x64 &&
+           targetPlatform != TargetPlatform.windows_uwp_x64;
   }
 
   @override

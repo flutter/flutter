@@ -632,7 +632,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///   final String? restorationId;
 ///
 ///   @override
-///   _RestorableCounterState createState() => _RestorableCounterState();
+///   State<RestorableCounter> createState() => _RestorableCounterState();
 /// }
 ///
 /// // The [State] object uses the [RestorationMixin] to make the current value

@@ -15,7 +15,7 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
@@ -226,13 +226,13 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       );
       logReader.connectedVMService = vmService;
 
-      final MockIOSDeployDebugger iosDeployDebugger = MockIOSDeployDebugger();
-      when(iosDeployDebugger.debuggerAttached).thenReturn(true);
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.debuggerAttached = true;
 
       final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
         'Message from debugger'
       ]);
-      when(iosDeployDebugger.logLines).thenAnswer((Invocation invocation) => debuggingLogs);
+      iosDeployDebugger.logLines = debuggingLogs;
       logReader.debuggerStream = iosDeployDebugger;
 
       // Wait for stream listeners to fire.
@@ -260,8 +260,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         ),
         useSyslog: false,
       );
-      final MockIOSDeployDebugger iosDeployDebugger = MockIOSDeployDebugger();
-      when(iosDeployDebugger.logLines).thenAnswer((Invocation invocation) => debuggingLogs);
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.logLines = debuggingLogs;
       logReader.debuggerStream = iosDeployDebugger;
       final Future<List<String>> logLines = logReader.logLines.toList();
 
@@ -285,8 +285,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         useSyslog: false,
       );
       final Completer<void> streamComplete = Completer<void>();
-      final MockIOSDeployDebugger iosDeployDebugger = MockIOSDeployDebugger();
-      when(iosDeployDebugger.logLines).thenAnswer((Invocation invocation) => debuggingLogs);
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.logLines = debuggingLogs;
       logReader.logLines.listen(null, onError: (Object error) => streamComplete.complete());
       logReader.debuggerStream = iosDeployDebugger;
 
@@ -303,14 +303,26 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         ),
         useSyslog: false,
       );
-      final MockIOSDeployDebugger iosDeployDebugger = MockIOSDeployDebugger();
-      when(iosDeployDebugger.logLines).thenAnswer((Invocation invocation) => const Stream<String>.empty());
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       logReader.debuggerStream = iosDeployDebugger;
 
       logReader.dispose();
-      verify(iosDeployDebugger.detach());
+      expect(iosDeployDebugger.detached, true);
     });
   });
 }
 
-class MockIOSDeployDebugger extends Mock implements IOSDeployDebugger {}
+class FakeIOSDeployDebugger extends Fake implements IOSDeployDebugger {
+  bool detached = false;
+
+  @override
+  bool debuggerAttached = false;
+
+  @override
+  Stream<String> logLines = const Stream<String>.empty();
+
+  @override
+  void detach() {
+    detached = true;
+  }
+}

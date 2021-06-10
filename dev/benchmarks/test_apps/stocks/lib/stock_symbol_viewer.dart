@@ -22,14 +22,16 @@ class _StockSymbolView extends StatelessWidget {
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
     if (stock.percentChange > 0)
-      changeInPrice = '+' + changeInPrice;
+      changeInPrice = '+$changeInPrice';
 
     final TextStyle headings = Theme.of(context).textTheme.bodyText1!;
     return Container(
       padding: const EdgeInsets.all(20.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
                 stock.symbol,
@@ -38,7 +40,6 @@ class _StockSymbolView extends StatelessWidget {
               ),
               arrow,
             ],
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
           ),
           Text('Last Sale', style: headings),
           Text('$lastSale ($changeInPrice)'),
@@ -61,7 +62,6 @@ class _StockSymbolView extends StatelessWidget {
             ),
           ),
         ],
-        mainAxisSize: MainAxisSize.min,
       ),
     );
   }

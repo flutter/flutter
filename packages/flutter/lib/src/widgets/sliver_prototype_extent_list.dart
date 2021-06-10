@@ -50,13 +50,13 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   final Widget prototypeItem;
 
   @override
-  _RenderSliverPrototypeExtentList createRenderObject(BuildContext context) {
+  RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context) {
     final _SliverPrototypeExtentListElement element = context as _SliverPrototypeExtentListElement;
     return _RenderSliverPrototypeExtentList(childManager: element);
   }
 
   @override
-  _SliverPrototypeExtentListElement createElement() => _SliverPrototypeExtentListElement(this);
+  SliverMultiBoxAdaptorElement createElement() => _SliverPrototypeExtentListElement(this);
 }
 
 class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {

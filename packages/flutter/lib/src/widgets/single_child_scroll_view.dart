@@ -338,8 +338,8 @@ class SingleChildScrollView extends StatelessWidget {
         return _SingleChildViewport(
           axisDirection: axisDirection,
           offset: offset,
-          child: contents,
           clipBehavior: clipBehavior,
+          child: contents,
         );
       },
     );

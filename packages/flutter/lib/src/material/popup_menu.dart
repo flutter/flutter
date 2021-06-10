@@ -112,7 +112,7 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
   bool represents(void value) => false;
 
   @override
-  _PopupMenuDividerState createState() => _PopupMenuDividerState();
+  State<PopupMenuDivider> createState() => _PopupMenuDividerState();
 }
 
 class _PopupMenuDividerState extends State<PopupMenuDivider> {
@@ -219,6 +219,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   const PopupMenuItem({
     Key? key,
     this.value,
+    this.onTap,
     this.enabled = true,
     this.height = kMinInteractiveDimension,
     this.padding,
@@ -231,6 +232,9 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
   /// The value that will be returned by [showMenu] if this entry is selected.
   final T? value;
+
+  /// Called when the menu item is tapped.
+  final VoidCallback? onTap;
 
   /// Whether the user is permitted to select this item.
   ///
@@ -319,6 +323,8 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   /// the menu route.
   @protected
   void handleTap() {
+    widget.onTap?.call();
+
     Navigator.pop<T>(context, widget.value);
   }
 
@@ -479,7 +485,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   Widget? get child => super.child;
 
   @override
-  _CheckedPopupMenuItemState<T> createState() => _CheckedPopupMenuItemState<T>();
+  PopupMenuItemState<T, CheckedPopupMenuItem<T>> createState() => _CheckedPopupMenuItemState<T>();
 }
 
 class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMenuItem<T>> with SingleTickerProviderStateMixin {
@@ -618,8 +624,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     this.itemSizes,
     this.selectedItemIndex,
     this.textDirection,
-    this.topPadding,
-    this.bottomPadding,
+    this.padding,
   );
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
@@ -636,11 +641,8 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   // Whether to prefer going to the left or to the right.
   final TextDirection textDirection;
 
-  // Top padding of unsafe area.
-  final double topPadding;
-
-  // Bottom padding of unsafe area.
-  final double bottomPadding;
+  // The padding of unsafe area.
+  EdgeInsets padding;
 
   // We put the child wherever position specifies, so long as it will fit within
   // the specified parent size padded (inset) by 8. If necessary, we adjust the
@@ -651,7 +653,8 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     // The menu can be at most the size of the overlay minus 8.0 pixels in each
     // direction.
     return BoxConstraints.loose(constraints.biggest).deflate(
-        const EdgeInsets.all(_kMenuScreenPadding) + EdgeInsets.only(top: topPadding, bottom: bottomPadding));
+      const EdgeInsets.all(_kMenuScreenPadding) + padding,
+    );
   }
 
   @override
@@ -694,14 +697,15 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
     // Avoid going outside an area defined as the rectangle 8.0 pixels from the
     // edge of the screen in every direction.
-    if (x < _kMenuScreenPadding)
-      x = _kMenuScreenPadding;
-    else if (x + childSize.width > size.width - _kMenuScreenPadding)
-      x = size.width - childSize.width - _kMenuScreenPadding;
-    if (y < _kMenuScreenPadding + topPadding)
-      y = _kMenuScreenPadding + topPadding;
-    else if (y + childSize.height > size.height - _kMenuScreenPadding - bottomPadding)
-      y = size.height - bottomPadding - _kMenuScreenPadding - childSize.height ;
+    if (x < _kMenuScreenPadding + padding.left)
+      x = _kMenuScreenPadding + padding.left;
+    else if (x + childSize.width > size.width - _kMenuScreenPadding - padding.right)
+      x = size.width - childSize.width - _kMenuScreenPadding - padding.right  ;
+    if (y < _kMenuScreenPadding + padding.top)
+      y = _kMenuScreenPadding + padding.top;
+    else if (y + childSize.height > size.height - _kMenuScreenPadding - padding.bottom)
+      y = size.height - padding.bottom - _kMenuScreenPadding - childSize.height ;
+
     return Offset(x, y);
   }
 
@@ -716,8 +720,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       || selectedItemIndex != oldDelegate.selectedItemIndex
       || textDirection != oldDelegate.textDirection
       || !listEquals(itemSizes, oldDelegate.itemSizes)
-      || topPadding != oldDelegate.topPadding
-      || bottomPadding != oldDelegate.bottomPadding;
+      || padding != oldDelegate.padding;
   }
 }
 
@@ -777,22 +780,27 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     }
 
     final Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
-
-    return Builder(
-      builder: (BuildContext context) {
-        final MediaQueryData mediaQuery = MediaQuery.of(context);
-        return CustomSingleChildLayout(
-          delegate: _PopupMenuRouteLayout(
-            position,
-            itemSizes,
-            selectedItemIndex,
-            Directionality.of(context),
-            mediaQuery.padding.top,
-            mediaQuery.padding.bottom,
-          ),
-          child: capturedThemes.wrap(menu),
-        );
-      },
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      removeBottom: true,
+      removeLeft: true,
+      removeRight: true,
+      child: Builder(
+        builder: (BuildContext context) {
+          return CustomSingleChildLayout(
+            delegate: _PopupMenuRouteLayout(
+              position,
+              itemSizes,
+              selectedItemIndex,
+              Directionality.of(context),
+              mediaQuery.padding,
+            ),
+            child: capturedThemes.wrap(menu),
+          );
+        },
+      ),
     );
   }
 }
@@ -1162,8 +1170,8 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
-          child: widget.child,
           enableFeedback: enableFeedback,
+          child: widget.child,
         ),
       );
 

@@ -347,7 +347,7 @@ void main() {
           TestSemantics(
             id: 1,
             flags: <SemanticsFlag>[SemanticsFlag.isSlider],
-          )
+          ),
         ],
       ),
       ignoreRect: true,
@@ -587,7 +587,7 @@ void main() {
       ..rrect()
       ..rrect()
       ..rrect()
-      ..rrect(color: CupertinoColors.systemPurple.color)
+      ..rrect(color: CupertinoColors.systemPurple.color),
     );
 
     await tester.pumpWidget(
@@ -610,7 +610,7 @@ void main() {
           ..rrect()
           ..rrect()
           ..rrect()
-          ..rrect(color: CupertinoColors.activeOrange.color)
+          ..rrect(color: CupertinoColors.activeOrange.color),
     );
   });
 }

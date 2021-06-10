@@ -45,9 +45,6 @@ class TestTextInput {
   /// first be requested, e.g. using [WidgetTester.showKeyboard].
   final VoidCallback? onCleared;
 
-  /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get _binaryMessenger => ServicesBinding.instance!.defaultBinaryMessenger;
-
   /// Log for method calls.
   ///
   /// For all registered channels, handled calls are added to the list. Can
@@ -153,16 +150,25 @@ class TestTextInput {
     _isVisible = false;
   }
 
-  /// Simulates the user typing the given text.
+  /// Simulates the user changing the text of the focused text field, and resets
+  /// the selection.
   ///
   /// Calling this method replaces the content of the connected input field with
   /// `text`, and places the caret at the end of the text.
+  ///
+  /// To update the UI under test after this method is invoked, use
+  /// [WidgetTester.pump].
   ///
   /// This can be called even if the [TestTextInput] has not been [register]ed.
   ///
   /// If this is used to inject text when there is a real IME connection, for
   /// example when using the [integration_test] library, there is a risk that
   /// the real IME will become confused as to the current state of input.
+  ///
+  /// See also:
+  ///
+  ///  * [updateEditingValue], which takes a [TextEditingValue] so that one can
+  ///    also change the selection.
   void enterText(String text) {
     updateEditingValue(TextEditingValue(
       text: text,
@@ -172,13 +178,21 @@ class TestTextInput {
 
   /// Simulates the user changing the [TextEditingValue] to the given value.
   ///
+  /// To update the UI under test after this method is invoked, use
+  /// [WidgetTester.pump].
+  ///
   /// This can be called even if the [TestTextInput] has not been [register]ed.
   ///
   /// If this is used to inject text when there is a real IME connection, for
   /// example when using the [integration_test] library, there is a risk that
   /// the real IME will become confused as to the current state of input.
+  ///
+  /// See also:
+  ///
+  ///  * [enterText], which is similar but takes only a String and resets the
+  ///    selection.
   void updateEditingValue(TextEditingValue value) {
-    _binaryMessenger.handlePlatformMessage(
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
@@ -186,7 +200,7 @@ class TestTextInput {
           <dynamic>[_client ?? -1, value.toJSON()],
         ),
       ),
-      (ByteData? data) { /* response from framework is discarded */ },
+      (ByteData? data) { /* ignored */ },
     );
   }
 
@@ -202,7 +216,7 @@ class TestTextInput {
   Future<void> receiveAction(TextInputAction action) async {
     return TestAsyncUtils.guard(() {
       final Completer<void> completer = Completer<void>();
-      _binaryMessenger.handlePlatformMessage(
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.textInput.name,
         SystemChannels.textInput.codec.encodeMethodCall(
           MethodCall(
@@ -216,8 +230,7 @@ class TestTextInput {
             // Decoding throws a PlatformException if the data represents an
             // error, and that's all we care about here.
             SystemChannels.textInput.codec.decodeEnvelope(data!);
-
-            // No error was found. Complete without issue.
+            // If we reach here then no error was found. Complete without issue.
             completer.complete();
           } catch (error) {
             // An exception occurred as a result of receiveAction()'ing. Report
@@ -226,7 +239,6 @@ class TestTextInput {
           }
         },
       );
-
       return completer.future;
     });
   }
@@ -244,7 +256,7 @@ class TestTextInput {
   /// example when using the [integration_test] library, there is a risk that
   /// the real IME will become confused as to the current state of input.
   void closeConnection() {
-    _binaryMessenger.handlePlatformMessage(
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(

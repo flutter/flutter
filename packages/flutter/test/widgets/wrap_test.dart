@@ -10,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 
 void verify(WidgetTester tester, List<Offset> answerKey) {
   final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(Offset.zero)
+    (RenderBox target) => target.localToGlobal(Offset.zero),
   ).toList();
   expect(testAnswers, equals(answerKey));
 }
@@ -826,8 +826,10 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
-    expect(tester.renderObject<RenderBox>(find.byType(Baseline)).size,
-           within<Size>(from: const Size(100.0, 200.0), distance: 0.001));
+    expect(
+      tester.renderObject<RenderBox>(find.byType(Baseline)).size,
+      within<Size>(from: const Size(100.0, 200.0), distance: 0.001),
+    );
   });
 
   testWidgets('Spacing with slight overflow', (WidgetTester tester) async {

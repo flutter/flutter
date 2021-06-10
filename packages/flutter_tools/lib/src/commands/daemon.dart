@@ -32,7 +32,7 @@ import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 import '../web/web_runner.dart';
 
-const String protocolVersion = '0.6.0';
+const String protocolVersion = '0.6.1';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -416,7 +416,7 @@ class DaemonDomain extends Domain {
   }
 }
 
-typedef _RunOrAttach = Future<void> Function({
+typedef RunOrAttach = Future<void> Function({
   Completer<DebugConnectionInfo> connectionInfoCompleter,
   Completer<void> appStartedCompleter,
 });
@@ -539,7 +539,7 @@ class AppDomain extends Domain {
 
   Future<AppInstance> launch(
     ResidentRunner runner,
-    _RunOrAttach runOrAttach,
+    RunOrAttach runOrAttach,
     Device device,
     String projectDirectory,
     bool enableHotReload,
@@ -1118,6 +1118,7 @@ class EmulatorDomain extends Domain {
 
   Future<void> launch(Map<String, dynamic> args) async {
     final String emulatorId = _getStringArg(args, 'emulatorId', required: true);
+    final bool coldBoot = _getBoolArg(args, 'coldBoot') ?? false;
     final List<Emulator> matches =
         await emulators.getEmulatorsMatching(emulatorId);
     if (matches.isEmpty) {
@@ -1125,7 +1126,7 @@ class EmulatorDomain extends Domain {
     } else if (matches.length > 1) {
       throw "multiple emulators match '$emulatorId'";
     } else {
-      await matches.first.launch();
+      await matches.first.launch(coldBoot: coldBoot);
     }
   }
 

@@ -78,8 +78,8 @@ class AsymmetricView extends StatelessWidget {
     return ListView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(0.0, 34.0, 16.0, 44.0),
-      children: _buildColumns(context),
       physics: const AlwaysScrollableScrollPhysics(),
+      children: _buildColumns(context),
     );
   }
 }

@@ -251,6 +251,9 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.traceAllowlist != null) {
       addFlag('trace-allowlist=${debuggingOptions.traceAllowlist}');
     }
+    if (debuggingOptions.traceSkiaAllowlist != null) {
+      addFlag('trace-skia-allowlist=${debuggingOptions.traceSkiaAllowlist}');
+    }
     if (debuggingOptions.traceSystrace) {
       addFlag('trace-systrace=true');
     }

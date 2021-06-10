@@ -525,9 +525,9 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
-        child: const SizedBox(width: 10.0, height: 10.0),
         onTap: () { },
         label: 'test',
+        child: const SizedBox(width: 10.0, height: 10.0),
       )));
       final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
       expect(result.passed, true);
@@ -537,9 +537,9 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
-        child: const SizedBox(width: 10.0, height: 10.0),
         onLongPress: () { },
         label: '',
+        child: const SizedBox(width: 10.0, height: 10.0),
       )));
       final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
       expect(result.passed, false);
@@ -550,9 +550,9 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
-        child: const SizedBox(width: 10.0, height: 10.0),
         onTap: () { },
         label: '',
+        child: const SizedBox(width: 10.0, height: 10.0),
       )));
       final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
       expect(result.passed, false);

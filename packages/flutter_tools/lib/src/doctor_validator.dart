@@ -127,7 +127,7 @@ class GroupedValidator extends DoctorValidator {
           }
           break;
         default:
-          throw 'Unrecognized validation type: ' + result.type.toString();
+          throw 'Unrecognized validation type: ${result.type}';
       }
       mergedMessages.addAll(result.messages);
     }

@@ -33,15 +33,50 @@ class SystemNavigator {
     await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop', animated);
   }
 
+  /// Selects the single-entry history mode.
+  ///
+  /// On web, this switches the browser history model to one that only tracks a
+  /// single entry, so that calling [routeInformationUpdated] replaces the
+  /// current entry.
+  ///
+  /// Currently, this is ignored on other platforms.
+  ///
+  /// See also:
+  ///
+  ///  * [selectMultiEntryHistory], which enables the browser history to have
+  ///    multiple entries.
+  static Future<void> selectSingleEntryHistory() {
+    return SystemChannels.navigation.invokeMethod<void>('selectSingleEntryHistory');
+  }
+
+  /// Selects the multiple-entry history mode.
+  ///
+  /// On web, this switches the browser history model to one that tracks all
+  /// updates to [routeInformationUpdated] to form a history stack. This is the
+  /// default.
+  ///
+  /// Currently, this is ignored on other platforms.
+  ///
+  /// See also:
+  ///
+  ///  * [selectSingleEntryHistory], which forces the history to only have one
+  ///    entry.
+  static Future<void> selectMultiEntryHistory() {
+    return SystemChannels.navigation.invokeMethod<void>('selectMultiEntryHistory');
+  }
+
   /// Notifies the platform for a route information change.
   ///
-  /// On Web, creates a new browser history entry and update URL with the route
-  /// information.
-  static void routeInformationUpdated({
+  /// On web, creates a new browser history entry and update URL with the route
+  /// information. Whether the history holds one entry or multiple entries is
+  /// determined by [selectSingleEntryHistory] and [selectMultiEntryHistory].
+  ///
+  /// Currently, this is ignored on other platforms.
+  static Future<void> routeInformationUpdated({
     required String location,
     Object? state,
   }) {
-    SystemChannels.navigation.invokeMethod<void>(
+    return SystemChannels.navigation.invokeMethod<void>(
       'routeInformationUpdated',
       <String, dynamic>{
         'location': location,
@@ -50,14 +85,22 @@ class SystemNavigator {
     );
   }
 
-  /// Notifies the platform of a route change.
+  /// Notifies the platform of a route change, and selects single-entry history
+  /// mode.
   ///
-  /// On Web, updates the URL bar with the [routeName].
-  static void routeUpdated({
+  /// This is equivalent to calling [selectSingleEntryHistory] and
+  /// [routeInformationUpdated] together.
+  ///
+  /// The `previousRouteName` argument is ignored.
+  @Deprecated(
+    'Use routeInformationUpdated instead. '
+    'This feature was deprecated after v2.3.0-1.0.pre.'
+  )
+  static Future<void> routeUpdated({
     String? routeName,
     String? previousRouteName,
   }) {
-    SystemChannels.navigation.invokeMethod<void>(
+    return SystemChannels.navigation.invokeMethod<void>(
       'routeUpdated',
       <String, dynamic>{
         'previousRouteName': previousRouteName,

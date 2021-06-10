@@ -155,7 +155,7 @@ abstract class KeyHelper {
   /// The numpad key from the specific key code mapping.
   LogicalKeyboardKey? numpadKey(int keyCode);
 
-  /// The logical key key from the specific key code mapping.
+  /// The logical key from the specific key code mapping.
   LogicalKeyboardKey? logicalKey(int keyCode);
 }
 

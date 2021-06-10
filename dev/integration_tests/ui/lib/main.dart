@@ -18,9 +18,9 @@ void main() {
               textDirection: TextDirection.ltr,
             ),
             onPressed: () {
-              Navigator.push<Object>(
+              Navigator.push<Object?>(
                 context,
-                MaterialPageRoute<dynamic>(
+                MaterialPageRoute<Object?>(
                   builder: (BuildContext context) {
                     return const Material(
                       child: Center(

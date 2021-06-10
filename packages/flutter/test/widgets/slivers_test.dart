@@ -61,10 +61,10 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
 
 void verify(WidgetTester tester, List<Offset> idealPositions, List<bool> idealVisibles) {
   final List<Offset> actualPositions = tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(Offset.zero)
+    (RenderBox target) => target.localToGlobal(Offset.zero),
   ).toList();
   final List<bool> actualVisibles = tester.renderObjectList<RenderSliverToBoxAdapter>(find.byType(SliverToBoxAdapter, skipOffstage: false)).map<bool>(
-    (RenderSliverToBoxAdapter target) => target.geometry!.visible
+    (RenderSliverToBoxAdapter target) => target.geometry!.visible,
   ).toList();
   expect(actualPositions, equals(idealPositions));
   expect(actualVisibles, equals(idealVisibles));
@@ -279,7 +279,7 @@ void main() {
       children.add(
           StateInitSpy(
             item, () => initializedChild.add(item), key: ValueKey<String>(item),
-          )
+          ),
       );
     }
     final ScrollController controller = ScrollController(initialScrollOffset: 5400);
@@ -436,7 +436,7 @@ void main() {
                   ),
                 ),
               ],
-            )
+            ),
           ),
         ),
       );
@@ -465,7 +465,7 @@ void main() {
                   ),
                 ),
               ],
-            )
+            ),
           ),
         ),
       );
@@ -654,9 +654,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: CustomScrollView(slivers: <Widget>[sliver])
-        )
-      )
+          child: CustomScrollView(slivers: <Widget>[sliver]),
+        ),
+      ),
     );
   }
 
@@ -668,8 +668,8 @@ void main() {
           offstage: true,
           sliver: SliverToBoxAdapter(
             child: Text('a'),
-          )
-        )
+          ),
+        ),
       ));
 
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
@@ -687,8 +687,8 @@ void main() {
           offstage: false,
           sliver: SliverToBoxAdapter(
             child: Text('a'),
-          )
-        )
+          ),
+        ),
       ));
 
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
@@ -711,7 +711,7 @@ void main() {
             child: Text(
               'a',
               textDirection: TextDirection.rtl,
-            )
+            ),
           ),
           opacity: 1.0,
         ),
@@ -727,10 +727,10 @@ void main() {
             child: Text(
               'a',
               textDirection: TextDirection.rtl,
-            )
+            ),
           ),
           opacity: 0.0,
-        )
+        ),
       ));
 
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
@@ -743,7 +743,7 @@ void main() {
             child: Text(
               'a',
               textDirection: TextDirection.rtl,
-            )
+            ),
           ),
           opacity: 0.0,
           alwaysIncludeSemantics: true,
@@ -760,7 +760,7 @@ void main() {
             child: Text(
               'a',
               textDirection: TextDirection.rtl,
-            )
+            ),
           ),
           opacity: 0.0,
           alwaysIncludeSemantics: false,
@@ -777,7 +777,7 @@ void main() {
             child: Text(
               'a',
               textDirection: TextDirection.rtl,
-            )
+            ),
           ),
           opacity: 0.1,
         ),
@@ -793,7 +793,7 @@ void main() {
             child: Text(
               'a',
               textDirection: TextDirection.rtl,
-            )
+            ),
           ),
           opacity: 0.1,
           alwaysIncludeSemantics: false,
@@ -810,7 +810,7 @@ void main() {
             child: Text(
               'a',
               textDirection: TextDirection.rtl,
-            )
+            ),
           ),
           opacity: 0.1,
           alwaysIncludeSemantics: true,
@@ -838,9 +838,9 @@ void main() {
               onTap: () {
                 events.add('tap');
               },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       ));
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
       await tester.tap(find.byType(GestureDetector), warnIfMissed: false);
@@ -860,9 +860,9 @@ void main() {
               onTap: () {
                 events.add('tap');
               },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       ));
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
       await tester.tap(find.byType(GestureDetector));
@@ -882,9 +882,9 @@ void main() {
               onTap: () {
                 events.add('tap');
               },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       ));
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
       await tester.tap(find.byType(GestureDetector), warnIfMissed: false);
@@ -904,9 +904,9 @@ void main() {
               onTap: () {
                 events.add('tap');
               },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       ));
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
       await tester.tap(find.byType(GestureDetector));
@@ -927,11 +927,11 @@ void main() {
                   SizedBox.shrink(),
                   Text('index 1'),
                   Text('index 2'),
-                ]
+                ],
               ),
             ),
           ],
-        )
+        ),
       ),
     ));
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -500.0), 10000.0);
@@ -951,7 +951,7 @@ void main() {
           slivers: <Widget>[
             SliverGrid(
               delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
+                (BuildContext context, int index) {
                   return Material(
                     color: index.isEven ? Colors.yellow : Colors.red,
                     child: InkWell(
@@ -965,10 +965,10 @@ void main() {
                 childCount: 2,
               ),
               gridDelegate: _TestArbitrarySliverGridDelegate(),
-            )
+            ),
           ],
         ),
-      )
+      ),
     ));
     // Assertion not triggered by arbitrary placement
     expect(tester.takeException(), isNull);

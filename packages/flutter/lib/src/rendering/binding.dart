@@ -534,6 +534,9 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
   ///
   /// The `root` render box is attached directly to the [renderView] and is
   /// given constraints that require it to fill the window.
+  ///
+  /// This binding does not automatically schedule any frames. Callers are
+  /// responsible for deciding when to first call [scheduleFrame].
   RenderingFlutterBinding({ RenderBox? root }) {
     assert(renderView != null);
     renderView.child = root;

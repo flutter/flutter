@@ -383,8 +383,8 @@ void main() {
             testResult.expectedOffsets[valueIndex],
             offsetMoreOrLessEquals(dragOffsets[valueIndex]),
             reason:
-              'There is a difference in the expected and actual value of the ' +
-              (valueIndex == 2 ? 'first' : valueIndex == 3 ? 'second' : 'third') +
+              'There is a difference in the expected and actual value of the '
+              '${valueIndex == 2 ? 'first' : valueIndex == 3 ? 'second' : 'third'}'
               ' split offset for the drag with:\n'
               'Touch slop: ${testResult.slop}\n'
               'Delta:      ${testResult.dragDistance}\n'

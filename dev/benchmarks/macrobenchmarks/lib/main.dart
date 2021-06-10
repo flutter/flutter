@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'common.dart';
 
+import 'src/animated_image.dart';
 import 'src/animated_placeholder.dart';
 import 'src/animation_with_microtasks.dart';
 import 'src/backdrop_filter.dart';
@@ -58,6 +59,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
         kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
         kAnimationWithMicrotasksRouteName: (BuildContext context) => const AnimationWithMicrotasks(),
+        kAnimatedImageRouteName: (BuildContext context) => const AnimatedImagePage(),
       },
     );
   }
@@ -199,6 +201,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Animation With Microtasks'),
             onPressed: () {
               Navigator.pushNamed(context, kAnimationWithMicrotasksRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimatedImageRouteName),
+            child: const Text('Animated Image'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedImageRouteName);
             },
           ),
         ],

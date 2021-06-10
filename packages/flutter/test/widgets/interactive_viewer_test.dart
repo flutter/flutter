@@ -679,15 +679,16 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-              body: Center(
-            child: InteractiveViewer(
-              constrained: false,
-              maxScale: 100000,
-              minScale: 0.01,
-              transformationController: transformationController,
-              child: const SizedBox(width: 1000.0, height: 1000.0),
+            body: Center(
+              child: InteractiveViewer(
+                constrained: false,
+                maxScale: 100000,
+                minScale: 0.01,
+                transformationController: transformationController,
+                child: const SizedBox(width: 1000.0, height: 1000.0),
+              ),
             ),
-          )),
+          ),
         ),
       );
 

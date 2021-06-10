@@ -58,7 +58,7 @@ void _tests() {
       .split('\n')
       .map<String>((String line) => line.trim())
       .join('\n')
-      .trim() + ',';
+      .trim();
 
     File? findThisTestFile(Directory directory) {
       for (final FileSystemEntity entity in directory.listSync()) {
@@ -86,7 +86,7 @@ void _tests() {
       .join('\n')
       .trim();
     semantics.dispose();
-    expect(code, expectedCode);
+    expect('$code,', expectedCode);
   });
 
   testWidgets('generated code is correct', (WidgetTester tester) async {

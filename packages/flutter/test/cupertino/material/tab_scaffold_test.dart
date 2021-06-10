@@ -200,7 +200,7 @@ void main() {
       find.descendant(
         of: find.byType(CupertinoTabScaffold),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.color.value);
@@ -223,7 +223,7 @@ void main() {
       find.descendant(
         of: find.byType(CupertinoTabScaffold),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.darkColor.value);

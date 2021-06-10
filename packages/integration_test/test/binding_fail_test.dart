@@ -42,6 +42,14 @@ Future<void> main() async {
       expect(results, containsPair('passing test', equals('success')));
       expect(results, containsPair('failing test', contains(_failureExcerpt)));
     });
+
+    test('when one test fails, then another passes', () async {
+      final Map<String, dynamic>? results = await _runTest(path.join('test', 'data', 'fail_then_pass_test_script.dart'));
+
+      expect(results, hasLength(2));
+      expect(results, containsPair('failing test', contains(_failureExcerpt)));
+      expect(results, containsPair('passing test', equals('success')));
+    });
   });
 }
 

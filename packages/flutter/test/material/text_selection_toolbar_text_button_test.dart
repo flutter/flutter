@@ -21,8 +21,8 @@ void main() {
               builder: (BuildContext context, StateSetter setter) {
                 setState = setter;
                 return TextSelectionToolbarTextButton(
-                  child: const Text('button'),
                   padding: TextSelectionToolbarTextButton.getPadding(index, total),
+                  child: const Text('button'),
                 );
               },
             ),

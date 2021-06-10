@@ -112,8 +112,8 @@ void main() {
             case '/4': return TestRoute<void>(settings: settings, child: const Text('G'));
           }
           return null;
-        }
-      )
+        },
+      ),
     );
 
     final NavigatorState navigator = insideKey.currentContext!.findAncestorStateOfType<NavigatorState>()!;
@@ -197,8 +197,8 @@ void main() {
             case '/1': return TestRoute<void>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B'));
           }
           return null;
-        }
-      )
+        },
+      ),
     );
     expect(find.byType(ModalBarrier), findsOneWidget);
 

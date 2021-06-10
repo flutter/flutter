@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -12,11 +13,11 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/install.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
-import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -29,11 +30,7 @@ void main() {
       final InstallCommand command = InstallCommand();
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
-      final MockAndroidDevice device = MockAndroidDevice();
-      when(device.isAppInstalled(any, userIdentifier: anyNamed('userIdentifier')))
-        .thenAnswer((_) async => false);
-      when(device.installApp(any, userIdentifier: anyNamed('userIdentifier')))
-        .thenAnswer((_) async => true);
+      final FakeAndroidDevice device = FakeAndroidDevice();
       testDeviceManager.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
@@ -45,11 +42,7 @@ void main() {
       final InstallCommand command = InstallCommand();
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
-      final MockIOSDevice device = MockIOSDevice();
-      when(device.isAppInstalled(any, userIdentifier: anyNamed('userIdentifier')))
-        .thenAnswer((_) async => false);
-      when(device.installApp(any, userIdentifier: anyNamed('userIdentifier')))
-        .thenAnswer((_) async => true);
+      final FakeIOSDevice device = FakeIOSDevice();
       testDeviceManager.addDevice(device);
 
       expect(() async => createTestCommandRunner(command).run(<String>['install', '--device-user', '10']),
@@ -62,9 +55,7 @@ void main() {
       final InstallCommand command = InstallCommand();
       command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
-      final MockIOSDevice device = MockIOSDevice();
-      when(device.isAppInstalled(any)).thenAnswer((_) async => false);
-      when(device.installApp(any)).thenAnswer((_) async => true);
+      final FakeIOSDevice device = FakeIOSDevice();
       testDeviceManager.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
@@ -86,3 +77,37 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
 }
 class FakeIOSApp extends Fake implements IOSApp {}
 class FakeAndroidApk extends Fake implements AndroidApk {}
+
+class FakeIOSDevice extends Fake implements IOSDevice {
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+
+  @override
+  Future<bool> isAppInstalled(
+    IOSApp app, {
+    String userIdentifier,
+  }) async => false;
+
+  @override
+  Future<bool> installApp(
+    IOSApp app, {
+    String userIdentifier,
+  }) async => true;
+}
+
+class FakeAndroidDevice extends Fake implements AndroidDevice {
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
+
+  @override
+  Future<bool> isAppInstalled(
+    AndroidApk app, {
+    String userIdentifier,
+  }) async => false;
+
+  @override
+  Future<bool> installApp(
+    AndroidApk app, {
+    String userIdentifier,
+  }) async => true;
+}

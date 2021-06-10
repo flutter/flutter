@@ -167,7 +167,7 @@ class PageStorageBucket {
 ///   const MyHomePage({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
+///   State<MyHomePage> createState() => _MyHomePageState();
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {
@@ -267,6 +267,8 @@ class PageStorage extends StatelessWidget {
   /// ```dart
   /// PageStorageBucket bucket = PageStorage.of(context);
   /// ```
+  ///
+  /// This method can be expensive (it walks the element tree).
   static PageStorageBucket? of(BuildContext context) {
     final PageStorage? widget = context.findAncestorWidgetOfExactType<PageStorage>();
     return widget?.bucket;

@@ -124,9 +124,9 @@ class DayPicker extends StatelessWidget {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag gesture used to scroll a
-  /// date picker wheel will begin upon the detection of a drag gesture. If set
-  /// to [DragStartBehavior.down] it will begin when a down event is first
-  /// detected.
+  /// date picker wheel will begin at the position where the drag gesture won
+  /// the arena. If set to [DragStartBehavior.down] it will begin at the
+  /// position where a down event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -301,8 +301,8 @@ class DayPicker extends StatelessWidget {
             onTap: () {
               onChanged(dayToBuild);
             },
-            child: dayWidget,
             dragStartBehavior: dragStartBehavior,
+            child: dayWidget,
           );
         }
 
@@ -401,7 +401,7 @@ class MonthPicker extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  _MonthPickerState createState() => _MonthPickerState();
+  State<MonthPicker> createState() => _MonthPickerState();
 }
 
 class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStateMixin {

@@ -149,10 +149,15 @@ class AndroidEmulator extends Emulator {
   String _prop(String name) => _properties != null ? _properties[name] : null;
 
   @override
-  Future<void> launch() async {
-    final Process process = await _processUtils.start(
-      <String>[_androidSdk.emulatorPath, '-avd', id],
-    );
+  Future<void> launch({@visibleForTesting Duration startupDuration, bool coldBoot = false}) async {
+    final List<String> command = <String>[
+      _androidSdk.emulatorPath,
+      '-avd',
+      id,
+      if (coldBoot)
+        '-no-snapshot-load'
+    ];
+    final Process process = await _processUtils.start(command);
 
     // Record output from the emulator process.
     final List<String> stdoutList = <String>[];
@@ -200,7 +205,7 @@ class AndroidEmulator extends Emulator {
     }));
 
     // Wait a few seconds for the emulator to start.
-    await Future<void>.delayed(const Duration(seconds: 3));
+    await Future<void>.delayed(startupDuration ?? const Duration(seconds: 3));
     earlyFailure = false;
     return;
   }

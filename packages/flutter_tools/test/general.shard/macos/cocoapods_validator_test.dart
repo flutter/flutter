@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
@@ -15,7 +13,7 @@ import '../../src/common.dart';
 void main() {
   group('CocoaPods validation', () {
     testWithoutContext('Emits installed status when CocoaPods is installed', () async {
-      final CocoaPodsValidator workflow = CocoaPodsValidator(FakeCocoaPods(CocoaPodsStatus.recommended), UserMessages());
+      final CocoaPodsValidator workflow = CocoaPodsValidator(FakeCocoaPods(CocoaPodsStatus.recommended, '1000.0.0'), UserMessages());
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.installed);
     });
@@ -55,6 +53,6 @@ class FakeCocoaPods extends Fake implements CocoaPods {
   final CocoaPodsStatus _evaluateCocoaPodsInstallation;
 
   @override
-  Future<String> get cocoaPodsVersionText async => _cocoaPodsVersionText;
-  final String _cocoaPodsVersionText;
+  Future<String?> get cocoaPodsVersionText async => _cocoaPodsVersionText;
+  final String? _cocoaPodsVersionText;
 }

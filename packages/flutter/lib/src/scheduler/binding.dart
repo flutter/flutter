@@ -202,12 +202,8 @@ mixin SchedulerBinding on BindingBase {
     _instance = this;
 
     if (!kReleaseMode) {
-      int frameNumber = 0;
       addTimingsCallback((List<FrameTiming> timings) {
-        for (final FrameTiming frameTiming in timings) {
-          frameNumber += 1;
-          _profileFramePostEvent(frameNumber, frameTiming);
-        }
+        timings.forEach(_profileFramePostEvent);
       });
     }
   }
@@ -1103,9 +1099,9 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
-  void _profileFramePostEvent(int frameNumber, FrameTiming frameTiming) {
+  void _profileFramePostEvent(FrameTiming frameTiming) {
     postEvent('Flutter.Frame', <String, dynamic>{
-      'number': frameNumber,
+      'number': frameTiming.frameNumber,
       'startTime': frameTiming.timestampInMicroseconds(FramePhase.buildStart),
       'elapsed': frameTiming.totalSpan.inMicroseconds,
       'build': frameTiming.buildDuration.inMicroseconds,

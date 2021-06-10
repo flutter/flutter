@@ -96,7 +96,6 @@ void main() {
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () { },
-          child: const Icon(Icons.add),
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
           splashColor: splashColor,
@@ -104,6 +103,7 @@ void main() {
           disabledElevation: disabledElevation,
           highlightElevation: highlightElevation,
           shape: shape,
+          child: const Icon(Icons.add),
         ),
       ),
     ));

@@ -300,4 +300,66 @@ void main() {
       );
     });
   });
+
+  test('toString works as intended', () async {
+    const AndroidPointerProperties androidPointerProperties = AndroidPointerProperties(id: 0, toolType: 0);
+    expect(androidPointerProperties.toString(), 'AndroidPointerProperties(id: 0, toolType: 0)');
+
+    const double zero = 0.0;
+    const AndroidPointerCoords androidPointerCoords = AndroidPointerCoords(
+      orientation: zero,
+      pressure: zero,
+      size: zero,
+      toolMajor: zero,
+      toolMinor: zero,
+      touchMajor: zero,
+      touchMinor: zero,
+      x: zero,
+      y: zero
+    );
+    expect(androidPointerCoords.toString(), 'AndroidPointerCoords(orientation: $zero, '
+      'pressure: $zero, '
+      'size: $zero, '
+      'toolMajor: $zero, '
+      'toolMinor: $zero, '
+      'touchMajor: $zero, '
+      'touchMinor: $zero, '
+      'x: $zero, '
+      'y: $zero)',
+    );
+
+    final AndroidMotionEvent androidMotionEvent = AndroidMotionEvent(
+      downTime: 0,
+      eventTime: 0,
+      action: 0,
+      pointerCount: 0,
+      pointerProperties: <AndroidPointerProperties>[],
+      pointerCoords: <AndroidPointerCoords>[],
+      metaState: 0,
+      buttonState: 0,
+      xPrecision: zero,
+      yPrecision: zero,
+      deviceId: 0,
+      edgeFlags: 0,
+      source: 0,
+      flags: 0,
+      motionEventId: 0
+    );
+    expect(androidMotionEvent.toString(), 'AndroidPointerEvent(downTime: 0, '
+      'eventTime: 0, '
+      'action: 0, '
+      'pointerCount: 0, '
+      'pointerProperties: [], '
+      'pointerCoords: [], '
+      'metaState: 0, '
+      'buttonState: 0, '
+      'xPrecision: $zero, '
+      'yPrecision: $zero, '
+      'deviceId: 0, '
+      'edgeFlags: 0, '
+      'source: 0, '
+      'flags: 0, '
+      'motionEventId: 0)',
+    );
+  });
 }

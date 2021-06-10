@@ -8,8 +8,7 @@ class AnimationWithMicrotasks extends StatefulWidget {
   const AnimationWithMicrotasks({Key key}) : super(key: key);
 
   @override
-  _AnimationWithMicrotasksState createState() =>
-      _AnimationWithMicrotasksState();
+  State<AnimationWithMicrotasks> createState() => _AnimationWithMicrotasksState();
 }
 
 class _AnimationWithMicrotasksState extends State<AnimationWithMicrotasks> {

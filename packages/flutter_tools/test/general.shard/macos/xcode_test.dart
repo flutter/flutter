@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -38,24 +38,23 @@ void main() {
     });
 
     group('Xcode', () {
-      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+      FakeXcodeProjectInterpreter xcodeProjectInterpreter;
 
       setUp(() {
-        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+        xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       });
 
       testWithoutContext('isInstalledAndMeetsVersionCheck is false when not macOS', () {
         final Xcode xcode = Xcode.test(
           platform: FakePlatform(operatingSystem: 'windows'),
           processManager: fakeProcessManager,
-          xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
 
         expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
       });
 
       testWithoutContext('isSimctlInstalled is true when simctl list succeeds', () {
-        when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
         fakeProcessManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -67,7 +66,7 @@ void main() {
         );
         final Xcode xcode = Xcode.test(
           processManager: fakeProcessManager,
-          xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
 
         expect(xcode.isSimctlInstalled, isTrue);
@@ -75,7 +74,6 @@ void main() {
       });
 
       testWithoutContext('isSimctlInstalled is true when simctl list fails', () {
-        when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
         fakeProcessManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -88,7 +86,7 @@ void main() {
         );
         final Xcode xcode = Xcode.test(
           processManager: fakeProcessManager,
-          xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
 
         expect(xcode.isSimctlInstalled, isFalse);
@@ -99,11 +97,10 @@ void main() {
         Xcode xcode;
 
         setUp(() {
-          mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-          when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
+          xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
           xcode = Xcode.test(
             processManager: fakeProcessManager,
-            xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
         });
 
@@ -137,105 +134,105 @@ void main() {
         });
 
         testWithoutContext('xcodeVersionSatisfactory is false when version is less than minimum', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(9, 0, 0));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(9, 0, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isFalse);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is false when xcodebuild tools are not installed', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
+          xcodeProjectInterpreter.isInstalled = false;
 
           expect(xcode.isRequiredVersionSatisfactory, isFalse);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is true when version meets minimum', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(12, 0, 1));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(12, 0, 1);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is true when major version exceeds minimum', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(13, 0, 0));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(13, 0, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(12, 3, 0));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(12, 3, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is true when patch version exceeds minimum', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(12, 0, 2));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(12, 0, 2);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is false when version is less than minimum', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(11, 0, 0));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(11, 0, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is false when xcodebuild tools are not installed', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
+          xcodeProjectInterpreter.isInstalled = false;
 
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when version meets minimum', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(12, 0, 1));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(12, 0, 1);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when major version exceeds minimum', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(13, 0, 0));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(13, 0, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when minor version exceeds minimum', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(12, 3, 0));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(12, 3, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when patch version exceeds minimum', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(12, 0, 2));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(12, 0, 2);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is false when not installed', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
+          xcodeProjectInterpreter.isInstalled = false;
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is false when version not satisfied', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(10, 2, 0));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(10, 2, 0);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
-          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.version).thenReturn(Version(12, 0, 1));
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(12, 0, 1);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -256,7 +253,6 @@ void main() {
         });
 
         testWithoutContext('eulaSigned is false when clang is not installed', () {
-          when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
           fakeProcessManager.addCommand(
             const FakeCommand(
               command: <String>['xcrun', 'clang'],
@@ -785,4 +781,13 @@ void main() {
   });
 }
 
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  @override
+  Version version = Version.unknown;
+
+  @override
+  bool isInstalled = false;
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
+}

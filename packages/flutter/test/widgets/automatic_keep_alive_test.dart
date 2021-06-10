@@ -11,7 +11,7 @@ class Leaf extends StatefulWidget {
   const Leaf({ required Key key, required this.child }) : super(key: key);
   final Widget child;
   @override
-  _LeafState createState() => _LeafState();
+  State<Leaf> createState() => _LeafState();
 }
 
 class _LeafState extends State<Leaf> {
@@ -446,8 +446,7 @@ void main() {
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
-              ]),
+              child: Stack(children: const <Widget>[]),
             ),
           ),
           AutomaticKeepAlive(

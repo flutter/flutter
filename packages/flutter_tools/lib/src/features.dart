@@ -293,11 +293,15 @@ const Feature experimentalInvalidationStrategy = Feature(
   ),
 );
 
-/// The feature for enabling the Windows UWP embeding.
+/// The feature for enabling the Windows UWP embedding.
 const Feature windowsUwpEmbedding = Feature(
   name: 'Flutter for Windows UWP',
   configSetting: 'enable-windows-uwp-desktop',
   master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  dev: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),

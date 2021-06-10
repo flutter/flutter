@@ -243,8 +243,8 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, '#!/usr/bin/env bash\n' + _generateLicense('# '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, '@ECHO off\n' + _generateLicense('REM '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, '#!/usr/bin/env bash\n${_generateLicense('# ')}');
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, '@ECHO off\n${_generateLicense('REM ')}');
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!DOCTYPE HTML>\n<!-- ${_generateLicense('')} -->', trailingBlank: false);
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->');
@@ -252,7 +252,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
 
 Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String extension, int minimumMatches, String license, { bool trailingBlank = true }) async {
   assert(!license.endsWith('\n'));
-  final String licensePattern = license + '\n' + (trailingBlank ? '\n' : '');
+  final String licensePattern = '$license\n${trailingBlank ? '\n' : ''}';
   final List<String> errors = <String>[];
   await for (final File file in _allFiles(workingDirectory, extension, minimumMatches: minimumMatches)) {
     final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
@@ -317,13 +317,13 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
     .map<String>((Directory entity) => path.basename(entity.path))
     .toList()..sort();
   if (!_listEquals<String>(packages, directories)) {
-    errors.add(
-      'flutter/lib/*.dart does not match flutter/lib/src/*/:\n'
-      'These are the exported packages:\n' +
-      packages.map<String>((String path) => '  lib/$path.dart').join('\n') +
-      'These are the directories:\n' +
-      directories.map<String>((String path) => '  lib/src/$path/').join('\n')
-    );
+    errors.add(<String>[
+      'flutter/lib/*.dart does not match flutter/lib/src/*/:',
+      'These are the exported packages:',
+      ...packages.map<String>((String path) => '  lib/$path.dart'),
+      'These are the directories:',
+      ...directories.map<String>((String path) => '  lib/src/$path/')
+    ].join('\n'));
   }
   // Verify that the imports are well-ordered.
   final Map<String, Set<String>> dependencyMap = <String, Set<String>>{};
@@ -347,7 +347,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
         continue;
       // Sanity check before performing _deepSearch, to ensure there's no rogue
       // dependencies.
-      final String validFilenames = dependencyMap.keys.map((String name) => name + '.dart').join(', ');
+      final String validFilenames = dependencyMap.keys.map((String name) => '$name.dart').join(', ');
       errors.add(
         '$key imported package:flutter/$dependency.dart '
         'which is not one of the valid exports { $validFilenames }.\n'
@@ -359,10 +359,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   for (final String package in dependencyMap.keys) {
     final List<String> loop = _deepSearch<String>(dependencyMap, package);
     if (loop != null) {
-      errors.add(
-        '${yellow}Dependency loop:$reset ' +
-        loop.join(' depends on ')
-      );
+      errors.add('${yellow}Dependency loop:$reset ${loop.join(' depends on ')}');
     }
   }
   // Fail if any errors

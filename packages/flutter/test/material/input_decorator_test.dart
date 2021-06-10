@@ -178,7 +178,7 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          floatingLabelBehavior: FloatingLabelBehavior.always
+          floatingLabelBehavior: FloatingLabelBehavior.always,
         ),
       ),
     );
@@ -193,7 +193,7 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          floatingLabelBehavior: FloatingLabelBehavior.never
+          floatingLabelBehavior: FloatingLabelBehavior.never,
         ),
       ),
     );
@@ -1744,7 +1744,7 @@ void main() {
                 constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
               ),
             ),
-          )
+          ),
       );
 
       // Theme settings should make it 300x40 pixels
@@ -1762,7 +1762,7 @@ void main() {
           decoration: const InputDecoration(
             constraints: BoxConstraints(maxWidth: 200, maxHeight: 32),
           ),
-        )
+        ),
       );
 
       // InputDecoration.constraints should override the theme. It should be
@@ -3137,7 +3137,7 @@ void main() {
     ]));
 
     final Set<Object> nodeValues = Set<Object>.from(
-      renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!)
+      renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!),
     );
     expect(nodeValues.length, 11);
   });

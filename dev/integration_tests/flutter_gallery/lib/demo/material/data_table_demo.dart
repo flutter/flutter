@@ -147,7 +147,7 @@ class DataTableDemo extends StatefulWidget {
   static const String routeName = '/material/data-table';
 
   @override
-  _DataTableDemoState createState() => _DataTableDemoState();
+  State<DataTableDemo> createState() => _DataTableDemoState();
 }
 
 class _DataTableDemoState extends State<DataTableDemo> {

@@ -17,8 +17,8 @@ import '_isolates_io.dart'
 /// {@macro flutter.foundation.compute.limitations}
 typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
-// The signature of [compute].
-typedef _ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String? debugLabel });
+/// The signature of [compute].
+typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String? debugLabel });
 
 /// Spawn an isolate, run `callback` on that isolate, passing it `message`, and
 /// (eventually) return the value returned by `callback`.
@@ -44,4 +44,4 @@ typedef _ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, 
 ///
 /// The `debugLabel` argument can be specified to provide a name to add to the
 /// [Timeline]. This is useful when profiling an application.
-const _ComputeImpl compute = _isolates.compute;
+const ComputeImpl compute = _isolates.compute;

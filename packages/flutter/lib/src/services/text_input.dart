@@ -224,7 +224,7 @@ class TextInputType {
 ///
 /// Despite the logical meaning of each action, choosing a particular
 /// [TextInputAction] does not necessarily cause any specific behavior to
-/// happen, other than changing the focus when approapriate. It is up to the
+/// happen, other than changing the focus when appropriate. It is up to the
 /// developer to ensure that the behavior that occurs when an action button is
 /// pressed is appropriate for the action button chosen.
 ///
@@ -1517,7 +1517,7 @@ class TextInput {
     assert(shouldSave != null);
     TextInput._instance._channel.invokeMethod<void>(
       'TextInput.finishAutofillContext',
-      shouldSave ,
+      shouldSave,
     );
   }
 }

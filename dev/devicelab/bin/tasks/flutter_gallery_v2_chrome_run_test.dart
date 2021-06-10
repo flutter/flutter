@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -38,7 +40,7 @@ class NewGalleryChromeRunTest {
   /// Runs the test.
   Future<TaskResult> run() async {
     final Directory galleryParentDir =
-        Directory.systemTemp.createTempSync('temp');
+        Directory.systemTemp.createTempSync('flutter_gallery_v2_chrome_run.');
     final Directory galleryDir =
         Directory(path.join(galleryParentDir.path, 'gallery'));
 

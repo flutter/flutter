@@ -157,7 +157,7 @@ abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
   }
 
   @override
-  _InheritedNotifierElement<T> createElement() => _InheritedNotifierElement<T>(this);
+  InheritedElement createElement() => _InheritedNotifierElement<T>(this);
 }
 
 class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {

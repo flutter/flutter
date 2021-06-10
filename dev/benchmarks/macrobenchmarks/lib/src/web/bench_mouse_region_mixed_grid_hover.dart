@@ -56,12 +56,12 @@ class _NestedListener extends StatelessWidget {
 /// Measures our ability to hit test mouse regions.
 class BenchMouseRegionMixedGridHover extends WidgetRecorder {
   BenchMouseRegionMixedGridHover() : super(name: benchmarkName) {
-    tester = _Tester(onDataPoint: handleDataPoint);
+    _tester = _Tester(onDataPoint: handleDataPoint);
   }
 
   static const String benchmarkName = 'bench_mouse_region_mixed_grid_hover';
 
-  _Tester tester;
+  _Tester _tester;
 
   void handleDataPoint(Duration duration) {
     profile.addDataPoint('hitTestDuration', duration, reported: true);
@@ -86,8 +86,8 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
     if (!started) {
       started = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
-        tester.start();
-        registerDidStop(tester.stop);
+        _tester.start();
+        registerDidStop(_tester.stop);
       });
     }
     super.frameDidDraw();

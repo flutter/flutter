@@ -45,7 +45,7 @@ class SemanticsDebugger extends StatefulWidget {
   final TextStyle labelStyle;
 
   @override
-  _SemanticsDebuggerState createState() => _SemanticsDebuggerState();
+  State<SemanticsDebugger> createState() => _SemanticsDebuggerState();
 }
 
 class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindingObserver {

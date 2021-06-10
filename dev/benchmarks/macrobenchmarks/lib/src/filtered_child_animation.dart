@@ -23,7 +23,7 @@ class FilteredChildAnimationPage extends StatefulWidget {
   final bool initialUseRepaintBoundary;
 
   @override
-  _FilteredChildAnimationPageState createState() => _FilteredChildAnimationPageState();
+  State<FilteredChildAnimationPage> createState() => _FilteredChildAnimationPageState();
 }
 
 class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage> with SingleTickerProviderStateMixin {
@@ -87,8 +87,8 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
           children: List<Widget>.generate(rows, (int r) => Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List<Widget>.generate(cols, (int c) => Container(
-              child: Text('text', style: TextStyle(fontSize: fontSize)),
               decoration: decoration,
+              child: Text('text', style: TextStyle(fontSize: fontSize)),
             )),
           )),
         ),
@@ -120,6 +120,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
         builder = (BuildContext context, Widget child) => Transform(
           transform: Matrix4.rotationZ(_controller.value * 2.0 * pi),
           alignment: Alignment.center,
+          filterQuality: FilterQuality.low,
           child: child,
         );
         break;
@@ -138,8 +139,8 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     return RepaintBoundary(
       child: AnimatedBuilder(
         animation: _controller,
-        child: protectChild ? RepaintBoundary(child: child) : child,
         builder: builder,
+        child: protectChild ? RepaintBoundary(child: child) : child,
       ),
     );
   }

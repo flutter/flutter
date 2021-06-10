@@ -43,14 +43,12 @@ class FadeInImageParts {
 }
 
 class FadeInImageElements {
-  const FadeInImageElements(this.rawImageElement, this.fadeTransitionElement);
+  const FadeInImageElements(this.rawImageElement);
 
   final Element rawImageElement;
-  final Element? fadeTransitionElement;
 
   RawImage get rawImage => rawImageElement.widget as RawImage;
-  FadeTransition? get fadeTransition => fadeTransitionElement?.widget as FadeTransition?;
-  double get opacity => fadeTransition == null ? 1 : fadeTransition!.opacity.value;
+  double get opacity => rawImage.opacity?.value ?? 1.0;
 }
 
 class LoadTestImageProvider extends ImageProvider<Object> {
@@ -78,11 +76,8 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
   final Iterable<Element> rawImageElements = tester.elementList(find.byType(RawImage));
   ComponentElement? fadeInImageElement;
   for (final Element rawImageElement in rawImageElements) {
-    Element? fadeTransitionElement;
     rawImageElement.visitAncestorElements((Element ancestor) {
-      if (ancestor.widget is FadeTransition) {
-        fadeTransitionElement = ancestor;
-      } else if (ancestor.widget is FadeInImage) {
+      if (ancestor.widget is FadeInImage) {
         if (fadeInImageElement == null) {
           fadeInImageElement = ancestor as ComponentElement;
         } else {
@@ -93,7 +88,7 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
       return true;
     });
     expect(fadeInImageElement, isNotNull);
-    elements.add(FadeInImageElements(rawImageElement, fadeTransitionElement));
+    elements.add(FadeInImageElements(rawImageElement));
   }
   if (elements.length == 2) {
     return FadeInImageParts(fadeInImageElement!, elements.last, elements.first);

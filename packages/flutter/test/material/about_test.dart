@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -232,9 +233,7 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
-  testWidgets('_PackageLicensePage title style without AppBarTheme', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('_PackageLicensePage title style without AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -281,9 +280,7 @@ void main() {
     expect(subtitle.style, subtitleTextStyle);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
-  testWidgets('_PackageLicensePage title style with AppBarTheme', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('_PackageLicensePage title style with AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -683,7 +680,7 @@ void main() {
                   applicationName: 'MyApp',
                   applicationVersion: '1.0.0',
                 );
-              }
+              },
             ),
           ),
         ),
@@ -709,6 +706,50 @@ void main() {
     expect(materialDones[0].color, scaffoldColor);
     expect(materialDones[1].color, cardColor);
   });
+
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to _PackageLicensePage', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83819
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: LicensePage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Check for packages.
+    expect(find.text('AAA'), findsOneWidget);
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+
+    // The inherited ScrollBehavior should not apply Scrollbars since they are
+    // already built in to the widget.
+    switch (debugDefaultTargetPlatformOverride) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(find.byType(CupertinoScrollbar), findsNothing);
+        break;
+      case TargetPlatform.iOS:
+        expect(find.byType(CupertinoScrollbar), findsOneWidget);
+        break;
+      case null:
+        break;
+    }
+    expect(find.byType(Scrollbar), findsOneWidget);
+    expect(find.byType(RawScrollbar), findsNothing);
+
+  }, variant: TargetPlatformVariant.all());
 }
 
 class FakeLicenseEntry extends LicenseEntry {

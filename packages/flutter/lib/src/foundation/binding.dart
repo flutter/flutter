@@ -104,8 +104,8 @@ abstract class BindingBase {
   /// A number of additional bindings are defined as extensions of
   /// [BindingBase], e.g., [ServicesBinding], [RendererBinding], and
   /// [WidgetsBinding]. Each of these bindings define behaviors that interact
-  /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers a
-  /// [ui.PlatformDispatcher.onPlatformMessage] handler, and [RendererBinding]
+  /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers
+  /// listeners with the [ChannelBuffers], and [RendererBinding]
   /// registers [ui.PlatformDispatcher.onMetricsChanged],
   /// [ui.PlatformDispatcher.onTextScaleFactorChanged],
   /// [ui.PlatformDispatcher.onSemanticsEnabledChanged], and
@@ -169,10 +169,27 @@ abstract class BindingBase {
       return true;
     }());
 
-    if (!kReleaseMode && !kIsWeb) {
-      registerSignalServiceExtension(
-        name: 'exit',
-        callback: _exitApplication,
+    if (!kReleaseMode) {
+      if (!kIsWeb) {
+        registerSignalServiceExtension(
+          name: 'exit',
+          callback: _exitApplication,
+        );
+      }
+      // These service extensions are used in profile mode applications.
+      registerStringServiceExtension(
+        name: 'connectedVmServiceUri',
+        getter: () async => connectedVmServiceUri ?? '',
+        setter: (String uri) async {
+          connectedVmServiceUri = uri;
+        },
+      );
+      registerStringServiceExtension(
+        name: 'activeDevToolsServerAddress',
+        getter: () async => activeDevToolsServerAddress ?? '',
+        setter: (String serverAddress) async {
+          activeDevToolsServerAddress = serverAddress;
+        },
       );
     }
 
@@ -245,23 +262,6 @@ abstract class BindingBase {
           };
         },
       );
-
-      registerStringServiceExtension(
-        name: 'connectedVmServiceUri',
-        getter: () async => connectedVmServiceUri ?? '',
-        setter: (String uri) async {
-          connectedVmServiceUri = uri;
-        },
-      );
-
-      registerStringServiceExtension(
-        name: 'activeDevToolsServerAddress',
-        getter: () async => activeDevToolsServerAddress ?? '',
-        setter: (String serverAddress) async {
-          activeDevToolsServerAddress = serverAddress;
-        },
-      );
-
       return true;
     }());
     assert(() {

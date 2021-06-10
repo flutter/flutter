@@ -448,7 +448,7 @@ class ThreePointCubic extends Curve {
 ///   final Widget child;
 ///
 ///   @override
-///   _FollowCurve2DState createState() => _FollowCurve2DState();
+///   State<FollowCurve2D> createState() => _FollowCurve2DState();
 /// }
 ///
 /// class _FollowCurve2DState extends State<FollowCurve2D> with TickerProviderStateMixin {
@@ -1401,7 +1401,7 @@ class ElasticInOutCurve extends Curve {
 ///  * [Curve], the interface implemented by the constants available from the
 ///    [Curves] class.
 class Curves {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   Curves._();
 
@@ -1442,7 +1442,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
   static const Cubic easeIn = Cubic(0.42, 0.0, 1.0, 1.0);
 
-  /// A cubic animation curve that starts starts slowly and ends linearly.
+  /// A cubic animation curve that starts slowly and ends linearly.
   ///
   /// The symmetric animation to [linearToEaseOut].
   ///

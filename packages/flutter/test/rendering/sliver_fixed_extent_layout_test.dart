@@ -93,10 +93,10 @@ void main() {
     });
 
     test('should be 5 when offset is 6 times greater than a specific item extent where the division will return more than 13 zero decimals', () {
-      const double itemExtentSpecificForAProblematicSreenSize = 411.42857142857144;
+      const double itemExtentSpecificForAProblematicScreenSize = 411.42857142857144;
       final int actual = testGetMaxChildIndexForScrollOffset(
-        itemExtentSpecificForAProblematicSreenSize * 6 + extraValueToHaveRoundingIssues,
-        itemExtentSpecificForAProblematicSreenSize,
+        itemExtentSpecificForAProblematicScreenSize * 6 + extraValueToHaveRoundingIssues,
+        itemExtentSpecificForAProblematicScreenSize,
       );
       expect(actual, 5);
     });

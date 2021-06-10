@@ -15,6 +15,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const String homeLinux = '/home/me';
 const String homeMac = '/Users/me';
@@ -99,6 +100,7 @@ void main() {
     FileSystemUtils fsUtils;
     Platform platform;
     FakePlistUtils plistUtils;
+    FakeProcessManager processManager;
 
     setUp(() {
       plistUtils = FakePlistUtils();
@@ -107,6 +109,7 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
       );
+      processManager = FakeProcessManager.empty();
     });
 
     testUsingContext('Can discover Android Studio >=4.1 location on Mac', () {
@@ -168,6 +171,91 @@ void main() {
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
       ProcessManager: () => FakeProcessManager.any(),
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
+
+    testUsingContext('Can discover installation from Spotlight query', () {
+      // One in expected location.
+      final String studioInApplication = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+      );
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        studioInApplication,
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
+
+      // Two in random location only Spotlight knows about.
+      final String randomLocation1 = fileSystem.path.join(
+        '/',
+        'random',
+        'Android Studio Preview.app',
+      );
+      final String randomLocation1PlistFolder = fileSystem.path.join(
+        randomLocation1,
+        'Contents',
+      );
+      fileSystem.directory(randomLocation1PlistFolder).createSync(recursive: true);
+      final String randomLocation1PlistPath = fileSystem.path.join(randomLocation1PlistFolder, 'Info.plist');
+      plistUtils.fileContents[randomLocation1PlistPath] = macStudioInfoPlist4_1;
+
+      final String randomLocation2 = fileSystem.path.join(
+        '/',
+        'random',
+        'Android Studio with Blaze.app',
+      );
+      final String randomLocation2PlistFolder = fileSystem.path.join(
+        randomLocation2,
+        'Contents',
+      );
+      fileSystem.directory(randomLocation2PlistFolder).createSync(recursive: true);
+      final String randomLocation2PlistPath = fileSystem.path.join(randomLocation2PlistFolder, 'Info.plist');
+      plistUtils.fileContents[randomLocation2PlistPath] = macStudioInfoPlist4_1;
+      final String javaBin = fileSystem.path.join('jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
+
+      // Spotlight finds the one known and two random installations.
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'mdfind',
+            'kMDItemCFBundleIdentifier="com.google.android.studio*"',
+          ],
+          stdout: '$randomLocation1\n$randomLocation2\n$studioInApplication',
+        ),
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join(randomLocation1, 'Contents', javaBin),
+            '-version',
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join(randomLocation2, 'Contents', javaBin),
+            '-version',
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join(studioInApplicationPlistFolder, javaBin),
+            '-version',
+          ],
+        ),
+      ]);
+
+      // Results are de-duplicated, only 3 installed.
+      expect(AndroidStudio.allInstalled().length, 3);
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => processManager,
       // Custom home paths are not supported on macOS nor Windows yet,
       // so we force the platform to fake Linux here.
       Platform: () => platform,
@@ -321,8 +409,44 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('Can discover Android Studio 4.2 location on Windows', () {
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+    windowsFileSystem
+      .directory(r'C:\Program Files\AndroidStudio')
+      .createSync(recursive: true);
+
+    final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+    expect(studio.version, Version(4, 2, 0));
+    expect(studio.studioAppName, 'Android Studio 4.2');
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => windowsFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('Does not discover Android Studio 4.1 location on Windows if LOCALAPPDATA is null', () {
     windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+    windowsFileSystem
+      .directory(r'C:\Program Files\AndroidStudio')
+      .createSync(recursive: true);
+
+    expect(AndroidStudio.allInstalled(), isEmpty);
+  }, overrides: <Type, Generator>{
+    Platform: () => FakePlatform(
+      operatingSystem: 'windows',
+      environment: <String, String>{}, // Does not include LOCALAPPDATA
+    ),
+    FileSystem: () => windowsFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('Does not discover Android Studio 4.2 location on Windows if LOCALAPPDATA is null', () {
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
     windowsFileSystem

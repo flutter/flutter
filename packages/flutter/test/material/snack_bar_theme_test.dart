@@ -79,7 +79,7 @@ void main() {
               },
               child: const Text('X'),
             );
-          }
+          },
         ),
       ),
     ));
@@ -106,18 +106,18 @@ void main() {
       theme: ThemeData(snackBarTheme: snackBarTheme),
       home: Scaffold(
         body: Builder(
-            builder: (BuildContext context) {
-              return GestureDetector(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: const Text(text),
-                    duration: const Duration(seconds: 2),
-                    action: SnackBarAction(label: action, onPressed: () {}),
-                  ));
-                },
-                child: const Text('X'),
-              );
-            }
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text(text),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(label: action, onPressed: () {}),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
         ),
       ),
     ));
@@ -150,25 +150,25 @@ void main() {
       theme: ThemeData(snackBarTheme: _snackBarTheme()),
       home: Scaffold(
         body: Builder(
-            builder: (BuildContext context) {
-              return GestureDetector(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    backgroundColor: backgroundColor,
-                    elevation: elevation,
-                    shape: shape,
-                    content: const Text('I am a snack bar.'),
-                    duration: const Duration(seconds: 2),
-                    action: SnackBarAction(
-                      textColor: textColor,
-                      label: action,
-                      onPressed: () {},
-                    ),
-                  ));
-                },
-                child: const Text('X'),
-              );
-            }
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  backgroundColor: backgroundColor,
+                  elevation: elevation,
+                  shape: shape,
+                  content: const Text('I am a snack bar.'),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(
+                    textColor: textColor,
+                    label: action,
+                    onPressed: () {},
+                  ),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
         ),
       ),
     ));
@@ -189,7 +189,7 @@ void main() {
   testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating)
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
       ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
@@ -231,7 +231,7 @@ void main() {
   testWidgets('SnackBar theme behavior is correct for fixed', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.fixed)
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.fixed),
       ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(

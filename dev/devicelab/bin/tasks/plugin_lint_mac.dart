@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -224,7 +226,7 @@ Future<void> main() async {
 
       section('Build Objective-C application with Swift and Objective-C plugins as frameworks');
 
-      objcPodfileContent = 'use_frameworks!\n' + objcPodfileContent;
+      objcPodfileContent = 'use_frameworks!\n$objcPodfileContent';
       objcPodfile.writeAsStringSync(objcPodfileContent, flush: true);
 
       await inDirectory(objcAppPath, () async {

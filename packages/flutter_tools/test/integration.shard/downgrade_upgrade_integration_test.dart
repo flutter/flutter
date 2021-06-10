@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import 'test_utils.dart';
 
 const String _kInitialVersion = 'v1.9.1';
@@ -46,7 +45,7 @@ void main() {
     }
   });
 
-  testUsingContext('Can upgrade and downgrade a Flutter checkout', () async {
+  testWithoutContext('Can upgrade and downgrade a Flutter checkout', () async {
     final Directory testDirectory = parentDirectory.childDirectory('flutter');
     testDirectory.createSync(recursive: true);
 

@@ -12,7 +12,7 @@ void main() {
       builder: (BuildContext context) {
         log.add('inner');
         return const Text('inner', textDirection: TextDirection.ltr);
-      }
+      },
     );
     int value = 0;
     await tester.pumpWidget(Builder(
@@ -31,12 +31,12 @@ void main() {
                 builder: (BuildContext context) {
                   log.add('middle $value');
                   return inner;
-                }
+                },
               ),
             );
-          }
+          },
         );
-      }
+      },
     ));
     log.add('---');
     await tester.tap(find.text('inner'));

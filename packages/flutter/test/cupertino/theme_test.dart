@@ -175,7 +175,8 @@ void main() {
     expect(
       setEquals(
         description,
-        <String>{ 'brightness',
+        <String>{
+          'brightness',
           'primaryColor',
           'primaryContrastingColor',
           'barBackgroundColor',
@@ -188,7 +189,7 @@ void main() {
           'navActionTextStyle',
           'pickerTextStyle',
           'dateTimePickerTextStyle',
-        }
+        },
       ),
       isTrue,
     );

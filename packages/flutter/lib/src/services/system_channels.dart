@@ -32,10 +32,19 @@ class SystemChannels {
   /// The following methods are used for the opposite direction data flow. The
   /// framework notifies the engine about the route changes.
   ///
-  ///  * `routeUpdated`, which is called when current route has changed.
+  ///  * `selectSingleEntryHistory`, which enables a single-entry history mode.
   ///
-  ///  * `routeInformationUpdated`, which is called by the [Router] when the
-  ///    application navigate to a new location.
+  ///  * `selectMultiEntryHistory`, which enables a multiple-entry history mode.
+  ///
+  ///  * `routeInformationUpdated`, which is called when the application
+  ///    navigates to a new location, and which takes two arguments, `location`
+  ///    (a URL) and `state` (an object).
+  ///
+  ///  * `routeUpdated`, a deprecated API which can be called in the same
+  ///    situations as `routeInformationUpdated` but whose arguments are
+  ///    `routeName` (a URL) and `previousRouteName` (which is ignored).
+  ///
+  /// These APIs are exposed by the [SystemNavigator] class.
   ///
   /// See also:
   ///

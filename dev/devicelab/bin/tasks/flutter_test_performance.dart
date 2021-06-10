@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // This test runs `flutter test` on the `trivial_widget_test.dart` four times.
 //
 // The first time, the result is ignored, on the basis that it's warming the

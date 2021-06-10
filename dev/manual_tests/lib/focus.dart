@@ -13,31 +13,25 @@ void main() {
 }
 
 class DemoButton extends StatefulWidget {
-  const DemoButton({Key key, this.name, this.canRequestFocus = true, this.autofocus = false}) : super(key: key);
+  const DemoButton({Key? key, required this.name, this.canRequestFocus = true, this.autofocus = false}) : super(key: key);
 
   final String name;
   final bool canRequestFocus;
   final bool autofocus;
 
   @override
-  _DemoButtonState createState() => _DemoButtonState();
+  State<DemoButton> createState() => _DemoButtonState();
 }
 
 class _DemoButtonState extends State<DemoButton> {
-  FocusNode focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    focusNode = FocusNode(
+  late final FocusNode focusNode = FocusNode(
       debugLabel: widget.name,
       canRequestFocus: widget.canRequestFocus,
-    );
-  }
+  );
 
   @override
   void dispose() {
-    focusNode?.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 
@@ -64,7 +58,7 @@ class _DemoButtonState extends State<DemoButton> {
             return Colors.red.withOpacity(0.25);
           if (states.contains(MaterialState.hovered))
             return Colors.blue.withOpacity(0.25);
-          return null;
+          return Colors.transparent;
         }),
       ),
       onPressed: () => _handleOnPressed(),
@@ -74,14 +68,14 @@ class _DemoButtonState extends State<DemoButton> {
 }
 
 class FocusDemo extends StatefulWidget {
-  const FocusDemo({Key key}) : super(key: key);
+  const FocusDemo({Key? key}) : super(key: key);
 
   @override
-  _FocusDemoState createState() => _FocusDemoState();
+  State<FocusDemo> createState() => _FocusDemoState();
 }
 
 class _FocusDemoState extends State<FocusDemo> {
-  FocusNode outlineFocus;
+  FocusNode? outlineFocus;
 
   @override
   void initState() {
@@ -91,7 +85,7 @@ class _FocusDemoState extends State<FocusDemo> {
 
   @override
   void dispose() {
-    outlineFocus.dispose();
+    outlineFocus?.dispose();
     super.dispose();
   }
 
@@ -142,7 +136,7 @@ class _FocusDemoState extends State<FocusDemo> {
         onKey: _handleKeyPress,
         autofocus: true,
         child: DefaultTextStyle(
-          style: textTheme.headline4,
+          style: textTheme.headline4!,
           child: Scaffold(
             appBar: AppBar(
               title: const Text('Focus Demo'),

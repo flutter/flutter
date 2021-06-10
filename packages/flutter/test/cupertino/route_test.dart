@@ -87,7 +87,7 @@ void main() {
           final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
           final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
           return aParagraph.text.style!.fontSize!.compareTo(
-            bParagraph.text.style!.fontSize!
+            bParagraph.text.style!.fontSize!,
           );
         });
 
@@ -397,7 +397,7 @@ void main() {
                 ));
               },
             );
-          }
+          },
         ),
       ),
     );
@@ -501,7 +501,7 @@ void main() {
                 ),
               ],
             );
-          }
+          },
         ),
       ),
     );
@@ -590,7 +590,7 @@ void main() {
                 ),
               ],
             );
-          }
+          },
         ),
       ),
     );
@@ -664,7 +664,7 @@ void main() {
         return const CupertinoPageScaffold(
           child: Text('2'),
         );
-      }
+      },
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
@@ -716,7 +716,7 @@ void main() {
         return const CupertinoPageScaffold(
           child: Text('2'),
         );
-      }
+      },
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
@@ -762,7 +762,7 @@ void main() {
         return const CupertinoPageScaffold(
           child: Text('2'),
         );
-      }
+      },
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
@@ -812,7 +812,7 @@ void main() {
         return const CupertinoPageScaffold(
           child: Text('2'),
         );
-      }
+      },
     );
 
     navigatorKey.currentState!.push(route2);
@@ -1025,7 +1025,7 @@ void main() {
           child: GestureDetector(
             onTap: () {
               homeTapCount += 1;
-            }
+            },
           ),
         ),
       ),
@@ -1044,7 +1044,7 @@ void main() {
             child: GestureDetector(
               onTap: () {
                 pageTapCount += 1;
-              }
+              },
             ),
           ),
         );
@@ -1118,9 +1118,9 @@ void main() {
               child: Hero(
                 tag: 'tag',
                 transitionOnUserGestures: true,
-                child: SizedBox(key: container, height: 150.0, width: 150.0)
+                child: SizedBox(key: container, height: 150.0, width: 150.0),
               ),
-            )
+            ),
           );
         },
         '/page2': (BuildContext context) {
@@ -1131,12 +1131,12 @@ void main() {
                 child: Hero(
                   tag: 'tag',
                   transitionOnUserGestures: true,
-                  child: SizedBox(key: container, height: 150.0, width: 150.0)
-                )
+                  child: SizedBox(key: container, height: 150.0, width: 150.0),
+                ),
               ),
-            )
+            ),
           );
-        }
+        },
       },
     ));
 
@@ -1354,8 +1354,7 @@ void main() {
       home: Navigator(
         onGenerateRoute: (RouteSettings settings) {
           return PageRouteBuilder<dynamic>(
-            pageBuilder: (BuildContext context, Animation<double> _,
-                Animation<double> __) {
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
               return GestureDetector(
                 onTap: () async {
                   await showCupertinoModalPopup<void>(
@@ -1443,9 +1442,10 @@ void main() {
           return GestureDetector(
             onTap: () async {
               await showCupertinoModalPopup<void>(
-                  context: context,
-                  builder: (BuildContext context) => const SizedBox(),
-                  barrierColor: customColor);
+                context: context,
+                builder: (BuildContext context) => const SizedBox(),
+                barrierColor: customColor,
+              );
             },
             child: const Text('tap'),
           );
@@ -1466,9 +1466,10 @@ void main() {
           return GestureDetector(
             onTap: () async {
               await showCupertinoModalPopup<void>(
-                  context: context,
-                  builder: (BuildContext context) => const Text('Visible'),
-                  barrierDismissible: true);
+                context: context,
+                builder: (BuildContext context) => const Text('Visible'),
+                barrierDismissible: true,
+              );
             },
             child: const Text('tap'),
           );
@@ -1491,9 +1492,10 @@ void main() {
           return GestureDetector(
             onTap: () async {
               await showCupertinoModalPopup<void>(
-                  context: context,
-                  builder: (BuildContext context) => const Text('Visible'),
-                  barrierDismissible: false);
+                context: context,
+                builder: (BuildContext context) => const Text('Visible'),
+                barrierDismissible: false,
+              );
             },
             child: const Text('tap'),
           );
@@ -1530,7 +1532,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
 
     expect(detector.hasTransition, isFalse);
@@ -1556,7 +1558,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
 
     // There should be no transition because the page has the same key.
@@ -1584,7 +1586,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
 
     expect(detector.hasTransition, isFalse);
@@ -1605,7 +1607,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
     // There should be no transition because the page has the same key.
     expect(detector.hasTransition, isFalse);
@@ -1795,7 +1797,7 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
     return super.resolve(
       newPageRouteHistory: newPageRouteHistory,
       locationToExitingPageRoute: locationToExitingPageRoute,
-      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes
+      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes,
     );
   }
 }
@@ -1804,7 +1806,7 @@ Widget buildNavigator({
   required List<Page<dynamic>> pages,
   PopPageCallback? onPopPage,
   GlobalKey<NavigatorState>? key,
-  TransitionDelegate<dynamic>? transitionDelegate
+  TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
     data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
@@ -1812,7 +1814,7 @@ Widget buildNavigator({
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultCupertinoLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate
+        DefaultWidgetsLocalizations.delegate,
       ],
       child: Directionality(
         textDirection: TextDirection.ltr,

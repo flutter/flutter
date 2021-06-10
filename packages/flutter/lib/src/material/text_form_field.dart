@@ -228,7 +228,7 @@ class TextFormField extends FormField<String> {
          'minLines and maxLines must be null when expands is true.',
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
-       assert(maxLength == null || maxLength > 0),
+       assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        assert(enableInteractiveSelection != null),
        super(
          key: key,
@@ -311,7 +311,7 @@ class TextFormField extends FormField<String> {
   final TextEditingController? controller;
 
   @override
-  _TextFormFieldState createState() => _TextFormFieldState();
+  FormFieldState<String> createState() => _TextFormFieldState();
 }
 
 class _TextFormFieldState extends FormFieldState<String> {

@@ -152,7 +152,7 @@ class DraggableScrollableSheet extends StatefulWidget {
   final ScrollableWidgetBuilder builder;
 
   @override
-  _DraggableScrollableSheetState createState() => _DraggableScrollableSheetState();
+  State<DraggableScrollableSheet> createState() => _DraggableScrollableSheetState();
 }
 
 /// A [Notification] related to the extent, which is the size, and scroll
@@ -335,8 +335,8 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
         _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
         final Widget sheet = FractionallySizedBox(
           heightFactor: _extent.currentExtent,
-          child: widget.builder(context, _scrollController),
           alignment: Alignment.bottomCenter,
+          child: widget.builder(context, _scrollController),
         );
         return widget.expand ? SizedBox.expand(child: sheet) : sheet;
       },
@@ -554,7 +554,7 @@ class DraggableScrollableActuator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _InheritedResetNotifier(child: child, notifier: _notifier);
+    return _InheritedResetNotifier(notifier: _notifier, child: child);
   }
 }
 

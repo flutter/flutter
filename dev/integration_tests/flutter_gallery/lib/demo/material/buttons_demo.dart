@@ -51,7 +51,7 @@ class ButtonsDemo extends StatefulWidget {
   static const String routeName = '/material/buttons';
 
   @override
-  _ButtonsDemoState createState() => _ButtonsDemoState();
+  State<ButtonsDemo> createState() => _ButtonsDemoState();
 }
 
 class _ButtonsDemoState extends State<ButtonsDemo> {
@@ -138,8 +138,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 },
               ),
               const ElevatedButton(
-                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 1'),
                 onPressed: null,
+                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 1'),
               ),
             ],
           ),
@@ -185,8 +185,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 },
               ),
               const TextButton(
-                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3',),
                 onPressed: null,
+                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3',),
               ),
             ],
           ),
@@ -233,8 +233,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               ),
               OutlinedButton(
                 style: style,
-                child: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 5'),
                 onPressed: null,
+                child: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 5'),
               ),
             ],
           ),
@@ -376,11 +376,11 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     return Align(
       alignment: const Alignment(0.0, -0.2),
       child: FloatingActionButton(
+        tooltip: 'floating action button',
         child: const Icon(Icons.add),
         onPressed: () {
           // Perform some action
         },
-        tooltip: 'floating action button',
       ),
     );
   }

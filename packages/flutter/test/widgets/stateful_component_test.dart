@@ -13,7 +13,7 @@ void main() {
 
     void checkTree(BoxDecoration expectedDecoration) {
       final SingleChildRenderObjectElement element = tester.element(
-        find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement)
+        find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement),
       );
       expect(element, isNotNull);
       expect(element.renderObject, isA<RenderDecoratedBox>());

@@ -78,7 +78,6 @@ class IntegrationTestTestDevice implements TestDevice {
     globals.printTrace('test $id: Finding the correct isolate with the integration test service extension');
     final vm_service.IsolateRef isolateRef = await vmService.findExtensionIsolate(
       kIntegrationTestMethod,
-      webIsolate: targetPlatform == TargetPlatform.web_javascript,
     );
 
     await vmService.service.streamListen(vm_service.EventStreams.kExtension);

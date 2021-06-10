@@ -146,8 +146,7 @@ void main() {
       expect(find.text('31'), findsNothing);
     });
 
-    testWidgets('Changing year does not change selected date', (
-        WidgetTester tester) async {
+    testWidgets('Changing year does not change selected date', (WidgetTester tester) async {
       DateTime? selectedDate;
       await tester.pumpWidget(calendarDatePicker(
         onDateChanged: (DateTime date) => selectedDate = date,
@@ -259,8 +258,7 @@ void main() {
       expect(displayedMonth, isNull);
     });
 
-    testWidgets('Selecting firstDate year respects firstDate', (
-        WidgetTester tester) async {
+    testWidgets('Selecting firstDate year respects firstDate', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2016, DateTime.june, 9),
@@ -277,8 +275,7 @@ void main() {
       expect(displayedMonth, DateTime(2016, DateTime.june, 1));
     });
 
-    testWidgets('Selecting lastDate year respects lastDate', (
-        WidgetTester tester) async {
+    testWidgets('Selecting lastDate year respects lastDate', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2016, DateTime.june, 9),
@@ -295,8 +292,7 @@ void main() {
       expect(displayedMonth, DateTime(2019, DateTime.january, 1));
     });
 
-    testWidgets(
-        'Only predicate days are selectable', (WidgetTester tester) async {
+    testWidgets('Only predicate days are selectable', (WidgetTester tester) async {
       DateTime? selectedDate;
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2017, DateTime.january, 10),
@@ -313,8 +309,7 @@ void main() {
       expect(selectedDate, DateTime(2017, DateTime.january, 10));
     });
 
-    testWidgets(
-        'Can select initial calendar picker mode', (WidgetTester tester) async {
+    testWidgets('Can select initial calendar picker mode', (WidgetTester tester) async {
       await tester.pumpWidget(calendarDatePicker(
         initialDate: DateTime(2014, DateTime.january, 15),
         initialCalendarMode: DatePickerMode.year,
@@ -332,17 +327,17 @@ void main() {
       ));
       const Color todayColor = Color(0xff2196f3); // default primary color
       expect(
-          Material.of(tester.element(find.text('2'))),
-          // The current day should be painted with a circle outline.
-          paints
-            ..circle(color: todayColor,
-                style: PaintingStyle.stroke,
-                strokeWidth: 1.0)
+        Material.of(tester.element(find.text('2'))),
+        // The current day should be painted with a circle outline.
+        paints..circle(
+          color: todayColor,
+          style: PaintingStyle.stroke,
+          strokeWidth: 1.0,
+        ),
       );
     });
 
-    testWidgets('Selecting date does not switch picker to year selection', (
-        WidgetTester tester) async {
+    testWidgets('Selecting date does not switch picker to year selection', (WidgetTester tester) async {
       await tester.pumpWidget(calendarDatePicker(
         initialDate: DateTime(2020, DateTime.may, 10),
         initialCalendarMode: DatePickerMode.year,
@@ -356,8 +351,7 @@ void main() {
       expect(find.text('2017'), findsNothing);
     });
 
-    testWidgets('Updates to initialDate parameter is reflected in the state', (
-        WidgetTester tester) async {
+    testWidgets('Updates to initialDate parameter is reflected in the state', (WidgetTester tester) async {
       final Key pickerKey = UniqueKey();
       final DateTime initialDate = DateTime(2020, 1, 21);
       final DateTime updatedDate = DateTime(1976, 2, 23);
@@ -378,8 +372,8 @@ void main() {
       expect(find.text('January 2020'), findsOneWidget);
       // Selected date should be painted with a colored circle.
       expect(
-          Material.of(tester.element(find.text('21'))),
-          paints..circle(color: selectedColor, style: PaintingStyle.fill)
+        Material.of(tester.element(find.text('21'))),
+        paints..circle(color: selectedColor, style: PaintingStyle.fill),
       );
 
       // Change to the updated initialDate
@@ -398,14 +392,12 @@ void main() {
       expect(find.text('February 1976'), findsOneWidget);
       // Selected date should be painted with a colored circle.
       expect(
-          Material.of(tester.element(find.text('23'))),
-          paints..circle(color: selectedColor, style: PaintingStyle.fill)
+        Material.of(tester.element(find.text('23'))),
+        paints..circle(color: selectedColor, style: PaintingStyle.fill),
       );
     });
 
-    testWidgets(
-        'Updates to initialCalendarMode parameter is reflected in the state', (
-        WidgetTester tester) async {
+    testWidgets('Updates to initialCalendarMode parameter is reflected in the state', (WidgetTester tester) async {
       final Key pickerKey = UniqueKey();
 
       await tester.pumpWidget(calendarDatePicker(
@@ -431,8 +423,7 @@ void main() {
       expect(find.text('2016'), findsNothing); // 2016 in year grid
     });
 
-    testWidgets('Dragging more than half the width should not cause a jump', (
-        WidgetTester tester) async {
+    testWidgets('Dragging more than half the width should not cause a jump', (WidgetTester tester) async {
       await tester.pumpWidget(calendarDatePicker());
       await tester.pumpAndSettle();
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
@@ -465,8 +456,7 @@ void main() {
         expect(find.text('January 2016'), findsOneWidget);
       });
 
-      testWidgets(
-          'Can navigate next/previous months', (WidgetTester tester) async {
+      testWidgets('Can navigate next/previous months', (WidgetTester tester) async {
         await tester.pumpWidget(calendarDatePicker());
         expect(find.text('January 2016'), findsOneWidget);
         // Navigate to the previous month button and activate it twice.
@@ -493,8 +483,7 @@ void main() {
         expect(find.text('March 2016'), findsOneWidget);
       });
 
-      testWidgets('Can navigate date grid with arrow keys', (
-          WidgetTester tester) async {
+      testWidgets('Can navigate date grid with arrow keys', (WidgetTester tester) async {
         DateTime? selectedDate;
         await tester.pumpWidget(calendarDatePicker(
           onDateChanged: (DateTime date) => selectedDate = date,
@@ -523,8 +512,7 @@ void main() {
         expect(selectedDate, DateTime(2016, DateTime.january, 18));
       });
 
-      testWidgets('Navigating with arrow keys scrolls months', (
-          WidgetTester tester) async {
+      testWidgets('Navigating with arrow keys scrolls months', (WidgetTester tester) async {
         DateTime? selectedDate;
         await tester.pumpWidget(calendarDatePicker(
           onDateChanged: (DateTime date) => selectedDate = date,
@@ -564,9 +552,7 @@ void main() {
         expect(selectedDate, DateTime(2015, DateTime.november, 26));
       });
 
-      testWidgets(
-          'RTL text direction reverses the horizontal arrow key navigation', (
-          WidgetTester tester) async {
+      testWidgets('RTL text direction reverses the horizontal arrow key navigation', (WidgetTester tester) async {
         DateTime? selectedDate;
         await tester.pumpWidget(calendarDatePicker(
           onDateChanged: (DateTime date) => selectedDate = date,
@@ -632,8 +618,7 @@ void main() {
         expect(feedback.hapticCount, 3);
       });
 
-      testWidgets('Tapping unselectable date does not vibrate', (
-          WidgetTester tester) async {
+      testWidgets('Tapping unselectable date does not vibrate', (WidgetTester tester) async {
         await tester.pumpWidget(calendarDatePicker(
           initialDate: DateTime(2016, DateTime.january, 10),
           selectableDayPredicate: (DateTime date) => date.day.isEven,

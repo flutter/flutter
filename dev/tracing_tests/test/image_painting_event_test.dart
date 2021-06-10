@@ -7,7 +7,6 @@ import 'dart:convert' show jsonEncode;
 import 'dart:developer' as developer;
 import 'dart:ui' as ui;
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';

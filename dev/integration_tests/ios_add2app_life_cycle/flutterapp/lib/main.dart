@@ -32,7 +32,7 @@ class LifeCycleSpy extends StatefulWidget {
   const LifeCycleSpy({Key? key}) : super(key: key);
 
   @override
-  _LifeCycleSpyState createState() => _LifeCycleSpyState();
+  State<LifeCycleSpy> createState() => _LifeCycleSpyState();
 }
 
 class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver {

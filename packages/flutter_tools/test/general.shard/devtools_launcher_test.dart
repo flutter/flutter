@@ -28,7 +28,7 @@ void main() {
     logger = BufferLogger.test();
     platform = FakePlatform(environment: <String, String>{});
 
-    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('devtools_launcher_test');
+    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_devtools_launcher_test.');
     persistentToolState = PersistentToolState.test(
       directory: tempDir,
       logger: logger,
@@ -107,18 +107,18 @@ void main() {
           command: <String>[
             'pub',
             'global',
-            'activate',
-            'devtools',
+            'list',
           ],
-          stdout: 'Activated DevTools 0.9.5',
+          stdout: 'devtools 0.9.6',
         ),
         const FakeCommand(
           command: <String>[
             'pub',
             'global',
-            'list',
+            'activate',
+            'devtools',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'Activated DevTools 0.9.6',
         ),
         FakeCommand(
           command: const <String>[
@@ -152,6 +152,14 @@ void main() {
           command: <String>[
             'pub',
             'global',
+            'list',
+          ],
+          stdout: '',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
             'activate',
             'devtools',
           ],
@@ -163,7 +171,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'devtools 0.9.5',
         ),
         FakeCommand(
           command: const <String>[
@@ -197,18 +205,18 @@ void main() {
           command: <String>[
             'pub',
             'global',
-            'activate',
-            'devtools',
+            'list',
           ],
-          stdout: 'Activated DevTools 0.9.5',
+          stdout: 'devtools 0.9.5',
         ),
         const FakeCommand(
           command: <String>[
             'pub',
             'global',
-            'list',
+            'activate',
+            'devtools',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'Activated DevTools 0.9.5',
         ),
         FakeCommand(
           command: const <String>[
@@ -267,6 +275,45 @@ void main() {
     await launcher.serve();
   });
 
+  testWithoutContext('DevtoolsLauncher can launch devtools with a memory profile', () async {
+    persistentToolState.lastDevToolsActivation = DateTime.now();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'pub',
+          'global',
+          'list',
+        ],
+        stdout: 'devtools 0.9.6',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'pub',
+          'global',
+          'run',
+          'devtools',
+          '--no-launch-browser',
+          '--vm-uri=localhost:8181/abcdefg',
+          '--profile-memory=foo'
+        ],
+        stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
+      ),
+    ]);
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      pubExecutable: 'pub',
+      logger: logger,
+      platform: platform,
+      persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient.any(),
+      processManager: processManager,
+    );
+
+    await launcher.launch(Uri.parse('localhost:8181/abcdefg'), additionalArguments: <String>['--profile-memory=foo']);
+
+    expect(launcher.processStart, completes);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('DevtoolsLauncher prints error if exception is thrown during activate', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
@@ -279,19 +326,19 @@ void main() {
           command: <String>[
             'pub',
             'global',
-            'activate',
-            'devtools',
+            'list',
           ],
-          stderr: 'Error - could not activate devtools',
-          exitCode: 1,
+          stdout: 'devtools 0.9.6',
         ),
         const FakeCommand(
           command: <String>[
             'pub',
             'global',
-            'list',
+            'activate',
+            'devtools',
           ],
-          stdout: 'devtools 0.9.6',
+          stderr: 'Error - could not activate devtools',
+          exitCode: 1,
         ),
         const FakeCommand(
           command: <String>[
@@ -324,18 +371,18 @@ void main() {
           command: <String>[
             'pub',
             'global',
-            'activate',
-            'devtools',
+            'list',
           ],
-          stdout: 'Activated DevTools 0.9.5',
+          stdout: 'devtools 0.9.5',
         ),
         const FakeCommand(
           command: <String>[
             'pub',
             'global',
-            'list',
+            'activate',
+            'devtools',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'Activated DevTools 0.9.6',
         ),
         const FakeCommand(
           command: <String>[
@@ -354,5 +401,49 @@ void main() {
     await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
 
     expect(logger.errorText, contains('Failed to launch DevTools: ProcessException'));
+  });
+
+  testWithoutContext('DevtoolsLauncher prints trace if connecting to pub.dev throws', () async {
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      pubExecutable: 'pub',
+      logger: logger,
+      platform: platform,
+      persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient.list(<FakeRequest>[
+        FakeRequest(
+          Uri.https('pub.dev', ''),
+          method: HttpMethod.head,
+          responseError: Exception('Connection failed.'),
+        ),
+      ]),
+      processManager: FakeProcessManager.empty(),
+    );
+
+    await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
+
+    expect(logger.traceText, contains('Skipping devtools launch because connecting to pub.dev failed with Exception: Connection failed.'));
+  });
+
+  testWithoutContext('DevtoolsLauncher prints trace if connecting to pub.dev returns non-OK status code', () async {
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      pubExecutable: 'pub',
+      logger: logger,
+      platform: platform,
+      persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient.list(<FakeRequest>[
+        FakeRequest(
+          Uri.https('pub.dev', ''),
+          method: HttpMethod.head,
+          response: const FakeResponse(
+            statusCode: HttpStatus.forbidden
+          ),
+        ),
+      ]),
+      processManager: FakeProcessManager.empty(),
+    );
+
+    await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
+
+    expect(logger.traceText, contains('Skipping devtools launch because pub.dev responded with HTTP status code 403 instead of 200.'));
   });
 }

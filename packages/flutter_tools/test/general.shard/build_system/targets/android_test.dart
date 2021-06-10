@@ -15,8 +15,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/android.dart';
-import 'package:flutter_tools/src/build_system/targets/assets.dart';
-import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/convert.dart';
 
 import '../../../src/common.dart';
@@ -37,7 +35,7 @@ void main() {
     artifacts = Artifacts.test();
   });
 
-  testWithoutContext('Android AOT targets has analyicsName', () {
+  testWithoutContext('Android AOT targets has analyticsName', () {
     expect(androidArmProfile.analyticsName, 'android_aot');
   });
 

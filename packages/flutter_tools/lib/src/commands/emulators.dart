@@ -15,6 +15,9 @@ class EmulatorsCommand extends FlutterCommand {
   EmulatorsCommand() {
     argParser.addOption('launch',
         help: 'The full or partial ID of the emulator to launch.');
+    argParser.addFlag('cold',
+        help: 'Used with the "--launch" flag to cold boot the emulator instance (Android only).',
+        negatable: false);
     argParser.addFlag('create',
         help: 'Creates a new Android emulator based on a Pixel device.',
         negatable: false);
@@ -36,14 +39,13 @@ class EmulatorsCommand extends FlutterCommand {
     if (globals.doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
       throwToolExit(
           'Unable to find any emulator sources. Please ensure you have some\n'
-              'Android AVD images ' +
-              (globals.platform.isMacOS ? 'or an iOS Simulator ' : '') +
-              'available.',
+          'Android AVD images ${globals.platform.isMacOS ? 'or an iOS Simulator ' : ''}available.',
           exitCode: 1);
     }
 
     if (argResults.wasParsed('launch')) {
-      await _launchEmulator(stringArg('launch'));
+      final bool coldBoot = argResults.wasParsed('cold');
+      await _launchEmulator(stringArg('launch'), coldBoot: coldBoot);
     } else if (argResults.wasParsed('create')) {
       await _createEmulator(name: stringArg('name'));
     } else {
@@ -57,7 +59,7 @@ class EmulatorsCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  Future<void> _launchEmulator(String id) async {
+  Future<void> _launchEmulator(String id, {bool coldBoot}) async {
     final List<Emulator> emulators =
         await emulatorManager.getEmulatorsMatching(id);
 
@@ -69,7 +71,7 @@ class EmulatorsCommand extends FlutterCommand {
         "More than one emulator matches '$id':",
       );
     } else {
-      await emulators.first.launch();
+      await emulators.first.launch(coldBoot: coldBoot);
     }
   }
 

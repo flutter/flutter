@@ -257,7 +257,7 @@ void main() {
                         return SampleForm(
                           callback: () => showYesNoAlert(context),
                         );
-                      }
+                      },
                     ));
                   },
                 ),
@@ -323,7 +323,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             contentsSetState = setState;
             return contentsEmpty ? Container() : SampleForm(key: UniqueKey(), callback: () async => false);
-          }
+          },
         );
       },
     );

@@ -103,7 +103,7 @@ Future<void> pollForServiceExtensionValue<T>({
     }
   }
   fail(
-    'Did not find expected value for service extension \'$extension\'. All call'
-    ' attempts responded with \'$continuePollingValue\'.',
+    "Did not find expected value for service extension '$extension'. All call"
+    " attempts responded with '$continuePollingValue'.",
   );
 }

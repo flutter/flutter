@@ -10,7 +10,7 @@ class CupertinoTextFieldDemo extends StatefulWidget {
   static const String routeName = '/cupertino/text_fields';
 
   @override
-  _CupertinoTextFieldDemoState createState() {
+  State<CupertinoTextFieldDemo> createState() {
     return _CupertinoTextFieldDemoState();
   }
 }
@@ -45,13 +45,13 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         padding: const EdgeInsets.symmetric(horizontal: 2.0),
         child: CupertinoButton(
           minSize: 0.0,
+          padding: const EdgeInsets.only(bottom: 4),
+          onPressed: () => setState(() => _chatTextController!.clear()),
           child: const Icon(
             CupertinoIcons.arrow_up_circle_fill,
             size: 28.0,
             color: CupertinoColors.activeGreen,
           ),
-          padding: const EdgeInsets.only(bottom: 4),
-          onPressed: ()=> setState(()=> _chatTextController!.clear()),
         ),
       ),
       autofocus: true,

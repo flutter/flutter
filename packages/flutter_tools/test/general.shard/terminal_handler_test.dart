@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
@@ -78,11 +79,6 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
       fakeFlutterView.toJson(),
     ],
   },
-);
-
-final FakeVmServiceRequest getVM = FakeVmServiceRequest(
-  method: 'getVM',
-  jsonResponse: fakeVM.toJson(),
 );
 
 void main() {
@@ -172,7 +168,7 @@ void main() {
 
     testWithoutContext('a - debugToggleProfileWidgetBuilds with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.profileWidgetBuilds',
           args: <String, Object>{
@@ -234,7 +230,7 @@ void main() {
 
     testWithoutContext('b - debugToggleBrightness with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.brightnessOverride',
           args: <String, Object>{
@@ -244,7 +240,7 @@ void main() {
             'value': 'Brightness.light',
           }
         ),
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.brightnessOverride',
           args: <String, Object>{
@@ -314,7 +310,7 @@ void main() {
 
     testWithoutContext('i - debugToggleWidgetInspector with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.inspector.show',
           args: <String, Object>{
@@ -347,7 +343,7 @@ void main() {
 
     testWithoutContext('I - debugToggleInvertOversizedImages with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.invertOversizedImages',
           args: <String, Object>{
@@ -388,7 +384,7 @@ void main() {
 
     testWithoutContext('L - debugDumpLayerTree with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpLayerTree',
           args: <String, Object>{
@@ -471,7 +467,7 @@ void main() {
     testWithoutContext('o,O - debugTogglePlatform with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         // Request 1.
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.platformOverride',
           args: <String, Object>{
@@ -481,7 +477,7 @@ void main() {
             'value': 'iOS'
           },
         ),
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.platformOverride',
           args: <String, Object>{
@@ -493,7 +489,7 @@ void main() {
           },
         ),
         // Request 2.
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.platformOverride',
           args: <String, Object>{
@@ -503,7 +499,7 @@ void main() {
             'value': 'android'
           },
         ),
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.platformOverride',
           args: <String, Object>{
@@ -543,7 +539,7 @@ void main() {
 
     testWithoutContext('p - debugToggleDebugPaintSizeEnabled with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugPaint',
           args: <String, Object>{
@@ -602,7 +598,7 @@ void main() {
 
     testWithoutContext('S - debugDumpSemanticsTreeInTraversalOrder with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        getVM,
+        listViews,
           const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
           args: <String, Object>{
@@ -643,7 +639,7 @@ void main() {
 
     testWithoutContext('U - debugDumpSemanticsTreeInInverseHitTestOrder with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        getVM,
+        listViews,
           const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
           args: <String, Object>{
@@ -697,7 +693,7 @@ void main() {
 
     testWithoutContext('t,T - debugDumpRenderTree with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpRenderTree',
           args: <String, Object>{
@@ -708,7 +704,7 @@ void main() {
           },
         ),
         // Request 2.
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpRenderTree',
           args: <String, Object>{
@@ -765,7 +761,7 @@ void main() {
 
     testWithoutContext('w,W - debugDumpApp with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpApp',
           args: <String, Object>{
@@ -776,7 +772,7 @@ void main() {
           },
         ),
         // Request 2.
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpApp',
           args: <String, Object>{
@@ -792,6 +788,18 @@ void main() {
 
       expect(terminalHandler.logger.statusText, contains('WIDGET DATA 1'));
       expect(terminalHandler.logger.statusText, contains('WIDGET DATA 2'));
+    });
+
+    testWithoutContext('v - launchDevToolsInBrowser', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+          <FakeVmServiceRequest>[],
+          supportsServiceProtocol: true);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final FakeResidentDevtoolsHandler devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
+
+      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      await terminalHandler.processTerminalInput('v');
+      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isTrue);
     });
 
     testWithoutContext('w,W - debugDumpApp without service protocol is skipped', () async {
@@ -824,7 +832,7 @@ void main() {
 
     testWithoutContext('z,Z - debugToggleDebugCheckElevationsEnabled with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugCheckElevationsEnabled',
           args: <String, Object>{
@@ -832,7 +840,7 @@ void main() {
           },
         ),
         // Request 2.
-        getVM,
+        listViews,
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugCheckElevationsEnabled',
           args: <String, Object>{
@@ -942,7 +950,7 @@ void main() {
 
     expect(terminalHandler.logger.statusText, equals(''));
     terminalHandler.logger.printStatus(message);
-    expect(terminalHandler.logger.statusText, equals(message + '\n'));  // printStatus makes a newline
+    expect(terminalHandler.logger.statusText, equals('$message\n'));  // printStatus makes a newline
 
     await terminalHandler.processTerminalInput('c');
     expect(terminalHandler.logger.statusText, equals(''));
@@ -1011,7 +1019,7 @@ void main() {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-      getVM,
+      listViews,
       FakeVmServiceRequest(
         method: 'ext.flutter.debugAllowBanner',
         args: <String, Object>{
@@ -1160,7 +1168,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final TerminalHandler terminalHandler = setUpTerminalHandler(
       <FakeVmServiceRequest>[
-       getVM,
+       listViews,
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
           args: <String, Object>{
@@ -1348,6 +1356,19 @@ class FakeResidentRunner extends ResidentHandlers {
       calledReload = true;
     }
     return OperationResult(reloadExitCode, '', fatal: fatalReloadError);
+  }
+
+  @override
+  ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
+  final ResidentDevtoolsHandler _residentDevtoolsHandler = FakeResidentDevtoolsHandler();
+}
+
+class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandler {
+  bool calledLaunchDevToolsInBrowser = false;
+
+  @override
+  bool launchDevToolsInBrowser({List<FlutterDevice> flutterDevices}) {
+    return calledLaunchDevToolsInBrowser = true;
   }
 }
 

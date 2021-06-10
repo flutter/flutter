@@ -75,7 +75,7 @@ void main() {
                 width: 100.0,
                 height: 100.0,
                 child: Container(
-                  color: const Color(0xFF0000FF)
+                  color: const Color(0xFF0000FF),
                 ),
               ),
             ),
@@ -105,7 +105,7 @@ void main() {
                 width: 100.0,
                 height: 100.0,
                 child: Container(
-                  color: const Color(0xFF0000FF)
+                  color: const Color(0xFF0000FF),
                 ),
               ),
             ),
@@ -135,7 +135,7 @@ void main() {
                 width: 100.0,
                 height: 100.0,
                 child: Container(
-                  color: const Color(0xFF0000FF)
+                  color: const Color(0xFF0000FF),
                 ),
               ),
             ),
@@ -184,7 +184,7 @@ void main() {
               ),
             );
           },
-        )
+        ),
       );
 
       expect(
@@ -387,7 +387,7 @@ void main() {
       expect(mockCanvas.rects, isEmpty);
       expect(mockCanvas.paints, isEmpty);
       expect(mockContext.children, isEmpty);
-      expect(mockContext.offets, isEmpty);
+      expect(mockContext.offsets, isEmpty);
     });
 
     testWidgets('ColoredBox - no size, child', (WidgetTester tester) async {
@@ -411,7 +411,7 @@ void main() {
       expect(mockCanvas.rects, isEmpty);
       expect(mockCanvas.paints, isEmpty);
       expect(mockContext.children.single, renderSizedBox);
-      expect(mockContext.offets.single, Offset.zero);
+      expect(mockContext.offsets.single, Offset.zero);
     });
 
     testWidgets('ColoredBox - size, no child', (WidgetTester tester) async {
@@ -424,7 +424,7 @@ void main() {
       expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
       expect(mockCanvas.paints.single.color, colorToPaint);
       expect(mockContext.children, isEmpty);
-      expect(mockContext.offets, isEmpty);
+      expect(mockContext.offsets, isEmpty);
     });
 
     testWidgets('ColoredBox - size, child', (WidgetTester tester) async {
@@ -440,7 +440,7 @@ void main() {
       expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
       expect(mockCanvas.paints.single.color, colorToPaint);
       expect(mockContext.children.single, renderSizedBox);
-      expect(mockContext.offets.single, Offset.zero);
+      expect(mockContext.offsets.single, Offset.zero);
     });
 
     testWidgets('ColoredBox - properties', (WidgetTester tester) async {
@@ -502,7 +502,7 @@ void main() {
                         onExit: (_) { logs.add('exit3'); },
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -580,7 +580,7 @@ void main() {
                         onExit: (_) { logs.add('exit3'); },
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -639,7 +639,7 @@ class HitsRenderBox extends Matcher {
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
-      (HitTestEntry entry) => entry.target == renderBox
+      (HitTestEntry entry) => entry.target == renderBox,
     ).isNotEmpty;
   }
 }
@@ -659,14 +659,14 @@ class DoesNotHitRenderBox extends Matcher {
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
-      (HitTestEntry entry) => entry.target == renderBox
+      (HitTestEntry entry) => entry.target == renderBox,
     ).isEmpty;
   }
 }
 
 class _MockPaintingContext extends Fake implements PaintingContext {
   final List<RenderObject> children = <RenderObject>[];
-  final List<Offset> offets = <Offset>[];
+  final List<Offset> offsets = <Offset>[];
 
   @override
   final _MockCanvas canvas = _MockCanvas();
@@ -674,7 +674,7 @@ class _MockPaintingContext extends Fake implements PaintingContext {
   @override
   void paintChild(RenderObject child, Offset offset) {
     children.add(child);
-    offets.add(offset);
+    offsets.add(offset);
   }
 }
 

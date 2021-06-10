@@ -26,6 +26,7 @@ ScrollbarPainter _buildPainter({
   Radius? radius,
   double minLength = _kMinThumbExtent,
   double? minOverscrollLength,
+  ScrollbarOrientation? scrollbarOrientation,
   required ScrollMetrics scrollMetrics,
 }) {
   return ScrollbarPainter(
@@ -39,6 +40,7 @@ ScrollbarPainter _buildPainter({
     minLength: minLength,
     minOverscrollLength: minOverscrollLength ?? minLength,
     fadeoutOpacityAnimation: kAlwaysCompleteAnimation,
+    scrollbarOrientation: scrollbarOrientation,
   )..update(scrollMetrics, scrollMetrics.axisDirection);
 }
 
@@ -247,6 +249,128 @@ void main() {
       }
     },
   );
+
+  test('scrollbarOrientation are respected', () {
+    const double viewportDimension = 23;
+    const double maxExtent = 100;
+    final ScrollMetrics startingMetrics = defaultMetrics.copyWith(
+      maxScrollExtent: maxExtent,
+      viewportDimension: viewportDimension,
+    );
+    const Size size = Size(600, viewportDimension);
+    const double margin = 0;
+
+    for (final ScrollbarOrientation scrollbarOrientation in ScrollbarOrientation.values) {
+      final AxisDirection axisDirection;
+      if (scrollbarOrientation == ScrollbarOrientation.left || scrollbarOrientation == ScrollbarOrientation.right)
+        axisDirection = AxisDirection.down;
+      else
+        axisDirection = AxisDirection.right;
+
+      painter = _buildPainter(
+        crossAxisMargin: margin,
+        scrollMetrics: startingMetrics,
+        scrollbarOrientation: scrollbarOrientation,
+      );
+
+      painter.update(
+        startingMetrics.copyWith(axisDirection: axisDirection),
+        axisDirection
+      );
+
+      painter.paint(testCanvas, size);
+      final Rect rect = captureRect();
+
+      switch (scrollbarOrientation) {
+        case ScrollbarOrientation.left:
+          expect(rect.left, 0);
+          expect(rect.top, 0);
+          expect(rect.right, _kThickness);
+          expect(rect.bottom, _kMinThumbExtent);
+          break;
+        case ScrollbarOrientation.right:
+          expect(rect.left, 600 - _kThickness);
+          expect(rect.top, 0);
+          expect(rect.right, 600);
+          expect(rect.bottom, _kMinThumbExtent);
+          break;
+        case ScrollbarOrientation.top:
+          expect(rect.left, 0);
+          expect(rect.top, 0);
+          expect(rect.right, _kMinThumbExtent);
+          expect(rect.bottom, _kThickness);
+          break;
+        case ScrollbarOrientation.bottom:
+          expect(rect.left, 0);
+          expect(rect.top, 23 - _kThickness);
+          expect(rect.right, _kMinThumbExtent);
+          expect(rect.bottom, 23);
+          break;
+      }
+    }
+  });
+
+  test('scrollbarOrientation default values are correct', () {
+    const double viewportDimension = 23;
+    const double maxExtent = 100;
+    final ScrollMetrics startingMetrics = defaultMetrics.copyWith(
+      maxScrollExtent: maxExtent,
+      viewportDimension: viewportDimension,
+    );
+    const Size size = Size(600, viewportDimension);
+    const double margin = 0;
+    Rect rect;
+
+    // Vertical scroll with TextDirection.ltr
+    painter = _buildPainter(
+      crossAxisMargin: margin,
+      scrollMetrics: startingMetrics,
+      textDirection: TextDirection.ltr,
+    );
+    painter.update(
+      startingMetrics.copyWith(axisDirection: AxisDirection.down),
+      AxisDirection.down
+    );
+    painter.paint(testCanvas, size);
+    rect = captureRect();
+    expect(rect.left, 600 - _kThickness);
+    expect(rect.top, 0);
+    expect(rect.right, 600);
+    expect(rect.bottom, _kMinThumbExtent);
+
+    // Vertical scroll with TextDirection.rtl
+    painter = _buildPainter(
+      crossAxisMargin: margin,
+      scrollMetrics: startingMetrics,
+      textDirection: TextDirection.rtl,
+    );
+    painter.update(
+      startingMetrics.copyWith(axisDirection: AxisDirection.down),
+      AxisDirection.down
+    );
+    painter.paint(testCanvas, size);
+    rect = captureRect();
+    expect(rect.left, 0);
+    expect(rect.top, 0);
+    expect(rect.right, _kThickness);
+    expect(rect.bottom, _kMinThumbExtent);
+
+    // Horizontal scroll
+    painter = _buildPainter(
+      crossAxisMargin: margin,
+      scrollMetrics: startingMetrics,
+    );
+    painter.update(
+      startingMetrics.copyWith(axisDirection: AxisDirection.right),
+      AxisDirection.right,
+    );
+    painter.paint(testCanvas, size);
+    rect = captureRect();
+    expect(rect.left, 0);
+    expect(rect.top, 23 - _kThickness);
+    expect(rect.right, _kMinThumbExtent);
+    expect(rect.bottom, 23);
+  });
 
   group('Padding works for all scroll directions', () {
     const EdgeInsets padding = EdgeInsets.fromLTRB(1, 2, 3, 4);
@@ -558,7 +682,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
           color: const Color(0x66BCBCBC),
-        )
+        ),
     );
 
     // Tap on the track area below the thumb.
@@ -573,7 +697,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 240.0, 800.0, 600.0),
           color: const Color(0x66BCBCBC),
-      )
+      ),
     );
 
     // Tap on the track area above the thumb.
@@ -588,7 +712,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
           color: const Color(0x66BCBCBC),
-      )
+      ),
     );
   });
 
@@ -600,7 +724,7 @@ void main() {
           data: MediaQueryData(),
           child: RawScrollbar(
             child: SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
+              child: SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
@@ -658,7 +782,7 @@ void main() {
           data: MediaQueryData(),
           child: RawScrollbar(
             child: SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
+              child: SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
@@ -697,6 +821,67 @@ void main() {
     );
   });
 
+  testWidgets('Scrollbar will fade back in when hovering over known track area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(),
+          child: RawScrollbar(
+            child: SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    await tester.pump();
+    // Scrollbar fully showing
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+    await gesture.up();
+    await tester.pump(_kScrollbarTimeToFade);
+    await tester.pump(_kScrollbarFadeDuration * 0.5);
+
+    // Scrollbar is fading out
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
+          color: const Color(0x4fbcbcbc),
+        ),
+    );
+
+    // Hover over scrollbar with mouse to bring opacity back up
+    final TestGesture mouseGesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await mouseGesture.addPointer();
+    addTearDown(mouseGesture.removePointer);
+    await mouseGesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pumpAndSettle();
+    // Scrollbar should be visible
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  });
+
   testWidgets('Scrollbar thumb can be dragged', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -710,7 +895,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
@@ -765,7 +950,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
@@ -880,7 +1065,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
@@ -922,6 +1107,7 @@ void main() {
     // Move back to reset.
     await dragScrollbarGesture.moveBy(const Offset(0.0, -scrollAmount));
     await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
     expect(scrollController.offset, 0.0);
     expect(
       find.byType(RawScrollbar),
@@ -981,7 +1167,7 @@ void main() {
     expect(exception, isAssertionError);
     expect(
       (exception as AssertionError).message,
-      contains('The Scrollbar\'s ScrollController has no ScrollPosition attached.'),
+      contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
   });
 
@@ -999,7 +1185,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                  child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
@@ -1151,5 +1337,23 @@ void main() {
           color: const Color(0x66bcbcbc),
         ),
     );
+  });
+
+  testWidgets('ScrollbarPainter asserts if scrollbarOrientation is used with wrong axisDirection', (WidgetTester tester) async {
+    final ScrollbarPainter painter = ScrollbarPainter(
+      color: _kScrollbarColor,
+      fadeoutOpacityAnimation: kAlwaysCompleteAnimation,
+      textDirection: TextDirection.ltr,
+      scrollbarOrientation: ScrollbarOrientation.left,
+    );
+    const Size size = Size(60, 80);
+    final ScrollMetrics scrollMetrics = defaultMetrics.copyWith(
+      maxScrollExtent: 100,
+      viewportDimension: size.height,
+      axisDirection: AxisDirection.right,
+    );
+    painter.update(scrollMetrics, scrollMetrics.axisDirection);
+
+    expect(() => painter.paint(testCanvas, size), throwsA(isA<AssertionError>()));
   });
 }
