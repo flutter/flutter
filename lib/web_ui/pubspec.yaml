@@ -14,7 +14,6 @@ dev_dependencies:
   html: 0.15.0
   http: 0.13.0
   image: 3.0.1
-  mockito: 5.0.0
   path: 1.8.0
   quiver: 3.0.0
   test: 1.16.6

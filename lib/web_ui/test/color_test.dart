@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'package:ui/ui.dart';
 
 import 'package:test/bootstrap/browser.dart';
@@ -33,23 +32,15 @@ void testMain() {
   });
 
   test('color created with out of bounds value', () {
-    try {
-      const Color c = Color(0x100 << 24);
-      final Paint p = Paint();
-      p.color = c;
-    } catch (e) {
-      expect(e != null, equals(true));
-    }
+    const Color c = Color(0x100 << 24);
+    final Paint p = Paint();
+    p.color = c;
   });
 
   test('color created with wildly out of bounds value', () {
-    try {
-      const Color c = Color(1 << 1000000);
-      final Paint p = Paint();
-      p.color = c;
-    } catch (e) {
-      expect(e != null, equals(true));
-    }
+    const Color c = Color(1 << 1000000);
+    final Paint p = Paint();
+    p.color = c;
   });
 
   test('two colors are only == if they have the same runtime type', () {

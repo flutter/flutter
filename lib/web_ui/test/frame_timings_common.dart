@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 
 import 'package:test/test.dart';
@@ -12,7 +11,7 @@ import 'package:ui/ui.dart' as ui;
 ///
 /// See CanvasKit-specific and HTML-specific test files `frame_timings_test.dart`.
 Future<void> runFrameTimingsTest() async {
-  List<ui.FrameTiming> timings;
+  List<ui.FrameTiming>? timings;
   ui.window.onReportTimings = (List<ui.FrameTiming> data) {
     timings = data;
   };
@@ -37,7 +36,7 @@ Future<void> runFrameTimingsTest() async {
   ui.window.scheduleFrame();
   await frameDone.future;
   expect(timings, hasLength(2), reason: '100 ms passed. 2 frames pumped.');
-  for (final ui.FrameTiming timing in timings) {
+  for (final ui.FrameTiming timing in timings!) {
     expect(timing.vsyncOverhead, greaterThanOrEqualTo(Duration.zero));
     expect(timing.buildDuration, greaterThanOrEqualTo(Duration.zero));
     expect(timing.rasterDuration, greaterThanOrEqualTo(Duration.zero));

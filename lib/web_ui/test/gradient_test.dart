@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
@@ -17,7 +16,7 @@ void testMain() {
     expect(
       Gradient.radial(
           Offset.zero,
-          null,
+          5.0,
           <Color>[const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
           <double>[0.0, 1.0],
           TileMode.mirror),

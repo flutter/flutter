@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide TextStyle;
@@ -29,7 +28,7 @@ void testMain() async {
       double maxDiffRatePercent = 0,
       Rect region = const Rect.fromLTWH(0, 0, 500, 500)}) async {
     final RecordingCanvas rc = RecordingCanvas(region);
-    final Paint paint = Paint()..shader = shader;
+    final SurfacePaint paint = SurfacePaint()..shader = shader;
     final Path path = Path();
     path.addRect(paintRect);
     rc.drawPath(path, paint);

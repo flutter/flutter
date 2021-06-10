@@ -9,7 +9,6 @@ import 'dart:async';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
-import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -239,21 +238,48 @@ void _testEngineSemanticsOwner() {
     semantics().receiveGlobalEvent(pointerEvent);
 
     // Verify the interactions.
-    verify(mockSemanticsEnabler.shouldEnableSemantics(pointerEvent));
+    expect(
+      mockSemanticsEnabler.shouldEnableSemanticsEvents,
+      [pointerEvent],
+    );
   });
 
-  test('Forward events to framewors if shouldEnableSemantics', () {
+  test('forwards events to framework if shouldEnableSemantics returns true', () {
     final MockSemanticsEnabler mockSemanticsEnabler = MockSemanticsEnabler();
     semantics().semanticsHelper.semanticsEnabler = mockSemanticsEnabler;
     final html.Event pointerEvent = html.Event('pointermove');
-    when(mockSemanticsEnabler.shouldEnableSemantics(pointerEvent))
-        .thenReturn(true);
-
+    mockSemanticsEnabler.shouldEnableSemanticsReturnValue = true;
     expect(semantics().receiveGlobalEvent(pointerEvent), isTrue);
   });
 }
 
-class MockSemanticsEnabler extends Mock implements SemanticsEnabler {}
+class MockSemanticsEnabler implements SemanticsEnabler {
+  @override
+  void dispose() {
+  }
+
+  @override
+  bool get isWaitingToEnableSemantics => throw UnimplementedError();
+
+  @override
+  html.Element prepareAccessibilityPlaceholder() {
+    throw UnimplementedError();
+  }
+
+  bool shouldEnableSemanticsReturnValue = false;
+  final List<html.Event> shouldEnableSemanticsEvents = <html.Event>[];
+
+  @override
+  bool shouldEnableSemantics(html.Event event) {
+    shouldEnableSemanticsEvents.add(event);
+    return shouldEnableSemanticsReturnValue;
+  }
+
+  @override
+  bool tryEnableSemantics(html.Event event) {
+    throw UnimplementedError();
+  }
+}
 
 void _testHeader() {
   test('renders heading role for headers', () {

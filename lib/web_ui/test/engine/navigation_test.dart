@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
-
-engine.TestUrlStrategy _strategy;
 
 const engine.MethodCodec codec = engine.JSONMethodCodec();
 
@@ -21,6 +18,8 @@ void main() {
 }
 
 void testMain() {
+  engine.TestUrlStrategy? _strategy;
+
   setUp(() async {
     _strategy = engine.TestUrlStrategy();
     await engine.window.debugInitializeHistory(_strategy, useSingle: true);
@@ -42,6 +41,6 @@ void testMain() {
       (_) => completer.complete(),
     );
     await completer.future;
-    expect(_strategy.getPath(), '/foo');
+    expect(_strategy!.getPath(), '/foo');
   });
 }
