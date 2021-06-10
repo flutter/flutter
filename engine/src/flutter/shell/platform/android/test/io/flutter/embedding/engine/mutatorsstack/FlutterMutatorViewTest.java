@@ -1,10 +1,14 @@
 package io.flutter.embedding.engine.mutatorsstack;
 
+import static android.view.View.OnFocusChangeListener;
 import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.*;
 
 import android.graphics.Matrix;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,5 +79,120 @@ public class FlutterMutatorViewTest {
       screenMatrix.postTranslate(7, 8);
       assertTrue(matrixCaptor.getValue().equals(screenMatrix));
     }
+  }
+
+  @Test
+  public void childHasFocus_rootHasFocus() {
+    final View rootView = mock(View.class);
+    when(rootView.hasFocus()).thenReturn(true);
+    assertTrue(FlutterMutatorView.childHasFocus(rootView));
+  }
+
+  @Test
+  public void childHasFocus_rootDoesNotHaveFocus() {
+    final View rootView = mock(View.class);
+    when(rootView.hasFocus()).thenReturn(false);
+    assertFalse(FlutterMutatorView.childHasFocus(rootView));
+  }
+
+  @Test
+  public void childHasFocus_rootIsNull() {
+    assertFalse(FlutterMutatorView.childHasFocus(null));
+  }
+
+  @Test
+  public void childHasFocus_childHasFocus() {
+    final View childView = mock(View.class);
+    when(childView.hasFocus()).thenReturn(true);
+
+    final ViewGroup rootView = mock(ViewGroup.class);
+    when(rootView.getChildCount()).thenReturn(1);
+    when(rootView.getChildAt(0)).thenReturn(childView);
+
+    assertTrue(FlutterMutatorView.childHasFocus(rootView));
+  }
+
+  @Test
+  public void childHasFocus_childDoesNotHaveFocus() {
+    final View childView = mock(View.class);
+    when(childView.hasFocus()).thenReturn(false);
+
+    final ViewGroup rootView = mock(ViewGroup.class);
+    when(rootView.getChildCount()).thenReturn(1);
+    when(rootView.getChildAt(0)).thenReturn(childView);
+
+    assertFalse(FlutterMutatorView.childHasFocus(rootView));
+  }
+
+  @Test
+  public void focusChangeListener_hasFocus() {
+    final ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
+    when(viewTreeObserver.isAlive()).thenReturn(true);
+
+    final FlutterMutatorView view =
+        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+          @Override
+          public ViewTreeObserver getViewTreeObserver() {
+            return viewTreeObserver;
+          }
+
+          @Override
+          public boolean hasFocus() {
+            return true;
+          }
+        };
+
+    final OnFocusChangeListener focusListener = mock(OnFocusChangeListener.class);
+    view.addOnFocusChangeListener(focusListener);
+
+    final ArgumentCaptor<ViewTreeObserver.OnGlobalFocusChangeListener> focusListenerCaptor =
+        ArgumentCaptor.forClass(ViewTreeObserver.OnGlobalFocusChangeListener.class);
+    verify(viewTreeObserver).addOnGlobalFocusChangeListener(focusListenerCaptor.capture());
+
+    focusListenerCaptor.getValue().onGlobalFocusChanged(null, null);
+    verify(focusListener).onFocusChange(view, true);
+  }
+
+  @Test
+  public void focusChangeListener_doesNotHaveFocus() {
+    final ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
+    when(viewTreeObserver.isAlive()).thenReturn(true);
+
+    final FlutterMutatorView view =
+        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+          @Override
+          public ViewTreeObserver getViewTreeObserver() {
+            return viewTreeObserver;
+          }
+
+          @Override
+          public boolean hasFocus() {
+            return false;
+          }
+        };
+
+    final OnFocusChangeListener focusListener = mock(OnFocusChangeListener.class);
+    view.addOnFocusChangeListener(focusListener);
+
+    final ArgumentCaptor<ViewTreeObserver.OnGlobalFocusChangeListener> focusListenerCaptor =
+        ArgumentCaptor.forClass(ViewTreeObserver.OnGlobalFocusChangeListener.class);
+    verify(viewTreeObserver).addOnGlobalFocusChangeListener(focusListenerCaptor.capture());
+
+    focusListenerCaptor.getValue().onGlobalFocusChanged(null, null);
+    verify(focusListener).onFocusChange(view, false);
+  }
+
+  @Test
+  public void focusChangeListener_viewTreeObserverIsAliveFalseDoesNotThrow() {
+    final FlutterMutatorView view =
+        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+          @Override
+          public ViewTreeObserver getViewTreeObserver() {
+            final ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
+            when(viewTreeObserver.isAlive()).thenReturn(false);
+            return viewTreeObserver;
+          }
+        };
+    view.addOnFocusChangeListener(mock(OnFocusChangeListener.class));
   }
 }
