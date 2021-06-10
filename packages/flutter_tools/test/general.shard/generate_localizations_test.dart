@@ -1568,7 +1568,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('DateTime tests', () {
-      testWithoutContext('imports package:intl', () {
+      testUsingContext('imports package:intl', () {
         const String singleDateMessageArbFileString = '''
 {
   "@@locale": "en",
@@ -1587,13 +1587,14 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleDateMessageArbFileString);
 
         LocalizationsGenerator(
-          fileSystem: fs,
-          inputPathString: defaultL10nPathString,
-          outputPathString: defaultL10nPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
+          fs,
         )
+          ..initialize(
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString)
           ..loadResources()
           ..writeOutputFiles(BufferLogger.test());
 
@@ -1682,7 +1683,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('NumberFormat tests', () {
-      testWithoutContext('imports package:intl', () {
+      testUsingContext('imports package:intl', () {
         const String singleDateMessageArbFileString = '''
 {
   "courseCompletion": "You have completed {progress} of the course.",
@@ -1702,13 +1703,14 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               singleDateMessageArbFileString);
 
         LocalizationsGenerator(
-          fileSystem: fs,
-          inputPathString: defaultL10nPathString,
-          outputPathString: defaultL10nPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
+          fs,
         )
+          ..initialize(
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString)
           ..loadResources()
           ..writeOutputFiles(BufferLogger.test());
 
