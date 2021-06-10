@@ -612,8 +612,8 @@ void testMain() {
     html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas');
     // Although we are drawing same picture, due to scaling the new canvas
     // should have fewer pixels.
-    expect(canvas2.width < unscaledWidth, true);
-    expect(canvas2.height < unscaledHeight, true);
+    expect(canvas2.width < unscaledWidth, isTrue);
+    expect(canvas2.height < unscaledHeight, isTrue);
   });
 
   test('Canvas should allocate more pixels when zoomed in', () async {
@@ -644,8 +644,8 @@ void testMain() {
     html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas');
     // Although we are drawing same picture, due to scaling the new canvas
     // should have more pixels.
-    expect(canvas2.width > unscaledWidth, true);
-    expect(canvas2.height > unscaledHeight, true);
+    expect(canvas2.width > unscaledWidth, isTrue);
+    expect(canvas2.height > unscaledHeight, isTrue);
   });
 
   test('Should recycle canvas once', () async {

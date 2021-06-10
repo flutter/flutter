@@ -75,7 +75,7 @@ void _testEngineSemanticsOwner() {
   });
 
   test('semantics is off by default', () {
-    expect(semantics().semanticsEnabled, false);
+    expect(semantics().semanticsEnabled, isFalse);
   });
 
   test('default mode is "unknown"', () {
@@ -84,13 +84,13 @@ void _testEngineSemanticsOwner() {
 
   test('placeholder enables semantics', () async {
     domRenderer.reset(); // triggers `autoEnableOnTap` to be called
-    expect(semantics().semanticsEnabled, false);
+    expect(semantics().semanticsEnabled, isFalse);
 
     // Synthesize a click on the placeholder.
     final html.Element placeholder =
         appShadowRoot.querySelector('flt-semantics-placeholder');
 
-    expect(placeholder.isConnected, true);
+    expect(placeholder.isConnected, isTrue);
 
     final html.Rectangle<num> rect = placeholder.getBoundingClientRect();
     placeholder.dispatchEvent(html.MouseEvent(
@@ -105,28 +105,28 @@ void _testEngineSemanticsOwner() {
         await Future<void>.delayed(const Duration(milliseconds: 50));
       }
     }
-    expect(semantics().semanticsEnabled, true);
-    expect(placeholder.isConnected, false);
+    expect(semantics().semanticsEnabled, isTrue);
+    expect(placeholder.isConnected, isFalse);
   });
 
   test('auto-enables semantics', () async {
     domRenderer.reset(); // triggers `autoEnableOnTap` to be called
-    expect(semantics().semanticsEnabled, false);
+    expect(semantics().semanticsEnabled, isFalse);
 
     final html.Element placeholder =
         appShadowRoot.querySelector('flt-semantics-placeholder');
 
-    expect(placeholder.isConnected, true);
+    expect(placeholder.isConnected, isTrue);
 
     // Sending a semantics update should auto-enable engine semantics.
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(builder, id: 0);
     semantics().updateSemantics(builder.build());
 
-    expect(semantics().semanticsEnabled, true);
+    expect(semantics().semanticsEnabled, isTrue);
 
     // The placeholder should be removed
-    expect(placeholder.isConnected, false);
+    expect(placeholder.isConnected, isFalse);
   });
 
   void renderLabel(String label) {
@@ -211,7 +211,7 @@ void _testEngineSemanticsOwner() {
 
   test('accepts standalone browser gestures', () {
     semantics().semanticsEnabled = true;
-    expect(semantics().shouldAcceptBrowserGesture('click'), true);
+    expect(semantics().shouldAcceptBrowserGesture('click'), isTrue);
     semantics().semanticsEnabled = false;
   });
 
@@ -220,13 +220,13 @@ void _testEngineSemanticsOwner() {
       semantics()
         ..debugOverrideTimestampFunction(fakeAsync.getClock(_testTime).now)
         ..semanticsEnabled = true;
-      expect(semantics().shouldAcceptBrowserGesture('click'), true);
+      expect(semantics().shouldAcceptBrowserGesture('click'), isTrue);
       semantics().receiveGlobalEvent(html.Event('pointermove'));
-      expect(semantics().shouldAcceptBrowserGesture('click'), false);
+      expect(semantics().shouldAcceptBrowserGesture('click'), isFalse);
 
       // After 1 second of inactivity a browser gestures counts as standalone.
       fakeAsync.elapse(const Duration(seconds: 1));
-      expect(semantics().shouldAcceptBrowserGesture('click'), true);
+      expect(semantics().shouldAcceptBrowserGesture('click'), isTrue);
       semantics().semanticsEnabled = false;
     });
   });

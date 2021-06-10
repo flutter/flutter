@@ -37,7 +37,7 @@ void testMain() async {
             browserEngine == BrowserEngine.webkit));
 
     test('loads Blehm font from buffer', () async {
-      expect(_containsFontFamily('Blehm'), false);
+      expect(_containsFontFamily('Blehm'), isFalse);
 
       final html.HttpRequest response = await html.HttpRequest.request(
           _testFontUrl,
@@ -45,7 +45,7 @@ void testMain() async {
       await ui.loadFontFromList(Uint8List.view(response.response),
           fontFamily: 'Blehm');
 
-      expect(_containsFontFamily('Blehm'), true);
+      expect(_containsFontFamily('Blehm'), isTrue);
     },
         // TODO(nurhan): https://github.com/flutter/flutter/issues/56702
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
@@ -78,7 +78,7 @@ void testMain() async {
           fontFamily: 'Blehm');
 
       // Verifies the font is loaded, and the cache is cleaned.
-      expect(_containsFontFamily('Blehm'), true);
+      expect(_containsFontFamily('Blehm'), isTrue);
       expect(TextMeasurementService.rulerManager.rulers.length, 0);
       expect(Spanometer.rulers.length, 0);
     },

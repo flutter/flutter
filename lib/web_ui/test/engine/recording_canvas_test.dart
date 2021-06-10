@@ -140,36 +140,36 @@ void testMain() {
 
     expect(underTest.debugPaintCommands, hasLength(10));
     final PaintDrawRect outsideLeft = underTest.debugPaintCommands[0];
-    expect(outsideLeft.isClippedOut, false);
+    expect(outsideLeft.isClippedOut, isFalse);
     expect(outsideLeft.leftBound, 0);
     expect(outsideLeft.topBound, 20);
     expect(outsideLeft.rightBound, 10);
     expect(outsideLeft.bottomBound, 30);
 
     final PaintDrawRect outsideAbove = underTest.debugPaintCommands[1];
-    expect(outsideAbove.isClippedOut, false);
+    expect(outsideAbove.isClippedOut, isFalse);
 
     final PaintDrawRect visible = underTest.debugPaintCommands[2];
-    expect(visible.isClippedOut, false);
+    expect(visible.isClippedOut, isFalse);
 
     final PaintDrawRect zeroSize = underTest.debugPaintCommands[3];
-    expect(zeroSize.isClippedOut, true);
+    expect(zeroSize.isClippedOut, isTrue);
 
     expect(underTest.debugPaintCommands[4], isA<PaintSave>());
 
     final PaintClipRect clip = underTest.debugPaintCommands[5];
-    expect(clip.isClippedOut, false);
+    expect(clip.isClippedOut, isFalse);
 
     final PaintDrawRect clippedOut = underTest.debugPaintCommands[6];
-    expect(clippedOut.isClippedOut, true);
+    expect(clippedOut.isClippedOut, isTrue);
 
     expect(underTest.debugPaintCommands[7], isA<PaintRestore>());
 
     final PaintDrawRect outsideRight = underTest.debugPaintCommands[8];
-    expect(outsideRight.isClippedOut, false);
+    expect(outsideRight.isClippedOut, isFalse);
 
     final PaintDrawRect outsideBelow = underTest.debugPaintCommands[9];
-    expect(outsideBelow.isClippedOut, false);
+    expect(outsideBelow.isClippedOut, isFalse);
 
     // Give it the entire screen so everything paints.
     underTest.apply(mockCanvas, screenRect);

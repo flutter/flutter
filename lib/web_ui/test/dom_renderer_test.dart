@@ -99,7 +99,7 @@ void testMain() {
       ..name = 'viewport'
       ..content = 'foo=bar';
     html.document.head!.append(existingMeta);
-    expect(existingMeta.isConnected, true);
+    expect(existingMeta.isConnected, isTrue);
 
     final DomRenderer renderer = DomRenderer();
     renderer.reset();
