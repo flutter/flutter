@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-#
+#!/usr/bin/env python
 # Copyright 2014 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,6 +11,8 @@
 # To update to a new MSVC toolchain, copy the updated script from the Chromium
 # tree, and edit to make it work in the Dart tree by updating paths in the original script.
 
+from __future__ import print_function
+
 import collections
 import glob
 import json
@@ -23,6 +24,7 @@ import shutil
 import stat
 import subprocess
 import sys
+
 
 from gn_helpers import ToGNString
 
@@ -122,12 +124,12 @@ def _RegistryGetValueUsingWinReg(key, value):
     contents of the registry key's value, or None on failure.  Throws
     ImportError if _winreg is unavailable.
   """
-  import winreg
+  import _winreg
   try:
     root, subkey = key.split('\\', 1)
     assert root == 'HKLM'  # Only need HKLM for now.
-    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, subkey) as hkey:
-      return winreg.QueryValueEx(hkey, value)[0]
+    with _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, subkey) as hkey:
+      return _winreg.QueryValueEx(hkey, value)[0]
   except WindowsError:
     return None
 
