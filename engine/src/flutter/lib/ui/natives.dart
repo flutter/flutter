@@ -70,13 +70,8 @@ void _setupHooks() {  // ignore: unused_element
 ///
 /// This function is only effective in debug and dynamic modes, and will throw in AOT mode.
 List<int> saveCompilationTrace() {
-  final dynamic result = _saveCompilationTrace();
-  if (result is Error)
-    throw result;
-  return result as List<int>;
+  throw UnimplementedError();
 }
-
-dynamic _saveCompilationTrace() native 'SaveCompilationTrace';
 
 void _scheduleMicrotask(void Function() callback) native 'ScheduleMicrotask';
 

@@ -40,7 +40,6 @@ namespace flutter {
 #define BUILTIN_NATIVE_LIST(V)  \
   V(Logger_PrintString, 1)      \
   V(Logger_PrintDebugString, 1) \
-  V(SaveCompilationTrace, 0)    \
   V(ScheduleMicrotask, 1)       \
   V(GetCallbackHandle, 1)       \
   V(GetCallbackFromHandle, 1)
@@ -200,35 +199,6 @@ void Logger_PrintString(Dart_NativeArguments args) {
                               log.size());
     Dart_ServiceSendDataEvent("Stdout", "WriteEvent", newline, sizeof(newline));
   }
-}
-
-void SaveCompilationTrace(Dart_NativeArguments args) {
-  uint8_t* buffer = nullptr;
-  intptr_t length = 0;
-  Dart_Handle result = Dart_SaveCompilationTrace(&buffer, &length);
-  if (Dart_IsError(result)) {
-    Dart_SetReturnValue(args, result);
-    return;
-  }
-
-  result = Dart_NewTypedData(Dart_TypedData_kUint8, length);
-  if (Dart_IsError(result)) {
-    Dart_SetReturnValue(args, result);
-    return;
-  }
-
-  Dart_TypedData_Type type;
-  void* data = nullptr;
-  intptr_t size = 0;
-  Dart_Handle status = Dart_TypedDataAcquireData(result, &type, &data, &size);
-  if (Dart_IsError(status)) {
-    Dart_SetReturnValue(args, status);
-    return;
-  }
-
-  memcpy(data, buffer, length);
-  Dart_TypedDataReleaseData(result);
-  Dart_SetReturnValue(args, result);
 }
 
 void ScheduleMicrotask(Dart_NativeArguments args) {
