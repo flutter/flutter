@@ -10,7 +10,7 @@ void main() => runApp(
         home: Material(
           color: Colors.white,
           child: DraggableScrollableSheet(
-            snapPoints: [],
+            snapPoints: <double>{.6},
             builder: (BuildContext context, ScrollController controller) =>
                 Material(
               color: Colors.blueAccent,
