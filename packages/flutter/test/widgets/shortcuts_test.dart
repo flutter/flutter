@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
 
-class TestAction extends CallbackAction<TestIntent> {
+class TestAction extends CallbackAction<Intent> {
   TestAction({
     required OnInvokeCallback onInvoke,
   })  : assert(onInvoke != null),
@@ -26,13 +26,50 @@ class TestDispatcher extends ActionDispatcher {
   @override
   Object? invokeAction(Action<TestIntent> action, Intent intent, [BuildContext? context]) {
     final Object? result = super.invokeAction(action, intent, context);
-    postInvoke?.call(action: action, intent: intent, context: context!, dispatcher: this);
+    postInvoke?.call(action: action, intent: intent, context: context, dispatcher: this);
+    return result;
+  }
+}
+
+/// An activator that accepts down events that has [key] as the logical key.
+///
+/// This class is used only to tests. It is intentionally designed poorly by
+/// returning null in [triggers], and checks [key] in [accepts].
+class DumbLogicalActivator extends ShortcutActivator {
+  const DumbLogicalActivator(this.key);
+
+  final LogicalKeyboardKey key;
+
+  @override
+  Iterable<LogicalKeyboardKey>? get triggers => null;
+
+  @override
+  bool accepts(RawKeyEvent event, RawKeyboard state) {
+    return event is RawKeyDownEvent
+        && event.logicalKey == key;
+  }
+
+  /// Returns a short and readable description of the key combination.
+  ///
+  /// Intended to be used in debug mode for logging purposes. In release mode,
+  /// [debugDescribeKeys] returns an empty string.
+  @override
+  String debugDescribeKeys() {
+    String result = '';
+    assert(() {
+      result = key.keyLabel;
+      return true;
+    }());
     return result;
   }
 }
 
 class TestIntent extends Intent {
   const TestIntent();
+}
+
+class TestIntent2 extends Intent {
+  const TestIntent2();
 }
 
 class TestShortcutManager extends ShortcutManager {
@@ -49,7 +86,13 @@ class TestShortcutManager extends ShortcutManager {
   }
 }
 
-Widget activatorTester(ShortcutActivator activator, ValueSetter<Intent> onInvoke) {
+Widget activatorTester(
+  ShortcutActivator activator,
+  ValueSetter<Intent> onInvoke, [
+  ShortcutActivator? activator2,
+  ValueSetter<Intent>? onInvoke2,
+]) {
+  final bool hasSecond = activator2 != null && onInvoke2 != null;
   return Actions(
     key: GlobalKey(),
     actions: <Type, Action<Intent>>{
@@ -57,10 +100,16 @@ Widget activatorTester(ShortcutActivator activator, ValueSetter<Intent> onInvoke
         onInvoke(intent);
         return true;
       }),
+      if (hasSecond)
+        TestIntent2: TestAction(onInvoke: (Intent intent) {
+          onInvoke2(intent);
+        }),
     },
     child: Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
         activator: const TestIntent(),
+        if (hasSecond)
+          activator2: const TestIntent2(),
       },
       child: const Focus(
         autofocus: true,
@@ -966,6 +1015,66 @@ void main() {
       await tester.pumpAndSettle();
       expect(value, isTrue);
       expect(controller.position.pixels, 0.0);
+    });
+
+    testWidgets('Shortcuts support activators that returns null in triggers', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const DumbLogicalActivator(LogicalKeyboardKey.keyC),
+        (Intent intent) { invoked += 1; },
+        const SingleActivator(LogicalKeyboardKey.keyC, control: true),
+        (Intent intent) { invoked += 10; },
+      ));
+      await tester.pump();
+
+      // Press KeyC: Accepted by DumbLogicalActivator
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      invoked = 0;
+
+      // Press ControlLeft + KeyC: Accepted by SingleActivator
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 10);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 10);
+      invoked = 0;
+
+      // Press ControlLeft + ShiftLeft + KeyC: Accepted by DumbLogicalActivator
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 1);
+      invoked = 0;
+    });
+  });
+
+  group('CharacterActivator', () {
+    testWidgets('is triggered on events with correct character', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const CharacterActivator('?'),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // Press KeyC: Accepted by DumbLogicalActivator
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.slash, character: '?');
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 1);
+      invoked = 0;
     });
   });
 }

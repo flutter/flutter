@@ -11,7 +11,7 @@ class LargeImageChangerPage extends StatefulWidget {
   const LargeImageChangerPage({Key key}) : super(key: key);
 
   @override
-  _LargeImageChangerState createState() => _LargeImageChangerState();
+  State<LargeImageChangerPage> createState() => _LargeImageChangerState();
 }
 
 class _LargeImageChangerState extends State<LargeImageChangerPage> {

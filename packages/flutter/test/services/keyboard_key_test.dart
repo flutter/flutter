@@ -38,6 +38,7 @@ void main() {
     test('Control characters are recognized as such', () async {
       // Check some common control characters
       expect(LogicalKeyboardKey.isControlCharacter('\x08'), isTrue); // BACKSPACE
+      expect(LogicalKeyboardKey.isControlCharacter('\x09'), isTrue); // TAB
       expect(LogicalKeyboardKey.isControlCharacter('\x0a'), isTrue); // LINE FEED
       expect(LogicalKeyboardKey.isControlCharacter('\x0d'), isTrue); // RETURN
       expect(LogicalKeyboardKey.isControlCharacter('\x1b'), isTrue); // ESC
@@ -47,6 +48,16 @@ void main() {
       expect(LogicalKeyboardKey.isControlCharacter(' '), isFalse);
       expect(LogicalKeyboardKey.isControlCharacter('~'), isFalse);
       expect(LogicalKeyboardKey.isControlCharacter('\xa0'), isFalse); // NO-BREAK SPACE
+    });
+    test('Control characters are not using incorrect values', () async {
+      const int kUnprintablePlane = 0x01000000000;
+      // Check some common control characters to make sure they're using
+      // their char code values, and not something else.
+      expect(LogicalKeyboardKey.backspace.keyId, equals(kUnprintablePlane + 0x08));
+      expect(LogicalKeyboardKey.tab.keyId, equals(kUnprintablePlane + 0x09));
+      expect(LogicalKeyboardKey.enter.keyId, equals(kUnprintablePlane + 0x0d));
+      expect(LogicalKeyboardKey.escape.keyId, equals(kUnprintablePlane + 0x1b));
+      expect(LogicalKeyboardKey.delete.keyId, equals(kUnprintablePlane + 0x7f));
     });
     test('Basic synonyms can be looked up.', () async {
       expect(LogicalKeyboardKey.shiftLeft.synonyms.first, equals(LogicalKeyboardKey.shift));

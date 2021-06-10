@@ -1716,7 +1716,7 @@ void main() {
     expect(find.byType(Material), paints..path(color: defaultColor));
   });
 
-  testWidgets('ListTile respects ListTileTheme\'s tileColor & selectedTileColor', (WidgetTester tester) async {
+  testWidgets("ListTile respects ListTileTheme's tileColor & selectedTileColor", (WidgetTester tester) async {
     late ListTileTheme theme;
     bool isSelected = false;
 
@@ -1754,7 +1754,7 @@ void main() {
     expect(find.byType(Material), paints..path(color: theme.selectedTileColor));
   });
 
-  testWidgets('ListTileTheme\'s tileColor & selectedTileColor are overridden by ListTile properties', (WidgetTester tester) async {
+  testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
     final Color selectedTileColor = Colors.red.shade500;

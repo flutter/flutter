@@ -26,7 +26,7 @@ import 'theme.dart';
 /// A paginated data table shows [rowsPerPage] rows of data per page and
 /// provides controls for showing other pages.
 ///
-/// Data is read lazily from from a [DataTableSource]. The widget is presented
+/// Data is read lazily from a [DataTableSource]. The widget is presented
 /// as a [Card].
 ///
 /// See also:

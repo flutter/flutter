@@ -1051,8 +1051,9 @@ void main() {
           ),
           child: Scrollbar(
             controller: controller,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0),
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
@@ -1491,5 +1492,53 @@ void main() {
         contains('The Scrollbar attempted to paint using the position attached to the provided ScrollController.'),
       );
     }
+  });
+
+  testWidgets('Scrollbar scrollOrientation works correctly', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+
+    Widget _buildScrollWithOrientation(ScrollbarOrientation orientation) {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(
+            platform: TargetPlatform.android,
+          ),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: Scrollbar(
+              interactive: true,
+              isAlwaysShown: true,
+              scrollbarOrientation: orientation,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                child: SizedBox(width: 4000.0, height: 4000.0)
+              ),
+            ),
+          ),
+        )
+      );
+    }
+
+    await tester.pumpWidget(_buildScrollWithOrientation(ScrollbarOrientation.left));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 4.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: Offset.zero,
+          p2: const Offset(0.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 4.0, 90.0),
+          color: _kAndroidThumbIdleColor,
+        ),
+    );
   });
 }

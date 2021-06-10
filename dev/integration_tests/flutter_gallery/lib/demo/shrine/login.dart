@@ -10,7 +10,7 @@ class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
@@ -133,8 +133,8 @@ class PrimaryColorOverride extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      child: child!,
       data: Theme.of(context).copyWith(primaryColor: color),
+      child: child!,
     );
   }
 }

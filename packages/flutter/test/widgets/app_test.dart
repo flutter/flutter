@@ -328,6 +328,133 @@ void main() {
     );
     expect(ScrollConfiguration.of(capturedContext).runtimeType, ScrollBehavior);
   });
+
+  test('basicLocaleListResolution', () {
+    // Matches exactly for language code.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale('zh'),
+          const Locale('un'),
+          const Locale('en'),
+        ],
+        <Locale>[
+          const Locale('en'),
+        ],
+      ),
+      const Locale('en'),
+    );
+
+    // Matches exactly for language code and country code.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale('en'),
+          const Locale('en', 'US'),
+        ],
+        <Locale>[
+          const Locale('en', 'US'),
+        ],
+      ),
+      const Locale('en', 'US'),
+    );
+
+    // Matches language+script over language+country
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+            countryCode: 'HK',
+          ),
+        ],
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            countryCode: 'HK',
+          ),
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+          ),
+        ],
+      ),
+      const Locale.fromSubtags(
+        languageCode: 'zh',
+        scriptCode: 'Hant',
+      ),
+    );
+
+    // Matches exactly for language code, script code and country code.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+          ),
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+            countryCode: 'TW',
+          ),
+        ],
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+            countryCode: 'TW',
+          ),
+        ],
+      ),
+      const Locale.fromSubtags(
+        languageCode: 'zh',
+        scriptCode: 'Hant',
+        countryCode: 'TW',
+      ),
+    );
+
+    // Selects for country code if the language code is not found in the
+    // preferred locales list.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'en',
+          ),
+          const Locale.fromSubtags(
+            languageCode: 'ar',
+            countryCode: 'tn',
+          ),
+        ],
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'fr',
+            countryCode: 'tn',
+          ),
+        ],
+      ),
+      const Locale.fromSubtags(
+        languageCode: 'fr',
+        countryCode: 'tn',
+      ),
+    );
+
+    // Selects first (default) locale when no match at all is found.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale('tn'),
+        ],
+        <Locale>[
+          const Locale('zh'),
+          const Locale('un'),
+          const Locale('en'),
+        ],
+      ),
+      const Locale('zh'),
+    );
+  });
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);

@@ -4,7 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle, PlaceholderAlignment;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
@@ -12,10 +12,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import 'package:vector_math/vector_math_64.dart';
+
 import 'box.dart';
 import 'custom_paint.dart';
 import 'layer.dart';
 import 'object.dart';
+import 'paragraph.dart';
 import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
@@ -136,7 +139,7 @@ bool _isWhitespace(int codeUnit) {
 /// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
 /// to actually blink the cursor, and other features not mentioned above are the
 /// responsibility of higher layers and not handled by this object.
-class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
+class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
   /// Creates a render object that implements the visual aspects of a text field.
   ///
   /// The [textAlign] argument must not be null. It defaults to [TextAlign.start].
@@ -152,7 +155,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// The [offset] is required and must not be null. You can use [new
   /// ViewportOffset.zero] if you have no need for scrolling.
   RenderEditable({
-    TextSpan? text,
+    InlineSpan? text,
     required TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
     Color? cursorColor,
@@ -199,6 +202,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required this.textSelectionDelegate,
     RenderEditablePainter? painter,
     RenderEditablePainter? foregroundPainter,
+    List<RenderBox>? children,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -277,11 +281,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     _updateForegroundPainter(foregroundPainter);
     _updatePainter(painter);
+    addAll(children);
+    _extractPlaceholderSpans(text);
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! TextParentData)
+      child.parentData = TextParentData();
   }
 
   /// Child render objects
   _RenderEditableCustomPaint? _foregroundRenderObject;
   _RenderEditableCustomPaint? _backgroundRenderObject;
+
+  @override
+  void dispose() {
+    _foregroundRenderObject?.dispose();
+    _foregroundRenderObject = null;
+    _backgroundRenderObject?.dispose();
+    _backgroundRenderObject = null;
+    super.dispose();
+  }
 
   void _updateForegroundPainter(RenderEditablePainter? newPainter) {
     final _CompositeRenderEditablePainter effectivePainter = newPainter == null
@@ -299,6 +320,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _foregroundRenderObject?.painter = effectivePainter;
     }
     _foregroundPainter = newPainter;
+  }
+
+  late List<PlaceholderSpan> _placeholderSpans;
+  void _extractPlaceholderSpans(InlineSpan? span) {
+    _placeholderSpans = <PlaceholderSpan>[];
+    span?.visitChildren((InlineSpan span) {
+      if (span is PlaceholderSpan) {
+        _placeholderSpans.add(span);
+      }
+      return true;
+    });
   }
 
   /// The [RenderEditablePainter] to use for painting above this
@@ -727,7 +759,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     int? lastNonWhitespace;
     for (final String currentString in string.characters) {
       if (!includeWhitespace &&
-          !_isWhitespace(currentString.characters.first.toString().codeUnitAt(0))) {
+          !_isWhitespace(currentString.characters.first.codeUnitAt(0))) {
         lastNonWhitespace = count;
       }
       if (count + currentString.length >= index) {
@@ -1011,9 +1043,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
-  // Deletes the current uncollapsed selection.
+  // Deletes the text within `selection` if it's non-empty.
   void _deleteSelection(TextSelection selection, SelectionChangedCause cause) {
-    assert(selection.isCollapsed == false);
+    assert(!selection.isCollapsed);
 
     if (_readOnly || !selection.isValid || selection.isCollapsed) {
       return;
@@ -1023,12 +1055,53 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final String textBefore = selection.textBefore(text);
     final String textAfter = selection.textAfter(text);
     final int cursorPosition = math.min(selection.start, selection.end);
-
     final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
     _setTextEditingValue(
       TextEditingValue(text: textBefore + textAfter, selection: newSelection),
       cause,
     );
+  }
+
+  // Deletes the current non-empty selection.
+  //
+  // Operates on the text/selection contained in textSelectionDelegate, and does
+  // not depend on `RenderEditable.selection`.
+  //
+  // If the selection is currently non-empty, this method deletes the selected
+  // text and returns true. Otherwise this method does nothing and returns
+  // false.
+  bool _deleteNonEmptySelection(SelectionChangedCause cause) {
+    // TODO(LongCatIsLooong): remove this method from `RenderEditable`
+    // https://github.com/flutter/flutter/issues/80226.
+    assert(!readOnly);
+    final TextEditingValue controllerValue = textSelectionDelegate.textEditingValue;
+    final TextSelection selection = controllerValue.selection;
+    assert(selection.isValid);
+
+    if (selection.isCollapsed) {
+      return false;
+    }
+
+    final String textBefore = selection.textBefore(controllerValue.text);
+    final String textAfter = selection.textAfter(controllerValue.text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: selection.start);
+    final TextRange composing = controllerValue.composing;
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - selection.start).clamp(0, selection.end - selection.start),
+        end: composing.end - (composing.end - selection.start).clamp(0, selection.end - selection.start),
+      );
+
+    _setTextEditingValue(
+      TextEditingValue(
+        text: textBefore + textAfter,
+        selection: newSelection,
+        composing: newComposingRange,
+      ),
+      cause,
+    );
+    return true;
   }
 
   // Deletes the from the current collapsed selection to the start of the field.
@@ -1089,12 +1162,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes backwards from the current selection.
+  /// Deletes backwards from the selection in [textSelectionDelegate].
   ///
-  /// If the [selection] is collapsed, deletes a single character before the
+  /// This method operates on the text/selection contained in
+  /// [textSelectionDelegate], and does not depend on [selection].
+  ///
+  /// If the selection is collapsed, deletes a single character before the
   /// cursor.
   ///
-  /// If the [selection] is not collapsed, deletes the selection.
+  /// If the selection is not collapsed, deletes the selection.
   ///
   /// {@template flutter.rendering.RenderEditable.cause}
   /// The given [SelectionChangedCause] indicates the cause of this change and
@@ -1105,29 +1181,45 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [deleteForward], which is same but in the opposite direction.
   void delete(SelectionChangedCause cause) {
-    assert(_selection != null);
+    // `delete` does not depend on the text layout, and the boundary analysis is
+    // done using the `previousCharacter` method instead of ICU, we can keep
+    // deleting without having to layout the text. For this reason, we can
+    // directly delete the character before the caret in the controller.
+    //
+    // TODO(LongCatIsLooong): remove this method from RenderEditable.
+    // https://github.com/flutter/flutter/issues/80226.
+    final TextEditingValue controllerValue = textSelectionDelegate.textEditingValue;
+    final TextSelection selection = controllerValue.selection;
 
-    if (_readOnly || !_selection!.isValid) {
+    if (!selection.isValid || readOnly || _deleteNonEmptySelection(cause)) {
       return;
     }
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
-    }
-
-    final String text = textSelectionDelegate.textEditingValue.text;
-    String textBefore = _selection!.textBefore(text);
+    assert(selection.isCollapsed);
+    final String textBefore = selection.textBefore(controllerValue.text);
     if (textBefore.isEmpty) {
       return;
     }
 
-    final int characterBoundary = previousCharacter(textBefore.length, textBefore);
-    textBefore = textBefore.substring(0, characterBoundary);
+    final String textAfter = selection.textAfter(controllerValue.text);
 
-    final String textAfter = _selection!.textAfter(text);
+    final int characterBoundary = previousCharacter(textBefore.length, textBefore);
     final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
+    final TextRange composing = controllerValue.composing;
+    assert(textBefore.length >= characterBoundary);
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - characterBoundary).clamp(0, textBefore.length - characterBoundary),
+        end: composing.end - (composing.end - characterBoundary).clamp(0, textBefore.length - characterBoundary),
+      );
+
     _setTextEditingValue(
-      TextEditingValue(text: textBefore + textAfter, selection: newSelection),
+      TextEditingValue(
+        text: textBefore.substring(0, characterBoundary) + textAfter,
+        selection: newSelection,
+        composing: newComposingRange,
+      ),
       cause,
     );
   }
@@ -1238,12 +1330,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes in the foward direction from the current selection.
+  /// Deletes in the forward direction, from the current selection in
+  /// [textSelectionDelegate].
   ///
-  /// If the [selection] is collapsed, deletes a single character after the
+  /// This method operates on the text/selection contained in
+  /// [textSelectionDelegate], and does not depend on [selection].
+  ///
+  /// If the selection is collapsed, deletes a single character after the
   /// cursor.
   ///
-  /// If the [selection] is not collapsed, deletes the selection.
+  /// If the selection is not collapsed, deletes the selection.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1251,34 +1347,41 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [delete], which is same but in the opposite direction.
   void deleteForward(SelectionChangedCause cause) {
-    assert(_selection != null);
+    // TODO(LongCatIsLooong): remove this method from RenderEditable.
+    // https://github.com/flutter/flutter/issues/80226.
+    final TextEditingValue controllerValue = textSelectionDelegate.textEditingValue;
+    final TextSelection selection = controllerValue.selection;
 
-    if (_readOnly || !_selection!.isValid) {
+    if (!selection.isValid || _readOnly || _deleteNonEmptySelection(cause)) {
       return;
     }
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
-    }
-
-    final String text = textSelectionDelegate.textEditingValue.text;
-    final String textBefore = _selection!.textBefore(text);
-    String textAfter = _selection!.textAfter(text);
-
+    assert(selection.isCollapsed);
+    final String textAfter = selection.textAfter(controllerValue.text);
     if (textAfter.isEmpty) {
       return;
     }
 
-    final int deleteCount = nextCharacter(0, textAfter);
-    textAfter = textAfter.substring(deleteCount);
-
+    final String textBefore = selection.textBefore(controllerValue.text);
+    final int characterBoundary = nextCharacter(0, textAfter);
+    final TextRange composing = controllerValue.composing;
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - textBefore.length).clamp(0, characterBoundary),
+        end: composing.end - (composing.end - textBefore.length).clamp(0, characterBoundary),
+      );
     _setTextEditingValue(
-      TextEditingValue(text: textBefore + textAfter, selection: _selection!),
+      TextEditingValue(
+        text: textBefore + textAfter.substring(characterBoundary),
+        selection: selection,
+        composing: newComposingRange,
+      ),
       cause,
     );
   }
 
-  /// Deletes a word in the foward direction from the current selection.
+  /// Deletes a word in the forward direction from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a word after the cursor.
   ///
@@ -1327,7 +1430,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a line in the foward direction from the current selection.
+  /// Deletes a line in the forward direction from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a line after the cursor.
   ///
@@ -2215,13 +2318,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// The text to display.
-  TextSpan? get text => _textPainter.text as TextSpan?;
+  InlineSpan? get text => _textPainter.text;
   final TextPainter _textPainter;
-  set text(TextSpan? value) {
+  set text(InlineSpan? value) {
     if (_textPainter.text == value)
       return;
     _textPainter.text = value;
     _cachedPlainText = null;
+    _extractPlaceholderSpans(value);
     markNeedsTextLayout();
     markNeedsSemanticsUpdate();
   }
@@ -2751,74 +2855,96 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     Rect currentRect;
     double ordinal = 0.0;
     int start = 0;
+    int placeholderIndex = 0;
+    int childIndex = 0;
+    RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
     for (final InlineSpanSemanticsInformation info in combineSemanticsInfo(_semanticsInfo!)) {
-      assert(!info.isPlaceholder);
       final TextSelection selection = TextSelection(
         baseOffset: start,
         extentOffset: start + info.text.length,
       );
       start += info.text.length;
 
-      final TextDirection initialDirection = currentDirection;
-      final List<ui.TextBox> rects = _textPainter.getBoxesForSelection(selection);
-      if (rects.isEmpty) {
-        continue;
-      }
-      Rect rect = rects.first.toRect();
-      currentDirection = rects.first.direction;
-      for (final ui.TextBox textBox in rects.skip(1)) {
-        rect = rect.expandToInclude(textBox.toRect());
-        currentDirection = textBox.direction;
-      }
-      // Any of the text boxes may have had infinite dimensions.
-      // We shouldn't pass infinite dimensions up to the bridges.
-      rect = Rect.fromLTWH(
-        math.max(0.0, rect.left),
-        math.max(0.0, rect.top),
-        math.min(rect.width, constraints.maxWidth),
-        math.min(rect.height, constraints.maxHeight),
-      );
-      // Round the current rectangle to make this API testable and add some
-      // padding so that the accessibility rects do not overlap with the text.
-      currentRect = Rect.fromLTRB(
-        rect.left.floorToDouble() - 4.0,
-        rect.top.floorToDouble() - 4.0,
-        rect.right.ceilToDouble() + 4.0,
-        rect.bottom.ceilToDouble() + 4.0,
-      );
-      final SemanticsConfiguration configuration = SemanticsConfiguration()
-        ..sortKey = OrdinalSortKey(ordinal++)
-        ..textDirection = initialDirection
-        ..label = info.semanticsLabel ?? info.text;
-      final GestureRecognizer? recognizer = info.recognizer;
-      if (recognizer != null) {
-        if (recognizer is TapGestureRecognizer) {
-          if (recognizer.onTap != null) {
-            configuration.onTap = recognizer.onTap;
-            configuration.isLink = true;
-          }
-        } else if (recognizer is DoubleTapGestureRecognizer) {
-          if (recognizer.onDoubleTap != null) {
-            configuration.onTap = recognizer.onDoubleTap;
-            configuration.isLink = true;
-          }
-        } else if (recognizer is LongPressGestureRecognizer) {
-          if (recognizer.onLongPress != null) {
-            configuration.onLongPress = recognizer.onLongPress;
-          }
-        } else {
-          assert(false, '${recognizer.runtimeType} is not supported.');
+      if (info.isPlaceholder) {
+        // A placeholder span may have 0 to multiple semantics nodes, we need
+        // to annotate all of the semantics nodes belong to this span.
+        while (children.length > childIndex &&
+               children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+          final SemanticsNode childNode = children.elementAt(childIndex);
+          final TextParentData parentData = child!.parentData! as TextParentData;
+          childNode.rect = Rect.fromLTWH(
+            childNode.rect.left,
+            childNode.rect.top,
+            childNode.rect.width * parentData.scale!,
+            childNode.rect.height * parentData.scale!,
+          );
+          newChildren.add(childNode);
+          childIndex += 1;
         }
+        child = childAfter(child!);
+        placeholderIndex += 1;
+      } else {
+        final TextDirection initialDirection = currentDirection;
+        final List<ui.TextBox> rects = _textPainter.getBoxesForSelection(selection);
+        if (rects.isEmpty) {
+          continue;
+        }
+        Rect rect = rects.first.toRect();
+        currentDirection = rects.first.direction;
+        for (final ui.TextBox textBox in rects.skip(1)) {
+          rect = rect.expandToInclude(textBox.toRect());
+          currentDirection = textBox.direction;
+        }
+        // Any of the text boxes may have had infinite dimensions.
+        // We shouldn't pass infinite dimensions up to the bridges.
+        rect = Rect.fromLTWH(
+          math.max(0.0, rect.left),
+          math.max(0.0, rect.top),
+          math.min(rect.width, constraints.maxWidth),
+          math.min(rect.height, constraints.maxHeight),
+        );
+        // Round the current rectangle to make this API testable and add some
+        // padding so that the accessibility rects do not overlap with the text.
+        currentRect = Rect.fromLTRB(
+          rect.left.floorToDouble() - 4.0,
+          rect.top.floorToDouble() - 4.0,
+          rect.right.ceilToDouble() + 4.0,
+          rect.bottom.ceilToDouble() + 4.0,
+        );
+        final SemanticsConfiguration configuration = SemanticsConfiguration()
+          ..sortKey = OrdinalSortKey(ordinal++)
+          ..textDirection = initialDirection
+          ..label = info.semanticsLabel ?? info.text;
+        final GestureRecognizer? recognizer = info.recognizer;
+        if (recognizer != null) {
+          if (recognizer is TapGestureRecognizer) {
+            if (recognizer.onTap != null) {
+              configuration.onTap = recognizer.onTap;
+              configuration.isLink = true;
+            }
+          } else if (recognizer is DoubleTapGestureRecognizer) {
+            if (recognizer.onDoubleTap != null) {
+              configuration.onTap = recognizer.onDoubleTap;
+              configuration.isLink = true;
+            }
+          } else if (recognizer is LongPressGestureRecognizer) {
+            if (recognizer.onLongPress != null) {
+              configuration.onLongPress = recognizer.onLongPress;
+            }
+          } else {
+            assert(false, '${recognizer.runtimeType} is not supported.');
+          }
+        }
+        final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
+            ? _cachedChildNodes!.removeFirst()
+            : SemanticsNode();
+        newChild
+          ..updateWith(config: configuration)
+          ..rect = currentRect;
+        newChildCache.addLast(newChild);
+        newChildren.add(newChild);
       }
-      final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
-          ? _cachedChildNodes!.removeFirst()
-          : SemanticsNode();
-      newChild
-        ..updateWith(config: configuration)
-        ..rect = currentRect;
-      newChildCache.addLast(newChild);
-      newChildren.add(newChild);
     }
     _cachedChildNodes = newChildCache;
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
@@ -2972,6 +3098,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       redepthChild(foregroundChild);
     if (backgroundChild != null)
       redepthChild(backgroundChild);
+    super.redepthChildren();
   }
 
   @override
@@ -2982,6 +3109,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       visitor(foregroundChild);
     if (backgroundChild != null)
       visitor(backgroundChild);
+    super.visitChildren(visitor);
   }
 
   bool get _isMultiline => maxLines != 1;
@@ -3123,7 +3251,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   double computeMaxIntrinsicWidth(double height) {
     _layoutText(maxWidth: double.infinity);
-    return _textPainter.maxIntrinsicWidth + cursorWidth;
+    return _textPainter.maxIntrinsicWidth + _caretMargin;
   }
 
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
@@ -3188,14 +3316,49 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    // Hit test text spans.
+    bool hitText = false;
     final Offset effectivePosition = position - _paintOffset;
     final TextPosition textPosition = _textPainter.getPositionForOffset(effectivePosition);
     final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
     if (span != null && span is HitTestTarget) {
       result.add(HitTestEntry(span as HitTestTarget));
-      return true;
+      hitText = true;
     }
-    return false;
+
+    // Hit test render object children
+    RenderBox? child = firstChild;
+    int childIndex = 0;
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
+      final TextParentData textParentData = child.parentData! as TextParentData;
+      final Matrix4 transform = Matrix4.translationValues(
+        textParentData.offset.dx,
+        textParentData.offset.dy,
+        0.0,
+      )..scale(
+        textParentData.scale,
+        textParentData.scale,
+        textParentData.scale,
+      );
+      final bool isHit = result.addWithPaintTransform(
+        transform: transform,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset? transformed) {
+          assert(() {
+            final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
+            return (transformed!.dx - manualPosition.dx).abs() < precisionErrorTolerance
+              && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
+          }());
+          return child!.hitTest(result, position: transformed!);
+        },
+      );
+      if (isHit) {
+        return true;
+      }
+      child = childAfter(child);
+      childIndex += 1;
+    }
+    return hitText;
   }
 
   late TapGestureRecognizer _tap;
@@ -3452,6 +3615,82 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return TextSelection(baseOffset: line.start, extentOffset: line.end);
   }
 
+  // Placeholder dimensions representing the sizes of child inline widgets.
+  //
+  // These need to be cached because the text painter's placeholder dimensions
+  // will be overwritten during intrinsic width/height calculations and must be
+  // restored to the original values before final layout and painting.
+  List<PlaceholderDimensions>? _placeholderDimensions;
+
+  // Layout the child inline widgets. We then pass the dimensions of the
+  // children to _textPainter so that appropriate placeholders can be inserted
+  // into the LibTxt layout. This does not do anything if no inline widgets were
+  // specified.
+  List<PlaceholderDimensions> _layoutChildren(BoxConstraints constraints, {bool dry = false}) {
+    if (childCount == 0) {
+      _textPainter.setPlaceholderDimensions(<PlaceholderDimensions>[]);
+      return <PlaceholderDimensions>[];
+    }
+    RenderBox? child = firstChild;
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
+    int childIndex = 0;
+    // Only constrain the width to the maximum width of the paragraph.
+    // Leave height unconstrained, which will overflow if expanded past.
+    BoxConstraints boxConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
+    // The content will be enlarged by textScaleFactor during painting phase.
+    // We reduce constraints by textScaleFactor, so that the content will fit
+    // into the box once it is enlarged.
+    boxConstraints = boxConstraints / textScaleFactor;
+    while (child != null) {
+      double? baselineOffset;
+      final Size childSize;
+      if (!dry) {
+        child.layout(
+          boxConstraints,
+          parentUsesSize: true,
+        );
+        childSize = child.size;
+        switch (_placeholderSpans[childIndex].alignment) {
+          case ui.PlaceholderAlignment.baseline:
+            baselineOffset = child.getDistanceToBaseline(
+              _placeholderSpans[childIndex].baseline!,
+            );
+            break;
+          default:
+            baselineOffset = null;
+            break;
+        }
+      } else {
+        assert(_placeholderSpans[childIndex].alignment != ui.PlaceholderAlignment.baseline);
+        childSize = child.getDryLayout(boxConstraints);
+      }
+      placeholderDimensions[childIndex] = PlaceholderDimensions(
+        size: childSize,
+        alignment: _placeholderSpans[childIndex].alignment,
+        baseline: _placeholderSpans[childIndex].baseline,
+        baselineOffset: baselineOffset,
+      );
+      child = childAfter(child);
+      childIndex += 1;
+    }
+    return placeholderDimensions;
+  }
+
+  void _setParentData() {
+    RenderBox? child = firstChild;
+    int childIndex = 0;
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
+      final TextParentData textParentData = child.parentData! as TextParentData;
+      textParentData.offset = Offset(
+        _textPainter.inlinePlaceholderBoxes![childIndex].left,
+        _textPainter.inlinePlaceholderBoxes![childIndex].top,
+      );
+      textParentData.scale = _textPainter.inlinePlaceholderScales![childIndex];
+      child = childAfter(child);
+      childIndex += 1;
+    }
+  }
+
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     assert(maxWidth != null && minWidth != null);
     if (_textLayoutLastMaxWidth == maxWidth && _textLayoutLastMinWidth == minWidth)
@@ -3512,8 +3751,34 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       );
   }
 
+  bool _canComputeDryLayout() {
+    // Dry layout cannot be calculated without a full layout for
+    // alignments that require the baseline (baseline, aboveBaseline,
+    // belowBaseline).
+    for (final PlaceholderSpan span in _placeholderSpans) {
+      switch (span.alignment) {
+        case ui.PlaceholderAlignment.baseline:
+        case ui.PlaceholderAlignment.aboveBaseline:
+        case ui.PlaceholderAlignment.belowBaseline:
+          return false;
+        case ui.PlaceholderAlignment.top:
+        case ui.PlaceholderAlignment.middle:
+        case ui.PlaceholderAlignment.bottom:
+          continue;
+      }
+    }
+    return true;
+  }
+
   @override
   Size computeDryLayout(BoxConstraints constraints) {
+    if (!_canComputeDryLayout()) {
+      assert(debugCannotComputeDryLayout(
+        reason: 'Dry layout not available for alignments that require baseline.',
+      ));
+      return Size.zero;
+    }
+    _textPainter.setPlaceholderDimensions(_layoutChildren(constraints, dry: true));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final double width = forceLine ? constraints.maxWidth : constraints
         .constrainWidth(_textPainter.size.width + _caretMargin);
@@ -3523,7 +3788,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
+    _placeholderDimensions = _layoutChildren(constraints);
+    _textPainter.setPlaceholderDimensions(_placeholderDimensions);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _setParentData();
     _computeCaretPrototype();
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
@@ -3658,6 +3926,31 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       context.paintChild(backgroundChild, offset);
 
     _textPainter.paint(context.canvas, effectiveOffset);
+
+    RenderBox? child = firstChild;
+    int childIndex = 0;
+    // childIndex might be out of index of placeholder boxes. This can happen
+    // if engine truncates children due to ellipsis. Sadly, we would not know
+    // it until we finish layout, and RenderObject is in immutable state at
+    // this point.
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
+      final TextParentData textParentData = child.parentData! as TextParentData;
+
+      final double scale = textParentData.scale!;
+      context.pushTransform(
+        needsCompositing,
+        effectiveOffset + textParentData.offset,
+        Matrix4.diagonal3Values(scale, scale, scale),
+        (PaintingContext context, Offset offset) {
+          context.paintChild(
+            child!,
+            offset,
+          );
+        },
+      );
+      child = childAfter(child);
+      childIndex += 1;
+    }
 
     if (foregroundChild != null)
       context.paintChild(foregroundChild, offset);

@@ -45,6 +45,10 @@ class TabBarTheme with Diagnosticable {
   final Color? labelColor;
 
   /// Default value for [TabBar.labelPadding].
+  ///
+  /// If there are few tabs with both icon and text and few
+  /// tabs with only icon or text, this padding is vertically
+  /// adjusted to provide uniform padding to all tabs.
   final EdgeInsetsGeometry? labelPadding;
 
   /// Default value for [TabBar.labelStyle].

@@ -224,7 +224,7 @@ class TextInputType {
 ///
 /// Despite the logical meaning of each action, choosing a particular
 /// [TextInputAction] does not necessarily cause any specific behavior to
-/// happen, other than changing the focus when approapriate. It is up to the
+/// happen, other than changing the focus when appropriate. It is up to the
 /// developer to ensure that the behavior that occurs when an action button is
 /// pressed is appropriate for the action button chosen.
 ///
@@ -1327,9 +1327,11 @@ class TextInput {
 
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
 
+    // The updateEditingStateWithTag request (autofill) can come up even to a
+    // text field that doesn't have a connection.
     if (method == 'TextInputClient.updateEditingStateWithTag') {
+      assert(_currentConnection!._client != null);
       final TextInputClient client = _currentConnection!._client;
-      assert(client != null);
       final AutofillScope? scope = client.currentAutofillScope;
       final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
       for (final String tag in editingValue.keys) {
@@ -1343,9 +1345,22 @@ class TextInput {
     }
 
     final int client = args[0] as int;
-    // The incoming message was for a different client.
-    if (client != _currentConnection!._id)
-      return;
+    if (client != _currentConnection!._id) {
+      // If the client IDs don't match, the incoming message was for a different
+      // client.
+      bool debugAllowAnyway = false;
+      assert(() {
+        // In debug builds we allow "-1" as a magical client ID that ignores
+        // this verification step so that tests can always get through, even
+        // when they are not mocking the engine side of text input.
+        if (client == -1)
+          debugAllowAnyway = true;
+        return true;
+      }());
+      if (!debugAllowAnyway)
+        return;
+    }
+
     switch (method) {
       case 'TextInputClient.updateEditingState':
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
@@ -1502,7 +1517,7 @@ class TextInput {
     assert(shouldSave != null);
     TextInput._instance._channel.invokeMethod<void>(
       'TextInput.finishAutofillContext',
-      shouldSave ,
+      shouldSave,
     );
   }
 }

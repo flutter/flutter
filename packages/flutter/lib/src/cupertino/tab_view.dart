@@ -133,9 +133,7 @@ class CupertinoTabView extends StatefulWidget {
   final String? restorationScopeId;
 
   @override
-  _CupertinoTabViewState createState() {
-    return _CupertinoTabViewState();
-  }
+  State<CupertinoTabView> createState() => _CupertinoTabViewState();
 }
 
 class _CupertinoTabViewState extends State<CupertinoTabView> {

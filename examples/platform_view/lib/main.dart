@@ -32,7 +32,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -75,10 +75,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     Padding(
                       padding: const EdgeInsets.all(18.0),
                       child: ElevatedButton(
+                        onPressed: _launchPlatformCount,
                         child: Platform.isIOS
                           ? const Text('Continue in iOS view')
                           : const Text('Continue in Android view'),
-                        onPressed: _launchPlatformCount,
                       ),
                     ),
                   ],

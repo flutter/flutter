@@ -406,10 +406,10 @@ class _TestAnimatedContainerWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedContainer(
-      child: child,
       duration: duration,
       onEnd: widget.callback,
       width: toggle ? 10 : 20,
+      child: child,
     );
   }
 }
@@ -418,11 +418,11 @@ class _TestAnimatedPaddingWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedPadding(
-      child: child,
       duration: duration,
       onEnd: widget.callback,
       padding:
       toggle ? const EdgeInsets.all(8.0) : const EdgeInsets.all(16.0),
+      child: child,
     );
   }
 }
@@ -431,10 +431,10 @@ class _TestAnimatedAlignWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedAlign(
-      child: child,
       duration: duration,
       onEnd: widget.callback,
       alignment: toggle ? Alignment.topLeft : Alignment.bottomRight,
+      child: child,
     );
   }
 }
@@ -443,10 +443,10 @@ class _TestAnimatedPositionedWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedPositioned(
-      child: child,
       duration: duration,
       onEnd: widget.callback,
       left: toggle ? 10 : 20,
+      child: child,
     );
   }
 }
@@ -455,10 +455,10 @@ class _TestAnimatedPositionedDirectionalWidgetState extends _TestAnimatedWidgetS
   @override
   Widget getAnimatedWidget() {
     return AnimatedPositionedDirectional(
-      child: child,
       duration: duration,
       onEnd: widget.callback,
       start: toggle ? 10 : 20,
+      child: child,
     );
   }
 }
@@ -467,10 +467,10 @@ class _TestAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedOpacity(
-      child: child,
       duration: duration,
       onEnd: widget.callback,
       opacity: toggle ? 1.0 : 0.0,
+      child: child,
     );
   }
 }
@@ -514,12 +514,12 @@ class _TestAnimatedDefaultTextStyleWidgetState extends _TestAnimatedWidgetState 
   @override
   Widget getAnimatedWidget() {
     return AnimatedDefaultTextStyle(
-      child: child,
       duration: duration,
       onEnd: widget.callback,
       style: toggle
         ? const TextStyle(fontStyle: FontStyle.italic)
         : const TextStyle(fontStyle: FontStyle.normal),
+      child: child,
     );
   }
 }
@@ -528,13 +528,13 @@ class _TestAnimatedPhysicalModelWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedPhysicalModel(
-      child: child,
       duration: duration,
       onEnd: widget.callback,
       color: toggle ? Colors.red : Colors.green,
       elevation: 0,
       shadowColor: Colors.blue,
       shape: BoxShape.rectangle,
+      child: child,
     );
   }
 }
@@ -543,15 +543,15 @@ class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return TweenAnimationBuilder<double>(
-      child: child,
       tween: Tween<double>(begin: 1, end: 2),
       duration: duration,
       onEnd: widget.callback,
+      child: child,
       builder: (BuildContext context, double? size, Widget? child) {
         return SizedBox(
-          child: child,
           width: size,
           height: size,
+          child: child,
         );
       },
     );
@@ -562,10 +562,10 @@ class _TestAnimatedThemeWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedTheme(
-      child: child,
       data: toggle ? ThemeData.dark() : ThemeData.light(),
       duration: duration,
       onEnd: widget.callback,
+      child: child,
     );
   }
 }

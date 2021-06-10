@@ -530,6 +530,7 @@ abstract class WidgetController {
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
     bool warnIfMissed = true,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
     return dragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'drag'),
@@ -538,6 +539,7 @@ abstract class WidgetController {
       buttons: buttons,
       touchSlopX: touchSlopX,
       touchSlopY: touchSlopY,
+      kind: kind,
     );
   }
 
@@ -559,10 +561,11 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
     assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons);
+      final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons, kind: kind);
       assert(gesture != null);
 
       final double xSign = offset.dx.sign;
@@ -954,8 +957,7 @@ abstract class WidgetController {
           'The hit test result at that offset is: $result\n'
           '${StackTrace.current}'
           'To silence this warning, pass "warnIfMissed: false" to "$callee()".\n'
-          'To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.\n'
-          ''
+          'To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.\n',
         );
       }
     }
@@ -1019,10 +1021,10 @@ abstract class WidgetController {
   ///
   ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
-    return simulateKeyDownEvent(key, platform: platform);
+    return simulateKeyDownEvent(key, character: character, platform: platform);
   }
 
   /// Simulates sending a physical key up event through the system channel.

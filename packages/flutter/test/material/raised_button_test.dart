@@ -121,9 +121,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: RaisedButton(
-              child: const Text('RaisedButton'),
               onPressed: () { },
               focusNode: focusNode,
+              child: const Text('RaisedButton'),
             ),
           ),
         ),
@@ -185,10 +185,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: RaisedButton(
-              child: const Text('RaisedButton'),
               onPressed: () {},
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
+              child: const Text('RaisedButton'),
             ),
           ),
         ),
@@ -312,10 +312,10 @@ void main() {
           body: Center(
             child: RaisedButton(
               onPressed: null,
-              child: const Text('RaisedButton'),
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
               disabledTextColor: unusedDisabledTextColor,
+              child: const Text('RaisedButton'),
             ),
           ),
         ),
@@ -340,9 +340,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RaisedButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }

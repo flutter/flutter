@@ -331,7 +331,7 @@ class SizeAnalyzer {
     }
     for (; i < localSegments.length; i += 1) {
       _logger.printStatus(
-        localSegments[i] + '/',
+        '${localSegments[i]}/',
         indent: (level + i) * 2,
         emphasis: true,
       );

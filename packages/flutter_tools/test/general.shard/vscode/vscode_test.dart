@@ -41,6 +41,19 @@ void main() {
     expect(vsCode.version, Version.unknown);
   });
 
+  testWithoutContext('can locate VS Code installed via Snap', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String home = '/home/me';
+    final Platform platform = FakePlatform(operatingSystem: 'linux', environment: <String, String>{'HOME': home});
+
+    fileSystem.directory(fileSystem.path.join('/snap/code/current/', '.vscode')).createSync(recursive: true);
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+
+    final List<VsCode> installed = VsCode.allInstalled(fileSystem, platform, processManager);
+    expect(installed.length, 1);
+  });
+
   testWithoutContext('can locate installations on macOS', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     const String home = '/home/me';

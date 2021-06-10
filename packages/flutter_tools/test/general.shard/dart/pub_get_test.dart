@@ -22,6 +22,31 @@ void main() {
     Cache.flutterRoot = '';
   });
 
+  testWithoutContext('Throws a tool exit if pub cannot be run', () async {
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/pub');
+
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      usage: TestUsage(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+
+    await expectLater(() => pub.get(
+      context: PubContext.pubGet,
+      checkUpToDate: true,
+    ), throwsToolExit(message: 'Your Flutter SDK download may be corrupt or missing permissions to run'));
+  });
+
   testWithoutContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
     'and the current framework version is the same as the last version', () async {
     final FakeProcessManager processManager = FakeProcessManager.empty();
@@ -406,12 +431,10 @@ void main() {
       botDetector: const BotDetectorAlwaysNo(),
       processManager: processManager,
     );
-    try {
-      await pub.get(context: PubContext.flutterTests);
-      throw AssertionError('pubGet did not fail');
-    } on ToolExit catch (error) {
-      expect(error.message, 'pub get failed (66; err3)');
-    }
+    await expectLater(
+      () => pub.get(context: PubContext.flutterTests),
+      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', 'pub get failed (66; err3)')),
+    );
     expect(logger.statusText,
       'Running "flutter pub get" in /...\n'
       'out1\n'

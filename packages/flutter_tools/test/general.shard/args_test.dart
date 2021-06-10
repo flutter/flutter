@@ -49,7 +49,7 @@ final RegExp _bannedQuotePatterns = RegExp(r" '|' |'\.|\('|'\)|`");
 final RegExp _bannedArgumentReferencePatterns = RegExp(r'[^"=]--[^ ]');
 final RegExp _questionablePatterns = RegExp(r'[a-z]\.[A-Z]');
 final RegExp _bannedUri = RegExp(r'\b[Uu][Rr][Ii]\b');
-const String _needHelp = 'Every option must have help explaining what it does, even if it\'s '
+const String _needHelp = "Every option must have help explaining what it does, even if it's "
                          'for testing purposes, because this is the bare minimum of '
                          'documentation we can add just for ourselves. If it is not intended '
                          'for developers, then use "hide: !verboseHelp" to only show the '

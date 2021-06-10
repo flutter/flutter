@@ -32,7 +32,7 @@ enum CacheExtentStyle {
 abstract class RenderAbstractViewport extends RenderObject {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  factory RenderAbstractViewport._() => throw Error();
+  RenderAbstractViewport._();
 
   /// Returns the [RenderAbstractViewport] that most tightly encloses the given
   /// render object.

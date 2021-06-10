@@ -65,7 +65,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   const AnimatedListSample({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _AnimatedListSampleState createState() => _AnimatedListSampleState();
+///   State<AnimatedListSample> createState() => _AnimatedListSampleState();
 /// }
 ///
 /// class _AnimatedListSampleState extends State<AnimatedListSample> {
@@ -235,8 +235,9 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     TextStyle textStyle = Theme.of(context).textTheme.headline4!;
-///     if (selected)
+///     if (selected) {
 ///       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
+///     }
 ///     return Padding(
 ///       padding: const EdgeInsets.all(2.0),
 ///       child: SizeTransition(
@@ -392,6 +393,8 @@ class AnimatedList extends StatefulWidget {
   /// If no [AnimatedList] surrounds the context given, then this function will
   /// assert in debug mode and throw an exception in release mode.
   ///
+  /// This method can be expensive (it walks the element tree).
+  ///
   /// See also:
   ///
   ///  * [maybeOf], a similar function that will return null if no
@@ -428,6 +431,8 @@ class AnimatedList extends StatefulWidget {
   ///
   /// If no [AnimatedList] surrounds the context given, then this function will
   /// return null.
+  ///
+  /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///
@@ -541,7 +546,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///   const SliverAnimatedListSample({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _SliverAnimatedListSampleState createState() => _SliverAnimatedListSampleState();
+///   State<SliverAnimatedListSample>  createState() => _SliverAnimatedListSampleState();
 /// }
 ///
 /// class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
@@ -808,6 +813,8 @@ class SliverAnimatedList extends StatefulWidget {
   /// If no [SliverAnimatedList] surrounds the context given, then this function
   /// will assert in debug mode and throw an exception in release mode.
   ///
+  /// This method can be expensive (it walks the element tree).
+  ///
   /// See also:
   ///
   ///  * [maybeOf], a similar function that will return null if no
@@ -842,6 +849,8 @@ class SliverAnimatedList extends StatefulWidget {
   ///
   /// If no [SliverAnimatedList] surrounds the context given, then this function
   /// will return null.
+  ///
+  /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///

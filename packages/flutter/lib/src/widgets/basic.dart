@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -67,6 +68,8 @@ export 'package:flutter/rendering.dart' show
   ValueGetter,
   WrapAlignment,
   WrapCrossAlignment;
+export 'package:flutter/services.dart' show
+  AssetBundle;
 
 // Examples can assume:
 // class TestWidget extends StatelessWidget { const TestWidget({Key? key}) : super(key: key); @override Widget build(BuildContext context) => const Placeholder(); }
@@ -1178,6 +1181,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : assert(transform != null),
        super(key: key, child: child);
@@ -1215,6 +1219,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment = Alignment.center,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.rotationZ(angle),
        super(key: key, child: child);
@@ -1242,6 +1247,7 @@ class Transform extends SingleChildRenderObjectWidget {
     Key? key,
     required Offset offset,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.translationValues(offset.dx, offset.dy, 0.0),
        origin = null,
@@ -1283,6 +1289,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment = Alignment.center,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.diagonal3Values(scale, scale, 1.0),
        super(key: key, child: child);
@@ -1314,6 +1321,15 @@ class Transform extends SingleChildRenderObjectWidget {
   /// Whether to apply the transformation when performing hit tests.
   final bool transformHitTests;
 
+  /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@template flutter.widgets.Transform.optional.FilterQuality}
+  /// The transform will be applied by re-rendering the child if [filterQuality] is null,
+  /// otherwise it controls the quality of an [ImageFilter.matrix] applied to a bitmap
+  /// rendering of the child.
+  /// {@endtemplate}
+  final FilterQuality? filterQuality;
+
   @override
   RenderTransform createRenderObject(BuildContext context) {
     return RenderTransform(
@@ -1322,6 +1338,7 @@ class Transform extends SingleChildRenderObjectWidget {
       alignment: alignment,
       textDirection: Directionality.maybeOf(context),
       transformHitTests: transformHitTests,
+      filterQuality: filterQuality,
     );
   }
 
@@ -1332,7 +1349,8 @@ class Transform extends SingleChildRenderObjectWidget {
       ..origin = origin
       ..alignment = alignment
       ..textDirection = Directionality.maybeOf(context)
-      ..transformHitTests = transformHitTests;
+      ..transformHitTests = transformHitTests
+      ..filterQuality = filterQuality;
   }
 }
 
@@ -1659,6 +1677,8 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// Unlike [Transform], which applies a transform just prior to painting,
 /// this object applies its rotation prior to layout, which means the entire
 /// rotated box consumes only as much space as required by the rotated child.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=BFE6_UglLfQ}
 ///
 /// {@tool snippet}
 ///
@@ -2230,6 +2250,12 @@ class SizedBox extends SingleChildRenderObjectWidget {
       height = size?.height,
       super(key: key, child: child);
 
+  /// Creates a box whose [width] and [height] are equal.
+  const SizedBox.square({Key? key, Widget? child, double? dimension})
+    : width = dimension,
+      height = dimension,
+      super(key: key, child: child);
+
   /// If non-null, requires the child to have exactly this width.
   final double? width;
 
@@ -2653,11 +2679,11 @@ class UnconstrainedBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstraintsTransformBox(
-      child: child,
       textDirection: textDirection,
       alignment: alignment,
       clipBehavior: clipBehavior,
       constraintsTransform: _axisToTransform(constrainedAxis),
+      child: child,
     );
   }
 
@@ -2675,6 +2701,33 @@ class UnconstrainedBox extends StatelessWidget {
 /// [RenderFractionallySizedOverflowBox].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=PEsY654EGZ0}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows a [FractionallySizedBox] whose one child is 50% of
+/// the box's size per the width and height factor parameters, and centered
+/// within that box by the alignment parameter.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return SizedBox.expand(
+///     child: FractionallySizedBox(
+///       widthFactor: 0.5,
+///       heightFactor: 0.5,
+///       alignment: FractionalOffset.center,
+///       child: DecoratedBox(
+///         decoration: BoxDecoration(
+///           border: Border.all(
+///             color: Colors.blue,
+///             width: 4,
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -3118,7 +3171,7 @@ class Offstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  _OffstageElement createElement() => _OffstageElement(this);
+  SingleChildRenderObjectElement createElement() => _OffstageElement(this);
 }
 
 class _OffstageElement extends SingleChildRenderObjectElement {
@@ -3825,9 +3878,9 @@ class Stack extends MultiChildRenderObjectWidget {
     if (alignment is AlignmentDirectional && textDirection == null) {
       assert(debugCheckHasDirectionality(
         context,
-        why: 'to resolve the \'alignment\' argument',
-        hint: alignment == AlignmentDirectional.topStart ? 'The default value for \'alignment\' is AlignmentDirectional.topStart, which requires a text direction.' : null,
-        alternative: 'Instead of providing a Directionality widget, another solution would be passing a non-directional \'alignment\', or an explicit \'textDirection\', to the $runtimeType.',
+        why: "to resolve the 'alignment' argument",
+        hint: alignment == AlignmentDirectional.topStart ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction." : null,
+        alternative: "Instead of providing a Directionality widget, another solution would be passing a non-directional 'alignment', or an explicit 'textDirection', to the $runtimeType.",
       ));
     }
     return true;
@@ -5494,7 +5547,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///   const FlowMenu({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _FlowMenuState createState() => _FlowMenuState();
+///   State<FlowMenu> createState() => _FlowMenuState();
 /// }
 ///
 /// class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin {
@@ -5873,6 +5926,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.height,
     this.scale = 1.0,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -5918,6 +5972,13 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color? color;
+
+  /// If non-null, the value from the [Animation] is multiplied with the opacity
+  /// of each image pixel before painting onto the canvas.
+  ///
+  /// This is more efficient than using [FadeTransition] to change the opacity
+  /// of an image.
+  final Animation<double>? opacity;
 
   /// Used to set the filterQuality of the image
   /// Use the "low" quality setting to scale the image, which corresponds to
@@ -6028,6 +6089,7 @@ class RawImage extends LeafRenderObjectWidget {
       height: height,
       scale: scale,
       color: color,
+      opacity: opacity,
       colorBlendMode: colorBlendMode,
       fit: fit,
       alignment: alignment,
@@ -6080,6 +6142,7 @@ class RawImage extends LeafRenderObjectWidget {
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DoubleProperty('scale', scale, defaultValue: 1.0));
     properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Animation<double>?>('opacity', opacity, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
@@ -6107,8 +6170,9 @@ class RawImage extends LeafRenderObjectWidget {
 /// class TestAssetBundle extends CachingAssetBundle {
 ///   @override
 ///   Future<ByteData> load(String key) async {
-///     if (key == 'resources/test')
+///     if (key == 'resources/test') {
 ///       return ByteData.view(Uint8List.fromList(utf8.encode('Hello World!')).buffer);
+///     }
 ///     return ByteData(0);
 ///   }
 /// }
@@ -6138,7 +6202,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// See also:
 ///
 ///  * [AssetBundle], the interface for asset bundles.
-///  * [rootBundle], the default default asset bundle.
+///  * [rootBundle], the default asset bundle.
 class DefaultAssetBundle extends InheritedWidget {
   /// Creates a widget that determines the default asset bundle for its descendants.
   ///
@@ -6179,6 +6243,11 @@ class DefaultAssetBundle extends InheritedWidget {
 /// A given render object can be placed at most once in the widget tree. This
 /// widget enforces that restriction by keying itself using a [GlobalObjectKey]
 /// for the given render object.
+///
+/// This widget will call [RenderObject.dispose] on the [renderBox] when it is
+/// unmounted. After that point, the [renderBox] will be unusable. If any
+/// children have been added to the [renderBox], they must be disposed in the
+/// [onUnmount] callback.
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// Creates an adapter for placing a specific [RenderBox] in the widget tree.
   ///
@@ -6186,6 +6255,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   WidgetToRenderBoxAdapter({
     required this.renderBox,
     this.onBuild,
+    this.onUnmount,
   }) : assert(renderBox != null),
        // WidgetToRenderBoxAdapter objects are keyed to their render box. This
        // prevents the widget being used in the widget hierarchy in two different
@@ -6194,6 +6264,9 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
        super(key: GlobalObjectKey(renderBox));
 
   /// The render box to place in the widget tree.
+  ///
+  /// This widget takes ownership of the render object. When it is unmounted,
+  /// it also calls [RenderObject.dispose].
   final RenderBox renderBox;
 
   /// Called when it is safe to update the render box and its descendants. If
@@ -6202,12 +6275,37 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// tree will be dirty.
   final VoidCallback? onBuild;
 
+  /// Called when it is safe to dispose of children that were manually added to
+  /// the [renderBox].
+  ///
+  /// Do not dispose the [renderBox] itself, as it will be disposed by the
+  /// framework automatically. However, during that process the framework will
+  /// check that all children of the [renderBox] have also been disposed.
+  /// Typically, child [RenderObject]s are disposed by corresponding [Element]s
+  /// when they are unmounted. However, child render objects that were manually
+  /// added do not have corresponding [Element]s to manage their lifecycle, and
+  /// need to be manually disposed here.
+  ///
+  /// See also:
+  ///
+  ///   * [RenderObjectElement.unmount], which invokes this callback before
+  ///     disposing of its render object.
+  ///   * [RenderObject.dispose], which instructs a render object to release
+  ///     any resources it may be holding.
+  final VoidCallback? onUnmount;
+
   @override
   RenderBox createRenderObject(BuildContext context) => renderBox;
 
   @override
   void updateRenderObject(BuildContext context, RenderBox renderObject) {
     onBuild?.call();
+  }
+
+  @override
+  void didUnmountRenderObject(RenderObject renderObject) {
+    assert(renderObject == renderBox);
+    onUnmount?.call();
   }
 }
 
@@ -6619,7 +6717,7 @@ class MouseRegion extends StatefulWidget {
   ///   final VoidCallback onExitButton;
   ///
   ///   @override
-  ///   _MyTimedButton createState() => _MyTimedButton();
+  ///   State<MyTimedButton> createState() => _MyTimedButton();
   /// }
   ///
   /// class _MyTimedButton extends State<MyTimedButton> {
@@ -6737,7 +6835,7 @@ class MouseRegion extends StatefulWidget {
   final Widget? child;
 
   @override
-  _MouseRegionState createState() => _MouseRegionState();
+  State<MouseRegion> createState() => _MouseRegionState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -7896,7 +7994,7 @@ class StatefulBuilder extends StatefulWidget {
   final StatefulWidgetBuilder builder;
 
   @override
-  _StatefulBuilderState createState() => _StatefulBuilderState();
+  State<StatefulBuilder> createState() => _StatefulBuilderState();
 }
 
 class _StatefulBuilderState extends State<StatefulBuilder> {
@@ -7918,13 +8016,13 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   final Color color;
 
   @override
-  _RenderColoredBox createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(BuildContext context) {
     return _RenderColoredBox(color: color);
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderColoredBox renderObject) {
-    renderObject.color = color;
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _RenderColoredBox).color = color;
   }
 
   @override
