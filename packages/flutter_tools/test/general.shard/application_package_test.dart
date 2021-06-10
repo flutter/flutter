@@ -353,24 +353,6 @@ void main() {
       expect(iosApp.bundleName, 'bundle.app');
     }, overrides: overrides);
 
-    testUsingContext('has expected properties with no product identifier', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
-      final Directory project = globals.fs.directory('ios/Runner.xcodeproj')..createSync(recursive: true);
-      project.childFile('project.pbxproj').createSync();
-      final BuildableIOSApp iosApp = BuildableIOSApp(
-          FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null, null);
-
-      expect(iosApp.id, 'com.example.Runner');
-      expect(iosApp.name, null);
-      expect(iosApp.simulatorBundlePath, 'build/ios/iphonesimulator');
-      expect(iosApp.deviceBundlePath, 'build/ios/iphoneos');
-      expect(iosApp.appDeltaDirectory.path, globals.fs.path.join('build', 'ios', 'app-delta'));
-      expect(iosApp.archiveBundlePath, 'build/ios/archive/Runner');
-      expect(iosApp.archiveBundleOutputPath, 'build/ios/archive/Runner.xcarchive');
-      expect(iosApp.ipaOutputPath, 'build/ios/ipa');
-    }, overrides: overrides);
-
     testUsingContext('returns null when there is no ios or .ios directory', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
@@ -396,6 +378,17 @@ void main() {
       globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
+
+      expect(iosApp, null);
+    }, overrides: overrides);
+
+    testUsingContext('returns null when there with no product identifier', () async {
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
+      final Directory project = globals.fs.directory('ios/Runner.xcodeproj')..createSync(recursive: true);
+      project.childFile('project.pbxproj').createSync();
+      final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
+          FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
 
       expect(iosApp, null);
     }, overrides: overrides);

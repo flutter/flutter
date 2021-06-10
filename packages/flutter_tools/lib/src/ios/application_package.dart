@@ -105,14 +105,17 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project, String? projectBundleId, String? hostAppBundleName)
+  BuildableIOSApp(this.project, String projectBundleId, String? hostAppBundleName)
     : _hostAppBundleName = hostAppBundleName,
-      super(projectBundleId: projectBundleId ?? 'com.example.Runner');
+      super(projectBundleId: projectBundleId);
 
-  static Future<BuildableIOSApp> fromProject(IosProject project, BuildInfo buildInfo) async {
+  static Future<BuildableIOSApp?> fromProject(IosProject project, BuildInfo buildInfo) async {
     final String? hostAppBundleName = await project.hostAppBundleName(buildInfo);
     final String? projectBundleId = await project.productBundleIdentifier(buildInfo);
-    return BuildableIOSApp(project, projectBundleId, hostAppBundleName);
+    if (projectBundleId != null) {
+      return BuildableIOSApp(project, projectBundleId, hostAppBundleName);
+    }
+    return null;
   }
 
   final IosProject project;
