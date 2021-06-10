@@ -49,5 +49,39 @@ void testMain() {
 
       expect(document.title, 'Different title');
     });
+
+    test('supports null title and primaryColor', () {
+      // Run the unit test without emulating Flutter tester environment.
+      ui.debugEmulateFlutterTesterEnvironment = false;
+
+      // TODO(yjbanov): https://github.com/flutter/flutter/issues/39159
+      document.title = 'Something Else';
+      expect(document.title, 'Something Else');
+
+      ui.window.sendPlatformMessage(
+          'flutter/platform',
+          codec.encodeMethodCall(const MethodCall(
+              'SystemChrome.setApplicationSwitcherDescription',
+              <String, dynamic>{
+                'label': null,
+                'primaryColor': null,
+              })),
+          null);
+
+      expect(document.title, '');
+
+      document.title = 'Something Else';
+      expect(document.title, 'Something Else');
+
+      ui.window.sendPlatformMessage(
+          'flutter/platform',
+          codec.encodeMethodCall(const MethodCall(
+              'SystemChrome.setApplicationSwitcherDescription',
+              <String, dynamic>{
+              })),
+          null);
+
+      expect(document.title, '');
+    });
   });
 }
