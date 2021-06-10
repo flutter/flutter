@@ -462,7 +462,8 @@ void main() {
 }
 
 class TestDeviceManager extends DeviceManager {
-    TestDeviceManager(List<Device> allDevices, {
+  TestDeviceManager(
+    List<Device> allDevices, {
     List<DeviceDiscovery> deviceDiscoveryOverrides,
     @required Logger logger,
     @required Terminal terminal,

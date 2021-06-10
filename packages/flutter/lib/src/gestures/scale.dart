@@ -60,11 +60,11 @@ class ScaleStartDetails {
   ///    coordinates.
   final Offset localFocalPoint;
 
- /// The number of pointers being tracked by the gesture recognizer.
- ///
- /// Typically this is the number of fingers being used to pan the widget using the gesture
- /// recognizer.
- final int pointerCount;
+  /// The number of pointers being tracked by the gesture recognizer.
+  ///
+  /// Typically this is the number of fingers being used to pan the widget using the gesture
+  /// recognizer.
+  final int pointerCount;
 
   @override
   String toString() => 'ScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, pointersCount: $pointerCount)';
