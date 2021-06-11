@@ -53,6 +53,8 @@ def main():
 
   fidlc_command = [
     args.fidlc_bin,
+    '--experimental',
+    'old_syntax_only',
     '--tables',
     args.output_c_tables,
     '--json',
