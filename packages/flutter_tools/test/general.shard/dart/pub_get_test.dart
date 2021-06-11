@@ -26,6 +26,31 @@ void main() {
     Cache.flutterRoot = '';
   });
 
+  testWithoutContext('Throws a tool exit if pub cannot be run', () async {
+    final FakeProcessManager processManager = FakeProcessManager.any();
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/pub');
+
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      usage: TestUsage(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+
+    await expectLater(() => pub.get(
+      context: PubContext.pubGet,
+      checkUpToDate: true,
+    ), throwsToolExit(message: 'Your Flutter SDK download may be corrupt or missing permissions to run'));
+  });
+
   testWithoutContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
     'and the current framework version is the same as the last version', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
@@ -715,6 +740,9 @@ class MockProcessManager implements ProcessManager {
       stderr: stderr,
     ));
   }
+
+  @override
+  bool canRun(dynamic executable, {String workingDirectory}) => true;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
