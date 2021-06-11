@@ -894,7 +894,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: Container(
+          child: SizedBox(
             width: 200,
             height: 75,
             child: Stepper(
@@ -923,7 +923,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: Container(
+          child: SizedBox(
             width: 200,
             height: 75,
             child: Stepper(
