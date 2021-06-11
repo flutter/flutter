@@ -150,7 +150,7 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// A list of points that the widget should snap to. [minChildSize] and
   /// [maxChildSize] are implicitly snapped to and should not be specified here-
   /// pass an empty list to snap the widget between min and max.
-  final Set<double>? snapPoints;
+  final List<double>? snapPoints;
 
   /// The builder that creates a child to display in this widget, which will
   /// use the provided [ScrollController] to enable dragging and scrolling
