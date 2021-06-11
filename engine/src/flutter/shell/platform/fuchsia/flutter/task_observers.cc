@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/fml/platform/fuchsia/task_observers.h"
+#include "task_observers.h"
 
 #include <map>
 
-namespace fml {
+namespace flutter_runner {
 
 thread_local std::map<intptr_t, fit::closure> tTaskObservers;
 
@@ -27,4 +27,4 @@ void CurrentMessageLoopRemoveAfterTaskObserver(intptr_t key) {
   tTaskObservers.erase(key);
 }
 
-}  // namespace fml
+}  // namespace flutter_runner
