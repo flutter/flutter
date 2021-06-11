@@ -285,9 +285,10 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             textStyle: route.style,
             child: ScrollConfiguration(
               // Dropdown menus should never overscroll or display an overscroll indicator.
-              // The default scrollbar platforms will apply.
+              // Scrollbars are built-in below.
               // Platform must use Theme and ScrollPhysics must be Clamping.
               behavior: ScrollConfiguration.of(context).copyWith(
+                scrollbars: false,
                 overscroll: false,
                 physics: const ClampingScrollPhysics(),
                 platform: Theme.of(context).platform,
@@ -1621,7 +1622,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
              child: Builder(builder: (BuildContext context) {
                return InputDecorator(
                  decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-                 isEmpty: state.value == null,
+                 isEmpty: items == null || items.where((DropdownMenuItem<T> item) => item.value == state.value).isEmpty,
                  isFocused: Focus.of(context).hasFocus,
                  child: DropdownButtonHideUnderline(
                    child: DropdownButton<T>(

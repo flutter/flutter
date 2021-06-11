@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import 'arc.dart';
 import 'colors.dart';
@@ -16,6 +17,7 @@ import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'scrollbar.dart';
 import 'theme.dart';
+import 'tooltip.dart';
 
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
 /// developers to be intentional about their [DefaultTextStyle].
@@ -896,7 +898,15 @@ class _MaterialAppState extends State<MaterialApp> {
   @override
   Widget build(BuildContext context) {
     Widget result = _buildWidgetApp(context);
-
+    result = Focus(
+      canRequestFocus: false,
+      onKey: (FocusNode node, RawKeyEvent event) {
+        if (event is! RawKeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape)
+          return KeyEventResult.ignored;
+        return Tooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
+      },
+      child: result,
+    );
     assert(() {
       if (widget.debugShowMaterialGrid) {
         result = GridPaper(

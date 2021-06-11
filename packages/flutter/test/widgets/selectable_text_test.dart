@@ -1303,24 +1303,27 @@ void main() {
   });
 
   testWidgets('minLines cannot be greater than maxLines', (WidgetTester tester) async {
-    try {
-      await tester.pumpWidget(
-        overlay(
-          child: SizedBox(
-            width: 300.0,
-            child: SelectableText(
-              'abcd',
-              minLines: 4,
-              maxLines: 3,
+    expect(
+      () async {
+        await tester.pumpWidget(
+          overlay(
+            child: SizedBox(
+              width: 300.0,
+              child: SelectableText(
+                'abcd',
+                minLines: 4,
+                maxLines: 3,
+              ),
             ),
           ),
-        ),
-      );
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains("minLines can't be greater than maxLines"));
-      return;
-    }
-    fail('An assert should be triggered when minLines is greater than maxLines');
+        );
+      },
+      throwsA(isA<AssertionError>().having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains("minLines can't be greater than maxLines"),
+      )),
+    );
   });
 
   testWidgets('Selectable height with minLine', (WidgetTester tester) async {

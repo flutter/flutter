@@ -222,13 +222,7 @@ class _PosixUtils extends OperatingSystemUtils {
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    try {
-      _processUtils.runSync(
-        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
-        throwOnError: true,
-        verboseExceptions: true,
-      );
-    } on ArgumentError {
+    if (!_processManager.canRun('unzip')) {
       // unzip is not available. this error message is modeled after the download
       // error in bin/internal/update_dart_sdk.sh
       String message = 'Please install unzip.';
@@ -241,6 +235,11 @@ class _PosixUtils extends OperatingSystemUtils {
         'Missing "unzip" tool. Unable to extract ${file.path}.\n$message'
       );
     }
+    _processUtils.runSync(
+      <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+      throwOnError: true,
+      verboseExceptions: true,
+    );
   }
 
   // tar -xzf tarball -C dest
@@ -454,11 +453,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   List<File> _which(String execName, { bool all = false }) {
-    // `where` always returns all matches, not just the first one.
-    ProcessResult result;
-    try {
-      result = _processManager.runSync(<String>['where', execName]);
-    } on ArgumentError {
+    if (!_processManager.canRun('where')) {
       // `where` could be missing if system32 is not on the PATH.
       throwToolExit(
         'Cannot find the executable for `where`. This can happen if the System32 '
@@ -467,6 +462,8 @@ class _WindowsUtils extends OperatingSystemUtils {
         'the terminal and/or IDE.'
       );
     }
+    // `where` always returns all matches, not just the first one.
+    final ProcessResult result = _processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0) {
       return const <File>[];
     }

@@ -169,10 +169,27 @@ abstract class BindingBase {
       return true;
     }());
 
-    if (!kReleaseMode && !kIsWeb) {
-      registerSignalServiceExtension(
-        name: 'exit',
-        callback: _exitApplication,
+    if (!kReleaseMode) {
+      if (!kIsWeb) {
+        registerSignalServiceExtension(
+          name: 'exit',
+          callback: _exitApplication,
+        );
+      }
+      // These service extensions are used in profile mode applications.
+      registerStringServiceExtension(
+        name: 'connectedVmServiceUri',
+        getter: () async => connectedVmServiceUri ?? '',
+        setter: (String uri) async {
+          connectedVmServiceUri = uri;
+        },
+      );
+      registerStringServiceExtension(
+        name: 'activeDevToolsServerAddress',
+        getter: () async => activeDevToolsServerAddress ?? '',
+        setter: (String serverAddress) async {
+          activeDevToolsServerAddress = serverAddress;
+        },
       );
     }
 
@@ -245,23 +262,6 @@ abstract class BindingBase {
           };
         },
       );
-
-      registerStringServiceExtension(
-        name: 'connectedVmServiceUri',
-        getter: () async => connectedVmServiceUri ?? '',
-        setter: (String uri) async {
-          connectedVmServiceUri = uri;
-        },
-      );
-
-      registerStringServiceExtension(
-        name: 'activeDevToolsServerAddress',
-        getter: () async => activeDevToolsServerAddress ?? '',
-        setter: (String serverAddress) async {
-          activeDevToolsServerAddress = serverAddress;
-        },
-      );
-
       return true;
     }());
     assert(() {

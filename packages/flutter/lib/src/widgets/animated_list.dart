@@ -235,8 +235,9 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     TextStyle textStyle = Theme.of(context).textTheme.headline4!;
-///     if (selected)
+///     if (selected) {
 ///       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
+///     }
 ///     return Padding(
 ///       padding: const EdgeInsets.all(2.0),
 ///       child: SizeTransition(
