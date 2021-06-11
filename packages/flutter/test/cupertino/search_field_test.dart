@@ -111,7 +111,6 @@ void main() {
       );
     },
   );
-  
   testWidgets(
     'can change keyboard type',
     (WidgetTester tester) async {
@@ -124,13 +123,11 @@ void main() {
           ),
         ),
       );
-      
        expect(tester.testTextInput.setClientArgs['inputType']['name'],
         equals('TextInputType.number'));
       );
     },
   );
-  
   testWidgets(
     'can control text content via controller',
     (WidgetTester tester) async {
