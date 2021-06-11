@@ -4,12 +4,11 @@
 
 import 'dart:convert' show JsonEncoder;
 
-import 'package:flutter_driver/flutter_driver.dart';
 import 'package:file/file.dart';
+import 'package:flutter_driver/flutter_driver.dart';
+import 'package:macrobenchmarks/common.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
-import 'package:macrobenchmarks/common.dart';
 
 import 'util.dart';
 

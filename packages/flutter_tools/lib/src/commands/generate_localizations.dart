@@ -7,7 +7,7 @@
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../localizations/gen_l10n.dart';
 import '../localizations/gen_l10n_types.dart';
 import '../localizations/localizations_utils.dart';
@@ -128,11 +128,11 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       'gen-inputs-and-outputs-list',
       valueHelp: 'path-to-output-directory',
       help: 'When specified, the tool generates a JSON file containing the '
-            'tool\'s inputs and outputs named gen_l10n_inputs_and_outputs.json.\n'
+            "tool's inputs and outputs named gen_l10n_inputs_and_outputs.json.\n"
             '\n'
             'This can be useful for keeping track of which files of the Flutter '
             'project were used when generating the latest set of localizations. '
-            'For example, the Flutter tool\'s build system uses this file to '
+            "For example, the Flutter tool's build system uses this file to "
             'keep track of when to call gen_l10n during hot reload.\n'
             '\n'
             'The value of this option is the directory where the JSON file will be '
@@ -172,6 +172,17 @@ class GenerateLocalizationsCommand extends FlutterCommand {
             '\n'
             'Resource attributes are still required for plural messages.'
     );
+    argParser.addFlag(
+      'nullable-getter',
+      help: 'Whether or not the localizations class getter is nullable.\n'
+            '\n'
+            'By default, this value is set to true so that '
+            'Localizations.of(context) returns a nullable value '
+            'for backwards compatibility. If this value is set to true, then '
+            'a null check is performed on the returned value of '
+            'Localizations.of(context), removing the need for null checking in '
+            'user code.'
+    );
   }
 
   final FileSystem _fileSystem;
@@ -201,7 +212,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         options: options,
         projectDir: _fileSystem.currentDirectory,
         dependenciesDir: null,
-        localizationsGenerator: LocalizationsGenerator(_fileSystem),
+        fileSystem: _fileSystem,
       );
       return FlutterCommandResult.success();
     }
@@ -220,29 +231,29 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     final bool useSyntheticPackage = boolArg('synthetic-package');
     final String projectPathString = stringArg('project-dir');
     final bool areResourceAttributesRequired = boolArg('required-resource-attributes');
-
-    final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(_fileSystem);
+    final bool usesNullableGetter = boolArg('nullable-getter');
 
     precacheLanguageAndRegionTags();
 
     try {
-      localizationsGenerator
-        ..initialize(
-          inputPathString: inputPathString,
-          outputPathString: outputPathString,
-          templateArbFileName: templateArbFileName,
-          outputFileString: outputFileString,
-          classNameString: classNameString,
-          preferredSupportedLocales: preferredSupportedLocales,
-          headerString: headerString,
-          headerFile: headerFile,
-          useDeferredLoading: useDeferredLoading,
-          inputsAndOutputsListPath: inputsAndOutputsListPath,
-          useSyntheticPackage: useSyntheticPackage,
-          projectPathString: projectPathString,
-          areResourceAttributesRequired: areResourceAttributesRequired,
-          untranslatedMessagesFile: untranslatedMessagesFile,
-        )
+      LocalizationsGenerator(
+        fileSystem: _fileSystem,
+        inputPathString: inputPathString,
+        outputPathString: outputPathString,
+        templateArbFileName: templateArbFileName,
+        outputFileString: outputFileString,
+        classNameString: classNameString,
+        preferredSupportedLocales: preferredSupportedLocales,
+        headerString: headerString,
+        headerFile: headerFile,
+        useDeferredLoading: useDeferredLoading,
+        inputsAndOutputsListPath: inputsAndOutputsListPath,
+        useSyntheticPackage: useSyntheticPackage,
+        projectPathString: projectPathString,
+        areResourceAttributesRequired: areResourceAttributesRequired,
+        untranslatedMessagesFile: untranslatedMessagesFile,
+        usesNullableGetter: usesNullableGetter,
+      )
         ..loadResources()
         ..writeOutputFiles(_logger);
     } on L10nException catch (e) {

@@ -2,17 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:path/path.dart' as path;
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
-import 'adb.dart';
+import 'devices.dart';
+import 'host_agent.dart';
 import 'running_processes.dart';
 import 'task_result.dart';
 import 'utils.dart';
@@ -25,7 +28,7 @@ final Set<String> noRebootForbidList = <String>{
 /// The maximum number of test runs before a device must be rebooted.
 ///
 /// This number was chosen arbitrarily.
-const int maxiumRuns = 30;
+const int maximumRuns = 30;
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
@@ -78,6 +81,14 @@ class _TaskRunner {
   }
 
   final TaskFunction task;
+
+  Future<Device/*?*/> _getWorkingDeviceIfAvailable() async {
+    try {
+      return await devices.workingDevice;
+    } on DeviceException {
+      return null;
+    }
+  }
 
   // TODO(ianh): workaround for https://github.com/dart-lang/sdk/issues/23797
   RawReceivePort _keepAlivePort;
@@ -134,11 +145,27 @@ class _TaskRunner {
         print('Skipping enabling configs for macOS, Linux, Windows, and Web');
       }
 
-      Future<TaskResult> futureResult = _performTask();
-      if (taskTimeout != null)
-        futureResult = futureResult.timeout(taskTimeout);
+      final Device/*?*/ device = await _getWorkingDeviceIfAvailable();
+      /*late*/ TaskResult result;
+      IOSink/*?*/ sink;
+      try {
+        if (device != null && device.canStreamLogs && hostAgent.dumpDirectory != null) {
+          sink = File(path.join(hostAgent.dumpDirectory.path, '${device.deviceId}.log')).openWrite();
+          await device.startLoggingToSink(sink);
+        }
 
-      TaskResult result = await futureResult;
+        Future<TaskResult> futureResult = _performTask();
+        if (taskTimeout != null)
+          futureResult = futureResult.timeout(taskTimeout);
+
+        result = await futureResult;
+      } finally {
+        if (device != null && device.canStreamLogs) {
+          assert(sink != null);
+          await device.stopLoggingToSink();
+          await sink.close();
+        }
+      }
 
       if (runProcessCleanup) {
         section('Checking running Dart$exe processes after task...');
@@ -190,7 +217,7 @@ class _TaskRunner {
       } else {
         runCount = 0;
       }
-      if (runCount < maxiumRuns) {
+      if (runCount < maximumRuns) {
         rebootFile
           ..createSync()
           ..writeAsStringSync((runCount + 1).toString());

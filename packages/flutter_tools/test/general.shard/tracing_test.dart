@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
+import '../src/fake_vm_services.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',

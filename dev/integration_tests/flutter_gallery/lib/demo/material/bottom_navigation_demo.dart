@@ -43,10 +43,11 @@ class NavigationIconView {
     if (type == BottomNavigationBarType.shifting) {
       iconColor = _color;
     } else {
-      final ThemeData themeData = Theme.of(context);
-      iconColor = themeData.brightness == Brightness.light
-          ? themeData.primaryColor
-          : themeData.accentColor;
+      final ThemeData theme = Theme.of(context);
+      final ColorScheme colorScheme = theme.colorScheme;
+      iconColor = theme.brightness == Brightness.light
+          ? colorScheme.primary
+          : colorScheme.secondary;
     }
 
     return FadeTransition(
@@ -111,7 +112,7 @@ class BottomNavigationDemo extends StatefulWidget {
   static const String routeName = '/material/bottom_navigation';
 
   @override
-  _BottomNavigationDemoState createState() => _BottomNavigationDemoState();
+  State<BottomNavigationDemo> createState() => _BottomNavigationDemoState();
 }
 
 class _BottomNavigationDemoState extends State<BottomNavigationDemo>

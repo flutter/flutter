@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> pumpTest(
@@ -18,8 +17,13 @@ Future<void> pumpTest(
   bool scrollable = true,
   bool reverse = false,
   ScrollController? controller,
+  bool enableMouseDrag = true,
 }) async {
   await tester.pumpWidget(MaterialApp(
+    scrollBehavior: const NoScrollbarBehavior().copyWith(dragDevices: enableMouseDrag
+      ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+      : null,
+    ),
     theme: ThemeData(
       platform: platform,
     ),
@@ -33,6 +37,13 @@ Future<void> pumpTest(
     ),
   ));
   await tester.pump(const Duration(seconds: 5)); // to let the theme animate
+}
+
+class NoScrollbarBehavior extends MaterialScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 // Pump a nested scrollable. The outer scrollable contains a sliver of a
@@ -170,6 +181,23 @@ void main() {
     // velocity of the last fling.
     expect(getScrollVelocity(tester), moreOrLessEquals(1000.0));
   });
+
+  testWidgets('A slower final fling does not apply carried momentum', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.pump(); // trigger fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // Repeat the exact same motion to build momentum.
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.pump(); // trigger the second fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // Make a final fling that is much slower.
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 200.0);
+    await tester.pump(); // trigger the third fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // expect that there is no carried velocity
+    expect(getScrollVelocity(tester), lessThan(200.0));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('No iOS/macOS momentum build with flings in opposite directions', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
@@ -377,7 +405,7 @@ void main() {
             slivers: <Widget>[SliverToBoxAdapter(
               child: SizedBox(
                 height: 2000,
-                child: GestureDetector(onTap: () {},),
+                child: GestureDetector(onTap: () {}),
               ),
             )],
           ),
@@ -890,8 +918,8 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 38);
-    expect(cheapWidgets, 20);
+    expect(expensiveWidgets, 40);
+    expect(cheapWidgets, 21);
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic', (WidgetTester tester) async {
@@ -933,9 +961,9 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 18);
-    expect(cheapWidgets, 40);
-    expect(physics.count, 40 + 18);
+    expect(expensiveWidgets, 17);
+    expect(cheapWidgets, 44);
+    expect(physics.count, 44 + 17);
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic and always return true', (WidgetTester tester) async {
@@ -976,7 +1004,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
     expect(expensiveWidgets, 0);
-    expect(cheapWidgets, 58);
+    expect(cheapWidgets, 61);
   });
 
   testWidgets('ensureVisible does not move PageViews', (WidgetTester tester) async {
@@ -1015,13 +1043,13 @@ void main() {
                           width: 200,
                           height: 10,
                         ),
-                      ]
+                      ],
                     );
-                  }
+                  },
                 ),
               );
-            }
-          )
+            },
+          ),
         ),
       ),
     );
@@ -1102,13 +1130,13 @@ void main() {
                           width: 200,
                           height: 10,
                         ),
-                      ]
+                      ],
                     );
-                  }
+                  },
                 ),
               );
-            }
-          )
+            },
+          ),
         ),
       ),
     );
@@ -1165,7 +1193,7 @@ void main() {
                 children: <Widget>[
                   for (int i = 0; i < 100; i++)
                     Text('SingleChildScrollView $i'),
-                ]
+                ],
               ),
               SizedBox(
                 height: 3000,
@@ -1177,11 +1205,11 @@ void main() {
                   itemBuilder: (BuildContext context, int index) {
                     return Text('Nested NeverScrollable ListView $index');
                   },
-                )
+                ),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       ),
     ));
     expect(outerController.position.pixels, 0.0);
@@ -1211,17 +1239,17 @@ void main() {
     Widget build(double height) {
       return MaterialApp(
         home: Scaffold(
-            body: SizedBox(
-              width: double.infinity,
-              height: height,
-              child: SingleChildScrollView(
-                controller: controller,
-                child: const SizedBox(
-                  width: double.infinity,
-                  height: 300.0,
-                ),
+          body: SizedBox(
+            width: double.infinity,
+            height: height,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(
+                width: double.infinity,
+                height: 300.0,
               ),
-            )
+            ),
+          ),
         ),
       );
     }
@@ -1245,6 +1273,46 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+
+  testWidgets('Does not scroll with mouse pointer drag when behavior is configured to ignore them', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, enableMouseDrag: false);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.moveBy(const Offset(0.0, 200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.removePointer();
+    await tester.pump();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
+
+  testWidgets('Does scroll with mouse pointer drag when behavior is not configured to ignore them', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, enableMouseDrag: true);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 200.0);
+
+    await gesture.moveBy(const Offset(0.0, 200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.removePointer();
+    await tester.pump();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
 }
 
 // ignore: must_be_immutable

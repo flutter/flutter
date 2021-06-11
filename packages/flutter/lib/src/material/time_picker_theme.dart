@@ -126,8 +126,8 @@ class TimePickerThemeData with Diagnosticable {
   /// text color can depend on the [MaterialState.selected] state, i.e. if the
   /// text is selected or not.
   ///
-  /// By default the overall theme's `textTheme` color is used when the text is
-  /// selected and `accentTextTheme` color is used when it's not selected.
+  /// If this color is null then the dial's text colors are based on the
+  /// theme's [ThemeData.colorScheme].
   final Color? dialTextColor;
 
   /// The color of the entry mode [IconButton].

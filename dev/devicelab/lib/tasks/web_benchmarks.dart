@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:io' as io;
 
+import 'package:flutter_devicelab/common.dart';
+import 'package:flutter_devicelab/framework/browser.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
+import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
-
-import 'package:flutter_devicelab/framework/browser.dart';
-import 'package:flutter_devicelab/framework/task_result.dart';
-import 'package:flutter_devicelab/framework/utils.dart';
 
 /// The port number used by the local benchmark server.
 const int benchmarkServerPort = 9999;
@@ -56,10 +58,10 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
           if (benchmarkName != benchmarkIterator.current) {
             profileData.completeError(Exception(
               'Browser returned benchmark results from a wrong benchmark.\n'
-              'Requested to run bechmark ${benchmarkIterator.current}, but '
+              'Requested to run benchmark ${benchmarkIterator.current}, but '
               'got results for $benchmarkName.',
             ));
-            server.close();
+            unawaited(server.close());
           }
 
           // Trace data is null when the benchmark is not frame-based, such as RawRecorder.
@@ -81,7 +83,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
           return Response.ok('Stopped performance tracing');
         } else if (request.requestedUri.path.endsWith('/on-error')) {
           final Map<String, dynamic> errorDetails = json.decode(await request.readAsString()) as Map<String, dynamic>;
-          server.close();
+          unawaited(server.close());
           // Keep the stack trace as a string. It's thrown in the browser, not this Dart VM.
           profileData.completeError('${errorDetails['error']}\n${errorDetails['stackTrace']}');
           return Response.ok('');
@@ -122,7 +124,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       shelf_io.serveRequests(server, cascade.handler);
 
       final String dartToolDirectory = path.join('$macrobenchmarksDirectory/.dart_tool');
-      final String userDataDir = io.Directory(dartToolDirectory).createTempSync('chrome_user_data_').path;
+      final String userDataDir = io.Directory(dartToolDirectory).createTempSync('flutter_chrome_user_data.').path;
 
       // TODO(yjbanov): temporarily disables headful Chrome until we get
       //                devicelab hardware that is able to run it. Our current
@@ -184,7 +186,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       }
       return TaskResult.success(taskResult, benchmarkScoreKeys: benchmarkScoreKeys);
     } finally {
-      server?.close();
+      unawaited(server?.close());
       chrome?.stop();
     }
   });

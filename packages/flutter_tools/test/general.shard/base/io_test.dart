@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/io.dart';
 
 void main() {
-  test('IOOverrides can inject a memory file system', () async {
+  testWithoutContext('IOOverrides can inject a memory file system', () async {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
     final FlutterIOOverrides flutterIOOverrides = FlutterIOOverrides(fileSystem: memoryFileSystem);
     await io.IOOverrides.runWithIOOverrides(() async {
@@ -56,7 +54,8 @@ void main() {
       expect(memoryFileSystem.link('ggg').resolveSymbolicLinksSync(), linkB.resolveSymbolicLinksSync());
     }, flutterIOOverrides);
   });
-  testUsingContext('ProcessSignal signals are properly delegated', () async {
+
+  testWithoutContext('ProcessSignal signals are properly delegated', () async {
     final FakeProcessSignal signal = FakeProcessSignal();
     final ProcessSignal signalUnderTest = ProcessSignal(signal);
 
@@ -65,15 +64,15 @@ void main() {
     expect(signalUnderTest, await signalUnderTest.watch().first);
   });
 
-  testUsingContext('ProcessSignal toString() works', () async {
-    expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
+  testWithoutContext('ProcessSignal toString() works', () async {
+    expect(io.ProcessSignal.sigint.toString(), ProcessSignal.sigint.toString());
   });
 
-  test('exit throws a StateError if called without being overriden', () {
+  testWithoutContext('exit throws a StateError if called without being overridden', () {
     expect(() => exit(0), throwsAssertionError);
   });
 
-  test('exit does not throw a StateError if overriden', () {
+  testWithoutContext('exit does not throw a StateError if overridden', () {
     try {
       setExitFunctionForTests((int value) {});
 
@@ -83,22 +82,34 @@ void main() {
     }
   });
 
-  test('test_api defines the Declarer in a known place', () {
+  testWithoutContext('test_api defines the Declarer in a known place', () {
     expect(Zone.current[#test.declarer], isNotNull);
   });
 
-  test('listNetworkInterfaces() uses overrides', () async {
+  testWithoutContext('listNetworkInterfaces() uses overrides', () async {
     setNetworkInterfaceLister(
       ({
-        bool includeLoopback,
-        bool includeLinkLocal,
-        InternetAddressType type,
+        bool? includeLoopback,
+        bool? includeLinkLocal,
+        InternetAddressType? type,
       }) async => <NetworkInterface>[],
     );
 
     expect(await listNetworkInterfaces(), isEmpty);
 
     resetNetworkInterfaceLister();
+  });
+
+  testWithoutContext('Does not listen to Posix process signals on windows', () async {
+    final FakePlatform windows = FakePlatform(operatingSystem: 'windows');
+    final FakePlatform linux = FakePlatform(operatingSystem: 'linux');
+    final FakeProcessSignal fakeSignalA = FakeProcessSignal();
+    final FakeProcessSignal fakeSignalB = FakeProcessSignal();
+    fakeSignalA.controller.add(fakeSignalA);
+    fakeSignalB.controller.add(fakeSignalB);
+
+    expect(await PosixProcessSignal(fakeSignalA, platform: windows).watch().isEmpty, true);
+    expect(await PosixProcessSignal(fakeSignalB, platform: linux).watch().first, isNotNull);
   });
 }
 

@@ -580,7 +580,6 @@ class InkResponse extends StatelessWidget {
   Widget build(BuildContext context) {
     final _ParentInkResponseState? parentState = _ParentInkResponseProvider.of(context);
     return _InkResponseStateWidget(
-      child: child,
       onTap: onTap,
       onTapDown: onTapDown,
       onTapCancel: onTapCancel,
@@ -609,6 +608,7 @@ class InkResponse extends StatelessWidget {
       parentState: parentState,
       getRectCallback: getRectCallback,
       debugCheckContext: debugCheckContext,
+      child: child,
     );
   }
 
@@ -781,7 +781,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
       if (enabled) {
-        // Don't call wigdet.onHover because many wigets, including the button
+        // Don't call widget.onHover because many widgets, including the button
         // widgets, apply setState to an ancestor context from onHover.
         updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
       }
@@ -865,12 +865,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
     switch (type) {
       case _HighlightType.pressed:
-        if (widget.onHighlightChanged != null)
-          widget.onHighlightChanged!(value);
+        widget.onHighlightChanged?.call(value);
         break;
       case _HighlightType.hover:
-        if (callOnHover && widget.onHover != null)
-          widget.onHover!(value);
+        if (callOnHover)
+          widget.onHover?.call(value);
         break;
       case _HighlightType.focus:
         break;
@@ -951,18 +950,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void _handleFocusUpdate(bool hasFocus) {
     _hasFocus = hasFocus;
     _updateFocusHighlights();
-    if (widget.onFocusChange != null) {
-      widget.onFocusChange!(hasFocus);
-    }
+    widget.onFocusChange?.call(hasFocus);
   }
 
   void _handleTapDown(TapDownDetails details) {
     if (_anyChildInkResponsePressed)
       return;
     _startSplash(details: details);
-    if (widget.onTapDown != null) {
-      widget.onTapDown!(details);
-    }
+    widget.onTapDown?.call(details);
   }
 
   void _startSplash({TapDownDetails? details, BuildContext? context}) {
@@ -991,24 +986,21 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     if (widget.onTap != null) {
       if (widget.enableFeedback)
         Feedback.forTap(context);
-      widget.onTap!();
+      widget.onTap?.call();
     }
   }
 
   void _handleTapCancel() {
     _currentSplash?.cancel();
     _currentSplash = null;
-    if (widget.onTapCancel != null) {
-      widget.onTapCancel!();
-    }
+    widget.onTapCancel?.call();
     updateHighlight(_HighlightType.pressed, value: false);
   }
 
   void _handleDoubleTap() {
     _currentSplash?.confirm();
     _currentSplash = null;
-    if (widget.onDoubleTap != null)
-      widget.onDoubleTap!();
+    widget.onDoubleTap?.call();
   }
 
   void _handleLongPress() {

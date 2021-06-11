@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'runner.dart' as runner;
 import 'src/artifacts.dart';
 import 'src/base/context.dart';
-import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
@@ -49,7 +48,7 @@ import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/devtools_launcher.dart';
 import 'src/features.dart';
-import 'src/globals.dart' as globals;
+import 'src/globals_null_migrated.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
@@ -85,7 +84,7 @@ Future<void> main(List<String> args) async {
   // instances of the platform or filesystem, so just use those.
   Cache.flutterRoot = Cache.defaultFlutterRoot(
     platform: const LocalPlatform(),
-    fileSystem: LocalFileSystem.instance,
+    fileSystem: globals.localFileSystem,
     userMessages: UserMessages(),
   );
 
@@ -108,7 +107,7 @@ Future<void> main(List<String> args) async {
       // devtools source code.
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
+        pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
         logger: globals.logger,
         platform: globals.platform,
         persistentToolState: globals.persistentToolState,
@@ -158,9 +157,10 @@ List<FlutterCommand> generateCommands({
   DriveCommand(verboseHelp: verboseHelp,
     fileSystem: globals.fs,
     logger: globals.logger,
+    platform: globals.platform,
   ),
   EmulatorsCommand(),
-  FormatCommand(),
+  FormatCommand(verboseHelp: verboseHelp),
   GenerateCommand(),
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,

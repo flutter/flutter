@@ -116,8 +116,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
     }
     super.onSingleTapUp(details);
     _state._requestKeyboard();
-    if (_state.widget.onTap != null)
-      _state.widget.onTap!();
+    _state.widget.onTap?.call();
   }
 
   @override
@@ -152,7 +151,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///   const MyPrefilledText({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyPrefilledTextState createState() => _MyPrefilledTextState();
+///   State<MyPrefilledText> createState() => _MyPrefilledTextState();
 /// }
 ///
 /// class _MyPrefilledTextState extends State<MyPrefilledText> {
@@ -269,7 +268,7 @@ class CupertinoTextField extends StatefulWidget {
     @Deprecated(
       'Use maxLengthEnforcement parameter which provides more specific '
       'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.25.0-5.0.pre.'
+      'This feature was deprecated after v1.25.0-5.0.pre.',
     )
     this.maxLengthEnforced = true,
     this.maxLengthEnforcement,
@@ -329,10 +328,12 @@ class CupertinoTextField extends StatefulWidget {
        assert(prefixMode != null),
        assert(suffixMode != null),
        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
-       assert(!identical(textInputAction, TextInputAction.newline) ||
+       assert(
+         !identical(textInputAction, TextInputAction.newline) ||
          maxLines == 1 ||
          !identical(keyboardType, TextInputType.text),
-         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.'),
+         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
+       ),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
@@ -420,7 +421,7 @@ class CupertinoTextField extends StatefulWidget {
     @Deprecated(
       'Use maxLengthEnforcement parameter which provides more specific '
       'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.25.0-5.0.pre.'
+      'This feature was deprecated after v1.25.0-5.0.pre.',
     )
     this.maxLengthEnforced = true,
     this.maxLengthEnforcement,
@@ -480,10 +481,12 @@ class CupertinoTextField extends StatefulWidget {
        assert(prefixMode != null),
        assert(suffixMode != null),
        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
-       assert(!identical(textInputAction, TextInputAction.newline) ||
+       assert(
+         !identical(textInputAction, TextInputAction.newline) ||
          maxLines == 1 ||
          !identical(keyboardType, TextInputType.text),
-         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.'),
+         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
+       ),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
@@ -504,6 +507,30 @@ class CupertinoTextField extends StatefulWidget {
   final TextEditingController? controller;
 
   /// {@macro flutter.widgets.Focus.focusNode}
+  ///
+  /// ## Key handling
+  ///
+  /// By default, [CupertinoTextField] absorbs key events of the Space key and
+  /// Enter key, because they are commonly used as both shortcuts and text field
+  /// inputs. This means that, if these keys are pressed when
+  /// [CupertinoTextField] is the primary focus, they will not be sent to other
+  /// enclosing widgets.
+  ///
+  /// If [FocusNode.onKey] is not null, this filter is bypassed. In the likely
+  /// case that this filter is still desired, check these keys and return
+  /// [KeyEventResult.skipRemainingHandlers].
+  ///
+  /// ```dart
+  /// final FocusNode focusNode = FocusNode(
+  ///   onKey: (FocusNode node, RawKeyEvent event) {
+  ///     if (event.logicalKey == LogicalKeyboardKey.space
+  ///         || event.logicalKey == LogicalKeyboardKey.enter) {
+  ///       return KeyEventResult.skipRemainingHandlers;
+  ///     }
+  ///     // Now process the event as desired.
+  ///   },
+  /// );
+  /// ```
   final FocusNode? focusNode;
 
   /// Controls the [BoxDecoration] of the box behind the text input.
@@ -669,7 +696,7 @@ class CupertinoTextField extends StatefulWidget {
   @Deprecated(
     'Use maxLengthEnforcement parameter which provides more specific '
     'behavior related to the maxLength limit. '
-    'This feature was deprecated after v1.25.0-5.0.pre.'
+    'This feature was deprecated after v1.25.0-5.0.pre.',
   )
   final bool maxLengthEnforced;
 
@@ -773,7 +800,7 @@ class CupertinoTextField extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _CupertinoTextFieldState createState() => _CupertinoTextFieldState();
+  State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1064,13 +1091,28 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     );
   }
 
+  KeyEventResult _handleRawKeyEvent(FocusNode node, RawKeyEvent event) {
+    assert(node.hasFocus);
+    // TextField uses "enter" to finish the input or create a new line, and "space" as
+    // a normal input character, so we default to terminate the handling of these
+    // two keys to avoid ancestor behaving incorrectly for handling the two keys
+    // (such as `ListTile` or `Material`).
+    if (event.logicalKey == LogicalKeyboardKey.space
+        || event.logicalKey == LogicalKeyboardKey.enter) {
+      return KeyEventResult.skipRemainingHandlers;
+    }
+    return KeyEventResult.ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
+    final FocusNode focusNode = _effectiveFocusNode;
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
+    VoidCallback? handleDidGainAccessibilityFocus;
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
@@ -1082,6 +1124,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
       case TargetPlatform.macOS:
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        handleDidGainAccessibilityFocus = () {
+          // macOS automatically activated the TextField when it receives
+          // accessibility focus.
+          if (!focusNode.hasFocus && focusNode.canRequestFocus) {
+            focusNode.requestFocus();
+          }
+        };
         break;
     }
 
@@ -1137,12 +1186,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
       border: resolvedBorder,
-      color: enabled ? decorationColor : (decorationColor ?? disabledColor),
+      color: enabled ? decorationColor : disabledColor,
     );
 
     final Color selectionColor = CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
-    final Widget paddedEditable = Padding(
+    Widget paddedEditable = Padding(
       padding: widget.padding,
       child: RepaintBoundary(
         child: UnmanagedRestorationScope(
@@ -1154,7 +1203,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             toolbarOptions: widget.toolbarOptions,
             showCursor: widget.showCursor,
             showSelectionHandles: _showSelectionHandles,
-            focusNode: _effectiveFocusNode,
+            focusNode: focusNode,
             keyboardType: widget.keyboardType,
             textInputAction: widget.textInputAction,
             textCapitalization: widget.textCapitalization,
@@ -1204,6 +1253,15 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       ),
     );
 
+    if (focusNode.onKey == null) {
+      paddedEditable = Focus(
+        onKey: _handleRawKeyEvent,
+        includeSemantics: false,
+        skipTraversal: true,
+        child: paddedEditable,
+      );
+    }
+
     return Semantics(
       enabled: enabled,
       onTap: !enabled || widget.readOnly ? null : () {
@@ -1212,10 +1270,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         }
         _requestKeyboard();
       },
+      onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: IgnorePointer(
         ignoring: !enabled,
         child: Container(
           decoration: effectiveDecoration,
+          color: !enabled && effectiveDecoration == null ? disabledColor : null,
           child: _selectionGestureDetectorBuilder.buildGestureDetector(
             behavior: HitTestBehavior.translucent,
             child: Align(

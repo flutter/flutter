@@ -8,7 +8,12 @@ and native Android instrumentation testing.
 
 Add a dependency on the `integration_test` and `flutter_test` package in the
 `dev_dependencies` section of `pubspec.yaml`. For plugins, do this in the
-`pubspec.yaml` of the example app.
+`pubspec.yaml` of the example app:
+
+```yaml
+integration_test:
+  sdk: flutter
+```
 
 Create a `integration_test/` directory for your package. In this directory,
 create a `<name>_test.dart`, using the following as a starting point to make
@@ -42,7 +47,7 @@ Future<void> main() => integrationDriver();
 You can also use different driver scripts to customize the behavior of the app
 under test. For example, `FlutterDriver` can also be parameterized with
 different [options](https://api.flutter.dev/flutter/flutter_driver/FlutterDriver/connect.html).
-See the [extended driver](https://github.com/flutter/plugins/tree/master/packages/integration_test/example/test_driver/integration_test_extended_driver.dart) for an example.
+See the [extended driver](https://github.com/flutter/flutter/blob/master/packages/integration_test/example/test_driver/extended_integration_test.dart) for an example.
 
 ### Package Structure
 
@@ -230,7 +235,7 @@ product="build/ios_integ/Build/Products"
 dev_target="14.3"
 
 # Pass --simulator if building for the simulator.
-flutter build ios integration_test/foo_test.dart -release
+flutter build ios integration_test/foo_test.dart --release
 
 pushd ios
 xcodebuild -workspace Runner.xcworkspace -scheme Runner -config Flutter/Release.xcconfig -derivedDataPath $output -sdk iphoneos build-for-testing
@@ -241,7 +246,7 @@ zip -r "ios_tests.zip" "Release-iphoneos" "Runner_iphoneos$dev_target-arm64.xcte
 popd
 ```
 
-You can verify locally that your tests are succesful by running the following command:
+You can verify locally that your tests are successful by running the following command:
 
 ```sh
 xcodebuild test-without-building -xctestrun "build/ios_integ/Build/Products/Runner_iphoneos14.3-arm64.xctestrun" -destination id=<YOUR_DEVICE_ID>

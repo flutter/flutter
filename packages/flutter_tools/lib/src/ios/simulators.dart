@@ -21,10 +21,12 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../devfs.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../device_port_forwarder.dart';
+import '../globals_null_migrated.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import 'application_package.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
 
@@ -128,7 +130,7 @@ class SimControl {
       return <String, Map<String, dynamic>>{};
     }
     try {
-      final Object decodeResult = json.decode(results.stdout?.toString())[section.name];
+      final Object decodeResult = json.decode(results.stdout)[section.name];
       if (decodeResult is Map<String, dynamic>) {
         return decodeResult;
       }
@@ -458,6 +460,7 @@ class IOSSimulator extends Device {
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
         if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
+        if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
         if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
         '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}'
       ],
@@ -470,6 +473,7 @@ class IOSSimulator extends Device {
         ipv6: ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
+        logger: globals.logger,
       );
     }
 

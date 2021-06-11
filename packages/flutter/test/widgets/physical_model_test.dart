@@ -460,9 +460,10 @@ void main() {
             width: 300,
             height: 300,
             child: Material(
-                elevation: 2.0,
-                color: Colors.red,
-                shape: CircleBorder()),
+              elevation: 2.0,
+              color: Colors.red,
+              shape: CircleBorder(),
+            ),
           ),
         ),
       ];
@@ -501,9 +502,10 @@ void main() {
             width: 300,
             height: 300,
             child: Material(
-                elevation: 2.0,
-                color: Colors.red,
-                shape: CircleBorder()),
+              elevation: 2.0,
+              color: Colors.red,
+              shape: CircleBorder(),
+            ),
           ),
         ),
       ];

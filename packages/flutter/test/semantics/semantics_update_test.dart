@@ -18,7 +18,7 @@ void main() {
       const Placeholder(),
       // Stops right after the warm up frame.
       null,
-      EnginePhase.build
+      EnginePhase.build,
     );
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
@@ -114,10 +114,18 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     required double thickness,
     required Rect rect,
     required String label,
-    required String hint,
+    // TODO(chunhtai): change the Object? to List<StringAttribute> when engine
+    // pr lands: https://github.com/flutter/engine/pull/25373.
+    // https://github.com/flutter/flutter/issues/79318.
+    Object? labelAttributes,
     required String value,
+    Object? valueAttributes,
     required String increasedValue,
+    Object? increasedValueAttributes,
     required String decreasedValue,
+    Object? decreasedValueAttributes,
+    required String hint,
+    Object? hintAttributes,
     TextDirection? textDirection,
     required Float64List transform,
     required Int32List childrenInTraversalOrder,

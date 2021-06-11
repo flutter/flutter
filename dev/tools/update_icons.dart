@@ -36,7 +36,7 @@ const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<Str
 };
 
 // Rewrite certain Flutter IDs (reserved keywords, numbers) using prefix matching.
-const Map<String, String> _identifierRewrites = <String, String>{
+const Map<String, String> identifierRewrites = <String, String>{
   '1x': 'one_x',
   '360': 'threesixty',
   '2d': 'twod',
@@ -83,9 +83,6 @@ const Map<String, String> _identifierRewrites = <String, String>{
   '23mp': 'twenty_three_mp',
   '24mp': 'twenty_four_mp',
   'class': 'class_',
-  // TODO(guidezpl): will clean these up in g3 b/153556862
-  'door_back': 'door_back_door',
-  'door_front': 'door_front_door',
   'try': 'try_sms_star',
 };
 
@@ -202,7 +199,7 @@ void main(List<String> args) {
   final String newIconData = regenerateIconsFile(iconClassFileData, newTokenPairMap);
 
   if (argResults[_dryRunOption] as bool) {
-    stdout.writeln(newIconData);
+    stdout.write(newIconData);
   } else {
     stderr.writeln('\nWriting to ${iconClassFile.path}.');
     iconClassFile.writeAsStringSync(newIconData);
@@ -333,7 +330,7 @@ class _Icon {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
-    if (id.endsWith('_outlined') && id!='insert_chart_outlined') {
+    if (id.endsWith('_outlined') && id != 'insert_chart_outlined') {
       shortId = _replaceLast(id, '_outlined');
       htmlSuffix = '-outlined';
     } else if (id.endsWith('_rounded')) {
@@ -348,9 +345,9 @@ class _Icon {
     }
 
     flutterId = id;
-    for (final MapEntry<String, String> rewritePair in _identifierRewrites.entries) {
+    for (final MapEntry<String, String> rewritePair in identifierRewrites.entries) {
       if (id.startsWith(rewritePair.key)) {
-        flutterId = id.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
+        flutterId = id.replaceFirst(rewritePair.key, identifierRewrites[rewritePair.key]!);
       }
     }
 
@@ -359,14 +356,14 @@ class _Icon {
 
   static const List<String> styleSuffixes = <String>['', '_outlined', '_rounded', '_sharp'];
 
-  String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
-  String shortId;       // e.g. 5g
-  String flutterId;     // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
-  String name;          // e.g. five g, five g outlined, five g rounded, five g sharp
-  String hexCodepoint;  // e.g. e547
+  late String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
+  late String shortId;       // e.g. 5g
+  late String flutterId;     // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
+  late String name;          // e.g. five g, five g outlined, five g rounded, five g sharp
+  late String hexCodepoint;  // e.g. e547
 
   // The suffix for the 'material-icons' HTML class.
-  String htmlSuffix;
+  late String htmlSuffix;
 
   String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId) ? ', matchTextDirection: true' : '';
 
@@ -395,9 +392,8 @@ class _Icon {
     // Sort a regular icon before its variants.
     if (shortId == b.shortId) {
       return id.length - b.id.length;
-    } else {
-      return flutterId.compareTo(b.flutterId);
     }
+    return flutterId.compareTo(b.flutterId);
   }
 
   String _replaceLast(String string, String toReplace) {

@@ -505,8 +505,8 @@ class PictureLayer extends Layer {
     properties.add(DiagnosticsProperty<String>('picture', describeIdentity(_picture)));
     properties.add(DiagnosticsProperty<String>(
       'raster cache hints',
-      'isComplex = $isComplexHint, willChange = $willChangeHint'),
-    );
+      'isComplex = $isComplexHint, willChange = $willChangeHint',
+    ));
   }
 
   @override
@@ -790,9 +790,11 @@ class ContainerLayer extends Layer {
 
   List<PictureLayer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
     FlutterError.reportError(FlutterErrorDetails(
-      exception: FlutterError('Painting order is out of order with respect to elevation.\n'
-                              'See https://api.flutter.dev/flutter/rendering/debugCheckElevationsEnabled.html '
-                              'for more details.'),
+      exception: FlutterError(
+        'Painting order is out of order with respect to elevation.\n'
+        'See https://api.flutter.dev/flutter/rendering/debugCheckElevationsEnabled.html '
+        'for more details.',
+      ),
       library: 'rendering library',
       context: ErrorDescription('during compositing'),
       informationCollector: () {
@@ -1580,7 +1582,7 @@ class TransformLayer extends OffsetLayer {
   Offset? _transformOffset(Offset localPosition) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(
-        PointerEvent.removePerspectiveTransform(transform!)
+        PointerEvent.removePerspectiveTransform(transform!),
       );
       _inverseDirty = false;
     }
@@ -1801,7 +1803,13 @@ class BackdropFilterLayer extends ContainerLayer {
   ///
   /// The [filter] property must be non-null before the compositing phase of the
   /// pipeline.
-  BackdropFilterLayer({ ui.ImageFilter? filter }) : _filter = filter;
+  ///
+  /// The [blendMode] property defaults to [BlendMode.srcOver].
+  BackdropFilterLayer({
+    ui.ImageFilter? filter,
+    BlendMode blendMode = BlendMode.srcOver,
+  }) : _filter = filter,
+       _blendMode = blendMode;
 
   /// The filter to apply to the existing contents of the scene.
   ///
@@ -1816,11 +1824,29 @@ class BackdropFilterLayer extends ContainerLayer {
     }
   }
 
+  /// The blend mode to use to apply the filtered background content onto the background
+  /// surface.
+  ///
+  /// The default value of this property is [BlendMode.srcOver].
+  /// {@macro flutter.widgets.BackdropFilter.blendMode}
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  BlendMode get blendMode => _blendMode;
+  BlendMode _blendMode;
+  set blendMode(BlendMode value) {
+    if (value != _blendMode) {
+      _blendMode = value;
+      markNeedsAddToScene();
+    }
+  }
+
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(filter != null);
     engineLayer = builder.pushBackdropFilter(
       filter!,
+      blendMode: blendMode,
       oldLayer: _engineLayer as ui.BackdropFilterEngineLayer?,
     );
     addChildrenToScene(builder, layerOffset);

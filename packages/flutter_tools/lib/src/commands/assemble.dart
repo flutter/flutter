@@ -22,7 +22,7 @@ import '../build_system/targets/web.dart';
 import '../build_system/targets/windows.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -79,12 +79,11 @@ List<Target> _kDefaultTargets = <Target>[
   const DebugBundleWindowsAssets(),
   const ProfileBundleWindowsAssets(),
   const ReleaseBundleWindowsAssets(),
+  // Windows UWP targets
+  const DebugBundleWindowsAssetsUwp(),
+  const ProfileBundleWindowsAssetsUwp(),
+  const ReleaseBundleWindowsAssetsUwp(),
 ];
-
-// TODO(ianh): https://github.com/dart-lang/args/issues/181 will allow us to remove useLegacyNames
-// and just switch to arguments that use the regular style, which still supporting the old names.
-// When fixing this, remove the hack in test/general.shard/args_test.dart that ignores these names.
-const bool useLegacyNames = true;
 
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
@@ -124,8 +123,8 @@ class AssembleCommand extends FlutterCommand {
         'files will be written. Must be either absolute or relative from the '
         'root of the current Flutter project.',
     );
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp, useLegacyNames: useLegacyNames);
-    usesDartDefineOption(useLegacyNames: useLegacyNames);
+    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
+    usesDartDefineOption();
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
@@ -141,21 +140,35 @@ class AssembleCommand extends FlutterCommand {
   String get name => 'assemble';
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
+  Future<CustomDimensions> get usageValues async {
     final FlutterProject flutterProject = FlutterProject.current();
     if (flutterProject == null) {
-      return const <CustomDimensions, String>{};
+      return const CustomDimensions();
     }
     try {
-      final Environment localEnvironment = createEnvironment();
-      return <CustomDimensions, String>{
-        CustomDimensions.commandBuildBundleTargetPlatform: localEnvironment.defines['TargetPlatform'],
-        CustomDimensions.commandBuildBundleIsModule: '${flutterProject.isModule}',
-      };
+      return CustomDimensions(
+        commandBuildBundleTargetPlatform: environment.defines[kTargetPlatform],
+        commandBuildBundleIsModule: flutterProject.isModule,
+      );
     } on Exception {
       // We've failed to send usage.
     }
-    return const <CustomDimensions, String>{};
+    return const CustomDimensions();
+  }
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    final String platform = environment.defines[kTargetPlatform];
+    if (platform == null) {
+      return super.requiredArtifacts;
+    }
+
+    final TargetPlatform targetPlatform = getTargetPlatformForName(platform);
+    final DevelopmentArtifact artifact = artifactFromTargetPlatform(targetPlatform);
+    if (artifact != null) {
+      return <DevelopmentArtifact>{artifact};
+    }
+    return super.requiredArtifacts;
   }
 
   /// The target(s) we are building.
@@ -197,6 +210,9 @@ class AssembleCommand extends FlutterCommand {
     return false;
   }
 
+  Environment get environment => _environment ??= createEnvironment();
+  Environment _environment;
+
   /// The environmental configuration for a build invocation.
   Environment createEnvironment() {
     final FlutterProject flutterProject = FlutterProject.current();
@@ -222,6 +238,7 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      platform: globals.platform,
       engineVersion: globals.artifacts.isLocalEngine
         ? null
         : globals.flutterVersion.engineRevision,
@@ -241,25 +258,24 @@ class AssembleCommand extends FlutterCommand {
       final String value = chunk.substring(indexEquals + 1);
       results[key] = value;
     }
-    if (argResults.wasParsed(useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions)) {
-      results[kExtraGenSnapshotOptions] = (argResults[useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
+    if (argResults.wasParsed(FlutterOptions.kExtraGenSnapshotOptions)) {
+      results[kExtraGenSnapshotOptions] = (argResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
-    if (argResults.wasParsed(useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption)) {
-      results[kDartDefines] = (argResults[useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption] as List<String>).join(',');
+    if (argResults.wasParsed(FlutterOptions.kDartDefinesOption)) {
+      results[kDartDefines] = (argResults[FlutterOptions.kDartDefinesOption] as List<String>).join(',');
     }
     results[kDeferredComponents] = 'false';
     if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets() && !isDebug()) {
       results[kDeferredComponents] = 'true';
     }
-    if (argResults.wasParsed(useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions)) {
-      results[kExtraFrontEndOptions] = (argResults[useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions] as List<String>).join(',');
+    if (argResults.wasParsed(FlutterOptions.kExtraFrontEndOptions)) {
+      results[kExtraFrontEndOptions] = (argResults[FlutterOptions.kExtraFrontEndOptions] as List<String>).join(',');
     }
     return results;
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Environment env = createEnvironment();
     final List<Target> targets = createTargets();
     final List<Target> nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
@@ -271,7 +287,15 @@ class AssembleCommand extends FlutterCommand {
       }
     }
     Target target;
-    final List<String> decodedDefines = decodeDartDefines(env.defines, kDartDefines);
+    List<String> decodedDefines;
+    try {
+      decodedDefines = decodeDartDefines(environment.defines, kDartDefines);
+    } on FormatException {
+      throwToolExit(
+        'Error parsing assemble command: your generated configuration may be out of date. '
+        "Try re-running 'flutter build ios' or the appropriate build command."
+      );
+    }
     if (FlutterProject.current().manifest.deferredComponents != null
         && decodedDefines.contains('validate-deferred-components=true')
         && deferredTargets.isNotEmpty
@@ -289,7 +313,7 @@ class AssembleCommand extends FlutterCommand {
     }
     final BuildResult result = await _buildSystem.build(
       target,
-      env,
+      environment,
       buildSystemConfig: BuildSystemConfig(
         resourcePoolSize: argResults.wasParsed('resource-pool-size')
           ? int.tryParse(stringArg('resource-pool-size'))

@@ -70,7 +70,7 @@ BuildApp() {
 
   local bundle_sksl_path=""
   if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
-    bundle_sksl_path="-iBundleSkSLPath=${BUNDLE_SKSL_PATH}"
+    bundle_sksl_path="-dBundleSkSLPath=${BUNDLE_SKSL_PATH}"
   fi
 
   local code_size_directory=""
@@ -85,7 +85,8 @@ BuildApp() {
       assemble                                                                \
       --no-version-check                                                      \
       ${performance_measurement_option}                                       \
-      -dTargetPlatform=darwin-x64                                             \
+      -dTargetPlatform=darwin                                                 \
+      -dDarwinArchs=x86_64                                                    \
       -dTargetFile="${target_path}"                                           \
       -dBuildMode="${build_mode}"                                             \
       -dTreeShakeIcons="${TREE_SHAKE_ICONS}"                                  \

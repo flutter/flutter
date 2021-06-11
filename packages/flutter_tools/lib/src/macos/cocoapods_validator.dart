@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../base/user_messages.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import 'cocoapods.dart';
 
 /// A validator that confirms cocoapods is in a valid state.
@@ -32,7 +30,7 @@ class CocoaPodsValidator extends DoctorValidator {
 
     ValidationType status = ValidationType.installed;
     if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
-      messages.add(ValidationMessage(_userMessages.cocoaPodsVersion(await _cocoaPods.cocoaPodsVersionText)));
+      messages.add(ValidationMessage(_userMessages.cocoaPodsVersion((await _cocoaPods.cocoaPodsVersionText).toString())));
     } else {
       if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
         status = ValidationType.missing;
@@ -50,9 +48,9 @@ class CocoaPodsValidator extends DoctorValidator {
           _userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsInstallInstructions)));
       } else {
         status = ValidationType.partial;
-        final String currentVersionText = await _cocoaPods.cocoaPodsVersionText;
+        final String currentVersionText = (await _cocoaPods.cocoaPodsVersionText).toString();
         messages.add(ValidationMessage.hint(
-          _userMessages.cocoaPodsOutdated(currentVersionText, _cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
+          _userMessages.cocoaPodsOutdated(currentVersionText, cocoaPodsRecommendedVersion.toString(), noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
       }
     }
 

@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert' show json, utf8, LineSplitter, JsonEncoder;
 import 'dart:io' as io;
 import 'dart:math' as math;
 
-import 'package:path/path.dart' as path;
+import 'package:flutter_devicelab/common.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 /// The number of samples used to extract metrics, such as noise, means,
@@ -291,7 +294,7 @@ class BlinkTraceSummary {
       Exception noMeasuredFramesFound() => Exception(
         'No measured frames found in benchmark tracing data. This likely '
         'indicates a bug in the benchmark. For example, the benchmark failed '
-        'to pump enough frames. It may also indicate a change in Chrome\'s '
+        "to pump enough frames. It may also indicate a change in Chrome's "
         'tracing data format. Check if Chrome version changed recently and '
         'adjust the parsing code accordingly.',
       );
@@ -625,9 +628,9 @@ Future<io.Process> _spawnChromiumProcess(String executable, List<String> args, {
     // A precaution that avoids accumulating browser processes, in case the
     // glibc bug doesn't cause the browser to quit and we keep looping and
     // launching more processes.
-    process.exitCode.timeout(const Duration(seconds: 1), onTimeout: () {
+    unawaited(process.exitCode.timeout(const Duration(seconds: 1), onTimeout: () {
       process.kill();
       return null;
-    });
+    }));
   }
 }

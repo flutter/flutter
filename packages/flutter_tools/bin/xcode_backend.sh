@@ -82,7 +82,7 @@ BuildApp() {
 
   local bundle_sksl_path=""
   if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
-    bundle_sksl_path="-iBundleSkSLPath=${BUNDLE_SKSL_PATH}"
+    bundle_sksl_path="-dBundleSkSLPath=${BUNDLE_SKSL_PATH}"
   fi
 
   # Default value of assets_path is flutter_assets
@@ -144,8 +144,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
 
   # TODO(jmagman): use assemble copied engine in add-to-app.
   if [[ -e "${project_path}/.ios" ]]; then
-    RunCommand rm -rf -- "${derived_dir}/engine/Flutter.framework"
-    RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
+    RunCommand rsync -av --delete --filter "- .DS_Store" "${flutter_framework}" "${derived_dir}/engine"
   fi
 
   RunCommand pushd "${project_path}" > /dev/null
@@ -235,8 +234,10 @@ AddObservatoryBonjourService() {
   local built_products_plist="${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}"
 
   if [[ ! -f "${built_products_plist}" ]]; then
-    EchoError "error: ${INFOPLIST_PATH} does not exist. The Flutter \"Thin Binary\" build phase must run after \"Copy Bundle Resources\"."
-    exit -1
+    # Very occasionally Xcode hasn't created an Info.plist when this runs.
+    # The file will be present on re-run.
+    echo "${INFOPLIST_PATH} does not exist. Skipping _dartobservatory._tcp NSBonjourServices insertion. Try re-building to enable \"flutter attach\"."
+    return
   fi
   # If there are already NSBonjourServices specified by the app (uncommon), insert the observatory service name to the existing list.
   if plutil -extract NSBonjourServices xml1 -o - "${built_products_plist}"; then

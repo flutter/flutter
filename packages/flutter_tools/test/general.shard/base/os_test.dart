@@ -2,29 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_info.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const String kExecutable = 'foo';
 const String kPath1 = '/bar/bin/$kExecutable';
 const String kPath2 = '/another/bin/$kExecutable';
 
 void main() {
-  FakeProcessManager fakeProcessManager;
+  late FakeProcessManager fakeProcessManager;
 
   setUp(() {
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
   });
 
   OperatingSystemUtils createOSUtils(Platform platform) {
@@ -62,7 +58,7 @@ void main() {
         ),
       );
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
-      expect(utils.which(kExecutable).path, kPath1);
+      expect(utils.which(kExecutable)!.path, kPath1);
     });
 
     testWithoutContext('returns all results for whichAll', () async {
@@ -85,16 +81,8 @@ void main() {
   });
 
   group('which on Windows', () {
-    testWithoutContext('throws tool exit if where throws an argument error', () async {
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: const <String>[
-            'where',
-            kExecutable,
-          ],
-          exception: ArgumentError('Cannot find executable for where'),
-        ),
-      );
+    testWithoutContext('throws tool exit if where.exe cannot be run', () async {
+      fakeProcessManager.excludedExecutables.add('where');
 
       final OperatingSystemUtils utils = OperatingSystemUtils(
         fileSystem: MemoryFileSystem.test(),
@@ -103,7 +91,7 @@ void main() {
         processManager: fakeProcessManager,
       );
 
-      expect(() => utils.which(kExecutable), throwsA(isA<ToolExit>()));
+      expect(() => utils.which(kExecutable), throwsToolExit());
     });
 
     testWithoutContext('returns null when executable does not exist', () async {
@@ -132,7 +120,7 @@ void main() {
         ),
       );
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
-      expect(utils.which(kExecutable).path, kPath1);
+      expect(utils.which(kExecutable)!.path, kPath1);
     });
 
     testWithoutContext('returns all results for whichAll', () async {
@@ -383,6 +371,134 @@ void main() {
           createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(utils.name, 'product version build darwin-x64');
     });
+
+    testWithoutContext('Windows name', () async {
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'ver',
+          ],
+          stdout: 'version',
+        ),
+      ]);
+
+      final OperatingSystemUtils utils =
+          createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      expect(utils.name, 'version');
+    });
+
+    testWithoutContext('Linux name', () async {
+      const String fakeOsRelease = '''
+      NAME="Name"
+      ID=id
+      ID_LIKE=id_like
+      BUILD_ID=build_id
+      PRETTY_NAME="Pretty Name"
+      ANSI_COLOR="ansi color"
+      HOME_URL="https://home.url/"
+      DOCUMENTATION_URL="https://documentation.url/"
+      SUPPORT_URL="https://support.url/"
+      BUG_REPORT_URL="https://bug.report.url/"
+      LOGO=logo
+      ''';
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      fileSystem.directory('/etc').createSync();
+      fileSystem.file('/etc/os-release').writeAsStringSync(fakeOsRelease);
+
+      final OperatingSystemUtils utils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+          operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
+        ),
+        processManager: fakeProcessManager,
+      );
+      expect(utils.name, 'Pretty Name 1.2.3-abcd');
+    });
+
+    testWithoutContext('Linux name reads from "/usr/lib/os-release" if "/etc/os-release" is missing', () async {
+      const String fakeOsRelease = '''
+      NAME="Name"
+      ID=id
+      ID_LIKE=id_like
+      BUILD_ID=build_id
+      PRETTY_NAME="Pretty Name"
+      ANSI_COLOR="ansi color"
+      HOME_URL="https://home.url/"
+      DOCUMENTATION_URL="https://documentation.url/"
+      SUPPORT_URL="https://support.url/"
+      BUG_REPORT_URL="https://bug.report.url/"
+      LOGO=logo
+      ''';
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      fileSystem.directory('/usr/lib').createSync(recursive: true);
+      fileSystem.file('/usr/lib/os-release').writeAsStringSync(fakeOsRelease);
+
+      expect(fileSystem.file('/etc/os-release').existsSync(), false);
+
+      final OperatingSystemUtils utils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+          operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
+        ),
+        processManager: fakeProcessManager,
+      );
+      expect(utils.name, 'Pretty Name 1.2.3-abcd');
+    });
+
+    testWithoutContext('Linux name when reading "/etc/os-release" fails', () async {
+      final FileExceptionHandler handler = FileExceptionHandler();
+      final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+
+      fileSystem.directory('/etc').createSync();
+      final File osRelease = fileSystem.file('/etc/os-release');
+
+      handler.addError(osRelease, FileSystemOp.read, const FileSystemException());
+
+      final OperatingSystemUtils utils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+          operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
+        ),
+        processManager: fakeProcessManager,
+      );
+      expect(utils.name, 'Linux 1.2.3-abcd');
+    });
+
+    testWithoutContext('Linux name omits kernel release if undefined', () async {
+      const String fakeOsRelease = '''
+      NAME="Name"
+      ID=id
+      ID_LIKE=id_like
+      BUILD_ID=build_id
+      PRETTY_NAME="Pretty Name"
+      ANSI_COLOR="ansi color"
+      HOME_URL="https://home.url/"
+      DOCUMENTATION_URL="https://documentation.url/"
+      SUPPORT_URL="https://support.url/"
+      BUG_REPORT_URL="https://bug.report.url/"
+      LOGO=logo
+      ''';
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      fileSystem.directory('/etc').createSync();
+      fileSystem.file('/etc/os-release').writeAsStringSync(fakeOsRelease);
+
+      final OperatingSystemUtils utils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+          operatingSystemVersion: 'undefinedOperatingSystemVersion',
+        ),
+        processManager: fakeProcessManager,
+      );
+      expect(utils.name, 'Pretty Name');
+    });
   });
 
   testWithoutContext('If unzip fails, include stderr in exception text', () {
@@ -420,17 +536,10 @@ void main() {
     );
   });
 
-  group('display an install message when unzip throws an ArgumentError', () {
+  group('display an install message when unzip cannot be run', () {
     testWithoutContext('Linux', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            'unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path,
-          ],
-          exception: ArgumentError(),
-        ),
-      );
+      fakeProcessManager.excludedExecutables.add('unzip');
 
       final OperatingSystemUtils linuxOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
@@ -449,14 +558,7 @@ void main() {
 
     testWithoutContext('macOS', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            'unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path,
-          ],
-          exception: ArgumentError(),
-        ),
-      );
+      fakeProcessManager.excludedExecutables.add('unzip');
 
       final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
@@ -466,7 +568,7 @@ void main() {
       );
 
       expect(
-            () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+        () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
         throwsToolExit
           (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
             'Consider running "brew install unzip".'),
@@ -475,14 +577,7 @@ void main() {
 
     testWithoutContext('unknown OS', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            'unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path,
-          ],
-          exception: ArgumentError(),
-        ),
-      );
+      fakeProcessManager.excludedExecutables.add('unzip');
 
       final OperatingSystemUtils unknownOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,

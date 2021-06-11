@@ -697,14 +697,14 @@ void main() {
     await tester.pumpWidget(buildApp(divisions: 3));
     expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor));
     expect(
-        material,
-        paints
-          ..circle(color: sliderTheme.activeTickMarkColor)
-          ..circle(color: sliderTheme.activeTickMarkColor)
-          ..circle(color: sliderTheme.inactiveTickMarkColor)
-          ..circle(color: sliderTheme.inactiveTickMarkColor)
-          ..shadow(color: Colors.black)
-          ..circle(color: sliderTheme.thumbColor)
+      material,
+      paints
+        ..circle(color: sliderTheme.activeTickMarkColor)
+        ..circle(color: sliderTheme.activeTickMarkColor)
+        ..circle(color: sliderTheme.inactiveTickMarkColor)
+        ..circle(color: sliderTheme.inactiveTickMarkColor)
+        ..shadow(color: Colors.black)
+        ..circle(color: sliderTheme.thumbColor),
     );
     expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
     expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
@@ -718,14 +718,15 @@ void main() {
     ));
     expect(material, paints..rrect(color: customColor1)..rrect(color: customColor2));
     expect(
-        material,
-        paints
-          ..circle(color: customColor2)
-          ..circle(color: customColor2)
-          ..circle(color: customColor1)
-          ..circle(color: customColor1)
-          ..shadow(color: Colors.black)
-          ..circle(color: customColor1));
+      material,
+      paints
+        ..circle(color: customColor2)
+        ..circle(color: customColor2)
+        ..circle(color: customColor1)
+        ..circle(color: customColor1)
+        ..shadow(color: Colors.black)
+        ..circle(color: customColor1),
+    );
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
     expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
@@ -737,10 +738,11 @@ void main() {
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
     expect(
-        material,
-        paints
-          ..rrect(color: sliderTheme.disabledActiveTrackColor)
-          ..rrect(color: sliderTheme.disabledInactiveTrackColor));
+      material,
+      paints
+        ..rrect(color: sliderTheme.disabledActiveTrackColor)
+        ..rrect(color: sliderTheme.disabledInactiveTrackColor),
+    );
     expect(material, paints..shadow(color: Colors.black)..circle(color: sliderTheme.disabledThumbColor));
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
@@ -749,10 +751,11 @@ void main() {
     // Test setting the activeColor and inactiveColor for disabled widget.
     await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, enabled: false));
     expect(
-        material,
-        paints
-          ..rrect(color: sliderTheme.disabledActiveTrackColor)
-          ..rrect(color: sliderTheme.disabledInactiveTrackColor));
+      material,
+      paints
+        ..rrect(color: sliderTheme.disabledActiveTrackColor)
+        ..rrect(color: sliderTheme.disabledInactiveTrackColor),
+    );
     expect(material, paints..circle(color: sliderTheme.disabledThumbColor));
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
@@ -903,6 +906,46 @@ void main() {
     expect(value, lessThan(0.5));
 
     await gesture.up();
+  });
+
+  testWidgets('Slider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28115
+
+    int startFired = 0;
+    int endFired = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: GestureDetector(
+                onHorizontalDragUpdate: (_) { },
+                child: Slider(
+                  value: 0.0,
+                  onChanged: (double newValue) { },
+                  onChangeStart: (double value) {
+                    startFired += 1;
+                  },
+                  onChangeEnd: (double value) {
+                    endFired += 1;
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.timedDrag(
+      find.byType(Slider),
+      const Offset(20.0, 0.0),
+      const Duration(milliseconds: 100),
+    );
+
+    expect(startFired, equals(1));
+    expect(endFired, equals(1));
   });
 
   testWidgets('Slider sizing', (WidgetTester tester) async {
@@ -1471,25 +1514,25 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-        MaterialApp(
-          home: Theme(
-            data: ThemeData.light(),
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: MediaQuery(
-                data: MediaQueryData.fromWindow(window),
-                child: Material(
-                  child: Slider(
-                    value: 100.0,
-                    min: 0.0,
-                    max: 200.0,
-                    onChanged: (double v) { },
-                  ),
+      MaterialApp(
+        home: Theme(
+          data: ThemeData.light(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: MediaQueryData.fromWindow(window),
+              child: Material(
+                child: Slider(
+                  value: 100.0,
+                  min: 0.0,
+                  max: 200.0,
+                  onChanged: (double v) { },
                 ),
               ),
             ),
           ),
-        )
+        ),
+      ),
     );
 
     expect(
@@ -2123,7 +2166,7 @@ void main() {
         ..paragraph()
         // Represents the Slider.
         ..path(color: fillColor)
-        ..paragraph()
+        ..paragraph(),
     );
 
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
@@ -2267,7 +2310,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
@@ -2296,7 +2339,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
@@ -2318,7 +2361,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
@@ -2361,9 +2404,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-            sliderTheme: const SliderThemeData(
-              trackShape: RectangularSliderTrackShape(),
-            ),
+          sliderTheme: const SliderThemeData(
+            trackShape: RectangularSliderTrackShape(),
+          ),
         ),
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -2387,10 +2430,11 @@ void main() {
 
     // The active track rect should start at 24.0 pixels,
     // and there should not have a gap between active and inactive track.
-    expect(renderObject,
-        paints
-          ..rect(rect: const Rect.fromLTRB(24.0, 298.0, 400.0, 302.0)) // active track Rect.
-          ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 776.0, 302.0)) // inactive track Rect.
+    expect(
+      renderObject,
+      paints
+        ..rect(rect: const Rect.fromLTRB(24.0, 298.0, 400.0, 302.0)) // active track Rect.
+        ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 776.0, 302.0)), // inactive track Rect.
     );
   });
 
@@ -2418,14 +2462,15 @@ void main() {
     // _RenderSlider is the last render object in the tree.
     final RenderObject renderObject = tester.allRenderObjects.last;
 
-    expect(renderObject,
-        paints
-          // active track RRect
-          ..rrect(rrect: RRect.fromLTRBAndCorners(-14.0, 2.0, 5.0, 8.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
-          // inactive track RRect
-          ..rrect(rrect: RRect.fromLTRBAndCorners(5.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
-          // thumb
-          ..circle(x: 5.0, y: 5.0, radius: 10.0, )
+    expect(
+      renderObject,
+      paints
+        // active track RRect
+        ..rrect(rrect: RRect.fromLTRBAndCorners(-14.0, 2.0, 5.0, 8.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
+        // inactive track RRect
+        ..rrect(rrect: RRect.fromLTRBAndCorners(5.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+        // thumb
+        ..circle(x: 5.0, y: 5.0, radius: 10.0, ),
     );
   });
 

@@ -20,7 +20,6 @@ import 'theme.dart';
 class CupertinoColors {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   CupertinoColors._();
 
   /// iOS 13's default blue color. Used to indicate active elements such as

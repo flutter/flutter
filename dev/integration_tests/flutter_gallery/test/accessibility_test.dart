@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/gallery/app.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/demo/all.dart';
+import 'package:flutter_gallery/gallery/app.dart';
 import 'package:flutter_gallery/gallery/themes.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('All material demos meet recommended tap target sizes', () {

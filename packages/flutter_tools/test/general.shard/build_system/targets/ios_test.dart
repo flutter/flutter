@@ -12,8 +12,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/assets.dart';
-import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/convert.dart';
 
@@ -49,7 +47,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
     environment = Environment.test(
@@ -103,7 +101,7 @@ void main() {
   });
 
   testUsingContext('DebugIosApplicationBundle', () async {
-    environment.inputs[kBundleSkSLPath] = 'bundle.sksl';
+    environment.defines[kBundleSkSLPath] = 'bundle.sksl';
     environment.defines[kBuildMode] = 'debug';
     environment.defines[kCodesignIdentity] = 'ABC123';
     // Precompiled dart data
@@ -227,7 +225,7 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    expect(const AotAssemblyRelease().build(environment), throwsA(isA<Exception>()
+    expect(const AotAssemblyRelease().build(environment), throwsA(isException
       .having(
         (Exception exception) => exception.toString(),
         'description',
@@ -256,13 +254,11 @@ void main() {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kIosArchs] = 'x86_64';
 
-    expect(const AotAssemblyRelease().build(environment), throwsA(isA<Exception>()
-        .having(
-          (Exception exception) => exception.toString(),
+    expect(const AotAssemblyRelease().build(environment), throwsA(isException.having(
+      (Exception exception) => exception.toString(),
       'description',
       contains('required define SdkRoot but it was not provided'),
-    )
-    ));
+    )));
     expect(processManager.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -373,7 +369,7 @@ void main() {
       processManager.addCommand(copyPhysicalFrameworkCommand);
       await expectLater(
         const DebugUnpackIOS().build(environment),
-        throwsA(isA<Exception>().having(
+        throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
           contains('Flutter.framework/Flutter does not exist, cannot thin'),
@@ -414,12 +410,13 @@ void main() {
       ]);
 
       await expectLater(
-          const DebugUnpackIOS().build(environment),
-          throwsA(isA<Exception>().having(
-                (Exception exception) => exception.toString(),
-            'description',
-            contains('does not contain arm64 armv7. Running lipo -info:\nArchitectures in the fat file:'),
-          )));
+        const DebugUnpackIOS().build(environment),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('does not contain arm64 armv7. Running lipo -info:\nArchitectures in the fat file:'),
+        )),
+      );
     });
 
     testWithoutContext('fails when lipo extract fails', () async {
@@ -468,11 +465,12 @@ void main() {
 
       await expectLater(
         const DebugUnpackIOS().build(environment),
-        throwsA(isA<Exception>().having(
-              (Exception exception) => exception.toString(),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
           'description',
           contains('Failed to extract arm64 armv7 for output/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
-        )));
+        )),
+      );
     });
 
     testWithoutContext('skips thin framework', () async {
@@ -583,12 +581,13 @@ void main() {
       ]);
 
       await expectLater(
-          const DebugUnpackIOS().build(environment),
-          throwsA(isA<Exception>().having(
-                (Exception exception) => exception.toString(),
-            'description',
-            contains('Failed to strip bitcode for output/Flutter.framework/Flutter.\nbitcode_strip error'),
-          )));
+        const DebugUnpackIOS().build(environment),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('Failed to strip bitcode for output/Flutter.framework/Flutter.\nbitcode_strip error'),
+        )),
+      );
 
       expect(processManager.hasRemainingExpectations, isFalse);
     });
@@ -655,12 +654,13 @@ void main() {
       ]);
 
       await expectLater(
-          const DebugUnpackIOS().build(environment),
-          throwsA(isA<Exception>().having(
-                (Exception exception) => exception.toString(),
-            'description',
-            contains('Failed to codesign output/Flutter.framework/Flutter with identity ABC123.\ncodesign error'),
-          )));
+        const DebugUnpackIOS().build(environment),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('Failed to codesign output/Flutter.framework/Flutter with identity ABC123.\ncodesign error'),
+        )),
+      );
 
       expect(processManager.hasRemainingExpectations, isFalse);
     });

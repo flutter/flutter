@@ -230,7 +230,7 @@ class Dialog extends StatelessWidget {
 ///     onPressed: () => showDialog<String>(
 ///       context: context,
 ///       builder: (BuildContext context) => AlertDialog(
-///         title: const Text('AlertDialog Tilte'),
+///         title: const Text('AlertDialog Title'),
 ///         content: const Text('AlertDialog description'),
 ///         actions: <Widget>[
 ///           TextButton(
@@ -507,9 +507,9 @@ class AlertDialog extends StatelessWidget {
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6!,
           child: Semantics(
-            child: title,
             namesRoute: label == null,
             container: true,
+            child: title,
           ),
         ),
       );
@@ -526,7 +526,10 @@ class AlertDialog extends StatelessWidget {
         ),
         child: DefaultTextStyle(
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1!,
-          child: content!,
+          child: Semantics(
+            container: true,
+            child: content,
+          ),
         ),
       );
     }
@@ -877,7 +880,11 @@ class SimpleDialog extends StatelessWidget {
         ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6!,
-          child: Semantics(namesRoute: label == null, child: title),
+          child: Semantics(
+            namesRoute: label == null,
+            container: true,
+            child: title,
+          ),
         ),
       );
     }
@@ -994,7 +1001,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=freeform}
+/// {@tool sample --template=stateless_widget_restoration_material}
 ///
 /// This sample demonstrates how to create a restorable Material dialog. This is
 /// accomplished by enabling state restoration by specifying
@@ -1003,51 +1010,25 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
 /// ```dart
-/// void main() {
-///   runApp(const MyApp());
-/// }
-///
-/// class MyApp extends StatelessWidget {
-///   const MyApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return const MaterialApp(
-///       restorationScopeId: 'app',
-///       title: 'Restorable Routes Demo',
-///       home: MyHomePage(),
-///     );
-///   }
-/// }
-///
-/// class MyHomePage extends StatelessWidget {
-///   const MyHomePage({Key? key}) : super(key: key);
-///
-///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-///     return DialogRoute<void>(
-///       context: context,
-///       builder: (BuildContext context) => const AlertDialog(title: Text('Material Alert!')),
-///     );
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       body: Center(
-///         child: OutlinedButton(
-///           onPressed: () {
-///             Navigator.of(context).restorablePush(_dialogBuilder);
-///           },
-///           child: const Text('Open Dialog'),
-///         ),
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: OutlinedButton(
+///         onPressed: () {
+///           Navigator.of(context).restorablePush(_dialogBuilder);
+///         },
+///         child: const Text('Open Dialog'),
 ///       ),
-///     );
-///   }
+///     ),
+///   );
+/// }
+///
+/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+///   return DialogRoute<void>(
+///     context: context,
+///     builder: (BuildContext context) => const AlertDialog(title: Text('Material Alert!')),
+///   );
 /// }
 /// ```
 ///
@@ -1171,7 +1152,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
 }
 
 double _paddingScaleFactor(double textScaleFactor) {
-  final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0).toDouble();
+  final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0);
   // The final padding scale factor is clamped between 1/3 and 1. For example,
   // a non-scaled padding of 24 will produce a padding between 24 and 8.
   return lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0)!;

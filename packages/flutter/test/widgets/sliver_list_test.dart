@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SliverList reverse children (with keys)', (WidgetTester tester) async {
@@ -173,7 +173,7 @@ void main() {
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -196,7 +196,7 @@ void main() {
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pump();
     // We need second pump to ensure the scheduled animation gets run.
@@ -233,7 +233,7 @@ void main() {
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -260,7 +260,7 @@ void main() {
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pump();
     // We need second pump to ensure the scheduled animation gets run.

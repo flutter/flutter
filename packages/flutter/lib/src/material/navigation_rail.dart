@@ -112,7 +112,7 @@ class NavigationRail extends StatefulWidget {
   /// [minWidth].
   ///
   /// The argument [extended] must not be null. [extended] can only be set to
-  /// true when when the [labelType] is null or [NavigationRailLabelType.none].
+  /// true when the [labelType] is null or [NavigationRailLabelType.none].
   ///
   /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
   /// [unselectedLabelTextStyle], [selectedLabelTextStyle],
@@ -287,7 +287,7 @@ class NavigationRail extends StatefulWidget {
   /// a copy of the [IconThemeData.fallback] with a custom [NavigationRail]
   /// specific color will be used.
   ///
-  /// The default value is Is the [Theme]'s [ThemeData.iconTheme] with a color
+  /// The default value is the [Theme]'s [ThemeData.iconTheme] with a color
   /// of the [Theme]'s [ColorScheme.onSurface] with an opacity of 0.64.
   /// Properties from this icon theme, or
   /// [NavigationRailThemeData.unselectedIconTheme] if this is null, are
@@ -299,7 +299,7 @@ class NavigationRail extends StatefulWidget {
   /// When a [NavigationRailDestination] is not selected,
   /// [unselectedIconTheme] will be used.
   ///
-  /// The default value is Is the [Theme]'s [ThemeData.iconTheme] with a color
+  /// The default value is the [Theme]'s [ThemeData.iconTheme] with a color
   /// of the [Theme]'s [ColorScheme.primary]. Properties from this icon theme,
   /// or [NavigationRailThemeData.selectedIconTheme] if this is null, are
   /// merged into the defaults.
@@ -383,7 +383,7 @@ class NavigationRail extends StatefulWidget {
   }
 
   @override
-  _NavigationRailState createState() => _NavigationRailState();
+  State<NavigationRail> createState() => _NavigationRailState();
 }
 
 class _NavigationRailState extends State<NavigationRail> with TickerProviderStateMixin {
@@ -653,7 +653,7 @@ class _RailDestination extends StatelessWidget {
                     child: label,
                   ),
                 ),
-              ]
+              ],
             ),
           );
         } else {
@@ -759,7 +759,7 @@ class _RailDestination extends StatelessWidget {
           Semantics(
             label: indexLabel,
           ),
-        ]
+        ],
       ),
     );
   }

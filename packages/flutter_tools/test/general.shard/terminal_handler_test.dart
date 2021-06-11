@@ -6,17 +6,80 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/vmservice.dart';
+import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
+import '../src/fake_vm_services.dart';
+
+final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  exceptionPauseMode: null,
+  extensionRPCs: <String>[],
+  libraries: <vm_service.LibraryRef>[
+    vm_service.LibraryRef(
+      id: '1',
+      uri: 'file:///hello_world/main.dart',
+      name: '',
+    ),
+  ],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+  isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
+);
+
+final vm_service.VM fakeVM = vm_service.VM(
+  isolates: <vm_service.IsolateRef>[fakeUnpausedIsolate],
+  pid: 1,
+  hostCPU: '',
+  isolateGroups: <vm_service.IsolateGroupRef>[],
+  targetCPU: '',
+  startTime: 0,
+  name: 'dart',
+  architectureBits: 64,
+  operatingSystem: '',
+  version: '',
+  systemIsolateGroups: <vm_service.IsolateGroupRef>[],
+  systemIsolates: <vm_service.IsolateRef>[],
+);
+
+final FlutterView fakeFlutterView = FlutterView(
+  id: 'a',
+  uiIsolate: fakeUnpausedIsolate,
+);
+
+final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[
+      fakeFlutterView.toJson(),
+    ],
+  },
+);
 
 void main() {
   testWithoutContext('keyboard input handling single help character', () async {
@@ -62,267 +125,1112 @@ void main() {
   });
 
   group('keycode verification, brought to you by the letter', () {
-    MockResidentRunner mockResidentRunner;
-    TerminalHandler terminalHandler;
-    BufferLogger testLogger;
-
-    setUp(() {
-      testLogger = BufferLogger.test();
-      final Signals signals = Signals.test();
-      final Terminal terminal = Terminal.test();
-      final MemoryFileSystem fs = MemoryFileSystem.test();
-      final ProcessInfo processInfo = ProcessInfo.test(fs);
-      mockResidentRunner = MockResidentRunner();
-      terminalHandler = TerminalHandler(
-        mockResidentRunner,
-        logger: testLogger,
-        signals: signals,
-        terminal: terminal,
-        processInfo: processInfo,
-      reportReady: false,
-      );
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(true);
-    });
-
     testWithoutContext('a, can handle trailing newlines', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
       await terminalHandler.processTerminalInput('a\n');
 
       expect(terminalHandler.lastReceivedCommand, 'a');
     });
 
     testWithoutContext('n, can handle trailing only newlines', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
       await terminalHandler.processTerminalInput('\n\n');
 
       expect(terminalHandler.lastReceivedCommand, '');
     });
 
-    testWithoutContext('a - debugToggleProfileWidgetBuilds with service protocol', () async {
-      await terminalHandler.processTerminalInput('a');
+    testWithoutContext('a - debugToggleProfileWidgetBuilds', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.profileWidgetBuilds',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'enabled': 'false'
+          },
+         ),
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.profileWidgetBuilds',
+          args: <String, Object>{
+            'isolateId': '1',
+            'enabled': 'true'
+          },
+          jsonResponse: <String, Object>{
+            'enabled': 'true'
+          },
+        ),
+      ]);
 
-      verify(mockResidentRunner.debugToggleProfileWidgetBuilds()).called(1);
+      await terminalHandler.processTerminalInput('a');
     });
 
-    testWithoutContext('a - debugToggleProfileWidgetBuilds', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(true);
-      await terminalHandler.processTerminalInput('a');
+    testWithoutContext('a - debugToggleProfileWidgetBuilds with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.profileWidgetBuilds',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'enabled': 'false'
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.profileWidgetBuilds',
+          args: <String, Object>{
+            'isolateId': '1',
+            'enabled': 'true'
+          },
+          jsonResponse: <String, Object>{
+            'enabled': 'true'
+          },
+        ),
+      ], web: true);
 
-      verify(mockResidentRunner.debugToggleProfileWidgetBuilds()).called(1);
+      await terminalHandler.processTerminalInput('a');
+    });
+
+    testWithoutContext('a - debugToggleProfileWidgetBuilds without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+
+      await terminalHandler.processTerminalInput('a');
     });
 
     testWithoutContext('b - debugToggleBrightness', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(true);
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.brightnessOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'Brightness.light',
+          }
+        ),
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.brightnessOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+            'value': 'Brightness.dark',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'Brightness.dark',
+          }
+        ),
+      ]);
       await terminalHandler.processTerminalInput('b');
 
-      verify(mockResidentRunner.debugToggleBrightness()).called(1);
+      expect(terminalHandler.logger.statusText, contains('Changed brightness to Brightness.dark'));
+    });
+
+    testWithoutContext('b - debugToggleBrightness with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.brightnessOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'Brightness.light',
+          }
+        ),
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.brightnessOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+            'value': 'Brightness.dark',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'Brightness.dark',
+          }
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('b');
+
+      expect(terminalHandler.logger.statusText, contains('Changed brightness to Brightness.dark'));
+    });
+
+    testWithoutContext('b - debugToggleBrightness without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+
+      await terminalHandler.processTerminalInput('b');
     });
 
     testWithoutContext('d,D - detach', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
       await terminalHandler.processTerminalInput('d');
+
+      expect(runner.calledDetach, true);
+      runner.calledDetach = false;
+
       await terminalHandler.processTerminalInput('D');
 
-      verify(mockResidentRunner.detach()).called(2);
+      expect(runner.calledDetach, true);
     });
 
     testWithoutContext('h,H,? - printHelp', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
       await terminalHandler.processTerminalInput('h');
+
+      expect(runner.calledPrintWithDetails, true);
+      runner.calledPrintWithDetails = false;
+
       await terminalHandler.processTerminalInput('H');
+
+      expect(runner.calledPrintWithDetails, true);
+      runner.calledPrintWithDetails = false;
+
       await terminalHandler.processTerminalInput('?');
 
-      verify(mockResidentRunner.printHelp(details: true)).called(3);
+      expect(runner.calledPrintWithDetails, true);
     });
 
-    testWithoutContext('i - debugToggleWidgetInspector with service protocol', () async {
+    testWithoutContext('i - debugToggleWidgetInspector', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.inspector.show',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+      ]);
+
       await terminalHandler.processTerminalInput('i');
-
-      verify(mockResidentRunner.debugToggleWidgetInspector()).called(1);
     });
 
-    testWithoutContext('I - debugToggleInvertOversizedImages with service protocol/debug', () async {
-      when(mockResidentRunner.isRunningDebug).thenReturn(true);
+    testWithoutContext('i - debugToggleWidgetInspector with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.inspector.show',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+      ], web: true);
+
+      await terminalHandler.processTerminalInput('i');
+    });
+
+    testWithoutContext('i - debugToggleWidgetInspector without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+
+      await terminalHandler.processTerminalInput('i');
+    });
+
+    testWithoutContext('I - debugToggleInvertOversizedImages', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.invertOversizedImages',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+      ]);
       await terminalHandler.processTerminalInput('I');
-
-      verify(mockResidentRunner.debugToggleInvertOversizedImages()).called(1);
     });
 
-    testWithoutContext('L - debugDumpLayerTree with service protocol', () async {
+    testWithoutContext('I - debugToggleInvertOversizedImages with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.invertOversizedImages',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('I');
+    });
+
+    testWithoutContext('I - debugToggleInvertOversizedImages without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('I');
+    });
+
+    testWithoutContext('I - debugToggleInvertOversizedImages in profile mode is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], buildMode: BuildMode.profile);
+      await terminalHandler.processTerminalInput('I');
+    });
+
+    testWithoutContext('L - debugDumpLayerTree', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpLayerTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'LAYER TREE',
+          }
+        ),
+      ]);
       await terminalHandler.processTerminalInput('L');
 
-      verify(mockResidentRunner.debugDumpLayerTree()).called(1);
+      expect(terminalHandler.logger.statusText, contains('LAYER TREE'));
     });
 
-    testWithoutContext('o,O - debugTogglePlatform with service protocol and debug mode', () async {
-      when(mockResidentRunner.isRunningDebug).thenReturn(true);
+    testWithoutContext('L - debugDumpLayerTree with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpLayerTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'LAYER TREE',
+          }
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('L');
+
+      expect(terminalHandler.logger.statusText, contains('LAYER TREE'));
+    });
+
+    testWithoutContext('L - debugDumpLayerTree with service protocol and profile mode is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], buildMode: BuildMode.profile);
+      await terminalHandler.processTerminalInput('L');
+    });
+
+    testWithoutContext('L - debugDumpLayerTree without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('L');
+    });
+
+    testWithoutContext('o,O - debugTogglePlatform', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        // Request 1.
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.platformOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'iOS'
+          },
+        ),
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.platformOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+            'value': 'fuchsia',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'fuchsia'
+          },
+        ),
+        // Request 2.
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.platformOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'android'
+          },
+        ),
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.platformOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+            'value': 'iOS',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'iOS'
+          },
+        ),
+      ]);
       await terminalHandler.processTerminalInput('o');
       await terminalHandler.processTerminalInput('O');
 
-      verify(mockResidentRunner.debugTogglePlatform()).called(2);
+      expect(terminalHandler.logger.statusText, contains('Switched operating system to fuchsia'));
+      expect(terminalHandler.logger.statusText, contains('Switched operating system to iOS'));
     });
 
-    testWithoutContext('p - debugToggleDebugPaintSizeEnabled with service protocol and debug mode', () async {
-      when(mockResidentRunner.isRunningDebug).thenReturn(true);
+    testWithoutContext('o,O - debugTogglePlatform with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        // Request 1.
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.platformOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'iOS'
+          },
+        ),
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.platformOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+            'value': 'fuchsia',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'fuchsia'
+          },
+        ),
+        // Request 2.
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.platformOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'android'
+          },
+        ),
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.platformOverride',
+          args: <String, Object>{
+            'isolateId': '1',
+            'value': 'iOS',
+          },
+          jsonResponse: <String, Object>{
+            'value': 'iOS'
+          },
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('o');
+      await terminalHandler.processTerminalInput('O');
+
+      expect(terminalHandler.logger.statusText, contains('Switched operating system to fuchsia'));
+      expect(terminalHandler.logger.statusText, contains('Switched operating system to iOS'));
+    });
+
+    testWithoutContext('o,O - debugTogglePlatform without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('o');
+      await terminalHandler.processTerminalInput('O');
+    });
+
+    testWithoutContext('p - debugToggleDebugPaintSizeEnabled', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugPaint',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+      ]);
       await terminalHandler.processTerminalInput('p');
-
-      verify(mockResidentRunner.debugToggleDebugPaintSizeEnabled()).called(1);
     });
 
-    testWithoutContext('p - debugToggleDebugPaintSizeEnabled with service protocol and debug mode', () async {
-      when(mockResidentRunner.isRunningDebug).thenReturn(true);
+    testWithoutContext('p - debugToggleDebugPaintSizeEnabled with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugPaint',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+      ], web: true);
       await terminalHandler.processTerminalInput('p');
-
-      verify(mockResidentRunner.debugToggleDebugPaintSizeEnabled()).called(1);
     });
 
-    testWithoutContext('P - debugTogglePerformanceOverlayOverride with service protocol', () async {
+    testWithoutContext('p - debugToggleDebugPaintSizeEnabled without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('p');
+    });
+
+    testWithoutContext('P - debugTogglePerformanceOverlayOverride', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.showPerformanceOverlay',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+      ]);
       await terminalHandler.processTerminalInput('P');
-
-      verify(mockResidentRunner.debugTogglePerformanceOverlayOverride()).called(1);
     });
 
-    testWithoutContext('q,Q - exit', () async {
-      await terminalHandler.processTerminalInput('q');
-      await terminalHandler.processTerminalInput('Q');
-
-      verify(mockResidentRunner.exit()).called(2);
+    testWithoutContext('P - debugTogglePerformanceOverlayOverride with web target is skipped ', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], web: true);
+      await terminalHandler.processTerminalInput('P');
     });
 
-    testWithoutContext('s - screenshot', () async {
-      final MockDevice mockDevice = MockDevice();
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockResidentRunner.isRunningDebug).thenReturn(true);
-      when(mockResidentRunner.flutterDevices).thenReturn(<FlutterDevice>[mockFlutterDevice]);
-      when(mockFlutterDevice.device).thenReturn(mockDevice);
-      when(mockDevice.supportsScreenshot).thenReturn(true);
-
-      await terminalHandler.processTerminalInput('s');
-
-      verify(mockResidentRunner.screenshot(mockFlutterDevice)).called(1);
+    testWithoutContext('P - debugTogglePerformanceOverlayOverride without service protocol is skipped ', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('P');
     });
 
-    testWithoutContext('r - hotReload supported and succeeds', () async {
-      when(mockResidentRunner.canHotReload).thenReturn(true);
-      when(mockResidentRunner.restart(fullRestart: false))
-          .thenAnswer((Invocation invocation) async {
-            return OperationResult(0, '');
-          });
-      await terminalHandler.processTerminalInput('r');
-
-      verify(mockResidentRunner.restart(fullRestart: false)).called(1);
-    });
-
-    testWithoutContext('r - hotReload supported and fails', () async {
-      when(mockResidentRunner.canHotReload).thenReturn(true);
-      when(mockResidentRunner.restart(fullRestart: false))
-          .thenAnswer((Invocation invocation) async {
-            return OperationResult(1, '');
-          });
-      await terminalHandler.processTerminalInput('r');
-
-      verify(mockResidentRunner.restart(fullRestart: false)).called(1);
-
-      expect(testLogger.statusText, contains('Try again after fixing the above error(s).'));
-    });
-
-    testWithoutContext('r - hotReload supported and fails fatally', () async {
-      when(mockResidentRunner.canHotReload).thenReturn(true);
-      when(mockResidentRunner.hotMode).thenReturn(true);
-      when(mockResidentRunner.restart(fullRestart: false))
-        .thenAnswer((Invocation invocation) async {
-          return OperationResult(1, 'fail', fatal: true);
-        });
-      expect(terminalHandler.processTerminalInput('r'), throwsToolExit());
-    });
-
-    testWithoutContext('r - hotReload unsupported', () async {
-      when(mockResidentRunner.canHotReload).thenReturn(false);
-      await terminalHandler.processTerminalInput('r');
-
-      verifyNever(mockResidentRunner.restart(fullRestart: false));
-    });
-
-    testWithoutContext('R - hotRestart supported and succeeds', () async {
-      when(mockResidentRunner.canHotRestart).thenReturn(true);
-      when(mockResidentRunner.hotMode).thenReturn(true);
-      when(mockResidentRunner.restart(fullRestart: true))
-        .thenAnswer((Invocation invocation) async {
-          return OperationResult(0, '');
-        });
-      await terminalHandler.processTerminalInput('R');
-
-      verify(mockResidentRunner.restart(fullRestart: true)).called(1);
-    });
-
-    testWithoutContext('R - hotRestart supported and fails', () async {
-      when(mockResidentRunner.canHotRestart).thenReturn(true);
-      when(mockResidentRunner.hotMode).thenReturn(true);
-      when(mockResidentRunner.restart(fullRestart: true))
-        .thenAnswer((Invocation invocation) async {
-          return OperationResult(1, 'fail');
-        });
-      await terminalHandler.processTerminalInput('R');
-
-      verify(mockResidentRunner.restart(fullRestart: true)).called(1);
-
-      expect(testLogger.statusText, contains('Try again after fixing the above error(s).'));
-    });
-
-    testWithoutContext('R - hotRestart supported and fails fatally', () async {
-      when(mockResidentRunner.canHotRestart).thenReturn(true);
-      when(mockResidentRunner.hotMode).thenReturn(true);
-      when(mockResidentRunner.restart(fullRestart: true))
-        .thenAnswer((Invocation invocation) async {
-          return OperationResult(1, 'fail', fatal: true);
-        });
-      expect(() => terminalHandler.processTerminalInput('R'), throwsToolExit());
-    });
-
-    testWithoutContext('R - hot restart unsupported', () async {
-      when(mockResidentRunner.canHotRestart).thenReturn(false);
-      await terminalHandler.processTerminalInput('R');
-
-      verifyNever(mockResidentRunner.restart(fullRestart: true));
-    });
-
-    testWithoutContext('S - debugDumpSemanticsTreeInTraversalOrder with service protocol', () async {
+     testWithoutContext('S - debugDumpSemanticsTreeInTraversalOrder', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'SEMANTICS DATA',
+          },
+        ),
+      ]);
       await terminalHandler.processTerminalInput('S');
 
-      verify(mockResidentRunner.debugDumpSemanticsTreeInTraversalOrder()).called(1);
+      expect(terminalHandler.logger.statusText, contains('SEMANTICS DATA'));
     });
 
-    testWithoutContext('t,T - debugDumpRenderTree with service protocol', () async {
+    testWithoutContext('S - debugDumpSemanticsTreeInTraversalOrder with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+          const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'SEMANTICS DATA',
+          },
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('S');
+
+      expect(terminalHandler.logger.statusText, contains('SEMANTICS DATA'));
+    });
+
+    testWithoutContext('S - debugDumpSemanticsTreeInTraversalOrder without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('S');
+    });
+
+    testWithoutContext('U - debugDumpSemanticsTreeInInverseHitTestOrder', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'SEMANTICS DATA',
+          },
+        ),
+      ]);
+      await terminalHandler.processTerminalInput('U');
+
+      expect(terminalHandler.logger.statusText, contains('SEMANTICS DATA'));
+    });
+
+    testWithoutContext('U - debugDumpSemanticsTreeInInverseHitTestOrder with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+          const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'SEMANTICS DATA',
+          },
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('U');
+
+      expect(terminalHandler.logger.statusText, contains('SEMANTICS DATA'));
+    });
+
+    testWithoutContext('U - debugDumpSemanticsTreeInInverseHitTestOrder without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('U');
+    });
+
+    testWithoutContext('t,T - debugDumpRenderTree', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpRenderTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'RENDER DATA 1',
+          },
+        ),
+        // Request 2.
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpRenderTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'RENDER DATA 2',
+          },
+        ),
+      ]);
       await terminalHandler.processTerminalInput('t');
       await terminalHandler.processTerminalInput('T');
 
-      verify(mockResidentRunner.debugDumpRenderTree()).called(2);
+      expect(terminalHandler.logger.statusText, contains('RENDER DATA 1'));
+      expect(terminalHandler.logger.statusText, contains('RENDER DATA 2'));
     });
 
-    testWithoutContext('U - debugDumpRenderTree with service protocol', () async {
-      await terminalHandler.processTerminalInput('U');
+    testWithoutContext('t,T - debugDumpRenderTree with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpRenderTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'RENDER DATA 1',
+          },
+        ),
+        // Request 2.
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpRenderTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'RENDER DATA 2',
+          },
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('t');
+      await terminalHandler.processTerminalInput('T');
 
-      verify(mockResidentRunner.debugDumpSemanticsTreeInInverseHitTestOrder()).called(1);
+      expect(terminalHandler.logger.statusText, contains('RENDER DATA 1'));
+      expect(terminalHandler.logger.statusText, contains('RENDER DATA 2'));
     });
 
-    testWithoutContext('w,W - debugDumpApp with service protocol', () async {
+    testWithoutContext('t,T - debugDumpRenderTree without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('t');
+      await terminalHandler.processTerminalInput('T');
+    });
+
+    testWithoutContext('w,W - debugDumpApp', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpApp',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'WIDGET DATA 1',
+          },
+        ),
+        // Request 2.
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpApp',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'WIDGET DATA 2',
+          },
+        ),
+      ]);
       await terminalHandler.processTerminalInput('w');
       await terminalHandler.processTerminalInput('W');
 
-      verify(mockResidentRunner.debugDumpApp()).called(2);
+      expect(terminalHandler.logger.statusText, contains('WIDGET DATA 1'));
+      expect(terminalHandler.logger.statusText, contains('WIDGET DATA 2'));
     });
 
-    testWithoutContext('z,Z - debugToggleDebugCheckElevationsEnabled with service protocol', () async {
+    testWithoutContext('w,W - debugDumpApp with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpApp',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'WIDGET DATA 1',
+          },
+        ),
+        // Request 2.
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpApp',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'WIDGET DATA 2',
+          },
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('w');
+      await terminalHandler.processTerminalInput('W');
+
+      expect(terminalHandler.logger.statusText, contains('WIDGET DATA 1'));
+      expect(terminalHandler.logger.statusText, contains('WIDGET DATA 2'));
+    });
+
+    testWithoutContext('v - launchDevToolsInBrowser', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+          <FakeVmServiceRequest>[],
+          supportsServiceProtocol: true);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final FakeResidentDevtoolsHandler devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
+
+      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      await terminalHandler.processTerminalInput('v');
+      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isTrue);
+    });
+
+    testWithoutContext('w,W - debugDumpApp without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('w');
+      await terminalHandler.processTerminalInput('W');
+    });
+
+    testWithoutContext('z,Z - debugToggleDebugCheckElevationsEnabled', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugCheckElevationsEnabled',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+        // Request 2.
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugCheckElevationsEnabled',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+      ]);
       await terminalHandler.processTerminalInput('z');
       await terminalHandler.processTerminalInput('Z');
-
-      verify(mockResidentRunner.debugToggleDebugCheckElevationsEnabled()).called(2);
     });
 
-    testWithoutContext('z,Z - debugToggleDebugCheckElevationsEnabled without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
+    testWithoutContext('z,Z - debugToggleDebugCheckElevationsEnabled with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugCheckElevationsEnabled',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+        // Request 2.
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugCheckElevationsEnabled',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+      ], web: true);
       await terminalHandler.processTerminalInput('z');
       await terminalHandler.processTerminalInput('Z');
-
-      // This should probably be disable when the service protocol is not enabled.
-      verify(mockResidentRunner.debugToggleDebugCheckElevationsEnabled()).called(2);
     });
+
+    testWithoutContext('z,Z - debugToggleDebugCheckElevationsEnabled without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('z');
+      await terminalHandler.processTerminalInput('Z');
+    });
+
+    testWithoutContext('q,Q - exit', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      await terminalHandler.processTerminalInput('q');
+
+      expect(runner.calledExit, true);
+      runner.calledExit = false;
+
+      await terminalHandler.processTerminalInput('Q');
+
+      expect(runner.calledExit, true);
+    });
+
+    testWithoutContext('r - hotReload unsupported', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsHotReload: false);
+      await terminalHandler.processTerminalInput('r');
+    });
+
+    testWithoutContext('R - hotRestart unsupported', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsRestart: false);
+      await terminalHandler.processTerminalInput('R');
+    });
+
+    testWithoutContext('r - hotReload', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await terminalHandler.processTerminalInput('r');
+
+      expect(runner.calledReload, true);
+      expect(runner.calledRestart, false);
+    });
+
+    testWithoutContext('R - hotRestart', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await terminalHandler.processTerminalInput('R');
+
+      expect(runner.calledReload, false);
+      expect(runner.calledRestart, true);
+    });
+
+    testWithoutContext('r - hotReload with non-fatal error', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], reloadExitCode: 1);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await terminalHandler.processTerminalInput('r');
+
+      expect(runner.calledReload, true);
+      expect(runner.calledRestart, false);
+      expect(terminalHandler.logger.statusText, contains('Try again after fixing the above error(s).'));
+    });
+
+    testWithoutContext('R - hotRestart with non-fatal error', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], reloadExitCode: 1);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await terminalHandler.processTerminalInput('R');
+
+      expect(runner.calledReload, false);
+      expect(runner.calledRestart, true);
+      expect(terminalHandler.logger.statusText, contains('Try again after fixing the above error(s).'));
+    });
+
+    testWithoutContext('r - hotReload with fatal error', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], reloadExitCode: 1, fatalReloadError: true);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await expectLater(() => terminalHandler.processTerminalInput('r'), throwsToolExit());
+
+      expect(runner.calledReload, true);
+      expect(runner.calledRestart, false);
+    });
+
+    testWithoutContext('R - hotRestart with fatal error', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], reloadExitCode: 1, fatalReloadError: true);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await expectLater(() => terminalHandler.processTerminalInput('R'), throwsToolExit());
+
+      expect(runner.calledReload, false);
+      expect(runner.calledRestart, true);
+    });
+  });
+
+  testWithoutContext('ResidentRunner clears the screen when it should', () async {
+    final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], reloadExitCode: 1, fatalReloadError: true);
+    const String message = 'This should be cleared';
+
+    expect(terminalHandler.logger.statusText, equals(''));
+    terminalHandler.logger.printStatus(message);
+    expect(terminalHandler.logger.statusText, equals('$message\n'));  // printStatus makes a newline
+
+    await terminalHandler.processTerminalInput('c');
+    expect(terminalHandler.logger.statusText, equals(''));
+  });
+
+  testWithoutContext('s, can take screenshot on debug device that supports screenshot', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+      listViews,
+      FakeVmServiceRequest(
+        method: 'ext.flutter.debugAllowBanner',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+          'enabled': 'false',
+        },
+      ),
+      FakeVmServiceRequest(
+        method: 'ext.flutter.debugAllowBanner',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+          'enabled': 'true',
+        },
+      )
+    ], logger: logger, supportsScreenshot: true);
+
+    await terminalHandler.processTerminalInput('s');
+
+    expect(logger.statusText, contains('Screenshot written to flutter_01.png (0kB)'));
+  });
+
+  testWithoutContext('s, can take screenshot on debug device that does not support screenshot', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+      listViews,
+      FakeVmServiceRequest(
+        method: 'ext.flutter.debugAllowBanner',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+          'enabled': 'false',
+        },
+      ),
+      FakeVmServiceRequest(
+        method: '_flutter.screenshot',
+        args: <String, Object>{},
+        jsonResponse: <String, Object>{
+          'screenshot': base64.encode(<int>[1, 2, 3, 4]),
+        },
+      ),
+      FakeVmServiceRequest(
+        method: 'ext.flutter.debugAllowBanner',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+          'enabled': 'true',
+        },
+      )
+    ], logger: logger, supportsScreenshot: false, fileSystem: fileSystem);
+
+    await terminalHandler.processTerminalInput('s');
+
+    expect(logger.statusText, contains('Screenshot written to flutter_01.png (0kB)'));
+    expect(fileSystem.currentDirectory.childFile('flutter_01.png').readAsBytesSync(), <int>[1, 2, 3, 4]);
+  });
+
+  testWithoutContext('s, can take screenshot on debug web device that does not support screenshot', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+      listViews,
+      FakeVmServiceRequest(
+        method: 'ext.flutter.debugAllowBanner',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+          'enabled': 'false',
+        },
+      ),
+      FakeVmServiceRequest(
+        method: 'ext.dwds.screenshot',
+        args: <String, Object>{},
+        jsonResponse: <String, Object>{
+          'data': base64.encode(<int>[1, 2, 3, 4]),
+        },
+      ),
+      FakeVmServiceRequest(
+        method: 'ext.flutter.debugAllowBanner',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+          'enabled': 'true',
+        },
+      )
+    ], logger: logger, supportsScreenshot: false, web: true, fileSystem: fileSystem);
+
+    await terminalHandler.processTerminalInput('s');
+
+    expect(logger.statusText, contains('Screenshot written to flutter_01.png (0kB)'));
+    expect(fileSystem.currentDirectory.childFile('flutter_01.png').readAsBytesSync(), <int>[1, 2, 3, 4]);
+  });
+
+  testWithoutContext('s, can take screenshot on device that does not support service protocol', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[],
+      logger: logger,
+      supportsScreenshot: true,
+      supportsServiceProtocol: false,
+      fileSystem: fileSystem,
+    );
+
+    await terminalHandler.processTerminalInput('s');
+
+    expect(logger.statusText, contains('Screenshot written to flutter_01.png (0kB)'));
+    expect(fileSystem.currentDirectory.childFile('flutter_01.png').readAsBytesSync(), <int>[1, 2, 3, 4]);
+  });
+
+  testWithoutContext('s, does not take a screenshot on a device that does not support screenshot or the service protocol', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[],
+      logger: logger,
+      supportsScreenshot: false,
+      supportsServiceProtocol: false,
+      fileSystem: fileSystem,
+    );
+
+    await terminalHandler.processTerminalInput('s');
+
+    expect(logger.statusText, '\n');
+    expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
+  });
+
+  testWithoutContext('s, does not take a screenshot on a web device that does not support screenshot or the service protocol', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[],
+      logger: logger,
+      supportsScreenshot: false,
+      supportsServiceProtocol: false,
+      web: true,
+      fileSystem: fileSystem,
+    );
+
+    await terminalHandler.processTerminalInput('s');
+
+    expect(logger.statusText, '\n');
+    expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
+  });
+
+  testWithoutContext('s, bails taking screenshot on debug device if debugAllowBanner throws RpcError', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[
+       listViews,
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+            'enabled': 'false',
+          },
+          // Failed response,
+          errorCode: RPCErrorCodes.kInternalError,
+        ),
+      ],
+      logger: logger,
+      supportsScreenshot: false,
+      fileSystem: fileSystem,
+    );
+
+    await terminalHandler.processTerminalInput('s');
+
+    expect(logger.errorText, contains('Error'));
+  });
+
+  testWithoutContext('s, bails taking screenshot on debug device if flutter.screenshot throws RpcError, restoring banner', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[
+       listViews,
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+            'enabled': 'false',
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: '_flutter.screenshot',
+          // Failed response,
+          errorCode: RPCErrorCodes.kInternalError,
+        ),
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+            'enabled': 'true',
+          },
+        ),
+      ],
+      logger: logger,
+      supportsScreenshot: false,
+      fileSystem: fileSystem,
+    );
+
+    await terminalHandler.processTerminalInput('s');
+
+    expect(logger.errorText, contains('Error'));
+  });
+
+  testWithoutContext('s, bails taking screenshot on debug device if dwds.screenshot throws RpcError, restoring banner', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[
+       listViews,
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+            'enabled': 'false',
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: 'ext.dwds.screenshot',
+          // Failed response,
+          errorCode: RPCErrorCodes.kInternalError,
+        ),
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+            'enabled': 'true',
+          },
+        ),
+      ],
+      logger: logger,
+      supportsScreenshot: false,
+      web: true,
+      fileSystem: fileSystem,
+    );
+
+    await terminalHandler.processTerminalInput('s');
+
+    expect(logger.errorText, contains('Error'));
+  });
+
+  testWithoutContext('s, bails taking screenshot on debug device if debugAllowBanner during second request', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[
+       listViews,
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+            'enabled': 'false',
+          },
+        ),
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+            'enabled': 'true',
+          },
+          // Failed response,
+          errorCode: RPCErrorCodes.kInternalError,
+        ),
+      ],
+      logger: logger,
+      supportsScreenshot: true,
+      fileSystem: fileSystem,
+    );
+
+    await terminalHandler.processTerminalInput('s');
+
+    expect(logger.errorText, contains('Error'));
   });
 
   testWithoutContext('pidfile creation', () {
@@ -331,13 +1239,19 @@ void main() {
     final Terminal terminal = Terminal.test();
     final MemoryFileSystem fs = MemoryFileSystem.test();
     final ProcessInfo processInfo = ProcessInfo.test(fs);
-    final ResidentRunner mockResidentRunner = MockResidentRunner();
-    when(mockResidentRunner.stayResident).thenReturn(true);
-    when(mockResidentRunner.supportsServiceProtocol).thenReturn(true);
-    when(mockResidentRunner.supportsRestart).thenReturn(true);
+    final FakeResidentRunner residentRunner = FakeResidentRunner(
+      FlutterDevice(FakeDevice(), buildInfo: BuildInfo.debug, generator: FakeResidentCompiler()),
+      testLogger,
+      fs,
+    );
+    residentRunner
+      ..supportsRestart = true
+      ..supportsServiceProtocol = true
+      ..stayResident = true;
+
     const String filename = 'test.pid';
     final TerminalHandler terminalHandler = TerminalHandler(
-      mockResidentRunner,
+      residentRunner,
       logger: testLogger,
       signals: signals,
       terminal: terminal,
@@ -345,23 +1259,202 @@ void main() {
       reportReady: false,
       pidFile: filename,
     );
-    expect(fs.file(filename).existsSync(), isFalse);
+
+    expect(fs.file(filename), isNot(exists));
     terminalHandler.setupTerminal();
     terminalHandler.registerSignalHandlers();
-    expect(fs.file(filename).existsSync(), isTrue);
+    expect(fs.file(filename), exists);
     terminalHandler.stop();
-    expect(fs.file(filename).existsSync(), isFalse);
+    expect(fs.file(filename),  isNot(exists));
   });
 }
 
-class MockDevice extends Mock implements Device {
-  MockDevice() {
-    when(isSupported()).thenReturn(true);
+class FakeResidentRunner extends ResidentHandlers {
+  FakeResidentRunner(FlutterDevice device, this.logger, this.fileSystem) : flutterDevices = <FlutterDevice>[device];
+
+  bool calledDetach = false;
+  bool calledPrint = false;
+  bool calledExit = false;
+  bool calledPrintWithDetails = false;
+  bool calledReload = false;
+  bool calledRestart = false;
+  int reloadExitCode = 0;
+  bool fatalReloadError = false;
+
+  @override
+  final Logger logger;
+
+  @override
+  final FileSystem fileSystem;
+
+  @override
+  final List<FlutterDevice> flutterDevices;
+
+  @override
+  bool canHotReload = true;
+
+  @override
+  bool hotMode = true;
+
+  @override
+  bool isRunningDebug = true;
+
+  @override
+  bool isRunningProfile = false;
+
+  @override
+  bool isRunningRelease = false;
+
+  @override
+  bool stayResident = true;
+
+  @override
+  bool supportsRestart = true;
+
+  @override
+  bool supportsServiceProtocol = true;
+
+  @override
+  bool supportsWriteSkSL = true;
+
+  @override
+  Future<void> cleanupAfterSignal() async { }
+
+  @override
+  Future<void> detach() async {
+    calledDetach = true;
+  }
+
+  @override
+  Future<void> exit() async {
+    calledExit = true;
+  }
+
+  @override
+  void printHelp({bool details}) {
+    if (details) {
+      calledPrintWithDetails = true;
+    } else {
+      calledPrint = true;
+    }
+  }
+
+  @override
+  Future<void> runSourceGenerators() async {  }
+
+  @override
+  Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String reason}) async {
+    if (fullRestart && !supportsRestart) {
+      throw StateError('illegal restart');
+    }
+    if (!fullRestart && !canHotReload) {
+      throw StateError('illegal reload');
+    }
+    if (fullRestart) {
+      calledRestart = true;
+    } else {
+      calledReload = true;
+    }
+    return OperationResult(reloadExitCode, '', fatal: fatalReloadError);
+  }
+
+  @override
+  ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
+  final ResidentDevtoolsHandler _residentDevtoolsHandler = FakeResidentDevtoolsHandler();
+}
+
+class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandler {
+  bool calledLaunchDevToolsInBrowser = false;
+
+  @override
+  bool launchDevToolsInBrowser({List<FlutterDevice> flutterDevices}) {
+    return calledLaunchDevToolsInBrowser = true;
   }
 }
 
-class MockResidentRunner extends Mock implements ResidentRunner {}
-class MockFlutterDevice extends Mock implements FlutterDevice {}
+class FakeDevice extends Fake implements Device {
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool supportsScreenshot = false;
+
+  @override
+  String get name => 'Fake Device';
+
+  @override
+  Future<void> takeScreenshot(File file) async {
+    if (!supportsScreenshot) {
+      throw StateError('illegal screenshot attempt');
+    }
+    file.writeAsBytesSync(<int>[1, 2, 3, 4]);
+  }
+
+}
+
+TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
+  bool supportsRestart = true,
+  bool supportsServiceProtocol = true,
+  bool supportsHotReload = true,
+  bool web = false,
+  bool fatalReloadError = false,
+  bool supportsScreenshot = false,
+  int reloadExitCode = 0,
+  BuildMode buildMode = BuildMode.debug,
+  Logger logger,
+  FileSystem fileSystem,
+}) {
+  final Logger testLogger = logger ?? BufferLogger.test();
+  final Signals signals = Signals.test();
+  final Terminal terminal = Terminal.test();
+  final FileSystem localFileSystem = fileSystem ?? MemoryFileSystem.test();
+  final ProcessInfo processInfo = ProcessInfo.test(MemoryFileSystem.test());
+  final FlutterDevice device = FlutterDevice(
+    FakeDevice()..supportsScreenshot = supportsScreenshot,
+    buildInfo: BuildInfo(buildMode, '', treeShakeIcons: false),
+    generator: FakeResidentCompiler(),
+    targetPlatform: web
+      ? TargetPlatform.web_javascript
+      : TargetPlatform.android_arm,
+  );
+  device.vmService = FakeVmServiceHost(requests: requests).vmService;
+  final FakeResidentRunner residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)
+    ..supportsServiceProtocol = supportsServiceProtocol
+    ..supportsRestart = supportsRestart
+    ..canHotReload = supportsHotReload
+    ..fatalReloadError = fatalReloadError
+    ..reloadExitCode = reloadExitCode;
+
+  switch (buildMode) {
+    case BuildMode.debug:
+      residentRunner
+        ..isRunningDebug = true
+        ..isRunningProfile = false
+        ..isRunningRelease = false;
+      break;
+    case BuildMode.profile:
+      residentRunner
+        ..isRunningDebug = false
+        ..isRunningProfile = true
+        ..isRunningRelease = false;
+      break;
+    case BuildMode.release:
+      residentRunner
+        ..isRunningDebug = false
+        ..isRunningProfile = false
+        ..isRunningRelease = true;
+      break;
+  }
+  return TerminalHandler(
+    residentRunner,
+    logger: testLogger,
+    signals: signals,
+    terminal: terminal,
+    processInfo: processInfo,
+    reportReady: false,
+  );
+}
+
 class FakeResidentCompiler extends Fake implements ResidentCompiler {}
 
 class TestRunner extends Fake implements ResidentRunner {

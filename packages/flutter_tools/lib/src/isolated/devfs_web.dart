@@ -17,6 +17,7 @@ import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../artifacts.dart';
 import '../asset.dart';
@@ -27,33 +28,38 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
-import '../bundle.dart';
+import '../build_system/targets/web.dart';
+import '../bundle_builder.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
+import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
 
-typedef DwdsLauncher = Future<Dwds> Function(
-    {@required AssetReader assetReader,
-    @required Stream<BuildResult> buildResults,
-    @required ConnectionProvider chromeConnection,
-    @required LoadStrategy loadStrategy,
-    @required bool enableDebugging,
-    ExpressionCompiler expressionCompiler,
-    bool enableDebugExtension,
-    String hostname,
-    bool useSseForDebugProxy,
-    bool useSseForDebugBackend,
-    bool serveDevTools,
-    UrlEncoder urlEncoder,
-    bool spawnDds});
+typedef DwdsLauncher = Future<Dwds> Function({
+  @required AssetReader assetReader,
+  @required Stream<BuildResult> buildResults,
+  @required ConnectionProvider chromeConnection,
+  @required LoadStrategy loadStrategy,
+  @required bool enableDebugging,
+  ExpressionCompiler expressionCompiler,
+  bool enableDebugExtension,
+  String hostname,
+  bool useSseForDebugProxy,
+  bool useSseForDebugBackend,
+  bool useSseForInjectedClient,
+  UrlEncoder urlEncoder,
+  bool spawnDds,
+  bool enableDevtoolsLaunch,
+  DevtoolsLauncher devtoolsLauncher,
+});
 
 // A minimal index for projects that do not yet support web.
 const String _kDefaultIndex = '''
@@ -71,9 +77,12 @@ const String _kDefaultIndex = '''
 ///
 /// This is only used in development mode.
 class WebExpressionCompiler implements ExpressionCompiler {
-  WebExpressionCompiler(this._generator);
+  WebExpressionCompiler(this._generator, {
+    @required FileSystem fileSystem,
+  }) : _fileSystem = fileSystem;
 
   final ResidentCompiler _generator;
+  final FileSystem _fileSystem;
 
   @override
   Future<ExpressionCompilationResult> compileExpressionToJs(
@@ -92,18 +101,18 @@ class WebExpressionCompiler implements ExpressionCompiler {
 
     if (compilerOutput != null && compilerOutput.outputFilename != null) {
       final String content = utf8.decode(
-          globals.fs.file(compilerOutput.outputFilename).readAsBytesSync());
+          _fileSystem.file(compilerOutput.outputFilename).readAsBytesSync());
       return ExpressionCompilationResult(
           content, compilerOutput.errorCount > 0);
     }
 
     return ExpressionCompilationResult(
-        'InternalError: frontend server failed to compile \'$expression\'',
+        "InternalError: frontend server failed to compile '$expression'",
         true);
   }
 
   @override
-  Future<void> initialize({bool soundNullSafety}) async {}
+  Future<void> initialize({String moduleFormat, bool soundNullSafety}) async {}
 
   @override
   Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
@@ -172,8 +181,10 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
+    bool useSseForInjectedClient,
     BuildInfo buildInfo,
     bool enableDwds,
+    bool enableDds,
     Uri entrypoint,
     ExpressionCompiler expressionCompiler,
     NullSafetyMode nullSafetyMode, {
@@ -273,14 +284,14 @@ class WebAssetServer implements AssetReader {
       enableDebugging: true,
       useSseForDebugProxy: useSseForDebugProxy,
       useSseForDebugBackend: useSseForDebugBackend,
-      serveDevTools: false,
+      useSseForInjectedClient: useSseForInjectedClient,
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
         server,
         _digestProvider,
       ).strategy,
       expressionCompiler: expressionCompiler,
-      spawnDds: true,
+      spawnDds: enableDds,
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -452,7 +463,8 @@ class WebAssetServer implements AssetReader {
   }
 
   /// Tear down the http server running.
-  Future<void> dispose() {
+  Future<void> dispose() async {
+    await dwds?.stop();
     return _httpServer.close();
   }
 
@@ -477,6 +489,12 @@ class WebAssetServer implements AssetReader {
         .childFile('index.html');
 
     if (indexFile.existsSync()) {
+      String indexFileContent =  indexFile.readAsStringSync();
+      if (indexFileContent.contains(kBaseHrefPlaceholder)) {
+          indexFileContent =  indexFileContent.replaceAll(kBaseHrefPlaceholder, '/');
+          headers[HttpHeaders.contentLengthHeader] = indexFileContent.length.toString();
+          return shelf.Response.ok(indexFileContent,headers: headers);
+        }
       headers[HttpHeaders.contentLengthHeader] =
           indexFile.lengthSync().toString();
       return shelf.Response.ok(indexFile.openRead(), headers: headers);
@@ -530,7 +548,7 @@ class WebAssetServer implements AssetReader {
     // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
     final Directory dartSdkParent = globals.fs
         .directory(
-            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath))
+            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath))
         .parent;
     final File dartSdkFile = globals.fs.file(dartSdkParent.uri.resolve(path));
     if (dartSdkFile.existsSync()) {
@@ -538,19 +556,19 @@ class WebAssetServer implements AssetReader {
     }
 
     final Directory flutterWebSdk = globals.fs
-        .directory(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk));
+        .directory(globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk));
     final File webSdkFile = globals.fs.file(flutterWebSdk.uri.resolve(path));
 
     return webSdkFile;
   }
 
   File get _resolveDartSdkJsFile =>
-      globals.fs.file(globals.artifacts.getArtifactPath(
+      globals.fs.file(globals.artifacts.getHostArtifact(
           kDartSdkJsArtifactMap[webRenderer][_nullSafetyMode]
       ));
 
   File get _resolveDartSdkJsMapFile =>
-    globals.fs.file(globals.artifacts.getArtifactPath(
+    globals.fs.file(globals.artifacts.getHostArtifact(
         kDartSdkJsMapArtifactMap[webRenderer][_nullSafetyMode]
     ));
 
@@ -587,10 +605,11 @@ class WebAssetServer implements AssetReader {
 }
 
 class ConnectionResult {
-  ConnectionResult(this.appConnection, this.debugConnection);
+  ConnectionResult(this.appConnection, this.debugConnection, this.vmService);
 
   final AppConnection appConnection;
   final DebugConnection debugConnection;
+  final vm_service.VmService vmService;
 }
 
 /// The web specific DevFS implementation.
@@ -606,8 +625,10 @@ class WebDevFS implements DevFS {
     @required this.urlTunneller,
     @required this.useSseForDebugProxy,
     @required this.useSseForDebugBackend,
+    @required this.useSseForInjectedClient,
     @required this.buildInfo,
     @required this.enableDwds,
+    @required this.enableDds,
     @required this.entrypoint,
     @required this.expressionCompiler,
     @required this.chromiumLauncher,
@@ -623,8 +644,10 @@ class WebDevFS implements DevFS {
   final UrlTunneller urlTunneller;
   final bool useSseForDebugProxy;
   final bool useSseForDebugBackend;
+  final bool useSseForInjectedClient;
   final BuildInfo buildInfo;
   final bool enableDwds;
+  final bool enableDds;
   final bool testMode;
   final ExpressionCompiler expressionCompiler;
   final ChromiumLauncher chromiumLauncher;
@@ -656,8 +679,12 @@ class WebDevFS implements DevFS {
         if (firstConnection.isCompleted) {
           appConnection.runMain();
         } else {
+          final vm_service.VmService vmService = await createVmServiceDelegate(
+            Uri.parse(debugConnection.uri),
+            logger: globals.logger,
+          );
           firstConnection
-              .complete(ConnectionResult(appConnection, debugConnection));
+              .complete(ConnectionResult(appConnection, debugConnection, vmService));
         }
       } on Exception catch (error, stackTrace) {
         if (!firstConnection.isCompleted) {
@@ -700,8 +727,10 @@ class WebDevFS implements DevFS {
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,
+      useSseForInjectedClient,
       buildInfo,
       enableDwds,
+      enableDds,
       entrypoint,
       expressionCompiler,
       nullSafetyMode,
@@ -812,11 +841,13 @@ class WebDevFS implements DevFS {
     final CompilerOutput compilerOutput = await generator.recompile(
       Uri(
         scheme: 'org-dartlang-app',
-        path: '/' + mainUri.pathSegments.last,
+        path: '/${mainUri.pathSegments.last}',
       ),
       invalidatedFiles,
       outputPath: dillOutputPath,
       packageConfig: packageConfig,
+      projectRootPath: projectRootPath,
+      fs: globals.fs,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
@@ -851,7 +882,7 @@ class WebDevFS implements DevFS {
 
   @visibleForTesting
   final File requireJS = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'kernel',
@@ -861,7 +892,7 @@ class WebDevFS implements DevFS {
 
   @visibleForTesting
   final File stackTraceMapper = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'web',
@@ -1001,13 +1032,12 @@ String _stripTrailingSlashes(String path) {
 String _parseBasePathFromIndexHtml(File indexHtml) {
   final String htmlContent =
       indexHtml.existsSync() ? indexHtml.readAsStringSync() : _kDefaultIndex;
-
   final Document document = parse(htmlContent);
   final Element baseElement = document.querySelector('base');
   String baseHref =
       baseElement?.attributes == null ? null : baseElement.attributes['href'];
 
-  if (baseHref == null) {
+  if (baseHref == null || baseHref == kBaseHrefPlaceholder) {
     baseHref = '';
   } else if (!baseHref.startsWith('/')) {
     throw ToolExit(

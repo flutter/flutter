@@ -163,7 +163,7 @@ class SystemUiOverlayStyle {
   }
 
   @override
-  String toString() => _toMap().toString();
+  String toString() => '${objectRuntimeType(this, 'SystemUiOverlayStyle')}(${_toMap()})';
 
   /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({
@@ -219,7 +219,6 @@ List<String> _stringify(List<dynamic> list) => <String>[
 class SystemChrome {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   SystemChrome._();
 
   /// Specifies the set of orientations the application interface can

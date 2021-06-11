@@ -11,12 +11,11 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
@@ -28,9 +27,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Therefore, we control the version of flutter_gallery_assets so that
   // existing tests do not fail when the package has a new version.
   'flutter_gallery_assets': '^1.0.1',
-  'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
-  'mockito': '4.1.1+1', // Prevent mockito from upgrading to the source gen version.
-  'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
+  'flutter_template_images': '3.0.1', // Must always exactly match flutter_tools template.
   // DART TEAM OWNED NNBD DEPS
   'archive': '">=3.0.0-nullsafety.0"',
   'async': '">=2.5.0-nullsafety.3"',
@@ -71,7 +68,12 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'process': '">=4.0.0-nullsafety.4"',
   'process_runner': '">=4.0.0-nullsafety.5"',
   'url_launcher': '">=6.0.0-nullsafety.1"',
-  'video_player': '">=2.0.0-nullsafety.2"',
+  // This is pinned to avoid the performance regression from a reverted feature
+  // from https://github.com/dart-lang/shelf/issues/189 . This can be removed
+  // when a new major version of shelf is published.
+  'shelf': '1.1.4',
+  // Latest version does not resolve on our CI.
+  'video_player': '2.1.1',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -127,6 +129,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         help: 'Use cached packages instead of accessing the network.',
         defaultsTo: false,
         negatable: false,
+      )
+      ..addFlag(
+        'crash',
+        help: 'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
+        defaultsTo: false,
+        negatable: false,
       );
   }
 
@@ -146,7 +154,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   // Lazy-initialize the net utilities with values from the context.
   Net _cachedNet;
   Net get _net => _cachedNet ??= Net(
-    httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+    httpClientFactory: context.get<HttpClientFactory>(),
     logger: globals.logger,
     platform: globals.platform,
   );
@@ -181,6 +189,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = boolArg('verify-only');
     final bool isConsumerOnly = boolArg('consumer-only');
     final bool offline = boolArg('offline');
+    final bool crash = boolArg('crash');
+
+    if (crash) {
+      throw StateError('test crash please ignore.');
+    }
 
     if (upgrade && offline) {
       throwToolExit(
@@ -1103,7 +1116,7 @@ class PubspecDependency extends PubspecLine {
       final String trailingComment = line.substring(hashIndex, line.length);
       assert(line.endsWith(trailingComment));
       isTransitive = trailingComment == kTransitiveMagicString;
-      suffix = ' ' + trailingComment;
+      suffix = ' $trailingComment';
       stripped = line.substring(colonIndex + 1, hashIndex).trimRight();
     } else {
       stripped = line.substring(colonIndex + 1, line.length).trimRight();

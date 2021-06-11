@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/android/deferred_components_validator.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -18,6 +19,7 @@ void main() {
   FileSystem fileSystem;
   BufferLogger logger;
   Directory projectDir;
+  Platform platform;
   Directory flutterRootDir;
 
   setUp(() {
@@ -25,12 +27,14 @@ void main() {
     logger = BufferLogger.test();
     projectDir = fileSystem.directory('/project');
     flutterRootDir = fileSystem.directory('/flutter_root');
+    platform = FakePlatform();
   });
 
   testWithoutContext('No checks passes', () async {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
     );
@@ -43,6 +47,7 @@ void main() {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
     );
@@ -67,6 +72,7 @@ void main() {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
@@ -105,6 +111,7 @@ void main() {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
@@ -128,7 +135,7 @@ void main() {
     expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/component1/src/main/AndroidManifest.xml\n'), true);
   });
 
-  testUsingContext('androidComponentSetup all files exist passes', () async {
+  testWithoutContext('androidComponentSetup all files exist passes', () async {
     final Directory templatesDir = flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
     final File buildGradleTemplate = templatesDir.childFile('build.gradle.tmpl');
     final File androidManifestTemplate = templatesDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml.tmpl');
@@ -143,6 +150,7 @@ void main() {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
@@ -175,6 +183,7 @@ void main() {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
     );
@@ -242,6 +251,7 @@ void main() {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
     );

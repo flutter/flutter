@@ -4,8 +4,8 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -259,9 +259,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              child: const Text('OutlineButton'),
               onPressed: () {},
               focusNode: focusNode,
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -322,10 +322,10 @@ void main() {
               colorScheme: colorScheme,
               textTheme: ButtonTextTheme.primary,
               child: OutlineButton(
-                child: const Text('OutlineButton'),
                 onPressed: () {},
                 focusNode: focusNode,
                 textColor: MaterialStateColor.resolveWith(getTextColor),
+                child: const Text('OutlineButton'),
               ),
             ),
           ),
@@ -388,10 +388,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              child: const Text('OutlineButton'),
               onPressed: () {},
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -514,10 +514,10 @@ void main() {
           body: Center(
             child: OutlineButton(
               onPressed: null,
-              child: const Text('OutlineButton'),
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
               disabledTextColor: unusedDisabledTextColor,
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -559,10 +559,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              child: const Text('OutlineButton'),
               onPressed: () {},
               focusNode: focusNode,
               borderSide: BorderSide(color: MaterialStateColor.resolveWith(getBorderColor)),
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -613,10 +613,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              child: const Text('OutlineButton'),
               onPressed: () {},
               borderSide: BorderSide(color: MaterialStateColor.resolveWith(getBorderColor)),
               highlightedBorderColor: ignoredPressedColor,
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -651,10 +651,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              child: const Text('OutlineButton'),
               onPressed: null,
               borderSide: BorderSide(color: MaterialStateColor.resolveWith(getBorderColor)),
               highlightedBorderColor: ignoredDisabledColor,
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -674,9 +674,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: OutlineButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -779,8 +779,8 @@ void main() {
     expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
     expect(
       outlineButton,
-      paints
-        ..path(color: disabledBorderColor, strokeWidth: borderWidth));
+      paints..path(color: disabledBorderColor, strokeWidth: borderWidth),
+    );
     _checkPhysicalLayer(
       tester.element(outlineButton),
       const Color(0x00000000),
@@ -800,8 +800,8 @@ void main() {
     expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
     expect(
       outlineButton,
-      paints
-        ..path(color: borderColor, strokeWidth: borderWidth));
+      paints..path(color: borderColor, strokeWidth: borderWidth),
+    );
     // initially, the interior of the button is transparent
     _checkPhysicalLayer(
       tester.element(outlineButton),
@@ -818,8 +818,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(
       outlineButton,
-      paints
-        ..path(color: highlightedBorderColor, strokeWidth: borderWidth));
+      paints..path(color: highlightedBorderColor, strokeWidth: borderWidth),
+    );
     _checkPhysicalLayer(
       tester.element(outlineButton),
       fillColor.withAlpha(0xFF),
@@ -832,8 +832,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       outlineButton,
-      paints
-        ..path(color: borderColor, strokeWidth: borderWidth));
+      paints..path(color: borderColor, strokeWidth: borderWidth),
+    );
     _checkPhysicalLayer(
       tester.element(outlineButton),
       fillColor.withAlpha(0x00),
@@ -860,8 +860,8 @@ void main() {
     );
 
     expect(
-        tester.renderObject(find.byKey(buttonKey)),
-        paintsExactlyCountTimes(#clipPath, 0),
+      tester.renderObject(find.byKey(buttonKey)),
+      paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 

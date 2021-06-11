@@ -8,7 +8,7 @@ import 'package:completion/completion.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class ShellCompletionCommand extends FlutterCommand {

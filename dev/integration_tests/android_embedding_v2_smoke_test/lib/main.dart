@@ -13,5 +13,5 @@ void main() {
       ),
     ),
   );
-  print('Test suceeded');
+  print('Test succeeded');
 }

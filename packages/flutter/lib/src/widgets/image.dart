@@ -8,7 +8,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
@@ -330,6 +329,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -389,6 +389,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -451,6 +452,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -612,6 +614,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -624,9 +627,12 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
-  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, scale != null
-         ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : AssetImage(name, bundle: bundle, package: package)
+  }) : image = ResizeImage.resizeIfNeeded(
+         cacheWidth,
+         cacheHeight,
+         scale != null
+           ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
+           : AssetImage(name, bundle: bundle, package: package),
        ),
        loadingBuilder = null,
        assert(alignment != null),
@@ -678,6 +684,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -768,8 +775,8 @@ class Image extends StatefulWidget {
   ///     ),
   ///     child: Image.network(
   ///       'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
-  ///       frameBuilder: (BuildContext context, Widget child, int? frame, bool? wasSynchronouslyLoaded) {
-  ///         if (wasSynchronouslyLoaded ?? false) {
+  ///       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+  ///         if (wasSynchronouslyLoaded) {
   ///           return child;
   ///         }
   ///         return AnimatedOpacity(
@@ -919,6 +926,20 @@ class Image extends StatefulWidget {
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color? color;
 
+  /// If non-null, the value from the [Animation] is multiplied with the opacity
+  /// of each image pixel before painting onto the canvas.
+  ///
+  /// This is more efficient than using [FadeTransition] to change the opacity
+  /// of an image, since this avoids creating a new composited layer. Composited
+  /// layers may double memory usage as the image is painted onto an offscreen
+  /// render target.
+  ///
+  /// See also:
+  ///
+  ///  * [AlwaysStoppedAnimation], which allows you to create an [Animation]
+  ///    from a single opacity value.
+  final Animation<double>? opacity;
+
   /// The rendering quality of the image.
   ///
   /// If the image is of a high quality and its pixels are perfectly aligned
@@ -1057,7 +1078,7 @@ class Image extends StatefulWidget {
   final bool isAntiAlias;
 
   @override
-  _ImageState createState() => _ImageState();
+  State<Image> createState() => _ImageState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1068,6 +1089,7 @@ class Image extends StatefulWidget {
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Animation<double>?>('opacity', opacity, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
@@ -1323,6 +1345,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       height: widget.height,
       scale: _imageInfo?.scale ?? 1.0,
       color: widget.color,
+      opacity: widget.opacity,
       colorBlendMode: widget.colorBlendMode,
       fit: widget.fit,
       alignment: widget.alignment,

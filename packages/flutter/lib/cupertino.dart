@@ -22,7 +22,6 @@
 
 library cupertino;
 
-export 'src/cupertino/action_sheet.dart';
 export 'src/cupertino/activity_indicator.dart';
 export 'src/cupertino/app.dart';
 export 'src/cupertino/bottom_tab_bar.dart';

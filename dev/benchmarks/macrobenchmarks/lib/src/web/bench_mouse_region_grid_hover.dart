@@ -7,8 +7,8 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'recorder.dart';
@@ -37,12 +37,12 @@ class _NestedMouseRegion extends StatelessWidget {
 /// Measures our ability to hit test mouse regions.
 class BenchMouseRegionGridHover extends WidgetRecorder {
   BenchMouseRegionGridHover() : super(name: benchmarkName) {
-    tester = _Tester(onDataPoint: handleDataPoint);
+    _tester = _Tester(onDataPoint: handleDataPoint);
   }
 
   static const String benchmarkName = 'bench_mouse_region_grid_hover';
 
-  _Tester tester;
+  _Tester _tester;
 
   void handleDataPoint(Duration duration) {
     profile.addDataPoint('hitTestDuration', duration, reported: true);
@@ -67,8 +67,8 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
     if (!started) {
       started = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
-        tester.start();
-        registerDidStop(tester.stop);
+        _tester.start();
+        registerDidStop(_tester.stop);
       });
     }
     super.frameDidDraw();

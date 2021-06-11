@@ -27,7 +27,7 @@ void main() {
         '   axisDirection: down\n'
         '   crossAxisDirection: right\n'
         '   offset: _FixedViewportOffset#00000(offset: 0.0)\n'
-        '   anchor: 0.0\n'
+        '   anchor: 0.0\n',
       ),
     );
     layout(root);
@@ -164,7 +164,7 @@ void main() {
         '   └─child: RenderSizedBox#00000 NEEDS-PAINT\n'
         '       parentData: paintOffset=Offset(0.0, -0.0) (can use size)\n'
         '       constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
-        '       size: Size(800.0, 400.0)\n'
+        '       size: Size(800.0, 400.0)\n',
       ),
     );
     expect(a.localToGlobal(Offset.zero), Offset.zero);

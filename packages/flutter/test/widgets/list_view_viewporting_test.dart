@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-
 import 'test_widgets.dart';
 
 void main() {
@@ -424,7 +423,7 @@ void main() {
         '           parentData: <none> (can use size)\n'
         '           constraints: BoxConstraints(w=800.0, h=100.0)\n'
         '           size: Size(800.0, 100.0)\n'
-        '           additionalConstraints: BoxConstraints(biggest)\n'
+        '           additionalConstraints: BoxConstraints(biggest)\n',
       ),
     );
 
@@ -465,29 +464,31 @@ void main() {
 
   testWidgets('ListView should paint with offset', (WidgetTester tester) async {
     await tester.pumpWidget(
-        MaterialApp(
-            home: Scaffold(
-                body: SizedBox(
-                    height: 500.0,
-                    child: CustomScrollView(
-                      controller: ScrollController(initialScrollOffset: 120.0),
-                      slivers: <Widget>[
-                        const SliverAppBar(
-                          expandedHeight: 250.0,
-                        ),
-                        SliverList(
-                            delegate: ListView.builder(
-                                itemExtent: 100.0,
-                                itemCount: 100,
-                                itemBuilder: (_, __) => const SizedBox(
-                                  height: 40.0,
-                                  child: Text('hey'),
-                                )).childrenDelegate),
-                      ],
-                    ),
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            height: 500.0,
+            child: CustomScrollView(
+              controller: ScrollController(initialScrollOffset: 120.0),
+              slivers: <Widget>[
+                const SliverAppBar(
+                  expandedHeight: 250.0,
                 ),
+                SliverList(
+                  delegate: ListView.builder(
+                    itemExtent: 100.0,
+                    itemCount: 100,
+                    itemBuilder: (_, __) => const SizedBox(
+                      height: 40.0,
+                      child: Text('hey'),
+                    ),
+                  ).childrenDelegate,
+                ),
+              ],
             ),
+          ),
         ),
+      ),
     );
 
     final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
@@ -496,23 +497,23 @@ void main() {
 
   testWidgets('ListView should paint with rtl', (WidgetTester tester) async {
     await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.rtl,
-          child: SizedBox(
-            height: 200.0,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              scrollDirection: Axis.horizontal,
-              itemExtent: 200.0,
-              itemCount: 10,
-              itemBuilder: (_, int i) => Container(
-                height: 200.0,
-                width: 200.0,
-                color: i.isEven ? Colors.black : Colors.red,
-              ),
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: SizedBox(
+          height: 200.0,
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            scrollDirection: Axis.horizontal,
+            itemExtent: 200.0,
+            itemCount: 10,
+            itemBuilder: (_, int i) => Container(
+              height: 200.0,
+              width: 200.0,
+              color: i.isEven ? Colors.black : Colors.red,
             ),
           ),
         ),
+      ),
     );
 
     final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));

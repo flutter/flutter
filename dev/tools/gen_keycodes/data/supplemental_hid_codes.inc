@@ -1,5 +1,11 @@
-  // These are supplemental key codes to be added to those that Chromium
-  // defines. Since the web doesn't have game controller buttons defined in the
+  // These are supplemental code data to be added to those that Chromium
+  // defines.
+
+  // ============================================================
+  // Game controller buttons
+  // ============================================================
+
+  // Since the web doesn't have game controller buttons defined in the
   // same way, these map USB HID codes for game controller buttons to
   // Android/Linux button names.
   //
@@ -43,6 +49,10 @@
   DOM_CODE(0x05ff1d, 0x0000, 0x0000, 0x0000, 0xffff, "GameButtonX", BUTTON_X),
   DOM_CODE(0x05ff1e, 0x0000, 0x0000, 0x0000, 0xffff, "GameButtonY", BUTTON_Y),
   DOM_CODE(0x05ff1f, 0x0000, 0x0000, 0x0000, 0xffff, "GameButtonZ", BUTTON_Z),
+
+  // ============================================================
+  // Fn key for Mac
+  // ============================================================
 
   // The Mac defines a key code for the Fn key on Mac keyboards, but it's not
   // defined on other platforms. Chromium does define an "Fn" row, but doesn't

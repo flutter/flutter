@@ -13,12 +13,14 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/testbed.dart';
+import '../../src/test_build_system.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
@@ -54,18 +56,35 @@ void main() {
   });
 
   testUsingContext('flutter assemble can parse inputs', () async {
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+    final AssembleCommand command = AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
         expect(environment.inputs, containsPair('Foo', 'Bar.txt'));
-      })
-    ));
+    }));
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     await commandRunner.run(<String>['assemble', '-o Output', '-iFoo=Bar.txt', 'debug_macos_bundle_flutter_assets']);
 
     expect(testLogger.traceText, contains('build succeeded.'));
+    expect(await command.requiredArtifacts, isEmpty);
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('flutter assemble sets required artifacts from target platform', () async {
+    final AssembleCommand command = AssembleCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)));
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    await commandRunner.run(<String>['assemble', '-o Output', '-dTargetPlatform=darwin', '-dDarwinArchs=x86_64', 'debug_macos_bundle_flutter_assets']);
+
+    expect(await command.requiredArtifacts, <DevelopmentArtifact>{
+      DevelopmentArtifact.macOS,
+    });
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('flutter assemble throws ToolExit if not provided with output', () async {
@@ -74,6 +93,28 @@ void main() {
     ));
 
     expect(commandRunner.run(<String>['assemble', 'debug_macos_bundle_flutter_assets']), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('flutter assemble throws ToolExit if dart-defines are not base64 encoded', () async {
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    ));
+
+    final List<String> command = <String>[
+      'assemble',
+      '--output',
+      'Output',
+      '--DartDefines=flutter.inspector.structuredErrors%3Dtrue',
+      'debug_macos_bundle_flutter_assets',
+    ];
+    expect(
+      commandRunner.run(command),
+      throwsToolExit(message: 'Error parsing assemble command: your generated configuration may be out of date')
+    );
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),

@@ -8,8 +8,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart';
 import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
 

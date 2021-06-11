@@ -69,7 +69,7 @@ Future<T?> showSearch<T>({
 /// The search page always shows an [AppBar] at the top where users can
 /// enter their search queries. The buttons shown before and after the search
 /// query text field can be customized via [SearchDelegate.buildLeading]
-/// and [SearchDelegate.buildActions]. Additonally, a widget can be placed
+/// and [SearchDelegate.buildActions]. Additionally, a widget can be placed
 /// across the bottom of the [AppBar] via [SearchDelegate.buildBottom].
 ///
 /// The body below the [AppBar] can either show suggested queries (returned by
@@ -180,7 +180,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.leading], the intended use for the return value of this method.
-  Widget buildLeading(BuildContext context);
+  Widget? buildLeading(BuildContext context);
 
   /// Widgets to display after the search query in the [AppBar].
   ///
@@ -193,7 +193,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.actions], the intended use for the return value of this method.
-  List<Widget> buildActions(BuildContext context);
+  List<Widget>? buildActions(BuildContext context);
 
   /// Widget to display across the bottom of the [AppBar].
   ///
@@ -248,9 +248,14 @@ abstract class SearchDelegate<T> {
   /// If the user taps on a suggestion provided by [buildSuggestions] this
   /// string should be updated to that suggestion via the setter.
   String get query => _queryTextController.text;
+
+  /// Changes the current query string.
+  ///
+  /// Setting the query string programmatically moves the cursor to the end of the text field.
   set query(String value) {
     assert(query != null);
     _queryTextController.text = value;
+    _queryTextController.selection = TextSelection.fromPosition(TextPosition(offset: _queryTextController.text.length));
   }
 
   /// Transition from the suggestions returned by [buildSuggestions] to the
@@ -583,7 +588,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             duration: const Duration(milliseconds: 300),
             child: body,
           ),
-        )
+        ),
       ),
     );
   }

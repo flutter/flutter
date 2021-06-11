@@ -7,19 +7,18 @@
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
@@ -42,8 +41,7 @@ void main() {
           arguments: <String>['--no-pub', '--template=app']);
       final BuildAppBundleCommand command = await runBuildAppBundleCommand(projectPath);
 
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64,android-x64'));
+      expect((await command.usageValues).commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64,android-x64');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -54,23 +52,19 @@ void main() {
           arguments: <String>['--no-pub', '--template=app']);
 
       final BuildAppBundleCommand commandDefault = await runBuildAppBundleCommand(projectPath);
-      expect(await commandDefault.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'release'));
+      expect((await commandDefault.usageValues).commandBuildAppBundleBuildMode, 'release');
 
       final BuildAppBundleCommand commandInRelease = await runBuildAppBundleCommand(projectPath,
           arguments: <String>['--release']);
-      expect(await commandInRelease.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'release'));
+      expect((await commandInRelease.usageValues).commandBuildAppBundleBuildMode, 'release');
 
       final BuildAppBundleCommand commandInDebug = await runBuildAppBundleCommand(projectPath,
           arguments: <String>['--debug']);
-      expect(await commandInDebug.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'debug'));
+      expect((await commandInDebug.usageValues).commandBuildAppBundleBuildMode, 'debug');
 
       final BuildAppBundleCommand commandInProfile = await runBuildAppBundleCommand(projectPath,
           arguments: <String>['--profile']);
-      expect(await commandInProfile.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'profile'));
+      expect((await commandInProfile.usageValues).commandBuildAppBundleBuildMode, 'profile');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -95,14 +89,14 @@ void main() {
   group('Gradle', () {
     Directory tempDir;
     FakeProcessManager processManager;
-    FakeAndroidSdk mockAndroidSdk;
+    FakeAndroidSdk fakeAndroidSdk;
     TestUsage testUsage;
 
     setUp(() {
       testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       processManager = FakeProcessManager.any();
-      mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
+      fakeAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {
@@ -162,14 +156,14 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'appbundle',
+          'gradle',
           label: 'app-not-using-android-x',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidSdk: () => fakeAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       Usage: () => testUsage,
@@ -202,14 +196,14 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'appbundle',
+          'gradle',
           label: 'app-using-android-x',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidSdk: () => fakeAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       Usage: () => testUsage,

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('!pinned && !floating && !bottom ==> fade opacity', (WidgetTester tester) async {
@@ -241,8 +241,8 @@ class _TestWidget extends StatelessWidget {
           SliverList(
             delegate: SliverChildListDelegate(List<Widget>.generate(20, (int i) {
               return SizedBox(
-                child: Text('Tile $i'),
                 height: 100.0,
+                child: Text('Tile $i'),
               );
             })),
           ),

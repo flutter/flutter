@@ -537,7 +537,7 @@ class _AndroidViewState extends State<AndroidView> {
     }
     SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setPlatformViewClient',
-      _id,
+      <String, dynamic>{'platformViewId': _id, 'usesVirtualDisplay': true},
     ).catchError((dynamic e) {
       if (e is MissingPluginException) {
         // We land the framework part of Android platform views keyboard
@@ -638,9 +638,7 @@ class _UiKitViewState extends State<UiKitView> {
       controller.dispose();
       return;
     }
-    if (widget.onPlatformViewCreated != null) {
-      widget.onPlatformViewCreated!(id);
-    }
+    widget.onPlatformViewCreated?.call(id);
     setState(() { _controller = controller; });
   }
 }
@@ -854,7 +852,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
   @override
   void initState() {
-    _focusNode = FocusNode(debugLabel: 'PlatformView(id: $_id)',);
+    _focusNode = FocusNode(debugLabel: 'PlatformView(id: $_id)');
     _initialize();
     super.initState();
   }
@@ -895,6 +893,10 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     if (!isFocused) {
       _controller?.clearFocus();
     }
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setPlatformViewClient',
+      <String, dynamic>{'platformViewId': _id},
+    );
   }
 
   void _handlePlatformFocusChanged(bool isFocused){
@@ -1033,10 +1035,11 @@ class AndroidViewSurface extends PlatformViewSurface {
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
        super(
-          key: key,
-          controller: controller,
-          hitTestBehavior: hitTestBehavior,
-          gestureRecognizers: gestureRecognizers);
+         key: key,
+         controller: controller,
+         hitTestBehavior: hitTestBehavior,
+         gestureRecognizers: gestureRecognizers,
+       );
 
   @override
   RenderObject createRenderObject(BuildContext context) {

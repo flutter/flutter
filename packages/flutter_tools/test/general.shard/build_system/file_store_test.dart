@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
@@ -78,7 +76,7 @@ void main() {
     fileCache.initialize();
     fileCache.diffFileList(<File>[file]);
     fileCache.persist();
-    final String currentHash =  fileCache.currentAssetKeys[file.path];
+    final String? currentHash = fileCache.currentAssetKeys[file.path];
     final Uint8List buffer = cacheFile
         .readAsBytesSync();
     FileStorage fileStorage = FileStorage.fromBuffer(buffer);
@@ -101,6 +99,19 @@ void main() {
 
     expect(fileStorage.files.single.hash, currentHash);
     expect(fileStorage.files.single.path, file.path);
+  });
+
+  testWithoutContext('FileStore handles changed format', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File cacheFile = fileSystem.file(FileStore.kFileCache)..writeAsStringSync(
+      '{"version":1,"files":[{"path_old":"foo.dart","hash_old":"f95b70fdc3088560732a5ac135644506"}]}');
+    final FileStore fileCache = FileStore(
+      cacheFile: cacheFile,
+      logger: BufferLogger.test(),
+    );
+
+    fileCache.initialize();
+    expect(cacheFile, isNot(exists));
   });
 
   testWithoutContext('FileStore handles persisting with a missing build directory', () async {

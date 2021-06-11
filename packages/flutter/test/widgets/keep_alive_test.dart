@@ -5,8 +5,8 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class Leaf extends StatefulWidget {
   const Leaf({
@@ -15,7 +15,7 @@ class Leaf extends StatefulWidget {
   }) : super(key: key);
   final Widget child;
   @override
-  _LeafState createState() => _LeafState();
+  State<Leaf> createState() => _LeafState();
 }
 
 class _LeafState extends State<Leaf> {
@@ -345,7 +345,7 @@ void main() {
       '                         └─child: RenderCustomPaint#00000 NEEDS-PAINT\n'
       '                             parentData: <none> (can use size)\n'
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
-      '                             size: Size(800.0, 400.0)\n'
+      '                             size: Size(800.0, 400.0)\n',
     ));
     const GlobalObjectKey<_LeafState>(0).currentState!.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
@@ -530,7 +530,7 @@ void main() {
       '                         └─child: RenderCustomPaint#00000\n'
       '                             parentData: <none> (can use size)\n'
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
-      '                             size: Size(800.0, 400.0)\n'
+      '                             size: Size(800.0, 400.0)\n',
     ));
   }, skip: kIsWeb);
 

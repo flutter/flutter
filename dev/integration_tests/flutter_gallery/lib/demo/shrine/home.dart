@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
-
 import 'package:flutter_gallery/demo/shrine/backdrop.dart';
 import 'package:flutter_gallery/demo/shrine/expanding_bottom_sheet.dart';
 import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
 import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/asymmetric_view.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class ProductPage extends StatelessWidget {
   const ProductPage({Key? key, this.category = Category.all}) : super(key: key);
@@ -41,7 +40,7 @@ class HomePage extends StatelessWidget {
       children: <Widget>[
         if (backdrop != null)
           backdrop!,
-        Align(child: expandingBottomSheet, alignment: Alignment.bottomRight),
+        Align(alignment: Alignment.bottomRight, child: expandingBottomSheet),
       ],
     );
   }

@@ -88,7 +88,8 @@ void main() {
         ));
 
         expect(client2.currentTextEditingValue, text2);
-    });
+      },
+    );
   });
 }
 
@@ -190,15 +191,6 @@ class FakeTextChannel implements MethodChannel {
     incoming = handler;
   }
 
-  @override
-  bool checkMethodCallHandler(Future<void> Function(MethodCall call)? handler) => throw UnimplementedError();
-
-  @override
-  void setMockMethodCallHandler(Future<void>? Function(MethodCall call)? handler)  => throw UnimplementedError();
-
-  @override
-  bool checkMockMethodCallHandler(Future<void> Function(MethodCall call)? handler) => throw UnimplementedError();
-
   void validateOutgoingMethodCalls(List<MethodCall> calls) {
     expect(outgoingCalls.length, calls.length);
     bool hasError = false;
@@ -212,7 +204,8 @@ class FakeTextChannel implements MethodChannel {
         print(
           'Index $i did not match:\n'
           '  actual:   ${outgoingCalls[i]}\n'
-          '  expected: ${calls[i]}');
+          '  expected: ${calls[i]}',
+        );
         hasError = true;
       }
     }

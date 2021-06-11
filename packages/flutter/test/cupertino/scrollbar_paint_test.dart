@@ -67,7 +67,7 @@ void main() {
             ),
             child: CupertinoScrollbar(
               child: ListView(
-                children: const <Widget> [SizedBox(width: 4000, height: 4000)]
+                children: const <Widget>[SizedBox(width: 4000, height: 4000)],
               ),
             ),
           ),

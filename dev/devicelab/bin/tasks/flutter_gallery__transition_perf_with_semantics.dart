@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_devicelab/tasks/gallery.dart';
-import 'package:flutter_devicelab/framework/adb.dart';
+// @dart = 2.8
+
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
+import 'package:flutter_devicelab/tasks/gallery.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;

@@ -56,6 +56,7 @@ mixin DeserializeCommandFactory {
       case 'tap': return Tap.deserialize(params, finderFactory);
       case 'waitFor': return WaitFor.deserialize(params, finderFactory);
       case 'waitForAbsent': return WaitForAbsent.deserialize(params, finderFactory);
+      case 'waitForTappable': return WaitForTappable.deserialize(params, finderFactory);
       case 'waitForCondition': return WaitForCondition.deserialize(params);
       case 'waitUntilNoTransientCallbacks': return WaitForCondition.deserialize(params);
       case 'waitUntilNoPendingFrame': return WaitForCondition.deserialize(params);

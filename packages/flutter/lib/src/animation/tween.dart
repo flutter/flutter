@@ -279,7 +279,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
           else
             ErrorHint(
               'There may be a dedicated "${begin.runtimeType}Tween" for this type, '
-              'or you may need to create one.'
+              'or you may need to create one.',
             ),
         ]);
       } on TypeError {
@@ -296,7 +296,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
           else
             ErrorHint(
               'There may be a dedicated "${begin.runtimeType}Tween" for this type, '
-              'or you may need to create one.'
+              'or you may need to create one.',
             ),
         ]);
       }

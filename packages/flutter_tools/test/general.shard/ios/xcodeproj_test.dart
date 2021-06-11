@@ -10,62 +10,24 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' as mocks;
+import '../../src/fake_process_manager.dart';
 
 const String xcodebuild = '/usr/bin/xcodebuild';
 
 void main() {
   group('MockProcessManager', () {
-    mocks.MockProcessManager processManager;
-    XcodeProjectInterpreter xcodeProjectInterpreter;
-    FakePlatform platform;
-    BufferLogger logger;
-
     setUp(() {
-      processManager = mocks.MockProcessManager();
-      platform = FakePlatform(operatingSystem: 'macos');
       final FileSystem fileSystem = MemoryFileSystem.test();
       fileSystem.file(xcodebuild).createSync(recursive: true);
-      logger = BufferLogger.test();
-      xcodeProjectInterpreter = XcodeProjectInterpreter(
-        logger: logger,
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: processManager,
-        terminal: Terminal.test(),
-        usage: null,
-      );
-    });
-
-    testWithoutContext('xcodebuild build settings flakes', () async {
-      const Duration delay = Duration(seconds: 1);
-      processManager.processFactory = mocks.flakyProcessFactory(
-        flakes: 1,
-        delay: delay + const Duration(seconds: 1),
-      );
-      platform.environment = const <String, String>{};
-
-      when(processManager.runSync(<String>['which', 'sysctl']))
-          .thenReturn(ProcessResult(0, 0, '', ''));
-      when(processManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
-          .thenReturn(ProcessResult(0, 1, '', ''));
-
-      expect(await xcodeProjectInterpreter.getBuildSettings(
-        '', scheme: 'Runner', timeout: delay),
-        const <String, String>{});
-      // build settings times out and is killed once, then succeeds.
-      verify(processManager.killPid(any)).called(1);
-      // The verbose logs should tell us something timed out.
-      expect(logger.traceText, contains('timed out'));
     });
   });
 
@@ -91,7 +53,7 @@ void main() {
   BufferLogger logger;
 
   setUp(() {
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
     platform = FakePlatform(operatingSystem: 'macos');
     fileSystem = MemoryFileSystem.test();
     fileSystem.file(xcodebuild).createSync(recursive: true);
@@ -101,7 +63,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: null,
     );
   });
@@ -120,7 +81,7 @@ void main() {
     ]);
 
     expect(xcodeProjectInterpreter.versionText, isNull);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild versionText returns null when xcodebuild is not installed', () {
@@ -147,7 +108,7 @@ void main() {
     ]);
 
     expect(xcodeProjectInterpreter.versionText, 'Xcode 8.3.3, Build version 8E3004b');
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild versionText handles Xcode version string with unexpected format', () {
@@ -161,7 +122,7 @@ void main() {
     ]);
 
     expect(xcodeProjectInterpreter.versionText, 'Xcode Ultra5000, Build version 8E3004b');
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild version parts can be parsed', () {
@@ -174,10 +135,8 @@ void main() {
       ),
     ]);
 
-    expect(xcodeProjectInterpreter.majorVersion, 11);
-    expect(xcodeProjectInterpreter.minorVersion, 4);
-    expect(xcodeProjectInterpreter.patchVersion, 1);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(xcodeProjectInterpreter.version, Version(11, 4, 1));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild minor and patch version default to 0', () {
@@ -190,10 +149,8 @@ void main() {
       ),
     ]);
 
-    expect(xcodeProjectInterpreter.majorVersion, 11);
-    expect(xcodeProjectInterpreter.minorVersion, 0);
-    expect(xcodeProjectInterpreter.patchVersion, 0);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(xcodeProjectInterpreter.version, Version(11, 0, 0));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild version parts is null when version has unexpected format', () {
@@ -205,10 +162,8 @@ void main() {
         stdout: 'Xcode Ultra5000\nBuild version 8E3004b',
       ),
     ]);
-    expect(xcodeProjectInterpreter.majorVersion, isNull);
-    expect(xcodeProjectInterpreter.minorVersion, isNull);
-    expect(xcodeProjectInterpreter.patchVersion, isNull);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(xcodeProjectInterpreter.version, isNull);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild isInstalled is false when not on MacOS', () {
@@ -218,20 +173,19 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: TestUsage(),
     );
     fileSystem.file(xcodebuild).deleteSync();
 
     expect(xcodeProjectInterpreter.isInstalled, isFalse);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild isInstalled is false when xcodebuild does not exist', () {
     fileSystem.file(xcodebuild).deleteSync();
 
     expect(xcodeProjectInterpreter.isInstalled, isFalse);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext(
@@ -249,7 +203,7 @@ void main() {
     ]);
 
     expect(xcodeProjectInterpreter.isInstalled, isFalse);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild isInstalled is false when version has unexpected format', () {
@@ -263,7 +217,7 @@ void main() {
     ]);
 
     expect(xcodeProjectInterpreter.isInstalled, isFalse);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild isInstalled is true when version has expected format', () {
@@ -277,7 +231,7 @@ void main() {
     ]);
 
     expect(xcodeProjectInterpreter.isInstalled, isTrue);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcrun runs natively on arm64', () {
@@ -297,15 +251,15 @@ void main() {
       '-arm64e',
       'xcrun',
     ]);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('xcodebuild build settings is empty when xcodebuild failed to get the build settings', () async {
+  testUsingContext('xcodebuild build settings is empty when xcodebuild failed to get the build settings', () async {
     platform.environment = const <String, String>{};
 
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager.addCommands(<FakeCommand>[
       kWhichSysctlCommand,
-      FakeCommand(
+      const FakeCommand(
         command: <String>[
           'sysctl',
           'hw.optional.arm64',
@@ -320,20 +274,26 @@ void main() {
           '/',
           '-scheme',
           'Free',
-          '-showBuildSettings'
+          '-showBuildSettings',
+          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
         ],
         exitCode: 1,
       ),
     ]);
 
-    expect(await xcodeProjectInterpreter.getBuildSettings('', scheme: 'Free'), const <String, String>{});
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(
+        await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(scheme: 'Free')),
+        const <String, String>{});
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext('build settings accepts an empty scheme', () async {
+  testUsingContext('build settings passes in the simulator SDK', () async {
     platform.environment = const <String, String>{};
 
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager.addCommands(<FakeCommand>[
       kWhichSysctlCommand,
       kARMCheckCommand,
       FakeCommand(
@@ -342,17 +302,56 @@ void main() {
           'xcodebuild',
           '-project',
           '/',
-          '-showBuildSettings'
+          '-sdk',
+          'iphonesimulator',
+          '-showBuildSettings',
+          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
         ],
         exitCode: 1,
       ),
     ]);
 
-    expect(await xcodeProjectInterpreter.getBuildSettings(''), const <String, String>{});
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(
+      await xcodeProjectInterpreter.getBuildSettings(
+        '',
+        buildContext: const XcodeProjectBuildContext(environmentType: EnvironmentType.simulator),
+      ),
+      const <String, String>{},
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext('xcodebuild build settings contains Flutter Xcode environment variables', () async {
+  testUsingContext('build settings accepts an empty scheme', () async {
+    platform.environment = const <String, String>{};
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      kWhichSysctlCommand,
+      kARMCheckCommand,
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-project',
+          '/',
+          '-showBuildSettings',
+          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
+        ],
+        exitCode: 1,
+      ),
+    ]);
+
+    expect(await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext()),
+        const <String, String>{});
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('xcodebuild build settings contains Flutter Xcode environment variables', () async {
     platform.environment = const <String, String>{
       'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
       'FLUTTER_XCODE_ARCHS': 'arm64'
@@ -369,13 +368,19 @@ void main() {
           '-scheme',
           'Free',
           '-showBuildSettings',
+          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
           'CODE_SIGN_STYLE=Manual',
           'ARCHS=arm64'
         ],
       ),
     ]);
-    expect(await xcodeProjectInterpreter.getBuildSettings('', scheme: 'Free'), const <String, String>{});
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(
+        await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(scheme: 'Free')),
+        const <String, String>{});
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testWithoutContext('xcodebuild clean contains Flutter Xcode environment variables', () async {
@@ -404,7 +409,7 @@ void main() {
     ]);
 
     await xcodeProjectInterpreter.cleanWorkspace('workspace_path', 'Free');
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild -list getInfo returns something when xcodebuild -list succeeds', () async {
@@ -422,12 +427,11 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: TestUsage(),
     );
 
     expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild -list getInfo throws a tool exit when it is unable to find a project', () async {
@@ -449,14 +453,37 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: TestUsage(),
     );
 
-    expect(
-        () async => xcodeProjectInterpreter.getInfo(workingDirectory),
-        throwsToolExit(message: stderr));
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(() => xcodeProjectInterpreter.getInfo(workingDirectory), throwsToolExit(message: stderr));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('xcodebuild -list getInfo throws a tool exit when project is corrupted', () async {
+    const String workingDirectory = '/';
+    const String stderr = 'Useful Xcode failure message about corrupted project.';
+
+    fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kARMCheckCommand,
+      FakeCommand(
+        command: <String>['xcrun', 'xcodebuild', '-list'],
+        exitCode: 74,
+        stderr: stderr,
+      ),
+    ]);
+
+    final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter(
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: fakeProcessManager,
+      usage: TestUsage(),
+    );
+
+    expect(() => xcodeProjectInterpreter.getInfo(workingDirectory), throwsToolExit(message: stderr));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Xcode project properties from default project can be parsed', () {

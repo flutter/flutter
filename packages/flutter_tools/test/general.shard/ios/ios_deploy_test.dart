@@ -13,13 +13,12 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main () {
@@ -29,7 +28,7 @@ void main () {
 
   setUp(() {
     artifacts = Artifacts.test();
-    iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+    iosDeployPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
     fileSystem = MemoryFileSystem.test();
   });
 
@@ -80,7 +79,7 @@ void main () {
 
       expect(await iosDeployDebugger.launchAndAttach(), isTrue);
       expect(await iosDeployDebugger.logLines.toList(), <String>['Did finish launching.']);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
       expect(appDeltaDirectory, exists);
     });
   });
@@ -294,7 +293,7 @@ void main () {
       );
 
       expect(exitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('returns non-zero exit code when ios-deploy does the same', () async {
@@ -317,7 +316,7 @@ void main () {
       );
 
       expect(exitCode, 1);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }
@@ -336,6 +335,7 @@ IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
     artifacts: <ArtifactSet>[
       FakeDyldEnvironmentArtifact(),
     ],
+    processManager: FakeProcessManager.any(),
   );
 
   return IOSDeploy(

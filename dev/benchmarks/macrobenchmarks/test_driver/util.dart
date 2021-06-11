@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
 import 'package:macrobenchmarks/common.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 const Duration kTimeout = Duration(seconds: 30);
 
@@ -67,7 +66,6 @@ void macroPerfTest(
     expect(timeline, isNotNull);
 
     final TimelineSummary summary = TimelineSummary.summarize(timeline);
-    await summary.writeSummaryToFile(testName, pretty: true);
     await summary.writeTimelineToFile(testName, pretty: true);
   }, timeout: Timeout(timeout));
 }

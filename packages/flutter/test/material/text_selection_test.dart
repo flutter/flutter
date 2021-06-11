@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition;
 
 class MockClipboard {
@@ -27,7 +28,7 @@ class MockClipboard {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   setUp(() async {
     await Clipboard.setData(const ClipboardData(text: 'clipboard data'));
@@ -152,7 +153,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('When menu items don\'t fit, an overflow menu is used.', (WidgetTester tester) async {
+    testWidgets("When menu items don't fit, an overflow menu is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
@@ -565,7 +566,7 @@ void main() {
                   padding: const EdgeInsets.symmetric(horizontal: 250),
                   child: FittedBox(
                     child: materialTextSelectionControls.buildHandle(
-                      context, TextSelectionHandleType.right, 10.0,
+                      context, TextSelectionHandleType.right, 10.0, null,
                     ),
                   ),
                 ),

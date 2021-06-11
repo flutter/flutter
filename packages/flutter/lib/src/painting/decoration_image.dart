@@ -51,7 +51,7 @@ class DecorationImage {
     this.centerSlice,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-    this.scale = 1.0
+    this.scale = 1.0,
   }) : assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
@@ -188,7 +188,7 @@ class DecorationImage {
         '$repeat',
       if (matchTextDirection)
         'match text direction',
-      'scale: $scale'
+      'scale: $scale',
     ];
     return '${objectRuntimeType(this, 'DecorationImage')}(${properties.join(", ")})';
   }
@@ -243,7 +243,7 @@ class DecorationImagePainter {
             ErrorSummary('DecorationImage.matchTextDirection can only be used when a TextDirection is available.'),
             ErrorDescription(
               'When DecorationImagePainter.paint() was called, there was no text direction provided '
-              'in the ImageConfiguration object to match.'
+              'in the ImageConfiguration object to match.',
             ),
             DiagnosticsProperty<DecorationImage>('The DecorationImage was', _details, style: DiagnosticsTreeStyle.errorProperty),
             DiagnosticsProperty<ImageConfiguration>('The ImageConfiguration was', configuration, style: DiagnosticsTreeStyle.errorProperty),
@@ -360,6 +360,8 @@ void debugFlushLastFrameImageSizeInfo() {
 ///
 ///  * `scale`: The number of image pixels for each logical pixel.
 ///
+///  * `opacity`: The opacity to paint the image onto the canvas with.
+///
 ///  * `colorFilter`: If non-null, the color filter to apply when painting the
 ///    image.
 ///
@@ -420,6 +422,7 @@ void paintImage({
   required ui.Image image,
   String? debugImageLabel,
   double scale = 1.0,
+  double opacity = 1.0,
   ColorFilter? colorFilter,
   BoxFit? fit,
   Alignment alignment = Alignment.center,
@@ -440,7 +443,7 @@ void paintImage({
     image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
     'Cannot paint an image that is disposed.\n'
     'The caller of paintImage is expected to wait to dispose the image until '
-    'after painting has completed.'
+    'after painting has completed.',
   );
   if (rect.isEmpty)
     return;
@@ -473,6 +476,7 @@ void paintImage({
   final Paint paint = Paint()..isAntiAlias = isAntiAlias;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
+  paint.color = Color.fromRGBO(0, 0, 0, opacity);
   paint.filterQuality = filterQuality;
   paint.invertColors = invertColors;
   final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;
@@ -534,9 +538,7 @@ void paintImage({
       if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
         _pendingImageSizeInfo[sizeInfo.source!] = sizeInfo;
       }
-      if (debugOnPaintImage != null) {
-        debugOnPaintImage!(sizeInfo);
-      }
+      debugOnPaintImage?.call(sizeInfo);
       SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
         _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
         if (_pendingImageSizeInfo.isEmpty) {
@@ -546,7 +548,7 @@ void paintImage({
           'Flutter.ImageSizesForFrame',
           <String, Object>{
             for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
-              imageSizeInfo.source!: imageSizeInfo.toJson()
+              imageSizeInfo.source!: imageSizeInfo.toJson(),
           },
         );
         _pendingImageSizeInfo = <String, ImageSizeInfo>{};

@@ -112,7 +112,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
       ext.kotlin_version = '1.3.50'
       repositories {
           google()
-          jcenter()
+          mavenCentral()
       }
 
       dependencies {
@@ -124,15 +124,13 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   allprojects {
       repositories {
           google()
-          jcenter()
+          mavenCentral()
       }
   }
 
   rootProject.buildDir = '../build'
   subprojects {
       project.buildDir = "${rootProject.buildDir}/${project.name}"
-  }
-  subprojects {
       project.evaluationDependsOn(':app')
   }
 

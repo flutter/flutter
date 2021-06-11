@@ -4,7 +4,7 @@
 
 // @dart = 2.8
 
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class GenerateCommand extends FlutterCommand {

@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -21,11 +18,14 @@ class FileStorage {
   FileStorage(this.version, this.files);
 
   factory FileStorage.fromBuffer(Uint8List buffer) {
-    final Map<String, dynamic> json = castStringKeyedMap(jsonDecode(utf8.decode(buffer)));
+    final Map<String, dynamic>? json = castStringKeyedMap(jsonDecode(utf8.decode(buffer)));
+    if (json == null) {
+      throw Exception('File storage format invalid');
+    }
     final int version = json['version'] as int;
-    final List<Map<String, Object>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, Object>>();
+    final List<Map<String, dynamic>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, dynamic>>();
     final List<FileHash> cachedFiles = <FileHash>[
-      for (final Map<String, Object> rawFile in rawCachedFiles) FileHash.fromJson(rawFile),
+      for (final Map<String, dynamic> rawFile in rawCachedFiles) FileHash._fromJson(rawFile),
     ];
     return FileStorage(version, cachedFiles);
   }
@@ -48,8 +48,11 @@ class FileStorage {
 class FileHash {
   FileHash(this.path, this.hash);
 
-  factory FileHash.fromJson(Map<String, Object> json) {
-    return FileHash(json['path'] as String, json['hash'] as String);
+  factory FileHash._fromJson(Map<String, dynamic> json) {
+    if (!json.containsKey('path') || !json.containsKey('hash')) {
+      throw Exception('File storage format invalid');
+    }
+    return FileHash(json['path']! as String, json['hash']! as String);
   }
 
   final String path;
@@ -88,8 +91,8 @@ enum FileStoreStrategy {
 /// The format of the file store is subject to change and not part of its API.
 class FileStore {
   FileStore({
-    @required File cacheFile,
-    @required Logger logger,
+    required File cacheFile,
+    required Logger logger,
     FileStoreStrategy strategy = FileStoreStrategy.hash,
   }) : _logger = logger,
        _strategy = strategy,
@@ -200,7 +203,7 @@ class FileStore {
 
   void _checkModification(File file, List<File> dirty) {
     final String absolutePath = file.path;
-    final String previousTime = previousAssetKeys[absolutePath];
+    final String? previousTime = previousAssetKeys[absolutePath];
 
     // If the file is missing it is assumed to be dirty.
     if (!file.existsSync()) {
@@ -221,7 +224,7 @@ class FileStore {
 
   void _hashFile(File file, List<File> dirty) {
     final String absolutePath = file.path;
-    final String previousHash = previousAssetKeys[absolutePath];
+    final String? previousHash = previousAssetKeys[absolutePath];
     // If the file is missing it is assumed to be dirty.
     if (!file.existsSync()) {
       currentAssetKeys.remove(absolutePath);
@@ -231,7 +234,7 @@ class FileStore {
     }
     final int fileBytes = file.lengthSync();
     final Md5Hash hash = Md5Hash();
-    RandomAccessFile openFile;
+    RandomAccessFile? openFile;
     try {
       openFile = file.openSync(mode: FileMode.read);
       int bytes = 0;

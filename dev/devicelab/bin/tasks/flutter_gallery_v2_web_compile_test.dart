@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+// @dart = 2.8
 
-import 'package:path/path.dart' as path;
+import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/versions/gallery.dart' show galleryVersion;
-
 import 'package:flutter_devicelab/tasks/perf_tests.dart' show WebCompileTest;
+import 'package:flutter_devicelab/versions/gallery.dart' show galleryVersion;
+import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(const NewGalleryWebCompileTest().run);
@@ -27,7 +27,7 @@ class NewGalleryWebCompileTest {
   /// Runs the test.
   Future<TaskResult> run() async {
     final Directory galleryParentDir =
-        Directory.systemTemp.createTempSync('temp');
+        Directory.systemTemp.createTempSync('flutter_gallery_v2_web_compile.');
     final Directory galleryDir =
         Directory(path.join(galleryParentDir.path, 'gallery'));
 

@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:path/path.dart' as path;
-
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/ab.dart';
 import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 ArgResults args;
 
@@ -106,6 +108,8 @@ Future<void> main(List<String> rawArgs) async {
   } else {
     await runTasks(_taskNames,
       silent: silent,
+      localEngine: localEngine,
+      localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
       exitOnFirstTestFailure: exitOnFirstTestFailure,
       gitBranch: gitBranch,
@@ -182,7 +186,7 @@ Future<void> _runABTest() async {
   abTest.finalize();
 
   final File jsonFile = _uniqueFile(args['ab-result-file'] as String ?? 'ABresults#.json');
-  jsonFile.writeAsString(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap));
+  unawaited(jsonFile.writeAsString(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap)));
 
   if (!silent) {
     section('Raw results');

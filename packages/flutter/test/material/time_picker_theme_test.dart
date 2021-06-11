@@ -231,7 +231,7 @@ void main() {
   testWidgets('Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme();
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
-    await tester.pumpWidget(_TimePickerLauncher(themeData: theme,));
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
@@ -424,18 +424,18 @@ class _TimePickerLauncher extends StatelessWidget {
       home: Material(
         child: Center(
           child: Builder(
-              builder: (BuildContext context) {
-                return ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () async {
-                    await showTimePicker(
-                      context: context,
-                      initialEntryMode: entryMode,
-                      initialTime: const TimeOfDay(hour: 7, minute: 15),
-                    );
-                  },
-                );
-              }
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                child: const Text('X'),
+                onPressed: () async {
+                  await showTimePicker(
+                    context: context,
+                    initialEntryMode: entryMode,
+                    initialTime: const TimeOfDay(hour: 7, minute: 15),
+                  );
+                },
+              );
+            },
           ),
         ),
       ),

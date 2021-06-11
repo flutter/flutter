@@ -10,6 +10,7 @@ import '../base/common.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
 import '../features.dart';
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult;
@@ -42,6 +43,7 @@ class BuildWebCommand extends BuildSubCommand {
             'to view and debug the original source code of a compiled and minified Dart '
             'application.'
     );
+
     argParser.addOption('pwa-strategy',
       defaultsTo: kOfflineFirst,
       help: 'The caching strategy to be used by the PWA service worker.',
@@ -59,6 +61,13 @@ class BuildWebCommand extends BuildSubCommand {
                        'is not desirable',
       },
     );
+    argParser.addOption('base-href',
+      help: 'Overrides the href attribute of the <base> tag in web/index.html. '
+          'No change is done to web/index.html file if this flag is not provided. '
+          'The value has to start and end with a slash "/". '
+          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base'
+    );
+
   }
 
   @override
@@ -79,13 +88,27 @@ class BuildWebCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (!featureFlags.isWebEnabled) {
-      throwToolExit('"build web" is not currently supported.');
+      throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
     final FlutterProject flutterProject = FlutterProject.current();
     final String target = stringArg('target');
     final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
+    }
+    if (stringArg('base-href') != null && !(stringArg('base-href').startsWith('/') && stringArg('base-href').endsWith('/'))) {
+      throwToolExit('base-href should start and end with /');
+    }
+    if (!globals.fs.currentDirectory
+        .childDirectory('web')
+        .childFile('index.html')
+        .readAsStringSync()
+        .contains(kBaseHrefPlaceholder) &&
+        stringArg('base-href') != null) {
+      throwToolExit(
+        "Couldn't find the placeholder for base href. "
+        r'Please add `<base href="$FLUTTER_BASE_HREF">` to web/index.html'
+      );
     }
     displayNullSafetyMode(buildInfo);
     await buildWeb(
@@ -96,6 +119,7 @@ class BuildWebCommand extends BuildSubCommand {
       stringArg('pwa-strategy'),
       boolArg('source-maps'),
       boolArg('native-null-assertions'),
+      stringArg('base-href'),
     );
     return FlutterCommandResult.success();
   }

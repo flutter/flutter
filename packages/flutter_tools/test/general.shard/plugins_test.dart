@@ -14,35 +14,33 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/flutter_plugins.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
-import 'package:package_config/package_config.dart';
+import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fakes.dart';
+import '../src/fakes.dart' hide FakeOperatingSystemUtils;
 import '../src/pubspec_schema.dart';
-import '../src/testbed.dart';
 
 void main() {
   group('plugins', () {
     FileSystem fs;
-    MockFlutterProject flutterProject;
-    MockFlutterManifest flutterManifest;
-    MockIosProject iosProject;
-    MockMacOSProject macosProject;
-    MockAndroidProject androidProject;
-    MockWebProject webProject;
-    MockWindowsProject windowsProject;
-    MockLinuxProject linuxProject;
+    FakeFlutterProject flutterProject;
+    FakeFlutterManifest flutterManifest;
+    FakeIosProject iosProject;
+    FakeMacOSProject macosProject;
+    FakeAndroidProject androidProject;
+    FakeWebProject webProject;
+    FakeWindowsProject windowsProject;
+    FakeLinuxProject linuxProject;
     FakeSystemClock systemClock;
     FlutterVersion flutterVersion;
     // A Windows-style filesystem. This is not populated by default, so tests
@@ -52,73 +50,69 @@ void main() {
 
     // Adds basic properties to the flutterProject and its subprojects.
     void setUpProject(FileSystem fileSystem) {
-      flutterProject = MockFlutterProject();
+      flutterProject = FakeFlutterProject();
+      flutterManifest = FakeFlutterManifest();
 
-      flutterManifest = MockFlutterManifest();
-      when(flutterManifest.dependencies).thenReturn(<String>{});
+      flutterProject
+        ..manifest = flutterManifest
+        ..directory = fileSystem.systemTempDirectory.childDirectory('app')
+        ..flutterPluginsFile = flutterProject.directory.childFile('.flutter-plugins')
+        ..flutterPluginsDependenciesFile = flutterProject.directory.childFile('.flutter-plugins-dependencies');
 
-      when(flutterProject.manifest).thenReturn(flutterManifest);
-
-      when(flutterProject.directory).thenReturn(fileSystem.systemTempDirectory.childDirectory('app'));
-      // TODO(franciscojma): Remove logic for .flutter-plugins once it's deprecated.
-      when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
-      when(flutterProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins-dependencies'));
-
-      iosProject = MockIosProject();
-      when(flutterProject.ios).thenReturn(iosProject);
+      iosProject = FakeIosProject();
+      flutterProject.ios = iosProject;
       final Directory iosDirectory = flutterProject.directory.childDirectory('ios');
-      when(iosProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('Runner'));
-      when(iosProject.podfile).thenReturn(iosDirectory.childFile('Podfile'));
-      when(iosProject.podManifestLock).thenReturn(iosDirectory.childFile('Podfile.lock'));
-      when(iosProject.pluginConfigKey).thenReturn('ios');
-      when(iosProject.existsSync()).thenReturn(false);
+      iosProject
+        ..pluginRegistrantHost = flutterProject.directory.childDirectory('Runner')
+        ..podfile = iosDirectory.childFile('Podfile')
+        ..podManifestLock = iosDirectory.childFile('Podfile.lock')
+        ..testExists = false;
 
-      macosProject = MockMacOSProject();
-      when(flutterProject.macos).thenReturn(macosProject);
+      macosProject = FakeMacOSProject();
+      flutterProject.macos = macosProject;
       final Directory macosDirectory = flutterProject.directory.childDirectory('macos');
-      when(macosProject.podfile).thenReturn(macosDirectory.childFile('Podfile'));
-      when(macosProject.podManifestLock).thenReturn(macosDirectory.childFile('Podfile.lock'));
       final Directory macosManagedDirectory = macosDirectory.childDirectory('Flutter');
-      when(macosProject.managedDirectory).thenReturn(macosManagedDirectory);
-      when(macosProject.pluginConfigKey).thenReturn('macos');
-      when(macosProject.existsSync()).thenReturn(false);
+      macosProject
+        ..podfile = macosDirectory.childFile('Podfile')
+        ..podManifestLock = macosDirectory.childFile('Podfile.lock')
+        ..managedDirectory = macosManagedDirectory
+        ..exists = false;
 
-      androidProject = MockAndroidProject();
-      when(flutterProject.android).thenReturn(androidProject);
+      androidProject = FakeAndroidProject();
+      flutterProject.android = androidProject;
       final Directory androidDirectory = flutterProject.directory.childDirectory('android');
-      when(androidProject.pluginRegistrantHost).thenReturn(androidDirectory.childDirectory('app'));
-      when(androidProject.hostAppGradleRoot).thenReturn(androidDirectory);
-      when(androidProject.pluginConfigKey).thenReturn('android');
-      when(androidProject.existsSync()).thenReturn(false);
+      androidProject
+        ..pluginRegistrantHost = androidDirectory.childDirectory('app')
+        ..hostAppGradleRoot = androidDirectory
+        ..exists = false;
 
-      webProject = MockWebProject();
-      when(flutterProject.web).thenReturn(webProject);
-      when(webProject.libDirectory).thenReturn(flutterProject.directory.childDirectory('lib'));
-      when(webProject.existsSync()).thenReturn(true);
-      when(webProject.pluginConfigKey).thenReturn('web');
-      when(webProject.existsSync()).thenReturn(false);
+      webProject = FakeWebProject();
+      flutterProject.web = webProject;
+      webProject
+        ..libDirectory = flutterProject.directory.childDirectory('lib')
+        ..exists = false;
 
-      windowsProject = MockWindowsProject();
-      when(flutterProject.windows).thenReturn(windowsProject);
-      when(windowsProject.pluginConfigKey).thenReturn('windows');
+      windowsProject = FakeWindowsProject();
+      flutterProject.windows = windowsProject;
       final Directory windowsManagedDirectory = flutterProject.directory.childDirectory('windows').childDirectory('flutter');
-      when(windowsProject.managedDirectory).thenReturn(windowsManagedDirectory);
-      when(windowsProject.cmakeFile).thenReturn(windowsManagedDirectory.parent.childFile('CMakeLists.txt'));
-      when(windowsProject.generatedPluginCmakeFile).thenReturn(windowsManagedDirectory.childFile('generated_plugins.mk'));
-      when(windowsProject.pluginSymlinkDirectory).thenReturn(windowsManagedDirectory.childDirectory('ephemeral').childDirectory('.plugin_symlinks'));
-      when(windowsProject.existsSync()).thenReturn(false);
+      windowsProject
+        ..managedDirectory = windowsManagedDirectory
+        ..cmakeFile = windowsManagedDirectory.parent.childFile('CMakeLists.txt')
+        ..generatedPluginCmakeFile = windowsManagedDirectory.childFile('generated_plugins.mk')
+        ..pluginSymlinkDirectory = windowsManagedDirectory.childDirectory('ephemeral').childDirectory('.plugin_symlinks')
+        ..exists = false;
 
-      linuxProject = MockLinuxProject();
-      when(flutterProject.linux).thenReturn(linuxProject);
-      when(linuxProject.pluginConfigKey).thenReturn('linux');
+      linuxProject = FakeLinuxProject();
+      flutterProject.linux = linuxProject;
       final Directory linuxManagedDirectory = flutterProject.directory.childDirectory('linux').childDirectory('flutter');
       final Directory linuxEphemeralDirectory = linuxManagedDirectory.childDirectory('ephemeral');
-      when(linuxProject.managedDirectory).thenReturn(linuxManagedDirectory);
-      when(linuxProject.ephemeralDirectory).thenReturn(linuxEphemeralDirectory);
-      when(linuxProject.pluginSymlinkDirectory).thenReturn(linuxEphemeralDirectory.childDirectory('.plugin_symlinks'));
-      when(linuxProject.cmakeFile).thenReturn(linuxManagedDirectory.parent.childFile('CMakeLists.txt'));
-      when(linuxProject.generatedPluginCmakeFile).thenReturn(linuxManagedDirectory.childFile('generated_plugins.mk'));
-      when(linuxProject.existsSync()).thenReturn(false);
+      linuxProject
+        ..managedDirectory = linuxManagedDirectory
+        ..ephemeralDirectory = linuxEphemeralDirectory
+        ..pluginSymlinkDirectory = linuxEphemeralDirectory.childDirectory('.plugin_symlinks')
+        ..cmakeFile = linuxManagedDirectory.parent.childFile('CMakeLists.txt')
+        ..generatedPluginCmakeFile = linuxManagedDirectory.childFile('generated_plugins.mk')
+        ..exists = false;
     }
 
     setUp(() async {
@@ -343,7 +337,7 @@ flutter:
       assert(name != null);
       assert(dependencies != null);
 
-      final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('plugin.');
+      final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('flutter_plugin.');
       pluginDirectory
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -406,7 +400,7 @@ dependencies:
           '/local_plugins/plugin_b'
         ]);
 
-        when(iosProject.existsSync()).thenReturn(true);
+        iosProject.testExists = true;
 
         await refreshPluginsList(flutterProject);
 
@@ -428,7 +422,7 @@ dependencies:
         final Directory pluginA = createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
         final Directory pluginB = createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
         final Directory pluginC = createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
-        when(iosProject.existsSync()).thenReturn(true);
+        iosProject.testExists = true;
 
         final DateTime dateCreated = DateTime(1970, 1, 1);
         systemClock.currentTime = dateCreated;
@@ -443,7 +437,6 @@ dependencies:
           'plugin-a=${pluginA.path}/\n'
           'plugin-b=${pluginB.path}/\n'
           'plugin-c=${pluginC.path}/\n'
-          ''
         );
 
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
@@ -524,8 +517,8 @@ dependencies:
         simulatePodInstallRun(iosProject);
         simulatePodInstallRun(macosProject);
         createFakePlugin(fs);
-        when(iosProject.existsSync()).thenReturn(true);
-        when(macosProject.existsSync()).thenReturn(true);
+        iosProject.testExists = true;
+        macosProject.exists = true;
 
         await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
         expect(iosProject.podManifestLock.existsSync(), false);
@@ -539,8 +532,8 @@ dependencies:
 
       testUsingContext('No changes to the plugin list does not invalidate the Cocoapod lockfiles', () async {
         createFakePlugin(fs);
-        when(iosProject.existsSync()).thenReturn(true);
-        when(macosProject.existsSync()).thenReturn(true);
+        iosProject.testExists = true;
+        macosProject.exists = true;
 
         // First call will create the .flutter-plugins-dependencies and the legacy .flutter-plugins file.
         // Since there was no plugins list, the lock files will be invalidated.
@@ -562,16 +555,14 @@ dependencies:
     });
 
     group('injectPlugins', () {
-      MockXcodeProjectInterpreter xcodeProjectInterpreter;
+      FakeXcodeProjectInterpreter xcodeProjectInterpreter;
 
       setUp(() {
-        xcodeProjectInterpreter = MockXcodeProjectInterpreter();
-        when(xcodeProjectInterpreter.isInstalled).thenReturn(false);
+        xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       });
 
       testUsingContext('Registrant uses old embedding in app project', () async {
-        when(flutterProject.isModule).thenReturn(false);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v1;
 
         await injectPlugins(flutterProject, androidPlatform: true);
 
@@ -589,8 +580,7 @@ dependencies:
       });
 
       testUsingContext('Registrant uses new embedding if app uses new embedding', () async {
-        when(flutterProject.isModule).thenReturn(false);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
         await injectPlugins(flutterProject, androidPlatform: true);
 
@@ -608,8 +598,7 @@ dependencies:
       });
 
       testUsingContext('Registrant uses shim for plugins using old embedding if app uses new embedding', () async {
-        when(flutterProject.isModule).thenReturn(false);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
         createNewJavaPlugin1();
         createNewKotlinPlugin2();
@@ -637,8 +626,7 @@ dependencies:
       });
 
       testUsingContext('exits the tool if an app uses the v1 embedding and a plugin only supports the v2 embedding', () async {
-        when(flutterProject.isModule).thenReturn(false);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v1;
 
         createNewJavaPlugin1();
 
@@ -659,8 +647,7 @@ dependencies:
 
       // Issue: https://github.com/flutter/flutter/issues/47803
       testUsingContext('exits the tool if a plugin sets an invalid android package in pubspec.yaml', () async {
-        when(flutterProject.isModule).thenReturn(false);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v1;
 
         final Directory pluginDir = createPluginWithInvalidAndroidPackage();
 
@@ -684,8 +671,7 @@ dependencies:
       });
 
       testUsingContext('old embedding app uses a plugin that supports v1 and v2 embedding works', () async {
-        when(flutterProject.isModule).thenReturn(false);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v1;
 
         createDualSupportJavaPlugin4();
 
@@ -707,8 +693,7 @@ dependencies:
       });
 
       testUsingContext('new embedding app uses a plugin that supports v1 and v2 embedding', () async {
-        when(flutterProject.isModule).thenReturn(false);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
         createDualSupportJavaPlugin4();
 
@@ -730,8 +715,8 @@ dependencies:
       });
 
       testUsingContext('Modules use new embedding', () async {
-        when(flutterProject.isModule).thenReturn(true);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+        flutterProject.isModule = true;
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
         await injectPlugins(flutterProject, androidPlatform: true);
 
@@ -749,8 +734,8 @@ dependencies:
       });
 
       testUsingContext('Module using old plugin shows warning', () async {
-        when(flutterProject.isModule).thenReturn(true);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+        flutterProject.isModule = true;
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
         createOldJavaPlugin('plugin3');
 
@@ -769,8 +754,8 @@ dependencies:
       });
 
       testUsingContext('Module using new plugin shows no warnings', () async {
-        when(flutterProject.isModule).thenReturn(true);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+        flutterProject.isModule = true;
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
         createNewJavaPlugin1();
 
@@ -790,8 +775,8 @@ dependencies:
       });
 
       testUsingContext('Module using plugin with v1 and v2 support shows no warning', () async {
-        when(flutterProject.isModule).thenReturn(true);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+        flutterProject.isModule = true;
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
         createDualSupportJavaPlugin4();
 
@@ -811,8 +796,8 @@ dependencies:
       });
 
       testUsingContext('Module using multiple old plugins all show warnings', () async {
-        when(flutterProject.isModule).thenReturn(true);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+        flutterProject.isModule = true;
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
         createOldJavaPlugin('plugin3');
         createOldJavaPlugin('plugin4');
@@ -834,23 +819,46 @@ dependencies:
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
-      testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
-        when(flutterProject.isModule).thenReturn(false);
+      testUsingContext('Module using multiple old and new plugins should be wrapped with try catch', () async {
+        flutterProject.isModule = true;
+        androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
-        final File manifest = fs.file('AndroidManifest.xml');
-        when(androidProject.appManifestFile).thenReturn(manifest);
+        createOldJavaPlugin('abcplugin1');
+        createNewJavaPlugin1();
 
         await injectPlugins(flutterProject, androidPlatform: true);
 
+        final File registrant = flutterProject.directory
+          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childFile('GeneratedPluginRegistrant.java');
+        const String newPluginName = 'flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());';
+        const String oldPluginName = 'abcplugin1.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("abcplugin1.UseOldEmbedding"));';
+        final String content = registrant.readAsStringSync();
+        for(final String plugin in <String>[newPluginName,oldPluginName]){
+          expect(content, contains(plugin));
+          expect(content.split(plugin).first.trim().endsWith('try {'), isTrue);
+          expect(content.split(plugin).last.trim().startsWith('} catch(Exception e) {'), isTrue);
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
+        final File manifest = fs.file('AndroidManifest.xml');
+        androidProject.appManifestFile = manifest;
+
+        await injectPlugins(flutterProject, androidPlatform: true);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext("Registrant for web doesn't escape slashes in imports", () async {
-        when(flutterProject.isModule).thenReturn(true);
+        flutterProject.isModule = true;
         final Directory webPluginWithNestedFile =
-            fs.systemTempDirectory.createTempSync('web_plugin_with_nested');
+            fs.systemTempDirectory.createTempSync('flutter_web_plugin_with_nested.');
         webPluginWithNestedFile.childFile('pubspec.yaml').writeAsStringSync('''
   flutter:
     plugin:
@@ -885,7 +893,7 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
       });
 
       testUsingContext('Injecting creates generated macos registrant, but does not include Dart-only plugins', () async {
-        when(flutterProject.isModule).thenReturn(true);
+        flutterProject.isModule = true;
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
         pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -907,8 +915,8 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('pluginClass: none doesn\'t trigger registrant entry on macOS', () async {
-        when(flutterProject.isModule).thenReturn(true);
+      testUsingContext("pluginClass: none doesn't trigger registrant entry on macOS", () async {
+        flutterProject.isModule = true;
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
         pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -933,7 +941,7 @@ flutter:
       });
 
       testUsingContext('Invalid yaml does not crash plugin lookup.', () async {
-        when(flutterProject.isModule).thenReturn(true);
+        flutterProject.isModule = true;
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
         pluginDirectory.childFile('pubspec.yaml').writeAsStringSync(r'''
@@ -951,7 +959,6 @@ flutter:
       });
 
       testUsingContext('Injecting creates generated Linux registrant', () async {
-        when(flutterProject.isModule).thenReturn(false);
         createFakePlugin(fs);
 
         await injectPlugins(flutterProject, linuxPlatform: true);
@@ -968,7 +975,6 @@ flutter:
       });
 
       testUsingContext('Injecting creates generated Linux registrant, but does not include Dart-only plugins', () async {
-        when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
         pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -991,8 +997,7 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('pluginClass: none doesn\'t trigger registrant entry on Linux', () async {
-        when(flutterProject.isModule).thenReturn(false);
+      testUsingContext("pluginClass: none doesn't trigger registrant entry on Linux", () async {
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
         pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -1017,7 +1022,6 @@ flutter:
       });
 
       testUsingContext('Injecting creates generated Linux plugin Cmake file', () async {
-        when(flutterProject.isModule).thenReturn(false);
         createFakePlugin(fs);
 
         await injectPlugins(flutterProject, linuxPlatform: true);
@@ -1036,7 +1040,6 @@ flutter:
       });
 
       testUsingContext('Generated Linux plugin files sorts by plugin name', () async {
-        when(flutterProject.isModule).thenReturn(false);
         createFakePlugins(fs, <String>[
           'plugin_d',
           'plugin_a',
@@ -1060,7 +1063,6 @@ flutter:
       });
 
       testUsingContext('Injecting creates generated Windows registrant', () async {
-        when(flutterProject.isModule).thenReturn(false);
         createFakePlugin(fs);
 
         await injectPlugins(flutterProject, windowsPlatform: true);
@@ -1077,7 +1079,6 @@ flutter:
       });
 
       testUsingContext('Injecting creates generated Windows registrant, but does not include Dart-only plugins', () async {
-        when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
         pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -1099,8 +1100,7 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('pluginClass: none doesn\'t trigger registrant entry on Windows', () async {
-        when(flutterProject.isModule).thenReturn(false);
+      testUsingContext("pluginClass: none doesn't trigger registrant entry on Windows", () async {
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
         pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -1125,7 +1125,6 @@ flutter:
       });
 
       testUsingContext('Generated Windows plugin files sorts by plugin name', () async {
-        when(flutterProject.isModule).thenReturn(false);
         createFakePlugins(fs, <String>[
           'plugin_d',
           'plugin_a',
@@ -1153,8 +1152,6 @@ flutter:
         setUpProject(fsWindows);
         createFakePlugin(fsWindows);
 
-        when(flutterProject.isModule).thenReturn(false);
-
         await injectPlugins(flutterProject, linuxPlatform: true, windowsPlatform: true);
 
         for (final CmakeBasedProject project in <CmakeBasedProject>[linuxProject, windowsProject]) {
@@ -1178,7 +1175,7 @@ flutter:
       });
 
       testUsingContext('Symlinks are created for Linux plugins', () async {
-        when(linuxProject.existsSync()).thenReturn(true);
+        linuxProject.exists = true;
         createFakePlugin(fs);
         // refreshPluginsList should call createPluginSymlinks.
         await refreshPluginsList(flutterProject);
@@ -1191,7 +1188,7 @@ flutter:
       });
 
       testUsingContext('Symlinks are created for Windows plugins', () async {
-        when(windowsProject.existsSync()).thenReturn(true);
+        windowsProject.exists = true;
         createFakePlugin(fs);
         // refreshPluginsList should call createPluginSymlinks.
         await refreshPluginsList(flutterProject);
@@ -1204,8 +1201,8 @@ flutter:
       });
 
       testUsingContext('Existing symlinks are removed when no longer in use with force', () {
-        when(linuxProject.existsSync()).thenReturn(true);
-        when(windowsProject.existsSync()).thenReturn(true);
+        linuxProject.exists = true;
+        windowsProject.exists = true;
 
         final List<File> dummyFiles = <File>[
           flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
@@ -1227,8 +1224,8 @@ flutter:
       });
 
       testUsingContext('Existing symlinks are removed automatically on refresh when no longer in use', () async {
-        when(linuxProject.existsSync()).thenReturn(true);
-        when(windowsProject.existsSync()).thenReturn(true);
+        linuxProject.exists = true;
+        windowsProject.exists = true;
 
         final List<File> dummyFiles = <File>[
           flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
@@ -1252,8 +1249,8 @@ flutter:
       });
 
       testUsingContext('createPluginSymlinks is a no-op without force when up to date', () {
-        when(linuxProject.existsSync()).thenReturn(true);
-        when(windowsProject.existsSync()).thenReturn(true);
+        linuxProject.exists = true;
+        windowsProject.exists = true;
 
         final List<File> dummyFiles = <File>[
           flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
@@ -1276,8 +1273,8 @@ flutter:
       });
 
       testUsingContext('createPluginSymlinks repairs missing links', () async {
-        when(linuxProject.existsSync()).thenReturn(true);
-        when(windowsProject.existsSync()).thenReturn(true);
+        linuxProject.exists = true;
+        windowsProject.exists = true;
         createFakePlugin(fs);
         await refreshPluginsList(flutterProject);
 
@@ -1300,805 +1297,12 @@ flutter:
       });
     });
 
-    group('resolvePlatformImplementation', () {
-      test('selects implementation from direct dependency', () async {
-        final FileSystem fs = MemoryFileSystem();
-        final Set<String> directDependencies = <String>{
-          'url_launcher_linux',
-          'url_launcher_macos',
-        };
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher_linux',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginLinux',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'url_launcher_macos',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'macos': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginMacOS',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'undirect_dependency_plugin',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'windows': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginWindows',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-        ]);
-
-        resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher_macos',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'macos': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginMacOS',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-        ]);
-
-        expect(resolutions.length, equals(2));
-        expect(resolutions[0].toMap(), equals(
-          <String, String>{
-            'pluginName': 'url_launcher_linux',
-            'dartClass': 'UrlLauncherPluginLinux',
-            'platform': 'linux',
-          })
-        );
-        expect(resolutions[1].toMap(), equals(
-          <String, String>{
-            'pluginName': 'url_launcher_macos',
-            'dartClass': 'UrlLauncherPluginMacOS',
-            'platform': 'macos',
-          })
-        );
-      });
-
-      test('selects default implementation', () async {
-        final FileSystem fs = MemoryFileSystem();
-        final Set<String> directDependencies = <String>{};
-
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'default_package': 'url_launcher_linux',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'url_launcher_linux',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginLinux',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-        ]);
-        expect(resolutions.length, equals(1));
-        expect(resolutions[0].toMap(), equals(
-          <String, String>{
-            'pluginName': 'url_launcher_linux',
-            'dartClass': 'UrlLauncherPluginLinux',
-            'platform': 'linux',
-          })
-        );
-      });
-
-      test('selects default implementation if interface is direct dependency', () async {
-        final FileSystem fs = MemoryFileSystem();
-        final Set<String> directDependencies = <String>{'url_launcher'};
-
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'default_package': 'url_launcher_linux',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'url_launcher_linux',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginLinux',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-        ]);
-        expect(resolutions.length, equals(1));
-        expect(resolutions[0].toMap(), equals(
-          <String, String>{
-            'pluginName': 'url_launcher_linux',
-            'dartClass': 'UrlLauncherPluginLinux',
-            'platform': 'linux',
-          })
-        );
-      });
-
-      test('selects user selected implementation despites default implementation', () async {
-        final FileSystem fs = MemoryFileSystem();
-        final Set<String> directDependencies = <String>{
-          'user_selected_url_launcher_implementation',
-          'url_launcher',
-        };
-
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'default_package': 'url_launcher_linux',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'url_launcher_linux',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginLinux',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'user_selected_url_launcher_implementation',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginLinux',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-        ]);
-        expect(resolutions.length, equals(1));
-        expect(resolutions[0].toMap(), equals(
-          <String, String>{
-            'pluginName': 'user_selected_url_launcher_implementation',
-            'dartClass': 'UrlLauncherPluginLinux',
-            'platform': 'linux',
-          })
-        );
-      });
-
-      test('selects user selected implementation despites default implementation', () async {
-        final FileSystem fs = MemoryFileSystem();
-        final Set<String> directDependencies = <String>{
-          'user_selected_url_launcher_implementation',
-          'url_launcher',
-        };
-
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'default_package': 'url_launcher_linux',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'url_launcher_linux',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginLinux',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'user_selected_url_launcher_implementation',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginLinux',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-        ]);
-        expect(resolutions.length, equals(1));
-        expect(resolutions[0].toMap(), equals(
-          <String, String>{
-            'pluginName': 'user_selected_url_launcher_implementation',
-            'dartClass': 'UrlLauncherPluginLinux',
-            'platform': 'linux',
-          })
-        );
-      });
-
-      testUsingContext('provides error when user selected multiple implementations', () async {
-        final FileSystem fs = MemoryFileSystem();
-        final Set<String> directDependencies = <String>{
-          'url_launcher_linux_1',
-          'url_launcher_linux_2',
-        };
-        expect(() {
-          resolvePlatformImplementation(<Plugin>[
-            Plugin.fromYaml(
-              'url_launcher_linux_1',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'implements': 'url_launcher',
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{
-                    'dartPluginClass': 'UrlLauncherPluginLinux',
-                  },
-                },
-              }),
-              <String>[],
-              fileSystem: fs,
-              appDependencies: directDependencies,
-            ),
-            Plugin.fromYaml(
-              'url_launcher_linux_2',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'implements': 'url_launcher',
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{
-                    'dartPluginClass': 'UrlLauncherPluginLinux',
-                  },
-                },
-              }),
-              <String>[],
-              fileSystem: fs,
-              appDependencies: directDependencies,
-            ),
-          ]);
-
-          expect(
-            testLogger.errorText,
-            'Plugin `url_launcher_linux_2` implements an interface for `linux`, which was already implemented by plugin `url_launcher_linux_1`.\n'
-            'To fix this issue, remove either dependency from pubspec.yaml.'
-            '\n\n'
-          );
-        },
-        throwsToolExit(
-          message: 'Please resolve the errors',
-        ));
-      });
-
-      testUsingContext('provides all errors when user selected multiple implementations', () async {
-        final FileSystem fs = MemoryFileSystem();
-        final Set<String> directDependencies = <String>{
-          'url_launcher_linux_1',
-          'url_launcher_linux_2',
-        };
-        expect(() {
-          resolvePlatformImplementation(<Plugin>[
-            Plugin.fromYaml(
-              'url_launcher_linux_1',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'implements': 'url_launcher',
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{
-                    'dartPluginClass': 'UrlLauncherPluginLinux',
-                  },
-                },
-              }),
-              <String>[],
-              fileSystem: fs,
-              appDependencies: directDependencies,
-            ),
-            Plugin.fromYaml(
-              'url_launcher_linux_2',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'implements': 'url_launcher',
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{
-                    'dartPluginClass': 'UrlLauncherPluginLinux',
-                  },
-                },
-              }),
-              <String>[],
-              fileSystem: fs,
-              appDependencies: directDependencies,
-            ),
-          ]);
-
-          expect(
-            testLogger.errorText,
-            'Plugin `url_launcher_linux_2` implements an interface for `linux`, which was already implemented by plugin `url_launcher_linux_1`.\n'
-            'To fix this issue, remove either dependency from pubspec.yaml.'
-            '\n\n'
-          );
-        },
-        throwsToolExit(
-          message: 'Please resolve the errors',
-        ));
-      });
-
-      testUsingContext('provides error when plugin pubspec.yaml doesn\'t have "implementation" nor "default_implementation"', () async {
-        final FileSystem fs = MemoryFileSystem();
-        final Set<String> directDependencies = <String>{
-          'url_launcher_linux_1',
-        };
-        expect(() {
-          resolvePlatformImplementation(<Plugin>[
-            Plugin.fromYaml(
-              'url_launcher_linux_1',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{
-                    'dartPluginClass': 'UrlLauncherPluginLinux',
-                  },
-                },
-              }),
-              <String>[],
-              fileSystem: fs,
-              appDependencies: directDependencies,
-            ),
-          ]);
-        },
-        throwsToolExit(
-          message: 'Please resolve the errors'
-        ));
-        expect(
-          testLogger.errorText,
-          'Plugin `url_launcher_linux_1` doesn\'t implement a plugin interface, '
-          'nor sets a default implementation in pubspec.yaml.\n\n'
-          'To set a default implementation, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    platforms:\n'
-          '      linux:\n'
-          '        default_package: <plugin-implementation>\n'
-          '\n'
-          'To implement an interface, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    implements: <plugin-interface>'
-          '\n\n'
-        );
-      });
-
-      testUsingContext('provides all errors when plugin pubspec.yaml doesn\'t have "implementation" nor "default_implementation"', () async {
-        final FileSystem fs = MemoryFileSystem();
-        final Set<String> directDependencies = <String>{
-          'url_launcher_linux',
-          'url_launcher_windows',
-        };
-        expect(() {
-          resolvePlatformImplementation(<Plugin>[
-            Plugin.fromYaml(
-              'url_launcher_linux',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{
-                    'dartPluginClass': 'UrlLauncherPluginLinux',
-                  },
-                },
-              }),
-              <String>[],
-              fileSystem: fs,
-              appDependencies: directDependencies,
-            ),
-            Plugin.fromYaml(
-              'url_launcher_windows',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'platforms': <String, dynamic>{
-                  'windows': <String, dynamic>{
-                    'dartPluginClass': 'UrlLauncherPluginWindows',
-                  },
-                },
-              }),
-              <String>[],
-              fileSystem: fs,
-              appDependencies: directDependencies,
-            ),
-          ]);
-        },
-        throwsToolExit(
-          message: 'Please resolve the errors'
-        ));
-        expect(
-          testLogger.errorText,
-          'Plugin `url_launcher_linux` doesn\'t implement a plugin interface, '
-          'nor sets a default implementation in pubspec.yaml.\n\n'
-          'To set a default implementation, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    platforms:\n'
-          '      linux:\n'
-          '        default_package: <plugin-implementation>\n'
-          '\n'
-          'To implement an interface, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    implements: <plugin-interface>'
-          '\n\n'
-          'Plugin `url_launcher_windows` doesn\'t implement a plugin interface, '
-          'nor sets a default implementation in pubspec.yaml.\n\n'
-          'To set a default implementation, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    platforms:\n'
-          '      windows:\n'
-          '        default_package: <plugin-implementation>\n'
-          '\n'
-          'To implement an interface, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    implements: <plugin-interface>'
-          '\n\n'
-        );
-      });
-    });
-
-    group('generateMainDartWithPluginRegistrant', () {
-      testUsingContext('Generates new entrypoint', () async {
-        when(flutterProject.isModule).thenReturn(false);
-
-        final List<Directory> directories = <Directory>[];
-        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
-        final File packagesFile = flutterProject.directory
-            .childFile('.packages')
-            ..createSync(recursive: true);
-
-        final Map<String, String> plugins = <String, String>{};
-        plugins['url_launcher_macos'] = '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        macos:
-          dartPluginClass: MacOSPlugin
-''';
-        plugins['url_launcher_linux'] = '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        linux:
-          dartPluginClass: LinuxPlugin
-''';
-        plugins['url_launcher_windows'] = '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        windows:
-          dartPluginClass: WindowsPlugin
-''';
-        plugins['awesome_macos'] = '''
-  flutter:
-    plugin:
-      implements: awesome
-      platforms:
-        macos:
-          dartPluginClass: AwesomeMacOS
-''';
-        for (final MapEntry<String, String> entry in plugins.entries) {
-          final String name = fs.path.basename(entry.key);
-          final Directory pluginDirectory = fakePubCache.childDirectory(name);
-          packagesFile.writeAsStringSync(
-              '$name:file://${pluginDirectory.childFile('lib').uri}\n',
-              mode: FileMode.writeOnlyAppend);
-          pluginDirectory.childFile('pubspec.yaml')
-              ..createSync(recursive: true)
-              ..writeAsStringSync(entry.value);
-          directories.add(pluginDirectory);
-        }
-
-        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
-
-        final Directory libDir = flutterProject.directory.childDirectory('lib');
-        libDir.createSync(recursive: true);
-
-        final File mainFile = libDir.childFile('main.dart');
-        mainFile.writeAsStringSync('''
-// @dart = 2.8
-void main() {
-}
-''');
-        final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
-          logger: globals.logger,
-          throwOnError: false,
-        );
-        final bool didGenerate = await generateMainDartWithPluginRegistrant(
-          flutterProject,
-          packageConfig,
-          'package:app/main.dart',
-          flutterBuild,
-          mainFile,
-          throwOnPluginPubspecError: true,
-        );
-        expect(didGenerate, isTrue);
-        expect(flutterBuild.readAsStringSync(),
-            '//\n'
-            '// Generated file. Do not edit.\n'
-            '//\n'
-            '\n'
-            '// @dart = 2.8\n'
-            '\n'
-            'import \'package:app/main.dart\' as entrypoint;\n'
-            'import \'dart:io\'; // ignore: dart_io_import.\n'
-            'import \'package:url_launcher_linux${fs.path.separator}url_launcher_linux.dart\';\n'
-            'import \'package:awesome_macos/awesome_macos.dart\';\n'
-            'import \'package:url_launcher_macos${fs.path.separator}url_launcher_macos.dart\';\n'
-            'import \'package:url_launcher_windows${fs.path.separator}url_launcher_windows.dart\';\n'
-            '\n'
-            '@pragma(\'vm:entry-point\')\n'
-            'void _registerPlugins() {\n'
-            '  if (Platform.isLinux) {\n'
-            '      LinuxPlugin.registerWith();\n'
-            '  } else if (Platform.isMacOS) {\n'
-            '      AwesomeMacOS.registerWith();\n'
-            '      MacOSPlugin.registerWith();\n'
-            '  } else if (Platform.isWindows) {\n'
-            '      WindowsPlugin.registerWith();\n'
-            '  }\n'
-            '}\n'
-            'void main() {\n'
-            '  entrypoint.main();\n'
-            '}\n'
-            '',
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-
-      testUsingContext('Plugin without platform support throws tool exit', () async {
-        when(flutterProject.isModule).thenReturn(false);
-
-        final List<Directory> directories = <Directory>[];
-        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
-        final File packagesFile = flutterProject.directory
-            .childFile('.packages')
-            ..createSync(recursive: true);
-        final Map<String, String> plugins = <String, String>{};
-        plugins['url_launcher_macos'] = '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        macos:
-          invalid:
-''';
-        for (final MapEntry<String, String> entry in plugins.entries) {
-          final String name = fs.path.basename(entry.key);
-          final Directory pluginDirectory = fakePubCache.childDirectory(name);
-          packagesFile.writeAsStringSync(
-              '$name:file://${pluginDirectory.childFile('lib').uri}\n',
-              mode: FileMode.writeOnlyAppend);
-          pluginDirectory.childFile('pubspec.yaml')
-              ..createSync(recursive: true)
-              ..writeAsStringSync(entry.value);
-          directories.add(pluginDirectory);
-        }
-
-        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
-
-        final Directory libDir = flutterProject.directory.childDirectory('lib');
-        libDir.createSync(recursive: true);
-
-        final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
-        final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
-          logger: globals.logger,
-          throwOnError: false,
-        );
-        await expectLater(
-          generateMainDartWithPluginRegistrant(
-            flutterProject,
-            packageConfig,
-            'package:app/main.dart',
-            flutterBuild,
-            mainFile,
-            throwOnPluginPubspecError: true,
-          ), throwsToolExit(message:
-            'Invalid plugin specification url_launcher_macos.\n'
-            'Invalid "macos" plugin specification.'
-          ),
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-
-      testUsingContext('Plugin with platform support without dart plugin class throws tool exit', () async {
-        when(flutterProject.isModule).thenReturn(false);
-
-        final List<Directory> directories = <Directory>[];
-        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
-        final File packagesFile = flutterProject.directory
-            .childFile('.packages')
-            ..createSync(recursive: true);
-        final Map<String, String> plugins = <String, String>{};
-        plugins['url_launcher_macos'] = '''
-  flutter:
-    plugin:
-      implements: url_launcher
-''';
-        for (final MapEntry<String, String> entry in plugins.entries) {
-          final String name = fs.path.basename(entry.key);
-          final Directory pluginDirectory = fakePubCache.childDirectory(name);
-          packagesFile.writeAsStringSync(
-              '$name:file://${pluginDirectory.childFile('lib').uri}\n',
-              mode: FileMode.writeOnlyAppend);
-          pluginDirectory.childFile('pubspec.yaml')
-              ..createSync(recursive: true)
-              ..writeAsStringSync(entry.value);
-          directories.add(pluginDirectory);
-        }
-
-        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
-
-        final Directory libDir = flutterProject.directory.childDirectory('lib');
-        libDir.createSync(recursive: true);
-
-        final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
-        final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
-          logger: globals.logger,
-          throwOnError: false,
-        );
-        await expectLater(
-          generateMainDartWithPluginRegistrant(
-            flutterProject,
-            packageConfig,
-            'package:app/main.dart',
-            flutterBuild,
-            mainFile,
-            throwOnPluginPubspecError: true,
-          ), throwsToolExit(message:
-            'Invalid plugin specification url_launcher_macos.\n'
-            'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
-            'An instruction to format the `pubspec.yaml` can be found here: '
-            'https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms'
-          ),
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-
-      testUsingContext('Does not show error messages if throwOnPluginPubspecError is false', () async {
-        final FileSystem fs = MemoryFileSystem();
-        final Set<String> directDependencies = <String>{
-          'url_launcher_windows',
-        };
-        resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher_windows',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'windows': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginWindows',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-        ],
-          throwOnPluginPubspecError: false,
-        );
-        expect(testLogger.errorText, '');
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-    });
-
     group('pubspec', () {
-
       Directory projectDir;
       Directory tempDir;
+
       setUp(() {
-        tempDir = globals.fs.systemTempDirectory.createTempSync('plugin_test.');
+        tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_plugin_test.');
         projectDir = tempDir.childDirectory('flutter_project');
       });
 
@@ -2110,7 +1314,7 @@ void main() {
         projectDir.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(yamlString);
       }
 
-      test('validatePubspecForPlugin works', () async {
+      testUsingContext('validatePubspecForPlugin works', () async {
         const String pluginYaml = '''
   flutter:
     plugin:
@@ -2136,7 +1340,7 @@ void main() {
         ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');
       });
 
-      test('createPlatformsYamlMap should create the correct map', () async {
+      testUsingContext('createPlatformsYamlMap should create the correct map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
         expect(map['ios'], <String, String> {
           'pluginClass' : 'PluginClass'
@@ -2150,7 +1354,7 @@ void main() {
         });
       });
 
-      test('createPlatformsYamlMap should create empty map', () async {
+      testUsingContext('createPlatformsYamlMap should create empty map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>[], null, null);
         expect(map.isEmpty, true);
       });
@@ -2159,8 +1363,7 @@ void main() {
 
     testWithoutContext('Symlink failures give developer mode instructions on recent versions of Windows', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14972.1]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972.1]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
@@ -2170,8 +1373,7 @@ void main() {
 
     testWithoutContext('Symlink failures instruct developers to run as administrator on older versions of Windows', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
@@ -2181,8 +1383,7 @@ void main() {
 
     testWithoutContext('Symlink failures only give instructions for specific errors', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 999));
 
@@ -2191,16 +1392,189 @@ void main() {
   });
 }
 
-class MockAndroidProject extends Mock implements AndroidProject {}
-class MockFlutterManifest extends Mock implements FlutterManifest {}
-class MockFlutterProject extends Mock implements FlutterProject {}
-class MockIosProject extends Mock implements IosProject {}
-class MockMacOSProject extends Mock implements MacOSProject {}
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockWebProject extends Mock implements WebProject {}
-class MockWindowsProject extends Mock implements WindowsProject {}
-class MockLinuxProject extends Mock implements LinuxProject {}
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class FakeFlutterManifest extends Fake implements FlutterManifest {
+  @override
+  Set<String> get dependencies => <String>{};
+}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  @override
+  bool get isInstalled => false;
+}
+
+class FakeFlutterProject extends Fake implements FlutterProject {
+  @override
+  bool isModule = false;
+
+  @override
+  FlutterManifest manifest;
+
+  @override
+  Directory directory;
+
+  @override
+  File flutterPluginsFile;
+
+  @override
+  File flutterPluginsDependenciesFile;
+
+  @override
+  IosProject ios;
+
+  @override
+  AndroidProject android;
+
+  @override
+  WebProject web;
+
+  @override
+  MacOSProject macos;
+
+  @override
+  LinuxProject linux;
+
+  @override
+  WindowsProject windows;
+
+  @override
+  WindowsUwpProject windowsUwp;
+}
+
+class FakeMacOSProject extends Fake implements MacOSProject {
+  @override
+  String pluginConfigKey = 'macos';
+
+  bool exists = false;
+
+  @override
+  File podfile;
+
+  @override
+  File podManifestLock;
+
+  @override
+  Directory managedDirectory;
+
+  @override
+  bool existsSync() => exists;
+}
+
+class FakeIosProject extends Fake implements IosProject {
+  @override
+  String pluginConfigKey = 'ios';
+
+  bool testExists = false;
+
+  @override
+  bool existsSync() => testExists;
+
+  @override
+  bool get exists => testExists;
+
+  @override
+  Directory pluginRegistrantHost;
+
+  @override
+  File podfile;
+
+  @override
+  File podManifestLock;
+}
+
+class FakeAndroidProject extends Fake implements AndroidProject {
+  @override
+  String pluginConfigKey = 'android';
+
+  bool exists = false;
+
+  @override
+  Directory pluginRegistrantHost;
+
+  @override
+  Directory hostAppGradleRoot;
+
+  @override
+  File appManifestFile;
+
+  AndroidEmbeddingVersion embeddingVersion;
+
+  @override
+  bool existsSync() => exists;
+
+  @override
+  AndroidEmbeddingVersion getEmbeddingVersion() {
+    return embeddingVersion;
+  }
+}
+
+class FakeWebProject extends Fake implements WebProject {
+  @override
+  String pluginConfigKey = 'web';
+
+  @override
+  Directory libDirectory;
+
+  bool exists = false;
+
+  @override
+  bool existsSync() => exists;
+}
+
+class FakeWindowsProject extends Fake implements WindowsProject {
+  @override
+  String pluginConfigKey = 'windows';
+
+  @override
+  Directory managedDirectory;
+
+  @override
+  Directory ephemeralDirectory;
+
+  @override
+  Directory pluginSymlinkDirectory;
+
+  @override
+  File cmakeFile;
+
+  @override
+  File generatedPluginCmakeFile;
+  bool exists = false;
+
+  @override
+  bool existsSync() => exists;
+}
+
+class FakeLinuxProject extends Fake implements LinuxProject {
+  @override
+  String pluginConfigKey = 'linux';
+
+  @override
+  Directory managedDirectory;
+
+  @override
+  Directory ephemeralDirectory;
+
+  @override
+  Directory pluginSymlinkDirectory;
+
+  @override
+  File cmakeFile;
+
+  @override
+  File generatedPluginCmakeFile;
+  bool exists = false;
+
+  @override
+  bool existsSync() => exists;
+
+}
+
+class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  FakeOperatingSystemUtils(this.name);
+
+  @override
+  final String name;
+}
 
 class FakeSystemClock extends Fake implements SystemClock {
   DateTime currentTime;

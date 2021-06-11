@@ -13,14 +13,10 @@ import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-
-/// The input key for an SkSL bundle path.
-const String kBundleSkSLPath = 'BundleSkSLPath';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
@@ -37,7 +33,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   BuildMode buildMode,
 }) async {
   // Check for an SkSL bundle.
-  final String shaderBundlePath = environment.inputs[kBundleSkSLPath];
+  final String shaderBundlePath = environment.defines[kBundleSkSLPath] ?? environment.inputs[kBundleSkSLPath];
   final DevFSContent skslBundle = processSkSLBundle(
     shaderBundlePath,
     engineVersion: environment.engineVersion,
@@ -51,7 +47,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   final AssetBundle assetBundle = AssetBundleFactory.defaultInstance(
     logger: environment.logger,
     fileSystem: environment.fileSystem,
-    platform: globals.platform,
+    platform: environment.platform,
     splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
   ).createBundle();
   final int resultCode = await assetBundle.build(
@@ -59,6 +55,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
     packagesPath: environment.projectDir.childFile('.packages').path,
     assetDirPath: null,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
+    targetPlatform: targetPlatform,
   );
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');
