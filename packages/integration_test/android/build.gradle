@@ -34,7 +34,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 18
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -47,5 +47,6 @@ android {
         api 'androidx.test.espresso:espresso-core:3.2.0'
 
         implementation 'com.google.guava:guava:28.1-android'
+        implementation 'androidx.test.uiautomator:uiautomator:2.2.0'
     }
 }

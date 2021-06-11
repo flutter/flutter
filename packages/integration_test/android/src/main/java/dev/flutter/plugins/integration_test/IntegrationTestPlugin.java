@@ -50,12 +50,23 @@ public class IntegrationTestPlugin implements MethodCallHandler, FlutterPlugin {
 
   @Override
   public void onMethodCall(MethodCall call, Result result) {
-    if (call.method.equals("allTestsFinished")) {
-      Map<String, String> results = call.argument("results");
-      testResultsSettable.set(results);
-      result.success(null);
-    } else {
-      result.notImplemented();
+    switch (call.method) {
+      case "allTestsFinished":
+        final Map<String, String> results = call.argument("results");
+        testResultsSettable.set(results);
+        result.success(null);
+        break;
+      case "captureScreenshot":
+        final Integer x = call.argument("x");
+        final Integer y = call.argument("y");
+        final Integer width = call.argument("width");
+        final Integer height = call.argument("height");
+        final byte[] image = FlutterDeviceScreenshot.capture(x, y, width, height);
+        result.success(image);
+        break;
+      default:
+        result.notImplemented();
+        break;
     }
   }
 }
