@@ -435,9 +435,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
-  Widget _buildVerticalControls() {
+  Widget _buildVerticalControls(int stepIndex) {
     if (widget.controlsBuilder != null)
-      return widget.controlsBuilder!(context, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
+      return widget.controlsBuilder!(context, stepIndex: stepIndex, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
 
     final Color cancelColor;
     switch (Theme.of(context).brightness) {
@@ -619,7 +619,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             child: Column(
               children: <Widget>[
                 widget.steps[index].content,
-                _buildVerticalControls(),
+                _buildVerticalControls(index),
               ],
             ),
           ),
@@ -719,7 +719,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 duration: kThemeAnimationDuration,
                 child: widget.steps[widget.currentStep].content,
               ),
-              _buildVerticalControls(),
+              _buildVerticalControls(widget.currentStep),
             ],
           ),
         ),
