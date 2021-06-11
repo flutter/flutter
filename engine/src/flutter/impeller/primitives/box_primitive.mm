@@ -47,7 +47,7 @@ BoxPrimitive::BoxPrimitive(std::shared_ptr<Context> context)
 
   {
     // Configure the stencil attachment.
-    // TODO(wip): Make this configurable if possible as the D32 compoment is
+    // TODO(wip): Make this configurable if possible as the D32 component is
     // wasted.
     const auto combined_depth_stencil_format =
         PixelFormat::kPixelFormat_D32_Float_S8_UNormInt;

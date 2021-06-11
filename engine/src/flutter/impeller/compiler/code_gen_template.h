@@ -27,6 +27,22 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   static constexpr ShaderStage kShaderStage = {{to_shader_stage(shader_stage)}};
 
   // ===========================================================================
+  // Stage Uniforms ============================================================
+  // ===========================================================================
+
+{% for uniform in uniform_buffers %}
+
+  static constexpr auto kUniform{{camel_case(uniform.name)}} = ShaderStageIOSlot { // {{uniform.name}}
+    "{{uniform.name}}",             // name
+    {{uniform.location}}u,          // attribute location
+    {{uniform.type.type_name}},     // type
+    {{uniform.type.bit_width}}u,    // bit width of type
+    {{uniform.type.vec_size}}u,     // vec size
+    {{uniform.type.columns}}u       // number of columns
+  };
+{% endfor %}
+
+  // ===========================================================================
   // Stage Inputs ==============================================================
   // ===========================================================================
 {% for stage_input in stage_inputs %}
