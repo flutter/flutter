@@ -83,8 +83,8 @@ class HotRunner extends ResidentRunner {
     bool machine = false,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-    ReloadSourcesHelper reloadSourcesHelper = _defaultReloadSourcesHelper,
-    ReassembleHelper reassembleHelper = _defaultReassembleHelper,
+    ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
+    ReassembleHelper reassembleHelper = defaultReassembleHelper,
   }) : _stopwatchFactory = stopwatchFactory,
        _reloadSourcesHelper = reloadSourcesHelper,
        _reassembleHelper = reassembleHelper,
@@ -1062,7 +1062,8 @@ typedef ReloadSourcesHelper = Future<OperationResult> Function(
   String reason,
 );
 
-Future<OperationResult> _defaultReloadSourcesHelper(
+@visibleForTesting
+Future<OperationResult> defaultReloadSourcesHelper(
   HotRunner hotRunner,
   List<FlutterDevice> flutterDevices,
   bool pause,
@@ -1167,7 +1168,8 @@ typedef ReassembleHelper = Future<ReassembleResult> Function(
   String fastReassembleClassName,
 );
 
-Future<ReassembleResult> _defaultReassembleHelper(
+@visibleForTesting
+Future<ReassembleResult> defaultReassembleHelper(
   List<FlutterDevice> flutterDevices,
   Map<FlutterDevice, List<FlutterView>> viewCache,
   void Function(String message) onSlow,
@@ -1181,6 +1183,7 @@ Future<ReassembleResult> _defaultReassembleHelper(
   int pausedIsolatesFound = 0;
   bool failedReassemble = false;
   bool shouldReportReloadTime = true;
+
   for (final FlutterDevice device in flutterDevices) {
     final List<FlutterView> views = viewCache[device];
     for (final FlutterView view in views) {
@@ -1188,6 +1191,13 @@ Future<ReassembleResult> _defaultReassembleHelper(
       // PostPauseEvent event - the client requesting the pause will resume the app.
       final vm_service.Isolate isolate = await device.vmService
         .getIsolateOrNull(view.uiIsolate.id);
+
+      // If the isolate is null or missing the reassemble RPC it may have been a shortlived
+      // or a background execution isolate.
+      if (isolate == null || !isolate.extensionRPCs.contains(kReassembleMethod)) {
+        continue;
+      }
+
       final vm_service.Event pauseEvent = isolate?.pauseEvent;
       if (pauseEvent != null
         && isPauseEvent(pauseEvent.kind)
@@ -1230,10 +1240,9 @@ Future<ReassembleResult> _defaultReassembleHelper(
     }
   }
   assert(reassembleViews.isNotEmpty);
-
   globals.printTrace('Reassembling application');
-
   final Future<void> reassembleFuture = Future.wait<void>(reassembleFutures);
+
   await reassembleFuture.timeout(
     const Duration(seconds: 2),
     onTimeout: () async {

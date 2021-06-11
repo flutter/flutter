@@ -25,6 +25,7 @@ const String kRunInViewMethod = '_flutter.runInView';
 const String kListViewsMethod = '_flutter.listViews';
 const String kScreenshotSkpMethod = '_flutter.screenshotSkp';
 const String kScreenshotMethod = '_flutter.screenshot';
+const String kReassembleMethod = 'ext.flutter.reassemble';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -647,7 +648,7 @@ class FlutterVmService {
     @required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
-      'ext.flutter.reassemble',
+      kReassembleMethod,
       isolateId: isolateId,
     );
   }

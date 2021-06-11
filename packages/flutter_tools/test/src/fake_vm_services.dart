@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
+import 'package:quiver/collection.dart';
 import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -33,7 +34,25 @@ class FakeVmServiceHost {
       if (_requests.isEmpty) {
         throw Exception('Unexpected request: $request');
       }
-      final FakeVmServiceRequest fakeRequest = _requests.removeAt(0) as FakeVmServiceRequest;
+      final VmServiceExpectation potentialRequest = _requests.removeAt(0);
+      FakeVmServiceRequest fakeRequest;
+
+      if (potentialRequest is UnorderedRequests) {
+        for (final FakeVmServiceRequest unorderedRequest in potentialRequest.requests) {
+          if (unorderedRequest.method == request['method'] && mapsEqual(unorderedRequest.args, request['params'] as Map)) {
+            fakeRequest = unorderedRequest;
+          }
+        }
+        if (fakeRequest == null) {
+          throw StateError('Expected a matching request for $request in ${potentialRequest.requests}, but nothing was found.');
+        }
+        potentialRequest.requests.remove(fakeRequest);
+        if (potentialRequest.requests.isNotEmpty) {
+          _requests.insert(0, potentialRequest);
+        }
+      } else {
+        fakeRequest = potentialRequest as FakeVmServiceRequest;
+      }
       expect(request, isA<Map<String, Object>>()
         .having((Map<String, Object> request) => request['method'], 'method', fakeRequest.method)
         .having((Map<String, Object> request) => request['params'], 'args', fakeRequest.args)
@@ -91,6 +110,16 @@ class FakeVmServiceHost {
 
 abstract class VmServiceExpectation {
   bool get isRequest;
+}
+
+/// One or more requests that can be accepted in any order.
+class UnorderedRequests implements VmServiceExpectation {
+  UnorderedRequests(this.requests);
+
+  final List<FakeVmServiceRequest> requests;
+
+  @override
+  bool get isRequest => true;
 }
 
 class FakeVmServiceRequest implements VmServiceExpectation {

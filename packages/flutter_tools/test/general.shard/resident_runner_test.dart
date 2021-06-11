@@ -53,7 +53,6 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   ),
   breakpoints: <vm_service.Breakpoint>[],
   exceptionPauseMode: null,
-  extensionRPCs: <String>[],
   libraries: <vm_service.LibraryRef>[
     vm_service.LibraryRef(
       id: '1',
@@ -69,6 +68,33 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   startTime: 0,
   isSystemIsolate: false,
   isolateFlags: <vm_service.IsolateFlag>[],
+  extensionRPCs: <String>[kReassembleMethod],
+);
+
+final vm_service.Isolate fakeBackgroundIsolate = vm_service.Isolate(
+  id: '2',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  exceptionPauseMode: null,
+  libraries: <vm_service.LibraryRef>[
+    vm_service.LibraryRef(
+      id: '1',
+      uri: 'file:///hello_world/main.dart',
+      name: '',
+    ),
+  ],
+  livePorts: 0,
+  name: 'callbackDispatcher',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+  isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
+  extensionRPCs: <String>[], // No reassemble method
 );
 
 final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
@@ -98,6 +124,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   startTime: 0,
   isSystemIsolate: false,
   isolateFlags: <vm_service.IsolateFlag>[],
+  extensionRPCs: <String>[kReassembleMethod],
 );
 
 final vm_service.VM fakeVM = vm_service.VM(
@@ -810,7 +837,7 @@ void main() {
     expect(result.code, 0);
   }));
 
-   testUsingContext('ResidentRunner resets compilation time on reload reject', () => testbed.run(() async {
+  testUsingContext('ResidentRunner resets compilation time on reload reject', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -1043,6 +1070,153 @@ void main() {
     ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
     Usage: () => TestUsage(),
     FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
+  }));
+
+  testUsingContext('ResidentRunner will not call reassemble on isolates without the extension RPC registered', () => testbed.run(() async {
+    final FakeVmServiceRequest viewsWithBackground = FakeVmServiceRequest(
+      method: kListViewsMethod,
+      jsonResponse: <String, Object>{
+        'views': <Object>[
+          FlutterView(
+            id: 'a',
+            uiIsolate: fakeUnpausedIsolate,
+          ),
+          FlutterView(
+            id: 'b',
+            uiIsolate: fakeBackgroundIsolate,
+          )
+        ],
+      },
+    );
+
+    final vm_service.VM fakeVMWithBackground = vm_service.VM(
+      isolates: <vm_service.IsolateRef>[fakeUnpausedIsolate, fakeBackgroundIsolate],
+      pid: 1,
+      hostCPU: '',
+      isolateGroups: <vm_service.IsolateGroupRef>[],
+      targetCPU: '',
+      startTime: 0,
+      name: 'dart',
+      architectureBits: 64,
+      operatingSystem: '',
+      version: '',
+      systemIsolateGroups: <vm_service.IsolateGroupRef>[],
+      systemIsolates: <vm_service.IsolateRef>[],
+    );
+
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      viewsWithBackground,
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: fakeVMWithBackground.toJson(),
+      ),
+      viewsWithBackground,
+      setAssetBundlePath,
+      FakeVmServiceRequest(
+        method: '_flutter.setAssetBundlePath',
+        args: <String, Object>{
+          'viewId': 'b',
+          'assetDirectory': 'build/flutter_assets',
+          'isolateId': '2',
+        }
+      ),
+      viewsWithBackground,
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: fakeVMWithBackground.toJson(),
+      ),
+      const FakeVmServiceRequest(
+        method: 'reloadSources',
+        args: <String, Object>{
+          'isolateId': '1',
+          'pause': false,
+          'rootLibUri': 'main.dart.incremental.dill',
+        },
+        jsonResponse: <String, Object>{
+          'type': 'ReloadReport',
+          'success': true,
+          'details': <String, Object>{
+            'loadedLibraryCount': 1,
+          },
+        },
+      ),
+      const FakeVmServiceRequest(
+        method: 'reloadSources',
+        args: <String, Object>{
+          'isolateId': '2',
+          'pause': false,
+          'rootLibUri': 'main.dart.incremental.dill',
+        },
+        jsonResponse: <String, Object>{
+          'type': 'ReloadReport',
+          'success': true,
+          'details': <String, Object>{
+            'loadedLibraryCount': 1,
+          },
+        },
+      ),
+      // These can be in any order.
+      UnorderedRequests(<FakeVmServiceRequest>[
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: fakeUnpausedIsolate.toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': '2',
+          },
+          jsonResponse: fakeBackgroundIsolate.toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'ext.flutter.reassemble',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+          },
+        ),
+      ]),
+    ]);
+    final FakeFlutterDevice flutterDevice =  FakeFlutterDevice(
+      mockDevice,
+      BuildInfo.debug,
+      FakeResidentCompiler(),
+      mockDevFS,
+    )..vmService = fakeVmServiceHost.vmService;
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        flutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
+    mockDevFS.nextUpdateReport = UpdateFSReport(
+      success: true,
+      invalidatedSourcesCount: 1,
+    );
+
+    final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> futureAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: futureAppStart,
+      connectionInfoCompleter: futureConnectionInfo,
+      enableDevTools: true,
+    ));
+
+    await futureAppStart.future;
+    final OperationResult result = await residentRunner.restart(fullRestart: false);
+
+    expect(result.fatal, false);
+    expect(result.code, 0);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+    ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
+    Usage: () => TestUsage(),
   }));
 
   testUsingContext('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {
