@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart';
@@ -23,7 +22,7 @@ void testMain() async {
     final Rect region = const Rect.fromLTRB(0, 0, 400, 300);
     final RecordingCanvas canvas = RecordingCanvas(region);
     final Rect titleRect = Rect.fromLTWH(20, 0, 50, 20);
-    final Paint paint = Paint()
+    final SurfacePaint paint = SurfacePaint()
       ..style = PaintingStyle.stroke
       ..color = const Color(0xff000000)
       ..strokeWidth = 1;

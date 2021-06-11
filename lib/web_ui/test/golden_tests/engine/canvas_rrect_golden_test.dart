@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
@@ -19,7 +18,7 @@ void main() {
 void testMain() async {
   final Rect region = Rect.fromLTWH(8, 8, 500, 100); // Compensate for old scuba tester padding
 
-  BitmapCanvas canvas;
+  late BitmapCanvas canvas;
 
   final SurfacePaintData niceRRectPaint = SurfacePaintData()
     ..color = const Color.fromRGBO(250, 186, 218, 1.0) // #fabada
@@ -48,7 +47,7 @@ void testMain() async {
           niceRRectPaint);
     }
 
-    html.document.body.append(canvas.rootElement);
+    html.document.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_rrect_round_square.png', region: region);
   });
 
@@ -61,7 +60,7 @@ void testMain() async {
           Radius.circular(30)),
       niceRRectPaint);
     canvas.drawPath(Path()..moveTo(0, 0)..lineTo(20, 0), niceRRectPaint);
-    html.document.body.append(canvas.rootElement);
+    html.document.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_rrect_flipped.png',
         region: Rect.fromLTWH(0, 0, 100, 200));
   });
@@ -78,7 +77,7 @@ void testMain() async {
       canvas.drawRRect(rrect, niceRRectPaint);
     }
 
-    html.document.body.append(canvas.rootElement);
+    html.document.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_rrect_overlapping_radius.png', region: region);
   });
 
@@ -101,7 +100,7 @@ void testMain() async {
       canvas.drawDRRect(outerRRect, innerRRect, niceRRectPaint);
     }
 
-    html.document.body.append(canvas.rootElement);
+    html.document.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_drrect_overlapping_radius.png', region: region);
   });
 }
