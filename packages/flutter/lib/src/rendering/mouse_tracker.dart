@@ -294,12 +294,12 @@ class MouseTracker extends ChangeNotifier {
   /// the hit test result at the position of the event.
   void updateWithEvent(PointerEvent event, ValueGetter<HitTestResult> getResult) {
     assert(event != null);
-    final HitTestResult result = event is PointerRemovedEvent ? HitTestResult() : getResult();
-    assert(result != null);
     if (event.kind != PointerDeviceKind.mouse)
       return;
     if (event is PointerSignalEvent)
       return;
+    final HitTestResult result = event is PointerRemovedEvent ? HitTestResult() : getResult();
+    assert(result != null);
     final int device = event.device;
     final _MouseState? existingState = _mouseStates[device];
     if (!_shouldMarkStateDirty(existingState, event))

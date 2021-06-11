@@ -1790,24 +1790,6 @@ void main() {
     await gesture.moveBy(const Offset(10.0, 10.0));
     expect(tester.takeException(), isNull);
   });
-
-  testWidgets('A tap should only cause one hit test', (WidgetTester tester) async {
-    int hitCount = 0;
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: _HitTestCounter(
-          onHitTestCallback: () { hitCount += 1; },
-          child: TextButton(onPressed: () {}, child: const Text('test')),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(TextButton), warnIfMissed: false);
-
-    expect(hitCount, 1);
-  });
-
 }
 
 // Render widget `topLeft` at the top-left corner, stacking on top of the widget
@@ -1897,39 +1879,5 @@ class _ColumnContainer extends StatelessWidget {
         children: children,
       ),
     );
-  }
-}
-
-class _HitTestCounter extends SingleChildRenderObjectWidget {
-  const _HitTestCounter({
-    Key? key,
-    required Widget child,
-    required this.onHitTestCallback,
-  }) : super(key: key, child: child);
-
-  final VoidCallback? onHitTestCallback;
-
-  @override
-  _RenderHitTestCounter createRenderObject(BuildContext context) {
-    return _RenderHitTestCounter()
-      .._onHitTestCallback = onHitTestCallback;
-  }
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    _RenderHitTestCounter renderObject,
-  ) {
-    renderObject._onHitTestCallback = onHitTestCallback;
-  }
-}
-
-class _RenderHitTestCounter extends RenderProxyBox {
-  VoidCallback? _onHitTestCallback;
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    _onHitTestCallback?.call();
-    return super.hitTestChildren(result, position: position);
   }
 }
