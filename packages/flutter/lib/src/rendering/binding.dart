@@ -284,10 +284,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       assert(event.position != null);
       _mouseTracker!.updateWithEvent(
         event,
-        // Mouse events(enter and exit) can be triggered with or without buttons pressed.
-        // If the button is pressed, we need to re-execute the hit test instead of
-        // reusing the cached results to trigger possible events.
-        () => (hitTestResult == null || event.down) ? renderView.hitTestMouseTrackers(event.position) : hitTestResult,
+        // Enter and exit events should be triggered with or without buttons
+        // pressed. When the button is pressed, normal hit test uses a cached
+        // result, but MouseTracker requires that the hit test is re-executed to
+        // update the hovering events.
+        () => (hitTestResult == null || event is PointerMoveEvent) ? renderView.hitTestMouseTrackers(event.position) : hitTestResult,
       );
     }
     super.dispatchEvent(event, hitTestResult);
