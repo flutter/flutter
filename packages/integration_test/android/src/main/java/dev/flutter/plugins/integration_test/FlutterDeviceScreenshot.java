@@ -22,11 +22,13 @@ class FlutterDeviceScreenshot {
    * @return byte array containing the cropped image in PNG format.
    */
   static byte[] capture(int x, int y, int width, int height) {
-    final Bitmap bitmap =
+    final Bitmap originalBitmap =
         InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+    final Bitmap croppedBitmap = Bitmap.createBitmap(originalBitmap, x, y, width, height);
 
     final ByteArrayOutputStream output = new ByteArrayOutputStream();
-    bitmap.compress(Bitmap.CompressFormat.PNG, /* irrelevant for PNG */ 100, output);
+    croppedBitmap.compress(Bitmap.CompressFormat.PNG, /* irrelevant for PNG */ 100, output);
+
     return output.toByteArray();
   }
 }
