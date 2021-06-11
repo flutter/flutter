@@ -125,7 +125,6 @@ void main() {
       );
        expect(tester.testTextInput.setClientArgs['inputType']['name'],
         equals('TextInputType.number'));
-      );
     },
   );
   testWidgets(
