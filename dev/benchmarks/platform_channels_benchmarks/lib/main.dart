@@ -12,8 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:microbenchmarks/common.dart';
 
-List<Object> _makeTestBuffer(int size) {
-  final List<Object> answer = <Object>[];
+List<Object?> _makeTestBuffer(int size) {
+  final List<Object?> answer = <Object?>[];
   for (int i = 0; i < size; ++i) {
     switch (i % 9) {
       case 0:
@@ -49,7 +49,7 @@ List<Object> _makeTestBuffer(int size) {
 }
 
 Future<double> _runBasicStandardSmall(
-    BasicMessageChannel<Object> basicStandard, int count) async {
+    BasicMessageChannel<Object?> basicStandard, int count) async {
   final Stopwatch watch = Stopwatch();
   watch.start();
   for (int i = 0; i < count; ++i) {
@@ -59,14 +59,14 @@ Future<double> _runBasicStandardSmall(
   return watch.elapsedMicroseconds / count;
 }
 
-Future<double> _runBasicStandardLarge(BasicMessageChannel<Object> basicStandard,
-    List<Object> largeBuffer, int count) async {
+Future<double> _runBasicStandardLarge(BasicMessageChannel<Object?> basicStandard,
+    List<Object?> largeBuffer, int count) async {
   int size = 0;
   final Stopwatch watch = Stopwatch();
   watch.start();
   for (int i = 0; i < count; ++i) {
-    final List<Object> result =
-        await basicStandard.send(largeBuffer) as List<Object>;
+    final List<Object?>? result =
+        await basicStandard.send(largeBuffer) as List<Object?>?;
     // This check should be tiny compared to the actual channel send/receive.
     size += (result == null) ? 0 : result.length;
   }
@@ -87,7 +87,7 @@ Future<double> _runBasicBinary(BasicMessageChannel<ByteData> basicBinary,
   final Stopwatch watch = Stopwatch();
   watch.start();
   for (int i = 0; i < count; ++i) {
-    final ByteData result = await basicBinary.send(buffer);
+    final ByteData? result = await basicBinary.send(buffer);
     // This check should be tiny compared to the actual channel send/receive.
     size += (result == null) ? 0 : result.lengthInBytes;
   }
@@ -108,11 +108,11 @@ Future<void> _runTests() async {
     );
   }
 
-  const BasicMessageChannel<Object> resetChannel = BasicMessageChannel<Object>(
+  const BasicMessageChannel<Object?> resetChannel = BasicMessageChannel<Object?>(
     'dev.flutter.echo.reset',
     StandardMessageCodec(),
   );
-  const BasicMessageChannel<Object> basicStandard = BasicMessageChannel<Object>(
+  const BasicMessageChannel<Object?> basicStandard = BasicMessageChannel<Object?>(
     'dev.flutter.echo.basic.standard',
     StandardMessageCodec(),
   );
@@ -125,9 +125,9 @@ Future<void> _runTests() async {
   /// WARNING: Don't change the following line of code, it will invalidate
   /// `Large` tests.  Instead make a different test.  The size of largeBuffer
   /// serialized is 14214 bytes.
-  final List<Object> largeBuffer = _makeTestBuffer(1000);
+  final List<Object?> largeBuffer = _makeTestBuffer(1000);
   final ByteData largeBufferBytes =
-      const StandardMessageCodec().encodeMessage(largeBuffer);
+      const StandardMessageCodec().encodeMessage(largeBuffer)!;
   final ByteData oneMB = ByteData(1024 * 1024);
 
   const int numMessages = 2500;
@@ -170,7 +170,7 @@ Future<void> _runTests() async {
 }
 
 class _BenchmarkWidget extends StatefulWidget {
-  const _BenchmarkWidget(this.tests, {Key key}) : super(key: key);
+  const _BenchmarkWidget(this.tests, {Key? key}) : super(key: key);
 
   final Future<void> Function() tests;
 

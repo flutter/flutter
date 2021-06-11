@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import '../framework/adb.dart';
+import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/host_agent.dart';
 import '../framework/task_result.dart';

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -220,7 +222,7 @@ Future<String> getAndroidManifest(String apk) async {
   );
 }
 
- /// Checks that the classes are contained in the APK, throws otherwise.
+/// Checks that the classes are contained in the APK, throws otherwise.
 Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
   final ApkExtractor extractor = ApkExtractor(apk);
   for (final String className in classes) {

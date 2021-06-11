@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../framework/adb.dart';
+// @dart = 2.8
+
+import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/host_agent.dart';
 import '../framework/task_result.dart';

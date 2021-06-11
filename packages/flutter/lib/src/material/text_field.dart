@@ -486,6 +486,30 @@ class TextField extends StatefulWidget {
   ///
   /// This widget builds an [EditableText] and will ensure that the keyboard is
   /// showing when it is tapped by calling [EditableTextState.requestKeyboard()].
+  ///
+  /// ## Key handling
+  ///
+  /// By default, [TextField] absorbs key events of the Space key and Enter key,
+  /// because they are commonly used as both shortcuts and text field inputs.
+  /// This means that, if these keys are pressed when [TextField] is the
+  /// primary focus, they will not be sent to other widgets (such as triggering
+  /// an enclosing [ListTile]).
+  ///
+  /// If [FocusNode.onKey] is not null, this filter is bypassed. In the likely
+  /// case that this filter is still desired, check these keys and return
+  /// [KeyEventResult.skipRemainingHandlers].
+  ///
+  /// ```dart
+  /// final FocusNode focusNode = FocusNode(
+  ///   onKey: (FocusNode node, RawKeyEvent event) {
+  ///     if (event.logicalKey == LogicalKeyboardKey.space
+  ///         || event.logicalKey == LogicalKeyboardKey.enter) {
+  ///       return KeyEventResult.skipRemainingHandlers;
+  ///     }
+  ///     // Now process the event as desired.
+  ///   },
+  /// );
+  /// ```
   final FocusNode? focusNode;
 
   /// The decoration to show around the text field.
@@ -1111,6 +1135,19 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
+  KeyEventResult _handleRawKeyEvent(FocusNode node, RawKeyEvent event) {
+    assert(node.hasFocus);
+    // TextField uses "enter" to finish the input or create a new line, and "space" as
+    // a normal input character, so we default to terminate the handling of these
+    // two keys to avoid ancestor behaving incorrectly for handling the two keys
+    // (such as `ListTile` or `Material`).
+    if (event.logicalKey == LogicalKeyboardKey.space
+        || event.logicalKey == LogicalKeyboardKey.enter) {
+      return KeyEventResult.skipRemainingHandlers;
+    }
+    return KeyEventResult.ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1262,6 +1299,15 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         ),
       ),
     );
+
+    if (focusNode.onKey == null) {
+      child = Focus(
+        onKey: _handleRawKeyEvent,
+        includeSemantics: false,
+        skipTraversal: true,
+        child: child,
+      );
+    }
 
     if (widget.decoration != null) {
       child = AnimatedBuilder(

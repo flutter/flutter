@@ -248,9 +248,14 @@ abstract class SearchDelegate<T> {
   /// If the user taps on a suggestion provided by [buildSuggestions] this
   /// string should be updated to that suggestion via the setter.
   String get query => _queryTextController.text;
+
+  /// Changes the current query string.
+  ///
+  /// Setting the query string programmatically moves the cursor to the end of the text field.
   set query(String value) {
     assert(query != null);
     _queryTextController.text = value;
+    _queryTextController.selection = TextSelection.fromPosition(TextPosition(offset: _queryTextController.text.length));
   }
 
   /// Transition from the suggestions returned by [buildSuggestions] to the

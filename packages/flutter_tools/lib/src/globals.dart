@@ -9,7 +9,6 @@ import 'device.dart';
 import 'doctor.dart';
 import 'fuchsia/fuchsia_sdk.dart';
 import 'ios/simulators.dart';
-import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
 import 'reporting/crash_reporting.dart';
 import 'runner/local_engine.dart';
@@ -19,8 +18,6 @@ export 'globals_null_migrated.dart';
 CrashReporter get crashReporter => context.get<CrashReporter>();
 Doctor get doctor => context.get<Doctor>();
 DeviceManager get deviceManager => context.get<DeviceManager>();
-
-CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 
 LocalEngineLocator get localEngineLocator => context.get<LocalEngineLocator>();
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
