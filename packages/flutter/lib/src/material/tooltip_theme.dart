@@ -37,6 +37,8 @@ class TooltipThemeData with Diagnosticable {
     this.textStyle,
     this.waitDuration,
     this.showDuration,
+    this.triggerMode,
+    this.provideTriggerFeedback,
   });
 
   /// The height of [Tooltip.child].
@@ -84,6 +86,15 @@ class TooltipThemeData with Diagnosticable {
   /// The length of time that the tooltip will be shown once it has appeared.
   final Duration? showDuration;
 
+  /// The mode that will decide when the tooltip will trigger
+  final TooltipTriggerMode? triggerMode;
+
+  /// Whether the tooltip will provide feedback when triggered.
+  ///
+  /// Defaults to true. Will call the appropriate method on `Feedback`
+  /// depending on the trigger mode, such as `Feedback.forLongPress`.
+  final bool? provideTriggerFeedback;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TooltipThemeData copyWith({
@@ -97,6 +108,8 @@ class TooltipThemeData with Diagnosticable {
     TextStyle? textStyle,
     Duration? waitDuration,
     Duration? showDuration,
+    TooltipTriggerMode? triggerMode,
+    bool? provideTriggerFeedback,
   }) {
     return TooltipThemeData(
       height: height ?? this.height,
@@ -109,6 +122,8 @@ class TooltipThemeData with Diagnosticable {
       textStyle: textStyle ?? this.textStyle,
       waitDuration: waitDuration ?? this.waitDuration,
       showDuration: showDuration ?? this.showDuration,
+      triggerMode: triggerMode ?? this.triggerMode,
+      provideTriggerFeedback: provideTriggerFeedback ?? this.provideTriggerFeedback,
     );
   }
 
@@ -146,6 +161,8 @@ class TooltipThemeData with Diagnosticable {
       textStyle,
       waitDuration,
       showDuration,
+      triggerMode,
+      provideTriggerFeedback
     );
   }
 
@@ -165,7 +182,9 @@ class TooltipThemeData with Diagnosticable {
         && other.decoration == decoration
         && other.textStyle == textStyle
         && other.waitDuration == waitDuration
-        && other.showDuration == showDuration;
+        && other.showDuration == showDuration
+        && other.triggerMode == triggerMode
+        && other.provideTriggerFeedback == provideTriggerFeedback;
   }
 
   @override
@@ -181,6 +200,9 @@ class TooltipThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
+    properties.add(DiagnosticsProperty<TooltipTriggerMode>('trigger mode', triggerMode, defaultValue: null));
+    properties.add(FlagProperty('provide trigger feedback', value: provideTriggerFeedback, defaultValue: null));
   }
 }
 
@@ -249,4 +271,19 @@ class TooltipTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(TooltipTheme oldWidget) => data != oldWidget.data;
+}
+
+/// The mode that will decide when the tooltip will trigger
+enum TooltipTriggerMode {
+  /// Tooltip will not be shown automatically, but can be done manually
+  /// by calling `ensureTooltipVisible`
+  Manual,
+
+  /// Tooltip will be shown automatically after a long press.
+  /// See `GestureDetector.onLongPress` for more details.
+  LongHold,
+
+  /// Tooltip will be shown automatically after a single tap
+  /// See `GestureDetector.onTap` for more details
+  Tap,
 }

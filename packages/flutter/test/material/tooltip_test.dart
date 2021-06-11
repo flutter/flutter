@@ -1426,6 +1426,8 @@ void main() {
       excludeFromSemantics: true,
       preferBelow: false,
       verticalOffset: 50.0,
+      triggerMode: TooltipTriggerMode.Manual,
+      provideTriggerFeedback: true,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -1442,7 +1444,67 @@ void main() {
       'semantics: excluded',
       'wait duration: 0:00:01.000000',
       'show duration: 0:00:02.000000',
+      'triggerMode: TooltipTriggerMode.Manual',
+      'provideTriggerFeedback: true',
     ]);
+  });
+  testWidgets('Tooltip trigger on tap when trigger mode is tap', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Tooltip(
+          message: tooltipText,
+          triggerMode: TooltipTriggerMode.Tap,
+          child: SizedBox(width: 100.0, height: 100.0),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    final TestGesture gestureTap = await tester.startGesture(tester.getCenter(tooltip));
+    await gestureTap.up();
+    await tester.pump();
+    expect(find.text(tooltipText), findsOneWidget);
+  });
+  testWidgets('Tooltip does not trigger on tap when trigger mode is longHold', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Tooltip(
+          message: tooltipText,
+          triggerMode: TooltipTriggerMode.LongHold,
+          child: SizedBox(width: 100.0, height: 100.0),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    final TestGesture gestureTap = await tester.startGesture(tester.getCenter(tooltip));
+    await gestureTap.up();
+    await tester.pump();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Tooltip does not trigger when trigger mode is manual', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Tooltip(
+          message: tooltipText,
+          triggerMode: TooltipTriggerMode.Manual,
+          child: SizedBox(width: 100.0, height: 100.0),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    final TestGesture gestureTap = await tester.startGesture(tester.getCenter(tooltip));
+    await gestureTap.up();
+    await tester.pump();
+    expect(find.text(tooltipText), findsNothing);
+
+    final TestGesture gestureLongHold = await tester.startGesture(tester.getCenter(tooltip));
+    await tester.pump();
+    await tester.pump(kLongPressTimeout);
+    await gestureLongHold.up();
+    expect(find.text(tooltipText), findsNothing);
   });
 }
 
