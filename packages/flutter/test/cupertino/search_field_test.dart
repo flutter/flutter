@@ -111,7 +111,26 @@ void main() {
       );
     },
   );
-
+  
+  testWidgets(
+    'can change keyboard type',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoSearchTextField(
+              keyboardType: TextInputType.number
+            ),
+          ),
+        ),
+      );
+      
+       expect(tester.testTextInput.setClientArgs['inputType']['name'],
+        equals('TextInputType.number'));
+      );
+    },
+  );
+  
   testWidgets(
     'can control text content via controller',
     (WidgetTester tester) async {
