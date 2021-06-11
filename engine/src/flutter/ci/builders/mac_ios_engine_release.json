@@ -1,0 +1,69 @@
+[
+    {
+        "archives": [],
+        "drone_dimensions": [
+            "device_type=none",
+            "mac_model=Macmini8,1",
+            "os=Mac"
+        ],
+        "gn": [
+            "--ios",
+            "--runtime-mode",
+            "debug",
+            "--simulator",
+            "--no-lto"
+        ],
+        "name": "ios_debug_sym",
+        "ninja": {
+            "config": "ios_debug_sim",
+            "targets": []
+        },
+        "tests": []
+    },
+    {
+        "archives": [],
+        "drone_dimensions": [
+            "device_type=none",
+            "mac_model=Macmini8,1",
+            "os=Mac"
+        ],
+        "gn": [
+            "--ios",
+            "--runtime-mode",
+            "release",
+            "--bitcode",
+            "--no-goma"
+        ],
+        "name": "ios_release",
+        "ninja": {
+            "config": "ios_release",
+            "targets": [],
+            "tool": "autoninja"
+        },
+        "tests": []
+    },
+    {
+        "archives": [],
+        "drone_dimensions": [
+            "device_type=none",
+            "mac_model=Macmini8,1",
+            "os=Mac"
+        ],
+        "generators": [],
+        "gn": [
+            "--ios",
+            "--runtime-mode",
+            "release",
+            "--bitcode",
+            "--no-goma",
+            "--ios-cpu=arm"
+        ],
+        "name": "ios_release_arm",
+        "ninja": {
+            "config": "ios_release_arm",
+            "targets": [],
+            "tool": "autoninja"
+        },
+        "tests": []
+    }
+]

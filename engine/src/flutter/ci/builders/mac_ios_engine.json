@@ -1,0 +1,70 @@
+[
+    {
+        "archives": [],
+        "drone_dimensions": [
+            "device_type=none",
+            "mac_model=Macmini8,1",
+            "os=Mac"
+        ],
+        "gn": [
+            "--ios",
+            "--runtime-mode",
+            "debug",
+            "--simulator",
+            "--no-lto"
+        ],
+        "name": "ios_debug_sym",
+        "ninja": {
+            "config": "ios_debug_sim",
+            "targets": []
+        },
+        "tests": []
+    },
+    {
+        "archives": [],
+        "drone_dimensions": [
+            "device_type=none",
+            "mac_model=Macmini8,1",
+            "os=Mac"
+        ],
+        "gn": [
+            "--bitcode",
+            "--ios",
+            "--runtime-mode",
+            "debug"
+        ],
+        "name": "ios_debug",
+        "ninja": {
+            "config": "ios_debug",
+            "targets": []
+        },
+        "tests": []
+    },
+    {
+        "archives": [],
+        "drone_dimensions": [
+            "device_type=none",
+            "mac_model=Macmini8,1",
+            "os=Mac"
+        ],
+        "generators": [
+            {
+                "name": "BuildObjcDoc",
+                "script": "flutter/tools/gen_objcdoc.sh"
+            }
+        ],
+        "gn": [
+            "--bitcode",
+            "--ios",
+            "--runtime-mode",
+            "debug",
+            "--ios-cpu=arm"
+        ],
+        "name": "ios_debug_arm",
+        "ninja": {
+            "config": "ios_debug_arm",
+            "targets": []
+        },
+        "tests": []
+    }
+]
