@@ -249,7 +249,7 @@ class _DraggableSheetExtent {
   _DraggableSheetExtent({
     required this.minExtent,
     required this.maxExtent,
-    required this.snapPoints,
+    required this.snapTargets,
     required this.initialExtent,
     required VoidCallback listener,
   })  : assert(minExtent != null),
@@ -265,7 +265,7 @@ class _DraggableSheetExtent {
 
   final double minExtent;
   final double maxExtent;
-  final Set<double> snapPoints;
+  final Set<double> snapTargets;
   final double initialExtent;
   final ValueNotifier<double> _currentExtent;
   double availablePixels;
@@ -326,7 +326,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     _extent = _DraggableSheetExtent(
       minExtent: widget.minChildSize,
       maxExtent: widget.maxChildSize,
-      snapPoints: <double>{
+      snapTargets: <double>{
         widget.minChildSize,
         ...widget.snapTargets ?? <double>[],
         widget.maxChildSize,
@@ -471,9 +471,17 @@ class _DraggableScrollableSheetScrollPosition
   bool get listShouldScroll => pixels > 0.0;
 
   void initialize() {
-    if (extent.snapPoints.isNotEmpty) {
+    if (extent.snapTargets.isNotEmpty) {
       isScrollingNotifier.addListener(_snapWhenIdle);
     }
+  }
+
+  @override
+  void dispose() {
+    if (extent.snapTargets.isNotEmpty) {
+      isScrollingNotifier.removeListener(_snapWhenIdle);
+    }
+    super.dispose();
   }
 
   @override
@@ -563,7 +571,7 @@ class _DraggableScrollableSheetScrollPosition
       return;
     }
     final double closestSnapTarget =
-        extent.snapPoints.reduce((double targetA, double targetB) {
+        extent.snapTargets.reduce((double targetA, double targetB) {
       if ((extent.currentExtent - targetA).abs() <
           (extent.currentExtent - targetB).abs()) {
         return targetA;
