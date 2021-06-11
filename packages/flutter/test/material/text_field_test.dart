@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle;
 
@@ -489,7 +488,7 @@ void main() {
     await tester.tap(find.byKey(icon));
     await tester.pump();
     expect(controller.text, '');
-    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream));
   });
 
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
@@ -1057,12 +1056,12 @@ void main() {
 
     await tester.pump();
 
-    String editText = findRenderEditable(tester).text!.text!;
+    String editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), newChar);
 
     await tester.pump(const Duration(seconds: 2));
 
-    editText = findRenderEditable(tester).text!.text!;
+    editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), '\u2022');
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
@@ -1097,7 +1096,7 @@ void main() {
 
     await tester.pump();
 
-    final String editText = findRenderEditable(tester).text!.text!;
+    final String editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), '\u2022');
   }, variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.macOS,
@@ -4537,6 +4536,69 @@ void main() {
       );
       await tester.pump();
     }
+
+    // Regression test for https://github.com/flutter/flutter/issues/81233
+    testWidgets('TextField should terminate the `space` and `enter` raw key events by default', (WidgetTester tester) async {
+      final Set<FocusNode> outerReceivedAnEvent = <FocusNode>{};
+      final FocusNode outerFocusNode = FocusNode();
+      KeyEventResult outerHandleEvent(FocusNode node, RawKeyEvent event) {
+        outerReceivedAnEvent.add(node);
+        return KeyEventResult.handled;
+      }
+      outerFocusNode.onKey = outerHandleEvent;
+
+      final Set<FocusNode> innerReceivedAnEvent = <FocusNode>{};
+      final FocusNode innerFocusNode = FocusNode();
+
+      Future<void> sendEvent(LogicalKeyboardKey key) async {
+        await tester.sendKeyEvent(key, platform: 'windows');
+      }
+
+      Widget buildFrame() {
+        return MaterialApp(
+          home: Material(
+            child: Focus(
+              onKey: outerFocusNode.onKey,
+              focusNode: outerFocusNode,
+              child: TextField(
+                focusNode: innerFocusNode,
+              ),
+            ),
+          ),
+        );
+      }
+      await tester.pumpWidget(buildFrame());
+      innerFocusNode.requestFocus();
+      await tester.pump();
+
+      // The inner TextField's focus node terminal the raw key event by default.
+      await sendEvent(LogicalKeyboardKey.space);
+      expect(outerReceivedAnEvent.length, 0);
+
+      await sendEvent(LogicalKeyboardKey.enter);
+      expect(outerReceivedAnEvent.length, 0);
+
+      // The `onKey` of the focus node of the TextField can be customized.
+      KeyEventResult innerHandleEvent(FocusNode node, RawKeyEvent event) {
+        innerReceivedAnEvent.add(node);
+        // The key event has not been handled, and the event should continue to be
+        // propagated to the outer key event handlers.
+        return KeyEventResult.ignored;
+      }
+      innerFocusNode.onKey = innerHandleEvent;
+      await tester.pumpWidget(buildFrame());
+
+      await sendEvent(LogicalKeyboardKey.space);
+      expect(outerReceivedAnEvent.length, 1);
+      expect(innerReceivedAnEvent.length, 1);
+
+      outerReceivedAnEvent.clear();
+      innerReceivedAnEvent.clear();
+
+      await sendEvent(LogicalKeyboardKey.enter);
+      expect(outerReceivedAnEvent.length, 1);
+      expect(innerReceivedAnEvent.length, 1);
+    }, skip: areKeyEventsHandledByPlatform);
 
     testWidgets('Shift test 1', (WidgetTester tester) async {
       await setupWidget(tester);
@@ -9718,5 +9780,44 @@ void main() {
       expect(state.currentTextEditingValue.text, '侬好啊旁友');
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
+  });
+
+  testWidgets('prefix/suffix buttons do not leak touch events', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/39376.
+
+    int textFieldTapCount = 0;
+    int prefixTapCount = 0;
+    int suffixTapCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            onTap: () { textFieldTapCount += 1; },
+            decoration: InputDecoration(
+              labelText: 'Label',
+              prefix: RaisedButton(
+                onPressed: () { prefixTapCount += 1; },
+                child: const Text('prefix'),
+              ),
+              suffix: RaisedButton(
+                onPressed: () { suffixTapCount += 1; },
+                child: const Text('suffix'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('prefix'));
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 0);
+
+    await tester.tap(find.text('suffix'));
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 1);
   });
 }

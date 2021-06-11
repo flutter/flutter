@@ -49,6 +49,11 @@ class HotEvent extends UsageEvent {
     this.invalidatedSourcesCount,
     this.transferTimeInMs,
     this.overallTimeInMs,
+    this.compileTimeInMs,
+    this.findInvalidatedTimeInMs,
+    this.scannedSourcesCount,
+    this.reassembleTimeInMs,
+    this.reloadVMTimeInMs,
   }) : super('hot', parameter, flutterUsage: globals.flutterUsage);
 
   final String? reason;
@@ -65,6 +70,11 @@ class HotEvent extends UsageEvent {
   final int? invalidatedSourcesCount;
   final int? transferTimeInMs;
   final int? overallTimeInMs;
+  final int? compileTimeInMs;
+  final int? findInvalidatedTimeInMs;
+  final int? scannedSourcesCount;
+  final int? reassembleTimeInMs;
+  final int? reloadVMTimeInMs;
 
   @override
   void send() {
@@ -83,6 +93,11 @@ class HotEvent extends UsageEvent {
       hotEventTransferTimeInMs: transferTimeInMs,
       hotEventOverallTimeInMs: overallTimeInMs,
       fastReassemble: fastReassemble,
+      hotEventCompileTimeInMs: compileTimeInMs,
+      hotEventFindInvalidatedTimeInMs: findInvalidatedTimeInMs,
+      hotEventScannedSourcesCount: scannedSourcesCount,
+      hotEventReassembleTimeInMs: reassembleTimeInMs,
+      hotEventReloadVMTimeInMs: reloadVMTimeInMs,
     );
     flutterUsage.sendEvent(category, parameter, parameters: parameters);
   }

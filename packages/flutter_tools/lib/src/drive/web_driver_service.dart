@@ -109,9 +109,11 @@ class WebDriverService extends DriverService {
       );
     } on Exception catch (ex) {
       throwToolExit(
-        'Unable to start WebDriver Session for Flutter for Web testing. \n'
-        'Make sure you have the correct WebDriver Server running at $driverPort. \n'
-        'Make sure the WebDriver Server matches option --browser-name. \n'
+        'Unable to start WebDriver Session for Flutter for Web testing.\n'
+        'Make sure you have the correct WebDriver Server running at $driverPort.\n'
+        'Make sure the WebDriver Server matches option --browser-name.\n'
+        'For more information see: '
+        'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser\n'
         '$ex'
       );
     }

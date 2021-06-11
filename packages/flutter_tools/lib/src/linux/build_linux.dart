@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -32,7 +30,7 @@ Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
     String target = 'lib/main.dart',
-    SizeAnalyzer sizeAnalyzer,
+    SizeAnalyzer? sizeAnalyzer,
     bool needCrossBuild = false,
     TargetPlatform targetPlatform = TargetPlatform.linux_x64,
     String targetSysroot = '/',
@@ -56,13 +54,14 @@ Future<void> buildLinux(
   // step.
   final Map<String, String> environmentConfig = buildInfo.toEnvironmentConfig();
   environmentConfig['FLUTTER_TARGET'] = target;
-  if (globals.artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
+  final Artifacts? artifacts = globals.artifacts;
+  if (artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     environmentConfig['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
     environmentConfig['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot, linuxProject, environmentConfig);
+  writeGeneratedCmakeConfig(Cache.flutterRoot!, linuxProject, environmentConfig);
 
   createPluginSymlinks(linuxProject.parent);
 
@@ -70,7 +69,7 @@ Future<void> buildLinux(
     'Building Linux application...',
   );
   try {
-    final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
+    final String buildModeName = getNameForBuildMode(buildInfo.mode);
     final Directory buildDirectory =
         globals.fs.directory(getLinuxBuildDirectory(targetPlatform)).childDirectory(buildModeName);
     await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory,
@@ -85,7 +84,7 @@ Future<void> buildLinux(
       .childFile('snapshot.$arch.json');
     final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
       .childFile('trace.$arch.json');
-    final Map<String, Object> output = await sizeAnalyzer.analyzeAotSnapshot(
+    final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(

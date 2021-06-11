@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -21,9 +18,9 @@ import '../base/process.dart';
 /// apps.
 class UwpTool {
   UwpTool({
-    @required Artifacts artifacts,
-    @required Logger logger,
-    @required ProcessManager processManager,
+    required Artifacts artifacts,
+    required Logger logger,
+    required ProcessManager processManager,
   }) : _artifacts = artifacts,
        _logger = logger,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger);
@@ -58,7 +55,7 @@ class UwpTool {
   ///
   /// If no installed application on the system matches the specified package
   /// name, returns null.
-  Future<String/*?*/> getPackageFamilyName(String packageName) async {
+  Future<String?> getPackageFamilyName(String packageName) async {
     for (final String packageFamily in await listApps()) {
       if (packageFamily.startsWith(packageName)) {
         return packageFamily;
@@ -70,7 +67,7 @@ class UwpTool {
   /// Launches the app with the specified package family name.
   ///
   /// On success, returns the process ID of the launched app, otherwise null.
-  Future<int/*?*/> launchApp(String packageFamily, List<String> args) async {
+  Future<int?> launchApp(String packageFamily, List<String> args) async {
     final List<String> launchCommand = <String>[
       _binaryPath,
       'launch',
@@ -82,7 +79,7 @@ class UwpTool {
       return null;
     }
     // Read the process ID from stdout.
-    final int processId = int.tryParse(result.stdout.trim());
+    final int? processId = int.tryParse(result.stdout.trim());
     _logger.printTrace('Launched application $packageFamily with process ID $processId');
     return processId;
   }
