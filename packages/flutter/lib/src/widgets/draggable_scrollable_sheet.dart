@@ -655,8 +655,7 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   ///
   /// Returns true if the notifier requested a reset, false otherwise.
   static bool shouldReset(BuildContext context) {
-    final InheritedWidget? widget =
-        context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
+    final InheritedWidget? widget = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     if (widget == null) {
       return false;
     }
