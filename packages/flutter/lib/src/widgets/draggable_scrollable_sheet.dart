@@ -107,7 +107,7 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.minChildSize = 0.25,
     this.maxChildSize = 1.0,
     this.expand = true,
-    this.snapPoints,
+    this.snapTargets,
     required this.builder,
   })  : assert(initialChildSize != null),
         assert(minChildSize != null),
@@ -148,10 +148,10 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// The default value is true.
   final bool expand;
 
-  /// A list of points that the widget should snap to. [minChildSize] and
+  /// A list of target points that the widget should snap to. [minChildSize] and
   /// [maxChildSize] are implicitly snapped to and should not be specified here-
   /// pass an empty list to snap the widget between min and max.
-  final List<double>? snapPoints;
+  final List<double>? snapTargets;
 
   /// The builder that creates a child to display in this widget, which will
   /// use the provided [ScrollController] to enable dragging and scrolling
@@ -328,7 +328,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       maxExtent: widget.maxChildSize,
       snapPoints: <double>{
         widget.minChildSize,
-        ...widget.snapPoints ?? <double>{},
+        ...widget.snapTargets ?? <double>[],
         widget.maxChildSize,
       },
       initialExtent: widget.initialChildSize,
@@ -559,19 +559,19 @@ class _DraggableScrollableSheetScrollPosition
 
   void _snapWhenIdle() {
     if (isScrollingNotifier.value) {
-      // Don't snap until we've finished scrolling
+      // Don't snap until we've finished scrolling.
       return;
     }
-    final double closestSnapPoint =
-        extent.snapPoints.reduce((double snapA, double snapB) {
-      if ((extent.currentExtent - snapA).abs() <
-          (extent.currentExtent - snapB).abs()) {
-        return snapA;
+    final double closestSnapTarget =
+        extent.snapPoints.reduce((double targetA, double targetB) {
+      if ((extent.currentExtent - targetA).abs() <
+          (extent.currentExtent - targetB).abs()) {
+        return targetA;
       }
-      return snapB;
+      return targetB;
     });
     final int pixelDistance = extent
-        .extentToPixels(extent.currentExtent - closestSnapPoint)
+        .extentToPixels(extent.currentExtent - closestSnapTarget)
         .abs()
         .round();
 
@@ -589,7 +589,7 @@ class _DraggableScrollableSheetScrollPosition
       }
       extent.updateExtent(snapController.value, context.notificationContext!);
     });
-    snapController.animateTo(closestSnapPoint,
+    snapController.animateTo(closestSnapTarget,
         duration: Duration(milliseconds: pixelDistance));
   }
 }
