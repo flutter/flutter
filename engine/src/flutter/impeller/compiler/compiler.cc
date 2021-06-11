@@ -283,21 +283,25 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   // The parser and compiler must be run separately because the parser contains
   // meta information (like type member names) that are useful for reflection.
   parser.parse();
-  const auto& parsed_ir = parser.get_parsed_ir();
-  spirv_cross::CompilerMSL msl_compiler(parsed_ir);
+
+  const auto parsed_ir =
+      std::make_shared<spirv_cross::ParsedIR>(parser.get_parsed_ir());
+
+  const auto msl_compiler =
+      std::make_shared<spirv_cross::CompilerMSL>(*parsed_ir);
 
   {
-    msl_compiler.rename_entry_point("main", options_.entry_point_name,
-                                    ToExecutionModel(options_.type));
+    msl_compiler->rename_entry_point("main", options_.entry_point_name,
+                                     ToExecutionModel(options_.type));
   }
 
   {
     spirv_cross::CompilerMSL::Options msl_options;
     msl_options.platform = spirv_cross::CompilerMSL::Options::Platform::macOS;
-    msl_compiler.set_msl_options(msl_options);
+    msl_compiler->set_msl_options(msl_options);
   }
 
-  msl_string_ = std::make_shared<std::string>(msl_compiler.compile());
+  msl_string_ = std::make_shared<std::string>(msl_compiler->compile());
 
   if (!msl_string_) {
     COMPILER_ERROR << "Could not generate MSL from SPIRV";

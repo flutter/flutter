@@ -21,10 +21,12 @@
 namespace impeller {
 namespace compiler {
 
+using namespace spirv_cross;
+
 using Writer = rapidjson::PrettyWriter<rapidjson::StringBuffer>;
 
-static std::string BaseTypeToString(spirv_cross::SPIRType::BaseType type) {
-  using Type = spirv_cross::SPIRType::BaseType;
+static std::string BaseTypeToString(SPIRType::BaseType type) {
+  using Type = SPIRType::BaseType;
   switch (type) {
     case Type::Void:
       return "ShaderType::kVoid";
@@ -68,9 +70,9 @@ static std::string BaseTypeToString(spirv_cross::SPIRType::BaseType type) {
 }
 
 static std::optional<std::string> GetMemberNameAtIndexIfExists(
-    const spirv_cross::ParsedIR& ir,
-    const spirv_cross::CompilerMSL& compiler,
-    const spirv_cross::SPIRType& type,
+    const ParsedIR& ir,
+    const CompilerMSL& compiler,
+    const SPIRType& type,
     size_t index) {
   if (type.type_alias != 0) {
     return GetMemberNameAtIndexIfExists(
@@ -86,11 +88,10 @@ static std::optional<std::string> GetMemberNameAtIndexIfExists(
   return std::nullopt;
 }
 
-static std::string GetMemberNameAtIndex(
-    const spirv_cross::ParsedIR& ir,
-    const spirv_cross::CompilerMSL& compiler,
-    const spirv_cross::SPIRType& type,
-    size_t index) {
+static std::string GetMemberNameAtIndex(const ParsedIR& ir,
+                                        const CompilerMSL& compiler,
+                                        const SPIRType& type,
+                                        size_t index) {
   if (auto name = GetMemberNameAtIndexIfExists(ir, compiler, type, index);
       name.has_value()) {
     return name.value();
@@ -103,9 +104,9 @@ static std::string GetMemberNameAtIndex(
 }
 
 static bool ReflectType(Writer& writer,
-                        const spirv_cross::ParsedIR& ir,
-                        const spirv_cross::CompilerMSL& compiler,
-                        const spirv_cross::TypeID& type_id) {
+                        const ParsedIR& ir,
+                        const CompilerMSL& compiler,
+                        const TypeID& type_id) {
   const auto type = compiler.get_type(type_id);
 
   writer.Key("type");
@@ -145,9 +146,9 @@ static bool ReflectType(Writer& writer,
 }
 
 static bool ReflectBaseResource(Writer& writer,
-                                const spirv_cross::ParsedIR& ir,
-                                const spirv_cross::CompilerMSL& compiler,
-                                const spirv_cross::Resource& res) {
+                                const ParsedIR& ir,
+                                const CompilerMSL& compiler,
+                                const Resource& res) {
   writer.Key("name");
   writer.String(res.name);
 
@@ -163,6 +164,10 @@ static bool ReflectBaseResource(Writer& writer,
   writer.Uint64(
       compiler.get_decoration(res.id, spv::Decoration::DecorationLocation));
 
+  writer.Key("index");
+  writer.Uint64(
+      compiler.get_decoration(res.id, spv::Decoration::DecorationIndex));
+
   if (!ReflectType(writer, ir, compiler, res.type_id)) {
     return false;
   }
@@ -171,9 +176,9 @@ static bool ReflectBaseResource(Writer& writer,
 }
 
 static bool ReflectStageIO(Writer& writer,
-                           const spirv_cross::ParsedIR& ir,
-                           const spirv_cross::CompilerMSL& compiler,
-                           const spirv_cross::Resource& io) {
+                           const ParsedIR& ir,
+                           const CompilerMSL& compiler,
+                           const Resource& io) {
   writer.StartObject();
 
   if (!ReflectBaseResource(writer, ir, compiler, io)) {
@@ -185,18 +190,14 @@ static bool ReflectStageIO(Writer& writer,
 }
 
 static bool ReflectUniformBuffer(Writer& writer,
-                                 const spirv_cross::ParsedIR& ir,
-                                 const spirv_cross::CompilerMSL& compiler,
-                                 const spirv_cross::Resource& buffer) {
+                                 const ParsedIR& ir,
+                                 const CompilerMSL& compiler,
+                                 const Resource& buffer) {
   writer.StartObject();
 
   if (!ReflectBaseResource(writer, ir, compiler, buffer)) {
     return false;
   }
-
-  writer.Key("index");
-  writer.Uint64(
-      compiler.get_decoration(buffer.id, spv::Decoration::DecorationIndex));
 
   writer.EndObject();
   return true;
@@ -225,149 +226,27 @@ static std::string StringToShaderStage(std::string str) {
   return "ShaderStage::kUnknown";
 }
 
-static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
-    const Reflector::Options& options,
-    const spirv_cross::ParsedIR& ir,
-    const spirv_cross::CompilerMSL& compiler) {
-  auto buffer = std::make_shared<rapidjson::StringBuffer>();
-  Writer writer(*buffer);
-
-  writer.StartObject();  // root
-
-  {
-    const auto& entrypoints = compiler.get_entry_points_and_stages();
-    if (entrypoints.size() != 1) {
-      FML_LOG(ERROR) << "Incorrect number of entrypoints in the shader. Found "
-                     << entrypoints.size() << " but expected 1.";
-      return nullptr;
-    }
-
-    writer.Key("entrypoint");
-    writer.String(entrypoints.front().name);
-
-    writer.Key("shader_name");
-    writer.String(options.shader_name);
-
-    writer.Key("shader_stage");
-    writer.String(ExecutionModelToString(entrypoints.front().execution_model));
-
-    writer.Key("header_file_name");
-    writer.String(options.header_file_name);
-  }
-
-  const auto all_shader_resources = compiler.get_shader_resources();
-
-  {
-    writer.Key("uniform_buffers");
-    writer.StartArray();
-    for (const auto& uniform_buffer : all_shader_resources.uniform_buffers) {
-      if (!ReflectUniformBuffer(writer, ir, compiler, uniform_buffer)) {
-        FML_LOG(ERROR) << "Could not reflect uniform buffer.";
-        return nullptr;
-      }
-    }
-    writer.EndArray();
-  }
-
-  {
-    writer.Key("stage_inputs");
-    writer.StartArray();
-    for (const auto& input : all_shader_resources.stage_inputs) {
-      if (!ReflectStageIO(writer, ir, compiler, input)) {
-        FML_LOG(ERROR) << "Could not reflect stage input.";
-        return nullptr;
-      }
-    }
-    writer.EndArray();
-  }
-
-  {
-    writer.Key("stage_outputs");
-    writer.StartArray();
-    for (const auto& output : all_shader_resources.stage_outputs) {
-      if (!ReflectStageIO(writer, ir, compiler, output)) {
-        FML_LOG(ERROR) << "Could not reflect stage output.";
-        return nullptr;
-      }
-    }
-    writer.EndArray();
-  }
-
-  {
-    auto reflect_types =
-        [&](const spirv_cross::SmallVector<spirv_cross::Resource> resources)
-        -> bool {
-      for (const auto& resource : resources) {
-      }
-      return true;
-    };
-    writer.Key("type_definitions");
-    writer.StartArray();
-    if (!reflect_types(all_shader_resources.uniform_buffers) ||
-        !reflect_types(all_shader_resources.stage_inputs) ||
-        !reflect_types(all_shader_resources.stage_outputs)) {
-      return nullptr;
-    }
-    writer.EndArray();
-  }
-
-  writer.EndObject();  // root
-
-  return std::make_shared<fml::NonOwnedMapping>(
-      reinterpret_cast<const uint8_t*>(buffer->GetString()), buffer->GetSize(),
-      [buffer](auto, auto) {});
-}
-
-static std::shared_ptr<fml::Mapping> InflateTemplate(
-    const spirv_cross::CompilerMSL& compiler,
-    const std::string_view& tmpl,
-    const fml::Mapping* reflection_args) {
-  if (!reflection_args) {
-    return nullptr;
-  }
-
-  inja::Environment env;
-  env.set_trim_blocks(true);
-  env.set_lstrip_blocks(true);
-
-  env.add_callback("camel_case", 1u, [](inja::Arguments& args) {
-    return ConvertToCamelCase(args.at(0u)->get<std::string>());
-  });
-
-  env.add_callback("to_shader_stage", 1u, [](inja::Arguments& args) {
-    return StringToShaderStage(args.at(0u)->get<std::string>());
-  });
-
-  auto template_data = inja::json::parse(
-      reinterpret_cast<const char*>(reflection_args->GetMapping()));
-
-  auto inflated_template =
-      std::make_shared<std::string>(env.render(tmpl, template_data));
-
-  return std::make_shared<fml::NonOwnedMapping>(
-      reinterpret_cast<const uint8_t*>(inflated_template->data()),
-      inflated_template->size(), [inflated_template](auto, auto) {});
-}
-
 Reflector::Reflector(Options options,
-                     const spirv_cross::ParsedIR& ir,
-                     const spirv_cross::CompilerMSL& compiler)
+                     std::shared_ptr<const ParsedIR> ir,
+                     std::shared_ptr<const CompilerMSL> compiler)
     : options_(std::move(options)),
-      template_arguments_(ReflectTemplateArguments(options_, ir, compiler)),
-      reflection_header_(InflateTemplate(compiler,
-                                         kReflectionHeaderTemplate,
-                                         template_arguments_.get())),
-      reflection_cc_(InflateTemplate(compiler,
-                                     kReflectionCCTemplate,
-                                     template_arguments_.get())) {
+      ir_(std::move(ir)),
+      compiler_(std::move(compiler)) {
+  if (!ir_ || !compiler_) {
+    return;
+  }
+
+  template_arguments_ = GenerateTemplateArguments();
   if (!template_arguments_) {
     return;
   }
 
+  reflection_header_ = GenerateReflectionHeader();
   if (!reflection_header_) {
     return;
   }
 
+  reflection_cc_ = GenerateReflectionCC();
   if (!reflection_cc_) {
     return;
   }
@@ -391,6 +270,127 @@ std::shared_ptr<fml::Mapping> Reflector::GetReflectionHeader() const {
 
 std::shared_ptr<fml::Mapping> Reflector::GetReflectionCC() const {
   return reflection_cc_;
+}
+
+std::shared_ptr<fml::Mapping> Reflector::GenerateTemplateArguments() const {
+  auto buffer = std::make_shared<rapidjson::StringBuffer>();
+  Writer writer(*buffer);
+
+  writer.StartObject();  // root
+
+  {
+    const auto& entrypoints = compiler_->get_entry_points_and_stages();
+    if (entrypoints.size() != 1) {
+      FML_LOG(ERROR) << "Incorrect number of entrypoints in the shader. Found "
+                     << entrypoints.size() << " but expected 1.";
+      return nullptr;
+    }
+
+    writer.Key("entrypoint");
+    writer.String(entrypoints.front().name);
+
+    writer.Key("shader_name");
+    writer.String(options_.shader_name);
+
+    writer.Key("shader_stage");
+    writer.String(ExecutionModelToString(entrypoints.front().execution_model));
+
+    writer.Key("header_file_name");
+    writer.String(options_.header_file_name);
+  }
+
+  const auto all_shader_resources = compiler_->get_shader_resources();
+
+  {
+    writer.Key("uniform_buffers");
+    writer.StartArray();
+    for (const auto& uniform_buffer : all_shader_resources.uniform_buffers) {
+      if (!ReflectUniformBuffer(writer, *ir_, *compiler_, uniform_buffer)) {
+        FML_LOG(ERROR) << "Could not reflect uniform buffer.";
+        return nullptr;
+      }
+    }
+    writer.EndArray();
+  }
+
+  {
+    writer.Key("stage_inputs");
+    writer.StartArray();
+    for (const auto& input : all_shader_resources.stage_inputs) {
+      if (!ReflectStageIO(writer, *ir_, *compiler_, input)) {
+        FML_LOG(ERROR) << "Could not reflect stage input.";
+        return nullptr;
+      }
+    }
+    writer.EndArray();
+  }
+
+  {
+    writer.Key("stage_outputs");
+    writer.StartArray();
+    for (const auto& output : all_shader_resources.stage_outputs) {
+      if (!ReflectStageIO(writer, *ir_, *compiler_, output)) {
+        FML_LOG(ERROR) << "Could not reflect stage output.";
+        return nullptr;
+      }
+    }
+    writer.EndArray();
+  }
+
+  {
+    auto reflect_types = [&](const SmallVector<Resource> resources) -> bool {
+      for (const auto& resource : resources) {
+      }
+      return true;
+    };
+    writer.Key("type_definitions");
+    writer.StartArray();
+    if (!reflect_types(all_shader_resources.uniform_buffers) ||
+        !reflect_types(all_shader_resources.stage_inputs) ||
+        !reflect_types(all_shader_resources.stage_outputs)) {
+      return nullptr;
+    }
+    writer.EndArray();
+  }
+
+  writer.EndObject();  // root
+
+  return std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(buffer->GetString()), buffer->GetSize(),
+      [buffer](auto, auto) {});
+}
+
+std::shared_ptr<fml::Mapping> Reflector::GenerateReflectionHeader() const {
+  return InflateTemplate(kReflectionHeaderTemplate);
+}
+
+std::shared_ptr<fml::Mapping> Reflector::GenerateReflectionCC() const {
+  return InflateTemplate(kReflectionCCTemplate);
+}
+
+std::shared_ptr<fml::Mapping> Reflector::InflateTemplate(
+    const std::string_view& tmpl) const {
+  inja::Environment env;
+  env.set_trim_blocks(true);
+  env.set_lstrip_blocks(true);
+
+  env.add_callback("camel_case", 1u, [](inja::Arguments& args) {
+    return ConvertToCamelCase(args.at(0u)->get<std::string>());
+  });
+
+  env.add_callback("to_shader_stage", 1u, [](inja::Arguments& args) {
+    return StringToShaderStage(args.at(0u)->get<std::string>());
+  });
+
+  auto template_data = inja::json::parse(
+      reinterpret_cast<const char*>(template_arguments_->GetMapping()));
+
+  auto inflated_template =
+      std::make_shared<std::string>(env.render(tmpl, template_data));
+
+  return std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(inflated_template->data()),
+      inflated_template->size(), [inflated_template](auto, auto) {});
 }
 
 }  // namespace compiler

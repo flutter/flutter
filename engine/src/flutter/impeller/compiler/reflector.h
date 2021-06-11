@@ -22,8 +22,8 @@ class Reflector {
   };
 
   Reflector(Options options,
-            const spirv_cross::ParsedIR& ir,
-            const spirv_cross::CompilerMSL& compiler);
+            std::shared_ptr<const spirv_cross::ParsedIR> ir,
+            std::shared_ptr<const spirv_cross::CompilerMSL> compiler);
 
   ~Reflector();
 
@@ -37,10 +37,21 @@ class Reflector {
 
  private:
   const Options options_;
+  const std::shared_ptr<const spirv_cross::ParsedIR> ir_;
+  const std::shared_ptr<const spirv_cross::CompilerMSL> compiler_;
   std::shared_ptr<fml::Mapping> template_arguments_;
   std::shared_ptr<fml::Mapping> reflection_header_;
   std::shared_ptr<fml::Mapping> reflection_cc_;
   bool is_valid_ = false;
+
+  std::shared_ptr<fml::Mapping> GenerateTemplateArguments() const;
+
+  std::shared_ptr<fml::Mapping> GenerateReflectionHeader() const;
+
+  std::shared_ptr<fml::Mapping> GenerateReflectionCC() const;
+
+  std::shared_ptr<fml::Mapping> InflateTemplate(
+      const std::string_view& tmpl) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Reflector);
 };
