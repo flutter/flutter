@@ -3177,7 +3177,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   @protected
   void reassemble() {
-    if (_debugReassembleConfig == null || _debugReassembleConfig?.widgetName == _widget?.runtimeType.toString()) {
+    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
       markNeedsBuild();
       _debugReassembleConfig = null;
     }
@@ -4791,7 +4791,9 @@ class StatefulElement extends ComponentElement {
 
   @override
   void reassemble() {
-    state.reassemble();
+    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
+      state.reassemble();
+    }
     super.reassemble();
   }
 
@@ -6441,4 +6443,10 @@ class _NullElement extends Element {
 class _NullWidget extends Widget {
   @override
   Element createElement() => throw UnimplementedError();
+}
+
+// Whether a [DebugReassembleConfig] indicates that an element holding [widget] can skip
+// a reassemble.
+bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
+  return config == null || config.widgetName == null || widget?.runtimeType.toString() == config.widgetName;
 }
