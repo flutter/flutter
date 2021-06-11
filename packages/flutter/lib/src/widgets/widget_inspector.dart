@@ -2851,8 +2851,7 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
-    required this.name,
-    required this.parameterLocations,
+    this.name,
   });
 
   /// File path of the location.
@@ -2860,14 +2859,12 @@ class _Location {
 
   /// 1-based line number.
   final int line;
+
   /// 1-based column number.
   final int column;
 
   /// Optional name of the parameter or function at this location.
   final String? name;
-
-  /// Optional locations of the parameters of the member at this location.
-  final List<_Location>? parameterLocations;
 
   Map<String, Object?> toJsonMap() {
     final Map<String, Object?> json = <String, Object?>{
@@ -2877,11 +2874,6 @@ class _Location {
     };
     if (name != null) {
       json['name'] = name;
-    }
-    if (parameterLocations != null) {
-      json['parameterLocations'] = parameterLocations!.map<Map<String, Object?>>(
-        (_Location location) => location.toJsonMap(),
-      ).toList();
     }
     return json;
   }
