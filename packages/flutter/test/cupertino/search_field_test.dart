@@ -123,6 +123,8 @@ void main() {
           ),
         ),
       );
+      await tester.tap(find.byType(CupertinoSearchTextField));
+      await tester.showKeyboard(find.byType(CupertinoSearchTextField));
        expect(tester.testTextInput.setClientArgs['inputType']['name'],
         equals('TextInputType.number'));
     },
