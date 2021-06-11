@@ -380,7 +380,7 @@ void main() {
       canceledPressed = true;
     }
 
-    Widget builder(BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel }) {
+    Widget builder(BuildContext context, { required int stepIndex, VoidCallback? onStepContinue, VoidCallback? onStepCancel }) {
       return Container(
         margin: const EdgeInsets.only(top: 16.0),
         child: ConstrainedBox(
