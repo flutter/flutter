@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -97,7 +95,7 @@ void main() {
   });
 
   test('SliverGeometry with no arguments is valid', () {
-    expect(const SliverGeometry().debugAssertIsValid(), isTrue);
+    expect(SliverGeometry.zero.debugAssertIsValid(), isTrue);
   });
 
   test('SliverGeometry throws error when layoutExtent exceeds paintExtent', () {

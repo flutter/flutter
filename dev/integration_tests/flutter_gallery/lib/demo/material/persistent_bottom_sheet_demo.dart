@@ -7,16 +7,18 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class PersistentBottomSheetDemo extends StatefulWidget {
+  const PersistentBottomSheetDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/persistent-bottom-sheet';
 
   @override
-  _PersistentBottomSheetDemoState createState() => _PersistentBottomSheetDemoState();
+  State<PersistentBottomSheetDemo> createState() => _PersistentBottomSheetDemoState();
 }
 
 class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  VoidCallback _showBottomSheetCallback;
+  VoidCallback? _showBottomSheetCallback;
 
   @override
   void initState() {
@@ -28,7 +30,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     setState(() { // disable the button
       _showBottomSheetCallback = null;
     });
-    _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+    _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       final ThemeData themeData = Theme.of(context);
       return Container(
         decoration: BoxDecoration(
@@ -39,7 +41,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
           child: Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: themeData.accentColor,
+              color: themeData.colorScheme.secondary,
               fontSize: 24.0,
             ),
           ),
@@ -62,7 +64,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
         return AlertDialog(
           content: const Text('You tapped the floating action button.'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -93,7 +95,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
         ),
       ),
       body: Center(
-        child: RaisedButton(
+        child: ElevatedButton(
           onPressed: _showBottomSheetCallback,
           child: const Text('SHOW BOTTOM SHEET'),
         ),

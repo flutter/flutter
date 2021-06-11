@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 
@@ -44,10 +42,10 @@ void main() {
     await tester.pumpWidget(
       Stack(
         alignment: Alignment.topLeft,
-        children: <Widget>[
+        children: const <Widget>[
           Positioned(
             left: 10.0,
-            child: Container(
+            child: SizedBox(
               key: key,
               width: 10.0,
               height: 10.0,
@@ -61,7 +59,7 @@ void main() {
     StackParentData parentData;
 
     container = tester.element(find.byKey(key));
-    parentData = container.renderObject.parentData as StackParentData;
+    parentData = container.renderObject!.parentData! as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, isNull);
     expect(parentData.bottom, isNull);
@@ -72,10 +70,10 @@ void main() {
     await tester.pumpWidget(
       Stack(
         alignment: Alignment.topLeft,
-        children: <Widget>[
+        children: const <Widget>[
           Positioned(
             right: 10.0,
-            child: Container(
+            child: SizedBox(
               key: key,
               width: 10.0,
               height: 10.0,
@@ -86,7 +84,7 @@ void main() {
     );
 
     container = tester.element(find.byKey(key));
-    parentData = container.renderObject.parentData as StackParentData;
+    parentData = container.renderObject!.parentData! as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, equals(10.0));
     expect(parentData.bottom, isNull);
@@ -97,18 +95,18 @@ void main() {
 
   testWidgets('Can remove parent data', (WidgetTester tester) async {
     const Key key = Key('container');
-    final Container container = Container(key: key, width: 10.0, height: 10.0);
+    const SizedBox sizedBox = SizedBox(key: key, width: 10.0, height: 10.0);
 
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[ Positioned(left: 10.0, child: container) ],
+        children: const <Widget>[ Positioned(left: 10.0, child: sizedBox) ],
       ),
     );
     Element containerElement = tester.element(find.byKey(key));
 
     StackParentData parentData;
-    parentData = containerElement.renderObject.parentData as StackParentData;
+    parentData = containerElement.renderObject!.parentData! as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, isNull);
     expect(parentData.bottom, isNull);
@@ -119,12 +117,12 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[ container ],
+        children: const <Widget>[ sizedBox ],
       ),
     );
     containerElement = tester.element(find.byKey(key));
 
-    parentData = containerElement.renderObject.parentData as StackParentData;
+    parentData = containerElement.renderObject!.parentData! as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, isNull);
     expect(parentData.bottom, isNull);
@@ -143,9 +141,9 @@ void main() {
         child: Center(
           child: Stack(
             alignment: Alignment.center,
-            children: <Widget>[
-              Container(key: child0Key, width: 20.0, height: 20.0),
-              Container(key: child1Key, width: 10.0, height: 10.0),
+            children: const <Widget>[
+              SizedBox(key: child0Key, width: 20.0, height: 20.0),
+              SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
           ),
         ),
@@ -153,11 +151,11 @@ void main() {
     );
 
     final Element child0 = tester.element(find.byKey(child0Key));
-    final StackParentData child0RenderObjectParentData = child0.renderObject.parentData as StackParentData;
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    final StackParentData child0RenderObjectParentData = child0.renderObject!.parentData! as StackParentData;
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
 
     final Element child1 = tester.element(find.byKey(child1Key));
-    final StackParentData child1RenderObjectParentData = child1.renderObject.parentData as StackParentData;
+    final StackParentData child1RenderObjectParentData = child1.renderObject!.parentData! as StackParentData;
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
@@ -166,16 +164,16 @@ void main() {
         child: Center(
           child: Stack(
             alignment: AlignmentDirectional.bottomEnd,
-            children: <Widget>[
-              Container(key: child0Key, width: 20.0, height: 20.0),
-              Container(key: child1Key, width: 10.0, height: 10.0),
+            children: const <Widget>[
+              SizedBox(key: child0Key, width: 20.0, height: 20.0),
+              SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
           ),
         ),
       ),
     );
 
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
     expect(child1RenderObjectParentData.offset, equals(const Offset(10.0, 10.0)));
   });
 
@@ -189,9 +187,9 @@ void main() {
         child: Center(
           child: Stack(
             alignment: Alignment.center,
-            children: <Widget>[
-              Container(key: child0Key, width: 20.0, height: 20.0),
-              Container(key: child1Key, width: 10.0, height: 10.0),
+            children: const <Widget>[
+              SizedBox(key: child0Key, width: 20.0, height: 20.0),
+              SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
           ),
         ),
@@ -199,11 +197,11 @@ void main() {
     );
 
     final Element child0 = tester.element(find.byKey(child0Key));
-    final StackParentData child0RenderObjectParentData = child0.renderObject.parentData as StackParentData;
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    final StackParentData child0RenderObjectParentData = child0.renderObject!.parentData! as StackParentData;
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
 
     final Element child1 = tester.element(find.byKey(child1Key));
-    final StackParentData child1RenderObjectParentData = child1.renderObject.parentData as StackParentData;
+    final StackParentData child1RenderObjectParentData = child1.renderObject!.parentData! as StackParentData;
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
@@ -212,16 +210,16 @@ void main() {
         child: Center(
           child: Stack(
             alignment: AlignmentDirectional.bottomEnd,
-            children: <Widget>[
-              Container(key: child0Key, width: 20.0, height: 20.0),
-              Container(key: child1Key, width: 10.0, height: 10.0),
+            children: const <Widget>[
+              SizedBox(key: child0Key, width: 20.0, height: 20.0),
+              SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
           ),
         ),
       ),
     );
 
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
     expect(child1RenderObjectParentData.offset, equals(const Offset(0.0, 10.0)));
   });
 
@@ -245,23 +243,23 @@ void main() {
 
   testWidgets('Can construct an IndexedStack', (WidgetTester tester) async {
     const int itemCount = 3;
-    List<int> itemsPainted;
+    late List<int> itemsPainted;
 
     Widget buildFrame(int index) {
       itemsPainted = <int>[];
       final List<Widget> items = List<Widget>.generate(itemCount, (int i) {
         return CustomPaint(
-          child: Text('$i', textDirection: TextDirection.ltr),
           painter: TestCallbackPainter(
-            onPaint: () { itemsPainted.add(i); }
+            onPaint: () { itemsPainted.add(i); },
           ),
+          child: Text('$i', textDirection: TextDirection.ltr),
         );
       });
       return Center(
         child: IndexedStack(
           alignment: Alignment.topLeft,
-          children: items,
           index: index,
+          children: items,
         ),
       );
     }
@@ -282,7 +280,7 @@ void main() {
   testWidgets('Can hit test an IndexedStack', (WidgetTester tester) async {
     const Key key = Key('indexedStack');
     const int itemCount = 3;
-    List<int> itemsTapped;
+    late List<int> itemsTapped;
 
     Widget buildFrame(int index) {
       itemsTapped = <int>[];
@@ -292,9 +290,9 @@ void main() {
       return Center(
         child: IndexedStack(
           alignment: Alignment.topLeft,
-          children: items,
           key: key,
           index: index,
+          children: items,
         ),
       );
     }
@@ -336,8 +334,8 @@ void main() {
     StackParentData parentData;
 
     box = tester.element(find.byKey(key));
-    renderBox = box.renderObject as RenderBox;
-    parentData = renderBox.parentData as StackParentData;
+    renderBox = box.renderObject! as RenderBox;
+    parentData = renderBox.parentData! as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, isNull);
     expect(parentData.bottom, isNull);
@@ -364,8 +362,8 @@ void main() {
     );
 
     box = tester.element(find.byKey(key));
-    renderBox = box.renderObject as RenderBox;
-    parentData = renderBox.parentData as StackParentData;
+    renderBox = box.renderObject! as RenderBox;
+    parentData = renderBox.parentData! as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, equals(10.0));
     expect(parentData.bottom, isNull);
@@ -388,7 +386,7 @@ void main() {
   });
 
   testWidgets('IndexedStack with null index', (WidgetTester tester) async {
-    bool tapped;
+    bool? tapped;
 
     await tester.pumpWidget(
       Directionality(
@@ -411,7 +409,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byType(IndexedStack));
+    await tester.tap(find.byType(IndexedStack), warnIfMissed: false);
     final RenderBox box = tester.renderObject(find.byType(IndexedStack));
     expect(box.size, equals(const Size(200.0, 200.0)));
     expect(tapped, isNull);
@@ -453,7 +451,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
-            overflow: Overflow.visible,
             clipBehavior: Clip.none,
             children: const <Widget>[
               SizedBox(
@@ -562,7 +559,7 @@ void main() {
             Positioned.directional(
               textDirection: TextDirection.rtl,
               start: 50.0,
-              child: Container(key: key, width: 75.0, height: 175.0),
+              child: SizedBox(key: key, width: 75.0, height: 175.0),
             ),
           ],
         ),
@@ -579,7 +576,7 @@ void main() {
             Positioned.directional(
               textDirection: TextDirection.ltr,
               start: 50.0,
-              child: Container(key: key, width: 75.0, height: 175.0),
+              child: SizedBox(key: key, width: 75.0, height: 175.0),
             ),
           ],
         ),
@@ -598,7 +595,7 @@ void main() {
           children: <Widget>[
             PositionedDirectional(
               start: 50.0,
-              child: Container(key: key, width: 75.0, height: 175.0),
+              child: SizedBox(key: key, width: 75.0, height: 175.0),
             ),
           ],
         ),
@@ -614,7 +611,7 @@ void main() {
           children: <Widget>[
             PositionedDirectional(
               start: 50.0,
-              child: Container(key: key, width: 75.0, height: 175.0),
+              child: SizedBox(key: key, width: 75.0, height: 175.0),
             ),
           ],
         ),
@@ -768,8 +765,8 @@ void main() {
     expect(
       tester.takeException().toString(),
       'No Directionality widget found.\n'
-      'Stack widgets require a Directionality widget ancestor to resolve the \'alignment\' argument.\n'
-      'The default value for \'alignment\' is AlignmentDirectional.topStart, which requires a text direction.\n'
+      "Stack widgets require a Directionality widget ancestor to resolve the 'alignment' argument.\n"
+      "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction.\n"
       'The specific widget that could not find a Directionality ancestor was:\n'
       '  Stack\n'
       'The ownership chain for the affected widget is: "Stack ← [root]"\n'
@@ -778,7 +775,7 @@ void main() {
       'example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve '
       'EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.\n'
       'Instead of providing a Directionality widget, another solution would be passing a non-directional '
-      '\'alignment\', or an explicit \'textDirection\', to the Stack.'
+      "'alignment', or an explicit 'textDirection', to the Stack.",
     );
   });
 }

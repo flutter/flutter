@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestIntent extends Intent {
@@ -33,7 +30,7 @@ void main() {
     await tester.pumpWidget(
       WidgetsApp(
         key: key,
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return const Placeholder();
         },
         color: const Color(0xFF123456),
@@ -42,18 +39,18 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   });
 
-  testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
-    bool checked = false;
+  testWidgets('WidgetsApp default key bindings', (WidgetTester tester) async {
+    bool? checked = false;
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       WidgetsApp(
         key: key,
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Material(
             child: Checkbox(
               value: checked,
               autofocus: true,
-              onChanged: (bool value) {
+              onChanged: (bool? value) {
                 checked = value;
               },
             ),
@@ -67,24 +64,27 @@ void main() {
     await tester.pumpAndSettle();
     // Default key mapping worked.
     expect(checked, isTrue);
-    checked = false;
+  });
 
+  testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
     final TestAction action = TestAction();
+    bool? checked = false;
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       WidgetsApp(
         key: key,
         actions: <Type, Action<Intent>>{
           TestIntent: action,
         },
-        shortcuts: <LogicalKeySet, Intent> {
-          LogicalKeySet(LogicalKeyboardKey.space): const TestIntent(),
+        shortcuts: const <ShortcutActivator, Intent> {
+          SingleActivator(LogicalKeyboardKey.space): TestIntent(),
         },
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Material(
             child: Checkbox(
               value: checked,
               autofocus: true,
-              onChanged: (bool value) {
+              onChanged: (bool? value) {
                 checked = value;
               },
             ),
@@ -104,16 +104,16 @@ void main() {
   });
 
   testWidgets('WidgetsApp default activation key mappings work', (WidgetTester tester) async {
-    bool checked = false;
+    bool? checked = false;
 
     await tester.pumpWidget(
       WidgetsApp(
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Material(
             child: Checkbox(
               value: checked,
               autofocus: true,
-              onChanged: (bool value) {
+              onChanged: (bool? value) {
                 checked = value;
               },
             ),
@@ -147,15 +147,15 @@ void main() {
 
   group('error control test', () {
     Future<void> expectFlutterError({
-      GlobalKey<NavigatorState> key,
-      Widget widget,
-      WidgetTester tester,
-      String errorMessage,
+      required GlobalKey<NavigatorState> key,
+      required Widget widget,
+      required WidgetTester tester,
+      required String errorMessage,
     }) async {
       await tester.pumpWidget(widget);
-      FlutterError error;
+      late FlutterError error;
       try {
-        key.currentState.pushNamed('/path');
+        key.currentState!.pushNamed('/path');
       } on FlutterError catch (e) {
         error = e;
       } finally {
@@ -227,17 +227,19 @@ void main() {
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
-                Animation<double> secondaryAnimation) {
+                Animation<double> secondaryAnimation,
+              ) {
                 return const Text('non-regular page one');
-              }
+              },
             ),
             PageRouteBuilder<void>(
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
-                Animation<double> secondaryAnimation) {
+                Animation<double> secondaryAnimation,
+              ) {
                 return const Text('non-regular page two');
-              }
+              },
             ),
           ];
         },
@@ -247,18 +249,19 @@ void main() {
             pageBuilder: (
               BuildContext context,
               Animation<double> animation,
-              Animation<double> secondaryAnimation) {
+              Animation<double> secondaryAnimation,
+            ) {
               return const Text('regular page');
-            }
+            },
           );
         },
         color: const Color(0xFF123456),
-      )
+      ),
     );
     expect(find.text('non-regular page two'), findsOneWidget);
     expect(find.text('non-regular page one'), findsNothing);
     expect(find.text('regular page'), findsNothing);
-    navigatorKey.currentState.pop();
+    navigatorKey.currentState!.pop();
     await tester.pumpAndSettle();
     expect(find.text('non-regular page two'), findsNothing);
     expect(find.text('non-regular page one'), findsOneWidget);
@@ -273,14 +276,14 @@ void main() {
     );
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location);
+        return Text(information.location!);
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
           location: 'popped',
         );
         return route.didPop(result);
-      }
+      },
     );
     await tester.pumpWidget(WidgetsApp.router(
       routeInformationProvider: provider,
@@ -292,7 +295,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -300,8 +303,9 @@ void main() {
   testWidgets('WidgetsApp.router has correct default', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location);
+        return Text(information.location!);
       },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) => true,
     );
     await tester.pumpWidget(WidgetsApp.router(
       routeInformationParser: SimpleRouteInformationParser(),
@@ -309,6 +313,147 @@ void main() {
       color: const Color(0xFF123456),
     ));
     expect(find.text('/'), findsOneWidget);
+  });
+
+  testWidgets('WidgetsApp has correct default ScrollBehavior', (WidgetTester tester) async {
+    late BuildContext capturedContext;
+    await tester.pumpWidget(
+      WidgetsApp(
+        builder: (BuildContext context, Widget? child) {
+          capturedContext = context;
+          return const Placeholder();
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+    expect(ScrollConfiguration.of(capturedContext).runtimeType, ScrollBehavior);
+  });
+
+  test('basicLocaleListResolution', () {
+    // Matches exactly for language code.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale('zh'),
+          const Locale('un'),
+          const Locale('en'),
+        ],
+        <Locale>[
+          const Locale('en'),
+        ],
+      ),
+      const Locale('en'),
+    );
+
+    // Matches exactly for language code and country code.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale('en'),
+          const Locale('en', 'US'),
+        ],
+        <Locale>[
+          const Locale('en', 'US'),
+        ],
+      ),
+      const Locale('en', 'US'),
+    );
+
+    // Matches language+script over language+country
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+            countryCode: 'HK',
+          ),
+        ],
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            countryCode: 'HK',
+          ),
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+          ),
+        ],
+      ),
+      const Locale.fromSubtags(
+        languageCode: 'zh',
+        scriptCode: 'Hant',
+      ),
+    );
+
+    // Matches exactly for language code, script code and country code.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+          ),
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+            countryCode: 'TW',
+          ),
+        ],
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+            countryCode: 'TW',
+          ),
+        ],
+      ),
+      const Locale.fromSubtags(
+        languageCode: 'zh',
+        scriptCode: 'Hant',
+        countryCode: 'TW',
+      ),
+    );
+
+    // Selects for country code if the language code is not found in the
+    // preferred locales list.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'en',
+          ),
+          const Locale.fromSubtags(
+            languageCode: 'ar',
+            countryCode: 'tn',
+          ),
+        ],
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'fr',
+            countryCode: 'tn',
+          ),
+        ],
+      ),
+      const Locale.fromSubtags(
+        languageCode: 'fr',
+        countryCode: 'tn',
+      ),
+    );
+
+    // Selects first (default) locale when no match at all is found.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale('tn'),
+        ],
+        <Locale>[
+          const Locale('zh'),
+          const Locale('un'),
+          const Locale('en'),
+        ],
+      ),
+      const Locale('zh'),
+    );
   });
 }
 
@@ -331,22 +476,22 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
 
 class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
   SimpleNavigatorRouterDelegate({
-    @required this.builder,
-    this.onPopPage,
+    required this.builder,
+    required this.onPopPage,
   });
 
   @override
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   RouteInformation get routeInformation => _routeInformation;
-  RouteInformation _routeInformation;
+  late RouteInformation _routeInformation;
   set routeInformation(RouteInformation newValue) {
     _routeInformation = newValue;
     notifyListeners();
   }
 
-  SimpleRouterDelegateBuilder builder;
-  SimpleNavigatorRouterDelegatePopPage<void> onPopPage;
+  final SimpleRouterDelegateBuilder builder;
+  final SimpleNavigatorRouterDelegatePopPage<void> onPopPage;
 
   @override
   Future<void> setNewRoutePath(RouteInformation configuration) {
@@ -366,13 +511,13 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        MaterialPage<void>(
-          builder: (BuildContext context) => const Text('base'),
+        const MaterialPage<void>(
+          child: Text('base'),
         ),
         MaterialPage<void>(
-          key: ValueKey<String>(routeInformation?.location),
-          builder: (BuildContext context) => builder(context, routeInformation),
-        )
+          key: ValueKey<String>(routeInformation.location!),
+          child: builder(context, routeInformation),
+        ),
       ],
     );
   }

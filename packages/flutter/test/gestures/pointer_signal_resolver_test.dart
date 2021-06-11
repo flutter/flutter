@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/gestures.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
-
-import '../flutter_test_alternative.dart';
 
 class TestPointerSignalListener {
   TestPointerSignalListener(this.event);

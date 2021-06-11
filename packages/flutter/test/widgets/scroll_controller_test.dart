@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'states.dart';
 
@@ -19,7 +17,7 @@ void main() {
         child: ListView(
           controller: controller,
           children: kStates.map<Widget>((String state) {
-            return Container(
+            return SizedBox(
               height: 200.0,
               child: Text(state),
             );
@@ -58,7 +56,7 @@ void main() {
           key: const Key('second'),
           controller: controller,
           children: kStates.map<Widget>((String state) {
-            return Container(
+            return SizedBox(
               height: 200.0,
               child: Text(state),
             );
@@ -84,7 +82,7 @@ void main() {
           key: const Key('second'),
           controller: controller2,
           children: kStates.map<Widget>((String state) {
-            return Container(
+            return SizedBox(
               height: 200.0,
               child: Text(state),
             );
@@ -108,7 +106,7 @@ void main() {
           controller: controller2,
           physics: const BouncingScrollPhysics(),
           children: kStates.map<Widget>((String state) {
-            return Container(
+            return SizedBox(
               height: 200.0,
               child: Text(state),
             );
@@ -215,7 +213,7 @@ void main() {
               child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return Container(height: 200.0, child: Text(state));
+                  return SizedBox(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
@@ -224,7 +222,7 @@ void main() {
               child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return Container(height: 200.0, child: Text(state));
+                  return SizedBox(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
@@ -255,7 +253,7 @@ void main() {
               child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return Container(height: 200.0, child: Text(state));
+                  return SizedBox(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
@@ -264,7 +262,7 @@ void main() {
               child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return Container(height: 200.0, child: Text(state));
+                  return SizedBox(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
@@ -293,7 +291,7 @@ void main() {
         child: ListView(
           controller: controller,
           children: kStates.map<Widget>((String state) {
-            return Container(height: 200.0, child: Text(state));
+            return SizedBox(height: 200.0, child: Text(state));
           }).toList(),
         ),
       ),
@@ -326,7 +324,7 @@ void main() {
               key: UniqueKey(), // it's a different ListView every time
               controller: controller,
               children: List<Widget>.generate(50, (int index) {
-                return Container(height: 100.0, child: Text('Item $index'));
+                return SizedBox(height: 100.0, child: Text('Item $index'));
               }).toList(),
             ),
           ),
@@ -341,18 +339,18 @@ void main() {
     // scroll offset.
     ScrollController controller = ScrollController(initialScrollOffset: 200.0);
     await tester.pumpWidget(buildFrame(controller));
-    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 2')), Offset.zero);
+    expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 2')), Offset.zero);
 
     controller.jumpTo(2000.0);
     await tester.pump();
-    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 20')), Offset.zero);
+    expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 20')), Offset.zero);
 
     // The initialScrollOffset isn't used in this case, because the scrolloffset
     // can be restored.
     controller = ScrollController(initialScrollOffset: 25.0);
     await tester.pumpWidget(buildFrame(controller));
     expect(controller.offset, 2000.0);
-    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 20')), Offset.zero);
+    expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 20')), Offset.zero);
 
     // keepScrollOffset: false. The scroll offset is -not- restored
     // when the ListView is recreated with a new ScrollController and
@@ -361,7 +359,7 @@ void main() {
     controller = ScrollController(keepScrollOffset: false, initialScrollOffset: 100.0);
     await tester.pumpWidget(buildFrame(controller));
     expect(controller.offset, 100.0);
-    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 1')), Offset.zero);
+    expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 1')), Offset.zero);
 
   });
 }

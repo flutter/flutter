@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show TextLeadingDistribution;
 
 import 'package:flutter/foundation.dart';
 
@@ -238,7 +239,7 @@ import 'text_style.dart';
 /// ![The result of the example below.](https://flutter.github.io/assets-for-api-docs/assets/painting/strut_force_example_2.png)
 ///
 /// ```dart
-/// Text.rich(
+/// const Text.rich(
 ///   TextSpan(
 ///     text: '       he candle flickered\n',
 ///     style: TextStyle(
@@ -300,6 +301,7 @@ class StrutStyle with Diagnosticable {
     List<String>? fontFamilyFallback,
     this.fontSize,
     this.height,
+    this.leadingDistribution,
     this.leading,
     this.fontWeight,
     this.fontStyle,
@@ -338,6 +340,7 @@ class StrutStyle with Diagnosticable {
     List<String>? fontFamilyFallback,
     double? fontSize,
     double? height,
+    TextLeadingDistribution? leadingDistribution,
     this.leading, // TextStyle does not have an equivalent (yet).
     FontWeight? fontWeight,
     FontStyle? fontStyle,
@@ -351,6 +354,7 @@ class StrutStyle with Diagnosticable {
        fontFamily = fontFamily != null ? (package == null ? fontFamily : 'packages/$package/$fontFamily') : textStyle.fontFamily,
        _fontFamilyFallback = fontFamilyFallback ?? textStyle.fontFamilyFallback,
        height = height ?? textStyle.height,
+       leadingDistribution = leadingDistribution ?? textStyle.leadingDistribution,
        fontSize = fontSize ?? textStyle.fontSize,
        fontWeight = fontWeight ?? textStyle.fontWeight,
        fontStyle = fontStyle ?? textStyle.fontStyle,
@@ -420,25 +424,20 @@ class StrutStyle with Diagnosticable {
   /// The default fontSize is 14 logical pixels.
   final double? fontSize;
 
-  /// The multiple of [fontSize] to multiply the ascent and descent by where
-  /// `ascent + descent = fontSize`.
+  /// The minimum height of the strut, as a multiple of [fontSize].
   ///
-  /// Ascent is the spacing above the baseline and descent is the spacing below
-  /// the baseline.
+  /// When [height] is omitted or null, then the strut's height will be the sum
+  /// of the strut's font-defined ascent, its font-defined descent, and its
+  /// [leading]. The font's combined ascent and descent may be taller or shorter
+  /// than the [fontSize].
   ///
-  /// When [height] is omitted or null, then the font defined ascent and descent
-  /// will be used. The font's combined ascent and descent may be taller or
-  /// shorter than the [fontSize]. When [height] is provided, the line's EM-square
-  /// ascent and descent (which sums to [fontSize]) will be scaled by [height] to
-  /// achieve a final line height of `fontSize * height + fontSize * leading`
-  /// logical pixels. The following diagram illustrates the differences between
-  /// the font metrics defined height and the EM-square height:
+  /// When [height] is provided, the line's EM-square ascent and descent (which
+  /// sums to [fontSize]) will be scaled by [height] to achieve a final strut
+  /// height of `fontSize * height + fontSize * leading` logical pixels. The
+  /// following diagram illustrates the differences between the font metrics
+  /// defined height and the EM-square height:
   ///
   /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
-  ///
-  /// The [height] will impact the spacing above and below the baseline differently
-  /// depending on the ratios between the font's ascent and descent. This property is
-  /// separate from the leading multiplier, which is controlled through [leading].
   ///
   /// The ratio of ascent:descent with [height] specified is the same as the
   /// font metrics defined ascent:descent ratio when [height] is null or omitted.
@@ -447,6 +446,22 @@ class StrutStyle with Diagnosticable {
   ///
   /// The default height is null.
   final double? height;
+
+  /// How the vertical space added by the [height] multiplier should be
+  /// distributed over and under the strut.
+  ///
+  /// When a non-null [height] is specified, after accommodating the imaginary
+  /// strut glyph, the remaining vertical space from the allotted
+  /// `fontSize * height` logical pixels will be distributed over and under the
+  /// strut, according to the [leadingDistribution] property.
+  ///
+  /// The additional leading introduced by the [leading] property applies
+  /// independently of [leadingDistribution]: it will always be distributed
+  /// evenly over and under the strut, regardless of [leadingDistribution].
+  ///
+  /// Defaults to null, which defers to the paragraph's
+  /// `ParagraphStyle.textHeightBehavior`'s `leadingDistribution`.
+  final TextLeadingDistribution? leadingDistribution;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).
   ///
@@ -458,12 +473,13 @@ class StrutStyle with Diagnosticable {
   /// The default fontStyle is [FontStyle.normal].
   final FontStyle? fontStyle;
 
-  /// The custom leading to apply to the strut as a multiple of [fontSize].
+  /// The additional leading to apply to the strut as a multiple of [fontSize],
+  /// independent of [height] and [leadingDistribution].
   ///
   /// Leading is additional spacing between lines. Half of the leading is added
   /// to the top and the other half to the bottom of the line. This differs
-  /// from [height] since the spacing is equally distributed above and below the
-  /// baseline.
+  /// from [height] since the spacing is always equally distributed above and
+  /// below the baseline, regardless of [leadingDistribution].
   ///
   /// The default leading is null, which will use the font-specified leading.
   final double? leading;

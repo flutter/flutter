@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -23,21 +21,20 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) {
                 didBuild = true;
-                final Overlay overlay = context.findAncestorWidgetOfExactType<Overlay>();
-                expect(overlay, isNotNull);
+                final Overlay overlay = context.findAncestorWidgetOfExactType<Overlay>()!;
                 expect(overlay.key, equals(overlayKey));
                 return Container();
               },
             ),
             OverlayEntry(
               builder: (BuildContext context) => Container(),
-            )
+            ),
           ],
         ),
       ),
     );
     expect(didBuild, isTrue);
-    final RenderObject theater = overlayKey.currentContext.findRenderObject();
+    final RenderObject theater = overlayKey.currentContext!.findRenderObject()!;
 
     expect(theater, hasAGoodToStringDeep);
     expect(
@@ -78,7 +75,7 @@ void main() {
         ' ╎     size: Size(800.0, 600.0)\n'
         ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
-        ' └╌no offstage children\n'
+        ' └╌no offstage children\n',
       ),
     );
   });
@@ -110,7 +107,7 @@ void main() {
         ),
       ),
     );
-    final RenderObject theater = overlayKey.currentContext.findRenderObject();
+    final RenderObject theater = overlayKey.currentContext!.findRenderObject()!;
 
     expect(theater, hasAGoodToStringDeep);
     expect(
@@ -189,13 +186,13 @@ void main() {
     expect(buildOrder, <String>['Base']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insert(
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New');
           return Container();
-        }
+        },
       ),
     );
     await tester.pump();
@@ -227,13 +224,13 @@ void main() {
     expect(buildOrder, <String>['Base']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insert(
       OverlayEntry(
-          builder: (BuildContext context) {
-            buildOrder.add('New');
-            return Container();
-          }
+        builder: (BuildContext context) {
+          buildOrder.add('New');
+          return Container();
+        },
       ),
       below: base,
     );
@@ -272,13 +269,13 @@ void main() {
     expect(buildOrder, <String>['Base', 'Top']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insert(
       OverlayEntry(
-          builder: (BuildContext context) {
-            buildOrder.add('New');
-            return Container();
-          }
+        builder: (BuildContext context) {
+          buildOrder.add('New');
+          return Container();
+        },
       ),
       above: base,
     );
@@ -325,7 +322,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insertAll(entries);
     await tester.pump();
 
@@ -371,7 +368,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insertAll(entries, below: base);
     await tester.pump();
 
@@ -423,7 +420,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insertAll(entries, above: base);
     await tester.pump();
 
@@ -486,7 +483,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.rearrange(rearranged);
     await tester.pump();
 
@@ -549,7 +546,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.rearrange(rearranged, above: initialEntries[2]);
     await tester.pump();
 
@@ -612,7 +609,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.rearrange(rearranged, below: initialEntries[2]);
     await tester.pump();
 
@@ -639,7 +636,7 @@ void main() {
       ),
     );
 
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
 
     try {
       overlay.insert(
@@ -657,8 +654,7 @@ void main() {
           },
         ),
       );
-    } catch (e) {
-      expect(e, isAssertionError);
+    } on AssertionError catch (e) {
       expect(e.message, 'Only one of `above` and `below` may be specified.');
     }
 
@@ -680,8 +676,7 @@ void main() {
           },
         ),
       );
-    } catch (e) {
-      expect(e, isAssertionError);
+    } on AssertionError catch (e) {
       expect(e.message, 'The provided entry used for `above` must be present in the Overlay.');
     }
 
@@ -692,8 +687,7 @@ void main() {
         },
       ));
 
-    } catch (e) {
-      expect(e, isAssertionError);
+    } on AssertionError catch (e) {
       expect(e.message, 'The provided entry used for `above` must be present in the Overlay and in the `newEntriesList`.');
     }
 
@@ -706,7 +700,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Builder(
           builder: (BuildContext context) {
-            FlutterError error;
+            late FlutterError error;
             final Widget debugRequiredFor = Container();
             try {
               Overlay.of(context, debugRequiredFor: debugRequiredFor);
@@ -738,7 +732,7 @@ void main() {
               ));
             }
             return Container();
-          }
+          },
         ),
       ),
     );
@@ -778,7 +772,7 @@ void main() {
     expect(newEntry.opaque, isTrue);
 
     // The new opaqueness is honored when inserted into an overlay.
-    overlayKey.currentState.insert(newEntry);
+    overlayKey.currentState!.insert(newEntry);
     await tester.pumpAndSettle();
 
     expect(find.byKey(root), findsNothing);
@@ -892,7 +886,7 @@ void main() {
     expect(tester.state<StatefulTestState>(find.byKey(bottom)).rebuildCount, 1);
     expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
 
-    overlayKey.currentState.rearrange(<OverlayEntry>[
+    overlayKey.currentState!.rearrange(<OverlayEntry>[
       bottomEntry, middleEntry, topEntry,
     ]);
     await tester.pump();
@@ -929,10 +923,10 @@ void main() {
     );
 
     expect(bottomTapCount, 0);
-    await tester.tap(find.byKey(overlayKey));
+    await tester.tap(find.byKey(overlayKey), warnIfMissed: false); // gesture detector is translucent; no hit is registered between it and the render view
     expect(bottomTapCount, 1);
 
-    overlayKey.currentState.insert(OverlayEntry(
+    overlayKey.currentState!.insert(OverlayEntry(
       maintainState: true,
       opaque: true,
       builder: (BuildContext context) {
@@ -944,11 +938,11 @@ void main() {
     // Bottom is offstage and does not receive tap events.
     expect(find.byType(GestureDetector), findsNothing);
     expect(find.byType(GestureDetector, skipOffstage: false), findsOneWidget);
-    await tester.tap(find.byKey(overlayKey));
+    await tester.tap(find.byKey(overlayKey), warnIfMissed: false); // gesture detector is translucent; no hit is registered between it and the render view
     expect(bottomTapCount, 1);
 
     int topTapCount = 0;
-    overlayKey.currentState.insert(OverlayEntry(
+    overlayKey.currentState!.insert(OverlayEntry(
       maintainState: true,
       opaque: true,
       builder: (BuildContext context) {
@@ -962,7 +956,7 @@ void main() {
     await tester.pump();
 
     expect(topTapCount, 0);
-    await tester.tap(find.byKey(overlayKey));
+    await tester.tap(find.byKey(overlayKey), warnIfMissed: false); // gesture detector is translucent; no hit is registered between it and the render view
     expect(topTapCount, 1);
     expect(bottomTapCount, 1);
   });
@@ -1002,7 +996,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Can used Positioned within OverlayEntry', (WidgetTester tester) async {
+  testWidgets('Can use Positioned within OverlayEntry', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1024,10 +1018,47 @@ void main() {
 
     expect(tester.getTopLeft(find.text('positioned child')), const Offset(145, 123));
   });
+
+  testWidgets('Overlay can set and update clipBehavior', (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) => Container(),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // By default, clipBehavior should be Clip.hardEdge
+    final dynamic renderObject = tester.renderObject(find.byType(Overlay));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    for (final Clip clip in Clip.values) {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) => Container(),
+              ),
+            ],
+            clipBehavior: clip,
+          ),
+        ),
+      );
+      expect(renderObject.clipBehavior, clip);
+    }
+  });
 }
 
 class StatefulTestWidget extends StatefulWidget {
-  const StatefulTestWidget({Key key}) : super(key: key);
+  const StatefulTestWidget({Key? key}) : super(key: key);
 
   @override
   State<StatefulTestWidget> createState() => StatefulTestState();

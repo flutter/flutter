@@ -13,6 +13,8 @@
 // This utility is run by `gen_localizations.dart` if --overwrite is passed
 // in as an option.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 

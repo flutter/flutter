@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
-  const NotifyMaterial({ Key key }) : super(key: key);
+  const NotifyMaterial({ Key? key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     LayoutChangedNotification().dispatch(context);
@@ -67,6 +64,20 @@ class ElevationColor {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/81504
+  testWidgets('MaterialApp.home nullable and update test', (WidgetTester tester) async {
+    // _WidgetsAppState._usesNavigator == true
+    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+
+    // _WidgetsAppState._usesNavigator == false
+    await tester.pumpWidget(const MaterialApp()); // Do not crash!
+
+    // _WidgetsAppState._usesNavigator == true
+    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink())); // Do not crash!
+
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('default Material debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Material().debugFillProperties(builder);
@@ -185,11 +196,11 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 1));
     final RenderPhysicalShape modelC = getModel(tester);
-    expect(modelC.elevation, closeTo(0.0, 0.001));
+    expect(modelC.elevation, moreOrLessEquals(0.0, epsilon: 0.001));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
     final RenderPhysicalShape modelD = getModel(tester);
-    expect(modelD.elevation, isNot(closeTo(0.0, 0.001)));
+    expect(modelD.elevation, isNot(moreOrLessEquals(0.0, epsilon: 0.001)));
 
     await tester.pump(kThemeChangeDuration);
     final RenderPhysicalShape modelE = getModel(tester);
@@ -235,9 +246,9 @@ void main() {
                 },
                 child: null,
               ),
-              Material(
+              const Material(
                 type: MaterialType.transparency,
-                child: Container(
+                child: SizedBox(
                   width: 400.0,
                   height: 500.0,
                 ),
@@ -343,6 +354,56 @@ void main() {
       expect(model.color, equals(Colors.cyan));
     });
 
+    testWidgets('overlay will apply to materials with a non-opaque surface color', (WidgetTester tester) async {
+      const Color surfaceColor = Color(0xFF121212);
+      const Color surfaceColorWithOverlay = Color(0xC6353535);
+
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            applyElevationOverlayColor: true,
+            colorScheme: const ColorScheme.dark(surface: surfaceColor),
+          ),
+          child: buildMaterial(
+            color: surfaceColor.withOpacity(.75),
+            elevation: 8.0,
+          ),
+        ),
+      );
+
+      final RenderPhysicalShape model = getModel(tester);
+      expect(model.color, equals(surfaceColorWithOverlay));
+      expect(model.color, isNot(equals(surfaceColor)));
+    });
+
+    testWidgets('Expected overlay color can be computed using colorWithOverlay', (WidgetTester tester) async {
+      const Color surfaceColor = Color(0xFF123456);
+      const Color onSurfaceColor = Color(0xFF654321);
+      const double elevation = 8.0;
+
+      final Color surfaceColorWithOverlay =
+        ElevationOverlay.colorWithOverlay(surfaceColor, onSurfaceColor, elevation);
+
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            applyElevationOverlayColor: true,
+            colorScheme: const ColorScheme.dark(
+              surface: surfaceColor,
+              onSurface: onSurfaceColor,
+            ),
+          ),
+          child: buildMaterial(
+            color: surfaceColor,
+            elevation: elevation,
+          ),
+        ),
+      );
+
+      final RenderPhysicalShape model = getModel(tester);
+      expect(model.color, equals(surfaceColorWithOverlay));
+      expect(model.color, isNot(equals(surfaceColor)));
+    });
   });
 
   group('Transparency clipping', () {
@@ -359,30 +420,14 @@ void main() {
       expect(find.byKey(materialKey), hasNoImmediateClip);
     });
 
-    testWidgets('Null clipBehavior asserts', (WidgetTester tester) async {
-      final GlobalKey materialKey = GlobalKey();
-      Future<void> doPump() async {
-        await tester.pumpWidget(
-            Material(
-              key: materialKey,
-              type: MaterialType.transparency,
-              child: const SizedBox(width: 100.0, height: 100.0),
-              clipBehavior: null,
-            ),
-        );
-      }
-
-      expect(() async => doPump(), throwsAssertionError);
-    });
-
     testWidgets('clips to bounding rect by default given Clip.antiAlias', (WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
           key: materialKey,
           type: MaterialType.transparency,
-          child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -396,15 +441,15 @@ void main() {
           key: materialKey,
           type: MaterialType.transparency,
           borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-          child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
       expect(
         find.byKey(materialKey),
         clipsWithBoundingRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(10.0))
+          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
         ),
       );
     });
@@ -416,8 +461,8 @@ void main() {
           key: materialKey,
           type: MaterialType.transparency,
           shape: const StadiumBorder(),
-          child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -436,8 +481,8 @@ void main() {
         return Material(
           type: MaterialType.transparency,
           shape: shape,
-          child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
+          child: const SizedBox(width: 100.0, height: 100.0),
         );
       }
       final Widget material = buildMaterial();
@@ -518,8 +563,8 @@ void main() {
           key: materialKey,
           type: MaterialType.canvas,
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-          child: const SizedBox(width: 100.0, height: 100.0),
           elevation: 1.0,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -537,8 +582,8 @@ void main() {
           key: materialKey,
           type: MaterialType.canvas,
           shape: const StadiumBorder(),
-          child: const SizedBox(width: 100.0, height: 100.0),
           elevation: 1.0,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -608,8 +653,8 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.circle,
-          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -625,8 +670,8 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
-          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -643,10 +688,10 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
-          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           elevation: 4.0,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -663,10 +708,10 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
-          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
           shape: const StadiumBorder(),
           elevation: 4.0,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -684,7 +729,6 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
-          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
           shape: const CircleBorder(
             side: BorderSide(
@@ -692,6 +736,7 @@ void main() {
               color: Color(0xFF0000FF),
             ),
           ),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -705,13 +750,13 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.transparency,
-          child: const SizedBox(width: 100.0, height: 100.0),
           shape: const CircleBorder(
             side: BorderSide(
               width: 2.0,
               color: Color(0xFF0000FF),
             ),
           ),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -725,8 +770,8 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.transparency,
-          child: const SizedBox(width: 100.0, height: 100.0),
           shape: const CircleBorder(),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 

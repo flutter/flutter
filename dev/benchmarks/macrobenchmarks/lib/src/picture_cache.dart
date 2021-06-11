@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 class PictureCachePage extends StatelessWidget {
+  const PictureCachePage({Key key}) : super(key: key);
+
   static const List<String> kTabNames = <String>['1', '2', '3', '4', '5'];
 
   @override
@@ -132,7 +133,7 @@ class ListItem extends StatelessWidget {
           ),
         ),
         Image.asset(
-          index % 2 == 0 ? 'food/butternut_squash_soup.png' : 'food/cherry_pie.png',
+          index.isEven ? 'food/butternut_squash_soup.png' : 'food/cherry_pie.png',
           package: 'flutter_gallery_assets',
           fit: BoxFit.cover,
           width: 110,
@@ -212,9 +213,9 @@ class ListItem extends StatelessWidget {
     if (count < 10000) {
       return count.toString();
     } else if (count < 100000) {
-      return (count / 10000).toStringAsPrecision(2) + 'w';
+      return '${(count / 10000).toStringAsPrecision(2)}w';
     } else {
-      return (count / 10000).floor().toString() + 'w';
+      return '${(count / 10000).floor()}w';
     }
   }
 

@@ -13,14 +13,16 @@ import 'package:flutter_gallery/demo/shrine/login.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/cut_corners_border.dart';
 
 class ShrineApp extends StatefulWidget {
+  const ShrineApp({Key? key}) : super(key: key);
+
   @override
-  _ShrineAppState createState() => _ShrineAppState();
+  State<ShrineApp> createState() => _ShrineAppState();
 }
 
 class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMixin {
   // Controller to coordinate both the opening/closing of backdrop and sliding
   // of expanding bottom sheet
-  AnimationController _controller;
+  late AnimationController _controller;
 
   @override
   void initState() {
@@ -55,14 +57,14 @@ class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMix
   }
 }
 
-Route<dynamic> _getRoute(RouteSettings settings) {
+Route<dynamic>? _getRoute(RouteSettings settings) {
   if (settings.name != '/login') {
     return null;
   }
 
   return MaterialPageRoute<void>(
     settings: settings,
-    builder: (BuildContext context) => LoginPage(),
+    builder: (BuildContext context) => const LoginPage(),
     fullscreenDialog: true,
   );
 }
@@ -77,33 +79,25 @@ ThemeData _buildShrineTheme() {
   final ThemeData base = ThemeData.light();
   return base.copyWith(
     colorScheme: kShrineColorScheme,
-    accentColor: kShrineBrown900,
     primaryColor: kShrinePink100,
-    buttonColor: kShrinePink100,
     scaffoldBackgroundColor: kShrineBackgroundWhite,
     cardColor: kShrineBackgroundWhite,
-    textSelectionColor: kShrinePink100,
     errorColor: kShrineErrorRed,
-    buttonTheme: const ButtonThemeData(
-      colorScheme: kShrineColorScheme,
-      textTheme: ButtonTextTheme.normal,
-    ),
     primaryIconTheme: _customIconTheme(base.iconTheme),
     inputDecorationTheme: const InputDecorationTheme(border: CutCornersBorder()),
     textTheme: _buildShrineTextTheme(base.textTheme),
     primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
-    accentTextTheme: _buildShrineTextTheme(base.accentTextTheme),
     iconTheme: _customIconTheme(base.iconTheme),
   );
 }
 
 TextTheme _buildShrineTextTheme(TextTheme base) {
   return base.copyWith(
-    headline5: base.headline5.copyWith(fontWeight: FontWeight.w500),
-    headline6: base.headline6.copyWith(fontSize: 18.0),
-    caption: base.caption.copyWith(fontWeight: FontWeight.w400, fontSize: 14.0),
-    bodyText1: base.bodyText1.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
-    button: base.button.copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
+    headline5: base.headline5!.copyWith(fontWeight: FontWeight.w500),
+    headline6: base.headline6!.copyWith(fontSize: 18.0),
+    caption: base.caption!.copyWith(fontWeight: FontWeight.w400, fontSize: 14.0),
+    bodyText1: base.bodyText1!.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+    button: base.button!.copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
   ).apply(
     fontFamily: 'Raleway',
     displayColor: kShrineBrown900,

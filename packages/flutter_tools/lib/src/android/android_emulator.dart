@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -14,7 +16,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
@@ -56,7 +57,7 @@ class AndroidEmulators extends EmulatorDiscovery {
 
   /// Return the list of available emulator AVDs.
   Future<List<AndroidEmulator>> _getEmulatorAvds() async {
-    final String emulatorPath = _androidSdk.emulatorPath;
+    final String emulatorPath = _androidSdk?.emulatorPath;
     if (emulatorPath == null) {
       return <AndroidEmulator>[];
     }
@@ -148,10 +149,15 @@ class AndroidEmulator extends Emulator {
   String _prop(String name) => _properties != null ? _properties[name] : null;
 
   @override
-  Future<void> launch() async {
-    final Process process = await _processUtils.start(
-      <String>[_androidSdk.emulatorPath, '-avd', id],
-    );
+  Future<void> launch({@visibleForTesting Duration startupDuration, bool coldBoot = false}) async {
+    final List<String> command = <String>[
+      _androidSdk.emulatorPath,
+      '-avd',
+      id,
+      if (coldBoot)
+        '-no-snapshot-load'
+    ];
+    final Process process = await _processUtils.start(command);
 
     // Record output from the emulator process.
     final List<String> stdoutList = <String>[];
@@ -164,7 +170,7 @@ class AndroidEmulator extends Emulator {
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen(stderrList.add);
-    final Future<void> stdioFuture = waitGroup<void>(<Future<void>>[
+    final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
       stdoutSubscription.asFuture<void>(),
       stderrSubscription.asFuture<void>(),
     ]);
@@ -199,7 +205,7 @@ class AndroidEmulator extends Emulator {
     }));
 
     // Wait a few seconds for the emulator to start.
-    await Future<void>.delayed(const Duration(seconds: 3));
+    await Future<void>.delayed(startupDuration ?? const Duration(seconds: 3));
     earlyFailure = false;
     return;
   }

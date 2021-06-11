@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -56,12 +54,12 @@ Future<void> testWithConstChildDelegate(WidgetTester tester, double offset) {
 
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {
   final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(const Offset(0.0, 0.0))
+    (RenderBox target) => target.localToGlobal(Offset.zero),
   ).toList();
   expect(testAnswers, equals(answerKey));
   final String foundText =
     tester.widgetList<Text>(find.byType(Text))
-    .map<String>((Text widget) => widget.data)
+    .map<String>((Text widget) => widget.data!)
     .reduce((String value, String element) => value + element);
   expect(foundText, equals(text));
 }
@@ -71,7 +69,7 @@ void main() {
     await test(tester, 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 400.0),
     ], 'ab');
 
@@ -104,7 +102,7 @@ void main() {
     await testWithConstChildDelegate(tester, 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 400.0),
     ], 'ab');
 
@@ -154,7 +152,7 @@ void main() {
       ),
     );
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 251.0),
       const Offset(0.0, 503.0),
     ], 'abc');
@@ -176,7 +174,7 @@ void main() {
       ),
     );
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 253.0),
       const Offset(0.0, 504.0),
     ], 'cab');
@@ -198,7 +196,7 @@ void main() {
       ),
     );
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 251.0),
       const Offset(0.0, 504.0),
     ], 'acb');
@@ -219,7 +217,7 @@ void main() {
       ),
     );
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 251.0),
     ], 'ab');
     await tester.pumpWidget(
@@ -240,7 +238,7 @@ void main() {
       ),
     );
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 251.0),
       const Offset(0.0, 504.0),
     ], 'acb');

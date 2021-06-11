@@ -28,7 +28,7 @@ Future<void> main() async {
 
       completer.future.then(
         (String value) {},
-        onError: (dynamic error, StackTrace stack) {
+        onError: (Object error, StackTrace stack) {
           assert(stack is stack_trace.Chain);
           FlutterError.reportError(FlutterErrorDetails(
             exception: error,
@@ -38,7 +38,7 @@ Future<void> main() async {
       );
 
       completer.completeError(const CustomException());
-    }, null);
+    }, () { });
 
     final FlutterErrorDetails details = await errorCompleter.future;
     expect(details, isNotNull);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -54,8 +52,8 @@ void main() {
 class TestSemanticsEvent extends SemanticsEvent {
   TestSemanticsEvent({ this.text, this.number }) : super('TestEvent');
 
-  final String text;
-  final int number;
+  final String? text;
+  final int? number;
 
   @override
   Map<String, dynamic> getDataMap() {

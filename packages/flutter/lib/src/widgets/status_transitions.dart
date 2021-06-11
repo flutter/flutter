@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'basic.dart';
 import 'framework.dart';
 
@@ -13,8 +11,8 @@ abstract class StatusTransitionWidget extends StatefulWidget {
   ///
   /// The [animation] argument must not be null.
   const StatusTransitionWidget({
-    Key key,
-    @required this.animation,
+    Key? key,
+    required this.animation,
   }) : assert(animation != null),
        super(key: key);
 
@@ -26,7 +24,7 @@ abstract class StatusTransitionWidget extends StatefulWidget {
   Widget build(BuildContext context);
 
   @override
-  _StatusTransitionState createState() => _StatusTransitionState();
+  State<StatusTransitionWidget> createState() => _StatusTransitionState();
 }
 
 class _StatusTransitionState extends State<StatusTransitionWidget> {

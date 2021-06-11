@@ -2,11 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,10 +11,10 @@ class TestBinding extends LiveTestWidgetsFlutterBinding {
   int framesBegun = 0;
   int framesDrawn = 0;
 
-  bool handleBeginFrameMicrotaskRun;
+  late bool handleBeginFrameMicrotaskRun;
 
   @override
-  void handleBeginFrame(Duration rawTimeStamp) {
+  void handleBeginFrame(Duration? rawTimeStamp) {
     handleBeginFrameMicrotaskRun = false;
     framesBegun += 1;
     Future<void>.microtask(() { handleBeginFrameMicrotaskRun = true; });
@@ -37,41 +32,43 @@ class TestBinding extends LiveTestWidgetsFlutterBinding {
 }
 
 void main() {
-  TestBinding binding;
+  late TestBinding binding;
 
   setUp(() {
     binding = TestBinding();
   });
 
   test('test pumpBenchmark() only runs one frame', () async {
-    await benchmarkWidgets((WidgetTester tester) async {
-      const Key root = Key('root');
-      binding.attachRootWidget(Container(key: root));
-      await tester.pump();
+    await benchmarkWidgets(
+      (WidgetTester tester) async {
+        const Key root = Key('root');
+        binding.attachRootWidget(Container(key: root));
+        await tester.pump();
 
-      expect(binding.framesBegun, greaterThan(0));
-      expect(binding.framesDrawn, greaterThan(0));
+        expect(binding.framesBegun, greaterThan(0));
+        expect(binding.framesDrawn, greaterThan(0));
 
-      final Element appState = tester.element(find.byKey(root));
-      binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
+        final Element appState = tester.element(find.byKey(root));
+        binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
 
-      final int startFramesBegun = binding.framesBegun;
-      final int startFramesDrawn = binding.framesDrawn;
-      expect(startFramesBegun, equals(startFramesDrawn));
+        final int startFramesBegun = binding.framesBegun;
+        final int startFramesDrawn = binding.framesDrawn;
+        expect(startFramesBegun, equals(startFramesDrawn));
 
-      appState.markNeedsBuild();
+        appState.markNeedsBuild();
 
-      await tester.pumpBenchmark(const Duration(milliseconds: 16));
+        await tester.pumpBenchmark(const Duration(milliseconds: 16));
 
-      final int endFramesBegun = binding.framesBegun;
-      final int endFramesDrawn = binding.framesDrawn;
-      expect(endFramesBegun, equals(endFramesDrawn));
+        final int endFramesBegun = binding.framesBegun;
+        final int endFramesDrawn = binding.framesDrawn;
+        expect(endFramesBegun, equals(endFramesDrawn));
 
-      expect(endFramesBegun, equals(startFramesBegun + 1));
-      expect(endFramesDrawn, equals(startFramesDrawn + 1));
-    },
-    // We are not interested in the performance of the "benchmark", we are just
-    // testing the behavior. So it's OK that asserts are enabled.
-    mayRunWithAsserts: true);
+        expect(endFramesBegun, equals(startFramesBegun + 1));
+        expect(endFramesDrawn, equals(startFramesDrawn + 1));
+      },
+      // We are not interested in the performance of the "benchmark", we are just
+      // testing the behavior. So it's OK that asserts are enabled.
+      mayRunWithAsserts: true,
+    );
   }, skip: isBrowser);
 }

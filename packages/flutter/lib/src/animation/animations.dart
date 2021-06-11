@@ -12,7 +12,7 @@ import 'curves.dart';
 import 'listener_helpers.dart';
 
 // Examples can assume:
-// AnimationController controller;
+// late AnimationController controller;
 
 class _AlwaysCompleteAnimation extends Animation<double> {
   const _AlwaysCompleteAnimation();
@@ -443,7 +443,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
             'Invalid curve endpoint at $t.\n'
             'Curves must map 0.0 to near zero and 1.0 to near one but '
             '${activeCurve.runtimeType} mapped $t to $transformedValue, which '
-            'is near $roundedTransformedValue.'
+            'is near $roundedTransformedValue.',
           );
         }
         return true;
@@ -491,11 +491,14 @@ class TrainHoppingAnimation extends Animation<double>
   /// The current train argument must not be null but the next train argument
   /// can be null. If the next train is null, then this object will just proxy
   /// the first animation and never hop.
-  TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain })
-      : assert(_currentTrain != null) {
+  TrainHoppingAnimation(
+    Animation<double> this._currentTrain,
+    this._nextTrain, {
+    this.onSwitchedTrain,
+  }) : assert(_currentTrain != null) {
     if (_nextTrain != null) {
       if (_currentTrain!.value == _nextTrain!.value) {
-        _currentTrain = _nextTrain!;
+        _currentTrain = _nextTrain;
         _nextTrain = null;
       } else if (_currentTrain!.value > _nextTrain!.value) {
         _mode = _TrainHoppingMode.maximize;
@@ -557,7 +560,7 @@ class TrainHoppingAnimation extends Animation<double>
         _currentTrain!
           ..removeStatusListener(_statusChangeHandler)
           ..removeListener(_valueChangeHandler);
-        _currentTrain = _nextTrain!;
+        _currentTrain = _nextTrain;
         _nextTrain = null;
         _currentTrain!.addStatusListener(_statusChangeHandler);
         _statusChangeHandler(_currentTrain!.status);
@@ -586,6 +589,8 @@ class TrainHoppingAnimation extends Animation<double>
     _currentTrain = null;
     _nextTrain?.removeListener(_valueChangeHandler);
     _nextTrain = null;
+    clearListeners();
+    clearStatusListeners();
     super.dispose();
   }
 

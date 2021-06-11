@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -36,48 +34,55 @@ class BottomSheetThemeData with Diagnosticable {
     this.modalElevation,
     this.shape,
     this.clipBehavior,
+    this.constraints,
   });
 
   /// Default value for [BottomSheet.backgroundColor].
   ///
   /// If null, [BottomSheet] defaults to [Material]'s default.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// Default value for [BottomSheet.elevation].
   ///
   /// {@macro flutter.material.material.elevation}
   ///
   /// If null, [BottomSheet] defaults to 0.0.
-  final double elevation;
+  final double? elevation;
 
   /// Value for [BottomSheet.backgroundColor] when the Bottom sheet is presented
   /// as a modal bottom sheet.
-  final Color modalBackgroundColor;
+  final Color? modalBackgroundColor;
 
   /// Value for [BottomSheet.elevation] when the Bottom sheet is presented as a
   /// modal bottom sheet.
-  final double modalElevation;
+  final double? modalElevation;
 
   /// Default value for [BottomSheet.shape].
   ///
   /// If null, no overriding shape is specified for [BottomSheet], so the
   /// [BottomSheet] is rectangular.
-  final ShapeBorder shape;
+  final ShapeBorder? shape;
 
   /// Default value for [BottomSheet.clipBehavior].
   ///
   /// If null, [BottomSheet] uses [Clip.none].
-  final Clip clipBehavior;
+  final Clip? clipBehavior;
+
+  /// Constrains the size of the [BottomSheet].
+  ///
+  /// If null, the bottom sheet's size will be unconstrained.
+  final BoxConstraints? constraints;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   BottomSheetThemeData copyWith({
-    Color backgroundColor,
-    double elevation,
-    Color modalBackgroundColor,
-    double modalElevation,
-    ShapeBorder shape,
-    Clip clipBehavior,
+    Color? backgroundColor,
+    double? elevation,
+    Color? modalBackgroundColor,
+    double? modalElevation,
+    ShapeBorder? shape,
+    Clip? clipBehavior,
+    BoxConstraints? constraints,
   }) {
     return BottomSheetThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -86,6 +91,7 @@ class BottomSheetThemeData with Diagnosticable {
       modalElevation: modalElevation ?? this.modalElevation,
       shape: shape ?? this.shape,
       clipBehavior: clipBehavior ?? this.clipBehavior,
+      constraints: constraints ?? this.constraints,
     );
   }
 
@@ -94,7 +100,7 @@ class BottomSheetThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BottomSheetThemeData lerp(BottomSheetThemeData a, BottomSheetThemeData b, double t) {
+  static BottomSheetThemeData? lerp(BottomSheetThemeData? a, BottomSheetThemeData? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
@@ -105,6 +111,7 @@ class BottomSheetThemeData with Diagnosticable {
       modalElevation: lerpDouble(a?.modalElevation, b?.modalElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
+      constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
     );
   }
 
@@ -117,6 +124,7 @@ class BottomSheetThemeData with Diagnosticable {
       modalElevation,
       shape,
       clipBehavior,
+      constraints,
     );
   }
 
@@ -132,7 +140,8 @@ class BottomSheetThemeData with Diagnosticable {
         && other.modalBackgroundColor == modalBackgroundColor
         && other.modalElevation == modalElevation
         && other.shape == shape
-        && other.clipBehavior == clipBehavior;
+        && other.clipBehavior == clipBehavior
+        && other.constraints == constraints;
   }
 
   @override
@@ -144,5 +153,6 @@ class BottomSheetThemeData with Diagnosticable {
     properties.add(DoubleProperty('modalElevation', modalElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
   }
 }

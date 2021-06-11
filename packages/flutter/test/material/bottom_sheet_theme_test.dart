@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -21,6 +18,7 @@ void main() {
     expect(bottomSheetTheme.elevation, null);
     expect(bottomSheetTheme.shape, null);
     expect(bottomSheetTheme.clipBehavior, null);
+    expect(bottomSheetTheme.constraints, null);
   });
 
   testWidgets('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
@@ -42,6 +40,7 @@ void main() {
       elevation: 2.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),
       clipBehavior: Clip.antiAlias,
+      constraints: const BoxConstraints(minWidth: 200, maxWidth: 640),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -54,6 +53,7 @@ void main() {
       'elevation: 2.0',
       'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
       'clipBehavior: Clip.antiAlias',
+      'constraints: BoxConstraints(200.0<=w<=640.0, 0.0<=h<=Infinity)',
     ]);
   });
 
@@ -248,9 +248,7 @@ void main() {
                     showModalBottomSheet<void>(
                       context: context,
                       builder: (BuildContext context) {
-                        return Container(
-                          child: const Text('This is a modal bottom sheet.'),
-                        );
+                        return const Text('This is a modal bottom sheet.');
                       },
                     );
                   },
@@ -302,10 +300,8 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                     showModalBottomSheet<void>(
                       context: context,
                       builder: (BuildContext _) {
-                        return Container(
-                          child: const Text(
-                            'This is a modal bottom sheet.',
-                          ),
+                        return const Text(
+                          'This is a modal bottom sheet.',
                         );
                       },
                     );
@@ -317,10 +313,8 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                     showBottomSheet<void>(
                       context: context,
                       builder: (BuildContext _) {
-                        return Container(
-                          child: const Text(
-                            'This is a persistent bottom sheet.',
-                          ),
+                        return const Text(
+                          'This is a persistent bottom sheet.',
                         );
                       },
                     );

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -31,13 +29,13 @@ class DrawerHeader extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   const DrawerHeader({
-    Key key,
+    Key? key,
     this.decoration,
     this.margin = const EdgeInsets.only(bottom: 8.0),
     this.padding = const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
     this.duration = const Duration(milliseconds: 250),
     this.curve = Curves.fastOutSlowIn,
-    @required this.child,
+    required this.child,
   }) : super(key: key);
 
   /// Decoration for the main drawer header [Container]; useful for applying
@@ -46,7 +44,7 @@ class DrawerHeader extends StatelessWidget {
   /// This decoration will extend under the system status bar.
   ///
   /// If this is changed, it will be animated according to [duration] and [curve].
-  final Decoration decoration;
+  final Decoration? decoration;
 
   /// The padding by which to inset [child].
   ///
@@ -57,7 +55,7 @@ class DrawerHeader extends StatelessWidget {
   final EdgeInsetsGeometry padding;
 
   /// The margin around the drawer header.
-  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry? margin;
 
   /// The duration for animations of the [decoration].
   final Duration duration;
@@ -70,8 +68,8 @@ class DrawerHeader extends StatelessWidget {
   /// This widget will be sized to the size of the header. To position the child
   /// precisely, consider using an [Align] or [Center] widget.
   ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -93,11 +91,11 @@ class DrawerHeader extends StatelessWidget {
         duration: duration,
         curve: curve,
         child: child == null ? null : DefaultTextStyle(
-          style: theme.textTheme.bodyText1,
+          style: theme.textTheme.bodyText1!,
           child: MediaQuery.removePadding(
             context: context,
             removeTop: true,
-            child: child,
+            child: child!,
           ),
         ),
       ),

@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const Color kTitleColor = Color(0xFF333333);
 const String kTitleString = 'Hello World';
 
-Future<void> pumpApp(WidgetTester tester, { GenerateAppTitle onGenerateTitle }) async {
+Future<void> pumpApp(WidgetTester tester, { GenerateAppTitle? onGenerateTitle }) async {
   await tester.pumpWidget(
     WidgetsApp(
       supportedLocales: const <Locale>[
@@ -24,7 +22,7 @@ Future<void> pumpApp(WidgetTester tester, { GenerateAppTitle onGenerateTitle }) 
         return PageRouteBuilder<void>(
           pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
             return Container();
-          }
+          },
         );
       },
     ),

@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart' show DiagnosticLevel, FlutterError;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import '../rendering/rendering_tester.dart';
 
 class SillyBorder extends BoxBorder {
   @override
@@ -77,7 +74,7 @@ void main() {
     expect(BoxBorder.lerp(null, directionalWithTop10, 0.25), const BorderDirectional(top: BorderSide(width: 2.5)));
     expect(BoxBorder.lerp(directionalWithTop10, visualWithTop100, 0.25), const Border(top: BorderSide(width: 32.5)));
     expect(BoxBorder.lerp(visualWithSides10, directionalWithMagentaTop5, 0.25), visualWithSides10At75 + directionalWithMagentaTop5At25);
-    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, 0.25), Border(top: BorderSide(width: 5.0, color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.25))));
+    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, 0.25), Border(top: BorderSide(width: 5.0, color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.25)!)));
     expect(BoxBorder.lerp(visualWithSides10, directionalWithSides10, 0.25), visualWithSides10At50);
     expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 0.25), visualWithYellowTop5At75 + directionalWithSides10At25);
     expect(() => BoxBorder.lerp(SillyBorder(), const Border(), 0.25), throwsFlutterError);
@@ -89,7 +86,7 @@ void main() {
     expect(BoxBorder.lerp(null, directionalWithTop10, 0.75), const BorderDirectional(top: BorderSide(width: 7.5)));
     expect(BoxBorder.lerp(directionalWithTop10, visualWithTop100, 0.75), const Border(top: BorderSide(width: 77.5)));
     expect(BoxBorder.lerp(visualWithSides10, directionalWithMagentaTop5, 0.75), visualWithSides10At25 + directionalWithMagentaTop5At75);
-    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, 0.75), Border(top: BorderSide(width: 5.0, color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.75))));
+    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, 0.75), Border(top: BorderSide(width: 5.0, color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.75)!)));
     expect(BoxBorder.lerp(visualWithSides10, directionalWithSides10, 0.75), directionalWithSides10At50);
     expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 0.75), visualWithYellowTop5At25 + directionalWithSides10At75);
     expect(() => BoxBorder.lerp(SillyBorder(), const Border(), 0.75), throwsFlutterError);
@@ -120,7 +117,7 @@ void main() {
   });
 
   test('BoxBorder.lerp throws correct FlutterError message', () {
-    FlutterError error;
+    late FlutterError error;
     try {
       BoxBorder.lerp(SillyBorder(), const Border(), 2.0);
     } on FlutterError catch (e) {
@@ -148,7 +145,7 @@ void main() {
       '   However, only Border and BorderDirectional classes are supported\n'
       '   by this method.\n'
       '   For a more general interpolation method, consider using\n'
-      '   ShapeBorder.lerp instead.\n'
+      '   ShapeBorder.lerp instead.\n',
     ));
   });
 
@@ -174,7 +171,7 @@ void main() {
           const Offset(111.0, 190.0),
           const Offset(110.0, 191.0),
           const Offset(111.0, 191.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -204,7 +201,7 @@ void main() {
           const Offset(50.0, 50.0),
           const Offset(50.0, 60.0),
           const Offset(60.0, 60.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -238,7 +235,7 @@ void main() {
           const Offset(111.0, 190.0),
           const Offset(110.0, 191.0),
           const Offset(111.0, 191.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -273,7 +270,7 @@ void main() {
           const Offset(50.0, 75.0),
           const Offset(55.0, 70.0),
           const Offset(60.0, 60.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -305,7 +302,7 @@ void main() {
           const Offset(111.0, 190.0),
           const Offset(110.0, 191.0),
           const Offset(111.0, 191.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -335,7 +332,7 @@ void main() {
           const Offset(40.0, 60.0),
           const Offset(50.0, 60.0),
           const Offset(60.0, 60.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -351,13 +348,6 @@ void main() {
         ],
       ),
     );
-  });
-
-  test('BorderDirectional constructor', () {
-    expect(() => BorderDirectional(top: nonconst(null)), throwsAssertionError);
-    expect(() => BorderDirectional(start: nonconst(null)), throwsAssertionError);
-    expect(() => BorderDirectional(end: nonconst(null)), throwsAssertionError);
-    expect(() => BorderDirectional(bottom: nonconst(null)), throwsAssertionError);
   });
 
   test('BorderDirectional.merge', () {
@@ -468,9 +458,9 @@ void main() {
     );
     expect(
       const BorderDirectional(
-        top: BorderSide(style: BorderStyle.none, width: 0.0),
-        start: BorderSide(style: BorderStyle.none, width: 0.0),
-        end: BorderSide(style: BorderStyle.none, width: 0.0),
+        top: BorderSide.none,
+        start: BorderSide.none,
+        end: BorderSide.none,
         bottom: BorderSide.none,
       ).isUniform,
       true,

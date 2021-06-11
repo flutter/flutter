@@ -15,12 +15,14 @@ import 'src/test_step.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(TestApp());
+  runApp(const TestApp());
 }
 
 class TestApp extends StatefulWidget {
+  const TestApp({Key? key}) : super(key: key);
+
   @override
-  _TestAppState createState() => _TestAppState();
+  State<TestApp> createState() => _TestAppState();
 }
 
 class _TestAppState extends State<TestApp> {
@@ -153,7 +155,7 @@ class _TestAppState extends State<TestApp> {
     () => basicJsonMessageToUnknownChannel(),
     () => basicStandardMessageToUnknownChannel(),
   ];
-  Future<TestStepResult> _result;
+  Future<TestStepResult>? _result;
   int _step = 0;
 
   void _executeNextStep() {

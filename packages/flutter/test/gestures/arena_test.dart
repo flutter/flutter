@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/gestures.dart';
-
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 typedef GestureArenaCallback = void Function(Object key);
 
@@ -34,12 +31,12 @@ class GestureTester {
   TestGestureArenaMember first = TestGestureArenaMember();
   TestGestureArenaMember second = TestGestureArenaMember();
 
-  GestureArenaEntry firstEntry;
+  late GestureArenaEntry firstEntry;
   void addFirst() {
     firstEntry = arena.add(primaryKey, first);
   }
 
-  GestureArenaEntry secondEntry;
+  late GestureArenaEntry secondEntry;
   void addSecond() {
     secondEntry = arena.add(primaryKey, second);
   }

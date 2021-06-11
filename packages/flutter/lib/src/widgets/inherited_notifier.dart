@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -45,25 +43,25 @@ import 'framework.dart';
 /// just need to know that there is one in their ancestry. This can help with
 /// decoupling widgets from their models.
 ///
-/// ```dart imports
+/// ```dart dartImports
 /// import 'dart:math' as math;
 /// ```
 ///
 /// ```dart preamble
 /// class SpinModel extends InheritedNotifier<AnimationController> {
-///   SpinModel({
-///     Key key,
-///     AnimationController notifier,
-///     Widget child,
+///   const SpinModel({
+///     Key? key,
+///     AnimationController? notifier,
+///     required Widget child,
 ///   }) : super(key: key, notifier: notifier, child: child);
 ///
 ///   static double of(BuildContext context) {
-///     return context.dependOnInheritedWidgetOfExactType<SpinModel>().notifier.value;
+///     return context.dependOnInheritedWidgetOfExactType<SpinModel>()!.notifier!.value;
 ///   }
 /// }
 ///
 /// class Spinner extends StatelessWidget {
-///   const Spinner();
+///   const Spinner({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -83,7 +81,7 @@ import 'framework.dart';
 /// ```
 ///
 /// ```dart
-/// AnimationController _controller;
+/// late AnimationController _controller;
 ///
 /// @override
 /// void initState() {
@@ -133,9 +131,9 @@ abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
   ///
   /// The [child] argument must not be null.
   const InheritedNotifier({
-    Key key,
+    Key? key,
     this.notifier,
-    @required Widget child,
+    required Widget child,
   }) : assert(child != null),
        super(key: key, child: child);
 
@@ -151,7 +149,7 @@ abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
   ///
   /// While the [notifier] is null, no notifications are sent, since the null
   /// object cannot itself send notifications.
-  final T notifier;
+  final T? notifier;
 
   @override
   bool updateShouldNotify(InheritedNotifier<T> oldWidget) {
@@ -159,7 +157,7 @@ abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
   }
 
   @override
-  _InheritedNotifierElement<T> createElement() => _InheritedNotifierElement<T>(this);
+  InheritedElement createElement() => _InheritedNotifierElement<T>(this);
 }
 
 class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
@@ -174,8 +172,8 @@ class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
 
   @override
   void update(InheritedNotifier<T> newWidget) {
-    final T oldNotifier = widget.notifier;
-    final T newNotifier = newWidget.notifier;
+    final T? oldNotifier = widget.notifier;
+    final T? newNotifier = newWidget.notifier;
     if (oldNotifier != newNotifier) {
       oldNotifier?.removeListener(_handleUpdate);
       newNotifier?.addListener(_handleUpdate);

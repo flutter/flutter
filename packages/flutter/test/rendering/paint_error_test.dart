@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,10 +13,10 @@ void main() {
   // the rendering_test.dart dependency of this test uses the bindings in not
   // compatible with existing tests in object_test.dart.
   test('reentrant paint error', () {
-    FlutterErrorDetails errorDetails;
+    late FlutterErrorDetails errorDetails;
     final RenderBox root = TestReentrantPaintingErrorRenderBox();
     layout(root, onErrors: () {
-      errorDetails = renderer.takeFlutterErrorDetails();
+      errorDetails = renderer.takeFlutterErrorDetails()!;
     });
     pumpFrame(phase: EnginePhase.paint);
 
@@ -45,7 +41,7 @@ void main() {
         'Since this typically indicates an infinite recursion, it is\n'
         'disallowed.\n'
         '\n'
-        'When the exception was thrown, this was the stack:'
+        'When the exception was thrown, this was the stack:',
       ),
     );
 
@@ -58,13 +54,13 @@ void main() {
         '  constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '  size: Size(100.0, 100.0)\n'
         'This RenderObject has no descendants.\n'
-        '═════════════════════════════════════════════════════════════════\n'
+        '═════════════════════════════════════════════════════════════════\n',
       ),
     );
   });
 
   test('needsCompositingBitsUpdate paint error', () {
-    FlutterError flutterError;
+    late FlutterError flutterError;
     final RenderBox root = RenderRepaintBoundary(child: RenderSizedBox(const Size(100, 100)));
     try {
       layout(root);
@@ -95,7 +91,7 @@ void main() {
         '   A RenderObject that still has dirty compositing bits cannot be\n'
         '   painted because this indicates that the tree has not yet been\n'
         '   properly configured for creating the layer tree.\n'
-        '   This usually indicates an error in the Flutter framework itself.\n'
+        '   This usually indicates an error in the Flutter framework itself.\n',
       ),
     );
     expect(

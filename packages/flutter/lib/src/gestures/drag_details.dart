@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 
-import 'dart:ui' show Offset;
+import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 
@@ -71,6 +71,7 @@ class DragStartDetails {
     this.sourceTimeStamp,
     this.globalPosition = Offset.zero,
     Offset? localPosition,
+    this.kind,
   }) : assert(globalPosition != null),
        localPosition = localPosition ?? globalPosition;
 
@@ -95,6 +96,9 @@ class DragStartDetails {
   ///
   /// Defaults to [globalPosition] if not specified in the constructor.
   final Offset localPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
 
   // TODO(ianh): Expose the current position, so that you can have a no-jump
   // drag even when disambiguating (though of course it would lag the finger
@@ -136,9 +140,11 @@ class DragUpdateDetails {
     required this.globalPosition,
     Offset? localPosition,
   }) : assert(delta != null),
-       assert(primaryDelta == null
+       assert(
+         primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
-           || (primaryDelta == delta.dy && delta.dx == 0.0)),
+           || (primaryDelta == delta.dy && delta.dx == 0.0),
+       ),
        localPosition = localPosition ?? globalPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
@@ -213,9 +219,11 @@ class DragEndDetails {
     this.velocity = Velocity.zero,
     this.primaryVelocity,
   }) : assert(velocity != null),
-       assert(primaryVelocity == null
+       assert(
+         primaryVelocity == null
            || primaryVelocity == velocity.pixelsPerSecond.dx
-           || primaryVelocity == velocity.pixelsPerSecond.dy);
+           || primaryVelocity == velocity.pixelsPerSecond.dy,
+       );
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///

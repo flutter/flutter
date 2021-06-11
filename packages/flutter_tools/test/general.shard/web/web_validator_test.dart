@@ -5,26 +5,25 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_validator.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  Platform platform;
-  ProcessManager processManager;
-  ChromiumLauncher chromeLauncher;
-  FileSystem fileSystem;
-  ChromiumValidator webValidator;
+  late Platform platform;
+  late FakeProcessManager fakeProcessManager;
+  late ChromiumLauncher chromeLauncher;
+  late FileSystem fileSystem;
+  late ChromiumValidator webValidator;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    processManager = MockProcessManager();
+    fakeProcessManager = FakeProcessManager.empty();
     platform = FakePlatform(
       operatingSystem: 'macos',
       environment: <String, String>{},
@@ -32,8 +31,13 @@ void main() {
     chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
-      processManager: processManager,
-      operatingSystemUtils: null,
+      processManager: fakeProcessManager,
+      operatingSystemUtils: OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform,
+        processManager: fakeProcessManager,
+      ),
       browserFinder: findChromeExecutable,
       logger: BufferLogger.test(),
     );
@@ -44,15 +48,13 @@ void main() {
   });
 
   testWithoutContext('WebValidator can find executable on macOS', () async {
-    when(processManager.canRun(kMacOSExecutable)).thenReturn(true);
-
     final ValidationResult result = await webValidator.validate();
 
     expect(result.type, ValidationType.installed);
   });
 
   testWithoutContext('WebValidator Can notice missing macOS executable ', () async {
-    when(processManager.canRun(kMacOSExecutable)).thenReturn(false);
+    fakeProcessManager.excludedExecutables.add(kMacOSExecutable);
 
     final ValidationResult result = await webValidator.validate();
 
@@ -60,7 +62,7 @@ void main() {
   });
 
   testWithoutContext('WebValidator does not warn about CHROME_EXECUTABLE unless it cant find chrome ', () async {
-    when(processManager.canRun(kMacOSExecutable)).thenReturn(false);
+    fakeProcessManager.excludedExecutables.add(kMacOSExecutable);
 
     final ValidationResult result = await webValidator.validate();
 
@@ -71,5 +73,3 @@ void main() {
     expect(result.type, ValidationType.missing);
   });
 }
-
-class MockProcessManager extends Mock implements ProcessManager {}

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' show Random;
 
 import 'package:flutter/cupertino.dart';
@@ -10,14 +9,16 @@ import 'package:flutter/cupertino.dart';
 import '../../gallery/demo.dart';
 
 class CupertinoRefreshControlDemo extends StatefulWidget {
+  const CupertinoRefreshControlDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/cupertino/refresh';
 
   @override
-  _CupertinoRefreshControlDemoState createState() => _CupertinoRefreshControlDemoState();
+  State<CupertinoRefreshControlDemo> createState() => _CupertinoRefreshControlDemoState();
 }
 
 class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDemo> {
-  List<List<String>> randomizedContacts;
+  late List<List<String>> randomizedContacts;
 
   @override
   void initState() {
@@ -65,7 +66,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
             CupertinoSliverRefreshControl(
               onRefresh: () {
                 return Future<void>.delayed(const Duration(seconds: 2))
-                ..then<void>((_) {
+                ..then((_) {
                     if (mounted) {
                       setState(() => repopulateList());
                     }
@@ -150,10 +151,10 @@ class _ListItem extends StatelessWidget {
     this.called,
   });
 
-  final String name;
-  final String place;
-  final String date;
-  final bool called;
+  final String? name;
+  final String? place;
+  final String? date;
+  final bool? called;
 
   @override
   Widget build(BuildContext context) {
@@ -163,9 +164,9 @@ class _ListItem extends StatelessWidget {
       padding: const EdgeInsets.only(top: 9.0),
       child: Row(
         children: <Widget>[
-          Container(
+          SizedBox(
             width: 38.0,
-            child: called
+            child: called!
                 ? Align(
                     alignment: Alignment.topCenter,
                     child: Icon(
@@ -192,7 +193,7 @@ class _ListItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Text(
-                          name,
+                          name!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -201,7 +202,7 @@ class _ListItem extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          place,
+                          place!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -214,7 +215,7 @@ class _ListItem extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    date,
+                    date!,
                     style: TextStyle(
                       color: CupertinoColors.inactiveGray.resolveFrom(context),
                       fontSize: 15.0,

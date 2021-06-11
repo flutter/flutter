@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('SafeArea', () {
@@ -94,7 +91,7 @@ void main() {
         left: true,
         right: false,
         bottom: false,
-        child: Container()
+        child: Container(),
       );
       final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
       child.debugFillProperties(properties);
@@ -217,7 +214,7 @@ void main() {
           final Offset topLeft = target.localToGlobal(Offset.zero);
           final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
           return Rect.fromPoints(topLeft, bottomRight);
-        }
+        },
       ).toList();
       expect(testAnswers, equals(expectedRects));
     }

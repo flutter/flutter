@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -225,7 +224,7 @@ class PlatformViewsService {
 ///
 /// A Dart version of Android's [MotionEvent.PointerProperties](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties).
 class AndroidPointerProperties {
-  /// Creates an AndroidPointerProperties.
+  /// Creates an [AndroidPointerProperties] object.
   ///
   /// All parameters must not be null.
   const AndroidPointerProperties({
@@ -260,7 +259,7 @@ class AndroidPointerProperties {
 
   @override
   String toString() {
-    return 'AndroidPointerProperties(id: $id, toolType: $toolType)';
+    return '${objectRuntimeType(this, 'AndroidPointerProperties')}(id: $id, toolType: $toolType)';
   }
 }
 
@@ -344,11 +343,19 @@ class AndroidPointerCoords {
 
   @override
   String toString() {
-    return 'AndroidPointerCoords(orientation: $orientation, pressure: $pressure, size: $size, toolMajor: $toolMajor, toolMinor: $toolMinor, touchMajor: $touchMajor, touchMinor: $touchMinor, x: $x, y: $y)';
+    return '${objectRuntimeType(this, 'AndroidPointerCoords')}(orientation: $orientation, pressure: $pressure, size: $size, toolMajor: $toolMajor, toolMinor: $toolMinor, touchMajor: $touchMajor, touchMinor: $touchMinor, x: $x, y: $y)';
   }
 }
 
 /// A Dart version of Android's [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent).
+///
+/// This is used by [AndroidViewController] to describe pointer events that are forwarded to a platform view
+/// when Flutter receives an event that it determines is to be handled by that platform view rather than by
+/// another Flutter widget.
+///
+/// See also:
+///
+///  * [AndroidViewController.sendMotionEvent], which can be used to send an [AndroidMotionEvent] explicitly.
 class AndroidMotionEvent {
   /// Creates an AndroidMotionEvent.
   ///
@@ -476,7 +483,7 @@ class AndroidMotionEvent {
 
   @override
   String toString() {
-    return 'AndroidPointerEvent(downTime: $downTime, eventTime: $eventTime, action: $action, pointerCount: $pointerCount, pointerProperties: $pointerProperties, pointerCoords: $pointerCoords, metaState: $metaState, buttonState: $buttonState, xPrecision: $xPrecision, yPrecision: $yPrecision, deviceId: $deviceId, edgeFlags: $edgeFlags, source: $source, flags: $flags)';
+    return 'AndroidPointerEvent(downTime: $downTime, eventTime: $eventTime, action: $action, pointerCount: $pointerCount, pointerProperties: $pointerProperties, pointerCoords: $pointerCoords, metaState: $metaState, buttonState: $buttonState, xPrecision: $xPrecision, yPrecision: $yPrecision, deviceId: $deviceId, edgeFlags: $edgeFlags, source: $source, flags: $flags, motionEventId: $motionEventId)';
   }
 }
 
@@ -533,20 +540,24 @@ class _AndroidMotionEventConverter {
     );
   }
 
-  void handlePointerUpEvent(PointerUpEvent event) {
-    pointerPositions.remove(event.pointer);
-    usedAndroidPointerIds.remove(pointerProperties[event.pointer]!.id);
-    pointerProperties.remove(event.pointer);
+  void _remove(int pointer) {
+    pointerPositions.remove(pointer);
+    usedAndroidPointerIds.remove(pointerProperties[pointer]!.id);
+    pointerProperties.remove(pointer);
     if (pointerProperties.isEmpty) {
       downTimeMillis = null;
     }
   }
 
+  void handlePointerUpEvent(PointerUpEvent event) {
+    _remove(event.pointer);
+  }
+
   void handlePointerCancelEvent(PointerCancelEvent event) {
-    pointerPositions.clear();
-    pointerProperties.clear();
-    usedAndroidPointerIds.clear();
-    downTimeMillis = null;
+    // The pointer cancel event is handled like pointer up. Normally,
+    // the difference is that pointer cancel doesn't perform any action,
+    // but in this case neither up or cancel perform any action.
+    _remove(event.pointer);
   }
 
   AndroidMotionEvent? toAndroidMotionEvent(PointerEvent event) {
@@ -568,28 +579,21 @@ class _AndroidMotionEventConverter {
       return null;
     }
 
-    int action;
-    switch (event.runtimeType) {
-      case PointerDownEvent:
-        action = numPointers == 1
-            ? AndroidViewController.kActionDown
-            : AndroidViewController.pointerAction(
-                pointerIdx, AndroidViewController.kActionPointerDown);
-        break;
-      case PointerUpEvent:
-        action = numPointers == 1
-            ? AndroidViewController.kActionUp
-            : AndroidViewController.pointerAction(
-                pointerIdx, AndroidViewController.kActionPointerUp);
-        break;
-      case PointerMoveEvent:
-        action = AndroidViewController.kActionMove;
-        break;
-      case PointerCancelEvent:
-        action = AndroidViewController.kActionCancel;
-        break;
-      default:
-        return null;
+    final int action;
+    if (event is PointerDownEvent) {
+      action = numPointers == 1
+          ? AndroidViewController.kActionDown
+          : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerDown);
+    } else if (event is PointerUpEvent) {
+      action = numPointers == 1
+          ? AndroidViewController.kActionUp
+          : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerUp);
+    } else if (event is PointerMoveEvent) {
+      action = AndroidViewController.kActionMove;
+    } else if (event is PointerCancelEvent) {
+      action = AndroidViewController.kActionCancel;
+    } else {
+      return null;
     }
 
     return AndroidMotionEvent(
@@ -771,7 +775,7 @@ abstract class AndroidViewController extends PlatformViewController {
   /// The unique identifier of the Android view controlled by this controller.
   @Deprecated(
     'Call `controller.viewId` instead. '
-    'This feature was deprecated after v1.20.0-2.0.pre.'
+    'This feature was deprecated after v1.20.0-2.0.pre.',
   )
   int get id => viewId;
 
@@ -812,16 +816,17 @@ abstract class AndroidViewController extends PlatformViewController {
   }
 
   /// Removes a callback added with [addOnPlatformViewCreatedListener].
-  void removeOnPlatformViewCreatedListener(
-      PlatformViewCreatedCallback listener) {
+  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
     assert(_state != _AndroidViewState.disposed);
     _platformViewCreatedCallbacks.remove(listener);
   }
 
   /// Sets the layout direction for the Android view.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
-    assert(_state != _AndroidViewState.disposed,
-        'trying to set a layout direction for a disposed UIView. View id: $viewId');
+    assert(
+      _state != _AndroidViewState.disposed,
+      'trying to set a layout direction for a disposed UIView. View id: $viewId',
+    );
 
     if (layoutDirection == _layoutDirection)
       return;
@@ -854,6 +859,10 @@ abstract class AndroidViewController extends PlatformViewController {
   /// for description of the parameters.
   @override
   Future<void> dispatchPointerEvent(PointerEvent event) async {
+    if (event is PointerHoverEvent) {
+      return;
+    }
+
     if (event is PointerDownEvent) {
       _motionEventConverter.handlePointerDownEvent(event);
     }
@@ -908,12 +917,13 @@ class SurfaceAndroidViewController extends AndroidViewController {
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
-  }) : super._(
-            viewId: viewId,
-            viewType: viewType,
-            layoutDirection: layoutDirection,
-            creationParams: creationParams,
-            creationParamsCodec: creationParamsCodec);
+  })  : super._(
+          viewId: viewId,
+          viewType: viewType,
+          layoutDirection: layoutDirection,
+          creationParams: creationParams,
+          creationParamsCodec: creationParamsCodec,
+        );
 
   @override
   Future<void> _sendCreateMessage() {
@@ -991,8 +1001,7 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> setSize(Size size) async {
-    assert(_state != _AndroidViewState.disposed,
-        'trying to size a disposed Android View. View id: $viewId');
+    assert(_state != _AndroidViewState.disposed, 'trying to size a disposed Android View. View id: $viewId');
 
     assert(size != null);
     assert(!size.isEmpty);

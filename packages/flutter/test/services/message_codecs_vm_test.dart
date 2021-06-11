@@ -2,16 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-// This file contains tests that are only supported by the Dart VM. For
-// example, on the Web there's no way to express large integers.
 @TestOn('!chrome')
-
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 import 'message_codecs_testing.dart';
 
 void main() {
@@ -77,10 +74,9 @@ void main() {
     test('should encode and decode a list containing big numbers', () {
       final List<dynamic> message = <dynamic>[
         -7000000000000000007,
-        Int64List.fromList(
-            <int>[-0x7fffffffffffffff - 1, 0, 0x7fffffffffffffff]),
+        Int64List.fromList(<int>[-0x7fffffffffffffff - 1, 0, 0x7fffffffffffffff]),
       ];
       checkEncodeDecode<dynamic>(standard, message);
     });
-  });
+  }, skip: kIsWeb);
 }

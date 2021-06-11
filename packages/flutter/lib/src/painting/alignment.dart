@@ -123,7 +123,7 @@ abstract class AlignmentGeometry {
       return Alignment._stringify(_x, _y);
     if (_x == 0.0)
       return AlignmentDirectional._stringify(_start, _y);
-    return Alignment._stringify(_x, _y) + ' + ' + AlignmentDirectional._stringify(_start, 0.0);
+    return '${Alignment._stringify(_x, _y)} + ${AlignmentDirectional._stringify(_start, 0.0)}';
   }
 
   @override
@@ -348,23 +348,23 @@ class Alignment extends AlignmentGeometry {
 
   static String _stringify(double x, double y) {
     if (x == -1.0 && y == -1.0)
-      return 'topLeft';
+      return 'Alignment.topLeft';
     if (x == 0.0 && y == -1.0)
-      return 'topCenter';
+      return 'Alignment.topCenter';
     if (x == 1.0 && y == -1.0)
-      return 'topRight';
+      return 'Alignment.topRight';
     if (x == -1.0 && y == 0.0)
-      return 'centerLeft';
+      return 'Alignment.centerLeft';
     if (x == 0.0 && y == 0.0)
-      return 'center';
+      return 'Alignment.center';
     if (x == 1.0 && y == 0.0)
-      return 'centerRight';
+      return 'Alignment.centerRight';
     if (x == -1.0 && y == 1.0)
-      return 'bottomLeft';
+      return 'Alignment.bottomLeft';
     if (x == 0.0 && y == 1.0)
-      return 'bottomCenter';
+      return 'Alignment.bottomCenter';
     if (x == 1.0 && y == 1.0)
-      return 'bottomRight';
+      return 'Alignment.bottomRight';
     return 'Alignment(${x.toStringAsFixed(1)}, '
                      '${y.toStringAsFixed(1)})';
   }

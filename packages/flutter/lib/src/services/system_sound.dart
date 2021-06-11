@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:async';
-
 import 'system_channels.dart';
 
 /// A sound provided by the system.
@@ -31,7 +29,6 @@ enum SystemSoundType {
 class SystemSound {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   SystemSound._();
 
   /// Play the specified system sound. If that sound is not present on the

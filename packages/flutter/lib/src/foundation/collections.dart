@@ -166,7 +166,7 @@ void mergeSort<T>(
   final int firstLength = middle - start;
   final int secondLength = end - middle;
   // secondLength is always the same as firstLength, or one greater.
-  final List<T?> scratchSpace = List<T?>.filled(secondLength, null, growable: false);
+  final List<T> scratchSpace = List<T>.filled(secondLength, list[start]);
   _mergeSort<T>(list, compare, middle, end, scratchSpace, 0);
   final int firstTarget = end - firstLength;
   _mergeSort<T>(list, compare, start, middle, list, firstTarget);
@@ -273,7 +273,7 @@ void _mergeSort<T>(
     int Function(T, T) compare,
     int start,
     int end,
-    List<T?> target,
+    List<T> target,
     int targetOffset,
     ) {
   final int length = end - start;
@@ -316,10 +316,10 @@ void _merge<T>(
   List<T> firstList,
   int firstStart,
   int firstEnd,
-  List<T?> secondList,
+  List<T> secondList,
   int secondStart,
   int secondEnd,
-  List<T?> target,
+  List<T> target,
   int targetOffset,
 ) {
   // No empty lists reaches here.
@@ -328,7 +328,7 @@ void _merge<T>(
   int cursor1 = firstStart;
   int cursor2 = secondStart;
   T firstElement = firstList[cursor1++];
-  T secondElement = secondList[cursor2++] as T;
+  T secondElement = secondList[cursor2++];
   while (true) {
     if (compare(firstElement, secondElement) <= 0) {
       target[targetOffset++] = firstElement;
@@ -340,7 +340,7 @@ void _merge<T>(
     } else {
       target[targetOffset++] = secondElement;
       if (cursor2 != secondEnd) {
-        secondElement = secondList[cursor2++] as T;
+        secondElement = secondList[cursor2++];
         continue;
       }
       // Second list empties first. Flushing first list here.

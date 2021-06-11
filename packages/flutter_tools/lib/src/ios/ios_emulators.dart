@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
@@ -40,7 +40,7 @@ class IOSEmulator extends Emulator {
   PlatformType get platformType => PlatformType.ios;
 
   @override
-  Future<void> launch() async {
+  Future<void> launch({bool coldBoot = false}) async {
     Future<bool> launchSimulator(List<String> additionalArgs) async {
       final List<String> args = <String>[
         'open',
@@ -49,7 +49,7 @@ class IOSEmulator extends Emulator {
         globals.xcode.getSimulatorPath(),
       ];
 
-      final RunResult launchResult = await processUtils.run(args);
+      final RunResult launchResult = await globals.processUtils.run(args);
       if (launchResult.exitCode != 0) {
         globals.printError('$launchResult');
         return false;

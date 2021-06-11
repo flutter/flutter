@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -33,18 +32,20 @@ const List<String> coolColorNames = <String>[
 const int _kChildCount = 50;
 
 class CupertinoNavigationDemo extends StatelessWidget {
-  CupertinoNavigationDemo()
+  CupertinoNavigationDemo({ Key? key, this.randomSeed })
       : colorItems = List<Color>.generate(_kChildCount, (int index) {
-          return coolColors[math.Random().nextInt(coolColors.length)];
+          return coolColors[math.Random(randomSeed).nextInt(coolColors.length)];
         }) ,
         colorNameItems = List<String>.generate(_kChildCount, (int index) {
-          return coolColorNames[math.Random().nextInt(coolColorNames.length)];
-        });
+          return coolColorNames[math.Random(randomSeed).nextInt(coolColorNames.length)];
+        }),
+        super(key: key);
 
   static const String routeName = '/cupertino/navigation';
 
   final List<Color> colorItems;
   final List<String> colorNameItems;
+  final int? randomSeed;
 
   @override
   Widget build(BuildContext context) {
@@ -57,21 +58,20 @@ class CupertinoNavigationDemo extends StatelessWidget {
           tabBar: CupertinoTabBar(
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.home),
+                icon: Icon(CupertinoIcons.house, size: 27),
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.conversation_bubble),
+                icon: Icon(CupertinoIcons.chat_bubble, size: 27),
                 label: 'Support',
               ),
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.profile_circled),
+                icon: Icon(CupertinoIcons.person_circle, size: 27),
                 label: 'Profile',
               ),
             ],
           ),
           tabBuilder: (BuildContext context, int index) {
-            assert(index >= 0 && index <= 2);
             switch (index) {
               case 0:
                 return CupertinoTabView(
@@ -79,25 +79,24 @@ class CupertinoNavigationDemo extends StatelessWidget {
                     return CupertinoDemoTab1(
                       colorItems: colorItems,
                       colorNameItems: colorNameItems,
+                      randomSeed: randomSeed,
                     );
                   },
                   defaultTitle: 'Colors',
                 );
-                break;
               case 1:
                 return CupertinoTabView(
-                  builder: (BuildContext context) => CupertinoDemoTab2(),
+                  builder: (BuildContext context) => const CupertinoDemoTab2(),
                   defaultTitle: 'Support Chat',
                 );
-                break;
               case 2:
                 return CupertinoTabView(
-                  builder: (BuildContext context) => CupertinoDemoTab3(),
+                  builder: (BuildContext context) => const CupertinoDemoTab3(),
                   defaultTitle: 'Account',
                 );
-                break;
             }
-            return null;
+            assert(false);
+            return const CupertinoTabView();
           },
         ),
       ),
@@ -106,7 +105,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
 }
 
 class ExitButton extends StatelessWidget {
-  const ExitButton();
+  const ExitButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +113,8 @@ class ExitButton extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: const Tooltip(
         message: 'Back',
-        child: Text('Exit'),
         excludeFromSemantics: true,
+        child: Text('Exit'),
       ),
       onPressed: () {
         // The demo is on the root navigator.
@@ -135,10 +134,16 @@ final Widget trailingButtons = Row(
 );
 
 class CupertinoDemoTab1 extends StatelessWidget {
-  const CupertinoDemoTab1({this.colorItems, this.colorNameItems});
+  const CupertinoDemoTab1({
+    Key? key,
+    this.colorItems,
+    this.colorNameItems,
+    this.randomSeed,
+  }) : super(key: key);
 
-  final List<Color> colorItems;
-  final List<String> colorNameItems;
+  final List<Color>? colorItems;
+  final List<String>? colorNameItems;
+  final int? randomSeed;
 
   @override
   Widget build(BuildContext context) {
@@ -164,8 +169,9 @@ class CupertinoDemoTab1 extends StatelessWidget {
                   return Tab1RowItem(
                     index: index,
                     lastItem: index == _kChildCount - 1,
-                    color: colorItems[index],
-                    colorName: colorNameItems[index],
+                    color: colorItems![index],
+                    colorName: colorNameItems![index],
+                    randomSeed: randomSeed,
                   );
                 },
                 childCount: _kChildCount,
@@ -179,12 +185,20 @@ class CupertinoDemoTab1 extends StatelessWidget {
 }
 
 class Tab1RowItem extends StatelessWidget {
-  const Tab1RowItem({this.index, this.lastItem, this.color, this.colorName});
+  const Tab1RowItem({
+    Key? key,
+    this.index,
+    this.lastItem,
+    this.color,
+    this.colorName,
+    this.randomSeed,
+  }) : super(key: key);
 
-  final int index;
-  final bool lastItem;
-  final Color color;
-  final String colorName;
+  final int? index;
+  final bool? lastItem;
+  final Color? color;
+  final String? colorName;
+  final int? randomSeed;
 
   @override
   Widget build(BuildContext context) {
@@ -197,6 +211,7 @@ class Tab1RowItem extends StatelessWidget {
             color: color,
             colorName: colorName,
             index: index,
+            randomSeed: randomSeed,
           ),
         ));
       },
@@ -223,7 +238,7 @@ class Tab1RowItem extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(colorName),
+                        Text(colorName!),
                         const Padding(padding: EdgeInsets.only(top: 8.0)),
                         Text(
                           'Buy this cool color',
@@ -258,7 +273,7 @@ class Tab1RowItem extends StatelessWidget {
       ),
     );
 
-    if (lastItem) {
+    if (lastItem!) {
       return row;
     }
 
@@ -275,32 +290,27 @@ class Tab1RowItem extends StatelessWidget {
 }
 
 class Tab1ItemPage extends StatefulWidget {
-  const Tab1ItemPage({this.color, this.colorName, this.index});
+  const Tab1ItemPage({Key? key, this.color, this.colorName, this.index, this.randomSeed}) : super(key: key);
 
-  final Color color;
-  final String colorName;
-  final int index;
+  final Color? color;
+  final String? colorName;
+  final int? index;
+  final int? randomSeed;
 
   @override
   State<StatefulWidget> createState() => Tab1ItemPageState();
 }
 
 class Tab1ItemPageState extends State<Tab1ItemPage> {
-  @override
-  void initState() {
-    super.initState();
-    relatedColors = List<Color>.generate(10, (int index) {
-      final math.Random random = math.Random();
-      return Color.fromARGB(
-        255,
-        (widget.color.red + random.nextInt(100) - 50).clamp(0, 255) as int,
-        (widget.color.green + random.nextInt(100) - 50).clamp(0, 255) as int,
-        (widget.color.blue + random.nextInt(100) - 50).clamp(0, 255) as int,
-      );
-    });
-  }
-
-  List<Color> relatedColors;
+  late final List<Color> relatedColors = List<Color>.generate(10, (int index) {
+    final math.Random random = math.Random(widget.randomSeed);
+    return Color.fromARGB(
+      255,
+      (widget.color!.red + random.nextInt(100) - 50).clamp(0, 255),
+      (widget.color!.green + random.nextInt(100) - 50).clamp(0, 255),
+      (widget.color!.blue + random.nextInt(100) - 50).clamp(0, 255),
+    );
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -334,7 +344,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Text(
-                          widget.colorName,
+                          widget.colorName!,
                           style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
                         ),
                         const Padding(padding: EdgeInsets.only(top: 6.0)),
@@ -428,6 +438,8 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
 }
 
 class CupertinoDemoTab2 extends StatelessWidget {
+  const CupertinoDemoTab2({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -437,7 +449,7 @@ class CupertinoDemoTab2 extends StatelessWidget {
       child: CupertinoScrollbar(
         child: ListView(
           children: <Widget>[
-            CupertinoUserInterfaceLevel(
+            const CupertinoUserInterfaceLevel(
               data: CupertinoUserInterfaceLevelData.elevated,
               child: Tab2Header(),
             ),
@@ -450,6 +462,8 @@ class CupertinoDemoTab2 extends StatelessWidget {
 }
 
 class Tab2Header extends StatelessWidget {
+  const Tab2Header({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -576,15 +590,15 @@ enum Tab2ConversationBubbleColor {
 }
 
 class Tab2ConversationBubble extends StatelessWidget {
-  const Tab2ConversationBubble({this.text, this.color});
+  const Tab2ConversationBubble({Key? key, this.text, this.color}) : super(key: key);
 
-  final String text;
-  final Tab2ConversationBubbleColor color;
+  final String? text;
+  final Tab2ConversationBubbleColor? color;
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor;
-    Color foregroundColor;
+    Color? backgroundColor;
+    Color? foregroundColor;
 
     switch (color) {
       case Tab2ConversationBubbleColor.gray:
@@ -594,6 +608,8 @@ class Tab2ConversationBubble extends StatelessWidget {
       case Tab2ConversationBubbleColor.blue:
         backgroundColor = CupertinoTheme.of(context).primaryColor;
         foregroundColor = CupertinoColors.white;
+        break;
+      default:
         break;
     }
 
@@ -605,7 +621,7 @@ class Tab2ConversationBubble extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
       child: Text(
-        text,
+        text!,
         style: TextStyle(
           color: foregroundColor,
           letterSpacing: -0.4,
@@ -618,10 +634,10 @@ class Tab2ConversationBubble extends StatelessWidget {
 }
 
 class Tab2ConversationAvatar extends StatelessWidget {
-  const Tab2ConversationAvatar({this.text, this.color});
+  const Tab2ConversationAvatar({Key? key, this.text, this.color}) : super(key: key);
 
-  final String text;
-  final Color color;
+  final String? text;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -632,20 +648,20 @@ class Tab2ConversationAvatar extends StatelessWidget {
           begin: FractionalOffset.topCenter,
           end: FractionalOffset.bottomCenter,
           colors: <Color>[
-            color,
+            color!,
             Color.fromARGB(
-              color.alpha,
-              (color.red - 60).clamp(0, 255) as int,
-              (color.green - 60).clamp(0, 255) as int,
-              (color.blue - 60).clamp(0, 255) as int,
+              color!.alpha,
+              (color!.red - 60).clamp(0, 255),
+              (color!.green - 60).clamp(0, 255),
+              (color!.blue - 60).clamp(0, 255),
             ),
-          ],
+          ]
         ),
       ),
       margin: const EdgeInsets.only(left: 8.0, bottom: 8.0),
       padding: const EdgeInsets.all(12.0),
       child: Text(
-        text,
+        text!,
         style: const TextStyle(
           color: CupertinoColors.white,
           fontSize: 13.0,
@@ -657,10 +673,10 @@ class Tab2ConversationAvatar extends StatelessWidget {
 }
 
 class Tab2ConversationRow extends StatelessWidget {
-  const Tab2ConversationRow({this.avatar, this.text});
+  const Tab2ConversationRow({Key? key, this.avatar, this.text}) : super(key: key);
 
-  final Tab2ConversationAvatar avatar;
-  final String text;
+  final Tab2ConversationAvatar? avatar;
+  final String? text;
 
   @override
   Widget build(BuildContext context) {
@@ -671,7 +687,8 @@ class Tab2ConversationRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: isSelf ? CrossAxisAlignment.center : CrossAxisAlignment.end,
         children: <Widget>[
-          if (avatar != null) avatar,
+          if (avatar != null)
+            avatar!,
           CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Tab2ConversationBubble(
@@ -726,6 +743,8 @@ List<Widget> buildTab2Conversation() {
 }
 
 class CupertinoDemoTab3 extends StatelessWidget {
+  const CupertinoDemoTab3({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -739,7 +758,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
               Navigator.of(context, rootNavigator: true).push(
                 CupertinoPageRoute<bool>(
                   fullscreenDialog: true,
-                  builder: (BuildContext context) => Tab3Dialog(),
+                  builder: (BuildContext context) => const Tab3Dialog(),
                 ),
               );
             },
@@ -776,13 +795,15 @@ class CupertinoDemoTab3 extends StatelessWidget {
 }
 
 class Tab3Dialog extends StatelessWidget {
+  const Tab3Dialog({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         leading: CupertinoButton(
-          child: const Text('Cancel'),
           padding: EdgeInsets.zero,
+          child: const Text('Cancel'),
           onPressed: () {
             Navigator.of(context).pop(false);
           },

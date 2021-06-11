@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,6 +18,8 @@ void main() {
     expect(localizations.previousMonthTooltip, isNotNull);
     expect(localizations.nextPageTooltip, isNotNull);
     expect(localizations.previousPageTooltip, isNotNull);
+    expect(localizations.firstPageTooltip, isNotNull);
+    expect(localizations.lastPageTooltip, isNotNull);
     expect(localizations.showMenuTooltip, isNotNull);
     expect(localizations.licensesPageTitle, isNotNull);
     expect(localizations.rowsPerPageTitle, isNotNull);
@@ -103,5 +103,29 @@ void main() {
     expect(localizations.licensesPackageDetailText(1).contains(r'$licensesCount'), isFalse);
     expect(localizations.licensesPackageDetailText(2).contains(r'$licensesCount'), isFalse);
     expect(localizations.licensesPackageDetailText(100).contains(r'$licensesCount'), isFalse);
+  });
+
+  testWidgets('MaterialLocalizations.of throws', (WidgetTester tester) async {
+    final GlobalKey noLocalizationsAvailable = GlobalKey();
+    final GlobalKey localizationsAvailable = GlobalKey();
+
+    await tester.pumpWidget(
+      Container(
+        key: noLocalizationsAvailable,
+        child: MaterialApp(
+          home: Container(
+            key: localizationsAvailable,
+          ),
+        ),
+      ),
+    );
+
+    expect(() => MaterialLocalizations.of(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
+      (AssertionError e) => e.message,
+      'message',
+      contains('No MaterialLocalizations found'),
+    )));
+
+    expect(MaterialLocalizations.of(localizationsAvailable.currentContext!), isA<MaterialLocalizations>());
   });
 }

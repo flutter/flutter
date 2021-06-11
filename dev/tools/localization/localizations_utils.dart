@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -94,9 +96,9 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       // Update the base string to reflect assumed scriptCodes.
       originalString = languageCode;
       if (scriptCode != null)
-        originalString += '_' + scriptCode;
+        originalString += '_$scriptCode';
       if (countryCode != null)
-        originalString += '_' + countryCode;
+        originalString += '_$countryCode';
     }
 
     return LocaleInfo(
@@ -200,7 +202,7 @@ void loadMatchingArbsIntoBundleMaps({
       // Add an assumed locale to default to when there is no info on scriptOnly locales.
       locale = LocaleInfo.fromString(localeString, deriveScriptCode: true);
       if (locale.scriptCode != null) {
-        final LocaleInfo scriptLocale = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
+        final LocaleInfo scriptLocale = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
         if (!localeToResources.containsKey(scriptLocale)) {
           assumedLocales.add(scriptLocale);
           localeToResources[scriptLocale] ??= <String, String>{};
@@ -378,9 +380,9 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 ///
 /// This function is used by tools that take in a JSON-formatted file to
 /// generate Dart code. For this reason, characters with special meaning
-/// in JSON files. For example, the backspace character (\b) have to be
-/// properly escaped by this function so that the generated Dart code
-/// correctly represents this character:
+/// in JSON files are escaped. For example, the backspace character (\b)
+/// has to be properly escaped by this function so that the generated
+/// Dart code correctly represents this character:
 /// ```
 /// foo\bar => 'foo\\bar'
 /// foo\nbar => 'foo\\nbar'
@@ -390,6 +392,19 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo$bar = 'foo\$bar'
 /// ```
 String generateString(String value) {
+  if (<String>['\n', '\f', '\t', '\r', '\b'].every((String pattern) => !value.contains(pattern))) {
+    final bool hasDollar = value.contains(r'$');
+    final bool hasBackslash = value.contains(r'\');
+    final bool hasQuote = value.contains("'");
+    final bool hasDoubleQuote = value.contains('"');
+    if (!hasQuote) {
+      return hasBackslash || hasDollar ? "r'$value'" : "'$value'";
+    }
+    if (!hasDoubleQuote) {
+      return hasBackslash || hasDollar ? 'r"$value"' : '"$value"';
+    }
+  }
+
   const String backslash = '__BACKSLASH__';
   assert(
     !value.contains(backslash),
@@ -401,17 +416,17 @@ String generateString(String value) {
   value = value
     // Replace backslashes with a placeholder for now to properly parse
     // other special characters.
-    .replaceAll('\\', backslash)
-    .replaceAll('\$', '\\\$')
-    .replaceAll("'", "\\'")
-    .replaceAll('"', '\\"')
-    .replaceAll('\n', '\\n')
-    .replaceAll('\f', '\\f')
-    .replaceAll('\t', '\\t')
-    .replaceAll('\r', '\\r')
-    .replaceAll('\b', '\\b')
+    .replaceAll(r'\', backslash)
+    .replaceAll(r'$', r'\$')
+    .replaceAll("'", r"\'")
+    .replaceAll('"', r'\"')
+    .replaceAll('\n', r'\n')
+    .replaceAll('\f', r'\f')
+    .replaceAll('\t', r'\t')
+    .replaceAll('\r', r'\r')
+    .replaceAll('\b', r'\b')
     // Reintroduce escaped backslashes into generated Dart string.
-    .replaceAll(backslash, '\\\\');
+    .replaceAll(backslash, r'\\');
 
   return "'$value'";
 }

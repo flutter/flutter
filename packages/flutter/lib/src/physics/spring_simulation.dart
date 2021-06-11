@@ -121,7 +121,7 @@ class SpringSimulation extends Simulation {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'SpringSimulation')}(end: $_endPosition, $type)';
+  String toString() => '${objectRuntimeType(this, 'SpringSimulation')}(end: ${_endPosition.toStringAsFixed(1)}, $type)';
 }
 
 /// A [SpringSimulation] where the value of [x] is guaranteed to have exactly the
@@ -250,8 +250,8 @@ class _UnderdampedSolution implements _SpringSolution {
     double distance,
     double velocity,
   ) {
-    final double w = math.sqrt(4.0 * spring.mass * spring.stiffness -
-                     spring.damping * spring.damping) / (2.0 * spring.mass);
+    final double w = math.sqrt(4.0 * spring.mass * spring.stiffness - spring.damping * spring.damping) /
+        (2.0 * spring.mass);
     final double r = -(spring.damping / 2.0 * spring.mass);
     final double c1 = distance;
     final double c2 = (velocity - r * distance) / w;
@@ -277,7 +277,7 @@ class _UnderdampedSolution implements _SpringSolution {
     final double power = math.pow(math.e, _r * time) as double;
     final double cosine = math.cos(_w * time);
     final double sine = math.sin(_w * time);
-    return      power * (_c2 * _w * cosine - _c1 * _w * sine) +
+    return power * (_c2 * _w * cosine - _c1 * _w * sine) +
            _r * power * (_c2 *      sine   + _c1 *      cosine);
   }
 

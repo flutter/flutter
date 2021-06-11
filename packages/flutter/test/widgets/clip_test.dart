@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'test_border.dart' show TestBorder;
@@ -43,7 +41,7 @@ class ValueClipper<T> extends CustomClipper<T> {
 }
 
 class NotifyClipper<T> extends CustomClipper<T> {
-  NotifyClipper({this.clip}) : super(reclip: clip);
+  NotifyClipper({required this.clip}) : super(reclip: clip);
 
   final ValueNotifier<T> clip;
 
@@ -391,10 +389,10 @@ void main() {
               width: 100.0,
               height: 100.0,
               child: ClipRect(
+                clipBehavior: Clip.hardEdge,
                 child: Container(
                   color: Colors.blue,
                 ),
-                clipBehavior: Clip.hardEdge,
               ),
             ),
             Positioned(
@@ -837,8 +835,8 @@ void main() {
 
     await tester.pumpWidget(
       ClipRect(
-        child: const Placeholder(),
         clipper: NotifyClipper<Rect>(clip: clip),
+        child: const Placeholder(),
       ),
     );
 

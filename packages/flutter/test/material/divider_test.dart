@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/painting.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
@@ -22,8 +19,8 @@ void main() {
     final RenderBox box = tester.firstRenderObject(find.byType(Divider));
     expect(box.size.height, 16.0);
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration as BoxDecoration;
-    expect(decoration.border.bottom.width, 0.0);
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    expect(decoration.border!.bottom.width, 0.0);
   });
 
   testWidgets('Divider custom thickness', (WidgetTester tester) async {
@@ -38,8 +35,8 @@ void main() {
       ),
     );
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration as BoxDecoration;
-    expect(decoration.border.bottom.width, 5.0);
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    expect(decoration.border!.bottom.width, 5.0);
   });
 
   testWidgets('Horizontal divider custom indentation', (WidgetTester tester) async {
@@ -107,8 +104,8 @@ void main() {
     final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
     expect(box.size.width, 16.0);
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration as BoxDecoration;
-    final Border border = decoration.border as Border;
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    final Border border = decoration.border! as Border;
     expect(border.left.width, 0.0);
   });
 
@@ -124,8 +121,8 @@ void main() {
       ),
     );
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration as BoxDecoration;
-    final Border border = decoration.border as Border;
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    final Border border = decoration.border! as Border;
     expect(border.left.width, 5.0);
   });
 
@@ -133,7 +130,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: Container(
+          child: SizedBox(
             height: 24.0,
             child: Row(
               children: const <Widget>[

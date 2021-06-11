@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
@@ -39,14 +38,14 @@ enum BorderStyle {
 ///
 /// ```dart
 /// Container(
-///   padding: EdgeInsets.all(8.0),
+///   padding: const EdgeInsets.all(8.0),
 ///   decoration: BoxDecoration(
 ///     border: Border(
 ///       top: BorderSide(width: 16.0, color: Colors.lightBlue.shade50),
 ///       bottom: BorderSide(width: 16.0, color: Colors.lightBlue.shade900),
 ///     ),
 ///   ),
-///   child: Text('Flutter in the sky', textAlign: TextAlign.center),
+///   child: const Text('Flutter in the sky', textAlign: TextAlign.center),
 /// )
 /// ```
 /// {@end-tool}
@@ -567,7 +566,7 @@ class _CompoundBorder extends ShapeBorder {
   @override
   ShapeBorder scale(double t) {
     return _CompoundBorder(
-      borders.map<ShapeBorder>((ShapeBorder border) => border.scale(t)).toList()
+      borders.map<ShapeBorder>((ShapeBorder border) => border.scale(t)).toList(),
     );
   }
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // This file is separate from viewport_test.dart because we can't use both
 // testWidgets and rendering_tester in the same file - testWidgets will
 // initialize a binding, which rendering_tester will attempt to re-initialize
@@ -18,7 +16,7 @@ void main() {
   const double width = 800;
   const double height = 600;
   Rect rectExpandedOnAxis(double value) => Rect.fromLTRB(0.0, 0.0 - value, width, height + value);
-  List<RenderSliver> children;
+  late List<RenderSliver> children;
 
   setUp(() {
     children = <RenderSliver>[
@@ -64,14 +62,15 @@ void main() {
   });
 
   test('Cache extent - nullx viewport', () async {
-    await expectLater(() => RenderViewport(
+    await expectLater(
+      () => RenderViewport(
         crossAxisDirection: AxisDirection.left,
         offset: ViewportOffset.zero(),
         cacheExtent: null,
         cacheExtentStyle: CacheExtentStyle.viewport,
         children: children,
       ),
-      throwsAssertionError
+      throwsAssertionError,
     );
   });
 
@@ -161,7 +160,7 @@ class CustomConstraintsRenderSliver extends RenderSliver {
   CustomConstraintsRenderSliver(this.constraints);
 
   @override
-  SliverGeometry get geometry => const SliverGeometry();
+  SliverGeometry get geometry => SliverGeometry.zero;
 
   @override
   final SliverConstraints constraints;

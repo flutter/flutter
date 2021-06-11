@@ -1,1 +1,0 @@
-A gallery showcasing apps and widgets build using the Flutter framework

@@ -9,10 +9,12 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class SliderDemo extends StatefulWidget {
+  const SliderDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/slider';
 
   @override
-  _SliderDemoState createState() => _SliderDemoState();
+  State<SliderDemo> createState() => _SliderDemoState();
 }
 
 Path _downTriangle(double size, Offset thumbCenter, { bool invert = false }) {
@@ -61,15 +63,15 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
   void paint(
     PaintingContext context,
     Offset center, {
-    @required Animation<double> activationAnimation,
-    @required Animation<double> enableAnimation,
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
     bool isDiscrete = false,
     bool isEnabled = false,
-    bool isOnTop,
-    @required SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    Thumb thumb,
-    bool isPressed,
+    bool? isOnTop,
+    required SliderThemeData sliderTheme,
+    TextDirection? textDirection,
+    Thumb? thumb,
+    bool? isPressed,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
@@ -78,7 +80,7 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
     );
 
     final double size = _thumbSize * sizeTween.evaluate(enableAnimation);
-    Path thumbPath;
+    late Path thumbPath;
     switch (textDirection) {
       case TextDirection.rtl:
         switch (thumb) {
@@ -87,6 +89,8 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
             break;
           case Thumb.end:
             thumbPath = _leftTriangle(size, center);
+            break;
+          default:
             break;
         }
         break;
@@ -98,10 +102,14 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
           case Thumb.end:
             thumbPath = _rightTriangle(size, center);
             break;
+          default:
+            break;
         }
         break;
+      default:
+        break;
     }
-    canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation));
+    canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation)!);
   }
 }
 
@@ -123,16 +131,16 @@ class _CustomThumbShape extends SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset thumbCenter, {
-    Animation<double> activationAnimation,
-    Animation<double> enableAnimation,
-    bool isDiscrete,
-    TextPainter labelPainter,
-    RenderBox parentBox,
-    SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    double value,
-    double textScaleFactor,
-    Size sizeWithOverflow,
+    Animation<double>? activationAnimation,
+    required Animation<double> enableAnimation,
+    bool? isDiscrete,
+    TextPainter? labelPainter,
+    RenderBox? parentBox,
+    required SliderThemeData sliderTheme,
+    TextDirection? textDirection,
+    double? value,
+    double? textScaleFactor,
+    Size? sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
@@ -141,7 +149,7 @@ class _CustomThumbShape extends SliderComponentShape {
     );
     final double size = _thumbSize * sizeTween.evaluate(enableAnimation);
     final Path thumbPath = _downTriangle(size, thumbCenter);
-    canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation));
+    canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation)!);
   }
 }
 
@@ -164,16 +172,16 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset thumbCenter, {
-    Animation<double> activationAnimation,
-    Animation<double> enableAnimation,
-    bool isDiscrete,
-    TextPainter labelPainter,
-    RenderBox parentBox,
-    SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    double value,
-    double textScaleFactor,
-    Size sizeWithOverflow,
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    bool? isDiscrete,
+    required TextPainter labelPainter,
+    RenderBox? parentBox,
+    required SliderThemeData sliderTheme,
+    TextDirection? textDirection,
+    double? value,
+    double? textScaleFactor,
+    Size? sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween enableColor = ColorTween(
@@ -187,7 +195,7 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     final double size = _indicatorSize * sizeTween.evaluate(enableAnimation);
     final Offset slideUpOffset = Offset(0.0, -slideUpTween.evaluate(activationAnimation));
     final Path thumbPath = _upTriangle(size, thumbCenter + slideUpOffset);
-    final Color paintColor = enableColor.evaluate(enableAnimation).withAlpha((255.0 * activationAnimation.value).round());
+    final Color paintColor = enableColor.evaluate(enableAnimation)!.withAlpha((255.0 * activationAnimation.value).round());
     canvas.drawPath(
       thumbPath,
       Paint()..color = paintColor,
@@ -211,13 +219,13 @@ class _SliderDemoState extends State<SliderDemo> {
         tabName: 'SINGLE',
         description: 'Sliders containing 1 thumb',
         demoWidget: _Sliders(),
-        documentationUrl: 'https://docs.flutter.io/flutter/material/Slider-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/Slider-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'RANGE',
         description: 'Sliders containing 2 thumbs',
         demoWidget: _RangeSliders(),
-        documentationUrl: 'https://docs.flutter.io/flutter/material/RangeSlider-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/RangeSlider-class.html',
       ),
     ];
 
@@ -259,10 +267,10 @@ class _SlidersState extends State<_Sliders> {
                   child: TextField(
                     textAlign: TextAlign.center,
                     onSubmitted: (String value) {
-                      final double newValue = double.tryParse(value);
+                      final double? newValue = double.tryParse(value);
                       if (newValue != null && newValue != _continuousValue) {
                         setState(() {
-                          _continuousValue = newValue.clamp(0.0, 100.0) as double;
+                          _continuousValue = newValue.clamp(0.0, 100.0);
                         });
                       }
                     },
@@ -274,7 +282,7 @@ class _SlidersState extends State<_Sliders> {
                 ),
               ),
               Slider.adaptive(
-                label: _continuousValue.toStringAsFixed(6).toString(),
+                label: _continuousValue.toStringAsFixed(6),
                 value: _continuousValue,
                 min: 0.0,
                 max: 100.0,
@@ -326,7 +334,7 @@ class _SlidersState extends State<_Sliders> {
                   valueIndicatorColor: Colors.deepPurpleAccent,
                   thumbShape: _CustomThumbShape(),
                   valueIndicatorShape: _CustomValueIndicatorShape(),
-                  valueIndicatorTextStyle: theme.accentTextTheme.bodyText1.copyWith(color: theme.colorScheme.onSurface),
+                  valueIndicatorTextStyle: theme.textTheme.bodyText1!.copyWith(color: theme.colorScheme.onSurface),
                 ),
                 child: Slider(
                   value: _discreteCustomValue,

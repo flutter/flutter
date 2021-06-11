@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.yourcompany.complexLayout</string>
+	<string>com.yourcompany.platformViewsLayoutHybridComposition</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -44,6 +44,6 @@
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
 	<key>io.flutter.metal_preview</key>
- 	<true/>
+	<true/>
 </dict>
 </plist>

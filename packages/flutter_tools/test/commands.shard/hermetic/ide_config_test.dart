@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/commands/ide_config.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/template.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   group('ide_config', () {
@@ -83,10 +84,10 @@ void main() {
       List<String> unexpectedPaths = const <String>[],
     }) async {
       dir ??= tempDir;
+      Cache.flutterRoot = tempDir.absolute.path;
       final IdeConfigCommand command = IdeConfigCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
-        '--flutter-root=${tempDir.absolute.path}',
         'ide-config',
         ...args,
       ]);

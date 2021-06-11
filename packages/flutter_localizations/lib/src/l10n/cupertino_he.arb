@@ -30,5 +30,6 @@
   "pasteButtonLabel": "הדבקה",
   "selectAllButtonLabel": "בחירת הכול",
   "tabSemanticsLabel": "כרטיסייה $tabIndex מתוך $tabCount",
-  "modalBarrierDismissLabel": "סגירה"
+  "modalBarrierDismissLabel": "סגירה",
+  "searchTextFieldPlaceholderLabel": "חיפוש"
 }

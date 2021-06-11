@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Constants taken from _ContextMenuActionState.
@@ -15,15 +13,15 @@ void main() {
   const Color _kDestructiveActionColor = CupertinoColors.destructiveRed;
   const FontWeight _kDefaultActionWeight = FontWeight.w600;
 
-  Widget _getApp({VoidCallback onPressed, bool isDestructiveAction = false, bool isDefaultAction = false}) {
+  Widget _getApp({VoidCallback? onPressed, bool isDestructiveAction = false, bool isDefaultAction = false}) {
     final UniqueKey actionKey = UniqueKey();
     final CupertinoContextMenuAction action = CupertinoContextMenuAction(
       key: actionKey,
-      child: const Text('I am a CupertinoContextMenuAction'),
       onPressed: onPressed,
       trailingIcon: CupertinoIcons.home,
       isDestructiveAction: isDestructiveAction,
       isDefaultAction: isDefaultAction,
+      child: const Text('I am a CupertinoContextMenuAction'),
     );
 
     return CupertinoApp(
@@ -42,7 +40,7 @@ void main() {
     );
     expect(finder, findsOneWidget);
     final Container container = tester.widget(finder);
-    return container.decoration as BoxDecoration;
+    return container.decoration! as BoxDecoration;
   }
 
   TextStyle _getTextStyle(WidgetTester tester) {

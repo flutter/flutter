@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -69,7 +67,7 @@ void main() {
             ),
             child: CupertinoScrollbar(
               child: ListView(
-                children: const <Widget> [SizedBox(width: 4000, height: 4000)]
+                children: const <Widget>[SizedBox(width: 4000, height: 4000)],
               ),
             ),
           ),

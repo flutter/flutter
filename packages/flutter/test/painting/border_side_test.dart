@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -17,9 +15,6 @@ void main() {
         style: BorderStyle.solid,
       ),
     );
-    expect(() => BorderSide(color: nonconst(null)), throwsAssertionError);
-    expect(() => BorderSide(width: nonconst(null)), throwsAssertionError);
-    expect(() => BorderSide(style: nonconst(null)), throwsAssertionError);
     expect(() => BorderSide(width: nonconst(-1.0)), throwsAssertionError);
     expect(
       const BorderSide(width: -0.0),
@@ -56,11 +51,8 @@ void main() {
     expect(      BorderSide.canMerge(none3, BorderSide.none), isTrue);
     expect(      BorderSide.canMerge(none3, side2), isFalse);
     expect(      BorderSide.canMerge(none3, yellowNone), isTrue);
-    expect(() => BorderSide.canMerge(null, null), throwsAssertionError);
-    expect(() => BorderSide.canMerge(null, side2), throwsAssertionError);
     expect(      BorderSide.canMerge(side2, BorderSide.none), isTrue);
     expect(      BorderSide.canMerge(side2, none3), isFalse);
-    expect(() => BorderSide.canMerge(side2, null), throwsAssertionError);
     expect(      BorderSide.canMerge(side2, side3), isTrue);
     expect(      BorderSide.canMerge(side2, yellowNone), isTrue);
     expect(      BorderSide.canMerge(side3, side2), isTrue);
@@ -78,11 +70,8 @@ void main() {
     expect(      BorderSide.merge(none3, BorderSide.none), none3);
     expect(() => BorderSide.merge(none3, side2), throwsAssertionError);
     expect(      BorderSide.merge(none3, yellowNone), none3);
-    expect(() => BorderSide.merge(null, null), throwsAssertionError);
-    expect(() => BorderSide.merge(null, side2), throwsAssertionError);
     expect(      BorderSide.merge(side2, BorderSide.none), side2);
     expect(() => BorderSide.merge(side2, none3), throwsAssertionError);
-    expect(() => BorderSide.merge(side2, null), throwsAssertionError);
     expect(      BorderSide.merge(side2, side3), side5);
     expect(      BorderSide.merge(side2, yellowNone), side2);
     expect(      BorderSide.merge(side3, side2), side5);

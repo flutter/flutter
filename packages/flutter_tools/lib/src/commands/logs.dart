@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import '../base/common.dart';
 import '../base/io.dart';
-import '../cache.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
@@ -18,6 +19,7 @@ class LogsCommand extends FlutterCommand {
       abbr: 'c',
       help: 'Clear log history before reading from logs.',
     );
+    usesDeviceTimeoutOption();
   }
 
   @override
@@ -33,7 +35,7 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
-    device = await findTargetDevice();
+    device = await findTargetDevice(includeUnsupportedDevices: true);
     if (device == null) {
       throwToolExit(null);
     }
@@ -64,12 +66,12 @@ class LogsCommand extends FlutterCommand {
     );
 
     // When terminating, close down the log reader.
-    ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
+    ProcessSignal.sigint.watch().listen((ProcessSignal signal) {
       subscription.cancel();
       globals.printStatus('');
       exitCompleter.complete(0);
     });
-    ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
+    ProcessSignal.sigterm.watch().listen((ProcessSignal signal) {
       subscription.cancel();
       exitCompleter.complete(0);
     });

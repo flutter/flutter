@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'data_table.dart';
 
@@ -35,7 +33,7 @@ abstract class DataTableSource extends ChangeNotifier {
   ///
   /// Data returned from this method must be consistent for the lifetime of the
   /// object. If the row count changes, then a new delegate must be provided.
-  DataRow getRow(int index);
+  DataRow? getRow(int index);
 
   /// Called to obtain the number of rows to tell the user are available.
   ///

@@ -6,38 +6,44 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
-
-class MockPlatform extends Mock implements Platform {}
 
 void main() {
-  group('ensureDirectoryExists', () {
-    MemoryFileSystem fs;
-    FileSystemUtils fsUtils;
+  group('fsUtils', () {
+    late MemoryFileSystem fs;
+    late FileSystemUtils fsUtils;
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       fsUtils = FileSystemUtils(
         fileSystem: fs,
-        platform: MockPlatform(),
+        platform: FakePlatform(),
       );
     });
 
-    testWithoutContext('recursively creates a directory if it does not exist', () async {
-      fsUtils.ensureDirectoryExists('foo/bar/baz.flx');
-      expect(fs.isDirectorySync('foo/bar'), true);
+    testWithoutContext('getUniqueFile creates a unique file name', () async {
+      final File fileA = fsUtils.getUniqueFile(fs.currentDirectory, 'foo', 'json')
+        ..createSync();
+      final File fileB = fsUtils.getUniqueFile(fs.currentDirectory, 'foo', 'json');
+
+      expect(fileA.path, '/foo_01.json');
+      expect(fileB.path, '/foo_02.json');
     });
 
-    testWithoutContext('throws tool exit on failure to create', () async {
-      fs.file('foo').createSync();
-      expect(() => fsUtils.ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
+    testWithoutContext('getUniqueDirectory creates a unique directory name', () async {
+      final Directory directoryA = fsUtils.getUniqueDirectory(fs.currentDirectory, 'foo')
+        ..createSync();
+      final Directory directoryB = fsUtils.getUniqueDirectory(fs.currentDirectory, 'foo');
+
+      expect(directoryA.path, '/foo_01');
+      expect(directoryB.path, '/foo_02');
     });
   });
 
@@ -45,7 +51,7 @@ void main() {
     /// Test file_systems.copyDirectorySync() using MemoryFileSystem.
     /// Copies between 2 instances of file systems which is also supported by copyDirectorySync().
     testWithoutContext('test directory copy', () async {
-      final MemoryFileSystem sourceMemoryFs = MemoryFileSystem();
+      final MemoryFileSystem sourceMemoryFs = MemoryFileSystem.test();
       const String sourcePath = '/some/origin';
       final Directory sourceDirectory = await sourceMemoryFs.directory(sourcePath).create(recursive: true);
       sourceMemoryFs.currentDirectory = sourcePath;
@@ -55,15 +61,11 @@ void main() {
       sourceMemoryFs.directory('empty_directory').createSync();
 
       // Copy to another memory file system instance.
-      final MemoryFileSystem targetMemoryFs = MemoryFileSystem();
+      final MemoryFileSystem targetMemoryFs = MemoryFileSystem.test();
       const String targetPath = '/some/non-existent/target';
       final Directory targetDirectory = targetMemoryFs.directory(targetPath);
 
-      final FileSystemUtils fsUtils = FileSystemUtils(
-        fileSystem: sourceMemoryFs,
-        platform: MockPlatform(),
-      );
-      fsUtils.copyDirectorySync(sourceDirectory, targetDirectory);
+      copyDirectory(sourceDirectory, targetDirectory);
 
       expect(targetDirectory.existsSync(), true);
       targetMemoryFs.currentDirectory = targetPath;
@@ -78,11 +80,7 @@ void main() {
     });
 
     testWithoutContext('Skip files if shouldCopyFile returns false', () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
-      final FileSystemUtils fsUtils = FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: MockPlatform(),
-      );
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final Directory origin = fileSystem.directory('/origin');
       origin.createSync();
       fileSystem.file(fileSystem.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
@@ -91,7 +89,7 @@ void main() {
       fileSystem.file(fileSystem.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
 
       final Directory destination = fileSystem.directory('/destination');
-      fsUtils.copyDirectorySync(origin, destination, shouldCopyFile: (File origin, File dest) {
+      copyDirectory(origin, destination, shouldCopyFile: (File origin, File dest) {
         return origin.basename == 'b.txt';
       });
 
@@ -102,11 +100,30 @@ void main() {
       expect(destination.childFile('a.txt').existsSync(), isFalse);
       expect(destination.childDirectory('nested').childFile('a.txt').existsSync(), isFalse);
     });
+
+    testWithoutContext('Skip directories if shouldCopyDirectory returns false', () {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final Directory origin = fileSystem.directory('/origin');
+      origin.createSync();
+      fileSystem.file(fileSystem.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
+      fileSystem.directory('/origin/nested').createSync();
+      fileSystem.file(fileSystem.path.join('origin', 'nested', 'a.txt')).writeAsStringSync('irrelevant');
+      fileSystem.file(fileSystem.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
+
+      final Directory destination = fileSystem.directory('/destination');
+      copyDirectory(origin, destination, shouldCopyDirectory: (Directory directory) {
+        return !directory.path.endsWith('nested');
+      });
+
+      expect(destination, exists);
+      expect(destination.childDirectory('nested'), isNot(exists));
+      expect(destination.childDirectory('nested').childFile('b.txt'),isNot(exists));
+    });
   });
 
   group('escapePath', () {
     testWithoutContext('on Windows', () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final FileSystemUtils fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'windows'),
@@ -117,7 +134,7 @@ void main() {
     });
 
     testWithoutContext('on Linux', () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final FileSystemUtils fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'linux'),
@@ -129,18 +146,15 @@ void main() {
   });
 
   group('LocalFileSystem', () {
-    MockIoProcessSignal mockSignal;
-    ProcessSignal signalUnderTest;
-    StreamController<io.ProcessSignal> controller;
+    late FakeProcessSignal fakeSignal;
+    late ProcessSignal signalUnderTest;
 
     setUp(() {
-      mockSignal = MockIoProcessSignal();
-      signalUnderTest = ProcessSignal(mockSignal);
-      controller = StreamController<io.ProcessSignal>();
-      when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
+      fakeSignal = FakeProcessSignal();
+      signalUnderTest = ProcessSignal(fakeSignal);
     });
 
-    testUsingContext('deletes system temp entry on a fatal signal', () async {
+    testWithoutContext('deletes system temp entry on a fatal signal', () async {
       final Completer<void> completer = Completer<void>();
       final Signals signals = Signals.test();
       final LocalFileSystem localFileSystem = LocalFileSystem.test(
@@ -155,7 +169,7 @@ void main() {
 
       expect(temp.existsSync(), isTrue);
 
-      controller.add(mockSignal);
+      fakeSignal.controller.add(fakeSignal);
       await completer.future;
 
       expect(temp.existsSync(), isFalse);
@@ -163,4 +177,10 @@ void main() {
   });
 }
 
-class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
+class FakeProcessSignal extends Fake implements io.ProcessSignal {
+  final StreamController<io.ProcessSignal> controller = StreamController<io.ProcessSignal>();
+
+  @override
+  Stream<io.ProcessSignal> watch() => controller.stream;
+}
+class FakeFile extends Fake implements File {}

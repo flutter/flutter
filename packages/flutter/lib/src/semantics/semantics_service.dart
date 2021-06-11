@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:async';
 import 'dart:ui' show TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
@@ -21,7 +20,6 @@ import 'semantics_event.dart' show AnnounceSemanticsEvent, TooltipSemanticsEvent
 class SemanticsService {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   SemanticsService._();
 
   /// Sends a semantic announcement.

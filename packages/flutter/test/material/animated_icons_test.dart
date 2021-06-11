@@ -2,19 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math show pi;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart' show Fake;
 import '../widgets/semantics_tester.dart';
 
 class MockCanvas extends Fake implements Canvas {
-  Path capturedPath;
-  Paint capturedPaint;
+  late Path capturedPath;
+  late Paint capturedPaint;
 
   @override
   void drawPath(Path path, Paint paint) {
@@ -22,13 +19,13 @@ class MockCanvas extends Fake implements Canvas {
     capturedPaint = paint;
   }
 
-  double capturedSx;
-  double capturedSy;
+  late double capturedSx;
+  late double capturedSy;
 
   @override
-  void scale(double sx, [double sy]) {
+  void scale(double sx, [double? sy]) {
     capturedSx = sx;
-    capturedSy = sy;
+    capturedSy = sy!;
   }
 
   final List<RecordedCanvasCall> invocations = <RecordedCanvasCall>[];
@@ -96,7 +93,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.capturedPaint, hasColor(0xFF666666));
   });
 
@@ -118,7 +115,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.capturedPaint, hasColor(0x80666666));
   });
 
@@ -140,7 +137,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.capturedPaint, hasColor(0xFF0000FF));
   });
 
@@ -162,7 +159,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter.paint(canvas, const Size(12.0, 12.0));
+    customPaint.painter!.paint(canvas, const Size(12.0, 12.0));
     // arrow_menu default size is 48x48 so we expect it to be scaled by 0.25.
     expect(canvas.capturedSx, 0.25);
     expect(canvas.capturedSy, 0.25);
@@ -187,7 +184,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter.paint(canvas, const Size(12.0, 12.0));
+    customPaint.painter!.paint(canvas, const Size(12.0, 12.0));
     // arrow_menu default size is 48x48 so we expect it to be scaled by 2.
     expect(canvas.capturedSx, 2);
     expect(canvas.capturedSy, 2);
@@ -230,7 +227,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.invocations, const <RecordedCanvasCall>[
       RecordedRotate(math.pi),
       RecordedTranslate(-48, -48),
@@ -254,7 +251,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.invocations, isEmpty);
   });
 
@@ -276,7 +273,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.invocations, const <RecordedCanvasCall>[
       RecordedRotate(math.pi),
       RecordedTranslate(-48, -48),

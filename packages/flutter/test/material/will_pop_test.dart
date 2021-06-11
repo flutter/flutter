@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 bool willPopValue = false;
 
 class SamplePage extends StatefulWidget {
-  const SamplePage({ Key key }) : super(key: key);
+  const SamplePage({ Key? key }) : super(key: key);
   @override
   SamplePageState createState() => SamplePageState();
 }
 
 class SamplePageState extends State<SamplePage> {
-  ModalRoute<void> _route;
+  ModalRoute<void>? _route;
 
   Future<bool> _callback() async => willPopValue;
 
@@ -45,7 +43,7 @@ class SamplePageState extends State<SamplePage> {
 int willPopCount = 0;
 
 class SampleForm extends StatelessWidget {
-  const SampleForm({ Key key, this.callback }) : super(key: key);
+  const SampleForm({ Key? key, required this.callback }) : super(key: key);
 
   final WillPopCallback callback;
 
@@ -68,7 +66,7 @@ class SampleForm extends StatelessWidget {
 
 // Expose the protected hasScopedWillPopCallback getter
 class TestPageRoute<T> extends MaterialPageRoute<T> {
-  TestPageRoute({ WidgetBuilder builder })
+  TestPageRoute({ required WidgetBuilder builder })
     : super(builder: builder, maintainState: true);
 
   bool get hasCallback => super.hasScopedWillPopCallback;
@@ -162,12 +160,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Sample Form'), findsOneWidget);
 
-    // Should not pop if callback returns null
-    willPopValue = null;
-    await tester.tap(find.byTooltip('Back'));
-    await tester.pumpAndSettle();
-    expect(find.text('Sample Form'), findsOneWidget);
-
     // Should pop if callback returns true
     willPopValue = true;
     await tester.tap(find.byTooltip('Back'));
@@ -230,8 +222,8 @@ void main() {
   });
 
   testWidgets('Form.willPop callbacks do not accumulate', (WidgetTester tester) async {
-    Future<bool> showYesNoAlert(BuildContext context) {
-      return showDialog<bool>(
+    Future<bool> showYesNoAlert(BuildContext context) async {
+      return (await showDialog<bool>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
@@ -247,7 +239,7 @@ void main() {
             ],
           );
         },
-      );
+      ))!;
     }
 
     Widget buildFrame() {
@@ -265,7 +257,7 @@ void main() {
                         return SampleForm(
                           callback: () => showYesNoAlert(context),
                         );
-                      }
+                      },
                     ));
                   },
                 ),
@@ -322,7 +314,7 @@ void main() {
   });
 
   testWidgets('Route.scopedWillPop callbacks do not accumulate', (WidgetTester tester) async {
-    StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
+    late StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
     bool contentsEmpty = false; // when true, don't include the SampleForm in the route
 
     final TestPageRoute<void> route = TestPageRoute<void>(
@@ -330,8 +322,8 @@ void main() {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             contentsSetState = setState;
-            return contentsEmpty ? Container() : SampleForm(key: UniqueKey());
-          }
+            return contentsEmpty ? Container() : SampleForm(key: UniqueKey(), callback: () async => false);
+          },
         );
       },
     );

@@ -2,23 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
-import 'image_data.dart';
 
 void main() {
   TestRenderingFlutterBinding();
 
   tearDown(() {
-    PaintingBinding.instance.imageCache.clear();
-    PaintingBinding.instance.imageCache.clearLiveImages();
+    PaintingBinding.instance!.imageCache!.clear();
+    PaintingBinding.instance!.imageCache!.clearLiveImages();
   });
 
   test('ResizeImage resizes to the correct dimensions (up)', () async {
@@ -36,7 +35,7 @@ void main() {
 
 
   test('ResizeImage resizes to the correct dimensions (down)', () async {
-    final Uint8List bytes = Uint8List.fromList(kBlueSquare);
+    final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
     expect(rawImageSize, const Size(50, 50));
@@ -100,12 +99,12 @@ void main() {
     final MemoryImage memoryImage = MemoryImage(bytes);
     final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
 
-    final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) {
+    Future<ui.Codec> decode(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
       expect(cacheWidth, 123);
       expect(cacheHeight, 321);
       expect(allowUpscaling, false);
-      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
-    };
+      return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
+    }
 
     resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
   });
@@ -137,8 +136,10 @@ void main() {
   });
 }
 
-Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
-    {ImageConfiguration configuration = ImageConfiguration.empty}) async {
+Future<Size> _resolveAndGetSize(
+  ImageProvider imageProvider, {
+  ImageConfiguration configuration = ImageConfiguration.empty,
+}) async {
   final ImageStream stream = imageProvider.resolve(configuration);
   final Completer<Size> completer = Completer<Size>();
   final ImageStreamListener listener =
@@ -149,7 +150,7 @@ Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
     }
   );
   stream.addListener(listener);
-  return await completer.future;
+  return completer.future;
 }
 
 // This version of MemoryImage guarantees obtainKey returns a future that has not been

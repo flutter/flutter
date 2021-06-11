@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -16,6 +13,8 @@ import 'button_style_button.dart';
 import 'color_scheme.dart';
 import 'constants.dart';
 import 'elevated_button_theme.dart';
+import 'ink_ripple.dart';
+import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -35,9 +34,9 @@ import 'theme_data.dart';
 ///
 /// The elevated button's default style is defined by
 /// [defaultStyleOf].  The style of this elevated button can be
-/// overridden with its [style] parameter. The style of all contained
+/// overridden with its [style] parameter. The style of all elevated
 /// buttons in a subtree can be overridden with the
-/// [ElevatedButtonTheme], and the style of all of the contained
+/// [ElevatedButtonTheme], and the style of all of the elevated
 /// buttons in an app can be overridden with the [Theme]'s
 /// [ThemeData.elevatedButtonTheme] property.
 ///
@@ -46,6 +45,39 @@ import 'theme_data.dart';
 ///
 /// If [onPressed] and [onLongPress] callbacks are null, then the
 /// button will be disabled.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This sample produces an enabled and a disabled ElevatedButton.
+///
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   final ButtonStyle style =
+///     ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
+///
+///   return Center(
+///     child: Column(
+///       mainAxisSize: MainAxisSize.min,
+///       children: <Widget>[
+///         ElevatedButton(
+///            style: style,
+///            onPressed: null,
+///            child: const Text('Disabled'),
+///         ),
+///         const SizedBox(height: 30),
+///         ElevatedButton(
+///           style: style,
+///           onPressed: () {},
+///           child: const Text('Enabled'),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+///
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -57,14 +89,14 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
   const ElevatedButton({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ButtonStyle? style,
+    FocusNode? focusNode,
     bool autofocus = false,
     Clip clipBehavior = Clip.none,
-    @required Widget child,
+    required Widget? child,
   }) : super(
     key: key,
     onPressed: onPressed,
@@ -84,21 +116,21 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// The [icon] and [label] arguments must not be null.
   factory ElevatedButton.icon({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus,
-    Clip clipBehavior,
-    @required Widget icon,
-    @required Widget label,
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ButtonStyle? style,
+    FocusNode? focusNode,
+    bool? autofocus,
+    Clip? clipBehavior,
+    required Widget icon,
+    required Widget label,
   }) = _ElevatedButtonWithIcon;
 
   /// A static convenience method that constructs an elevated button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [onPrimary], and [onSurface] colors are used to to create a
+  /// The [onPrimary], and [onSurface] colors are used to create a
   /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value in the same
   /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
   /// names. Specify a value for [onPrimary] to specify the color of the
@@ -133,41 +165,45 @@ class ElevatedButton extends ButtonStyleButton {
   /// )
   /// ```
   static ButtonStyle styleFrom({
-    Color primary,
-    Color onPrimary,
-    Color onSurface,
-    Color shadowColor,
-    double elevation,
-    TextStyle textStyle,
-    EdgeInsetsGeometry padding,
-    Size minimumSize,
-    BorderSide side,
-    OutlinedBorder shape,
-    MouseCursor enabledMouseCursor,
-    MouseCursor disabledMouseCursor,
-    VisualDensity visualDensity,
-    MaterialTapTargetSize tapTargetSize,
-    Duration animationDuration,
-    bool enableFeedback,
+    Color? primary,
+    Color? onPrimary,
+    Color? onSurface,
+    Color? shadowColor,
+    double? elevation,
+    TextStyle? textStyle,
+    EdgeInsetsGeometry? padding,
+    Size? minimumSize,
+    Size? fixedSize,
+    Size? maximumSize,
+    BorderSide? side,
+    OutlinedBorder? shape,
+    MouseCursor? enabledMouseCursor,
+    MouseCursor? disabledMouseCursor,
+    VisualDensity? visualDensity,
+    MaterialTapTargetSize? tapTargetSize,
+    Duration? animationDuration,
+    bool? enableFeedback,
+    AlignmentGeometry? alignment,
+    InteractiveInkFeatureFactory? splashFactory,
   }) {
-    final MaterialStateProperty<Color> backgroundColor = (onSurface == null && primary == null)
+    final MaterialStateProperty<Color?>? backgroundColor = (onSurface == null && primary == null)
       ? null
       : _ElevatedButtonDefaultBackground(primary, onSurface);
-    final MaterialStateProperty<Color> foregroundColor = (onSurface == null && onPrimary == null)
+    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && onPrimary == null)
       ? null
       : _ElevatedButtonDefaultForeground(onPrimary, onSurface);
-    final MaterialStateProperty<Color> overlayColor = (onPrimary == null)
+    final MaterialStateProperty<Color?>? overlayColor = (onPrimary == null)
       ? null
       : _ElevatedButtonDefaultOverlay(onPrimary);
-    final MaterialStateProperty<double> elevationValue = (elevation == null)
+    final MaterialStateProperty<double>? elevationValue = (elevation == null)
       ? null
       : _ElevatedButtonDefaultElevation(elevation);
-    final MaterialStateProperty<MouseCursor> mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
+    final MaterialStateProperty<MouseCursor?>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
       : _ElevatedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
-      textStyle: MaterialStateProperty.all<TextStyle>(textStyle),
+      textStyle: MaterialStateProperty.all<TextStyle?>(textStyle),
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       overlayColor: overlayColor,
@@ -175,6 +211,8 @@ class ElevatedButton extends ButtonStyleButton {
       elevation: elevationValue,
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
+      fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
+      maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
       mouseCursor: mouseCursor,
@@ -182,6 +220,8 @@ class ElevatedButton extends ButtonStyleButton {
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
+      alignment: alignment,
+      splashFactory: splashFactory,
     );
   }
 
@@ -197,7 +237,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// "Theme.foo" is shorthand for `Theme.of(context).foo`. Color
   /// scheme values like "onSurface(0.38)" are shorthand for
   /// `onSurface.withOpacity(0.38)`. [MaterialStateProperty] valued
-  /// properties that are not followed by by a sublist have the same
+  /// properties that are not followed by a sublist have the same
   /// value for all states, otherwise the values are as specified for
   /// each state, and "others" means all other states.
   ///
@@ -222,15 +262,18 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `shadowColor` - Theme.shadowColor
   /// * `elevation`
   ///   * disabled - 0
-  ///   * hovered or focused - 2
-  ///   * pressed - 6
+  ///   * default - 2
+  ///   * hovered or focused - 4
+  ///   * pressed - 8
   /// * `padding`
   ///   * textScaleFactor <= 1 - horizontal(16)
   ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(16), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
-  /// * `side` - BorderSide.none
+  /// * `fixedSize` - null
+  /// * `maximumSize` - Size.infinite
+  /// * `side` - null
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
   ///   * disabled - SystemMouseCursors.forbidden
@@ -239,6 +282,8 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
+  /// * `alignment` - Alignment.center
+  /// * `splashFactory` - InkRipple.splashFactory
   ///
   /// The default padding values for the [ElevatedButton.icon] factory are slightly different:
   ///
@@ -247,6 +292,11 @@ class ElevatedButton extends ButtonStyleButton {
   ///   * `1 < textScaleFactor <= 2` - lerp(start(12) end(16), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
+  ///
+  /// The default value for `side`, which defines the appearance of the button's
+  /// outline, is null. That means that the outline is defined by the button
+  /// shape's [OutlinedBorder.side]. Typically the default value of an
+  /// [OutlinedBorder]'s side is [BorderSide.none], so an outline is not drawn.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -256,7 +306,7 @@ class ElevatedButton extends ButtonStyleButton {
       const EdgeInsets.symmetric(horizontal: 16),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
+      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
 
     return styleFrom(
@@ -268,7 +318,8 @@ class ElevatedButton extends ButtonStyleButton {
       textStyle: theme.textTheme.button,
       padding: scaledPadding,
       minimumSize: const Size(64, 36),
-      side: BorderSide.none,
+      maximumSize: Size.infinite,
+      side: null,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
       enabledMouseCursor: SystemMouseCursors.click,
       disabledMouseCursor: SystemMouseCursors.forbidden,
@@ -276,26 +327,28 @@ class ElevatedButton extends ButtonStyleButton {
       tapTargetSize: theme.materialTapTargetSize,
       animationDuration: kThemeChangeDuration,
       enableFeedback: true,
+      alignment: Alignment.center,
+      splashFactory: InkRipple.splashFactory,
     );
   }
 
   /// Returns the [ElevatedButtonThemeData.style] of the closest
   /// [ElevatedButtonTheme] ancestor.
   @override
-  ButtonStyle themeStyleOf(BuildContext context) {
-    return ElevatedButtonTheme.of(context)?.style;
+  ButtonStyle? themeStyleOf(BuildContext context) {
+    return ElevatedButtonTheme.of(context).style;
   }
 }
 
 @immutable
-class _ElevatedButtonDefaultBackground extends MaterialStateProperty<Color> with Diagnosticable {
+class _ElevatedButtonDefaultBackground extends MaterialStateProperty<Color?> with Diagnosticable {
   _ElevatedButtonDefaultBackground(this.primary, this.onSurface);
 
-  final Color primary;
-  final Color onSurface;
+  final Color? primary;
+  final Color? onSurface;
 
   @override
-  Color resolve(Set<MaterialState> states) {
+  Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled))
       return onSurface?.withOpacity(0.12);
     return primary;
@@ -303,14 +356,14 @@ class _ElevatedButtonDefaultBackground extends MaterialStateProperty<Color> with
 }
 
 @immutable
-class _ElevatedButtonDefaultForeground extends MaterialStateProperty<Color> with Diagnosticable {
+class _ElevatedButtonDefaultForeground extends MaterialStateProperty<Color?> with Diagnosticable {
   _ElevatedButtonDefaultForeground(this.onPrimary, this.onSurface);
 
-  final Color onPrimary;
-  final Color onSurface;
+  final Color? onPrimary;
+  final Color? onSurface;
 
   @override
-  Color resolve(Set<MaterialState> states) {
+  Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled))
       return onSurface?.withOpacity(0.38);
     return onPrimary;
@@ -318,17 +371,17 @@ class _ElevatedButtonDefaultForeground extends MaterialStateProperty<Color> with
 }
 
 @immutable
-class _ElevatedButtonDefaultOverlay extends MaterialStateProperty<Color> with Diagnosticable {
+class _ElevatedButtonDefaultOverlay extends MaterialStateProperty<Color?> with Diagnosticable {
   _ElevatedButtonDefaultOverlay(this.onPrimary);
 
   final Color onPrimary;
 
   @override
-  Color resolve(Set<MaterialState> states) {
+  Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.hovered))
-      return onPrimary?.withOpacity(0.08);
+      return onPrimary.withOpacity(0.08);
     if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
-      return onPrimary?.withOpacity(0.24);
+      return onPrimary.withOpacity(0.24);
     return null;
   }
 }
@@ -354,14 +407,14 @@ class _ElevatedButtonDefaultElevation extends MaterialStateProperty<double> with
 }
 
 @immutable
-class _ElevatedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> with Diagnosticable {
+class _ElevatedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor?> with Diagnosticable {
   _ElevatedButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
 
-  final MouseCursor enabledCursor;
-  final MouseCursor disabledCursor;
+  final MouseCursor? enabledCursor;
+  final MouseCursor? disabledCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled))
       return disabledCursor;
     return enabledCursor;
@@ -370,15 +423,15 @@ class _ElevatedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCurso
 
 class _ElevatedButtonWithIcon extends ElevatedButton {
   _ElevatedButtonWithIcon({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus,
-    Clip clipBehavior,
-    @required Widget icon,
-    @required Widget label,
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ButtonStyle? style,
+    FocusNode? focusNode,
+    bool? autofocus,
+    Clip? clipBehavior,
+    required Widget icon,
+    required Widget label,
   }) : assert(icon != null),
        assert(label != null),
        super(
@@ -398,162 +451,27 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
       const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
+      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
+      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
     );
   }
 }
 
 class _ElevatedButtonWithIconChild extends StatelessWidget {
-  const _ElevatedButtonWithIconChild({ Key key, this.label, this.icon }) : super(key: key);
+  const _ElevatedButtonWithIconChild({ Key? key, required this.label, required this.icon }) : super(key: key);
 
   final Widget label;
   final Widget icon;
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1;
-    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1));
+    final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
+    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), label],
-    );
-  }
-}
-
-/// Please use [ElevatedButton].
-@Deprecated(
-  'This class was briefly released with the wrong name. The correct name is ElevatedButton. '
-  'This feature was deprecated after v1.20.0-2.0.pre.'
-)
-class ContainedButton extends ElevatedButton {
-  /// Please use [new ElevatedButton].
-  const ContainedButton({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
-    @required Widget child,
-  }) : super(
-    key: key,
-    onPressed: onPressed,
-    onLongPress: onLongPress,
-    style: style,
-    focusNode: focusNode,
-    autofocus: autofocus,
-    clipBehavior: clipBehavior,
-    child: child,
-  );
-
-  /// Please use [new ElevatedButton.icon].
-  factory ContainedButton.icon({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus,
-    Clip clipBehavior,
-    @required Widget icon,
-    @required Widget label,
-  }) = _ContainedButtonWithIcon;
-
-  /// Please use [ElevatedButton.styleFrom].
-  static ButtonStyle styleFrom({
-    Color primary,
-    Color onPrimary,
-    Color onSurface,
-    Color shadowColor,
-    double elevation,
-    TextStyle textStyle,
-    EdgeInsetsGeometry padding,
-    Size minimumSize,
-    BorderSide side,
-    OutlinedBorder shape,
-    MouseCursor enabledMouseCursor,
-    MouseCursor disabledMouseCursor,
-    VisualDensity visualDensity,
-    MaterialTapTargetSize tapTargetSize,
-    Duration animationDuration,
-    bool enableFeedback,
-  }) {
-    return ElevatedButton.styleFrom(
-      primary: primary,
-      onPrimary: onPrimary,
-      onSurface: onSurface,
-      shadowColor: shadowColor,
-      elevation: elevation,
-      textStyle: textStyle,
-      padding: padding,
-      minimumSize: minimumSize,
-      side: side,
-      shape: shape,
-      enabledMouseCursor: enabledMouseCursor,
-      disabledMouseCursor: disabledMouseCursor,
-      visualDensity: visualDensity,
-      tapTargetSize: tapTargetSize,
-      animationDuration: animationDuration,
-      enableFeedback: enableFeedback,
-    );
-  }
-}
-
-class _ContainedButtonWithIcon extends ContainedButton {
-  _ContainedButtonWithIcon({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus,
-    Clip clipBehavior,
-    @required Widget icon,
-    @required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super(
-         key: key,
-         onPressed: onPressed,
-         onLongPress: onLongPress,
-         style: style,
-         focusNode: focusNode,
-         autofocus: autofocus ?? false,
-         clipBehavior: clipBehavior ?? Clip.none,
-         child: _ContainedButtonWithIconChild(icon: icon, label: label),
-      );
-
-  @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
-    );
-    return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
-    );
-  }
-}
-
-class _ContainedButtonWithIconChild extends StatelessWidget {
-  const _ContainedButtonWithIconChild({ Key key, this.label, this.icon }) : super(key: key);
-
-  final Widget label;
-  final Widget icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final double scale = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1;
-    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1));
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), label],
+      children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],
     );
   }
 }

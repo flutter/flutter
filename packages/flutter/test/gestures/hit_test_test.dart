@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/gestures.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
-
-import '../flutter_test_alternative.dart';
 
 void main() {
   test('wrapped HitTestResult gets HitTestEntry added to wrapping HitTestResult', () async {
@@ -38,7 +35,7 @@ void main() {
   });
 
   test('HitTestResult should correctly push and pop transforms', () {
-    Matrix4 currentTransform(HitTestResult targetResult) {
+    Matrix4? currentTransform(HitTestResult targetResult) {
       final HitTestEntry entry = HitTestEntry(_DummyHitTestTarget());
       targetResult.add(entry);
       return entry.transform;
@@ -78,7 +75,7 @@ void main() {
   });
 
   test('HitTestResult should correctly push and pop offsets', () {
-    Matrix4 currentTransform(HitTestResult targetResult) {
+    Matrix4? currentTransform(HitTestResult targetResult) {
       final HitTestEntry entry = HitTestEntry(_DummyHitTestTarget());
       targetResult.add(entry);
       return entry.transform;

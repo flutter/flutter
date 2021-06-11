@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -41,13 +38,13 @@ class TestTree {
       ),
     );
   }
-  RenderBox root;
-  RenderConstrainedBox child;
+  late RenderBox root;
+  late RenderConstrainedBox child;
   bool painted = false;
 }
 
 class MutableCompositor extends RenderProxyBox {
-  MutableCompositor({ RenderBox child }) : super(child);
+  MutableCompositor({ required RenderBox child }) : super(child);
   bool _alwaysComposite = false;
   @override
   bool get alwaysNeedsCompositing => _alwaysComposite;
@@ -69,7 +66,7 @@ class TestCompositingBitsTree {
                 onPaint: () { painted = true; },
               ),
               child: child = RenderConstrainedBox(
-                additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0)
+                additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
               ),
             ),
           ),
@@ -77,9 +74,9 @@ class TestCompositingBitsTree {
       ),
     );
   }
-  RenderBox root;
-  MutableCompositor compositor;
-  RenderConstrainedBox child;
+  late RenderBox root;
+  late MutableCompositor compositor;
+  late RenderConstrainedBox child;
   bool painted = false;
 }
 
@@ -136,7 +133,7 @@ void main() {
     final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
       listener: () {
         ++semanticsUpdateCount;
-      }
+      },
     );
     // Lay out, composite, paint, and update semantics
     layout(testTree.root, phase: EnginePhase.flushSemantics);
@@ -157,9 +154,9 @@ void main() {
     final TestTree testTree = TestTree();
     int semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
-        listener: () {
-          ++semanticsUpdateCount;
-        }
+      listener: () {
+        ++semanticsUpdateCount;
+      },
     );
     // Lay out, composite, paint, and update semantics
     layout(testTree.root, phase: EnginePhase.flushSemantics);

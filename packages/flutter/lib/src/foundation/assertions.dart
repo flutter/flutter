@@ -11,10 +11,11 @@ import 'print.dart';
 import 'stack_frame.dart';
 
 // Examples can assume:
-// String runtimeType;
-// bool draconisAlive;
-// bool draconisAmulet;
-// Diagnosticable draconis;
+// late String runtimeType;
+// late bool draconisAlive;
+// late bool draconisAmulet;
+// late Diagnosticable draconis;
+// void methodThatMayThrow() { }
 
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
@@ -93,7 +94,8 @@ class PartialStackFrame {
 /// A class that filters stack frames for additional filtering on
 /// [FlutterError.defaultStackFilter].
 abstract class StackFilter {
-  /// A const constructor to allow subclasses to be const.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const StackFilter();
 
   /// Filters the list of [StackFrame]s by updating corresponding indices in
@@ -378,7 +380,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 /// See also:
 ///
 ///   * [FlutterError.onError], which is called whenever the Flutter framework
-///     catches an error
+///     catches an error.
 class FlutterErrorDetails with Diagnosticable {
   /// Creates a [FlutterErrorDetails] object with the given arguments setting
   /// the object's properties.
@@ -390,20 +392,20 @@ class FlutterErrorDetails with Diagnosticable {
   /// their default values. (`throw null` results in a
   /// [NullThrownError] exception.)
   const FlutterErrorDetails({
-    this.exception,
+    required this.exception,
     this.stack,
     this.library = 'Flutter framework',
     this.context,
     this.stackFilter,
     this.informationCollector,
     this.silent = false,
-  });
+  }) : assert(exception != null);
 
   /// Creates a copy of the error details but with the given fields replaced
   /// with new values.
   FlutterErrorDetails copyWith({
     DiagnosticsNode? context,
-    dynamic exception,
+    Object? exception,
     InformationCollector? informationCollector,
     String? library,
     bool? silent,
@@ -437,7 +439,7 @@ class FlutterErrorDetails with Diagnosticable {
 
   /// The exception. Often this will be an [AssertionError], maybe specifically
   /// a [FlutterError]. However, this could be any value at all.
-  final dynamic exception;
+  final Object exception;
 
   /// The stack trace from where the [exception] was thrown (as opposed to where
   /// it was caught).
@@ -552,7 +554,7 @@ class FlutterErrorDetails with Diagnosticable {
       // some code snippets. This leads to ugly messages. To avoid this, we move
       // the assertion message up to before the code snippets, separated by a
       // newline, if we recognize that format is being used.
-      final Object? message = exception.message;
+      final Object? message = (exception as AssertionError).message;
       final String fullMessage = exception.toString();
       if (message is String && message != fullMessage) {
         if (fullMessage.length > message.length) {
@@ -586,11 +588,12 @@ class FlutterErrorDetails with Diagnosticable {
   }
 
   Diagnosticable? _exceptionToDiagnosticable() {
+    final Object exception = this.exception;
     if (exception is FlutterError) {
-      return exception as FlutterError;
+      return exception;
     }
     if (exception is AssertionError && exception.message is FlutterError) {
-      return exception.message as FlutterError;
+      return exception.message! as FlutterError;
     }
     return null;
   }
@@ -628,7 +631,7 @@ class FlutterErrorDetails with Diagnosticable {
     } else if (exception is num) {
       properties.add(ErrorDescription('The number $exception was $verb.'));
     } else {
-      DiagnosticsNode errorName;
+      final DiagnosticsNode errorName;
       if (exception is AssertionError) {
         errorName = ErrorDescription('assertion');
       } else if (exception is String) {
@@ -674,7 +677,7 @@ class FlutterErrorDetails with Diagnosticable {
             'provide substantially more information in this error message to help you determine '
             'and fix the underlying cause.\n'
             'In either case, please report this assertion by filing a bug on GitHub:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+            '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
           ));
         }
       }
@@ -800,17 +803,17 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
         ErrorSummary('FlutterError is missing a summary.'),
         ErrorDescription(
           'All FlutterError objects should start with a short (one line) '
-          'summary description of the problem that was detected.'
+          'summary description of the problem that was detected.',
         ),
         DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace),
         ErrorDescription(
           '\nThis error should still help you solve your problem, '
           'however please also report this malformed error in the '
           'framework by filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
         ),
-      ],
-    ));
+      ]),
+    );
     assert(() {
       final Iterable<DiagnosticsNode> summaries = diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.summary);
       if (summaries.length > 1) {
@@ -819,7 +822,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           ErrorDescription(
             'All FlutterError objects should have only a single short '
             '(one line) summary description of the problem that was '
-            'detected.'
+            'detected.',
           ),
           DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace),
           ErrorDescription('\nThe malformed error has ${summaries.length} summaries.'),
@@ -833,7 +836,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           '\nThis error should still help you solve your problem, '
           'however please also report this malformed error in the '
           'framework by filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
         ));
         throw FlutterError.fromParts(message);
       }
@@ -874,7 +877,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// Do not call [onError] directly, instead, call [reportError], which
   /// forwards to [onError] if it is not null.
-  static FlutterExceptionHandler? onError = (FlutterErrorDetails details) => presentError(details);
+  static FlutterExceptionHandler? onError = presentError;
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].
   ///
@@ -893,13 +896,15 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// ```dart
   /// FlutterError.demangleStackTrace = (StackTrace stackTrace) {
   ///   if (stack is stack_trace.Trace)
-  //      return stack.vmTrace;
-  //    if (stack is stack_trace.Chain)
-  //      return stack.toTrace().vmTrace;
-  //    return stack;
+  ///     return stack.vmTrace;
+  ///   if (stack is stack_trace.Chain)
+  ///     return stack.toTrace().vmTrace;
+  ///   return stack;
   /// };
   /// ```
-  static StackTraceDemangler demangleStackTrace = (StackTrace stackTrace) => stackTrace;
+  static StackTraceDemangler demangleStackTrace = _defaultStackTraceDemangler;
+
+  static StackTrace _defaultStackTraceDemangler(StackTrace stackTrace) => stackTrace;
 
   /// Called whenever the Flutter framework wants to present an error to the
   /// users.
@@ -943,22 +948,32 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   static void dumpErrorToConsole(FlutterErrorDetails details, { bool forceReport = false }) {
     assert(details != null);
     assert(details.exception != null);
-    bool reportError = details.silent != true; // could be null
+    bool isInDebugMode = false;
     assert(() {
       // In checked mode, we ignore the "silent" flag.
-      reportError = true;
+      isInDebugMode = true;
       return true;
     }());
+    final bool reportError = isInDebugMode || details.silent != true; // could be null
     if (!reportError && !forceReport)
       return;
     if (_errorCount == 0 || forceReport) {
-      debugPrint(
-        TextTreeRenderer(
-          wrapWidth: wrapWidth,
-          wrapWidthProperties: wrapWidth,
-          maxDescendentsTruncatableNode: 5,
-        ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
-      );
+      // Diagnostics is only available in debug mode. In profile and release modes fallback to plain print.
+      if (isInDebugMode) {
+        debugPrint(
+          TextTreeRenderer(
+            wrapWidth: wrapWidth,
+            wrapWidthProperties: wrapWidth,
+            maxDescendentsTruncatableNode: 5,
+          ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
+        );
+      } else {
+        debugPrintStack(
+          stackTrace: details.stack,
+          label: details.exception.toString(),
+          maxFrames: 100,
+        );
+      }
     } else {
       debugPrint('Another exception was thrown: ${details.summary}');
     }
@@ -1049,7 +1064,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     final List<String> where = <String>[
       for (MapEntry<String, int> entry in removedPackagesAndClasses.entries)
         if (entry.value > 0)
-          entry.key
+          entry.key,
     ]..sort();
     if (skipped == 1) {
       result.add('(elided one frame from ${where.single})');
@@ -1085,12 +1100,35 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   }
 
   /// Calls [onError] with the given details, unless it is null.
+  ///
+  /// {@tool snippet}
+  /// When calling this from a `catch` block consider annotating the method
+  /// containing the `catch` block with
+  /// `@pragma('vm:notify-debugger-on-exception')` to allow an attached debugger
+  /// to treat the exception as unhandled. This means instead of executing the
+  /// `catch` block, the debugger can break at the original source location from
+  /// which the exception was thrown.
+  ///
+  /// ```dart
+  /// @pragma('vm:notify-debugger-on-exception')
+  /// void doSomething() {
+  ///   try {
+  ///     methodThatMayThrow();
+  ///   } catch (exception, stack) {
+  ///     FlutterError.reportError(FlutterErrorDetails(
+  ///       exception: exception,
+  ///       stack: stack,
+  ///       library: 'example library',
+  ///       context: ErrorDescription('while doing something'),
+  ///     ));
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   static void reportError(FlutterErrorDetails details) {
     assert(details != null);
     assert(details.exception != null);
-    if (onError != null) {
-      onError!(details);
-    }
+    onError?.call(details);
   }
 }
 
@@ -1180,6 +1218,9 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
   static DiagnosticsNode _createStackFrame(String frame) {
     return DiagnosticsNode.message(frame, allowWrap: false);
   }
+
+  @override
+  bool get allowTruncate => false;
 }
 
 class _FlutterErrorDetailsNode extends DiagnosticableNode<FlutterErrorDetails> {

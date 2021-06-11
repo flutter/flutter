@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget wrap({ Widget child }) {
+Widget wrap({ required Widget child }) {
   return MediaQuery(
     data: const MediaQueryData(),
     child: Directionality(
@@ -38,7 +37,7 @@ void main() {
     expect(log, equals(<dynamic>[false, '-', false]));
   });
 
-  testWidgets('SwitchListTile control test', (WidgetTester tester) async {
+  testWidgets('SwitchListTile semantics test', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(wrap(
       child: Column(
@@ -51,14 +50,14 @@ void main() {
           ),
           CheckboxListTile(
             value: true,
-            onChanged: (bool value) { },
+            onChanged: (bool? value) { },
             title: const Text('BBB'),
             secondary: const Text('bbb'),
           ),
           RadioListTile<bool>(
             value: true,
             groupValue: false,
-            onChanged: (bool value) { },
+            onChanged: (bool? value) { },
             title: const Text('CCC'),
             secondary: const Text('ccc'),
           ),
@@ -278,7 +277,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -298,7 +297,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
   testWidgets('SwitchListTile controlAffinity test', (WidgetTester tester) async {
@@ -339,5 +338,98 @@ void main() {
     // at trailing edge. This also covers test for ListTileControlAffinity.trailing.
     expect(listTile.leading.runtimeType, Icon);
     expect(listTile.trailing.runtimeType, Switch);
+  });
+
+  testWidgets('SwitchListTile respects shape', (WidgetTester tester) async {
+    const ShapeBorder shapeBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.horizontal(right: Radius.circular(100)),
+    );
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: SwitchListTile(
+          value: true,
+          onChanged: null,
+          title: Text('Title'),
+          shape: shapeBorder,
+        ),
+      ),
+    ));
+
+    expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
+  });
+
+  testWidgets('SwitchListTile respects tileColor', (WidgetTester tester) async {
+    final Color tileColor = Colors.red.shade500;
+
+    await tester.pumpWidget(
+      wrap(
+        child: Center(
+          child: SwitchListTile(
+            value: false,
+            onChanged: null,
+            title: const Text('Title'),
+            tileColor: tileColor,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Material), paints..path(color: tileColor));
+  });
+
+  testWidgets('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
+    final Color selectedTileColor = Colors.green.shade500;
+
+    await tester.pumpWidget(
+      wrap(
+        child: Center(
+          child: SwitchListTile(
+            value: false,
+            onChanged: null,
+            title: const Text('Title'),
+            selected: true,
+            selectedTileColor: selectedTileColor,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Material), paints..path(color: selectedTileColor));
+  });
+
+  testWidgets('SwitchListTile selected item text Color', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/76909
+
+    const Color activeColor = Color(0xff00ff00);
+
+    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          toggleableActiveColor: toggleableActiveColor,
+        ),
+        home: Scaffold(
+          body: Center(
+            child: SwitchListTile(
+              activeColor: activeColor,
+              selected: true,
+              title: const Text('title'),
+              value: true,
+              onChanged: (bool? value) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color? textColor(String text) {
+      return tester.renderObject<RenderParagraph>(find.text(text)).text.style?.color;
+    }
+
+    await tester.pumpWidget(buildFrame(toggleableActiveColor: activeColor));
+    expect(textColor('title'), activeColor);
+
+    await tester.pumpWidget(buildFrame(activeColor: activeColor));
+    expect(textColor('title'), activeColor);
   });
 }

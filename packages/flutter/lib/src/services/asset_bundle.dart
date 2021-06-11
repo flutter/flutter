@@ -10,7 +10,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
-import 'binary_messenger.dart';
+import 'binding.dart';
 
 /// A collection of resources used by the application.
 ///
@@ -66,16 +66,15 @@ abstract class AssetBundle {
   /// implementation.)
   Future<String> loadString(String key, { bool cache = true }) async {
     final ByteData data = await load(key);
-    // Note: data has a non-nullable type, but might be null when running with
-    // weak checking, so we need to null check it anyway (and ignore the warning
-    // that the null-handling logic is dead code).
     if (data == null)
-      throw FlutterError('Unable to load asset: $key'); // ignore: dead_code
-    if (data.lengthInBytes < 10 * 1024) {
-      // 10KB takes about 3ms to parse on a Pixel 2 XL.
-      // See: https://github.com/dart-lang/sdk/issues/31954
+      throw FlutterError('Unable to load asset: $key');
+    // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
+    // on a Pixel 4.
+    if (data.lengthInBytes < 50 * 1024) {
       return utf8.decode(data.buffer.asUint8List());
     }
+    // For strings larger than 50 KB, run the computation in an isolate to
+    // avoid causing main thread jank.
     return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
   }
 
@@ -88,7 +87,7 @@ abstract class AssetBundle {
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
-  Future<T> loadStructuredData<T>(String key, Future<T> parser(String value));
+  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser);
 
   /// If this is a caching asset bundle, and the given key describes a cached
   /// asset, then evict the asset from the cache so that the next time it is
@@ -134,7 +133,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> parser(String value)) async {
+  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
     assert(key != null);
     assert(parser != null);
     return parser(await loadString(key));
@@ -178,11 +177,11 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> parser(String value)) {
+  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) {
     assert(key != null);
     assert(parser != null);
     if (_structuredDataCache.containsKey(key))
-      return _structuredDataCache[key] as Future<T>;
+      return _structuredDataCache[key]! as Future<T>;
     Completer<T>? completer;
     Future<T>? result;
     loadString(key, cache: false).then<T>(parser).then<void>((T value) {
@@ -220,7 +219,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData? asset =
-        await defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
+        await ServicesBinding.instance!.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null)
       throw FlutterError('Unable to load asset: $key');
     return asset;

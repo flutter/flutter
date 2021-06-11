@@ -8,10 +8,12 @@ import 'package:flutter_driver/driver_extension.dart';
 /// This application does nothing but show a empty screen.
 void main() {
   enableFlutterDriverExtension();
-  runApp(Empty());
+  runApp(const Empty());
 }
 
 class Empty extends StatelessWidget {
+  const Empty({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) => Container();
 }

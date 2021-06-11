@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Kleebi",
   "selectAllButtonLabel": "Vali kõik",
   "tabSemanticsLabel": "$tabIndex. vaheleht $tabCount-st",
-  "modalBarrierDismissLabel": "Loobu"
+  "modalBarrierDismissLabel": "Loobu",
+  "searchTextFieldPlaceholderLabel": "Otsige"
 }

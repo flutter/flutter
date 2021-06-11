@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter/foundation.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -40,10 +37,12 @@ class TextureBox extends RenderBox {
   /// Creates a box backed by the texture identified by [textureId], and use
   /// [filterQuality] to set texture's [FilterQuality].
   TextureBox({
-    @required int textureId,
+    required int textureId,
+    bool freeze = false,
     FilterQuality filterQuality = FilterQuality.low,
   }) : assert(textureId != null),
       _textureId = textureId,
+      _freeze = freeze,
       _filterQuality = filterQuality;
 
   /// The identity of the backend texture.
@@ -57,15 +56,26 @@ class TextureBox extends RenderBox {
     }
   }
 
-  /// {@macro FilterQuality}
+  /// When true the texture will not be updated with new frames.
+  bool get freeze => _freeze;
+  bool _freeze;
+  set freeze(bool value) {
+    assert(value != null);
+    if (value != _freeze) {
+      _freeze = value;
+      markNeedsPaint();
+    }
+  }
+
+  /// {@macro flutter.widgets.Texture.filterQuality}
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {
     assert(value != null);
-    if (value == _filterQuality)
-      return;
-    _filterQuality = value;
-    markNeedsPaint();
+    if (value != _filterQuality) {
+      _filterQuality = value;
+      markNeedsPaint();
+    }
   }
 
   @override
@@ -78,8 +88,8 @@ class TextureBox extends RenderBox {
   bool get isRepaintBoundary => true;
 
   @override
-  void performResize() {
-    size = constraints.biggest;
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
   }
 
   @override
@@ -87,11 +97,10 @@ class TextureBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_textureId == null)
-      return;
     context.addLayer(TextureLayer(
       rect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       textureId: _textureId,
+      freeze: freeze,
       filterQuality: _filterQuality,
     ));
   }

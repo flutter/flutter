@@ -5,20 +5,21 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show debugDumpRenderTree;
 
 class CardModel {
-  CardModel(this.value, this.height) {
+  CardModel(this.value, this.height) :
     textController = TextEditingController(text: 'Item $value');
-  }
+
   int value;
   double height;
   int get color => ((value % 9) + 1) * 100;
-  TextEditingController textController;
+  final TextEditingController textController;
   Key get key => ObjectKey(this);
 }
 
 class CardCollection extends StatefulWidget {
+  const CardCollection({Key? key}) : super(key: key);
+
   @override
   CardCollectionState createState() => CardCollectionState();
 }
@@ -40,7 +41,7 @@ class CardCollectionState extends State<CardCollection> {
   ];
 
   MaterialColor _primaryColor = Colors.deepPurple;
-  List<CardModel> _cardModels;
+  List<CardModel> _cardModels = <CardModel>[];
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   TextAlign _textAlign = TextAlign.center;
   bool _editable = false;
@@ -163,25 +164,25 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  void _selectColor(MaterialColor selection) {
+  void _selectColor(MaterialColor? selection) {
     setState(() {
-      _primaryColor = selection;
+      _primaryColor = selection!;
     });
   }
 
-  void _changeDismissDirection(DismissDirection newDismissDirection) {
+  void _changeDismissDirection(DismissDirection? newDismissDirection) {
     setState(() {
-      _dismissDirection = newDismissDirection;
+      _dismissDirection = newDismissDirection!;
     });
   }
 
-  void _changeTextAlign(TextAlign newTextAlign) {
+  void _changeTextAlign(TextAlign? newTextAlign) {
     setState(() {
-      _textAlign = newTextAlign;
+      _textAlign = newTextAlign!;
     });
   }
 
-  Widget buildDrawerCheckbox(String label, bool value, void callback(), { bool enabled = true }) {
+  Widget buildDrawerCheckbox(String label, bool value, void Function() callback, { bool enabled = true }) {
     return ListTile(
       onTap: enabled ? callback : null,
       title: Text(label),
@@ -192,7 +193,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor> onChanged, { IconData icon, bool enabled = true }) {
+  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor?> onChanged, { IconData? icon, bool enabled = true }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
@@ -205,7 +206,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { IconData icon, bool enabled = true }) {
+  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection?> onChanged, { IconData? icon, bool enabled = true }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
@@ -218,7 +219,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign> onChanged, { IconData icon, bool enabled = true }) {
+  Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign?> onChanged, { IconData? icon, bool enabled = true }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
@@ -305,7 +306,7 @@ class CardCollectionState extends State<CardCollection> {
       rightArrowIcon = Opacity(opacity: 0.1, child: rightArrowIcon);
 
     final ThemeData theme = Theme.of(context);
-    final TextStyle backgroundTextStyle = theme.primaryTextTheme.headline6;
+    final TextStyle? backgroundTextStyle = theme.primaryTextTheme.headline6;
 
     // The background Widget appears behind the Dismissible card when the card
     // moves to the left or right. The Positioned widget ensures that the
@@ -365,7 +366,7 @@ class CardCollectionState extends State<CardCollection> {
       cardCollection = Stack(
         children: <Widget>[
           Column(children: <Widget>[Image.network(_sunshineURL)]),
-          ShaderMask(child: cardCollection, shaderCallback: _createShader),
+          ShaderMask(shaderCallback: _createShader, child: cardCollection),
         ],
       );
     }
@@ -390,7 +391,7 @@ class CardCollectionState extends State<CardCollection> {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     title: 'Cards',
     home: CardCollection(),
   ));

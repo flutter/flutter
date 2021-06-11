@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
@@ -28,7 +26,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    Offset startGlobalPosition;
+    Offset? startGlobalPosition;
 
     void onStart(ForcePressDetails details) {
       startGlobalPosition = details.globalPosition;
@@ -411,7 +409,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    Offset startGlobalPosition;
+    Offset? startGlobalPosition;
 
     void onStart(ForcePressDetails details) {
       startGlobalPosition = details.globalPosition;
@@ -607,5 +605,20 @@ void main() {
     expect(peaked, 1);
     expect(updated, 1);
     expect(ended, 1);
+  });
+
+  testWidgets('ForecePressGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    expect(
+      () {
+        ForcePressGestureRecognizer(
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
+      ),
+    );
   });
 }

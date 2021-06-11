@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -21,7 +19,7 @@ void main() {
       (Canvas canvas) {
         painter.paint(
           canvas,
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const ImageConfiguration(size: size, textDirection: TextDirection.rtl),
         );
       },
@@ -34,7 +32,7 @@ void main() {
       (Canvas canvas) {
         painter.paint(
           canvas,
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const ImageConfiguration(size: size, textDirection: TextDirection.ltr),
         );
       },
@@ -63,7 +61,7 @@ void main() {
       (Canvas canvas) {
         painter.paint(
           canvas,
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const ImageConfiguration(size: size, textDirection: TextDirection.rtl),
         );
       },
@@ -71,7 +69,7 @@ void main() {
     );
   });
 
-  test('BoxDecoration.getClipPath', () {
+  test('BoxDecoration.getClipPath with borderRadius', () {
     const double radius = 10;
     final BoxDecoration decoration = BoxDecoration(
       borderRadius: BorderRadius.circular(radius),
@@ -81,6 +79,19 @@ void main() {
     final Matcher isLookLikeExpectedPath = isPathThat(
       includes: const <Offset>[ Offset(30.0, 10.0), Offset(50.0, 10.0), ],
       excludes: const <Offset>[ Offset(1.0, 1.0), Offset(99.0, 19.0), ],
+    );
+    expect(clipPath, isLookLikeExpectedPath);
+  });
+
+  test('BoxDecoration.getClipPath with shape BoxShape.circle', () {
+    const BoxDecoration decoration = BoxDecoration(
+      shape: BoxShape.circle,
+    );
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
+    final Matcher isLookLikeExpectedPath = isPathThat(
+      includes: const <Offset>[ Offset(50.0, 0.0), Offset(40.0, 10.0), ],
+      excludes: const <Offset>[ Offset(40.0, 0.0), Offset(10.0, 10.0), ],
     );
     expect(clipPath, isLookLikeExpectedPath);
   });

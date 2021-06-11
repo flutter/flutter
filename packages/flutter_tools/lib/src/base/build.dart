@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -19,7 +17,7 @@ class SnapshotType {
   SnapshotType(this.platform, this.mode)
     : assert(mode != null);
 
-  final TargetPlatform platform;
+  final TargetPlatform? platform;
   final BuildMode mode;
 
   @override
@@ -29,9 +27,9 @@ class SnapshotType {
 /// Interface to the gen_snapshot command-line tool.
 class GenSnapshot {
   GenSnapshot({
-    @required Artifacts artifacts,
-    @required ProcessManager processManager,
-    @required Logger logger,
+    required Artifacts artifacts,
+    required ProcessManager processManager,
+    required Logger logger,
   }) : _artifacts = artifacts,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -55,10 +53,11 @@ class GenSnapshot {
   };
 
   Future<int> run({
-    @required SnapshotType snapshotType,
-    DarwinArch darwinArch,
+    required SnapshotType snapshotType,
+    DarwinArch? darwinArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
+    assert(snapshotType.platform != TargetPlatform.ios || darwinArch != null);
     final List<String> args = <String>[
       ...additionalArgs,
     ];
@@ -68,7 +67,7 @@ class GenSnapshot {
     // iOS has a separate gen_snapshot for armv7 and arm64 in the same,
     // directory. So we need to select the right one.
     if (snapshotType.platform == TargetPlatform.ios) {
-      snapshotterPath += '_' + getNameForDarwinArch(darwinArch);
+      snapshotterPath += '_${getNameForDarwinArch(darwinArch!)}';
     }
 
     return _processUtils.stream(
@@ -81,11 +80,11 @@ class GenSnapshot {
 class AOTSnapshotter {
   AOTSnapshotter({
     this.reportTimings = false,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required Xcode xcode,
-    @required ProcessManager processManager,
-    @required Artifacts artifacts,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Xcode xcode,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
   }) : _logger = logger,
       _fileSystem = fileSystem,
       _xcode = xcode,
@@ -107,19 +106,18 @@ class AOTSnapshotter {
 
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
   Future<int> build({
-    @required TargetPlatform platform,
-    @required BuildMode buildMode,
-    @required String mainPath,
-    @required String packagesPath,
-    @required String outputPath,
-    DarwinArch darwinArch,
+    required TargetPlatform platform,
+    required BuildMode buildMode,
+    required String mainPath,
+    required String outputPath,
+    DarwinArch? darwinArch,
+    String? sdkRoot,
     List<String> extraGenSnapshotOptions = const <String>[],
-    @required bool bitcode,
-    @required String splitDebugInfo,
-    @required bool dartObfuscation,
+    required bool bitcode,
+    String? splitDebugInfo,
+    required bool dartObfuscation,
     bool quiet = false,
   }) async {
-    // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
     assert(platform != TargetPlatform.ios || darwinArch != null);
     if (bitcode && platform != TargetPlatform.ios) {
       _logger.printError('Bitcode is only supported for iOS.');
@@ -137,25 +135,38 @@ class AOTSnapshotter {
     final List<String> genSnapshotArgs = <String>[
       '--deterministic',
     ];
+
+    // We strip snapshot by default, but allow to suppress this behavior
+    // by supplying --no-strip in extraGenSnapshotOptions.
+    bool shouldStrip = true;
+
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
-      genSnapshotArgs.addAll(extraGenSnapshotOptions);
+      for (final String option in extraGenSnapshotOptions) {
+        if (option == '--no-strip') {
+          shouldStrip = false;
+          continue;
+        }
+        genSnapshotArgs.add(option);
+      }
     }
 
     final String assembly = _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
-    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
+    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin) {
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
-        '--strip'
       ]);
     } else {
       final String aotSharedLibrary = _fileSystem.path.join(outputDir.path, 'app.so');
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-elf',
         '--elf=$aotSharedLibrary',
-        '--strip'
       ]);
+    }
+
+    if (shouldStrip) {
+      genSnapshotArgs.add('--strip');
     }
 
     if (platform == TargetPlatform.android_arm || darwinArch == DarwinArch.armv7) {
@@ -182,11 +193,9 @@ class AOTSnapshotter {
     // Optimization arguments.
     genSnapshotArgs.addAll(<String>[
       // Faster async/await
-      '--no-causal-async-stacks',
-      '--lazy-async-stacks',
       if (shouldSplitDebugInfo) ...<String>[
         '--dwarf-stack-traces',
-        '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo, debugFilename)}'
+        '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}'
       ],
       if (dartObfuscation)
         '--obfuscate',
@@ -207,10 +216,11 @@ class AOTSnapshotter {
 
     // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
-    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
+    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin) {
       final RunResult result = await _buildFramework(
-        appleArch: darwinArch,
+        appleArch: darwinArch!,
         isIOS: platform == TargetPlatform.ios,
+        sdkRoot: sdkRoot,
         assemblyPath: assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
@@ -226,12 +236,13 @@ class AOTSnapshotter {
   /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
   /// source at [assemblyPath].
   Future<RunResult> _buildFramework({
-    @required DarwinArch appleArch,
-    @required bool isIOS,
-    @required String assemblyPath,
-    @required String outputPath,
-    @required bool bitcode,
-    @required bool quiet
+    required DarwinArch appleArch,
+    required bool isIOS,
+    String? sdkRoot,
+    required String assemblyPath,
+    required String outputPath,
+    required bool bitcode,
+    required bool quiet
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
     if (!quiet) {
@@ -241,18 +252,19 @@ class AOTSnapshotter {
     final List<String> commonBuildOptions = <String>[
       '-arch', targetArch,
       if (isIOS)
-        '-miphoneos-version-min=9.0',
+        // When the minimum version is updated, remember to update
+        // template MinimumOSVersion.
+        // https://github.com/flutter/flutter/pull/62902
+        '-miphoneos-version-min=8.0',
     ];
 
     const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
-    List<String> isysrootArgs;
-    if (isIOS) {
-      final String iPhoneSDKLocation = await _xcode.sdkLocation(SdkType.iPhone);
-      if (iPhoneSDKLocation != null) {
-        isysrootArgs = <String>['-isysroot', iPhoneSDKLocation];
-      }
+    List<String>? isysrootArgs;
+    if (sdkRoot != null) {
+      isysrootArgs = <String>['-isysroot', sdkRoot];
     }
+
     final RunResult compileResult = await _xcode.cc(<String>[
       '-arch', targetArch,
       if (isysrootArgs != null) ...isysrootArgs,
@@ -297,9 +309,11 @@ class AOTSnapshotter {
       TargetPlatform.android_arm64,
       TargetPlatform.android_x64,
       TargetPlatform.ios,
-      TargetPlatform.darwin_x64,
+      TargetPlatform.darwin,
       TargetPlatform.linux_x64,
+      TargetPlatform.linux_arm64,
       TargetPlatform.windows_x64,
+      TargetPlatform.windows_uwp_x64,
     ].contains(platform);
   }
 }

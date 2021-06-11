@@ -3,31 +3,28 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
-
 import 'package:flutter_gallery/demo/shrine/colors.dart';
 import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
 import 'package:flutter_gallery/demo/shrine/model/product.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class CategoryMenuPage extends StatelessWidget {
   const CategoryMenuPage({
-    Key key,
+    Key? key,
     this.onCategoryTap,
   }) : super(key: key);
 
-  final VoidCallback onCategoryTap;
+  final VoidCallback? onCategoryTap;
 
   Widget _buildCategory(Category category, BuildContext context) {
     final String categoryString = category.toString().replaceAll('Category.', '').toUpperCase();
     final ThemeData theme = Theme.of(context);
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext context, Widget child, AppStateModel model) =>
+      builder: (BuildContext context, Widget? child, AppStateModel model) =>
           GestureDetector(
             onTap: () {
               model.setCategory(category);
-              if (onCategoryTap != null) {
-                onCategoryTap();
-              }
+              onCategoryTap?.call();
             },
             child: model.selectedCategory == category
               ? Column(
@@ -50,7 +47,7 @@ class CategoryMenuPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Text(
                     categoryString,
-                    style: theme.textTheme.bodyText1.copyWith(
+                    style: theme.textTheme.bodyText1!.copyWith(
                       color: kShrineBrown900.withAlpha(153)
                     ),
                     textAlign: TextAlign.center,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,15 +16,11 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
+        child: Semantics(
+          label: 'test',
+          textDirection: TextDirection.ltr,
           child: Semantics(
-            label: 'test',
-            textDirection: TextDirection.ltr,
-            child: Container(
-              child: Semantics(
-                checked: true
-              ),
-            ),
+            checked: true,
           ),
         ),
       ),
@@ -49,10 +43,8 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
-          child: Semantics(
-             checked: true,
-          ),
+        child: Semantics(
+           checked: true,
         ),
       ),
     );
@@ -73,11 +65,9 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
-          child: Semantics(
-            label: 'test',
-            textDirection: TextDirection.ltr,
-          ),
+        child: Semantics(
+          label: 'test',
+          textDirection: TextDirection.ltr,
         ),
       ),
     );
@@ -99,13 +89,11 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
+        child: Semantics(
+          checked: true,
           child: Semantics(
-            checked: true,
-            child: Semantics(
-              label: 'test',
-              textDirection: TextDirection.ltr,
-            ),
+            label: 'test',
+            textDirection: TextDirection.ltr,
           ),
         ),
       ),
@@ -125,7 +113,7 @@ void main() {
     ));
 
     int changeCount = 0;
-    tester.binding.pipelineOwner.semanticsOwner.addListener(() {
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       changeCount += 1;
     });
 
@@ -133,13 +121,11 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
+        child: Semantics(
+          checked: true,
           child: Semantics(
-            checked: true,
-            child: Semantics(
-              label: 'test',
-              textDirection: TextDirection.ltr,
-            ),
+            label: 'test',
+            textDirection: TextDirection.ltr,
           ),
         ),
       ),

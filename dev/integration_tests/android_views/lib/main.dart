@@ -16,10 +16,12 @@ final List<PageWidget> _allPages = <PageWidget>[
 
 void main() {
   enableFlutterDriverExtension(handler: driverDataHandler.handleMessage);
-  runApp(MaterialApp(home: Home()));
+  runApp(const MaterialApp(home: Home()));
 }
 
 class Home extends StatelessWidget {
+  const Home({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

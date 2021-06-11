@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
@@ -9,7 +11,7 @@ import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cmake.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 
 abstract class WindowsApp extends ApplicationPackage {
@@ -72,4 +74,15 @@ class BuildableWindowsApp extends WindowsApp {
 
   @override
   String get name => project.parent.manifest.appName;
+}
+
+class BuildableUwpApp extends ApplicationPackage {
+  BuildableUwpApp({@required this.project}) : super(id: project.packageGuid);
+
+  final WindowsUwpProject project;
+
+  String get projectVersion => project.packageVersion;
+
+  @override
+  String get name => getCmakeExecutableName(project);
 }

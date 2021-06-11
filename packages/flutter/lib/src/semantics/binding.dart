@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show AccessibilityFeatures, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
@@ -27,7 +26,7 @@ mixin SemanticsBinding on BindingBase {
 
   /// Called when the platform accessibility features change.
   ///
-  /// See [Window.onAccessibilityFeaturesChanged].
+  /// See [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged].
   @protected
   void handleAccessibilityFeaturesChanged() {
     _accessibilityFeatures = window.accessibilityFeatures;

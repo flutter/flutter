@@ -8,13 +8,13 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/product_columns.dart';
 
 class AsymmetricView extends StatelessWidget {
-  const AsymmetricView({Key key, this.products}) : super(key: key);
+  const AsymmetricView({Key? key, this.products}) : super(key: key);
 
-  final List<Product> products;
+  final List<Product>? products;
 
-  List<Container> _buildColumns(BuildContext context) {
-    if (products == null || products.isEmpty) {
-      return const <Container>[];
+  List<SizedBox> _buildColumns(BuildContext context) {
+    if (products == null || products!.isEmpty) {
+      return const <SizedBox>[];
     }
 
     // This will return a list of columns. It will oscillate between the two
@@ -25,26 +25,26 @@ class AsymmetricView extends StatelessWidget {
     // some kinda awkward math so we use _evenCasesIndex and _oddCasesIndex as
     // helpers for creating the index of the product list that will correspond
     // to the index of the list of columns.
-    return List<Container>.generate(_listItemCount(products.length), (int index) {
+    return List<SizedBox>.generate(_listItemCount(products!.length), (int index) {
       double width = .59 * MediaQuery.of(context).size.width;
       Widget column;
-      if (index % 2 == 0) {
+      if (index.isEven) {
         /// Even cases
         final int bottom = _evenCasesIndex(index);
         column = TwoProductCardColumn(
-          bottom: products[bottom],
-          top: products.length - 1 >= bottom + 1
-            ? products[bottom + 1]
+          bottom: products![bottom],
+          top: products!.length - 1 >= bottom + 1
+            ? products![bottom + 1]
             : null,
         );
         width += 32.0;
       } else {
         /// Odd cases
         column = OneProductCardColumn(
-          product: products[_oddCasesIndex(index)],
+          product: products![_oddCasesIndex(index)],
         );
       }
-      return Container(
+      return SizedBox(
         width: width,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -78,8 +78,8 @@ class AsymmetricView extends StatelessWidget {
     return ListView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(0.0, 34.0, 16.0, 44.0),
-      children: _buildColumns(context),
       physics: const AlwaysScrollableScrollPhysics(),
+      children: _buildColumns(context),
     );
   }
 }

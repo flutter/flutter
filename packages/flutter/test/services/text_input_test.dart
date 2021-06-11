@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:convert' show utf8;
 import 'dart:convert' show jsonDecode;
 
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('TextInput message channels', () {
-    FakeTextChannel fakeTextChannel;
+    late FakeTextChannel fakeTextChannel;
 
     setUp(() {
       fakeTextChannel = FakeTextChannel((MethodCall call) async {});
@@ -34,7 +32,7 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState', null));
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -47,20 +45,33 @@ void main() {
     });
 
     test('text input client handler responds to reattach with setClient (null TextEditingValue)', () async {
-      final FakeTextInputClient client = FakeTextInputClient(null);
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       TextInput.attach(client, client.configuration);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState', null));
 
-      expect(fakeTextChannel.outgoingCalls.length, 2);
+      expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
         // From original attach
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
-        // From requestExistingInputState
+        // From original attach
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+        // From requestExistingInputState
+        const MethodCall(
+          'TextInput.setEditingState',
+          <String, dynamic>{
+            'text': '',
+            'selectionBase': -1,
+            'selectionExtent': -1,
+            'selectionAffinity': 'TextAffinity.downstream',
+            'selectionIsDirectional': false,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        ),
       ]);
     });
   });
@@ -123,7 +134,7 @@ void main() {
     test('basic structure', () async {
       const TextInputType text = TextInputType.text;
       const TextInputType number = TextInputType.number;
-      const TextInputType number2 = TextInputType.numberWithOptions();
+      const TextInputType number2 = TextInputType.number;
       const TextInputType signed = TextInputType.numberWithOptions(signed: true);
       const TextInputType signed2 = TextInputType.numberWithOptions(signed: true);
       const TextInputType decimal = TextInputType.numberWithOptions(decimal: true);
@@ -135,6 +146,14 @@ void main() {
       expect(signed.toString(), 'TextInputType(name: TextInputType.number, signed: true, decimal: false)');
       expect(decimal.toString(), 'TextInputType(name: TextInputType.number, signed: false, decimal: true)');
       expect(signedDecimal.toString(), 'TextInputType(name: TextInputType.number, signed: true, decimal: true)');
+      expect(TextInputType.multiline.toString(), 'TextInputType(name: TextInputType.multiline, signed: null, decimal: null)');
+      expect(TextInputType.phone.toString(), 'TextInputType(name: TextInputType.phone, signed: null, decimal: null)');
+      expect(TextInputType.datetime.toString(), 'TextInputType(name: TextInputType.datetime, signed: null, decimal: null)');
+      expect(TextInputType.emailAddress.toString(), 'TextInputType(name: TextInputType.emailAddress, signed: null, decimal: null)');
+      expect(TextInputType.url.toString(), 'TextInputType(name: TextInputType.url, signed: null, decimal: null)');
+      expect(TextInputType.visiblePassword.toString(), 'TextInputType(name: TextInputType.visiblePassword, signed: null, decimal: null)');
+      expect(TextInputType.name.toString(), 'TextInputType(name: TextInputType.name, signed: null, decimal: null)');
+      expect(TextInputType.streetAddress.toString(), 'TextInputType(name: TextInputType.address, signed: null, decimal: null)');
 
       expect(text == number, false);
       expect(number == number2, true);
@@ -151,6 +170,22 @@ void main() {
       expect(signed.hashCode == decimal.hashCode, false);
       expect(signed.hashCode == signedDecimal.hashCode, false);
       expect(decimal.hashCode == signedDecimal.hashCode, false);
+
+      expect(TextInputType.text.index, 0);
+      expect(TextInputType.multiline.index, 1);
+      expect(TextInputType.number.index, 2);
+      expect(TextInputType.phone.index, 3);
+      expect(TextInputType.datetime.index, 4);
+      expect(TextInputType.emailAddress.index, 5);
+      expect(TextInputType.url.index, 6);
+      expect(TextInputType.visiblePassword.index, 7);
+      expect(TextInputType.name.index, 8);
+      expect(TextInputType.streetAddress.index, 9);
+
+      expect(TextEditingValue.empty.toString(),
+          'TextEditingValue(text: \u2524\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
+      expect(const TextEditingValue(text: 'Sample Text').toString(),
+          'TextEditingValue(text: \u2524Sample Text\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
     });
 
     test('TextInputClient onConnectionClosed method is called', () async {
@@ -162,14 +197,14 @@ void main() {
       expect(client.latestMethodCall, isEmpty);
 
       // Send onConnectionClosed message.
-      final ByteData messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[1],
         'method': 'TextInputClient.onConnectionClosed',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData _) {},
+        (ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'connectionClosed');
@@ -177,162 +212,149 @@ void main() {
 
     test('TextInputClient performPrivateCommand method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(null);
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
 
       // Send performPrivateCommand message.
-      final ByteData messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {\"input_context\" : \"abcdefg\"}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abcdefg"}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData _) {},
+        (ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test('TextInputClient performPrivateCommand method is called with float',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with float', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(null);
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
 
       // Send performPrivateCommand message.
-      final ByteData messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {\"input_context\" : 0.5}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : 0.5}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData _) {},
+        (ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test(
-        'TextInputClient performPrivateCommand method is called with CharSequence array',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with CharSequence array', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(null);
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
 
       // Send performPrivateCommand message.
-      final ByteData messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {\"input_context\" : ["abc", "efg"]}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : ["abc", "efg"]}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData _) {},
+        (ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test(
-        'TextInputClient performPrivateCommand method is called with CharSequence',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with CharSequence', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(null);
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
 
       // Send performPrivateCommand message.
-      final ByteData messageBytes =
+      final ByteData? messageBytes =
           const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {\"input_context\" : "abc"}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abc"}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData _) {},
+        (ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test(
-        'TextInputClient performPrivateCommand method is called with float array',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with float array', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(null);
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
 
       // Send performPrivateCommand message.
-      final ByteData messageBytes =
+      final ByteData? messageBytes =
           const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {\"input_context\" : [0.5, 0.8]}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : [0.5, 0.8]}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData _) {},
+        (ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test('TextInputClient showAutocorrectionPromptRect method is called',
-        () async {
+    test('TextInputClient showAutocorrectionPromptRect method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(null);
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
 
       // Send onConnectionClosed message.
-      final ByteData messageBytes =
+      final ByteData? messageBytes =
           const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[1, 0, 1],
         'method': 'TextInputClient.showAutocorrectionPromptRect',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData _) {},
+        (ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'showAutocorrectionPromptRect');
@@ -341,7 +363,7 @@ void main() {
 
   test('TextEditingValue.isComposingRangeValid', () async {
     // The composing range is empty.
-    expect(const TextEditingValue(text: '').isComposingRangeValid, isFalse);
+    expect(TextEditingValue.empty.isComposingRangeValid, isFalse);
 
     expect(
       const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 0)).isComposingRangeValid,
@@ -376,7 +398,7 @@ class FakeTextInputClient implements TextInputClient {
   TextEditingValue currentTextEditingValue;
 
   @override
-  AutofillScope get currentAutofillScope => null;
+  AutofillScope? get currentAutofillScope => null;
 
   @override
   void performAction(TextInputAction action) {
@@ -415,7 +437,7 @@ class FakeTextChannel implements MethodChannel {
   FakeTextChannel(this.outgoing) : assert(outgoing != null);
 
   Future<dynamic> Function(MethodCall) outgoing;
-  Future<void> Function(MethodCall) incoming;
+  Future<void> Function(MethodCall)? incoming;
 
   List<MethodCall> outgoingCalls = <MethodCall>[];
 
@@ -442,19 +464,7 @@ class FakeTextChannel implements MethodChannel {
   String get name => 'flutter/textinput';
 
   @override
-  void setMethodCallHandler(Future<void> Function(MethodCall call) handler) {
-    incoming = handler;
-  }
-
-  @override
-  bool checkMethodCallHandler(Future<void> Function(MethodCall call) handler) => throw UnimplementedError();
-
-
-  @override
-  void setMockMethodCallHandler(Future<void> Function(MethodCall call) handler)  => throw UnimplementedError();
-
-  @override
-  bool checkMockMethodCallHandler(Future<void> Function(MethodCall call) handler) => throw UnimplementedError();
+  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) => incoming = handler;
 
   void validateOutgoingMethodCalls(List<MethodCall> calls) {
     expect(outgoingCalls.length, calls.length);
@@ -468,8 +478,9 @@ class FakeTextChannel implements MethodChannel {
       if (outgoingString != expectedString) {
         print(
           'Index $i did not match:\n'
-          '  actual:   ${outgoingCalls[i]}\n'
-          '  expected: ${calls[i]}');
+          '  actual:   $outgoingString\n'
+          '  expected: $expectedString',
+        );
         hasError = true;
       }
     }

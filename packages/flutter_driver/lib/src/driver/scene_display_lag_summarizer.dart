@@ -12,7 +12,7 @@ const String _kVsyncTransitionsMissed = 'vsync_transitions_missed';
 
 /// Summarizes [TimelineEvents]s corresponding to [kSceneDisplayLagEvent] events.
 ///
-/// A sample event (some fields have been omitted for brewity):
+/// A sample event (some fields have been omitted for brevity):
 /// ```
 ///     {
 ///      "name": "SceneDisplayLag",
@@ -66,8 +66,8 @@ class SceneDisplayLagSummarizer {
 
   double _getVsyncTransitionsMissed(TimelineEvent e) {
     assert(e.name == kSceneDisplayLagEvent);
-    assert(e.arguments.containsKey(_kVsyncTransitionsMissed));
-    final dynamic transitionsMissed = e.arguments[_kVsyncTransitionsMissed];
+    assert(e.arguments!.containsKey(_kVsyncTransitionsMissed));
+    final dynamic transitionsMissed = e.arguments![_kVsyncTransitionsMissed];
     assert(transitionsMissed is String);
     return double.parse(transitionsMissed as String);
   }

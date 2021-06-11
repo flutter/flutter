@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 
@@ -23,13 +24,16 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('Can collect coverage in machine mode', () async {
+  testWithoutContext('Can collect coverage in machine mode', () async {
     final TestProject project = TestProject();
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(coverage: true);
     await flutter.done;
 
-    expect(tempDir.childDirectory('coverage').childFile('lcov.info'), exists);
+    final File lcovFile = tempDir.childDirectory('coverage').childFile('lcov.info');
+
+    expect(lcovFile, exists);
+    expect(lcovFile.readAsStringSync(), contains('main.dart')); // either 'SF:lib/main.dart or SF:lib\\main.dart
   });
 }

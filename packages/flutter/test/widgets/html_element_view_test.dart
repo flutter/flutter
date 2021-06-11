@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('chrome')
-
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';
@@ -155,12 +152,10 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: Container(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: HtmlElementView(viewType: 'webview', key: key),
-            ),
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: HtmlElementView(viewType: 'webview', key: key),
           ),
         ),
       );

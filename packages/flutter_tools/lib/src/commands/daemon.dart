@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:async/async.dart';
@@ -18,6 +20,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../device_port_forwarder.dart';
 import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -26,10 +29,10 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../vmservice.dart';
 import '../web/web_runner.dart';
-import '../widget_cache.dart';
 
-const String protocolVersion = '0.6.0';
+const String protocolVersion = '0.6.1';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -52,11 +55,9 @@ class DaemonCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     globals.printStatus('Starting device daemon...');
-    isRunningFromDaemon = true;
-
     final Daemon daemon = Daemon(
       stdinCommandStream, stdoutCommandResponse,
-      notifyingLogger: globals.logger as NotifyingLogger,
+      notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
     );
     final int code = await daemon.onExit;
     if (code != 0) {
@@ -369,29 +370,30 @@ class DaemonDomain extends Domain {
     final String projectRoot = _getStringArg(args, 'projectRoot', required: true);
     final List<String> result = <String>[];
     try {
-      // TODO(jonahwilliams): replace this with a project metadata check once
-      // that has been implemented.
       final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectRoot));
-      if (flutterProject.linux.existsSync()) {
+      if (featureFlags.isLinuxEnabled && flutterProject.linux.existsSync()) {
         result.add('linux');
       }
-      if (flutterProject.macos.existsSync()) {
+      if (featureFlags.isMacOSEnabled && flutterProject.macos.existsSync()) {
         result.add('macos');
       }
-      if (flutterProject.windows.existsSync()) {
+      if (featureFlags.isWindowsEnabled && flutterProject.windows.existsSync()) {
         result.add('windows');
       }
-      if (flutterProject.ios.existsSync()) {
+      if (featureFlags.isIOSEnabled && flutterProject.ios.existsSync()) {
         result.add('ios');
       }
-      if (flutterProject.android.existsSync()) {
+      if (featureFlags.isAndroidEnabled && flutterProject.android.existsSync()) {
         result.add('android');
       }
-      if (flutterProject.web.existsSync()) {
+      if (featureFlags.isWebEnabled && flutterProject.web.existsSync()) {
         result.add('web');
       }
-      if (flutterProject.fuchsia.existsSync()) {
+      if (featureFlags.isFuchsiaEnabled && flutterProject.fuchsia.existsSync()) {
         result.add('fuchsia');
+      }
+      if (featureFlags.areCustomDevicesEnabled) {
+        result.add('custom');
       }
       return <String, Object>{
         'platforms': result,
@@ -414,7 +416,7 @@ class DaemonDomain extends Domain {
   }
 }
 
-typedef _RunOrAttach = Future<void> Function({
+typedef RunOrAttach = Future<void> Function({
   Completer<DebugConnectionInfo> connectionInfoCompleter,
   Completer<void> appStartedCompleter,
 });
@@ -425,13 +427,12 @@ typedef _RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('restart', restart);
-    registerHandler('reloadMethod', reloadMethod);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('detach', detach);
   }
 
-  static final Uuid _uuidGenerator = Uuid();
+  static const Uuid _uuidGenerator = Uuid();
 
   static String _getNewAppId() => _uuidGenerator.v4();
 
@@ -469,10 +470,9 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      flutterProject: flutterProject,
       target: target,
       buildInfo: options.buildInfo,
-      widgetCache: WidgetCache(featureFlags: featureFlags),
+      platform: globals.platform,
     );
 
     ResidentRunner runner;
@@ -487,6 +487,10 @@ class AppDomain extends Domain {
         stayResident: true,
         urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
+        usage: globals.flutterUsage,
+        systemClock: globals.systemClock,
+        logger: globals.logger,
+        fileSystem: globals.fs,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -520,6 +524,7 @@ class AppDomain extends Domain {
         return runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
+          enableDevTools: true,
           route: route,
         );
       },
@@ -528,13 +533,13 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
-      globals.logger as AppRunLogger,
+      asLogger<AppRunLogger>(globals.logger),
     );
   }
 
   Future<AppInstance> launch(
     ResidentRunner runner,
-    _RunOrAttach runOrAttach,
+    RunOrAttach runOrAttach,
     Device device,
     String projectDirectory,
     bool enableHotReload,
@@ -545,6 +550,12 @@ class AppDomain extends Domain {
     final AppInstance app = AppInstance(_getNewAppId(),
         runner: runner, logToStdout: daemon.logToStdout, logger: logger);
     _apps.add(app);
+
+    // Set the domain and app for the given AppRunLogger. This allows the logger
+    // to log messages containing the app ID to the host.
+    logger.domain = this;
+    logger.app = app;
+
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
       'directory': projectDirectory,
@@ -634,28 +645,6 @@ class AppDomain extends Domain {
     );
   }
 
-  Future<OperationResult> reloadMethod(Map<String, dynamic> args) async {
-    final String appId = _getStringArg(args, 'appId', required: true);
-    final String classId = _getStringArg(args, 'class', required: true);
-    final String libraryId = _getStringArg(args, 'library', required: true);
-    final bool debounce = _getBoolArg(args, 'debounce') ?? false;
-
-    final AppInstance app = _getApp(appId);
-    if (app == null) {
-      throw "app '$appId' not found";
-    }
-
-    return _queueAndDebounceReloadAction(
-      app,
-      OperationType.reloadMethod,
-      debounce,
-      null,
-      () {
-        return app.reloadMethod(classId: classId, libraryId: libraryId);
-      },
-    );
-  }
-
   /// Debounce and queue reload actions.
   ///
   /// Only one reload action will run at a time. Actions requested in quick
@@ -699,9 +688,16 @@ class AppDomain extends Domain {
     if (app == null) {
       throw "app '$appId' not found";
     }
-
-    final Map<String, dynamic> result = await app.runner
-        .invokeFlutterExtensionRpcRawOnFirstIsolate(methodName, params: params);
+    final FlutterDevice device = app.runner.flutterDevices.first;
+    final List<FlutterView> views = await device.vmService.getFlutterViews();
+    final Map<String, dynamic> result = await device
+      .vmService
+      .invokeFlutterExtensionRpcRaw(
+        methodName,
+        args: params,
+        isolateId: views
+          .first.uiIsolate.id
+      );
     if (result == null) {
       throw 'method not available: $methodName';
     }
@@ -822,21 +818,17 @@ class DeviceDomain extends Domain {
   }
 
   /// Enable device events.
-  Future<void> enable(Map<String, dynamic> args) {
-    final List<Future<void>> calls = <Future<void>>[];
+  Future<void> enable(Map<String, dynamic> args) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      calls.add(discoverer.startPolling());
+      discoverer.startPolling();
     }
-    return Future.wait<void>(calls);
   }
 
   /// Disable device events.
   Future<void> disable(Map<String, dynamic> args) async {
-    final List<Future<void>> calls = <Future<void>>[];
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      calls.add(discoverer.stopPolling());
+      discoverer.stopPolling();
     }
-    return Future.wait<void>(calls);
   }
 
   /// Forward a host port to a device port.
@@ -870,10 +862,11 @@ class DeviceDomain extends Domain {
   }
 
   @override
-  Future<void> dispose() async {
+  Future<void> dispose() {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      await discoverer.dispose();
+      discoverer.dispose();
     }
+    return Future<void>.value();
   }
 
   /// Return the device matching the deviceId field in the args.
@@ -898,7 +891,6 @@ class DevToolsDomain extends Domain {
   Future<Map<String, dynamic>> serve([ Map<String, dynamic> args ]) async {
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
     final DevToolsServerAddress server = await _devtoolsLauncher.serve();
-
     return<String, dynamic>{
       'host': server?.host,
       'port': server?.port,
@@ -982,15 +974,14 @@ dynamic _toJsonable(dynamic obj) {
   return '$obj';
 }
 
-class NotifyingLogger extends Logger {
-  NotifyingLogger({ @required this.verbose, this.parent }) {
+class NotifyingLogger extends DelegatingLogger {
+  NotifyingLogger({ @required this.verbose, @required Logger parent }) : super(parent) {
     _messageController = StreamController<LogMessage>.broadcast(
       onListen: _onListen,
     );
   }
 
   final bool verbose;
-  final Logger parent;
   final List<LogMessage> messageBuffer = <LogMessage>[];
   StreamController<LogMessage> _messageController;
 
@@ -1034,7 +1025,7 @@ class NotifyingLogger extends Logger {
     if (!verbose) {
       return;
     }
-    parent?.printError(message);
+    super.printError(message);
   }
 
   @override
@@ -1043,13 +1034,12 @@ class NotifyingLogger extends Logger {
     @required Duration timeout,
     String progressId,
     bool multilineOutput = false,
+    bool includeTiming = true,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     assert(timeout != null);
     printStatus(message);
     return SilentStatus(
-      timeout: timeout,
-      timeoutConfiguration: timeoutConfiguration,
       stopwatch: Stopwatch(),
     );
   }
@@ -1093,10 +1083,6 @@ class AppInstance {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
   }
 
-  Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
-    return runner.reloadMethod(classId: classId, libraryId: libraryId);
-  }
-
   Future<void> stop() => runner.exit();
   Future<void> detach() => runner.detach();
 
@@ -1104,9 +1090,7 @@ class AppInstance {
     _logger.close();
   }
 
-  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
-    _logger.domain = domain;
-    _logger.app = this;
+  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> Function() method) async {
     return method();
   }
 }
@@ -1134,6 +1118,7 @@ class EmulatorDomain extends Domain {
 
   Future<void> launch(Map<String, dynamic> args) async {
     final String emulatorId = _getStringArg(args, 'emulatorId', required: true);
+    final bool coldBoot = _getBoolArg(args, 'coldBoot') ?? false;
     final List<Emulator> matches =
         await emulators.getEmulatorsMatching(emulatorId);
     if (matches.isEmpty) {
@@ -1141,7 +1126,7 @@ class EmulatorDomain extends Domain {
     } else if (matches.length > 1) {
       throw "multiple emulators match '$emulatorId'";
     } else {
-      await matches.first.launch();
+      await matches.first.launch(coldBoot: coldBoot);
     }
   }
 
@@ -1164,82 +1149,12 @@ class EmulatorDomain extends Domain {
 //
 // TODO(devoncarew): To simplify this code a bit, we could choose to specialize
 // this class into two, one for each of the above use cases.
-class AppRunLogger extends Logger {
-  AppRunLogger({ this.parent });
+class AppRunLogger extends DelegatingLogger {
+  AppRunLogger({ @required Logger parent }) : super(parent);
 
   AppDomain domain;
   AppInstance app;
-  final Logger parent;
   int _nextProgressId = 0;
-
-  @override
-  void printError(
-    String message, {
-    StackTrace stackTrace,
-    bool emphasis,
-    TerminalColor color,
-    int indent,
-    int hangingIndent,
-    bool wrap,
-  }) {
-    if (parent != null) {
-      parent.printError(
-        message,
-        stackTrace: stackTrace,
-        emphasis: emphasis,
-        indent: indent,
-        hangingIndent: hangingIndent,
-        wrap: wrap,
-      );
-    } else {
-      if (stackTrace != null) {
-        _sendLogEvent(<String, dynamic>{
-          'log': message,
-          'stackTrace': stackTrace.toString(),
-          'error': true,
-        });
-      } else {
-        _sendLogEvent(<String, dynamic>{
-          'log': message,
-          'error': true,
-        });
-      }
-    }
-  }
-
-  @override
-  void printStatus(
-    String message, {
-    bool emphasis = false,
-    TerminalColor color,
-    bool newline = true,
-    int indent,
-    int hangingIndent,
-    bool wrap,
-  }) {
-    if (parent != null) {
-      parent.printStatus(
-        message,
-        emphasis: emphasis,
-        color: color,
-        newline: newline,
-        indent: indent,
-        hangingIndent: hangingIndent,
-        wrap: wrap,
-      );
-    } else {
-      _sendLogEvent(<String, dynamic>{'log': message});
-    }
-  }
-
-  @override
-  void printTrace(String message) {
-    if (parent != null) {
-      parent.printTrace(message);
-    } else {
-      _sendLogEvent(<String, dynamic>{'log': message, 'trace': true});
-    }
-  }
 
   Status _status;
 
@@ -1249,27 +1164,25 @@ class AppRunLogger extends Logger {
     @required Duration timeout,
     String progressId,
     bool multilineOutput = false,
+    bool includeTiming = true,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    assert(timeout != null);
     final int id = _nextProgressId++;
 
-    _sendProgressEvent(<String, dynamic>{
-      'id': id.toString(),
-      'progressId': progressId,
-      'message': message,
-    });
+    _sendProgressEvent(
+      eventId: id.toString(),
+      eventType: progressId,
+      message: message,
+    );
 
     _status = SilentStatus(
-      timeout: timeout,
-      timeoutConfiguration: timeoutConfiguration,
       onFinish: () {
         _status = null;
-        _sendProgressEvent(<String, dynamic>{
-          'id': id.toString(),
-          'progressId': progressId,
-          'finished': true,
-        });
+        _sendProgressEvent(
+          eventId: id.toString(),
+          eventType: progressId,
+          finished: true,
+        );
       }, stopwatch: Stopwatch())..start();
     return _status;
   }
@@ -1278,18 +1191,26 @@ class AppRunLogger extends Logger {
     domain = null;
   }
 
-  void _sendLogEvent(Map<String, dynamic> event) {
+  void _sendProgressEvent({
+    @required String eventId,
+    @required String eventType,
+    bool finished = false,
+    String message,
+  }) {
     if (domain == null) {
-      printStatus('event sent after app closed: $event');
+      // If we're sending progress events before an app has started, send the
+      // progress messages as plain status messages.
+      if (message != null) {
+        printStatus(message);
+      }
     } else {
-      domain._sendAppEvent(app, 'log', event);
-    }
-  }
+      final Map<String, dynamic> event = <String, dynamic>{
+        'id': eventId,
+        'progressId': eventType,
+        if (message != null) 'message': message,
+        if (finished != null) 'finished': finished,
+      };
 
-  void _sendProgressEvent(Map<String, dynamic> event) {
-    if (domain == null) {
-      printStatus('event sent after app closed: $event');
-    } else {
       domain._sendAppEvent(app, 'progress', event);
     }
   }
@@ -1339,7 +1260,6 @@ class LaunchMode {
 }
 
 enum OperationType {
-  reloadMethod,
   reload,
   restart
 }

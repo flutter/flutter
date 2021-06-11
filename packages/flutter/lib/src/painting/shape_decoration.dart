@@ -91,7 +91,7 @@ class ShapeDecoration extends Decoration {
   /// [RoundedRectangleBorder]; the [BoxDecoration] class cannot animate the
   /// transition from a [BoxShape.circle] to [BoxShape.rectangle]).
   factory ShapeDecoration.fromBoxDecoration(BoxDecoration source) {
-    ShapeBorder shape;
+    final ShapeBorder shape;
     assert(source.shape != null);
     switch (source.shape) {
       case BoxShape.circle:
@@ -194,7 +194,7 @@ class ShapeDecoration extends Decoration {
     if (a is BoxDecoration) {
       return ShapeDecoration.lerp(ShapeDecoration.fromBoxDecoration(a), this, t);
     } else if (a == null || a is ShapeDecoration) {
-      return ShapeDecoration.lerp(a as ShapeDecoration, this, t);
+      return ShapeDecoration.lerp(a as ShapeDecoration?, this, t);
     }
     return super.lerpFrom(a, t) as ShapeDecoration?;
   }
@@ -204,7 +204,7 @@ class ShapeDecoration extends Decoration {
     if (b is BoxDecoration) {
       return ShapeDecoration.lerp(this, ShapeDecoration.fromBoxDecoration(b), t);
     } else if (b == null || b is ShapeDecoration) {
-      return ShapeDecoration.lerp(this, b as ShapeDecoration, t);
+      return ShapeDecoration.lerp(this, b as ShapeDecoration?, t);
     }
     return super.lerpTo(b, t) as ShapeDecoration?;
   }
@@ -288,7 +288,7 @@ class ShapeDecoration extends Decoration {
   }
 
   @override
-  _ShapeDecorationPainter createBoxPainter([ VoidCallback? onChanged ]) {
+  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
     assert(onChanged != null || image == null);
     return _ShapeDecorationPainter(this, onChanged!);
   }
@@ -329,7 +329,7 @@ class _ShapeDecorationPainter extends BoxPainter {
         _interiorPaint!.color = _decoration.color!;
     }
     if (_decoration.gradient != null)
-      _interiorPaint!.shader = _decoration.gradient!.createShader(rect);
+      _interiorPaint!.shader = _decoration.gradient!.createShader(rect, textDirection: textDirection);
     if (_decoration.shadows != null) {
       if (_shadowCount == null) {
         _shadowCount = _decoration.shadows!.length;

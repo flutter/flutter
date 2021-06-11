@@ -1,0 +1,5 @@
+dartdoc:
+  ignore:
+    # The stub `Flutter` package is expected to have no
+    # documentable libraries.
+    - no-documentable-libraries

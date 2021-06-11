@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -27,8 +24,7 @@ class TestAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
     if (key == 'AssetManifest.json')
-      return ByteData.view(Uint8List.fromList(
-          const Utf8Encoder().convert(_assetBundleContents)).buffer);
+      return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert(_assetBundleContents)).buffer);
 
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
     if (key == 'one')
@@ -46,9 +42,10 @@ void main() {
       assetBundleMap[mainAssetPath] = <String>[];
 
       final AssetImage assetImage = AssetImage(
-          mainAssetPath,
-          bundle: TestAssetBundle(assetBundleMap));
-      const ImageConfiguration configuration = ImageConfiguration();
+        mainAssetPath,
+        bundle: TestAssetBundle(assetBundleMap),
+      );
+      const ImageConfiguration configuration = ImageConfiguration.empty;
 
       assetImage.obtainKey(configuration)
         .then(expectAsync1((AssetBundleImageKey bundleKey) {
@@ -93,15 +90,15 @@ void main() {
 
       assetBundleMap[mainAssetPath] = <String>[mainAssetPath, variantPath];
 
-      final TestAssetBundle testAssetBundle = TestAssetBundle(
-          assetBundleMap);
+      final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
 
       final AssetImage assetImage = AssetImage(
-          mainAssetPath,
-          bundle: testAssetBundle);
+        mainAssetPath,
+        bundle: testAssetBundle,
+      );
 
       // we have the exact match for this scale, let's use it
-      assetImage.obtainKey(const ImageConfiguration())
+      assetImage.obtainKey(ImageConfiguration.empty)
         .then(expectAsync1((AssetBundleImageKey bundleKey) {
           expect(bundleKey.name, mainAssetPath);
           expect(bundleKey.scale, 1.0);
@@ -125,15 +122,15 @@ void main() {
 
       assetBundleMap[mainAssetPath] = <String>[mainAssetPath];
 
-      final TestAssetBundle testAssetBundle = TestAssetBundle(
-          assetBundleMap);
+      final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
 
       final AssetImage assetImage = AssetImage(
-          mainAssetPath,
-          bundle: TestAssetBundle(assetBundleMap));
+        mainAssetPath,
+        bundle: TestAssetBundle(assetBundleMap),
+      );
 
 
-      assetImage.obtainKey(const ImageConfiguration())
+      assetImage.obtainKey(ImageConfiguration.empty)
         .then(expectAsync1((AssetBundleImageKey bundleKey) {
           expect(bundleKey.name, mainAssetPath);
           expect(bundleKey.scale, 1.0);
@@ -141,8 +138,8 @@ void main() {
 
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
-        devicePixelRatio: 3.0),
-      ).then(expectAsync1((AssetBundleImageKey bundleKey) {
+        devicePixelRatio: 3.0,
+      )).then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, mainAssetPath);
         expect(bundleKey.scale, 1.0);
       }));
@@ -164,18 +161,18 @@ void main() {
 
       assetBundleMap[mainAssetPath] = <String>[mainAssetPath, variantPath];
 
-      final TestAssetBundle testAssetBundle = TestAssetBundle(
-          assetBundleMap);
+      final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
 
       final AssetImage assetImage = AssetImage(
-          mainAssetPath,
-          bundle: testAssetBundle);
+        mainAssetPath,
+        bundle: testAssetBundle,
+      );
 
       // we have 1.0 and 3.0, asking for 1.5 should give
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
-        devicePixelRatio: deviceRatio),
-      ).then(expectAsync1((AssetBundleImageKey bundleKey) {
+        devicePixelRatio: deviceRatio,
+      )).then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, expectedAssetPath);
         expect(bundleKey.scale, chosenAssetRatio);
       }));

@@ -19,7 +19,7 @@ in the source code into API documentation, as seen on https://api.flutter.dev/.
 There are three kinds of code blocks.
 
 * A `snippet`, which is a more or less context-free code snippet that we
-  magically determine how to analyze, and
+  magically determine how to analyze.
 
 * A `dartpad` sample, which gets placed into a full-fledged application, and can
   be executed inline in the documentation on the web page using
@@ -63,7 +63,7 @@ when generating the HTML to put into the Dart docs.
 
 #### Analysis
 
-The `../bots/analyze-sample-code.dart` script finds code inside the `@tool
+The `../bots/analyze_sample_code.dart` script finds code inside the `@tool
 snippet` sections and uses the Dart analyzer to check them.
 
 There are several kinds of sample code you can specify:
@@ -165,7 +165,7 @@ For more information about how to create, use, or update templates, see
 
 #### Analysis
 
-The `../bots/analyze-sample-code.dart` script finds code inside the `@tool
+The `../bots/analyze_sample_code.dart` script finds code inside the `@tool
 sample` sections and uses the Dart analyzer to check them after applying the
 specified template.
 
@@ -176,7 +176,7 @@ code blocks and descriptions are interpolated.
 
 There is currently one skeleton for
 [application](config/skeletons/sample.html) samples, one for
-[dartpad](config/skeletons/dartpad-sample.html) and one for
+[dartpad](config/skeletons/dartpad-sample.html), and one for
 [snippet](config/skeletons/snippet.html) code samples, but there could be more.
 
 Skeletons use mustache notation (e.g. `{{code}}`) to mark where components will
@@ -222,7 +222,7 @@ generating the entire docs output takes a long time.
 Instead, you can run the analysis locally with this command from the Flutter root:
 
 ```
-TMPDIR=/tmp bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart --temp=samples
+TMPDIR=/tmp bin/cache/dart-sdk/bin/dart dev/bots/analyze_sample_code.dart --temp=samples
 ```
 
 This will analyze the samples, and leave the generated files in `/tmp/samples`

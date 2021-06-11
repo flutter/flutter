@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -41,6 +38,8 @@ enum StretchMode {
 /// The part of a material design [AppBar] that expands, collapses, and
 /// stretches.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=mSc7qFzxHDw}
+///
 /// Most commonly used in the [SliverAppBar.flexibleSpace] field, a flexible
 /// space bar expands and contracts as the app scrolls so that the [AppBar]
 /// reaches from the top of the app to the top of the scrolling contents of the
@@ -67,24 +66,26 @@ enum StretchMode {
 /// import 'package:flutter/material.dart';
 /// ```
 /// ```dart
-/// void main() => runApp(MaterialApp(home: MyApp()));
+/// void main() => runApp(const MaterialApp(home: MyApp()));
 ///
 /// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: CustomScrollView(
-///         physics: const BouncingScrollPhysics(),
+///         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
 ///         slivers: <Widget>[
 ///           SliverAppBar(
 ///             stretch: true,
 ///             onStretchTrigger: () {
 ///               // Function callback for stretch
-///               return;
+///               return Future<void>.value();
 ///             },
 ///             expandedHeight: 300.0,
 ///             flexibleSpace: FlexibleSpaceBar(
-///               stretchModes: <StretchMode>[
+///               stretchModes: const <StretchMode>[
 ///                 StretchMode.zoomBackground,
 ///                 StretchMode.blurBackground,
 ///                 StretchMode.fadeTitle,
@@ -93,7 +94,7 @@ enum StretchMode {
 ///               title: const Text('Flight Report'),
 ///               background: Stack(
 ///                 fit: StackFit.expand,
-///                 children: [
+///                 children: <Widget>[
 ///                   Image.network(
 ///                     'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
 ///                     fit: BoxFit.cover,
@@ -102,7 +103,7 @@ enum StretchMode {
 ///                     decoration: BoxDecoration(
 ///                       gradient: LinearGradient(
 ///                         begin: Alignment(0.0, 0.5),
-///                         end: Alignment(0.0, 0.0),
+///                         end: Alignment.center,
 ///                         colors: <Color>[
 ///                           Color(0x60000000),
 ///                           Color(0x00000000),
@@ -115,19 +116,21 @@ enum StretchMode {
 ///             ),
 ///           ),
 ///           SliverList(
-///             delegate: SliverChildListDelegate([
-///               ListTile(
-///                 leading: Icon(Icons.wb_sunny),
-///                 title: Text('Sunday'),
-///                 subtitle: Text('sunny, h: 80, l: 65'),
-///               ),
-///               ListTile(
-///                 leading: Icon(Icons.wb_sunny),
-///                 title: Text('Monday'),
-///                 subtitle: Text('sunny, h: 80, l: 65'),
-///               ),
-///               // ListTiles++
-///             ]),
+///             delegate: SliverChildListDelegate(
+///               const <Widget>[
+///                 ListTile(
+///                   leading: Icon(Icons.wb_sunny),
+///                   title: Text('Sunday'),
+///                   subtitle: Text('sunny, h: 80, l: 65'),
+///                 ),
+///                 ListTile(
+///                   leading: Icon(Icons.wb_sunny),
+///                   title: Text('Monday'),
+///                   subtitle: Text('sunny, h: 80, l: 65'),
+///                 ),
+///                 // ListTiles++
+///               ],
+///             ),
 ///           ),
 ///         ],
 ///       ),
@@ -148,7 +151,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Most commonly used in the [AppBar.flexibleSpace] field.
   const FlexibleSpaceBar({
-    Key key,
+    Key? key,
     this.title,
     this.background,
     this.centerTitle,
@@ -161,18 +164,18 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// The primary contents of the flexible space bar when expanded.
   ///
   /// Typically a [Text] widget.
-  final Widget title;
+  final Widget? title;
 
   /// Shown behind the [title] when expanded.
   ///
   /// Typically an [Image] widget with [Image.fit] set to [BoxFit.cover].
-  final Widget background;
+  final Widget? background;
 
   /// Whether the title should be centered.
   ///
   /// By default this property is true if the current target platform
   /// is [TargetPlatform.iOS] or [TargetPlatform.macOS], false otherwise.
-  final bool centerTitle;
+  final bool? centerTitle;
 
   /// Collapse effect while scrolling.
   ///
@@ -194,7 +197,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// By default the value of this property is
   /// `EdgeInsetsDirectional.only(start: 72, bottom: 16)` if the title is
   /// not centered, `EdgeInsetsDirectional.only(start: 0, bottom: 16)` otherwise.
-  final EdgeInsetsGeometry titlePadding;
+  final EdgeInsetsGeometry? titlePadding;
 
   /// Wraps a widget that contains an [AppBar] to convey sizing information down
   /// to the [FlexibleSpaceBar].
@@ -207,37 +210,40 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// height of the resulting [FlexibleSpaceBar] when fully expanded.
   /// `currentExtent` sets the scale of the [FlexibleSpaceBar.background] and
   /// [FlexibleSpaceBar.title] widgets of [FlexibleSpaceBar] upon
-  /// initialization.
-  ///
+  /// initialization. `scrolledUnder` is true if the [FlexibleSpaceBar]
+  /// overlaps the app's primary scrollable, false if it does not, and null
+  /// if the caller has not determined as much.
   /// See also:
   ///
   ///  * [FlexibleSpaceBarSettings] which creates a settings object that can be
   ///    used to specify these settings to a [FlexibleSpaceBar].
   static Widget createSettings({
-    double toolbarOpacity,
-    double minExtent,
-    double maxExtent,
-    @required double currentExtent,
-    @required Widget child,
+    double? toolbarOpacity,
+    double? minExtent,
+    double? maxExtent,
+    bool? isScrolledUnder,
+    required double currentExtent,
+    required Widget child,
   }) {
     assert(currentExtent != null);
     return FlexibleSpaceBarSettings(
       toolbarOpacity: toolbarOpacity ?? 1.0,
       minExtent: minExtent ?? currentExtent,
       maxExtent: maxExtent ?? currentExtent,
+      isScrolledUnder: isScrolledUnder,
       currentExtent: currentExtent,
       child: child,
     );
   }
 
   @override
-  _FlexibleSpaceBarState createState() => _FlexibleSpaceBarState();
+  State<FlexibleSpaceBar> createState() => _FlexibleSpaceBarState();
 }
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   bool _getEffectiveCenterTitle(ThemeData theme) {
     if (widget.centerTitle != null)
-      return widget.centerTitle;
+      return widget.centerTitle!;
     assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
@@ -249,7 +255,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       case TargetPlatform.macOS:
         return true;
     }
-    return null;
   }
 
   Alignment _getTitleAlignment(bool effectiveCenterTitle) {
@@ -263,7 +268,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       case TextDirection.ltr:
         return Alignment.bottomLeft;
     }
-    return null;
   }
 
   double _getCollapsePadding(double t, FlexibleSpaceBarSettings settings) {
@@ -276,14 +280,13 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         final double deltaExtent = settings.maxExtent - settings.minExtent;
         return -Tween<double>(begin: 0.0, end: deltaExtent / 4.0).transform(t);
     }
-    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+        final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
         assert(
           settings != null,
           'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().',
@@ -295,14 +298,18 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
         // 0.0 -> Expanded
         // 1.0 -> Collapsed to toolbar
-        final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0) as double;
+        final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
 
         // background
         if (widget.background != null) {
           final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
           const double fadeEnd = 1.0;
           assert(fadeStart <= fadeEnd);
-          final double opacity = 1.0 - Interval(fadeStart, fadeEnd).transform(t);
+          // If the min and max extent are the same, the app bar cannot collapse
+          // and the content should be visible, so opacity = 1.
+          final double opacity = settings.maxExtent == settings.minExtent
+              ? 1.0
+              : 1.0 - Interval(fadeStart, fadeEnd).transform(t);
           double height = settings.maxExtent;
 
           // StretchMode.zoomBackground
@@ -330,14 +337,14 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
             children.add(Positioned.fill(
               child: BackdropFilter(
-                child: Container(
-                  color: Colors.transparent,
-                ),
                 filter: ui.ImageFilter.blur(
                   sigmaX: blurAmount,
                   sigmaY: blurAmount,
-                )
-              )
+                ),
+                child: Container(
+                  color: Colors.transparent,
+                ),
+              ),
             ));
           }
         }
@@ -346,7 +353,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         if (widget.title != null) {
           final ThemeData theme = Theme.of(context);
 
-          Widget title;
+          Widget? title;
           switch (theme.platform) {
             case TargetPlatform.iOS:
             case TargetPlatform.macOS:
@@ -367,7 +374,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           if (widget.stretchModes.contains(StretchMode.fadeTitle) &&
             constraints.maxHeight > settings.maxExtent) {
             final double stretchOpacity = 1 -
-              (((constraints.maxHeight - settings.maxExtent) / 100).clamp(0.0, 1.0) as double);
+              (((constraints.maxHeight - settings.maxExtent) / 100).clamp(0.0, 1.0));
             title = Opacity(
               opacity: stretchOpacity,
               child: title,
@@ -376,9 +383,9 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
           final double opacity = settings.toolbarOpacity;
           if (opacity > 0.0) {
-            TextStyle titleStyle = theme.primaryTextTheme.headline6;
+            TextStyle titleStyle = theme.primaryTextTheme.headline6!;
             titleStyle = titleStyle.copyWith(
-              color: titleStyle.color.withOpacity(opacity)
+              color: titleStyle.color!.withOpacity(opacity),
             );
             final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
             final EdgeInsetsGeometry padding = widget.titlePadding ??
@@ -406,7 +413,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                           alignment: titleAlignment,
                           child: title,
                         );
-                      }
+                      },
                     ),
                   ),
                 ),
@@ -416,7 +423,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         }
 
         return ClipRect(child: Stack(children: children));
-      }
+      },
     );
   }
 }
@@ -435,12 +442,13 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   /// The required [toolbarOpacity], [minExtent], [maxExtent], [currentExtent],
   /// and [child] parameters must not be null.
   const FlexibleSpaceBarSettings({
-    Key key,
-    @required this.toolbarOpacity,
-    @required this.minExtent,
-    @required this.maxExtent,
-    @required this.currentExtent,
-    @required Widget child,
+    Key? key,
+    required this.toolbarOpacity,
+    required this.minExtent,
+    required this.maxExtent,
+    required this.currentExtent,
+    required Widget child,
+    this.isScrolledUnder,
   }) : assert(toolbarOpacity != null),
        assert(minExtent != null && minExtent >= 0),
        assert(maxExtent != null && maxExtent >= 0),
@@ -465,11 +473,23 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   /// these elements upon initialization.
   final double currentExtent;
 
+  /// True if the FlexibleSpaceBar overlaps the primary scrollable's contents.
+  ///
+  /// This value is used by the [AppBar] to resolve
+  /// [AppBar.backgroundColor] against [MaterialState.scrolledUnder],
+  /// i.e.  to enable apps to specify different colors when content
+  /// has been scrolled up and behind the app bar.
+  ///
+  /// Null if the caller hasn't determined if the FlexibleSpaceBar
+  /// overlaps the primary scrollable's contents.
+  final bool? isScrolledUnder;
+
   @override
   bool updateShouldNotify(FlexibleSpaceBarSettings oldWidget) {
     return toolbarOpacity != oldWidget.toolbarOpacity
         || minExtent != oldWidget.minExtent
         || maxExtent != oldWidget.maxExtent
-        || currentExtent != oldWidget.currentExtent;
+        || currentExtent != oldWidget.currentExtent
+        || isScrolledUnder != oldWidget.isScrolledUnder;
   }
 }

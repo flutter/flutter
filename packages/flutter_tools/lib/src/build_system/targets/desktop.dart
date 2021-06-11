@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../../base/file_system.dart';
 import '../depfile.dart';
 
@@ -16,12 +14,12 @@ import '../depfile.dart';
 /// Throws an [Exception] if [artifacts] includes missing files, directories,
 /// or links.
 Depfile unpackDesktopArtifacts({
-  @required FileSystem fileSystem,
-  @required List<String> artifacts,
-  @required Directory outputDirectory,
-  @required String engineSourcePath,
-  List<String> clientSourcePaths,
-  String icuDataPath,
+  required FileSystem fileSystem,
+  required List<String> artifacts,
+  required Directory outputDirectory,
+  required String engineSourcePath,
+  List<String>? clientSourcePaths,
+  String? icuDataPath,
 }) {
   final List<File> inputs = <File>[];
   final List<File> outputs = <File>[];

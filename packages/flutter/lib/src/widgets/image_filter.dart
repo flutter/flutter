@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -12,15 +10,23 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 
 /// Applies an [ImageFilter] to its child.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=7Lftorq4i2o}
+///
+/// See also:
+///
+/// * [BackdropFilter], which applies an [ImageFilter] to everything
+///   beneath its child.
+/// * [ColorFiltered], which applies a [ColorFilter] to its child.
 @immutable
 class ImageFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies an [ImageFilter] to its child.
   ///
   /// The [imageFilter] must not be null.
   const ImageFiltered({
-    Key key,
-    @required this.imageFilter,
-    Widget child,
+    Key? key,
+    required this.imageFilter,
+    Widget? child,
   }) : assert(imageFilter != null),
        super(key: key, child: child);
 
@@ -31,8 +37,8 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) => _ImageFilterRenderObject(imageFilter);
 
   @override
-  void updateRenderObject(BuildContext context, _ImageFilterRenderObject renderObject) {
-    renderObject.imageFilter = imageFilter;
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _ImageFilterRenderObject).imageFilter = imageFilter;
   }
 
   @override
@@ -64,10 +70,10 @@ class _ImageFilterRenderObject extends RenderProxyBox {
     if (layer == null) {
       layer = ImageFilterLayer(imageFilter: imageFilter);
     } else {
-      final ImageFilterLayer filterLayer = layer as ImageFilterLayer;
+      final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
       filterLayer.imageFilter = imageFilter;
     }
-    context.pushLayer(layer, super.paint, offset);
+    context.pushLayer(layer!, super.paint, offset);
     assert(layer != null);
   }
 }

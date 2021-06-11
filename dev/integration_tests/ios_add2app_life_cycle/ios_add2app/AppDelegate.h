@@ -5,8 +5,16 @@
 #import <UIKit/UIKit.h>
 #import <Flutter/Flutter.h>
 
-@interface AppDelegate : FlutterAppDelegate
+#import <EarlGreyTest/GREYHostApplicationDistantObject.h>
 
-@property(nonatomic, strong, readonly) FlutterEngine* engine;
+NS_ASSUME_NONNULL_BEGIN
 
+@interface GREYHostApplicationDistantObject (AppDelegate)
+- (NSNotificationCenter *)notificationCenter;
 @end
+
+@interface AppDelegate : FlutterAppDelegate
+@property(nonatomic, strong, readonly) FlutterEngine* engine;
+@end
+
+NS_ASSUME_NONNULL_END

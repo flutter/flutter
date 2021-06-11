@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
-
-import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -35,7 +31,7 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   ///
   /// The [childManager] argument must not be null.
   RenderSliverFillViewport({
-    @required RenderSliverBoxChildManager childManager,
+    required RenderSliverBoxChildManager childManager,
     double viewportFraction = 1.0,
   }) : assert(viewportFraction != null),
        assert(viewportFraction > 0.0),
@@ -85,16 +81,15 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
 class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a scrollable [RenderBox] which is
   /// sized to fit the remaining space in the viewport.
-  RenderSliverFillRemainingWithScrollable({ RenderBox child }) : super(child: child);
+  RenderSliverFillRemainingWithScrollable({ RenderBox? child }) : super(child: child);
 
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
-    // TODO(Piinks): This may fill too much space for NestedScrollView, https://github.com/flutter/flutter/issues/46028
     final double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
     if (child != null)
-      child.layout(constraints.asBoxConstraints(
+      child!.layout(constraints.asBoxConstraints(
         minExtent: extent,
         maxExtent: extent,
       ));
@@ -109,7 +104,7 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
     if (child != null)
-      setChildParentData(child, constraints, geometry);
+      setChildParentData(child!, constraints, geometry!);
   }
 }
 
@@ -136,7 +131,7 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
 class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a non-scrollable [RenderBox] which is
   /// sized to fit the remaining space in the viewport.
-  RenderSliverFillRemaining({ RenderBox child }) : super(child: child);
+  RenderSliverFillRemaining({ RenderBox? child }) : super(child: child);
 
   @override
   void performLayout() {
@@ -146,13 +141,13 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
     double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
 
     if (child != null) {
-      double childExtent;
+      final double childExtent;
       switch (constraints.axis) {
         case Axis.horizontal:
-          childExtent = child.getMaxIntrinsicWidth(constraints.crossAxisExtent);
+          childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
           break;
         case Axis.vertical:
-          childExtent = child.getMaxIntrinsicHeight(constraints.crossAxisExtent);
+          childExtent = child!.getMaxIntrinsicHeight(constraints.crossAxisExtent);
           break;
       }
 
@@ -160,7 +155,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
       // that instead of potentially cutting off the child. This allows us to
       // safely specify a maxExtent.
       extent = math.max(extent, childExtent);
-      child.layout(constraints.asBoxConstraints(
+      child!.layout(constraints.asBoxConstraints(
         minExtent: extent,
         maxExtent: extent,
       ));
@@ -182,7 +177,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
     if (child != null)
-      setChildParentData(child, constraints, geometry);
+      setChildParentData(child!, constraints, geometry!);
   }
 }
 
@@ -209,7 +204,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
 class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a non-scrollable [RenderBox] which is
   /// sized to fit the remaining space plus any overscroll in the viewport.
-  RenderSliverFillRemainingAndOverscroll({ RenderBox child }) : super(child: child);
+  RenderSliverFillRemainingAndOverscroll({ RenderBox? child }) : super(child: child);
 
   @override
   void performLayout() {
@@ -222,13 +217,13 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
     double maxExtent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
     if (child != null) {
-      double childExtent;
+      final double childExtent;
       switch (constraints.axis) {
         case Axis.horizontal:
-          childExtent = child.getMaxIntrinsicWidth(constraints.crossAxisExtent);
+          childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
           break;
         case Axis.vertical:
-          childExtent = child.getMaxIntrinsicHeight(constraints.crossAxisExtent);
+          childExtent = child!.getMaxIntrinsicHeight(constraints.crossAxisExtent);
           break;
       }
 
@@ -240,7 +235,7 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
       // size or overscrolling at the top of the scrollable (rather than at the
       // end where this sliver is).
       maxExtent = math.max(extent, maxExtent);
-      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: maxExtent));
+      child!.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: maxExtent));
     }
 
     assert(extent.isFinite,
@@ -259,6 +254,6 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
     if (child != null)
-      setChildParentData(child, constraints, geometry);
+      setChildParentData(child!, constraints, geometry!);
   }
 }

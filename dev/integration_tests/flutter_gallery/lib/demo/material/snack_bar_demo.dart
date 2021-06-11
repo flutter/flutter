@@ -19,12 +19,12 @@ const String _text3 =
   'By default snackbars automatically disappear after a few seconds ';
 
 class SnackBarDemo extends StatefulWidget {
-  const SnackBarDemo({ Key key }) : super(key: key);
+  const SnackBarDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/material/snack-bar';
 
   @override
-  _SnackBarDemoState createState() => _SnackBarDemoState();
+  State<SnackBarDemo> createState() => _SnackBarDemoState();
 }
 
 class _SnackBarDemoState extends State<SnackBarDemo> {
@@ -40,16 +40,16 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
           const Text(_text1),
           const Text(_text2),
           Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               child: const Text('SHOW A SNACKBAR'),
               onPressed: () {
                 final int thisSnackBarIndex = _snackBarIndex++;
-                Scaffold.of(context).showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('This is snackbar #$thisSnackBarIndex.'),
                   action: SnackBarAction(
                     label: 'ACTION',
                     onPressed: () {
-                      Scaffold.of(context).showSnackBar(SnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text("You pressed snackbar $thisSnackBarIndex's action."),
                       ));
                     },
@@ -84,8 +84,8 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
         builder: buildBody
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
         tooltip: 'Create',
+        child: const Icon(Icons.add),
         onPressed: () {
           print('Floating Action Button was pressed');
         },

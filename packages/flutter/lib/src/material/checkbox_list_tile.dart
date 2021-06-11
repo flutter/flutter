@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 
 import 'checkbox.dart';
@@ -28,9 +26,10 @@ import 'theme_data.dart';
 /// those of the same name on [ListTile].
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
-/// property, but the color used is that described by [activeColor], if any,
-/// defaulting to the accent color of the current [Theme]. No effort is made to
-/// coordinate the [selected] state and the [value] state; to have the list tile
+/// property. This tile's [activeColor] is used for the selected item's text color, or
+/// the theme's [ThemeData.toggleableActiveColor] if [activeColor] is null.
+///
+/// This widget does not coordinate the [selected] state and the [value] state; to have the list tile
 /// appear selected when the checkbox is checked, pass the same value to both.
 ///
 /// The checkbox is shown on the right by default in left-to-right languages
@@ -60,8 +59,8 @@ import 'theme_data.dart';
 ///   return CheckboxListTile(
 ///     title: const Text('Animate Slowly'),
 ///     value: timeDilation != 1.0,
-///     onChanged: (bool value) {
-///       setState(() { timeDilation = value ? 10.0 : 1.0; });
+///     onChanged: (bool? value) {
+///       setState(() { timeDilation = value! ? 10.0 : 1.0; });
 ///     },
 ///     secondary: const Icon(Icons.hourglass_empty),
 ///   );
@@ -100,11 +99,12 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LinkedLabelCheckbox extends StatelessWidget {
 ///   const LinkedLabelCheckbox({
-///     this.label,
-///     this.padding,
-///     this.value,
-///     this.onChanged,
-///   });
+///     Key? key,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
+///   }) : super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
@@ -121,7 +121,7 @@ import 'theme_data.dart';
 ///             child: RichText(
 ///               text: TextSpan(
 ///                 text: label,
-///                 style: TextStyle(
+///                 style: const TextStyle(
 ///                   color: Colors.blueAccent,
 ///                   decoration: TextDecoration.underline,
 ///                 ),
@@ -134,7 +134,7 @@ import 'theme_data.dart';
 ///           ),
 ///           Checkbox(
 ///             value: value,
-///             onChanged: (bool newValue) {
+///             onChanged: (bool? newValue) {
 ///               onChanged(newValue);
 ///             },
 ///           ),
@@ -180,11 +180,12 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LabeledCheckbox extends StatelessWidget {
 ///   const LabeledCheckbox({
-///     this.label,
-///     this.padding,
-///     this.value,
-///     this.onChanged,
-///   });
+///     Key? key,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
+///   }) : super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
@@ -204,7 +205,7 @@ import 'theme_data.dart';
 ///             Expanded(child: Text(label)),
 ///             Checkbox(
 ///               value: value,
-///               onChanged: (bool newValue) {
+///               onChanged: (bool? newValue) {
 ///                 onChanged(newValue);
 ///               },
 ///             ),
@@ -259,11 +260,12 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// The value of [tristate] must not be null.
   const CheckboxListTile({
-    Key key,
-    @required this.value,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.onChanged,
     this.activeColor,
     this.checkColor,
+    this.tileColor,
     this.title,
     this.subtitle,
     this.isThreeLine = false,
@@ -274,6 +276,8 @@ class CheckboxListTile extends StatelessWidget {
     this.autofocus = false,
     this.contentPadding,
     this.tristate = false,
+    this.shape,
+    this.selectedTileColor,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(isThreeLine != null),
@@ -284,7 +288,7 @@ class CheckboxListTile extends StatelessWidget {
        super(key: key);
 
   /// Whether this checkbox is checked.
-  final bool value;
+  final bool? value;
 
   /// Called when the value of the checkbox should change.
   ///
@@ -309,32 +313,35 @@ class CheckboxListTile extends StatelessWidget {
   ///   title: Text('Throw away your shot'),
   /// )
   /// ```
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool?>? onChanged;
 
   /// The color to use when this checkbox is checked.
   ///
   /// Defaults to accent color of the current [Theme].
-  final Color activeColor;
+  final Color? activeColor;
 
   /// The color to use for the check icon when this checkbox is checked.
   ///
   /// Defaults to Color(0xFFFFFFFF).
-  final Color checkColor;
+  final Color? checkColor;
+
+  /// {@macro flutter.material.ListTile.tileColor}
+  final Color? tileColor;
 
   /// The primary content of the list tile.
   ///
   /// Typically a [Text] widget.
-  final Widget title;
+  final Widget? title;
 
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
-  final Widget subtitle;
+  final Widget? subtitle;
 
   /// A widget to display on the opposite side of the tile from the checkbox.
   ///
   /// Typically an [Icon] widget.
-  final Widget secondary;
+  final Widget? secondary;
 
   /// Whether this list tile is intended to display three lines of text.
   ///
@@ -345,7 +352,7 @@ class CheckboxListTile extends StatelessWidget {
   /// Whether this list tile is part of a vertically dense list.
   ///
   /// If this property is null then its value is based on [ListTileTheme.dense].
-  final bool dense;
+  final bool? dense;
 
   /// Whether to render icons and text in the [activeColor].
   ///
@@ -368,7 +375,7 @@ class CheckboxListTile extends StatelessWidget {
   /// widgets in [CheckboxListTile].
   ///
   /// When the value is null, the `contentPadding` is `EdgeInsets.symmetric(horizontal: 16.0)`.
-  final EdgeInsetsGeometry contentPadding;
+  final EdgeInsetsGeometry? contentPadding;
 
   /// If true the checkbox's [value] can be true, false, or null.
   ///
@@ -382,6 +389,27 @@ class CheckboxListTile extends StatelessWidget {
   /// If tristate is false (the default), [value] must not be null.
   final bool tristate;
 
+  /// {@macro flutter.material.ListTileTheme.shape}
+  final ShapeBorder? shape;
+
+  /// If non-null, defines the background color when [CheckboxListTile.selected] is true.
+  final Color? selectedTileColor;
+
+  void _handleValueChange() {
+    assert(onChanged != null);
+    switch (value) {
+      case false:
+        onChanged!(true);
+        break;
+      case true:
+        onChanged!(tristate ? null : false);
+        break;
+      case null:
+        onChanged!(false);
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Widget control = Checkbox(
@@ -393,7 +421,7 @@ class CheckboxListTile extends StatelessWidget {
       autofocus: autofocus,
       tristate: tristate,
     );
-    Widget leading, trailing;
+    Widget? leading, trailing;
     switch (controlAffinity) {
       case ListTileControlAffinity.leading:
         leading = control;
@@ -407,7 +435,7 @@ class CheckboxListTile extends StatelessWidget {
     }
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).accentColor,
+        selectedColor: activeColor ?? Theme.of(context).toggleableActiveColor,
         child: ListTile(
           leading: leading,
           title: title,
@@ -416,10 +444,13 @@ class CheckboxListTile extends StatelessWidget {
           isThreeLine: isThreeLine,
           dense: dense,
           enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(!value); } : null,
+          onTap: onChanged != null ? _handleValueChange : null,
           selected: selected,
           autofocus: autofocus,
           contentPadding: contentPadding,
+          shape: shape,
+          selectedTileColor: selectedTileColor,
+          tileColor: tileColor,
         ),
       ),
     );

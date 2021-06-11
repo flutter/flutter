@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
@@ -21,7 +19,7 @@ void main() {
       );
       bufferLogger.printStatus('0123456789' * 8);
 
-      expect(bufferLogger.statusText, equals(('0123456789' * 4 + '\n') * 2));
+      expect(bufferLogger.statusText, equals(('${'0123456789' * 4}\n') * 2));
     });
 
     testWithoutContext('can turn off wrapping', () async {
@@ -37,7 +35,7 @@ void main() {
   });
 
   group('ANSI coloring and bold', () {
-    AnsiTerminal terminal;
+    late AnsiTerminal terminal;
 
     setUp(() {
       terminal = AnsiTerminal(
@@ -108,17 +106,17 @@ void main() {
   });
 
   group('character input prompt', () {
-    AnsiTerminal terminalUnderTest;
+    late AnsiTerminal terminalUnderTest;
 
     setUp(() {
-      terminalUnderTest = TestTerminal(stdio: MockStdio());
+      terminalUnderTest = TestTerminal(stdio: FakeStdio());
     });
 
     testWithoutContext('character prompt throws if usesTerminalUi is false', () async {
       expect(terminalUnderTest.promptForCharInput(
         <String>['a', 'b', 'c'],
         prompt: 'Please choose something',
-        logger: null,
+        logger: BufferLogger.test(),
       ), throwsStateError);
     });
 
@@ -143,7 +141,6 @@ void main() {
           bufferLogger.statusText,
           'Please choose something [a|b|c]: d\n'
           'Please choose something [a|b|c]: \n'
-          '\n'
           'Please choose something [a|b|c]: b\n');
     });
 
@@ -166,32 +163,73 @@ void main() {
 
       expect(choice, 'b');
       expect(
-          bufferLogger.statusText,
-          'Please choose something: \n'
-          '\n');
+        bufferLogger.statusText,
+        'Please choose something: \n'
+      );
     });
 
     testWithoutContext('Does not set single char mode when a terminal is not attached', () {
-      final Stdio stdio = MockStdio();
-      when(stdio.stdin).thenThrow(StateError('This should not be called'));
-      when(stdio.stdinHasTerminal).thenReturn(false);
+      final Stdio stdio = FakeStdio()
+        ..stdinHasTerminal = false;
       final AnsiTerminal ansiTerminal = AnsiTerminal(
         stdio: stdio,
-        platform: const LocalPlatform()
+        platform: const LocalPlatform(),
       );
 
       expect(() => ansiTerminal.singleCharMode = true, returnsNormally);
     });
   });
+
+  testWithoutContext('AnsiTerminal.preferredStyle', () {
+    final Stdio stdio = FakeStdio();
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform()).preferredStyle, 0); // Defaults to 0 for backwards compatibility.
+
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  1)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  2)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  3)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  4)).preferredStyle, 3);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  5)).preferredStyle, 4);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  6)).preferredStyle, 5);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  7)).preferredStyle, 5);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  8)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  9)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 10)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 11)).preferredStyle, 3);
+
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  1, 1)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  2, 1)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  3, 1)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  4, 1)).preferredStyle, 3);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  5, 1)).preferredStyle, 4);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  6, 1)).preferredStyle, 6);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  7, 1)).preferredStyle, 6);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  8, 1)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  9, 1)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 10, 1)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 11, 1)).preferredStyle, 3);
+
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  1, 23)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  2, 23)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  3, 23)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  4, 23)).preferredStyle, 3);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  5, 23)).preferredStyle, 4);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  6, 23)).preferredStyle, 28);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  7, 23)).preferredStyle, 28);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  8, 23)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  9, 23)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 10, 23)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 11, 23)).preferredStyle, 3);
+  });
 }
 
-Stream<String> mockStdInStream;
+late Stream<String> mockStdInStream;
 
 class TestTerminal extends AnsiTerminal {
   TestTerminal({
-    Stdio stdio,
+    Stdio? stdio,
     Platform platform = const LocalPlatform(),
-  }) : super(stdio: stdio, platform: platform);
+    DateTime? now,
+  }) : super(stdio: stdio ?? Stdio(), platform: platform, now: now ?? DateTime(2018));
 
   @override
   Stream<String> get keystrokes {
@@ -199,6 +237,12 @@ class TestTerminal extends AnsiTerminal {
   }
 
   bool singleCharMode = false;
+
+  @override
+  int get preferredStyle => 0;
 }
 
-class MockStdio extends Mock implements Stdio {}
+class FakeStdio extends Fake implements Stdio {
+  @override
+  bool stdinHasTerminal = false;
+}

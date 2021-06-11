@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import '../framework/adb.dart';
+import '../framework/devices.dart';
 import '../framework/framework.dart';
+import '../framework/host_agent.dart';
+import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
@@ -23,6 +26,7 @@ TaskFunction createGalleryTransitionE2ETest({bool semanticsEnabled = false}) {
     needFullTimeline: false,
     timelineSummaryFile: 'e2e_perf_summary',
     transitionDurationFile: null,
+    timelineTraceFile: null,
     driverFile: 'transitions_perf_e2e_test',
   );
 }
@@ -43,6 +47,7 @@ class GalleryTransitionTest {
     this.testFile = 'transitions_perf',
     this.needFullTimeline = true,
     this.timelineSummaryFile = 'transitions.timeline_summary',
+    this.timelineTraceFile = 'transitions.timeline',
     this.transitionDurationFile = 'transition_durations.timeline',
     this.driverFile,
   });
@@ -51,6 +56,7 @@ class GalleryTransitionTest {
   final bool needFullTimeline;
   final String testFile;
   final String timelineSummaryFile;
+  final String timelineTraceFile;
   final String transitionDurationFile;
   final String driverFile;
 
@@ -58,35 +64,59 @@ class GalleryTransitionTest {
     final Device device = await devices.workingDevice;
     await device.unlock();
     final String deviceId = device.deviceId;
-    final Directory galleryDirectory =
-        dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
+    final Directory galleryDirectory = dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
     await inDirectory<void>(galleryDirectory, () async {
-      await flutter('packages', options: <String>['get']);
+      String applicationBinaryPath;
+      if (deviceOperatingSystem == DeviceOperatingSystem.android) {
+        section('BUILDING APPLICATION');
+        await flutter(
+          'build',
+          options: <String>[
+            'apk',
+            '--no-android-gradle-daemon',
+            '--profile',
+            '-t',
+            'test_driver/$testFile.dart',
+            '--target-platform',
+            'android-arm,android-arm64',
+          ],
+        );
+        applicationBinaryPath = 'build/app/outputs/flutter-apk/app-profile.apk';
+      }
 
       final String testDriver = driverFile ?? (semanticsEnabled
           ? '${testFile}_with_semantics_test'
           : '${testFile}_test');
-
+      section('DRIVE START');
       await flutter('drive', options: <String>[
+        '--no-dds',
         '--profile',
         if (needFullTimeline)
           '--trace-startup',
-        '-t',
-        'test_driver/$testFile.dart',
+        if (applicationBinaryPath != null)
+          '--use-application-binary=$applicationBinaryPath'
+        else
+          ...<String>[
+            '-t',
+            'test_driver/$testFile.dart',
+          ],
         '--driver',
         'test_driver/$testDriver.dart',
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
       ]);
     });
 
+    final String testOutputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
     final Map<String, dynamic> summary = json.decode(
-      file('${galleryDirectory.path}/build/$timelineSummaryFile.json').readAsStringSync(),
+      file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync(),
     ) as Map<String, dynamic>;
 
     if (transitionDurationFile != null) {
       final Map<String, dynamic> original = json.decode(
-        file('${galleryDirectory.path}/build/$transitionDurationFile.json').readAsStringSync(),
+        file('$testOutputDirectory/$transitionDurationFile.json').readAsStringSync(),
       ) as Map<String, dynamic>;
       final Map<String, List<int>> transitions = <String, List<int>>{};
       for (final String key in original.keys) {
@@ -96,18 +126,26 @@ class GalleryTransitionTest {
       summary['missed_transition_count'] = _countMissedTransitions(transitions);
     }
 
-    return TaskResult.success(summary, benchmarkScoreKeys: <String>[
-      if (transitionDurationFile != null)
-        'missed_transition_count',
-      'average_frame_build_time_millis',
-      'worst_frame_build_time_millis',
-      '90th_percentile_frame_build_time_millis',
-      '99th_percentile_frame_build_time_millis',
-      'average_frame_rasterizer_time_millis',
-      'worst_frame_rasterizer_time_millis',
-      '90th_percentile_frame_rasterizer_time_millis',
-      '99th_percentile_frame_rasterizer_time_millis',
-    ]);
+    return TaskResult.success(summary,
+      detailFiles: <String>[
+        if (transitionDurationFile != null)
+          '$testOutputDirectory/$transitionDurationFile.json',
+        if (timelineTraceFile != null)
+          '$testOutputDirectory/$timelineTraceFile.json'
+      ],
+      benchmarkScoreKeys: <String>[
+        if (transitionDurationFile != null)
+          'missed_transition_count',
+        'average_frame_build_time_millis',
+        'worst_frame_build_time_millis',
+        '90th_percentile_frame_build_time_millis',
+        '99th_percentile_frame_build_time_millis',
+        'average_frame_rasterizer_time_millis',
+        'worst_frame_rasterizer_time_millis',
+        '90th_percentile_frame_rasterizer_time_millis',
+        '99th_percentile_frame_rasterizer_time_millis',
+      ],
+    );
   }
 }
 

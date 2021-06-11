@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
 void main() {
   test('Stack can layout with top, right, bottom, left 0.0', () {
     final RenderBox size = RenderConstrainedBox(
-      additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0))
+      additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
     );
 
     final RenderBox red = RenderDecoratedBox(
@@ -32,7 +30,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <RenderBox>[red, green],
     );
-    final StackParentData greenParentData = green.parentData as StackParentData;
+    final StackParentData greenParentData = green.parentData! as StackParentData;
     greenParentData
       ..top = 0.0
       ..right = 0.0
@@ -81,7 +79,7 @@ void main() {
           clipBehavior: clip,
       );
       { // Make sure that the child is positioned so the stack will consider it as overflowed.
-        final StackParentData parentData = child.parentData as StackParentData;
+        final StackParentData parentData = child.parentData! as StackParentData;
         parentData.left = parentData.right = 0;
       }
       layout(stack, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
@@ -93,24 +91,24 @@ void main() {
   group('RenderIndexedStack', () {
     test('visitChildrenForSemantics only visits displayed child', () {
       final RenderBox child1 = RenderConstrainedBox(
-          additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0))
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
       );
       final RenderBox child2 = RenderConstrainedBox(
-          additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0))
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
       );
       final RenderBox child3 = RenderConstrainedBox(
-          additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0))
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
       );
       final RenderBox stack = RenderIndexedStack(
-          index: 1,
-          textDirection: TextDirection.ltr,
-          children: <RenderBox>[child1, child2, child3],
+        index: 1,
+        textDirection: TextDirection.ltr,
+        children: <RenderBox>[child1, child2, child3],
       );
 
       final List<RenderObject> visitedChildren = <RenderObject>[];
-      final RenderObjectVisitor visitor = (RenderObject child) {
+      void visitor(RenderObject child) {
         visitedChildren.add(child);
-      };
+      }
 
       stack.visitChildrenForSemantics(visitor);
 

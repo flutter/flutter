@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show TextDirection;
 
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart' show SystemChannels;
-import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
-
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -18,10 +14,12 @@ void main() {
   test('Semantic announcement', () async {
     final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
 
-    SystemChannels.accessibility.setMockMessageHandler((Object mockMessage) async {
+    Future<dynamic> handleMessage(dynamic mockMessage) async {
       final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
       log.add(message);
-    });
+    }
+
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
     await SemanticsService.announce('announcement 1', TextDirection.ltr);
     await SemanticsService.announce('announcement 2', TextDirection.rtl);

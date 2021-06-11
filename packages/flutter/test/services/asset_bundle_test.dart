@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -18,10 +15,10 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<ByteData> load(String key) async {
+    loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
     if (key == 'AssetManifest.json')
       return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert('{"one": ["one"]}')).buffer);
 
-    loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
     if (key == 'one')
       return ByteData(1)..setInt8(0, 49);
     throw FlutterError('key not found');
@@ -42,7 +39,7 @@ void main() {
 
     expect(bundle.loadCallCount['one'], 1);
 
-    Object loadException;
+    late Object loadException;
     try {
       await bundle.loadString('foo');
     } catch (e) {
@@ -62,7 +59,7 @@ void main() {
   test('NetworkAssetBundle control test', () async {
     final Uri uri = Uri.http('example.org', '/path');
     final NetworkAssetBundle bundle = NetworkAssetBundle(uri);
-    FlutterError error;
+    late FlutterError error;
     try {
       await bundle.load('key');
     } on FlutterError catch (e) {
@@ -77,5 +74,12 @@ void main() {
       '   Unable to load asset: key\n'
       '   HTTP status code: 404\n',
     );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+
+  test('toString works as intended', () {
+    final Uri uri = Uri.http('example.org', '/path');
+    final NetworkAssetBundle bundle = NetworkAssetBundle(uri);
+
+    expect(bundle.toString(), 'NetworkAssetBundle#${shortHash(bundle)}($uri)');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }

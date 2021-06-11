@@ -10,34 +10,37 @@ import 'dart:math' as math;
 import 'package:macrobenchmarks/src/web/bench_text_layout.dart';
 import 'package:macrobenchmarks/src/web/bench_text_out_of_picture_bounds.dart';
 
-import 'package:gallery/benchmarks/gallery_automator.dart' show DemoType, typeOfDemo;
-
+import 'src/web/bench_build_image.dart';
 import 'src/web/bench_build_material_checkbox.dart';
 import 'src/web/bench_card_infinite_scroll.dart';
 import 'src/web/bench_child_layers.dart';
 import 'src/web/bench_clipped_out_pictures.dart';
+import 'src/web/bench_default_target_platform.dart';
 import 'src/web/bench_draw_rect.dart';
 import 'src/web/bench_dynamic_clip_on_static_picture.dart';
 import 'src/web/bench_mouse_region_grid_hover.dart';
 import 'src/web/bench_mouse_region_grid_scroll.dart';
+import 'src/web/bench_mouse_region_mixed_grid_hover.dart';
+import 'src/web/bench_pageview_scroll_linethrough.dart';
 import 'src/web/bench_paths.dart';
 import 'src/web/bench_picture_recording.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
-import 'src/web/gallery/gallery_recorder.dart';
+import 'src/web/bench_wrapbox_scroll.dart';
 import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
 const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
 
-const String _galleryBenchmarkPrefix = 'gallery_v2';
-
 /// List of all benchmarks that run in the devicelab.
 ///
 /// When adding a new benchmark, add it to this map. Make sure that the name
 /// of your benchmark is unique.
 final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
+  // Benchmarks that run both in CanvasKit and HTML modes
+  BenchDefaultTargetPlatform.benchmarkName: () => BenchDefaultTargetPlatform(),
+  BenchBuildImage.benchmarkName: () => BenchBuildImage(),
   BenchCardInfiniteScroll.benchmarkName: () => BenchCardInfiniteScroll.forward(),
   BenchCardInfiniteScroll.benchmarkNameBackward: () => BenchCardInfiniteScroll.backward(),
   BenchClippedOutPictures.benchmarkName: () => BenchClippedOutPictures(),
@@ -48,42 +51,29 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
   BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),
   BenchDynamicClipOnStaticPicture.benchmarkName: () => BenchDynamicClipOnStaticPicture(),
+  BenchPageViewScrollLineThrough.benchmarkName: () => BenchPageViewScrollLineThrough(),
   BenchPictureRecording.benchmarkName: () => BenchPictureRecording(),
   BenchUpdateManyChildLayers.benchmarkName: () => BenchUpdateManyChildLayers(),
   BenchMouseRegionGridScroll.benchmarkName: () => BenchMouseRegionGridScroll(),
   BenchMouseRegionGridHover.benchmarkName: () => BenchMouseRegionGridHover(),
-  if (isCanvasKit)
-    BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
+  BenchMouseRegionMixedGridHover.benchmarkName: () => BenchMouseRegionMixedGridHover(),
+  BenchWrapBoxScroll.benchmarkName: () => BenchWrapBoxScroll(),
 
-  // Benchmarks that we don't want to run using CanvasKit.
+  // CanvasKit-only benchmarks
+  if (isCanvasKit) ...<String, RecorderFactory>{
+    BenchTextLayout.canvasKitBenchmarkName: () => BenchTextLayout.canvasKit(),
+    BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
+    BenchTextCachedLayout.canvasKitBenchmarkName: () => BenchTextCachedLayout.canvasKit(),
+  },
+
+  // HTML-only benchmarks
   if (!isCanvasKit) ...<String, RecorderFactory>{
-    BenchTextLayout.domBenchmarkName: () => BenchTextLayout(useCanvas: false),
-    BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout(useCanvas: true),
-    BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout(useCanvas: false),
-    BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout(useCanvas: true),
+    BenchTextLayout.domBenchmarkName: () => BenchTextLayout.dom(),
+    BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout.canvas(),
+    BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout.dom(),
+    BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout.canvas(),
     BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid.dom(),
     BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),
-
-    // The following benchmark is for the Flutter Gallery.
-    // This benchmark is failing when run with CanvasKit, so we skip it
-    // for now.
-    // TODO(yjbanov): https://github.com/flutter/flutter/issues/59082
-    '${_galleryBenchmarkPrefix}_studies_perf': () => GalleryRecorder(
-      benchmarkName: '${_galleryBenchmarkPrefix}_studies_perf',
-      shouldRunPredicate: (String demo) => typeOfDemo(demo) == DemoType.study,
-    ),
-    '${_galleryBenchmarkPrefix}_unanimated_perf': () => GalleryRecorder(
-      benchmarkName: '${_galleryBenchmarkPrefix}_unanimated_perf',
-      shouldRunPredicate: (String demo) => typeOfDemo(demo) == DemoType.unanimatedWidget,
-    ),
-    '${_galleryBenchmarkPrefix}_animated_perf': () => GalleryRecorder(
-      benchmarkName: '${_galleryBenchmarkPrefix}_animated_perf',
-      shouldRunPredicate: (String demo) => typeOfDemo(demo) == DemoType.animatedWidget,
-    ),
-    '${_galleryBenchmarkPrefix}_scroll_perf': () => GalleryRecorder(
-      benchmarkName: '${_galleryBenchmarkPrefix}_scroll_perf',
-      testScrollsOnly: true,
-    ),
   },
 };
 
@@ -255,7 +245,7 @@ class TimeseriesVisualization {
       final AnnotatedSample sample = _stats.samples[i];
 
       if (sample.isWarmUpValue) {
-        // Put gray background behing warm-up samples.
+        // Put gray background behind warm-up samples.
         _ctx.fillStyle = 'rgba(200,200,200,1)';
         _ctx.fillRect(xOffset, 0, barWidth, _normalized(_maxValueChartRange));
       }

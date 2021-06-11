@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -39,7 +36,7 @@ void main() {
     // can fit in the viewport, and the SliverList doesn't report a child count,
     // so the SliverList leads to an infinite precedingScrollExtent.
     final RenderViewport renderViewport = tester.renderObject(find.byType(Viewport));
-    final RenderSliver lastRenderSliver = renderViewport.lastChild;
+    final RenderSliver lastRenderSliver = renderViewport.lastChild!;
     expect(lastRenderSliver.constraints.precedingScrollExtent, double.infinity);
   });
 }

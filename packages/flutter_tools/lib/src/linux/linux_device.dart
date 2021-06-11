@@ -2,16 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_linux.dart';
@@ -22,13 +25,22 @@ class LinuxDevice extends DesktopDevice {
   LinuxDevice({
     @required ProcessManager processManager,
     @required Logger logger,
-  }) : super(
-      'linux',
-      platformType: PlatformType.linux,
-      ephemeral: false,
-      logger: logger,
-      processManager: processManager,
-  );
+    @required FileSystem fileSystem,
+    @required OperatingSystemUtils operatingSystemUtils,
+  })  : _operatingSystemUtils = operatingSystemUtils,
+        super(
+          'linux',
+          platformType: PlatformType.linux,
+          ephemeral: false,
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          operatingSystemUtils: operatingSystemUtils,
+        );
+
+  final OperatingSystemUtils _operatingSystemUtils;
+
+  TargetPlatform _targetPlatform;
 
   @override
   bool isSupported() => true;
@@ -37,7 +49,17 @@ class LinuxDevice extends DesktopDevice {
   String get name => 'Linux';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.linux_x64;
+  Future<TargetPlatform> get targetPlatform async {
+    if (_targetPlatform == null) {
+      if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
+        _targetPlatform = TargetPlatform.linux_x64;
+      } else {
+        _targetPlatform = TargetPlatform.linux_arm64;
+      }
+    }
+
+    return _targetPlatform;
+  }
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -54,6 +76,7 @@ class LinuxDevice extends DesktopDevice {
       FlutterProject.current().linux,
       buildInfo,
       target: mainPath,
+      targetPlatform: _targetPlatform,
     );
   }
 
@@ -67,21 +90,27 @@ class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
     @required Platform platform,
     @required FeatureFlags featureFlags,
-    ProcessManager processManager,
-    Logger logger,
-  }) : _platform = platform ?? globals.platform, // TODO(jonahwilliams): remove after google3 roll
+    @required OperatingSystemUtils operatingSystemUtils,
+    @required FileSystem fileSystem,
+    @required ProcessManager processManager,
+    @required Logger logger,
+  }) : _platform = platform,
        _linuxWorkflow = LinuxWorkflow(
           platform: platform,
           featureFlags: featureFlags,
        ),
+       _fileSystem = fileSystem,
        _logger = logger,
-       _processManager = processManager ?? globals.processManager,
+       _processManager = processManager,
+       _operatingSystemUtils = operatingSystemUtils,
        super('linux devices');
 
   final Platform _platform;
   final LinuxWorkflow _linuxWorkflow;
   final ProcessManager _processManager;
   final Logger _logger;
+  final FileSystem _fileSystem;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   bool get supportsPlatform => _platform.isLinux;
@@ -98,6 +127,8 @@ class LinuxDevices extends PollingDeviceDiscovery {
       LinuxDevice(
         logger: _logger,
         processManager: _processManager,
+        fileSystem: _fileSystem,
+        operatingSystemUtils: _operatingSystemUtils,
       ),
     ];
   }

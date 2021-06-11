@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
-import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import '../rendering/rendering_tester.dart';
 
+const int kMaxFrameworkAccessibilityIdentifier = (1<<16) - 1;
 
 void main() {
   setUp(() {
@@ -32,7 +30,7 @@ void main() {
       expect(node.isTagged(tag1), isTrue);
       expect(node.isTagged(tag2), isFalse);
 
-      node.tags.add(tag2);
+      node.tags!.add(tag2);
       expect(node.isTagged(tag1), isTrue);
       expect(node.isTagged(tag2), isTrue);
     });
@@ -84,13 +82,14 @@ void main() {
         childrenInInversePaintOrder: children,
       );
 
-      children.add(SemanticsNode()
-        ..isMergedIntoParent = true
-        ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0)
+      children.add(
+        SemanticsNode()
+          ..isMergedIntoParent = true
+          ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0),
       );
 
       {
-        FlutterError error;
+        late FlutterError error;
         try {
           node.updateWith(
             config: config,
@@ -99,12 +98,11 @@ void main() {
         } on FlutterError catch (e) {
           error = e;
         }
-        expect(error, isNotNull);
         expect(error.toString(), equalsIgnoringHashCodes(
           'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
           'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
           'Error details:\n'
-          "The list's length has changed from 1 to 2."
+          "The list's length has changed from 1 to 2.",
         ));
         expect(
           error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
@@ -113,7 +111,7 @@ void main() {
       }
 
       {
-        FlutterError error;
+        late FlutterError error;
         final List<SemanticsNode> modifiedChildren = <SemanticsNode>[
           SemanticsNode()
             ..isMergedIntoParent = true
@@ -140,7 +138,6 @@ void main() {
         } on FlutterError catch (e) {
           error = e;
         }
-        expect(error, isNotNull);
         expect(error.toStringDeep(), equalsIgnoringHashCodes(
           'FlutterError\n'
           '   Failed to replace child semantics nodes because the list of\n'
@@ -154,7 +151,7 @@ void main() {
           '\n'
           '   Child node at position 1 was replaced:\n'
           '   Previous child: SemanticsNode#7(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(40.0, 14.0, 20.0, 20.0))\n'
-          '   New child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n'
+          '   New child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n',
         ));
 
         expect(
@@ -195,7 +192,7 @@ void main() {
       pumpFrame(phase: EnginePhase.flushSemantics);
 
       int expectedActions = SemanticsAction.tap.index | SemanticsAction.longPress.index | SemanticsAction.scrollLeft.index | SemanticsAction.scrollRight.index;
-      expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
+      expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
 
       middle
         ..hasScrollLeftAction = false
@@ -205,7 +202,7 @@ void main() {
       pumpFrame(phase: EnginePhase.flushSemantics);
 
       expectedActions = SemanticsAction.tap.index | SemanticsAction.longPress.index | SemanticsAction.scrollDown.index | SemanticsAction.scrollRight.index;
-      expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
+      expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
     });
   });
 
@@ -493,16 +490,16 @@ void main() {
     expect(
       allProperties.toStringDeep(),
       equalsIgnoringHashCodes(
-          'SemanticsNode#2\n'
-          '   STALE\n'
-          '   owner: null\n'
-          '   merge boundary ⛔️\n'
-          '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
-          '   actions: longPress, scrollUp, showOnScreen\n'
-          '   flags: hasCheckedState, isSelected, isButton\n'
-          '   label: "Use all the properties"\n'
-          '   textDirection: rtl\n'
-          '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n'
+        'SemanticsNode#2\n'
+        '   STALE\n'
+        '   owner: null\n'
+        '   merge boundary ⛔️\n'
+        '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
+        '   actions: longPress, scrollUp, showOnScreen\n'
+        '   flags: hasCheckedState, isSelected, isButton\n'
+        '   label: "Use all the properties"\n'
+        '   textDirection: rtl\n'
+        '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n',
       ),
     );
     expect(
@@ -573,6 +570,24 @@ void main() {
     );
   });
 
+  test('Semantics id does not repeat', () {
+    final SemanticsOwner owner = SemanticsOwner();
+    const int expectId = 1400;
+    SemanticsNode? nodeToRemove;
+    for (int i = 0; i < kMaxFrameworkAccessibilityIdentifier; i++) {
+      final SemanticsNode node = SemanticsNode();
+      node.attach(owner);
+      if (node.id == expectId) {
+        nodeToRemove = node;
+      }
+    }
+    nodeToRemove!.detach();
+    final SemanticsNode newNode = SemanticsNode();
+    newNode.attach(owner);
+    // Id is reused.
+    expect(newNode.id, expectId);
+  });
+
   test('Tags show up in debug properties', () {
     final SemanticsNode actionNode = SemanticsNode()
       ..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
@@ -622,18 +637,18 @@ void main() {
     config.isFocused = true;
     config.isTextField = true;
 
-    final VoidCallback onShowOnScreen = () { };
-    final VoidCallback onScrollDown = () { };
-    final VoidCallback onScrollUp = () { };
-    final VoidCallback onScrollLeft = () { };
-    final VoidCallback onScrollRight = () { };
-    final VoidCallback onLongPress = () { };
-    final VoidCallback onDecrease = () { };
-    final VoidCallback onIncrease = () { };
-    final MoveCursorHandler onMoveCursorForwardByCharacter = (bool _) { };
-    final MoveCursorHandler onMoveCursorBackwardByCharacter = (bool _) { };
-    final VoidCallback onTap = () { };
-    final VoidCallback onCustomAction = () { };
+    void onShowOnScreen() { }
+    void onScrollDown() { }
+    void onScrollUp() { }
+    void onScrollLeft() { }
+    void onScrollRight() { }
+    void onLongPress() { }
+    void onDecrease() { }
+    void onIncrease() { }
+    void onMoveCursorForwardByCharacter(bool _) { }
+    void onMoveCursorBackwardByCharacter(bool _) { }
+    void onTap() { }
+    void onCustomAction() { }
 
     config.onShowOnScreen = onShowOnScreen;
     config.onScrollDown = onScrollDown;
@@ -683,8 +698,8 @@ class TestRender extends RenderProxyBox {
     this.hasScrollRightAction = false,
     this.hasScrollUpAction = false,
     this.hasScrollDownAction = false,
-    this.isSemanticBoundary,
-    RenderBox child,
+    this.isSemanticBoundary = false,
+    RenderBox? child,
   }) : super(child);
 
   bool hasTapAction;
@@ -694,7 +709,6 @@ class TestRender extends RenderProxyBox {
   bool hasScrollUpAction;
   bool hasScrollDownAction;
   bool isSemanticBoundary;
-
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -717,5 +731,5 @@ class TestRender extends RenderProxyBox {
 }
 
 class CustomSortKey extends OrdinalSortKey {
-  const CustomSortKey(double order, {String name}) : super(order, name: name);
+  const CustomSortKey(double order, {String? name}) : super(order, name: name);
 }

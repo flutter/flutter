@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'framework.dart';
 
@@ -38,8 +36,9 @@ class Texture extends LeafRenderObjectWidget {
   /// Creates a widget backed by the texture identified by [textureId], and use
   /// [filterQuality] to set texture's [FilterQuality].
   const Texture({
-    Key key,
-    @required this.textureId,
+    Key? key,
+    required this.textureId,
+    this.freeze = false,
     this.filterQuality = FilterQuality.low,
   }) : assert(textureId != null),
        super(key: key);
@@ -47,7 +46,10 @@ class Texture extends LeafRenderObjectWidget {
   /// The identity of the backend texture.
   final int textureId;
 
-  /// {@template FilterQuality}
+  /// When true the texture will not be updated with new frames.
+  final bool freeze;
+
+  /// {@template flutter.widgets.Texture.filterQuality}
   /// The quality of sampling the texture and rendering it on screen.
   ///
   /// When the texture is scaled, a default [FilterQuality.low] is used for a higher quality but slower
@@ -58,11 +60,12 @@ class Texture extends LeafRenderObjectWidget {
   final FilterQuality filterQuality;
 
   @override
-  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId, filterQuality: filterQuality);
+  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId, freeze: freeze, filterQuality: filterQuality);
 
   @override
   void updateRenderObject(BuildContext context, TextureBox renderObject) {
     renderObject.textureId = textureId;
+    renderObject.freeze = freeze;
     renderObject.filterQuality = filterQuality;
   }
 }

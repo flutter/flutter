@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Horizontal', () {
@@ -63,7 +60,7 @@ void main() {
         const Offset(100, 0),
       );
       expect(
-        updateDetails.fold(0.0, (double offset, DragUpdateDetails details) => offset + details.primaryDelta),
+        updateDetails.fold(0.0, (double offset, DragUpdateDetails details) => offset + (details.primaryDelta ?? 0)),
         100.0,
       );
     });
@@ -391,7 +388,7 @@ void main() {
         const Offset(0, 100),
       );
       expect(
-        updateDetails.fold(0.0, (double offset, DragUpdateDetails details) => offset + details.primaryDelta),
+        updateDetails.fold(0.0, (double offset, DragUpdateDetails details) => offset + (details.primaryDelta ?? 0)),
         100.0,
       );
     });

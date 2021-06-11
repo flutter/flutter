@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import '../base/fingerprint.dart';
 import '../build_info.dart';
-import '../globals.dart' as globals;
-import '../ios/xcodeproj.dart';
-import '../plugins.dart';
+import '../cache.dart';
+import '../flutter_plugins.dart';
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 
 /// For a given build, determines whether dependencies have changed since the
@@ -16,11 +14,10 @@ import '../project.dart';
 Future<void> processPodsIfNeeded(
   XcodeBasedProject xcodeProject,
   String buildDirectory,
-  BuildMode buildMode,
-) async {
+  BuildMode buildMode) async {
   final FlutterProject project = xcodeProject.parent;
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
-  await refreshPluginsList(project);
+  await refreshPluginsList(project, macOSPlatform: project.macos.existsSync());
   if (!(hasPlugins(project) || (project.isModule && xcodeProject.podfile.existsSync()))) {
     return;
   }
@@ -32,16 +29,23 @@ Future<void> processPodsIfNeeded(
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
       xcodeProject.generatedXcodePropertiesFile.path,
+      globals.fs.path.join(
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
+        'bin',
+        'podhelper.rb',
+      ),
     ],
     fileSystem: globals.fs,
     logger: globals.logger,
   );
 
-  final bool didPodInstall = await globals.cocoaPods.processPods(
+  final bool didPodInstall = await globals.cocoaPods?.processPods(
     xcodeProject: xcodeProject,
-    engineDir: flutterFrameworkDir(buildMode),
+    buildMode: buildMode,
     dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
-  );
+  ) == true;
   if (didPodInstall) {
     fingerprinter.writeFingerprint();
   }

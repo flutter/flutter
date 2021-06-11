@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -17,7 +14,7 @@ void main() {
       opacity: 0.0,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -37,7 +34,7 @@ void main() {
       opacity: 1.0,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -56,7 +53,7 @@ void main() {
       opacity: 0.5,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -64,12 +61,12 @@ void main() {
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
-      children: <RenderSliver>[renderSliverOpacity]
+      children: <RenderSliver>[renderSliverOpacity],
     );
 
     expect(renderSliverOpacity.debugLayer, null);
     layout(root, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
-    final ContainerLayer layer = renderSliverOpacity.debugLayer;
+    final ContainerLayer layer = renderSliverOpacity.debugLayer!;
     expect(layer, isNotNull);
 
     // Mark for repaint otherwise pumpFrame is a noop.
@@ -90,7 +87,7 @@ void main() {
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -115,7 +112,7 @@ void main() {
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -139,7 +136,7 @@ void main() {
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -147,12 +144,12 @@ void main() {
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
-      children: <RenderSliver>[renderSliverAnimatedOpacity]
+      children: <RenderSliver>[renderSliverAnimatedOpacity],
     );
 
     expect(renderSliverAnimatedOpacity.debugLayer, null);
     layout(root, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
-    final ContainerLayer layer = renderSliverAnimatedOpacity.debugLayer;
+    final ContainerLayer layer = renderSliverAnimatedOpacity.debugLayer!;
     expect(layer, isNotNull);
 
     // Mark for repaint otherwise pumpFrame is a noop.

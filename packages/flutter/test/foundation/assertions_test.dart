@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'capture_output.dart';
 
@@ -59,10 +57,10 @@ void main() {
         '\n'
         'INFO\n'
         '═════════════════════════════════════════════════════════════════\n',
-
     );
     expect(
       FlutterErrorDetails(
+        exception: NullThrownError(),
         library: 'LIBRARY',
         context: ErrorDescription('CONTEXTING'),
         informationCollector: () sync* {
@@ -70,8 +68,7 @@ void main() {
         },
       ).toString(),
       '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
-      'The following Null object was thrown CONTEXTING:\n'
-      '  null\n'
+      'The null value was thrown CONTEXTING.\n'
       '\n'
       'INFO\n'
       '═════════════════════════════════════════════════════════════════\n',
@@ -116,10 +113,9 @@ void main() {
       '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
-      const FlutterErrorDetails().toString(),
+      FlutterErrorDetails(exception: NullThrownError()).toString(),
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
-      'The following Null object was thrown:\n'
-      '  null\n'
+      'The null value was thrown.\n'
       '═════════════════════════════════════════════════════════════════\n',
     );
   });
@@ -142,7 +138,7 @@ void main() {
     FlutterError error = FlutterError(
       'My Error Summary.\n'
       'My first description.\n'
-      'My second description.'
+      'My second description.',
     );
     expect(error.diagnostics.length, equals(3));
     expect(error.diagnostics[0].level, DiagnosticLevel.summary);
@@ -163,7 +159,7 @@ void main() {
       'My Error Summary.\n'
       'My first description.\n'
       'My second description.\n'
-      '\n'
+      '\n',
     );
 
     expect(error.diagnostics.length, equals(5));
@@ -189,7 +185,7 @@ void main() {
       'My Error Summary.\n'
       'My first description.\n'
       '\n'
-      'My second description.'
+      'My second description.',
     );
     expect(error.diagnostics.length, equals(4));
     expect(error.diagnostics[0].level, DiagnosticLevel.summary);
@@ -223,7 +219,7 @@ void main() {
 
   test('Malformed FlutterError objects', () {
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[]);
       } on AssertionError catch (e) {
@@ -239,10 +235,11 @@ void main() {
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          (ErrorDescription('Error description without a summary'))]);
+          ErrorDescription('Error description without a summary'),
+        ]);
       } on AssertionError catch (e) {
         error = e;
       }
@@ -259,13 +256,13 @@ void main() {
         'This error should still help you solve your problem, however\n'
         'please also report this malformed error in the framework by\n'
         'filing a bug on GitHub:\n'
-        '  https://github.com/flutter/flutter/issues/new?template=BUG.md\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Error Summary A'),
@@ -296,13 +293,13 @@ void main() {
         'This error should still help you solve your problem, however\n'
         'please also report this malformed error in the framework by\n'
         'filing a bug on GitHub:\n'
-        '  https://github.com/flutter/flutter/issues/new?template=BUG.md\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorDescription('Some description'),
@@ -325,7 +322,7 @@ void main() {
         'This error should still help you solve your problem, however\n'
         'please also report this malformed error in the framework by\n'
         'filing a bug on GitHub:\n'
-        '  https://github.com/flutter/flutter/issues/new?template=BUG.md\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
     }
@@ -333,7 +330,7 @@ void main() {
 
   test('User-thrown exceptions have ErrorSummary properties', () {
     {
-      DiagnosticsNode node;
+      final DiagnosticsNode node;
       try {
         throw 'User thrown string';
       } catch (e) {
@@ -344,7 +341,7 @@ void main() {
     }
 
     {
-      DiagnosticsNode node;
+      final DiagnosticsNode node;
       try {
         throw ArgumentError.notNull('myArgument');
       } catch (e) {
@@ -425,7 +422,7 @@ void main() {
       'provide substantially more information in this error message to help you determine '
       'and fix the underlying cause.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
-      '  https://github.com/flutter/flutter/issues/new?template=BUG.md',
+      '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
     );
     expect(builder.properties[4] is ErrorSpacer, true);
     final DiagnosticsStackTrace trace = builder.properties[5] as DiagnosticsStackTrace;
@@ -442,7 +439,7 @@ void main() {
       ],
       replacement: 'test',
     );
-    final List<String> reasons = List<String>(2);
+    final List<String?> reasons = List<String?>.filled(2, null);
     filter.filter(
       const <StackFrame>[
         StackFrame(className: 'TestClass', method: 'test1', packageScheme: 'package', package: 'test', packagePath: 'blah.dart', line: 1, column: 1, number: 0, source: ''),
@@ -450,6 +447,6 @@ void main() {
       ],
       reasons,
     );
-    expect(reasons, List<String>(2));
+    expect(reasons, List<String?>.filled(2, null));
   });
 }

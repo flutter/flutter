@@ -7,8 +7,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class BackdropFilterPage extends StatefulWidget {
+  const BackdropFilterPage({Key key}) : super(key: key);
+
   @override
-  _BackdropFilterPageState createState() => _BackdropFilterPageState();
+  State<BackdropFilterPage> createState() => _BackdropFilterPageState();
 }
 
 class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProviderStateMixin {

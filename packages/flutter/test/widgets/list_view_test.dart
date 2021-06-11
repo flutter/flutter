@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart';
@@ -24,7 +21,7 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
 }
 
 class Alive extends StatefulWidget {
-  const Alive(this.alive, this.index, { Key key }) : super(key: key);
+  const Alive(this.alive, this.index, { Key? key }) : super(key: key);
   final bool alive;
   final int index;
 
@@ -68,9 +65,7 @@ class _StatefulListViewState extends State<_StatefulListView> {
           children: List<Widget>.generate(200, (int i) {
             return Builder(
               builder: (BuildContext context) {
-                return Container(
-                  child: Alive(widget.aliveCallback(i), i),
-                );
+                return Alive(widget.aliveCallback(i), i);
               },
             );
           }),
@@ -100,6 +95,7 @@ void main() {
           itemExtent: 200.0,
           children: List<Widget>.generate(20, (int i) {
             return Container(
+              color: Colors.green,
               child: Text('$i'),
             );
           }),
@@ -150,9 +146,7 @@ void main() {
             return Builder(
               builder: (BuildContext context) {
                 log.add(i);
-                return Container(
-                  child: Text('$i'),
-                );
+                return Text('$i');
               },
             );
           }),
@@ -242,9 +236,7 @@ void main() {
         child: ListView(
           itemExtent: 100.0,
           children: List<Widget>.generate(2, (int i) {
-            return Container(
-              child: Text('$i'),
-            );
+            return Text('$i');
           }),
         ),
       ),
@@ -263,9 +255,7 @@ void main() {
         child: ListView(
           itemExtent: 100.0,
           children: List<Widget>.generate(5, (int i) {
-            return Container(
-              child: Text('$i'),
-            );
+            return Text('$i');
           }),
         ),
       ),
@@ -309,9 +299,7 @@ void main() {
             itemExtent: 100.0,
             shrinkWrap: true,
             children: List<Widget>.generate(20, (int i) {
-              return Container(
-                child: Text('$i'),
-              );
+              return Text('$i');
             }),
           ),
         ),
@@ -327,9 +315,7 @@ void main() {
       List<Widget>.generate(
         20,
         (int i) {
-          return Container(
-            child: Text('$i', textDirection: TextDirection.ltr),
-          );
+          return Text('$i', textDirection: TextDirection.ltr);
         },
       ),
     );
@@ -371,7 +357,7 @@ void main() {
   });
 
   testWidgets('ListView automatically pad MediaQuery on axis', (WidgetTester tester) async {
-    EdgeInsets innerMediaQueryPadding;
+    EdgeInsets? innerMediaQueryPadding;
 
     await tester.pumpWidget(
       Directionality(
@@ -405,7 +391,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               cacheExtent: 500.0,
@@ -434,12 +420,12 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               cacheExtent: 500.0,
-              children: <Widget>[
-                Container(
+              children: const <Widget>[
+                SizedBox(
                   height: 100.0,
                 ),
               ],
@@ -459,19 +445,19 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               itemExtent: 100.0,
               cacheExtent: 500.0,
-              children: <Widget>[
-                Container(
+              children: const <Widget>[
+                SizedBox(
                   height: 100.0,
                 ),
-                Container(
+                SizedBox(
                   height: 100.0,
                 ),
-                Container(
+                SizedBox(
                   height: 100.0,
                 ),
               ],
@@ -489,13 +475,13 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               itemExtent: 100.0,
               cacheExtent: 500.0,
-              children: <Widget>[
-                Container(
+              children: const <Widget>[
+                SizedBox(
                   height: 100.0,
                 ),
               ],
@@ -514,13 +500,13 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               scrollDirection: Axis.horizontal,
               itemExtent: 100.0,
-              children: <Widget>[
-                Container(
+              children: const <Widget>[
+                SizedBox(
                   height: 100.0,
                 ),
               ],
@@ -545,20 +531,20 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/43380.
     final ScrollController controller = ScrollController();
 
-    Widget buildListView({@required Axis scrollDirection}) {
+    Widget buildListView({ required Axis scrollDirection }) {
       assert(scrollDirection != null);
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 100.0,
             child: ListView(
               controller: controller,
               scrollDirection: scrollDirection,
               itemExtent: 50.0,
-              children: <Widget>[
-                Container(
+              children: const <Widget>[
+                SizedBox(
                   height: 50.0,
                   width: 50.0,
                 ),
@@ -603,8 +589,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          children: <Widget>[Container(height: 2000.0)],
           clipBehavior: Clip.antiAlias,
+          children: <Widget>[Container(height: 2000.0)],
         ),
       ),
     );

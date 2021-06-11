@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui';
 
 import 'message_codecs.dart';
@@ -12,7 +11,6 @@ import 'platform_channel.dart';
 class SystemChannels {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   SystemChannels._();
 
   /// A JSON [MethodChannel] for navigation.
@@ -34,10 +32,19 @@ class SystemChannels {
   /// The following methods are used for the opposite direction data flow. The
   /// framework notifies the engine about the route changes.
   ///
-  ///  * `routeUpdated`, which is called when current route has changed.
+  ///  * `selectSingleEntryHistory`, which enables a single-entry history mode.
   ///
-  ///  * `routeInformationUpdated`, which is called by the [Router] when the
-  ///    application navigate to a new location.
+  ///  * `selectMultiEntryHistory`, which enables a multiple-entry history mode.
+  ///
+  ///  * `routeInformationUpdated`, which is called when the application
+  ///    navigates to a new location, and which takes two arguments, `location`
+  ///    (a URL) and `state` (an object).
+  ///
+  ///  * `routeUpdated`, a deprecated API which can be called in the same
+  ///    situations as `routeInformationUpdated` but whose arguments are
+  ///    `routeName` (a URL) and `previousRouteName` (which is ignored).
+  ///
+  /// These APIs are exposed by the [SystemNavigator] class.
   ///
   /// See also:
   ///
@@ -122,6 +129,11 @@ class SystemChannels {
   /// they apply, so that stale messages referencing past transactions can be
   /// ignored.
   ///
+  /// In debug builds, messages sent with a client ID of -1 are always accepted.
+  /// This allows tests to smuggle messages without having to mock the engine's
+  /// text handling (for example, allowing the engine to still handle the text
+  /// input messages in an integration test).
+  ///
   /// The methods described below are wrapped in a more convenient form by the
   /// [TextInput] and [TextInputConnection] class.
   ///
@@ -154,9 +166,15 @@ class SystemChannels {
   /// is a transaction identifier. Calls for stale transactions should be ignored.
   ///
   ///  * `TextInputClient.updateEditingState`: The user has changed the contents
-  ///    of the text control. The second argument is a [String] containing a
-  ///    JSON-encoded object with seven keys, in the form expected by
-  ///    [TextEditingValue.fromJSON].
+  ///    of the text control. The second argument is an object with seven keys,
+  ///    in the form expected by [TextEditingValue.fromJSON].
+  ///
+  ///  * `TextInputClient.updateEditingStateWithTag`: One or more text controls
+  ///    were autofilled by the platform's autofill service. The first argument
+  ///    (the client ID) is ignored, the second argument is a map of tags to
+  ///    objects in the form expected by [TextEditingValue.fromJSON]. See
+  ///    [AutofillScope.getAutofillClient] for details on the interpretation of
+  ///    the tag.
   ///
   ///  * `TextInputClient.performAction`: The user has triggered an action. The
   ///    second argument is a [String] consisting of the stringification of one
@@ -167,7 +185,8 @@ class SystemChannels {
   ///    one. The framework should call `TextInput.setClient` and
   ///    `TextInput.setEditingState` again with its most recent information. If
   ///    there is no existing state on the framework side, the call should
-  ///    fizzle.
+  ///    fizzle. (This call is made without a client ID; indeed, without any
+  ///    arguments at all.)
   ///
   ///  * `TextInputClient.onConnectionClosed`: The text input connection closed
   ///    on the platform side. For example the application is moved to
@@ -317,5 +336,47 @@ class SystemChannels {
   static const MethodChannel restoration = OptionalMethodChannel(
     'flutter/restoration',
     StandardMethodCodec(),
+  );
+
+  /// A [MethodChannel] for installing and managing deferred components.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `installDeferredComponent`: Requests that a deferred component identified by
+  ///    the provided loadingUnitId or componentName be downloaded and installed.
+  ///    Providing a loadingUnitId with null componentName will install a component that
+  ///    includes the desired loading unit. If a componentName is provided, then the
+  ///    deferred component with the componentName will be installed. This method
+  ///    returns a future that will not be completed until the feature is fully installed
+  ///    and ready to use. When an error occurs, the future will complete an error.
+  ///    Calling `loadLibrary()` on a deferred imported library is equivalent to calling
+  ///    this method with a loadingUnitId and null componentName.
+  ///  * `uninstallDeferredComponent`:  Requests that a deferred component identified by
+  ///    the provided loadingUnitId or componentName be uninstalled. Since
+  ///    uninstallation typically requires significant disk i/o, this method only
+  ///    signals the intent to uninstall. Actual uninstallation (eg, removal of
+  ///    assets and files) may occur at a later time. However, once uninstallation
+  ///    is requested, the deferred component should not be used anymore until
+  ///    `installDeferredComponent` or `loadLibrary` is called again.
+  static const MethodChannel deferredComponent = OptionalMethodChannel(
+    'flutter/deferredcomponent',
+    StandardMethodCodec(),
+  );
+
+  /// A JSON [MethodChannel] for localization.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `Localization.getStringResource`: Obtains the native string resource
+  ///    for a specific locale. The argument is a [Map] with two keys, `key`
+  ///    giving a [String] which the resource is defined with, and an optional
+  ///    `locale` which is a [String] containing the BCP47 locale identifier of
+  ///    the locale requested. See [Locale.toLanguageTag]. When `locale` is not
+  ///    specified, the current system locale is used instead.
+  static const MethodChannel localization = OptionalMethodChannel(
+    'flutter/localization',
+    JSONMethodCodec(),
   );
 }

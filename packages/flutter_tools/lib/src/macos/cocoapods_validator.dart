@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import '../base/context.dart';
 import '../base/user_messages.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import 'cocoapods.dart';
 
-CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
-
+/// A validator that confirms cocoapods is in a valid state.
+///
+/// See also:
+///   * [CocoaPods], for the interface to the cocoapods command line tool.
 class CocoaPodsValidator extends DoctorValidator {
   CocoaPodsValidator(
     CocoaPods cocoaPods,
@@ -31,12 +30,7 @@ class CocoaPodsValidator extends DoctorValidator {
 
     ValidationType status = ValidationType.installed;
     if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
-      if (await _cocoaPods.isCocoaPodsInitialized) {
-        messages.add(ValidationMessage(_userMessages.cocoaPodsVersion(await _cocoaPods.cocoaPodsVersionText)));
-      } else {
-        status = ValidationType.partial;
-        messages.add(ValidationMessage.error(_userMessages.cocoaPodsUninitialized(noCocoaPodsConsequence)));
-      }
+      messages.add(ValidationMessage(_userMessages.cocoaPodsVersion((await _cocoaPods.cocoaPodsVersionText).toString())));
     } else {
       if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
         status = ValidationType.missing;
@@ -51,12 +45,12 @@ class CocoaPodsValidator extends DoctorValidator {
       } else if (cocoaPodsStatus == CocoaPodsStatus.unknownVersion) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.hint(
-          _userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+          _userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsInstallInstructions)));
       } else {
         status = ValidationType.partial;
-        final String currentVersionText = await _cocoaPods.cocoaPodsVersionText;
+        final String currentVersionText = (await _cocoaPods.cocoaPodsVersionText).toString();
         messages.add(ValidationMessage.hint(
-          _userMessages.cocoaPodsOutdated(currentVersionText, _cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+          _userMessages.cocoaPodsOutdated(currentVersionText, cocoaPodsRecommendedVersion.toString(), noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
       }
     }
 

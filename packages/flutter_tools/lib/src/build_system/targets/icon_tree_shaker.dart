@@ -2,26 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:mime/mime.dart' as mime;
+import 'package:process/process.dart';
 
 import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
+import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
 import '../build_system.dart';
-import 'common.dart';
-
-/// The build define controlling whether icon fonts should be stripped down to
-/// only the glyphs used by the application.
-const String kIconTreeShakerFlag = 'TreeShakeIcons';
-
-/// Whether icon font subsetting is enabled by default.
-const bool kIconTreeShakerEnabledDefault = true;
 
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   if (object is List<dynamic>) {
@@ -61,7 +56,7 @@ class IconTreeShaker {
        _fontManifest = fontManifest?.string {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
-      logger.printError('Font subetting is not supported in debug mode. The '
+      logger.printError('Font subsetting is not supported in debug mode. The '
                          '--tree-shake-icons flag will be ignored.');
     }
   }
@@ -114,7 +109,7 @@ class IconTreeShaker {
       _artifacts.getArtifactPath(Artifact.constFinder),
     );
     final File dart = _fs.file(
-      _artifacts.getArtifactPath(Artifact.engineDartBinary),
+      _artifacts.getHostArtifact(HostArtifact.engineDartBinary),
     );
 
     final Map<String, List<int>> iconData = await _findConstants(
@@ -132,7 +127,7 @@ class IconTreeShaker {
     if (fonts.length != iconData.length) {
       environment.logger.printStatus(
         'Expected to find fonts for ${iconData.keys}, but found '
-        '${fonts.keys}. This usually means you are refering to '
+        '${fonts.keys}. This usually means you are referring to '
         'font families in an IconData class but not including them '
         'in the assets section of your pubspec.yaml, are missing '
         'the package that would include them, or are missing '
@@ -219,7 +214,7 @@ class IconTreeShaker {
     return true;
   }
 
-  /// Returns a map of { fontFamly: relativePath } pairs.
+  /// Returns a map of { fontFamily: relativePath } pairs.
   Future<Map<String, String>> _parseFontJson(
     String fontManifestData,
     Set<String> families,
@@ -303,9 +298,9 @@ class IconTreeShaker {
     return _parseConstFinderResult(constFinderResult);
   }
 
-  Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult consts) {
+  Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult constants) {
     final Map<String, List<int>> result = <String, List<int>>{};
-    for (final Map<String, dynamic> iconDataMap in consts.constantInstances) {
+    for (final Map<String, dynamic> iconDataMap in constants.constantInstances) {
       if ((iconDataMap['fontPackage'] ?? '') is! String || // Null is ok here.
            iconDataMap['fontFamily'] is! String ||
            iconDataMap['codePoint'] is! num) {
@@ -344,7 +339,7 @@ class _ConstFinderResult {
   List<Map<String, dynamic>> get nonConstantLocations {
     _nonConstantLocations ??= _getList(
       result['nonConstantLocations'],
-      'Invalid ConstFinder output: Expected "nonConstLocations" to be a list ofobjects',
+      'Invalid ConstFinder output: Expected "nonConstLocations" to be a list of objects',
     );
     return _nonConstantLocations;
   }

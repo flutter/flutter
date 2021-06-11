@@ -2,20 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 Size pageSize = const Size(600.0, 300.0);
 const List<int> defaultPages = <int>[0, 1, 2, 3, 4, 5];
 final List<GlobalKey> globalKeys = defaultPages.map<GlobalKey>((_) => GlobalKey()).toList();
-int currentPage;
+int? currentPage;
 
 Widget buildPage(int page) {
-  return Container(
+  return SizedBox(
     key: globalKeys[page],
     width: pageSize.width,
     height: pageSize.height,
@@ -26,7 +22,7 @@ Widget buildPage(int page) {
 Widget buildFrame({
   bool reverse = false,
   List<int> pages = defaultPages,
-  @required TextDirection textDirection,
+  required TextDirection textDirection,
 }) {
   final PageView child = PageView(
     scrollDirection: Axis.horizontal,
@@ -40,7 +36,7 @@ Widget buildFrame({
   return Directionality(
     textDirection: textDirection,
     child: Center(
-      child: Container(
+      child: SizedBox(
         width: pageSize.width, height: pageSize.height, child: child,
       ),
     ),

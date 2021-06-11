@@ -20,5 +20,6 @@
   "pasteButtonLabel": "ਪੇਸਟ ਕਰੋ",
   "selectAllButtonLabel": "ਸਭ ਚੁਣੋ",
   "tabSemanticsLabel": "$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ",
-  "modalBarrierDismissLabel": "ਖਾਰਜ ਕਰੋ"
+  "modalBarrierDismissLabel": "ਖਾਰਜ ਕਰੋ",
+  "searchTextFieldPlaceholderLabel": "ਖੋਜੋ"
 }

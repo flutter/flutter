@@ -12,9 +12,9 @@ import 'debug.dart';
 import 'object.dart';
 
 // Examples can assume:
-// int rows, columns;
-// String _name;
-// bool inherit;
+// late int rows, columns;
+// late String _name;
+// late bool inherit;
 
 /// The various priority levels used to filter which diagnostics are shown and
 /// omitted.
@@ -32,7 +32,7 @@ enum DiagnosticLevel {
   /// the diagnostics to be formatted consistently with other diagnostics and
   /// they should expect them to sometimes be misleading. For example,
   /// [FlagProperty] and [ObjectFlagProperty] have uglier formatting when the
-  /// property `value` does does not match a value with a custom flag
+  /// property `value` does not match a value with a custom flag
   /// description. An example of a misleading diagnostic is a diagnostic for
   /// a property that has no effect because some other property of the object is
   /// set in a way that causes the hidden property to have no effect.
@@ -786,8 +786,8 @@ class _PrefixedStringBuilder {
   _PrefixedStringBuilder({
     required this.prefixLineOne,
     required String? prefixOtherLines,
-    this.wrapWidth}) :
-      _prefixOtherLines = prefixOtherLines;
+    this.wrapWidth,
+  })  : _prefixOtherLines = prefixOtherLines;
 
   /// Prefix to add to the first line.
   final String prefixLineOne;
@@ -850,7 +850,7 @@ class _PrefixedStringBuilder {
       _wrappableRanges,
       wrapWidth!,
       startOffset: firstLine ? prefixLineOne.length : _prefixOtherLines!.length,
-      otherLineOffset: firstLine ? _prefixOtherLines!.length : _prefixOtherLines!.length,
+      otherLineOffset: _prefixOtherLines!.length,
     );
     int i = 0;
     final int length = lines.length;
@@ -1009,7 +1009,7 @@ class _PrefixedStringBuilder {
   }
 
   String? _getCurrentPrefix(bool firstLine) {
-    return _buffer.isEmpty ? prefixLineOne : (firstLine ? _prefixOtherLines : _prefixOtherLines);
+    return _buffer.isEmpty ? prefixLineOne : _prefixOtherLines;
   }
 
   /// Write lines assuming the lines obey the specified prefixes. Ensures that
@@ -1059,7 +1059,7 @@ class _NoDefaultValue {
 }
 
 /// Marker object indicating that a [DiagnosticsNode] has no default value.
-const _NoDefaultValue kNoDefaultValue = _NoDefaultValue();
+const Object kNoDefaultValue = _NoDefaultValue();
 
 bool _isSingleLine(DiagnosticsTreeStyle? style) {
   return style == DiagnosticsTreeStyle.singleLine;
@@ -1124,10 +1124,11 @@ class TextTreeRenderer {
       return '';
     } else {
       return _debugRender(
-          node,
-          prefixLineOne: prefixLineOne,
-          prefixOtherLines: prefixOtherLines,
-          parentConfiguration: parentConfiguration);
+        node,
+        prefixLineOne: prefixLineOne,
+        prefixOtherLines: prefixOtherLines,
+        parentConfiguration: parentConfiguration,
+      );
     }
   }
 
@@ -1246,7 +1247,7 @@ class TextTreeRenderer {
     }
 
     final Iterable<DiagnosticsNode> propertiesIterable = node.getProperties().where(
-            (DiagnosticsNode n) => !n.isFiltered(_minLevel)
+            (DiagnosticsNode n) => !n.isFiltered(_minLevel),
     );
     List<DiagnosticsNode> properties;
     if (_maxDescendentsTruncatableNode >= 0 && node.allowTruncate) {
@@ -1435,7 +1436,7 @@ abstract class DiagnosticsNode {
          name == null || !name.endsWith(':'),
          'Names of diagnostic nodes must not end with colons.\n'
          'name:\n'
-         '  "$name"'
+         '  "$name"',
        );
 
   /// Diagnostics containing just a string `message` and not a concrete name or
@@ -1542,7 +1543,8 @@ abstract class DiagnosticsNode {
   ///
   /// See also:
   ///
-  ///  * [getProperties]
+  ///  * [getProperties], which returns the properties of the [DiagnosticsNode]
+  ///    object.
   List<DiagnosticsNode> getChildren();
 
   String get _separator => showSeparator ? ':' : '';
@@ -1656,12 +1658,9 @@ abstract class DiagnosticsNode {
     assert(minLevel != null);
     assert(() {
       if (_isSingleLine(style)) {
-        result = toStringDeep(
-            parentConfiguration: parentConfiguration, minLevel: minLevel);
+        result = toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
       } else {
-        String? description = toDescription(parentConfiguration: parentConfiguration);
-        assert(description != null);
-        description = description!;
+        final String description = toDescription(parentConfiguration: parentConfiguration)!;
 
         if (name == null || name!.isEmpty || !showName) {
           result = description;
@@ -1764,8 +1763,8 @@ abstract class DiagnosticsNode {
 /// of an actual property of the object:
 ///
 /// ```dart
-/// var table = MessageProperty('table size', '$columns\u00D7$rows');
-/// var usefulness = MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)');
+/// MessageProperty table = MessageProperty('table size', '$columns\u00D7$rows');
+/// MessageProperty usefulness = MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)');
 /// ```
 /// {@end-tool}
 /// {@tool snippet}
@@ -1774,7 +1773,7 @@ abstract class DiagnosticsNode {
 /// concrete value that is a string:
 ///
 /// ```dart
-/// var name = StringProperty('name', _name);
+/// StringProperty name = StringProperty('name', _name);
 /// ```
 /// {@end-tool}
 ///
@@ -1896,7 +1895,7 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
 
   _NumProperty.lazy(
     String name,
-    ComputePropertyValueCallback<T> computeValue, {
+    ComputePropertyValueCallback<T?> computeValue, {
     String? ifNull,
     this.unit,
     bool showName = true,
@@ -1983,7 +1982,7 @@ class DoubleProperty extends _NumProperty<double> {
   /// The [showName] and [level] arguments must not be null.
   DoubleProperty.lazy(
     String name,
-    ComputePropertyValueCallback<double> computeValue, {
+    ComputePropertyValueCallback<double?> computeValue, {
     String? ifNull,
     bool showName = true,
     String? unit,
@@ -2479,7 +2478,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 ///    only one flag, and is preferred if there is only one entry.
 ///  * [IterableProperty], which provides similar functionality describing
 ///    the values a collection of objects.
-class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
+class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   /// Create a summary for multiple properties, indicating whether each of them
   /// is present (non-null) or absent (null).
   ///
@@ -2487,7 +2486,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
   /// null.
   FlagsSummary(
     String name,
-    Map<String, T> value, {
+    Map<String, T?> value, {
     String? ifEmpty,
     bool showName = true,
     bool showSeparator = true,
@@ -2506,7 +2505,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
        );
 
   @override
-  Map<String, T> get value => super.value as Map<String, T>;
+  Map<String, T?> get value => super.value!;
 
   @override
   String valueToString({TextTreeConfiguration? parentConfiguration}) {
@@ -2544,16 +2543,16 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
     return json;
   }
 
-  bool _hasNonNullEntry() => value.values.any((T o) => o != null);
+  bool _hasNonNullEntry() => value.values.any((T? o) => o != null);
 
   // An iterable of each entry's description in [value].
   //
   // For a non-null value, its description is its key.
   //
-  // For a null value, it is omitted unless `includeEmtpy` is true and
+  // For a null value, it is omitted unless `includeEmpty` is true and
   // [ifEntryNull] contains a corresponding description.
   Iterable<String> _formattedValues() sync* {
-    for (final MapEntry<String, T> entry in value.entries) {
+    for (final MapEntry<String, T?> entry in value.entries) {
       if (entry.value != null) {
         yield entry.key;
       }
@@ -2566,7 +2565,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
 /// May throw exception if accessing the property would throw an exception
 /// and callers must handle that case gracefully. For example, accessing a
 /// property may trigger an assert that layout constraints were violated.
-typedef ComputePropertyValueCallback<T> = T Function();
+typedef ComputePropertyValueCallback<T> = T? Function();
 
 /// Property with a [value] of type [T].
 ///
@@ -2650,7 +2649,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(showSeparator != null),
-       assert(defaultValue == kNoDefaultValue || defaultValue is T),
+       assert(defaultValue == kNoDefaultValue || defaultValue is T?),
        assert(missingIfNull != null),
        assert(style != null),
        assert(level != null),
@@ -2847,7 +2846,8 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// of the property is downgraded to [DiagnosticLevel.fine] as the property
   /// value is uninteresting.
   ///
-  /// [defaultValue] has type [T] or is [kNoDefaultValue].
+  /// The [defaultValue] is [kNoDefaultValue] by default. Otherwise it must be of
+  /// type `T?`.
   final Object? defaultValue;
 
   final DiagnosticLevel _defaultLevel;
@@ -3068,7 +3068,7 @@ class DiagnosticPropertiesBuilder {
 }
 
 // Examples can assume:
-// class ExampleSuperclass with Diagnosticable { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
+// class ExampleSuperclass with Diagnosticable { late String message; late double stepWidth; late double scale; late double paintExtent; late double hitTestExtent; late double paintExtend; late double maxWidth; late bool primary; late double progress; late int maxLines; late Duration duration; late int depth; Iterable<BoxShadow>? boxShadow; late DiagnosticsTreeStyle style; late bool hasSize; late Matrix4 transform; Map<Listenable, VoidCallback>? handles; late Color color; late bool obscureText; late ImageRepeat repeat; late Size size; late Widget widget; late bool isCurrent; late bool keepAlive; late TextAlign textAlign; }
 
 /// A mixin class for providing string and [DiagnosticsNode] debug
 /// representations describing the properties of an object.
@@ -3325,9 +3325,9 @@ mixin Diagnosticable {
   ///     properties.add(DiagnosticsProperty<Map<Listenable, VoidCallback>>(
   ///       'handles',
   ///       handles,
-  ///       description: handles != null ?
-  ///       '${handles.length} active client${ handles.length == 1 ? "" : "s" }' :
-  ///       null,
+  ///       description: handles != null
+  ///         ? '${handles!.length} active client${ handles!.length == 1 ? "" : "s" }'
+  ///         : null,
   ///       ifNull: 'no notifications ever received',
   ///       showName: false,
   ///     ));
@@ -3377,13 +3377,10 @@ abstract class DiagnosticableTree with Diagnosticable {
   ///
   ///  * [toString], for a brief description of the object.
   ///  * [toStringDeep], for a description of the subtree rooted at this object.
-  String? toStringShallow({
+  String toStringShallow({
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    if (kReleaseMode) {
-      return toString();
-    }
     String? shallowString;
     assert(() {
       final StringBuffer result = StringBuffer();
@@ -3398,7 +3395,7 @@ abstract class DiagnosticableTree with Diagnosticable {
       shallowString = result.toString();
       return true;
     }());
-    return shallowString;
+    return shallowString ?? toString();
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -3470,13 +3467,10 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   }
 
   @override
-  String? toStringShallow({
+  String toStringShallow({
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    if (kReleaseMode) {
-      return toString();
-    }
     String? shallowString;
     assert(() {
       final StringBuffer result = StringBuffer();
@@ -3491,7 +3485,7 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
       shallowString = result.toString();
       return true;
     }());
-    return shallowString;
+    return shallowString ?? toString();
   }
 
   @override

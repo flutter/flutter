@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
@@ -108,7 +106,7 @@ void main() {
 typedef GestureAcceptedCallback = void Function();
 
 class PassiveGestureRecognizer extends OneSequenceGestureRecognizer {
-  GestureAcceptedCallback onGestureAccepted;
+  GestureAcceptedCallback? onGestureAccepted;
 
   @override
   void addPointer(PointerDownEvent event) {
@@ -132,9 +130,7 @@ class PassiveGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void acceptGesture(int pointer) {
-    if (onGestureAccepted != null) {
-      onGestureAccepted();
-    }
+    onGestureAccepted?.call();
   }
 
   @override

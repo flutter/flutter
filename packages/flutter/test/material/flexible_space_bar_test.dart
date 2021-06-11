@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -73,10 +71,13 @@ void main() {
       ),
     ) as FlexibleSpaceBarSettings;
 
+    const Key dragTarget = Key('orange box');
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
+            key: dragTarget,
             primary: true,
             slivers: <Widget>[
               SliverPersistentHeader(
@@ -110,18 +111,49 @@ void main() {
     final Text textWidget = actionTextBox.widget as Text;
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
 
-    TextStyle effectiveStyle = textWidget.style;
-    effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
-    expect(effectiveStyle.color.alpha, 128); // Which is alpha of .5
+    final TextStyle effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
+    expect(effectiveStyle.color?.alpha, 128); // Which is alpha of .5
 
     // We drag up to fully collapse the space bar.
-    await tester.drag(find.byType(Container).first, const Offset(0, -400.0));
+    await tester.drag(find.byKey(dragTarget), const Offset(0, -400.0));
     await tester.pumpAndSettle();
 
     expect(clipRect.size.height, minExtent);
   });
 
-  testWidgets('Collpased FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar.background is visible when using height other than kToolbarHeight', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/80451
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 300,
+            flexibleSpace: const FlexibleSpaceBar(
+              title: Text('Title'),
+              background:  Text('Background'),
+              collapseMode: CollapseMode.pin,
+            ),
+          ),
+          body: CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                  color: Colors.orange[400],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Opacity backgroundOpacity = tester.firstWidget(find.byType(Opacity));
+    expect(backgroundOpacity.opacity, 1.0);
+  });
+
+  testWidgets('Collapsed FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const double expandedHeight = 200;
     await tester.pumpWidget(
@@ -141,7 +173,7 @@ void main() {
                 delegate: SliverChildListDelegate(
                   <Widget>[
                     for (int i = 0; i < 50; i++)
-                      Container(
+                      SizedBox(
                         height: 200,
                         child: Center(child: Text('Item $i')),
                       ),
@@ -178,25 +210,37 @@ void main() {
                           rect: const Rect.fromLTRB(0.0, 0.0, 800.0, expandedHeight),
                           children: <TestSemantics>[
                             TestSemantics(
-                              id: 11,
-                              rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isHeader,
-                                SemanticsFlag.namesRoute
+                              id: 12,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 13,
+                                  rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isHeader,
+                                    SemanticsFlag.namesRoute,
+                                  ],
+                                  label: 'Title',
+                                  textDirection: TextDirection.ltr,
+                                ),
                               ],
-                              label: 'Title',
-                              textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
                               id: 10,
-                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, expandedHeight),
-                              label: 'Expanded title',
-                              textDirection: TextDirection.ltr,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 11,
+                                  rect: const Rect.fromLTRB(0.0, 0.0, 800.0, expandedHeight),
+                                  label: 'Expanded title',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                              ],
                             ),
                           ],
                         ),
                         TestSemantics(
-                          id: 12,
+                          id: 14,
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           rect: TestSemantics.fullScreen,
                           actions: <SemanticsAction>[SemanticsAction.scrollUp],
@@ -272,27 +316,39 @@ void main() {
                           rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0),
                           children: <TestSemantics>[
                             TestSemantics(
-                              id: 11,
-                              rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isHeader,
-                                SemanticsFlag.namesRoute
+                              id: 12,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0),
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 13,
+                                  rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isHeader,
+                                    SemanticsFlag.namesRoute,
+                                  ],
+                                  label: 'Title',
+                                  textDirection: TextDirection.ltr,
+                                ),
                               ],
-                              label: 'Title',
-                              textDirection: TextDirection.ltr,
                             ),
                             // The flexible space bar still persists in the
                             // semantic tree even if it is collapsed.
                             TestSemantics(
                               id: 10,
-                              rect: const Rect.fromLTRB(0.0, 36.0, 800.0, 92.0),
-                              label: 'Expanded title',
-                              textDirection: TextDirection.ltr,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0),
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 11,
+                                  rect: const Rect.fromLTRB(0.0, 36.0, 800.0, 92.0),
+                                  label: 'Expanded title',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                              ],
                             ),
                           ],
                         ),
                         TestSemantics(
-                          id: 12,
+                          id: 14,
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           rect: TestSemantics.fullScreen,
                           actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
@@ -324,20 +380,20 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              id: 13,
+                              id: 15,
                               rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                               label: 'Item 4',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              id: 14,
+                              id: 16,
                               rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                               flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                               label: 'Item 5',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              id: 15,
+                              id: 17,
                               rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0),
                               flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                               label: 'Item 6',
@@ -367,7 +423,7 @@ void main() {
   testWidgets('FlexibleSpaceBar sets width constraints for the title', (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
-    double width;
+    late double width;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -393,7 +449,7 @@ void main() {
                   ),
                 ],
               );
-            }
+            },
           ),
         ),
       ),
@@ -415,7 +471,7 @@ void main() {
   });
 
   testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
-    Widget buildFrame(TargetPlatform platform, bool centerTitle) {
+    Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: Scaffold(
@@ -465,7 +521,7 @@ void main() {
   });
 
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
-    Widget buildFrame(TargetPlatform platform, bool centerTitle) {
+    Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: Scaffold(
@@ -536,7 +592,7 @@ void main() {
 class TestDelegate extends SliverPersistentHeaderDelegate {
 
   const TestDelegate({
-    this.settings,
+    required this.settings,
   });
 
   final FlexibleSpaceBarSettings settings;

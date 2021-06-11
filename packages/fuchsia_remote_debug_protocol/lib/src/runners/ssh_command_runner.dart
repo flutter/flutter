@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io' show ProcessResult;
 
 import 'package:meta/meta.dart';
@@ -45,7 +44,7 @@ class SshCommandRunner {
   /// IPv4 nor IPv6. When connecting to a link local address (`fe80::` is
   /// usually at the start of the address), an interface should be supplied.
   SshCommandRunner({
-    this.address,
+    required this.address,
     this.interface = '',
     this.sshConfigPath,
   }) : _processManager = const LocalProcessManager() {
@@ -56,7 +55,7 @@ class SshCommandRunner {
   @visibleForTesting
   SshCommandRunner.withProcessManager(
     this._processManager, {
-    this.address,
+    required this.address,
     this.interface = '',
     this.sshConfigPath,
   }) {
@@ -71,7 +70,7 @@ class SshCommandRunner {
   final String address;
 
   /// The path to the SSH config (optional).
-  final String sshConfigPath;
+  final String? sshConfigPath;
 
   /// The name of the machine's network interface (for use with IPv6
   /// connections. Ignored otherwise).
@@ -85,7 +84,7 @@ class SshCommandRunner {
     final List<String> args = <String>[
       'ssh',
       if (sshConfigPath != null)
-        ...<String>['-F', sshConfigPath],
+        ...<String>['-F', sshConfigPath!],
       if (isIpV6Address(address))
         ...<String>['-6', if (interface.isEmpty) address else '$address%$interface']
       else

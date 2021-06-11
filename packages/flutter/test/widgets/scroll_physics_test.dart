@@ -2,37 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestScrollPhysics extends ScrollPhysics {
   const TestScrollPhysics({
-    this.name,
-    ScrollPhysics parent
+    required this.name,
+    ScrollPhysics? parent,
   }) : super(parent: parent);
   final String name;
 
   @override
-  TestScrollPhysics applyTo(ScrollPhysics ancestor) {
+  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return TestScrollPhysics(
       name: name,
-      parent: parent?.applyTo(ancestor) ?? ancestor,
+      parent: parent?.applyTo(ancestor) ?? ancestor!,
     );
   }
 
-  TestScrollPhysics get namedParent => parent as TestScrollPhysics;
+  TestScrollPhysics get namedParent => parent! as TestScrollPhysics;
   String get names => parent == null ? name : '$name ${namedParent.names}';
 
   @override
   String toString() {
     if (parent == null)
-      return '$runtimeType($name)';
-    return '$runtimeType($name) -> $parent';
+      return '${objectRuntimeType(this, 'TestScrollPhysics')}($name)';
+    return '${objectRuntimeType(this, 'TestScrollPhysics')}($name) -> $parent';
   }
 }
 
@@ -69,7 +65,7 @@ void main() {
     const ScrollPhysics always = AlwaysScrollableScrollPhysics();
     const ScrollPhysics page = PageScrollPhysics();
 
-    String types(ScrollPhysics s) => s.parent == null ? '${s.runtimeType}' : '${s.runtimeType} ${types(s.parent)}';
+    String types(ScrollPhysics? value) => value!.parent == null ? '${value.runtimeType}' : '${value.runtimeType} ${types(value.parent)}';
 
     expect(
       types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),
@@ -97,7 +93,7 @@ void main() {
     );
   });
 
-  test('ScrollPhysics scrolling subclasses - Creating the simulation doesn\'t alter the velocity for time 0', () {
+  test("ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0", () {
     final ScrollMetrics position = FixedScrollMetrics(
       minScrollExtent: 0.0,
       maxScrollExtent: 100.0,
@@ -112,13 +108,13 @@ void main() {
 
     // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
     // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
-    expect(bounce.createBallisticSimulation(position, 1000).dx(0), moreOrLessEquals(1000));
-    expect(clamp.createBallisticSimulation(position, 1000).dx(0), moreOrLessEquals(1000));
-    expect(page.createBallisticSimulation(position, 1000).dx(0), moreOrLessEquals(1000));
+    expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    expect(page.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
   });
 
   group('BouncingScrollPhysics test', () {
-    BouncingScrollPhysics physicsUnderTest;
+    late BouncingScrollPhysics physicsUnderTest;
 
     setUp(() {
       physicsUnderTest = const BouncingScrollPhysics();
@@ -253,7 +249,7 @@ void main() {
       axisDirection: AxisDirection.down,
     );
     expect(position.pixels, pixels);
-    FlutterError error;
+    late FlutterError error;
     try {
       physics.applyBoundaryConditions(position, pixels);
     } on FlutterError catch (e) {
@@ -272,7 +268,8 @@ void main() {
       // in Flutter web 0.0 sometimes just appears as 0. or 0
       expect(
         error.toStringDeep(),
-        matches(RegExp(r'''
+        matches(RegExp(
+          r'''
 FlutterError
    ClampingScrollPhysics\.applyBoundaryConditions\(\) was called
    redundantly\.
@@ -287,7 +284,7 @@ FlutterError
      FixedScrollMetrics\(500(\.\d*)?..\[0(\.\d*)?\]..500(\.\d*)?\)
 ''',
           multiLine: true,
-        ))
+        )),
       );
     }
   });
@@ -311,7 +308,7 @@ FlutterError
             itemCount: 100,
           ),
         ),
-      )
+      ),
     ));
     await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });

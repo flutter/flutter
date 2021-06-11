@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -22,7 +21,7 @@ import 'image_stream.dart';
 typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
 
 /// Signature used for error handling by [_createErrorHandlerAndKey].
-typedef _AsyncKeyErrorHandler<T> = Future<void> Function(T key, dynamic exception, StackTrace? stack);
+typedef _AsyncKeyErrorHandler<T> = Future<void> Function(T key, Object exception, StackTrace? stack);
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
@@ -119,8 +118,6 @@ class ImageConfiguration {
     result.write('ImageConfiguration(');
     bool hasArguments = false;
     if (bundle != null) {
-      if (hasArguments)
-        result.write(', ');
       result.write('bundle: $bundle');
       hasArguments = true;
     }
@@ -237,20 +234,19 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 /// ```dart
 /// class MyImage extends StatefulWidget {
 ///   const MyImage({
-///     Key key,
-///     @required this.imageProvider,
-///   }) : assert(imageProvider != null),
-///        super(key: key);
+///     Key? key,
+///     required this.imageProvider,
+///   }) : super(key: key);
 ///
 ///   final ImageProvider imageProvider;
 ///
 ///   @override
-///   _MyImageState createState() => _MyImageState();
+///   State<MyImage> createState() => _MyImageState();
 /// }
 ///
 /// class _MyImageState extends State<MyImage> {
-///   ImageStream _imageStream;
-///   ImageInfo _imageInfo;
+///   ImageStream? _imageStream;
+///   ImageInfo? _imageInfo;
 ///
 ///   @override
 ///   void didChangeDependencies() {
@@ -264,33 +260,37 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 ///   @override
 ///   void didUpdateWidget(MyImage oldWidget) {
 ///     super.didUpdateWidget(oldWidget);
-///     if (widget.imageProvider != oldWidget.imageProvider)
+///     if (widget.imageProvider != oldWidget.imageProvider) {
 ///       _getImage();
+///     }
 ///   }
 ///
 ///   void _getImage() {
-///     final ImageStream oldImageStream = _imageStream;
+///     final ImageStream? oldImageStream = _imageStream;
 ///     _imageStream = widget.imageProvider.resolve(createLocalImageConfiguration(context));
-///     if (_imageStream.key != oldImageStream?.key) {
+///     if (_imageStream!.key != oldImageStream?.key) {
 ///       // If the keys are the same, then we got the same image back, and so we don't
 ///       // need to update the listeners. If the key changed, though, we must make sure
 ///       // to switch our listeners to the new image stream.
 ///       final ImageStreamListener listener = ImageStreamListener(_updateImage);
 ///       oldImageStream?.removeListener(listener);
-///       _imageStream.addListener(listener);
+///       _imageStream!.addListener(listener);
 ///     }
 ///   }
 ///
 ///   void _updateImage(ImageInfo imageInfo, bool synchronousCall) {
 ///     setState(() {
 ///       // Trigger a build whenever the image changes.
+///       _imageInfo?.dispose();
 ///       _imageInfo = imageInfo;
 ///     });
 ///   }
 ///
 ///   @override
 ///   void dispose() {
-///     _imageStream.removeListener(ImageStreamListener(_updateImage));
+///     _imageStream?.removeListener(ImageStreamListener(_updateImage));
+///     _imageInfo?.dispose();
+///     _imageInfo = null;
 ///     super.dispose();
 ///   }
 ///
@@ -332,10 +332,8 @@ abstract class ImageProvider<T extends Object> {
       (T key, ImageErrorListener errorHandler) {
         resolveStreamForKey(configuration, stream, key, errorHandler);
       },
-      (T? key, dynamic exception, StackTrace? stack) async {
+      (T? key, Object exception, StackTrace? stack) async {
         await null; // wait an event turn in case a listener has been added to the image stream.
-        final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
-        stream.setCompleter(imageCompleter);
         InformationCollector? collector;
         assert(() {
           collector = () sync* {
@@ -345,7 +343,10 @@ abstract class ImageProvider<T extends Object> {
           };
           return true;
         }());
-        imageCompleter.setError(
+        if (stream.completer == null) {
+          stream.setCompleter(_ErrorImageCompleter());
+        }
+        stream.completer!.reportError(
           exception: exception,
           stack: stack,
           context: ErrorDescription('while resolving an image'),
@@ -377,18 +378,18 @@ abstract class ImageProvider<T extends Object> {
   /// [FlutterError.onError], and the method will return null.
   ///
   /// A completed return value of null indicates that an error has occurred.
-  Future<ImageCacheStatus> obtainCacheStatus({
+  Future<ImageCacheStatus?> obtainCacheStatus({
     required ImageConfiguration configuration,
     ImageErrorListener? handleError,
   }) {
     assert(configuration != null);
-    final Completer<ImageCacheStatus> completer = Completer<ImageCacheStatus>();
+    final Completer<ImageCacheStatus?> completer = Completer<ImageCacheStatus?>();
     _createErrorHandlerAndKey(
       configuration,
       (T key, ImageErrorListener innerHandleError) {
         completer.complete(PaintingBinding.instance!.imageCache!.statusForKey(key));
       },
-      (T? key, dynamic exception, StackTrace? stack) async {
+      (T? key, Object exception, StackTrace? stack) async {
         if (handleError != null) {
           handleError(exception, stack);
         } else {
@@ -424,7 +425,7 @@ abstract class ImageProvider<T extends Object> {
   ) {
     T? obtainedKey;
     bool didError = false;
-    Future<void> handleError(dynamic exception, StackTrace? stack) async {
+    Future<void> handleError(Object exception, StackTrace? stack) async {
       if (didError) {
         return;
       }
@@ -446,8 +447,8 @@ abstract class ImageProvider<T extends Object> {
       specification: ZoneSpecification(
         handleUncaughtError: (Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
           handleError(error, stackTrace);
-        }
-      )
+        },
+      ),
     );
     dangerZone.runGuarded(() {
       Future<T> key;
@@ -530,7 +531,12 @@ abstract class ImageProvider<T extends Object> {
   ///
   /// ```dart
   /// class MyWidget extends StatelessWidget {
-  ///   final String url = '...';
+  ///   const MyWidget({
+  ///     Key? key,
+  ///     this.url = ' ... ',
+  ///   }) : super(key: key);
+  ///
+  ///   final String url;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -540,8 +546,9 @@ abstract class ImageProvider<T extends Object> {
   ///   void evictImage() {
   ///     final NetworkImage provider = NetworkImage(url);
   ///     provider.evict().then<void>((bool success) {
-  ///       if (success)
+  ///       if (success) {
   ///         debugPrint('removed image!');
+  ///       }
   ///     });
   ///   }
   /// }
@@ -651,7 +658,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       codec: _loadAsync(key, decode),
       scale: key.scale,
       debugLabel: key.name,
-      informationCollector: collector
+      informationCollector: collector,
     );
   }
 
@@ -670,39 +677,39 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       PaintingBinding.instance!.imageCache!.evict(key);
       rethrow;
     }
-    // `key.bundle.load` has a non-nullable return type, but might be null when
-    // running with weak checking, so we need to null check it anyway (and
-    // ignore the warning that the null-handling logic is dead code).
-    if (data == null) { // ignore: dead_code
+    if (data == null) {
       PaintingBinding.instance!.imageCache!.evict(key);
       throw StateError('Unable to read data');
     }
-    return await decode(data.buffer.asUint8List());
+    return decode(data.buffer.asUint8List());
   }
 }
 
+/// Key used internally by [ResizeImage].
+///
+/// This is used to identify the precise resource in the [imageCache].
 @immutable
-class _SizeAwareCacheKey {
-  const _SizeAwareCacheKey(this.providerCacheKey, this.width, this.height);
+class ResizeImageKey {
+  // Private constructor so nobody from the outside can poison the image cache
+  // with this key. It's only accessible to [ResizeImage] internally.
+  const ResizeImageKey._(this._providerCacheKey, this._width, this._height);
 
-  final Object providerCacheKey;
-
-  final int? width;
-
-  final int? height;
+  final Object _providerCacheKey;
+  final int? _width;
+  final int? _height;
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    return other is _SizeAwareCacheKey
-        && other.providerCacheKey == providerCacheKey
-        && other.width == width
-        && other.height == height;
+    return other is ResizeImageKey
+        && other._providerCacheKey == _providerCacheKey
+        && other._width == _width
+        && other._height == _height;
   }
 
   @override
-  int get hashCode => hashValues(providerCacheKey, width, height);
+  int get hashCode => hashValues(_providerCacheKey, _width, _height);
 }
 
 /// Instructs Flutter to decode the image at the specified dimensions
@@ -713,7 +720,7 @@ class _SizeAwareCacheKey {
 ///
 /// The decoded image may still be displayed at sizes other than the
 /// cached size provided here.
-class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
+class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// Creates an ImageProvider that decodes the image to the specified size.
   ///
   /// The cached image will be directly decoded and stored at the resolution
@@ -758,36 +765,36 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
   }
 
   @override
-  ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
-    final DecoderCallback decodeResize = (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+  ImageStreamCompleter load(ResizeImageKey key, DecoderCallback decode) {
+    Future<ui.Codec> decodeResize(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
         'ResizeImage cannot be composed with another ImageProvider that applies '
-        'cacheWidth, cacheHeight, or allowUpscaling.'
+        'cacheWidth, cacheHeight, or allowUpscaling.',
       );
       return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
-    };
-    final ImageStreamCompleter completer = imageProvider.load(key.providerCacheKey, decodeResize);
+    }
+    final ImageStreamCompleter completer = imageProvider.load(key._providerCacheKey, decodeResize);
     if (!kReleaseMode) {
-      completer.debugLabel = '${completer.debugLabel} - Resized(${key.width}×${key.height})';
+      completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
     return completer;
   }
 
   @override
-  Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) {
-    Completer<_SizeAwareCacheKey>? completer;
+  Future<ResizeImageKey> obtainKey(ImageConfiguration configuration) {
+    Completer<ResizeImageKey>? completer;
     // If the imageProvider.obtainKey future is synchronous, then we will be able to fill in result with
     // a value before completer is initialized below.
-    SynchronousFuture<_SizeAwareCacheKey>? result;
+    SynchronousFuture<ResizeImageKey>? result;
     imageProvider.obtainKey(configuration).then((Object key) {
       if (completer == null) {
         // This future has completed synchronously (completer was never assigned),
         // so we can directly create the synchronous result to return.
-        result = SynchronousFuture<_SizeAwareCacheKey>(_SizeAwareCacheKey(key, width, height));
+        result = SynchronousFuture<ResizeImageKey>(ResizeImageKey._(key, width, height));
       } else {
         // This future did not synchronously complete.
-        completer.complete(_SizeAwareCacheKey(key, width, height));
+        completer.complete(ResizeImageKey._(key, width, height));
       }
     });
     if (result != null) {
@@ -795,7 +802,7 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
     }
     // If the code reaches here, it means the imageProvider.obtainKey was not
     // completed sync, so we initialize the completer for completion later.
-    completer = Completer<_SizeAwareCacheKey>();
+    completer = Completer<ResizeImageKey>();
     return completer.future;
   }
 }
@@ -888,7 +895,7 @@ class FileImage extends ImageProvider<FileImage> {
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 
-    return await decode(bytes);
+    return decode(bytes);
   }
 
   @override
@@ -929,9 +936,21 @@ class MemoryImage extends ImageProvider<MemoryImage> {
       assert(scale != null);
 
   /// The bytes to decode into an image.
+  ///
+  /// The bytes represent encoded image bytes and can be encoded in any of the
+  /// following supported image formats: {@macro flutter.dart:ui.imageFormats}
+  ///
+  /// See also:
+  ///
+  ///  * [PaintingBinding.instantiateImageCodec]
   final Uint8List bytes;
 
   /// The scale to place in the [ImageInfo] object of the image.
+  ///
+  /// See also:
+  ///
+  ///  * [ImageInfo.scale], which gives more information on how this scale is
+  ///    applied.
   final double scale;
 
   @override
@@ -993,9 +1012,11 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 ///
 /// Then, to fetch the image and associate it with scale `1.5`, use:
 ///
+/// {@tool snippet}
 /// ```dart
-/// AssetImage('icons/heart.png', scale: 1.5)
+/// const ExactAssetImage('icons/heart.png', scale: 1.5)
 /// ```
+/// {@end-tool}
 ///
 /// ## Assets in packages
 ///
@@ -1003,9 +1024,11 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// For instance, suppose the structure above is inside a package called
 /// `my_icons`. Then to fetch the image, use:
 ///
+/// {@tool snippet}
 /// ```dart
-/// AssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
+/// const ExactAssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
 /// ```
+/// {@end-tool}
 ///
 /// Assets used by the package itself should also be fetched using the [package]
 /// argument as above.
@@ -1110,25 +1133,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
 }
 
 // A completer used when resolving an image fails sync.
-class _ErrorImageCompleter extends ImageStreamCompleter {
-  _ErrorImageCompleter();
-
-  void setError({
-    DiagnosticsNode? context,
-    dynamic exception,
-    StackTrace? stack,
-    InformationCollector? informationCollector,
-    bool silent = false,
-  }) {
-    reportError(
-      context: context,
-      exception: exception,
-      stack: stack,
-      informationCollector: informationCollector,
-      silent: silent,
-    );
-  }
-}
+class _ErrorImageCompleter extends ImageStreamCompleter {}
 
 /// The exception thrown when the HTTP request to load a network image fails.
 class NetworkImageLoadException implements Exception {

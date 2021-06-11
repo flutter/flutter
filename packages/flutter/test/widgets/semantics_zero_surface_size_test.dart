@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -33,13 +30,13 @@ void main() {
       ), ignoreTransform: true,
     ));
 
-    await tester.binding.setSurfaceSize(const Size(0.0, 0.0));
+    await tester.binding.setSurfaceSize(Size.zero);
     await tester.pumpAndSettle();
 
     expect(semantics, hasSemantics(
       TestSemantics(
         id: 0,
-        rect: const Rect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+        rect: Rect.zero,
       ), ignoreTransform: true,
     ));
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:args/args.dart';
@@ -27,7 +29,6 @@ class AnalyzeOnce extends AnalyzeBase {
     @required Platform platform,
     @required ProcessManager processManager,
     @required Terminal terminal,
-    @required List<String> experiments,
     @required Artifacts artifacts,
     this.workingDirectory,
   }) : super(
@@ -39,7 +40,6 @@ class AnalyzeOnce extends AnalyzeBase {
         platform: platform,
         processManager: processManager,
         terminal: terminal,
-        experiments: experiments,
         artifacts: artifacts,
       );
 
@@ -95,7 +95,7 @@ class AnalyzeOnce extends AnalyzeBase {
       logger: logger,
       processManager: processManager,
       terminal: terminal,
-      experiments: experiments,
+      protocolTrafficLog: protocolTrafficLog,
     );
 
     Stopwatch timer;
@@ -137,7 +137,6 @@ class AnalyzeOnce extends AnalyzeBase {
       progress = argResults['preamble'] as bool
           ? logger.startProgress(
             'Analyzing $message...',
-            timeout: timeoutConfiguration.slowOperation,
           )
           : null;
 
@@ -148,14 +147,9 @@ class AnalyzeOnce extends AnalyzeBase {
       timer?.stop();
     }
 
-    final int undocumentedMembers = AnalyzeBase.countMissingDartDocs(errors);
-    if (!isDartDocs) {
-      errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
-    }
-
     // emit benchmarks
     if (isBenchmarking) {
-      writeBenchmark(timer, errors.length, undocumentedMembers);
+      writeBenchmark(timer, errors.length);
     }
 
     // --write
@@ -172,18 +166,14 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final int errorCount = errors.length;
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
-    final String dartDocMessage = AnalyzeBase.generateDartDocMessage(undocumentedMembers);
     final String errorsMessage = AnalyzeBase.generateErrorsMessage(
       issueCount: errorCount,
       seconds: seconds,
-      undocumentedMembers: undocumentedMembers,
-      dartDocMessage: dartDocMessage,
     );
 
     if (errorCount > 0) {
       logger.printStatus('');
-      // We consider any level of error to be an error exit (we don't report different levels).
-      throwToolExit(errorsMessage);
+      throwToolExit(errorsMessage, exitCode: _isFatal(errors) ? 1 : 0);
     }
 
     if (argResults['congratulate'] as bool) {
@@ -193,5 +183,22 @@ class AnalyzeOnce extends AnalyzeBase {
     if (server.didServerErrorOccur) {
       throwToolExit('Server error(s) occurred. (ran in ${seconds}s)');
     }
+  }
+
+  bool _isFatal(List<AnalysisError> errors) {
+    for (final AnalysisError error in errors) {
+      final AnalysisSeverity severityLevel = error.writtenError.severityLevel;
+      if (severityLevel == AnalysisSeverity.error) {
+        return true;
+      }
+      if (severityLevel == AnalysisSeverity.warning &&
+        (argResults['fatal-warnings'] as bool || argResults['fatal-infos'] as bool)) {
+        return true;
+      }
+      if (severityLevel == AnalysisSeverity.info && argResults['fatal-infos'] as bool) {
+        return true;
+      }
+    }
+    return false;
   }
 }

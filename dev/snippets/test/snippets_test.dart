@@ -4,19 +4,18 @@
 
 import 'dart:convert';
 import 'dart:io' hide Platform;
+
 import 'package:path/path.dart' as path;
-
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
 import 'package:snippets/configuration.dart';
 import 'package:snippets/snippets.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('Generator', () {
-    Configuration configuration;
-    SnippetGenerator generator;
-    Directory tmpDir;
-    File template;
+    late Configuration configuration;
+    late SnippetGenerator generator;
+    late Directory tmpDir;
+    late File template;
 
     setUp(() {
       tmpDir = Directory.systemTemp.createTempSync('flutter_snippets_test.');
@@ -30,6 +29,11 @@ void main() {
 // Flutter code sample for {{element}}
 
 {{description}}
+
+import 'package:flutter/material.dart';
+import '../foo.dart';
+
+{{code-imports}}
 
 {{code-my-preamble}}
 
@@ -68,6 +72,10 @@ main() {
 A description of the snippet.
 
 On several lines.
+
+```dart imports
+import 'dart:ui';
+```
 
 ```my-dart_language my-preamble
 const String name = 'snippet';
@@ -109,6 +117,12 @@ void main() {
       expect(outputContents, contains('A description of the snippet.'));
       expect(outputContents, contains('void main() {'));
       expect(outputContents, contains("const String name = 'snippet';"));
+      final List<String> lines = outputContents.split('\n');
+      final int dartUiLine = lines.indexOf("import 'dart:ui';");
+      final int materialLine = lines.indexOf("import 'package:flutter/material.dart';");
+      final int otherLine = lines.indexOf("import '../foo.dart';");
+      expect(dartUiLine, lessThan(materialLine));
+      expect(materialLine, lessThan(otherLine));
     });
 
     test('generates snippets', () async {

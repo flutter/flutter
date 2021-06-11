@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -42,10 +40,10 @@ void main() {
     expect(material.elevation, 2.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle.color, const Color(0xdd000000));
-    expect(material.textStyle.fontFamily, 'Roboto');
-    expect(material.textStyle.fontSize, 14);
-    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0xdd000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
 
     final Offset center = tester.getCenter(find.byType(MaterialButton));
@@ -62,10 +60,10 @@ void main() {
     expect(material.elevation, 8.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle.color, const Color(0xdd000000));
-    expect(material.textStyle.fontFamily, 'Roboto');
-    expect(material.textStyle.fontSize, 14);
-    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0xdd000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
 
     // Disabled MaterialButton
@@ -87,10 +85,10 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle.color, const Color(0x61000000));
-    expect(material.textStyle.fontFamily, 'Roboto');
-    expect(material.textStyle.fontSize, 14);
-    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0x61000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
   });
 
@@ -192,7 +190,7 @@ void main() {
     expect(material.elevation, equals(focusElevation));
 
     // Hover elevation overrides focus
-    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(() => gesture?.removePointer());
     await gesture.moveTo(tester.getCenter(find.byType(MaterialButton)));
@@ -305,13 +303,13 @@ void main() {
     bool wasPressed;
     Finder materialButton;
 
-    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
+    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MaterialButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -395,7 +393,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -410,7 +408,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -425,7 +423,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
@@ -624,8 +622,8 @@ void main() {
       child: Material(
         child: Center(
           child: MaterialButton(
-            child: Text('Button'),
             onPressed: null, // button is disabled
+            child: Text('Button'),
           ),
         ),
       ),
@@ -654,7 +652,7 @@ void main() {
   });
 
   testWidgets('MaterialButton minWidth and height parameters', (WidgetTester tester) async {
-    Widget buildFrame({ double minWidth, double height, EdgeInsets padding = EdgeInsets.zero, Widget child }) {
+    Widget buildFrame({ double? minWidth, double? height, EdgeInsets padding = EdgeInsets.zero, Widget? child }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -789,7 +787,7 @@ void main() {
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
@@ -806,7 +804,7 @@ void main() {
       );
     }
 
-    await buildTest(const VisualDensity());
+    await buildTest(VisualDensity.standard);
     final RenderBox box = tester.renderObject(find.byKey(key));
     Rect childRect = tester.getRect(find.byKey(childKey));
     await tester.pumpAndSettle();
@@ -825,7 +823,7 @@ void main() {
     expect(box.size, equals(const Size(108, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
-    await buildTest(const VisualDensity(), useText: true);
+    await buildTest(VisualDensity.standard, useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(88, 48)));
@@ -848,8 +846,8 @@ void main() {
     const double disabledElevation = 16;
 
     final Finder rawMaterialButtonFinder = find.descendant(
-        of: find.byType(MaterialButton),
-        matching: find.byType(RawMaterialButton)
+      of: find.byType(MaterialButton),
+      matching: find.byType(RawMaterialButton),
     );
 
     await tester.pumpWidget(
@@ -869,8 +867,8 @@ void main() {
 
   testWidgets('MaterialButton.disabledElevation defaults to 0.0 when not provided', (WidgetTester tester) async {
     final Finder rawMaterialButtonFinder = find.descendant(
-        of: find.byType(MaterialButton),
-        matching: find.byType(RawMaterialButton)
+      of: find.byType(MaterialButton),
+      matching: find.byType(RawMaterialButton),
     );
 
     await tester.pumpWidget(

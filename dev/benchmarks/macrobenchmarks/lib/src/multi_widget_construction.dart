@@ -12,8 +12,7 @@ class MultiWidgetConstructTable extends StatefulWidget {
   final int rowCount;
 
   @override
-  _MultiWidgetConstructTableState createState() =>
-      _MultiWidgetConstructTableState();
+  State<MultiWidgetConstructTable> createState() => _MultiWidgetConstructTableState();
 }
 
 class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
@@ -70,22 +69,22 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
                     // This implementation rebuild the widget tree for every
                     // frame, and is intentionally designed of poor performance
                     // for benchmark purposes.
-                    return counter % 2 == 0
+                    return counter.isEven
                         ? Container(
                             // This key forces rebuilding the element
                             key: ValueKey<int>(widgetCounter + label),
                             color: Color.lerp(
                                 Colors.white, baseColor, label / totalLength),
-                            child: Text('${widgetCounter + label}'),
                             constraints: BoxConstraints.expand(height: height),
+                            child: Text('${widgetCounter + label}'),
                           )
                         : MyContainer(
                             // This key forces rebuilding the element
                             key: ValueKey<int>(widgetCounter + label),
                             color: Color.lerp(
                                 Colors.white, baseColor, label / totalLength),
-                            child: Text('${widgetCounter + label}'),
                             constraints: BoxConstraints.expand(height: height),
+                            child: Text('${widgetCounter + label}'),
                           );
                   },
                 ),
@@ -110,8 +109,8 @@ class MyContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: color,
-      child: child,
       constraints: constraints,
+      child: child,
     );
   }
 }

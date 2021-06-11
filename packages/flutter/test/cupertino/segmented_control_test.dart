@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -41,7 +38,7 @@ StatefulBuilder setupSimpleSegmentedControl() {
   );
 }
 
-Widget boilerplate({ Widget child }) {
+Widget boilerplate({ required Widget child }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(child: child),
@@ -88,35 +85,37 @@ void main() {
   });
 
   testWidgets('Need at least 2 children', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         boilerplate(
           child: CupertinoSegmentedControl<int>(
-            children: children,
+            children: const <int, Widget>{},
             onValueChanged: (int newValue) { },
           ),
         ),
-      );
-      fail('Should not be possible to create a segmented control with no children');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children.length'));
-    }
-    try {
-      children[0] = const Text('Child 1');
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
+    );
 
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         boilerplate(
           child: CupertinoSegmentedControl<int>(
-            children: children,
+            children: const <int, Widget>{0: Text('Child 1')},
             onValueChanged: (int newValue) { },
           ),
         ),
-      );
-      fail('Should not be possible to create a segmented control with just one child');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children.length'));
-    }
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
+    );
   });
 
   testWidgets('Padding works', (WidgetTester tester) async {
@@ -132,18 +131,18 @@ void main() {
       child: Text('Child 2'),
     ) ;
 
-    Future<void> verifyPadding({ EdgeInsets padding }) async {
+    Future<void> verifyPadding({ EdgeInsets? padding }) async {
       final EdgeInsets effectivePadding = padding ?? const EdgeInsets.symmetric(horizontal: 16);
       final Rect segmentedControlRect = tester.getRect(find.byKey(key));
       expect(
-          tester.getTopLeft(find.byWidget(children[0])),
+          tester.getTopLeft(find.byWidget(children[0]!)),
           segmentedControlRect.topLeft.translate(
             effectivePadding.topLeft.dx,
             effectivePadding.topLeft.dy,
           ),
       );
       expect(
-        tester.getBottomLeft(find.byWidget(children[0])),
+        tester.getBottomLeft(find.byWidget(children[0]!)),
         segmentedControlRect.bottomLeft.translate(
           effectivePadding.bottomLeft.dx,
           effectivePadding.bottomLeft.dy,
@@ -151,14 +150,14 @@ void main() {
       );
 
       expect(
-        tester.getTopRight(find.byWidget(children[1])),
+        tester.getTopRight(find.byWidget(children[1]!)),
         segmentedControlRect.topRight.translate(
           effectivePadding.topRight.dx,
           effectivePadding.topRight.dy,
         ),
       );
       expect(
-        tester.getBottomRight(find.byWidget(children[1])),
+        tester.getBottomRight(find.byWidget(children[1]!)),
         segmentedControlRect.bottomRight.translate(
           effectivePadding.bottomRight.dx,
           effectivePadding.bottomRight.dy,
@@ -211,8 +210,8 @@ void main() {
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         boilerplate(
           child: CupertinoSegmentedControl<int>(
             children: children,
@@ -220,46 +219,13 @@ void main() {
             groupValue: 2,
           ),
         ),
-      );
-      fail('Should not be possible to create segmented control in which '
-          'value is not the key of one of the children widgets');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children'));
-    }
-  });
-
-  testWidgets('Children and onValueChanged arguments can not be null', (WidgetTester tester) async {
-    try {
-      await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSegmentedControl<int>(
-            children: null,
-            onValueChanged: (int newValue) { },
-          ),
-        ),
-      );
-      fail('Should not be possible to create segmented control with null children');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children'));
-    }
-
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
-
-    try {
-      await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSegmentedControl<int>(
-            children: children,
-            onValueChanged: null,
-          ),
-        ),
-      );
-      fail('Should not be possible to create segmented control with null onValueChanged');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('onValueChanged'));
-    }
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children'),
+      )),
+    );
   });
 
   testWidgets('Widgets have correct default text/icon styles, change correctly on selection', (WidgetTester tester) async {
@@ -562,7 +528,7 @@ void main() {
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
-    int sharedValue;
+    int? sharedValue;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -642,8 +608,7 @@ void main() {
       ),
     );
 
-    final RenderBox buttonBox = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     expect(buttonBox.size.height, 400.0);
   });
@@ -674,8 +639,7 @@ void main() {
       ),
     );
 
-    final RenderBox segmentedControl = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox segmentedControl = tester.renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     // Subtract the 16.0px from each side. Remaining width should be allocated
     // to each child equally.
@@ -683,12 +647,9 @@ void main() {
 
     expect(childWidth, 200.0);
 
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[0].parentData.surroundingRect.width);
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[1].parentData.surroundingRect.width);
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[2].parentData.surroundingRect.width);
+    expect(childWidth, getRenderSegmentedControl(tester).getChildrenAsList()[0].parentData.surroundingRect.width);
+    expect(childWidth, getRenderSegmentedControl(tester).getChildrenAsList()[1].parentData.surroundingRect.width);
+    expect(childWidth, getRenderSegmentedControl(tester).getChildrenAsList()[2].parentData.surroundingRect.width);
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
@@ -714,8 +675,7 @@ void main() {
       ),
     );
 
-    final RenderBox segmentedControl = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox segmentedControl = tester.renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     expect(segmentedControl.size.width.isFinite, isTrue);
   });
@@ -737,8 +697,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopRight(find.text('Child 1')).dx >
-        tester.getTopRight(find.text('Child 2')).dx, isTrue);
+    expect(tester.getTopRight(find.text('Child 1')).dx > tester.getTopRight(find.text('Child 2')).dx, isTrue);
   });
 
   testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
@@ -851,37 +810,38 @@ void main() {
     await tester.pump();
 
     expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                label: 'Child 1',
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isInMutuallyExclusiveGroup,
-                ],
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-              ),
-              TestSemantics.rootChild(
-                label: 'Child 2',
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isInMutuallyExclusiveGroup,
-                  SemanticsFlag.isSelected,
-                ],
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-              ),
-            ],
-          ),
-          ignoreId: true,
-          ignoreRect: true,
-          ignoreTransform: true,
-        ));
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              label: 'Child 1',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isInMutuallyExclusiveGroup,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            TestSemantics.rootChild(
+              label: 'Child 2',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isInMutuallyExclusiveGroup,
+                SemanticsFlag.isSelected,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
 
     semantics.dispose();
   });
@@ -930,7 +890,7 @@ void main() {
 
   testWidgets('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
-    TapDownDetails tapDownDetails;
+    late TapDownDetails tapDownDetails;
     children[0] = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: (TapDownDetails details) { tapDownDetails = details; },
@@ -961,7 +921,7 @@ void main() {
 
     expect(sharedValue, 1);
 
-    final Offset segment0GlobalOffset = tester.getTopLeft(find.byWidget(children[0]));
+    final Offset segment0GlobalOffset = tester.getTopLeft(find.byWidget(children[0]!));
     await tester.tapAt(segment0GlobalOffset + const Offset(7, 11));
 
     expect(tapDownDetails.localPosition, const Offset(7, 11));
@@ -998,13 +958,14 @@ void main() {
 
       expect(sharedValue, 0);
 
-      final Offset centerOfTwo = tester.getCenter(find.byWidget(children[1]));
+      final Offset centerOfTwo = tester.getCenter(find.byWidget(children[1]!));
       // Tap within the bounds of children[1], but not at the center.
       // children[1] is a SizedBox thus not hittable by itself.
       await tester.tapAt(centerOfTwo + const Offset(10, 0));
 
       expect(sharedValue, 1);
-  });
+    },
+  );
 
   testWidgets('Animation is correct when the selected segment changes', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
@@ -1418,7 +1379,7 @@ void main() {
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
-    int sharedValue = 0;
+    int? sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(

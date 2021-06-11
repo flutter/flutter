@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -129,10 +126,10 @@ void main() {
     );
 
     final RichText iconText = tester.firstWidget(find.descendant(
-        of: find.byType(BackButton),
-        matching: find.byType(RichText)
+      of: find.byType(BackButton),
+      matching: find.byType(RichText),
     ));
-    expect(iconText.text.style.color, Colors.blue);
+    expect(iconText.text.style!.color, Colors.blue);
   });
 
   testWidgets('BackButton semantics', (WidgetTester tester) async {
@@ -179,10 +176,10 @@ void main() {
     );
 
     final RichText iconText = tester.firstWidget(find.descendant(
-        of: find.byType(CloseButton),
-        matching: find.byType(RichText)
+      of: find.byType(CloseButton),
+      matching: find.byType(RichText),
     ));
-    expect(iconText.text.style.color, Colors.red);
+    expect(iconText.text.style!.color, Colors.red);
   });
 
   testWidgets('CloseButton onPressed overrides default pop behavior', (WidgetTester tester) async {

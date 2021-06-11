@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 
 /// A tile in a material design grid list.
@@ -23,26 +21,26 @@ class GridTile extends StatelessWidget {
   ///
   /// Must have a child. Does not typically have both a header and a footer.
   const GridTile({
-    Key key,
+    Key? key,
     this.header,
     this.footer,
-    @required this.child,
+    required this.child,
   }) : assert(child != null),
        super(key: key);
 
   /// The widget to show over the top of this grid tile.
   ///
   /// Typically a [GridTileBar].
-  final Widget header;
+  final Widget? header;
 
   /// The widget to show over the bottom of this grid tile.
   ///
   /// Typically a [GridTileBar].
-  final Widget footer;
+  final Widget? footer;
 
   /// The widget that fills the tile.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
@@ -60,14 +58,14 @@ class GridTile extends StatelessWidget {
             top: 0.0,
             left: 0.0,
             right: 0.0,
-            child: header,
+            child: header!,
           ),
         if (footer != null)
           Positioned(
             left: 0.0,
             bottom: 0.0,
             right: 0.0,
-            child: footer,
+            child: footer!,
           ),
       ],
     );

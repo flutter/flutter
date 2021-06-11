@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../../gallery/demo.dart';
 
@@ -18,7 +17,7 @@ class Dessert {
   final int calcium;
   final int iron;
 
-  bool selected = false;
+  bool? selected = false;
 }
 
 class DessertDataSource extends DataTableSource {
@@ -79,7 +78,7 @@ class DessertDataSource extends DataTableSource {
     Dessert('Coconut slice and KitKat',             677, 41.0,  72,  8.5,  63, 12, 12),
   ];
 
-  void _sort<T>(Comparable<T> getField(Dessert d), bool ascending) {
+  void _sort<T>(Comparable<T> Function(Dessert d) getField, bool ascending) {
     _desserts.sort((Dessert a, Dessert b) {
       if (!ascending) {
         final Dessert c = a;
@@ -96,17 +95,17 @@ class DessertDataSource extends DataTableSource {
   int _selectedCount = 0;
 
   @override
-  DataRow getRow(int index) {
+  DataRow? getRow(int index) {
     assert(index >= 0);
     if (index >= _desserts.length)
       return null;
     final Dessert dessert = _desserts[index];
     return DataRow.byIndex(
       index: index,
-      selected: dessert.selected,
-      onSelectChanged: (bool value) {
+      selected: dessert.selected!,
+      onSelectChanged: (bool? value) {
         if (dessert.selected != value) {
-          _selectedCount += value ? 1 : -1;
+          _selectedCount += value! ? 1 : -1;
           assert(_selectedCount >= 0);
           dessert.selected = value;
           notifyListeners();
@@ -134,28 +133,30 @@ class DessertDataSource extends DataTableSource {
   @override
   int get selectedRowCount => _selectedCount;
 
-  void _selectAll(bool checked) {
+  void _selectAll(bool? checked) {
     for (final Dessert dessert in _desserts)
       dessert.selected = checked;
-    _selectedCount = checked ? _desserts.length : 0;
+    _selectedCount = checked! ? _desserts.length : 0;
     notifyListeners();
   }
 }
 
 class DataTableDemo extends StatefulWidget {
+  const DataTableDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/data-table';
 
   @override
-  _DataTableDemoState createState() => _DataTableDemoState();
+  State<DataTableDemo> createState() => _DataTableDemoState();
 }
 
 class _DataTableDemoState extends State<DataTableDemo> {
-  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
-  int _sortColumnIndex;
+  int? _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
+  int? _sortColumnIndex;
   bool _sortAscending = true;
   final DessertDataSource _dessertsDataSource = DessertDataSource();
 
-  void _sort<T>(Comparable<T> getField(Dessert d), int columnIndex, bool ascending) {
+  void _sort<T>(Comparable<T> Function(Dessert d) getField, int columnIndex, bool ascending) {
     _dessertsDataSource._sort<T>(getField, ascending);
     setState(() {
       _sortColumnIndex = columnIndex;
@@ -178,8 +179,8 @@ class _DataTableDemoState extends State<DataTableDemo> {
           children: <Widget>[
             PaginatedDataTable(
               header: const Text('Nutrition'),
-              rowsPerPage: _rowsPerPage,
-              onRowsPerPageChanged: (int value) { setState(() { _rowsPerPage = value; }); },
+              rowsPerPage: _rowsPerPage!,
+              onRowsPerPageChanged: (int? value) { setState(() { _rowsPerPage = value; }); },
               sortColumnIndex: _sortColumnIndex,
               sortAscending: _sortAscending,
               onSelectAll: _dessertsDataSource._selectAll,

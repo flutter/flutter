@@ -7,8 +7,8 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'recorder.dart';
@@ -21,7 +21,7 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
 
   static const String benchmarkName = 'bench_mouse_region_grid_scroll';
 
-  final _Tester tester = _Tester();
+  final _Tester _tester = _Tester();
 
   // Use a non-trivial border to force Web to switch painter
   Border _getBorder(int columnIndex, int rowIndex) {
@@ -42,8 +42,8 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
     if (!started) {
       started = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
-        tester.start();
-        registerDidStop(tester.stop);
+        _tester.start();
+        registerDidStop(_tester.stop);
       });
     }
     super.frameDidDraw();
@@ -116,13 +116,8 @@ class _Tester {
 
   TestGesture get gesture {
     return _gesture ??= TestGesture(
-      dispatcher: (PointerEvent event, HitTestResult result) async {
-        RendererBinding.instance.dispatchEvent(event, result);
-      },
-      hitTester: (Offset location) {
-        final HitTestResult result = HitTestResult();
-        RendererBinding.instance.hitTest(result, location);
-        return result;
+      dispatcher: (PointerEvent event) async {
+        RendererBinding.instance.handlePointerEvent(event);
       },
       kind: PointerDeviceKind.mouse,
     );

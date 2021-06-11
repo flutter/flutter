@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('OverflowBar documented defaults', (WidgetTester tester) async {
@@ -52,7 +50,7 @@ void main() {
     final Key child2Key = UniqueKey();
     final Key child3Key = UniqueKey();
 
-    Widget buildFrame({ double spacing, TextDirection textDirection }) {
+    Widget buildFrame({ required double spacing, required TextDirection textDirection }) {
       return Directionality(
         textDirection: textDirection,
         child: Align(
@@ -176,7 +174,7 @@ void main() {
   });
 
   testWidgets('OverflowBar intrinsic width', (WidgetTester tester) async {
-    Widget buildFrame({ double width }) {
+    Widget buildFrame({ required double width }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -207,7 +205,7 @@ void main() {
   });
 
   testWidgets('OverflowBar intrinsic height', (WidgetTester tester) async {
-    Widget buildFrame({ double maxWidth }) {
+    Widget buildFrame({ required double maxWidth }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -235,5 +233,42 @@ void main() {
 
     await tester.pumpWidget(buildFrame(maxWidth: 150));
     expect(tester.getSize(find.byType(OverflowBar)).height, 166); // 166 = 50 + 8 + 25 + 8 + 75
+  });
+
+
+  testWidgets('OverflowBar is wider that its intrinsic width', (WidgetTester tester) async {
+    final Key key0 = UniqueKey();
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+
+    Widget buildFrame(TextDirection textDirection) {
+      return Directionality(
+        textDirection: textDirection,
+        child: SizedBox(
+          width: 800,
+          // intrinsic width = 50 + 10 + 60 + 10 + 70 = 200
+          child: OverflowBar(
+            spacing: 10,
+            children: <Widget>[
+              SizedBox(key: key0, width: 50, height: 50),
+              SizedBox(key: key1, width: 60, height: 50),
+              SizedBox(key: key2, width: 70, height: 50),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    expect(tester.getSize(find.byType(OverflowBar)), const Size(800.0, 600.0));
+    expect(tester.getTopLeft(find.byKey(key0)).dx, 0);
+    expect(tester.getTopLeft(find.byKey(key1)).dx, 60);
+    expect(tester.getTopLeft(find.byKey(key2)).dx, 130);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+    expect(tester.getSize(find.byType(OverflowBar)), const Size(800.0, 600.0));
+    expect(tester.getTopLeft(find.byKey(key0)).dx, 750);
+    expect(tester.getTopLeft(find.byKey(key1)).dx, 680);
+    expect(tester.getTopLeft(find.byKey(key2)).dx, 600);
   });
 }

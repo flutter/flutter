@@ -20,5 +20,6 @@
   "pasteButtonLabel": "पेस्ट करा",
   "selectAllButtonLabel": "सर्व निवडा",
   "tabSemanticsLabel": "$tabCount पैकी $tabIndex टॅब",
-  "modalBarrierDismissLabel": "डिसमिस करा"
+  "modalBarrierDismissLabel": "डिसमिस करा",
+  "searchTextFieldPlaceholderLabel": "शोधा"
 }

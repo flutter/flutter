@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -68,11 +65,11 @@ void main() {
           axisDirection: AxisDirection.down,
           color: const Color(0x0DFFFFFF),
           notificationPredicate: (ScrollNotification notification) => notification.depth == 1,
-          child: SingleChildScrollView(
+          child: const SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Container(
+            child: SizedBox(
                 width: 600.0,
-                child: const CustomScrollView(
+                child: CustomScrollView(
                   slivers: <Widget>[
                     SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
                   ],
@@ -248,8 +245,14 @@ void main() {
     expect(painter, paints..rotate(angle: math.pi / 2.0)..circle()..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(-5.0, 0.0));
-    expect(painter, paints..rotate(angle: math.pi / 2.0)..circle()
-                          ..rotate(angle: math.pi / 2.0)..circle());
+    expect(
+      painter,
+      paints
+        ..rotate(angle: math.pi / 2.0)
+        ..circle()
+        ..rotate(angle: math.pi / 2.0)
+        ..circle(),
+    );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
@@ -281,11 +284,11 @@ void main() {
     RenderObject painter;
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
           behavior: TestScrollBehavior1(),
-          child: const CustomScrollView(
+          child: CustomScrollView(
             scrollDirection: Axis.horizontal,
             physics: AlwaysScrollableScrollPhysics(),
             reverse: true,
@@ -303,11 +306,11 @@ void main() {
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
           behavior: TestScrollBehavior2(),
-          child: const CustomScrollView(
+          child: CustomScrollView(
             scrollDirection: Axis.horizontal,
             physics: AlwaysScrollableScrollPhysics(),
             slivers: <Widget>[
@@ -329,21 +332,21 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
-          behavior: TestScrollBehavior2(),
+          behavior: const TestScrollBehavior2(),
           child: CustomScrollView(
             center: centerKey,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => Text('First sliver $index',),
+                  (BuildContext context, int index) => Text('First sliver $index'),
                   childCount: 2,
                 ),
               ),
               SliverList(
                 key: centerKey,
                 delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => Text('Second sliver $index',),
+                  (BuildContext context, int index) => Text('Second sliver $index'),
                   childCount: 5,
                 ),
               ),
@@ -362,7 +365,116 @@ void main() {
     expect(painter, paints..save()..translate(y: 0.0)..scale()..circle());
   });
 
-  group('Modify glow position', () {
+  testWidgets('CustomScrollView overscroll indicator works well with [CustomScrollView.center] and [OverscrollIndicatorNotification.paintOffset]', (WidgetTester tester) async {
+    final Key centerKey = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScrollConfiguration(
+          behavior: const TestScrollBehavior2(),
+          child: NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (OverscrollIndicatorNotification notification) {
+              if (notification.leading) {
+                notification.paintOffset = 50.0;
+              }
+              return false;
+            },
+            child: CustomScrollView(
+              center: centerKey,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: <Widget>[
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) => Text('First sliver $index'),
+                    childCount: 2,
+                  ),
+                ),
+                SliverList(
+                  key: centerKey,
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) => Text('Second sliver $index'),
+                    childCount: 5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('First sliver 1'), findsNothing);
+
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0)); // offset will be magnified ten times
+    expect(find.text('First sliver 1'), findsOneWidget);
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    // The OverscrollIndicator should respect the [OverscrollIndicatorNotification.paintOffset] setting.
+    expect(painter, paints..save()..translate(y: 50.0)..scale()..circle());
+  });
+
+  testWidgets('The OverscrollIndicator should not overflow the scrollable view edge', (WidgetTester tester) async {
+    // Regressing test for https://github.com/flutter/flutter/issues/64149
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NotificationListener<OverscrollIndicatorNotification>(
+          onNotification: (OverscrollIndicatorNotification notification) {
+            notification.paintOffset = 50.0; // both the leading and trailing indicator have a 50.0 pixels offset.
+            return false;
+          },
+          child: const CustomScrollView(
+            slivers: <Widget>[
+              SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+            ],
+          ),
+        ),
+      ),
+    );
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
+    expect(painter, paints..save()..translate(y: 50.0)..scale()..circle());
+    // Reverse scroll (30 pixels), and the offset < notification.paintOffset.
+    await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -30.0));
+    await tester.pump();
+    // The OverscrollIndicator should move with the CustomScrollView.
+    expect(painter, paints..save()..translate(y: 50.0 - 30.0)..scale()..circle());
+
+    // Reverse scroll (30+20 pixels) and offset == notification.paintOffset.
+    await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -20.0));
+    await tester.pump();
+    expect(painter, paints..save()..translate(y: 50.0 - 50.0)..scale()..circle());
+
+    // Reverse scroll (30+20+10 pixels) and offset > notification.paintOffset.
+    await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -10.0));
+    await tester.pump();
+    // The OverscrollIndicator should not overflow the CustomScrollView's edge.
+    expect(painter, paints..save()..translate(y: 50.0 - 50.0)..scale()..circle());
+
+    await tester.pumpAndSettle(); // Finish the leading indicator.
+
+    // trigger the trailing indicator
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, -200.0));
+    expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0)..scale()..circle());
+
+    // Reverse scroll (30 pixels), and the offset < notification.paintOffset.
+    await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, 30.0));
+    await tester.pump();
+    // The OverscrollIndicator should move with the CustomScrollView.
+    expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0 - 30.0)..scale()..circle());
+
+    // Reverse scroll (30+20 pixels) and offset == notification.paintOffset.
+    await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, 20.0));
+    await tester.pump();
+    expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0 - 50.0)..scale()..circle());
+
+    // Reverse scroll (30+20+10 pixels) and offset > notification.paintOffset.
+    await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, 10.0));
+    await tester.pump();
+    // The OverscrollIndicator should not overflow the CustomScrollView's edge.
+    expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0 - 50.0)..scale()..circle());
+  });
+
+  group('[OverscrollIndicatorNotification.paintOffset] test', () {
     testWidgets('Leading', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
@@ -384,11 +496,12 @@ void main() {
       );
       final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
       await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
+      // The OverscrollIndicator should respect the [OverscrollIndicatorNotification.paintOffset] setting.
       expect(painter, paints..save()..translate(y: 50.0)..scale()..circle());
       // Reverse scroll direction.
       await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -30.0));
       await tester.pump();
-      // The painter should follow the scroll direction.
+      // The OverscrollIndicator should move with the CustomScrollView.
       expect(painter, paints..save()..translate(y: 50.0 - 30.0)..scale()..circle());
     });
 
@@ -415,34 +528,39 @@ void main() {
       await tester.dragFrom(const Offset(200.0, 200.0), const Offset(200.0, -10000.0));
       await tester.pump();
       await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, -5.0));
+      // The OverscrollIndicator should respect the [OverscrollIndicatorNotification.paintOffset] setting.
       expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0)..scale()..circle());
       // Reverse scroll direction.
       await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, 30.0));
       await tester.pump();
-      // The painter should follow the scroll direction.
+      // The OverscrollIndicator should move with the CustomScrollView.
       expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0 - 30.0)..scale()..circle());
     });
   });
 }
 
 class TestScrollBehavior1 extends ScrollBehavior {
+  const TestScrollBehavior1();
+
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
-      child: child,
-      axisDirection: axisDirection,
+      axisDirection: details.direction,
       color: const Color(0xFF00FF00),
+      child: child,
     );
   }
 }
 
 class TestScrollBehavior2 extends ScrollBehavior {
+  const TestScrollBehavior2();
+
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
-      child: child,
-      axisDirection: axisDirection,
+      axisDirection: details.direction,
       color: const Color(0xFF0000FF),
+      child: child,
     );
   }
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -10,12 +12,10 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/pubspec_schema.dart';
 
 void main() {
   String fixPath(String path) {
@@ -39,11 +39,6 @@ void main() {
     });
 
     testUsingContext('main asset and variants', () async {
-      // Setting flutterRoot here so that it picks up the MemoryFileSystem's
-      // path separator.
-      Cache.flutterRoot = getFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(

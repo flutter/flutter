@@ -8,14 +8,13 @@ import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:meta/meta.dart';
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 /// The number of samples from warm-up iterations.
 ///
@@ -217,15 +216,16 @@ abstract class SceneBuilderRecorder extends Recorder {
   Profile get profile => _profile;
   Profile _profile;
 
-  /// Called from [Window.onBeginFrame].
+  /// Called from [dart:ui.PlatformDispatcher.onBeginFrame].
   @mustCallSuper
   void onBeginFrame() {}
 
   /// Called on every frame.
   ///
   /// An implementation should exercise the [sceneBuilder] to build a frame.
-  /// However, it must not call [SceneBuilder.build] or [Window.render].
-  /// Instead the benchmark harness will call them and time them appropriately.
+  /// However, it must not call [SceneBuilder.build] or
+  /// [dart:ui.FlutterView.render]. Instead the benchmark harness will call them
+  /// and time them appropriately.
   void onDrawFrame(SceneBuilder sceneBuilder);
 
   @override
@@ -527,11 +527,16 @@ class _WidgetBuildRecorderHost extends StatefulWidget {
   final WidgetBuildRecorder recorder;
 
   @override
-  State<StatefulWidget> createState() =>
-      recorder._hostState = _WidgetBuildRecorderHostState();
+  State<StatefulWidget> createState() => _WidgetBuildRecorderHostState();
 }
 
 class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
+  @override
+  void initState() {
+    super.initState();
+    widget.recorder._hostState = this;
+  }
+
   // This is just to bypass the @protected on setState.
   void _setStateTrampoline() {
     setState(() {});
@@ -744,9 +749,9 @@ class TimeseriesStats {
   String toString() {
     final StringBuffer buffer = StringBuffer();
     buffer.writeln(
-      '$name: (samples: $cleanSampleCount clean/$outlierSampleCount outliers/'
-      '${cleanSampleCount + outlierSampleCount} measured/'
-      '${samples.length} total)');
+      '$name: (samples: $cleanSampleCount clean/$outlierSampleCount '
+      'outliers/${cleanSampleCount + outlierSampleCount} '
+      'measured/${samples.length} total)');
     buffer.writeln(' | average: $average μs');
     buffer.writeln(' | outlier average: $outlierAverage μs');
     buffer.writeln(' | outlier/clean ratio: ${outlierRatio}x');
