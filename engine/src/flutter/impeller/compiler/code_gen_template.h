@@ -29,7 +29,6 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   // ===========================================================================
   // Stage Uniforms ============================================================
   // ===========================================================================
-
 {% for uniform in uniform_buffers %}
 
   static constexpr auto kUniform{{camel_case(uniform.name)}} = ShaderStageIOSlot { // {{uniform.name}}

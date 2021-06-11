@@ -123,6 +123,7 @@ static bool ReflectType(Writer& writer,
   writer.Key("columns");
   writer.Uint64(type.columns);
 
+  // Member types should only be present if the base type is a struct.
   if (!type.member_types.empty()) {
     writer.Key("member");
     writer.StartArray();
@@ -254,11 +255,12 @@ static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
     writer.String(options.header_file_name);
   }
 
+  const auto all_shader_resources = compiler.get_shader_resources();
+
   {
     writer.Key("uniform_buffers");
     writer.StartArray();
-    for (const auto& uniform_buffer :
-         compiler.get_shader_resources().uniform_buffers) {
+    for (const auto& uniform_buffer : all_shader_resources.uniform_buffers) {
       if (!ReflectUniformBuffer(writer, ir, compiler, uniform_buffer)) {
         FML_LOG(ERROR) << "Could not reflect uniform buffer.";
         return nullptr;
@@ -270,7 +272,7 @@ static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
   {
     writer.Key("stage_inputs");
     writer.StartArray();
-    for (const auto& input : compiler.get_shader_resources().stage_inputs) {
+    for (const auto& input : all_shader_resources.stage_inputs) {
       if (!ReflectStageIO(writer, ir, compiler, input)) {
         FML_LOG(ERROR) << "Could not reflect stage input.";
         return nullptr;
@@ -282,11 +284,29 @@ static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
   {
     writer.Key("stage_outputs");
     writer.StartArray();
-    for (const auto& output : compiler.get_shader_resources().stage_outputs) {
+    for (const auto& output : all_shader_resources.stage_outputs) {
       if (!ReflectStageIO(writer, ir, compiler, output)) {
         FML_LOG(ERROR) << "Could not reflect stage output.";
         return nullptr;
       }
+    }
+    writer.EndArray();
+  }
+
+  {
+    auto reflect_types =
+        [&](const spirv_cross::SmallVector<spirv_cross::Resource> resources)
+        -> bool {
+      for (const auto& resource : resources) {
+      }
+      return true;
+    };
+    writer.Key("type_definitions");
+    writer.StartArray();
+    if (!reflect_types(all_shader_resources.uniform_buffers) ||
+        !reflect_types(all_shader_resources.stage_inputs) ||
+        !reflect_types(all_shader_resources.stage_outputs)) {
+      return nullptr;
     }
     writer.EndArray();
   }
