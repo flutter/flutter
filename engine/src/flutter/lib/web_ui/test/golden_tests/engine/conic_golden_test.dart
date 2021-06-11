@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
@@ -25,13 +24,13 @@ void testMain() async {
         RenderStrategy());
     final RecordingCanvas canvas = RecordingCanvas(canvasBounds);
 
-    Paint paint = Paint()
+    SurfacePaint paint = SurfacePaint()
       ..color = const Color(0x7F7F7F7F)
       ..style = PaintingStyle.fill;
 
     canvas.drawPath(path, paint);
 
-    paint = Paint()
+    paint = SurfacePaint()
       ..strokeWidth = 2.0
       ..color = const Color(0xFF7F007F)
       ..style = PaintingStyle.stroke;
@@ -39,7 +38,7 @@ void testMain() async {
     canvas.drawPath(path, paint);
     canvas.endRecording();
 
-    html.document.body.append(bitmapCanvas.rootElement);
+    html.document.body!.append(bitmapCanvas.rootElement);
     canvas.apply(bitmapCanvas, canvasBounds);
     await matchGoldenFile('$scubaFileName.png', region: region);
     bitmapCanvas.rootElement.remove();

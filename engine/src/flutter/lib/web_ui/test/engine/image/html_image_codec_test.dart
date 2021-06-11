@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -103,7 +102,7 @@ void testMain() async {
   group('ImageCodecUrl', () {
     test('loads sample image from web', () async {
       final Uri uri = Uri.base.resolve('sample_image1.png');
-      final HtmlCodec codec = await ui.webOnlyInstantiateImageCodecFromUrl(uri);
+      final HtmlCodec codec = await ui.webOnlyInstantiateImageCodecFromUrl(uri) as HtmlCodec;
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       expect(frameInfo.image, isNotNull);
       expect(frameInfo.image.width, 100);
@@ -114,7 +113,7 @@ void testMain() async {
       final HtmlCodec codec = await ui.webOnlyInstantiateImageCodecFromUrl(uri,
           chunkCallback: (int loaded, int total) {
         buffer.write('$loaded/$total,');
-      });
+      }) as HtmlCodec;
       await codec.getNextFrame();
       expect(buffer.toString(), '0/100,100/100,');
     });

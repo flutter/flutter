@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
@@ -19,7 +18,7 @@ void main() {
 void testMain() async {
   final Rect region = Rect.fromLTWH(0, 0, 500, 500);
 
-  BitmapCanvas canvas;
+  late BitmapCanvas canvas;
 
   setUp(() {
     canvas = BitmapCanvas(region, RenderStrategy());
@@ -31,7 +30,7 @@ void testMain() async {
 
   test('draws paths using nonzero and evenodd winding rules', () async {
     paintPaths(canvas);
-    html.document.body.append(canvas.rootElement);
+    html.document.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_path_winding.png', region: region);
   });
 
