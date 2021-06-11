@@ -23,6 +23,7 @@ class BuildMacosCommand extends BuildSubCommand {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesBuildNumberOption();
     usesBuildNameOption();
+    addXcodeSpecificBuildOptions();
   }
 
   @override

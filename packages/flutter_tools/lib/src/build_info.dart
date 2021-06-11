@@ -42,6 +42,7 @@ class BuildInfo {
     this.androidGradleDaemon = true,
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
+    this.shouldPodInstall = true,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -158,6 +159,10 @@ class BuildInfo {
   ///
   /// If this is null, it will be initialized from the default cached location.
   final String? initializeFromDill;
+
+  /// Whether `pod install` should be executed when related changes detected.
+  final bool shouldPodInstall;
+
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);

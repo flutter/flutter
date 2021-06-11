@@ -198,7 +198,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
+  if (buildInfo.shouldPodInstall) {
+    await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
+  }
   if (configOnly) {
     return XcodeBuildResult(success: true);
   }
