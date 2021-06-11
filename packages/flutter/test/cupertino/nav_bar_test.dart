@@ -1359,6 +1359,25 @@ void main() {
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsNothing);
   });
+
+  testWidgets(
+       'Leading positon of the text in CupertinoNavigationBar should be centered vertically',
+       (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            leading: Text('lead'),
+            middle: Text('Title'),
+            trailing: Text('Trailing')),
+            child: Center(child: Text('Test!')),
+        ),
+      ),
+    );
+
+    // 44 is the standard height of the nav bar.
+    expect(tester.getCenter(find.text('lead')).dy, 22.0);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
