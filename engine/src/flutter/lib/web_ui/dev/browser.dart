@@ -10,8 +10,6 @@ import 'package:pedantic/pedantic.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:typed_data/typed_buffers.dart';
 
-import 'package:test_api/src/utils.dart' show getErrorMessage;
-
 /// An interface for running browser instances.
 ///
 /// This is intentionally coarse-grained: browsers are controlled primary from
@@ -123,8 +121,9 @@ abstract class Browser {
         return;
       }
       _onExitCompleter.completeError(
-          Exception('Failed to run $name: ${getErrorMessage(error)}.'),
-          stackTrace);
+        Exception('Failed to run $name: $error.'),
+        stackTrace,
+      );
     });
   }
 
