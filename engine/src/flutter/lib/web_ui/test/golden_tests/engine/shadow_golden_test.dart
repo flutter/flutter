@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
@@ -23,7 +22,7 @@ void main() {
 void testMain() async {
   final Rect region = Rect.fromLTWH(0, 0, 550, 300);
 
-  SurfaceSceneBuilder builder;
+  late SurfaceSceneBuilder builder;
 
   setUpStableTestFonts();
 
@@ -32,7 +31,7 @@ void testMain() async {
   });
 
   void _paintShapeOutline() {
-    final EnginePictureRecorder recorder = PictureRecorder();
+    final EnginePictureRecorder recorder = EnginePictureRecorder();
     final RecordingCanvas canvas = recorder.beginRecording(Rect.largest);
     canvas.drawRect(
       const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
@@ -81,7 +80,7 @@ void testMain() async {
       ..addRect(const Rect.fromLTRB(0, 0, 20, 20));
     builder.pushOffset(offset.dx, offset.dy);
 
-    final EnginePictureRecorder recorder = PictureRecorder();
+    final EnginePictureRecorder recorder = EnginePictureRecorder();
     final RecordingCanvas canvas = recorder.beginRecording(Rect.largest);
     canvas
         .debugEnforceArbitraryPaint(); // make sure DOM canvas doesn't take over
@@ -107,7 +106,7 @@ void testMain() async {
       ..close();
     builder.pushOffset(offset.dx, offset.dy);
 
-    final EnginePictureRecorder recorder = PictureRecorder();
+    final EnginePictureRecorder recorder = EnginePictureRecorder();
     final RecordingCanvas canvas = recorder.beginRecording(Rect.largest);
     canvas
         .debugEnforceArbitraryPaint(); // make sure DOM canvas doesn't take over
@@ -157,8 +156,8 @@ void testMain() async {
 
       builder.pop();
 
-      final html.Element sceneElement = builder.build().webOnlyRootElement;
-      html.document.body.append(sceneElement);
+      final html.Element sceneElement = builder.build().webOnlyRootElement!;
+      html.document.body!.append(sceneElement);
 
       await matchGoldenFile(
         'shadows.png',
