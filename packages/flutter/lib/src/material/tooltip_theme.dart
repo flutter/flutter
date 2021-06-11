@@ -200,9 +200,8 @@ class TooltipThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
-    properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
-    properties.add(DiagnosticsProperty<TooltipTriggerMode>('trigger mode', triggerMode, defaultValue: null));
-    properties.add(FlagProperty('provide trigger feedback', value: provideTriggerFeedback, defaultValue: null));
+    properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
+    properties.add(FlagProperty('provideTriggerFeedback', value: provideTriggerFeedback, ifTrue: 'true', showName: true, defaultValue: null));
   }
 }
 
