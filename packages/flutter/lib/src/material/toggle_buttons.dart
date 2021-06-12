@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'toggle_buttons_theme.dart';
@@ -284,6 +285,13 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).fillColor is used. If
   /// [ToggleButtonsThemeData.fillColor] is also null, then
   /// the fill color is null.
+  ///
+  /// If fillColor is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///
   final Color? fillColor;
 
   /// The color to use for filling the button when the button has input focus.
@@ -654,7 +662,7 @@ class ToggleButtons extends StatelessWidget {
         color: color,
         selectedColor: selectedColor,
         disabledColor: disabledColor,
-        fillColor: fillColor ?? toggleButtonsTheme.fillColor,
+        fillColor: fillColor,
         focusColor: focusColor ?? toggleButtonsTheme.focusColor,
         highlightColor: highlightColor ?? toggleButtonsTheme.highlightColor,
         hoverColor: hoverColor ?? toggleButtonsTheme.hoverColor,
@@ -852,6 +860,12 @@ class _ToggleButton extends StatelessWidget {
   /// The button's label, which is usually an [Icon] or a [Text] widget.
   final Widget child;
 
+  Color _resolveColor(Set<MaterialState> states, Color? widgetColor, Color? themeColor, Color defaultColor) {
+  return _ResolveColor(widgetColor).resolve(states)
+    ?? _ResolveColor(themeColor).resolve(states)
+    ?? defaultColor;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -863,12 +877,24 @@ class _ToggleButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
 
+    final Set<MaterialState> states = <MaterialState>{
+        if (selected && onPressed != null) MaterialState.selected,
+        if (onPressed == null) MaterialState.disabled,
+    };
+
+    Color _defaultFillColor(Set<MaterialState> states) {
+      if(states.contains(MaterialState.selected)) {
+        return theme.colorScheme.primary.withOpacity(0.12);
+      }
+      return theme.colorScheme.surface.withOpacity(0.0);
+    }
+
+    currentFillColor = _resolveColor(states, fillColor, toggleButtonsTheme.fillColor, _defaultFillColor(states));
+
     if (onPressed != null && selected) {
       currentColor = selectedColor
         ?? toggleButtonsTheme.selectedColor
         ?? theme.colorScheme.primary;
-      currentFillColor = fillColor
-        ?? theme.colorScheme.primary.withOpacity(0.12);
       currentFocusColor = focusColor
         ?? toggleButtonsTheme.focusColor
         ?? theme.colorScheme.primary.withOpacity(0.12);
@@ -882,7 +908,6 @@ class _ToggleButton extends StatelessWidget {
       currentColor = color
         ?? toggleButtonsTheme.color
         ?? theme.colorScheme.onSurface.withOpacity(0.87);
-      currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
       currentFocusColor = focusColor
         ?? toggleButtonsTheme.focusColor
         ?? theme.colorScheme.onSurface.withOpacity(0.12);
@@ -896,7 +921,6 @@ class _ToggleButton extends StatelessWidget {
       currentColor = disabledColor
         ?? toggleButtonsTheme.disabledColor
         ?? theme.colorScheme.onSurface.withOpacity(0.38);
-      currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
     }
 
     final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.bodyText2!;
@@ -948,6 +972,21 @@ class _ToggleButton extends StatelessWidget {
       ifTrue: 'Button is selected',
       ifFalse: 'Button is unselected',
     ));
+  }
+}
+
+@immutable
+class _ResolveColor extends MaterialStateProperty<Color?> with Diagnosticable {
+  _ResolveColor(this.primary);
+
+  final Color? primary;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (primary is MaterialStateProperty<Color>) {
+      return MaterialStateProperty.resolveAs<Color?>(primary, states);
+    }
+    return states.contains(MaterialState.selected) ? primary : null;
   }
 }
 
