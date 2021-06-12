@@ -1,6 +1,7 @@
 name: ui
 publish_to: none
 
+# Keep the SDK version range in sync with pubspecs under web_sdk
 environment:
   sdk: ">=2.12.0-0 <3.0.0"
 
@@ -9,7 +10,6 @@ dependencies:
   meta: 1.3.0
 
 dev_dependencies:
-  analyzer: 1.1.0
   archive: 3.1.2
   html: 0.15.0
   http: 0.13.0
