@@ -17,7 +17,9 @@ import 'package:integration_test/integration_test.dart';
 import 'package:integration_test_example/main.dart' as app;
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final IntegrationTestWidgetsFlutterBinding binding =
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized()
+  as IntegrationTestWidgetsFlutterBinding;
 
   testWidgets('verify text', (WidgetTester tester) async {
     // Build our app and trigger a frame.
@@ -25,6 +27,9 @@ void main() {
 
     // Trigger a frame.
     await tester.pumpAndSettle();
+
+    // Take a screenshot.
+    await binding.takeScreenshot('platform_name');
 
     // TODO(nturgut): https://github.com/flutter/flutter/issues/51890
     // Add screenshot capability for mobile platforms.
@@ -38,5 +43,17 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('verify screenshot', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    app.main();
+
+    // Trigger a frame.
+    await tester.pumpAndSettle();
+
+    // Multiple methods can take screenshots. Screenshots are taken with the
+    // same order the methods run.
+    await binding.takeScreenshot('platform_name_2');
   });
 }

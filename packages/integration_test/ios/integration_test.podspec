@@ -15,6 +15,8 @@ Runs tests that use the flutter_test API as integration tests.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
+  s.ios.framework  = 'UIKit'
+
   s.platform = :ios, '8.0'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
 end
