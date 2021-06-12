@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'color_scheme.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'material_state.dart';
@@ -860,17 +861,17 @@ class _ToggleButton extends StatelessWidget {
   /// The button's label, which is usually an [Icon] or a [Text] widget.
   final Widget child;
 
-  Color _resolveColor(Set<MaterialState> states, Color? widgetColor, Color? themeColor, Color defaultColor) {
-  return _ResolveColor(widgetColor).resolve(states)
-    ?? _ResolveColor(themeColor).resolve(states)
-    ?? defaultColor;
+  Color _resolveColor(Set<MaterialState> states, MaterialStateProperty<Color?> widgetColor,
+  MaterialStateProperty<Color?> themeColor, MaterialStateProperty<Color> defaultColor) {
+  return widgetColor.resolve(states)
+    ?? themeColor.resolve(states)
+    ?? defaultColor.resolve(states);
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final Color currentColor;
-    final Color currentFillColor;
     Color? currentFocusColor;
     Color? currentHoverColor;
     Color? currentSplashColor;
@@ -882,14 +883,8 @@ class _ToggleButton extends StatelessWidget {
         if (onPressed == null) MaterialState.disabled,
     };
 
-    Color _defaultFillColor(Set<MaterialState> states) {
-      if(states.contains(MaterialState.selected)) {
-        return theme.colorScheme.primary.withOpacity(0.12);
-      }
-      return theme.colorScheme.surface.withOpacity(0.0);
-    }
-
-    currentFillColor = _resolveColor(states, fillColor, toggleButtonsTheme.fillColor, _defaultFillColor(states));
+    final Color currentFillColor = _resolveColor(states, _ResolveFillColor(fillColor),
+    _ResolveFillColor(toggleButtonsTheme.fillColor), _DefaultFillColor(theme.colorScheme));
 
     if (onPressed != null && selected) {
       currentColor = selectedColor
@@ -976,8 +971,8 @@ class _ToggleButton extends StatelessWidget {
 }
 
 @immutable
-class _ResolveColor extends MaterialStateProperty<Color?> with Diagnosticable {
-  _ResolveColor(this.primary);
+class _ResolveFillColor extends MaterialStateProperty<Color?> with Diagnosticable {
+  _ResolveFillColor(this.primary);
 
   final Color? primary;
 
@@ -987,6 +982,21 @@ class _ResolveColor extends MaterialStateProperty<Color?> with Diagnosticable {
       return MaterialStateProperty.resolveAs<Color?>(primary, states);
     }
     return states.contains(MaterialState.selected) ? primary : null;
+  }
+}
+
+@immutable
+class _DefaultFillColor extends MaterialStateProperty<Color> with Diagnosticable {
+  _DefaultFillColor(this.colorScheme);
+
+  final ColorScheme colorScheme;
+
+  @override
+  Color resolve(Set<MaterialState> states) {
+    if(states.contains(MaterialState.selected)) {
+      return colorScheme.primary.withOpacity(0.12);
+    }
+    return colorScheme.surface.withOpacity(0.0);
   }
 }
 
