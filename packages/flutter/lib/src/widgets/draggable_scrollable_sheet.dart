@@ -265,7 +265,7 @@ class _DraggableSheetExtent {
 
   final double minExtent;
   final double maxExtent;
-  final Set<double> snapTargets;
+  final List<double> snapTargets;
   final double initialExtent;
   final ValueNotifier<double> _currentExtent;
   double availablePixels;
