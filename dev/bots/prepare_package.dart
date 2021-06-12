@@ -595,7 +595,7 @@ class ArchivePublisher {
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
     }
-    jsonData['current_release'][branchName] = revision;
+    (jsonData['current_release'] as Map<String, dynamic>)[branchName] = revision;
     if (!jsonData.containsKey('releases')) {
       jsonData['releases'] = <Map<String, dynamic>>[];
     }

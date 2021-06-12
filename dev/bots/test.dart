@@ -1059,7 +1059,7 @@ Future<void> _ensureChromeDriverIsRunning() async {
   final HttpClientResponse response = await request.close();
   final Map<String, dynamic> webDriverStatus = json.decode(await response.transform(utf8.decoder).join('')) as Map<String, dynamic>;
   client.close();
-  final bool webDriverReady = webDriverStatus['value']['ready'] as bool;
+  final bool webDriverReady = (webDriverStatus['value'] as Map<String, dynamic>)['ready'] as bool;
   if (!webDriverReady) {
     throw Exception('WebDriver not available.');
   }
