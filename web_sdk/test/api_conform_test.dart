@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
-
 import 'dart:io';
 
+import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
-import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 // Ignore members defined on Object.
 const Set<String> _kObjectMembers = <String>{
@@ -19,7 +18,10 @@ const Set<String> _kObjectMembers = <String>{
 };
 
 CompilationUnit _parseAndCheckDart(String path) {
-  final FeatureSet analyzerFeatures = FeatureSet.fromEnableFlags(<String>['non-nullable']);
+  final FeatureSet analyzerFeatures = FeatureSet.fromEnableFlags2(
+    sdkLanguageVersion: Version.parse('2.12.0'),
+    flags: <String>['non-nullable'],
+  );
   if (!analyzerFeatures.isEnabled(Feature.non_nullable)) {
     throw Exception('non-nullable feature is disabled.');
   }
@@ -50,9 +52,9 @@ void main() {
 
   bool failed = false;
   print('Checking ${uiClasses.length} public classes.');
-  for (String className in uiClasses.keys) {
-    final ClassDeclaration uiClass = uiClasses[className];
-    final ClassDeclaration webClass = webClasses[className];
+  for (final String className in uiClasses.keys) {
+    final ClassDeclaration uiClass = uiClasses[className]!;
+    final ClassDeclaration webClass = webClasses[className]!;
     // If the web class is missing there isn't much left to do here. Print a
     // warning and move along.
     if (webClass == null) {
@@ -76,9 +78,9 @@ void main() {
     _collectPublicConstructors(uiClass, uiConstructors);
     _collectPublicConstructors(webClass, webConstructors);
 
-    for (String name in uiConstructors.keys) {
-      final ConstructorDeclaration uiConstructor = uiConstructors[name];
-      final ConstructorDeclaration webConstructor = webConstructors[name];
+    for (final String name in uiConstructors.keys) {
+      final ConstructorDeclaration uiConstructor = uiConstructors[name]!;
+      final ConstructorDeclaration? webConstructor = webConstructors[name];
       if (webConstructor == null) {
         failed = true;
         print(
@@ -109,31 +111,31 @@ void main() {
               uiConstructor.parameters.parameters[i];
           final FormalParameter webParam =
               webConstructor.parameters.parameters[i];
-          if (webParam.identifier.name != uiParam.identifier.name) {
+          if (webParam.identifier!.name != uiParam.identifier!.name) {
             failed = true;
             print('Warning: lib/ui/ui.dart $className.$name parameter $i'
-                ' ${uiParam.identifier.name} has a different name in lib/web_ui/ui.dart.');
+                ' ${uiParam.identifier!.name} has a different name in lib/web_ui/ui.dart.');
           }
           if (uiParam.isPositional != webParam.isPositional) {
             failed = true;
             print('Warning: lib/ui/ui.dart $className.$name parameter $i'
-                '${uiParam.identifier.name} is positional, but not in lib/web_ui/ui.dart.');
+                '${uiParam.identifier!.name} is positional, but not in lib/web_ui/ui.dart.');
           }
           if (uiParam.isNamed != webParam.isNamed) {
             failed = true;
             print('Warning: lib/ui/ui.dart $className.$name parameter $i'
-                '${uiParam.identifier.name} is named, but not in lib/web_ui/ui.dart.');
+                '${uiParam.identifier!.name} is named, but not in lib/web_ui/ui.dart.');
           }
         }
       }
     }
 
-    for (String methodName in uiMethods.keys) {
+    for (final String methodName in uiMethods.keys) {
       if (_kObjectMembers.contains(methodName)) {
         continue;
       }
-      final MethodDeclaration uiMethod = uiMethods[methodName];
-      final MethodDeclaration webMethod = webMethods[methodName];
+      final MethodDeclaration uiMethod = uiMethods[methodName]!;
+      final MethodDeclaration? webMethod = webMethods[methodName];
       if (webMethod == null) {
         failed = true;
         print(
@@ -144,8 +146,8 @@ void main() {
       if (uiMethod.parameters == null || webMethod.parameters == null) {
         continue;
       }
-      if (uiMethod.parameters.parameters.length !=
-          webMethod.parameters.parameters.length) {
+      if (uiMethod.parameters!.parameters.length !=
+          webMethod.parameters!.parameters.length) {
         failed = true;
         print(
             'Warning: lib/ui/ui.dart $className.$methodName has a different parameter '
@@ -154,25 +156,25 @@ void main() {
       // Technically you could re-order named parameters and still be valid,
       // but we enforce that they are identical.
       for (int i = 0;
-          i < uiMethod.parameters.parameters.length &&
-              i < webMethod.parameters.parameters.length;
+          i < uiMethod.parameters!.parameters.length &&
+              i < webMethod.parameters!.parameters.length;
           i++) {
-        final FormalParameter uiParam = uiMethod.parameters.parameters[i];
-        final FormalParameter webParam = webMethod.parameters.parameters[i];
-        if (webParam.identifier.name != uiParam.identifier.name) {
+        final FormalParameter uiParam = uiMethod.parameters!.parameters[i];
+        final FormalParameter webParam = webMethod.parameters!.parameters[i];
+        if (webParam.identifier!.name != uiParam.identifier!.name) {
           failed = true;
           print('Warning: lib/ui/ui.dart $className.$methodName parameter $i'
-              ' ${uiParam.identifier.name} has a different name in lib/web_ui/ui.dart.');
+              ' ${uiParam.identifier!.name} has a different name in lib/web_ui/ui.dart.');
         }
         if (uiParam.isPositional != webParam.isPositional) {
           failed = true;
           print('Warning: lib/ui/ui.dart $className.$methodName parameter $i'
-              '${uiParam.identifier.name} is positional, but not in lib/web_ui/ui.dart.');
+              '${uiParam.identifier!.name} is positional, but not in lib/web_ui/ui.dart.');
         }
         if (uiParam.isNamed != webParam.isNamed) {
           failed = true;
           print('Warning: lib/ui/ui.dart $className.$methodName parameter $i'
-              '${uiParam.identifier.name} is named, but not in lib/web_ui/ui.dart.');
+              '${uiParam.identifier!.name} is named, but not in lib/web_ui/ui.dart.');
         }
       }
       // check return type.
@@ -199,18 +201,18 @@ void main() {
 // Collects all public classes defined by the part files of [unit].
 void _collectPublicClasses(CompilationUnit unit,
     Map<String, ClassDeclaration> destination, String root) {
-  for (Directive directive in unit.directives) {
+  for (final Directive directive in unit.directives) {
     if (directive is! PartDirective) {
       continue;
     }
-    final PartDirective partDirective = directive as PartDirective;
+    final PartDirective partDirective = directive;
     final String literalUri = partDirective.uri.toString();
     final CompilationUnit subUnit = _parseAndCheckDart('$root${literalUri.substring(1, literalUri.length - 1)}');
-    for (CompilationUnitMember member in subUnit.declarations) {
+    for (final CompilationUnitMember member in subUnit.declarations) {
       if (member is! ClassDeclaration) {
         continue;
       }
-      final ClassDeclaration classDeclaration = member as ClassDeclaration;
+      final ClassDeclaration classDeclaration = member;
       if (classDeclaration.name.name.startsWith('_')) {
         continue;
       }
@@ -221,32 +223,31 @@ void _collectPublicClasses(CompilationUnit unit,
 
 void _collectPublicConstructors(ClassDeclaration classDeclaration,
     Map<String, ConstructorDeclaration> destination) {
-  for (ClassMember member in classDeclaration.members) {
+  for (final ClassMember member in classDeclaration.members) {
     if (member is! ConstructorDeclaration) {
       continue;
     }
-    final ConstructorDeclaration method = member as ConstructorDeclaration;
-    if (method?.name?.name == null) {
-      destination['Unnamed Constructor'] = method;
+    final String? methodName = member.name?.name;
+    if (methodName == null) {
+      destination['Unnamed Constructor'] = member;
       continue;
     }
-    if (method.name.name.startsWith('_')) {
+    if (methodName.startsWith('_')) {
       continue;
     }
-    destination[method.name.name] = method;
+    destination[methodName] = member;
   }
 }
 
 void _collectPublicMethods(ClassDeclaration classDeclaration,
     Map<String, MethodDeclaration> destination) {
-  for (ClassMember member in classDeclaration.members) {
+  for (final ClassMember member in classDeclaration.members) {
     if (member is! MethodDeclaration) {
       continue;
     }
-    final MethodDeclaration method = member as MethodDeclaration;
-    if (method.name.name.startsWith('_')) {
+    if (member.name.name.startsWith('_')) {
       continue;
     }
-    destination[method.name.name] = method;
+    destination[member.name.name] = member;
   }
 }
