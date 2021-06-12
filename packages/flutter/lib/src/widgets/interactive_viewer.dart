@@ -548,7 +548,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// At the time this is called, the [TransformationController] will have
   /// already been updated to reflect the change caused by the interaction, if
-  /// the interation caused the matrix to change.
+  /// the interaction caused the matrix to change.
   ///
   /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///

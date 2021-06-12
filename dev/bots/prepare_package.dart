@@ -20,13 +20,10 @@ const String chromiumRepo = 'https://chromium.googlesource.com/external/github.c
 const String githubRepo = 'https://github.com/flutter/flutter.git';
 const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra_release/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
-const String oldGsBase = 'gs://flutter_infra';
 const String releaseFolder = '/releases';
-const String oldGsReleaseFolder = '$oldGsBase$releaseFolder';
-const String oldBaseUrl = 'https://storage.googleapis.com/flutter_infra';
-const String newGsBase = 'gs://flutter_infra_release';
-const String newGsReleaseFolder = '$newGsBase$releaseFolder';
-const String newBaseUrl = 'https://storage.googleapis.com/flutter_infra_release';
+const String gsBase = 'gs://flutter_infra_release';
+const String gsReleaseFolder = '$gsBase$releaseFolder';
+const String baseUrl = 'https://storage.googleapis.com/flutter_infra_release';
 const int shortCacheSeconds = 60;
 
 /// Exception class for when a process fails to run, so we can catch
@@ -540,7 +537,7 @@ class ArchivePublisher {
     this.platform = const LocalPlatform(),
   })  : assert(revision.length == 40),
         platformName = platform.operatingSystem.toLowerCase(),
-        metadataGsPath = '$newGsReleaseFolder/${getMetadataFilename(platform)}',
+        metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
         _processRunner = ProcessRunner(
           processManager: processManager,
           subprocessOutput: subprocessOutput,
@@ -577,28 +574,24 @@ class ArchivePublisher {
   /// This method will throw if the target archive already exists on cloud
   /// storage.
   Future<void> publishArchive([bool forceUpload = false]) async {
-    for (final bool isNew in <bool>[false, true]) {
-      final String releaseFolder = isNew ? newGsReleaseFolder : oldGsReleaseFolder;
-      final String destGsPath = '$releaseFolder/$destinationArchivePath';
-      if (!forceUpload) {
-        if (await _cloudPathExists(destGsPath) && !dryRun) {
-          throw PreparePackageException(
-            'File $destGsPath already exists on cloud storage!',
-          );
-        }
+    final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
+    if (!forceUpload) {
+      if (await _cloudPathExists(destGsPath) && !dryRun) {
+        throw PreparePackageException(
+          'File $destGsPath already exists on cloud storage!',
+        );
       }
-      await _cloudCopy(
-        src: outputFile.absolute.path,
-        dest: destGsPath,
-      );
-      assert(tempDir.existsSync());
-      await _updateMetadata('$releaseFolder/${getMetadataFilename(platform)}', newBucket: isNew);
     }
+    await _cloudCopy(
+      src: outputFile.absolute.path,
+      dest: destGsPath,
+    );
+    assert(tempDir.existsSync());
+    await _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
   }
 
-  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData, {bool newBucket=true}) async {
-    final String tmpBaseUrl = newBucket ? newBaseUrl : oldBaseUrl;
-    jsonData['base_url'] = '$tmpBaseUrl$releaseFolder';
+  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
+    jsonData['base_url'] = '$baseUrl$releaseFolder';
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
     }
@@ -630,7 +623,7 @@ class ArchivePublisher {
     return jsonData;
   }
 
-  Future<void> _updateMetadata(String gsPath, {bool newBucket=true}) async {
+  Future<void> _updateMetadata(String gsPath) async {
     // We can't just cat the metadata from the server with 'gsutil cat', because
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
@@ -652,7 +645,7 @@ class ArchivePublisher {
         throw PreparePackageException('Unable to parse JSON metadata received from cloud: $e');
       }
 
-      jsonData = await _addRelease(jsonData, newBucket: newBucket);
+      jsonData = await _addRelease(jsonData);
 
       const JsonEncoder encoder = JsonEncoder.withIndent('  ');
       metadataFile.writeAsStringSync(encoder.convert(jsonData));
@@ -776,7 +769,7 @@ Future<void> main(List<String> rawArguments) async {
     defaultsTo: false,
     help: 'If set, will publish the archive to Google Cloud Storage upon '
         'successful creation of the archive. Will publish under this '
-        'directory: $newBaseUrl$releaseFolder',
+        'directory: $baseUrl$releaseFolder',
   );
   argParser.addFlag(
     'force',

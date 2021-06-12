@@ -157,21 +157,27 @@ void main() {
     'Second line goes until\n'
     'Third line of stuff';
   const String kMoreThanFourLines =
-    kThreeLines +
-    "\nFourth line won't display and ends at";
+    '$kThreeLines\n'
+    "Fourth line won't display and ends at";
   // Gap between caret and edge of input, defined in editable.dart.
   const int kCaretGap = 1;
 
   setUp(() async {
     debugResetSemanticsIdCounter();
-    SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      mockClipboard.handleMethodCall,
+    );
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
   tearDown(() {
-    SystemChannels.platform.setMockMethodCallHandler(null);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
   });
 
   final Key textFieldKey = UniqueKey();
@@ -339,7 +345,7 @@ void main() {
 
   testWidgets('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
-    late String textFieldValue;
+    String? textFieldValue;
 
     await tester.pumpWidget(
       overlay(
@@ -362,15 +368,16 @@ void main() {
 
     Future<void> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
+        expect(textFieldValue, isNull);
         await tester.enterText(find.byType(TextField), testValue);
         // Check that the onChanged event handler fired.
         expect(textFieldValue, equals(testValue));
+        textFieldValue = null;
         await skipPastScrollingAnimation(tester);
       });
     }
 
     await checkText(' ');
-
     expect(findTextFieldBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
@@ -416,6 +423,8 @@ void main() {
       text: 'X',
       selection: TextSelection.collapsed(offset: 1),
     ));
+    await tester.idle();
+    expect(tester.state(find.byType(EditableText)), editableText);
     await checkCursorToggle();
   });
 
@@ -479,7 +488,7 @@ void main() {
     await tester.tap(find.byKey(icon));
     await tester.pump();
     expect(controller.text, '');
-    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream));
   });
 
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
@@ -982,7 +991,7 @@ void main() {
     // Enter a string with the same number of characters as testValueTwoLines,
     // but where the overflowing part is all spaces. Assert that it only renders
     // on one line.
-    const String testValueSpaces = testValueOneLine + '          ';
+    const String testValueSpaces = '$testValueOneLine          ';
     expect(testValueSpaces.length, testValueTwoLines.length);
     await tester.enterText(find.byType(TextField), testValueSpaces);
     await skipPastScrollingAnimation(tester);
@@ -992,7 +1001,7 @@ void main() {
     expect(inputBox.size.height, oneLineInputSize.height);
 
     // Swapping the final space for a letter causes it to wrap to 2 lines.
-    const String testValueSpacesOverflow = testValueOneLine + '         a';
+    const String testValueSpacesOverflow = '$testValueOneLine         a';
     expect(testValueSpacesOverflow.length, testValueTwoLines.length);
     await tester.enterText(find.byType(TextField), testValueSpacesOverflow);
     await skipPastScrollingAnimation(tester);
@@ -1047,12 +1056,12 @@ void main() {
 
     await tester.pump();
 
-    String editText = findRenderEditable(tester).text!.text!;
+    String editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), newChar);
 
     await tester.pump(const Duration(seconds: 2));
 
-    editText = findRenderEditable(tester).text!.text!;
+    editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), '\u2022');
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
@@ -1087,7 +1096,7 @@ void main() {
 
     await tester.pump();
 
-    final String editText = findRenderEditable(tester).text!.text!;
+    final String editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), '\u2022');
   }, variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.macOS,
@@ -1438,13 +1447,13 @@ void main() {
     // Wait for context menu to be built.
     await tester.pumpAndSettle();
     final RenderBox container = tester.renderObject(find.descendant(
-      of: find.byType(FadeTransition),
+      of: find.byType(Overlay),
       matching: find.byType(SizedBox),
     ).first);
     expect(container.size, Size.zero);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgets('Sawping controllers should update selection', (WidgetTester tester) async {
+  testWidgets('Swapping controllers should update selection', (WidgetTester tester) async {
     TextEditingController controller = TextEditingController(text: 'readonly');
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) {
@@ -2643,7 +2652,7 @@ void main() {
     }
 
     const String hintPlaceholder = 'Placeholder';
-    const String multipleLineText = "Here's a text, which is more than one line, to demostrate the multiple line hint text";
+    const String multipleLineText = "Here's a text, which is more than one line, to demonstrate the multiple line hint text";
     await tester.pumpWidget(builder(null, hintPlaceholder));
 
     RenderBox findHintText(String hint) => tester.renderObject(find.text(hint));
@@ -3863,8 +3872,8 @@ void main() {
     ));
 
     const String surrogatePair = '😆';
-    await tester.enterText(find.byType(TextField), surrogatePair + '0123456789101112');
-    expect(textController.text, surrogatePair + '012345678');
+    await tester.enterText(find.byType(TextField), '${surrogatePair}0123456789101112');
+    expect(textController.text, '${surrogatePair}012345678');
   });
 
   testWidgets('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
@@ -3878,8 +3887,8 @@ void main() {
     ));
 
     const String graphemeCluster = '👨‍👩‍👦';
-    await tester.enterText(find.byType(TextField), graphemeCluster + '0123456789101112');
-    expect(textController.text, graphemeCluster + '012345678');
+    await tester.enterText(find.byType(TextField), '${graphemeCluster}0123456789101112');
+    expect(textController.text, '${graphemeCluster}012345678');
   });
 
   testWidgets('maxLength limits input in the center of a maxed-out field.', (WidgetTester tester) async {
@@ -3899,7 +3908,7 @@ void main() {
     expect(textController.text, testValue);
 
     // Entering more characters at the end does nothing.
-    await tester.enterText(find.byType(TextField), testValue + '9999999');
+    await tester.enterText(find.byType(TextField), '${testValue}9999999');
     expect(textController.text, testValue);
 
     // Entering text in the middle of the field also does nothing.
@@ -3933,7 +3942,7 @@ void main() {
       // Entering more characters at the end does nothing.
       await tester.showKeyboard(find.byType(TextField));
       tester.testTextInput.updateEditingValue(const TextEditingValue(
-        text: testValue + '9999999',
+        text: '${testValue}9999999',
         selection: TextSelection.collapsed(offset: 10 + 7),
         composing: TextRange.empty,
       ));
@@ -4165,8 +4174,8 @@ void main() {
     ));
 
     const String surrogatePair = '😆';
-    await tester.enterText(find.byType(TextField), surrogatePair + '0123456789101112');
-    expect(textController.text, surrogatePair + '012345678');
+    await tester.enterText(find.byType(TextField), '${surrogatePair}0123456789101112');
+    expect(textController.text, '${surrogatePair}012345678');
   });
 
   testWidgets('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
@@ -4180,8 +4189,8 @@ void main() {
     ));
 
     const String graphemeCluster = '👨‍👩‍👦';
-    await tester.enterText(find.byType(TextField), graphemeCluster + '0123456789101112');
-    expect(textController.text, graphemeCluster + '012345678');
+    await tester.enterText(find.byType(TextField), '${graphemeCluster}0123456789101112');
+    expect(textController.text, '${graphemeCluster}012345678');
   });
 
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
@@ -4528,6 +4537,69 @@ void main() {
       await tester.pump();
     }
 
+    // Regression test for https://github.com/flutter/flutter/issues/81233
+    testWidgets('TextField should terminate the `space` and `enter` raw key events by default', (WidgetTester tester) async {
+      final Set<FocusNode> outerReceivedAnEvent = <FocusNode>{};
+      final FocusNode outerFocusNode = FocusNode();
+      KeyEventResult outerHandleEvent(FocusNode node, RawKeyEvent event) {
+        outerReceivedAnEvent.add(node);
+        return KeyEventResult.handled;
+      }
+      outerFocusNode.onKey = outerHandleEvent;
+
+      final Set<FocusNode> innerReceivedAnEvent = <FocusNode>{};
+      final FocusNode innerFocusNode = FocusNode();
+
+      Future<void> sendEvent(LogicalKeyboardKey key) async {
+        await tester.sendKeyEvent(key, platform: 'windows');
+      }
+
+      Widget buildFrame() {
+        return MaterialApp(
+          home: Material(
+            child: Focus(
+              onKey: outerFocusNode.onKey,
+              focusNode: outerFocusNode,
+              child: TextField(
+                focusNode: innerFocusNode,
+              ),
+            ),
+          ),
+        );
+      }
+      await tester.pumpWidget(buildFrame());
+      innerFocusNode.requestFocus();
+      await tester.pump();
+
+      // The inner TextField's focus node terminal the raw key event by default.
+      await sendEvent(LogicalKeyboardKey.space);
+      expect(outerReceivedAnEvent.length, 0);
+
+      await sendEvent(LogicalKeyboardKey.enter);
+      expect(outerReceivedAnEvent.length, 0);
+
+      // The `onKey` of the focus node of the TextField can be customized.
+      KeyEventResult innerHandleEvent(FocusNode node, RawKeyEvent event) {
+        innerReceivedAnEvent.add(node);
+        // The key event has not been handled, and the event should continue to be
+        // propagated to the outer key event handlers.
+        return KeyEventResult.ignored;
+      }
+      innerFocusNode.onKey = innerHandleEvent;
+      await tester.pumpWidget(buildFrame());
+
+      await sendEvent(LogicalKeyboardKey.space);
+      expect(outerReceivedAnEvent.length, 1);
+      expect(innerReceivedAnEvent.length, 1);
+
+      outerReceivedAnEvent.clear();
+      innerReceivedAnEvent.clear();
+
+      await sendEvent(LogicalKeyboardKey.enter);
+      expect(outerReceivedAnEvent.length, 1);
+      expect(innerReceivedAnEvent.length, 1);
+    }, skip: areKeyEventsHandledByPlatform);
+
     testWidgets('Shift test 1', (WidgetTester tester) async {
       await setupWidget(tester);
       const String testValue = 'a big house';
@@ -4694,8 +4766,8 @@ void main() {
       );
 
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4767,8 +4839,8 @@ void main() {
       );
 
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4840,8 +4912,8 @@ void main() {
     );
 
     const String clipboardContent = 'I love Flutter!';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};
         return null;
@@ -4890,8 +4962,8 @@ void main() {
         maxLines: 3,
       );
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4964,8 +5036,8 @@ void main() {
       obscureText: true,
     );
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -9371,8 +9443,8 @@ void main() {
     );
 
     bool triedToReadClipboard = false;
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.getData') {
           triedToReadClipboard = true;
         }
@@ -9708,5 +9780,44 @@ void main() {
       expect(state.currentTextEditingValue.text, '侬好啊旁友');
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
+  });
+
+  testWidgets('prefix/suffix buttons do not leak touch events', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/39376.
+
+    int textFieldTapCount = 0;
+    int prefixTapCount = 0;
+    int suffixTapCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            onTap: () { textFieldTapCount += 1; },
+            decoration: InputDecoration(
+              labelText: 'Label',
+              prefix: RaisedButton(
+                onPressed: () { prefixTapCount += 1; },
+                child: const Text('prefix'),
+              ),
+              suffix: RaisedButton(
+                onPressed: () { suffixTapCount += 1; },
+                child: const Text('suffix'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('prefix'));
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 0);
+
+    await tester.tap(find.text('suffix'));
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 1);
   });
 }

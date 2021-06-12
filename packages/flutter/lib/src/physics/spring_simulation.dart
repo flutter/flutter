@@ -121,7 +121,7 @@ class SpringSimulation extends Simulation {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'SpringSimulation')}(end: $_endPosition, $type)';
+  String toString() => '${objectRuntimeType(this, 'SpringSimulation')}(end: ${_endPosition.toStringAsFixed(1)}, $type)';
 }
 
 /// A [SpringSimulation] where the value of [x] is guaranteed to have exactly the

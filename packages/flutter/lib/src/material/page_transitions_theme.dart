@@ -546,8 +546,9 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
 /// and delegates to [buildTransitions].
 ///
-/// If a builder with a matching platform is not found, then the
-/// [FadeUpwardsPageTransitionsBuilder] is used.
+/// If a builder for the current [ThemeData.platform] is not found, then
+/// no animated transition will occur. The new page will just be displayed
+/// immediately.
 ///
 /// See also:
 ///
@@ -563,16 +564,23 @@ class PageTransitionsTheme with Diagnosticable {
   /// Constructs an object that selects a transition based on the platform.
   ///
   /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder]
-  /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
-  /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
-  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders }) : _builders = builders;
+  /// for [TargetPlatform.android] and [TargetPlatform.fuchsia],
+  /// [CupertinoPageTransitionsBuilder] for [TargetPlatform.iOS], and no
+  /// animated transition for other platforms or if the app is running on the
+  /// web.
+  const PageTransitionsTheme({
+    Map<TargetPlatform, PageTransitionsBuilder> builders = kIsWeb ? _defaultWebBuilders : _defaultBuilders,
+  }) : _builders = builders;
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
+    // Only have default transitions for mobile platforms
     TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
     TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-    TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
-    TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-    TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+    TargetPlatform.fuchsia: FadeUpwardsPageTransitionsBuilder(),
+  };
+
+  static const Map<TargetPlatform, PageTransitionsBuilder> _defaultWebBuilders = <TargetPlatform, PageTransitionsBuilder>{
+    // By default no page transitions for web apps.
   };
 
   /// The [PageTransitionsBuilder]s supported by this theme.
@@ -595,9 +603,8 @@ class PageTransitionsTheme with Diagnosticable {
     if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route))
       platform = TargetPlatform.iOS;
 
-    final PageTransitionsBuilder matchingBuilder =
-      builders[platform] ?? const FadeUpwardsPageTransitionsBuilder();
-    return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
+    final PageTransitionsBuilder? matchingBuilder = builders[platform];
+    return matchingBuilder?.buildTransitions<T>(route, context, animation, secondaryAnimation, child) ?? child;
   }
 
   // Just used to the builders Map to a list with one PageTransitionsBuilder per platform

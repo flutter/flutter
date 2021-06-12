@@ -317,17 +317,20 @@ class _UsNumberTextInputFormatter extends TextInputFormatter {
         selectionIndex++;
     }
     if (newTextLength >= 4) {
-      newText.write(newValue.text.substring(0, usedSubstringIndex = 3) + ') ');
+      final String value = newValue.text.substring(0, usedSubstringIndex = 3);
+      newText.write('$value) ');
       if (newValue.selection.end >= 3)
         selectionIndex += 2;
     }
     if (newTextLength >= 7) {
-      newText.write(newValue.text.substring(3, usedSubstringIndex = 6) + '-');
+      final String value = newValue.text.substring(3, usedSubstringIndex = 6);
+      newText.write('$value-');
       if (newValue.selection.end >= 6)
         selectionIndex++;
     }
     if (newTextLength >= 11) {
-      newText.write(newValue.text.substring(6, usedSubstringIndex = 10) + ' ');
+      final String value = newValue.text.substring(6, usedSubstringIndex = 10);
+      newText.write('$value ');
       if (newValue.selection.end >= 10)
         selectionIndex++;
     }

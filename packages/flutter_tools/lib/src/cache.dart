@@ -478,7 +478,7 @@ class Cache {
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
-    /// Delete all stamp files maintained by the cache.
+  /// Delete all stamp files maintained by the cache.
   void clearStampFiles() {
     try {
       getStampFileFor('flutter_tools').deleteSync();
@@ -766,7 +766,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
-      await artifactUpdater.downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
+      await artifactUpdater.downloadZipArchive('Downloading package $pkgName...', Uri.parse('$url$pkgName.zip'), pkgDir);
     }
 
     for (final List<String> toolsDir in getBinaryDirs()) {
@@ -802,7 +802,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     bool exists = false;
     for (final String pkgName in getPackageDirs()) {
-      exists = await cache.doesRemoteExist('Checking package $pkgName is available...', Uri.parse(url + pkgName + '.zip'));
+      exists = await cache.doesRemoteExist('Checking package $pkgName is available...', Uri.parse('$url$pkgName.zip'));
       if (!exists) {
         return false;
       }
@@ -1072,7 +1072,7 @@ class ArtifactUpdater {
     }
   }
 
-    /// Clear any zip/gzip files downloaded.
+  /// Clear any zip/gzip files downloaded.
   void removeDownloadedFiles() {
     for (final File file in downloadedFiles) {
       if (!file.existsSync()) {

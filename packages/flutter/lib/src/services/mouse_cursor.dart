@@ -345,7 +345,7 @@ class _SystemMouseCursorSession extends MouseCursorSession {
 /// I-beam, etc.
 ///
 /// An instance of [SystemMouseCursor] refers to one cursor from each platform
-/// that represents the same concept, such as being text text, being clickable,
+/// that represents the same concept, such as being text, being clickable,
 /// or being a forbidden operation. Since the set of system cursors supported by
 /// each platform varies, multiple instances can correspond to the same system
 /// cursor.

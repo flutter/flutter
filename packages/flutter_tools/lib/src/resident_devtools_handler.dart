@@ -82,6 +82,10 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       _served = true;
     }
     await _devToolsLauncher.ready;
+    // Do not attempt to print debugger list if the connection has failed.
+    if (_devToolsLauncher.activeDevToolsServer == null) {
+      return;
+    }
     final List<FlutterDevice> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
     await _maybeCallDevToolsUriServiceExtension(devicesWithExtension);
     await _callConnectedVmServiceUriExtension(devicesWithExtension);
@@ -166,7 +170,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     try {
       await flutterDevice.vmService?.findExtensionIsolate(
         extension,
-        webIsolate: flutterDevice.targetPlatform == TargetPlatform.web_javascript,
       );
       return flutterDevice;
     } on VmServiceDisappearedException {

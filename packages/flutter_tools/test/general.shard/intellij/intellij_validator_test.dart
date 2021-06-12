@@ -68,8 +68,8 @@ void main() {
     final Directory installedDirectory = fileSystem.directory(installPath);
     installedDirectory.createSync(recursive: true);
     // Create plugin JAR file for Flutter and Dart plugin.
-    createIntellijFlutterPluginJar(pluginPath + '/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
-    createIntellijDartPluginJar(pluginPath + '/Dart/lib/Dart.jar', fileSystem);
+    createIntellijFlutterPluginJar('$pluginPath/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar('$pluginPath/Dart/lib/Dart.jar', fileSystem);
 
     final Iterable<DoctorValidator> installed = IntelliJValidatorOnLinux.installed(
       fileSystem: fileSystem,
@@ -95,8 +95,8 @@ void main() {
     final Directory installedDirectory = fileSystem.directory(installPath);
     installedDirectory.createSync(recursive: true);
     // Create plugin JAR file for Flutter and Dart plugin.
-    createIntellijFlutterPluginJar(pluginPath + '/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
-    createIntellijDartPluginJar(pluginPath + '/Dart/lib/Dart.jar', fileSystem);
+    createIntellijFlutterPluginJar('$pluginPath/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar('$pluginPath/Dart/lib/Dart.jar', fileSystem);
 
     final Iterable<DoctorValidator> installed = IntelliJValidatorOnLinux.installed(
       fileSystem: fileSystem,
@@ -122,8 +122,8 @@ void main() {
     final Directory installedDirectory = fileSystem.directory(installPath);
     installedDirectory.createSync(recursive: true);
     // Create plugin JAR file for Flutter and Dart plugin.
-    createIntellijFlutterPluginJar(pluginPath + '/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
-    createIntellijDartPluginJar(pluginPath + '/Dart/lib/Dart.jar', fileSystem);
+    createIntellijFlutterPluginJar('$pluginPath/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar('$pluginPath/Dart/lib/Dart.jar', fileSystem);
 
     final Iterable<DoctorValidator> installed = IntelliJValidatorOnLinux.installed(
       fileSystem: fileSystem,
@@ -149,8 +149,8 @@ void main() {
     final Directory installedDirectory = fileSystem.directory(installPath);
     installedDirectory.createSync(recursive: true);
     // Create plugin JAR file for Flutter and Dart plugin.
-    createIntellijFlutterPluginJar(pluginPath + '/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
-    createIntellijDartPluginJar(pluginPath + '/Dart/lib/Dart.jar', fileSystem);
+    createIntellijFlutterPluginJar('$pluginPath/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar('$pluginPath/Dart/lib/Dart.jar', fileSystem);
 
     final Iterable<DoctorValidator> installed = IntelliJValidatorOnLinux.installed(
       fileSystem: fileSystem,
@@ -175,8 +175,8 @@ void main() {
         .writeAsStringSync(installPath, flush: true);
     final Directory installedDirectory = fileSystem.directory(installPath);
     installedDirectory.createSync(recursive: true);
-    createIntellijFlutterPluginJar(pluginPath + '/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
-    createIntellijDartPluginJar(pluginPath + '/Dart/lib/Dart.jar', fileSystem);
+    createIntellijFlutterPluginJar('$pluginPath/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar('$pluginPath/Dart/lib/Dart.jar', fileSystem);
 
     final Iterable<DoctorValidator> installed = IntelliJValidatorOnWindows.installed(
       fileSystem: fileSystem,

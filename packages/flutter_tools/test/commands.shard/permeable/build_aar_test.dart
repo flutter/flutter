@@ -55,8 +55,7 @@ void main() {
           arguments: <String>['--no-pub', '--template=module']);
 
       final BuildAarCommand command = await runCommandIn(projectPath);
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAarProjectType, 'module'));
+      expect((await command.usageValues).commandBuildAarProjectType, 'module');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -67,8 +66,7 @@ void main() {
           arguments: <String>['--no-pub', '--template=plugin', '--project-name=aar_test']);
 
       final BuildAarCommand command = await runCommandIn(projectPath);
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAarProjectType, 'plugin'));
+      expect((await command.usageValues).commandBuildAarProjectType, 'plugin');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -80,8 +78,7 @@ void main() {
 
       final BuildAarCommand command = await runCommandIn(projectPath,
           arguments: <String>['--target-platform=android-arm']);
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAarTargetPlatform, 'android-arm'));
+      expect((await command.usageValues).commandBuildAarTargetPlatform, 'android-arm');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),

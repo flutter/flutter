@@ -185,7 +185,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
           final String? report = debugReport != null ? debugReport() : null;
           // The 19 in the line below is the width of the prefix used by
           // _debugLogDiagnostic in arena.dart.
-          final String prefix = debugPrintGestureArenaDiagnostics ? ' ' * 19 + '❙ ' : '';
+          final String prefix = debugPrintGestureArenaDiagnostics ? '${' ' * 19}❙ ' : '';
           debugPrint('$prefix$this calling $name callback.${ report?.isNotEmpty == true ? " $report" : "" }');
         }
         return true;
