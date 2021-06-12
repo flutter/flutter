@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 import 'dart:typed_data';
 
@@ -47,7 +46,7 @@ void testMain() {
       browserSupportsFinalizationRegistry = false;
 
       Future<void> expectFrameData(ui.FrameInfo frame, List<int> data) async {
-        final ByteData frameData = await frame.image.toByteData();
+        final ByteData frameData = (await frame.image.toByteData())!;
         expect(frameData.buffer.asUint8List(), Uint8List.fromList(data));
       }
 
@@ -73,7 +72,7 @@ void testMain() {
 
     test('CkImage toString', () {
       final SkImage skImage =
-          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)
+          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!
               .makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       expect(image.toString(), '[1×1]');
@@ -83,7 +82,7 @@ void testMain() {
 
     test('CkImage can be explicitly disposed of', () {
       final SkImage skImage =
-          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)
+          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!
               .makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       expect(image.debugDisposed, isFalse);
@@ -99,7 +98,7 @@ void testMain() {
 
     test('CkImage can be explicitly disposed of when cloned', () async {
       final SkImage skImage =
-          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)
+          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!
               .makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       final SkiaObjectBox<CkImage, SkImage> box = image.box;
@@ -133,7 +132,7 @@ void testMain() {
 
     test('CkImage toByteData', () async {
       final SkImage skImage =
-          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)
+          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!
               .makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       expect((await image.toByteData()).lengthInBytes, greaterThan(0));
@@ -145,7 +144,7 @@ void testMain() {
     test('CkImage can be resurrected', () {
       browserSupportsFinalizationRegistry = false;
       final SkImage skImage =
-          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)
+          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!
               .makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       expect(image.box.rawSkiaObject, isNotNull);
@@ -259,13 +258,13 @@ void testMain() {
 
 class TestHttpRequest implements html.HttpRequest {
   @override
-  String responseType;
+  String responseType = 'invalid';
 
   @override
-  int timeout = 10;
+  int? timeout = 10;
 
   @override
-  bool withCredentials = false;
+  bool? withCredentials = false;
 
   @override
   void abort() {
@@ -273,7 +272,7 @@ class TestHttpRequest implements html.HttpRequest {
   }
 
   @override
-  void addEventListener(String type, listener, [bool useCapture]) {
+  void addEventListener(String type, listener, [bool? useCapture]) {
     throw UnimplementedError();
   }
 
@@ -320,7 +319,7 @@ class TestHttpRequest implements html.HttpRequest {
   Stream<html.ProgressEvent> get onTimeout => throw UnimplementedError();
 
   @override
-  void open(String method, String url, {bool async, String user, String password}) {}
+  void open(String method, String url, {bool? async, String? user, String? password}) {}
 
   @override
   void overrideMimeType(String mime) {
@@ -331,7 +330,7 @@ class TestHttpRequest implements html.HttpRequest {
   int get readyState => throw UnimplementedError();
 
   @override
-  void removeEventListener(String type, listener, [bool useCapture]) {
+  void removeEventListener(String type, listener, [bool? useCapture]) {
     throw UnimplementedError();
   }
 

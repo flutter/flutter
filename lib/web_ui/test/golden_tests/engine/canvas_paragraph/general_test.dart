@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:math' as math;
@@ -33,7 +32,7 @@ void testMain() async {
     CanvasParagraph paragraph;
 
     // Single-line multi-span.
-    paragraph = rich(ParagraphStyle(fontFamily: 'Roboto'), (builder) {
+    paragraph = rich(EngineParagraphStyle(fontFamily: 'Roboto'), (builder) {
       builder.pushStyle(EngineTextStyle.only(color: blue));
       builder.addText('Lorem ');
       builder.pushStyle(EngineTextStyle.only(
@@ -49,7 +48,7 @@ void testMain() async {
     offset = offset.translate(0, paragraph.height + 10);
 
     // Multi-line single-span.
-    paragraph = rich(ParagraphStyle(fontFamily: 'Roboto'), (builder) {
+    paragraph = rich(EngineParagraphStyle(fontFamily: 'Roboto'), (builder) {
       builder.addText('Lorem ipsum dolor sit');
     })
       ..layout(constrain(90.0));
@@ -57,7 +56,7 @@ void testMain() async {
     offset = offset.translate(0, paragraph.height + 10);
 
     // Multi-line multi-span.
-    paragraph = rich(ParagraphStyle(fontFamily: 'Roboto'), (builder) {
+    paragraph = rich(EngineParagraphStyle(fontFamily: 'Roboto'), (builder) {
       builder.pushStyle(EngineTextStyle.only(color: blue));
       builder.addText('Lorem ipsum ');
       builder.pushStyle(EngineTextStyle.only(background: Paint()..color = red));
@@ -91,21 +90,21 @@ void testMain() async {
     }
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.left),
+      EngineParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.left),
       build,
     )..layout(constrain(100.0));
     canvas.drawParagraph(paragraph, offset);
     offset = offset.translate(0, paragraph.height + 10);
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.center),
+      EngineParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.center),
       build,
     )..layout(constrain(100.0));
     canvas.drawParagraph(paragraph, offset);
     offset = offset.translate(0, paragraph.height + 10);
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.right),
+      EngineParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.right),
       build,
     )..layout(constrain(100.0));
     canvas.drawParagraph(paragraph, offset);
@@ -132,21 +131,21 @@ void testMain() async {
     }
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.left),
+      EngineParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.left),
       build,
     )..layout(constrain(100.0));
     canvas.drawParagraph(paragraph, offset);
     offset = offset.translate(0, paragraph.height + 10);
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.center),
+      EngineParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.center),
       build,
     )..layout(constrain(100.0));
     canvas.drawParagraph(paragraph, offset);
     offset = offset.translate(0, paragraph.height + 10);
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.right),
+      EngineParagraphStyle(fontFamily: 'Roboto', textAlign: TextAlign.right),
       build,
     )..layout(constrain(100.0));
     canvas.drawParagraph(paragraph, offset);
@@ -169,7 +168,7 @@ void testMain() async {
 
     void drawParagraphAt(Offset offset, TextAlign align) {
       paragraph = rich(
-        ParagraphStyle(fontFamily: 'Roboto', fontSize: 20.0, textAlign: align),
+        EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 20.0, textAlign: align),
         build,
       )..layout(constrain(150.0));
       canvas.save();
@@ -200,7 +199,7 @@ void testMain() async {
 
   void testGiantParagraphStyles(EngineCanvas canvas) {
     final CanvasParagraph paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', fontSize: 80.0),
+      EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 80.0),
       (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(color: yellow, fontSize: 24.0));
         builder.addText('Lorem ');
@@ -231,14 +230,14 @@ void testMain() async {
     const Rect bounds = Rect.fromLTWH(0, 0, 600, 200);
 
     // Store the old font size value on the body, and set a gaint font size.
-    final String oldBodyFontSize = html.document.body.style.fontSize;
-    html.document.body.style.fontSize = '100px';
+    final String oldBodyFontSize = html.document.body!.style.fontSize;
+    html.document.body!.style.fontSize = '100px';
 
     final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
     Offset offset = Offset(10.0, 10.0);
 
     final CanvasParagraph paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto'),
+      EngineParagraphStyle(fontFamily: 'Roboto'),
       (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(color: yellow, fontSize: 24.0));
         builder.addText('Lorem ');
@@ -260,7 +259,7 @@ void testMain() async {
     final double placeholderWidth = paragraph.height * 2;
 
     final CanvasParagraph paragraph2 = rich(
-      ParagraphStyle(),
+      EngineParagraphStyle(),
       (CanvasParagraphBuilder builder) {
         builder.addPlaceholder(placeholderWidth, placeholderHeight, PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic);
       },
@@ -281,14 +280,14 @@ void testMain() async {
     await takeScreenshot(canvas, bounds, 'canvas_paragraph_giant_body_font_size_dom');
 
     // Restore the old font size value.
-    html.document.body.style.fontSize = oldBodyFontSize;
+    html.document.body!.style.fontSize = oldBodyFontSize;
   });
 
   test('paints spans with varying heights/baselines', () {
     final canvas = BitmapCanvas(bounds, RenderStrategy());
 
     final CanvasParagraph paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto'),
+      EngineParagraphStyle(fontFamily: 'Roboto'),
       (builder) {
         builder.pushStyle(EngineTextStyle.only(fontSize: 20.0));
         builder.addText('Lorem ');
@@ -323,7 +322,7 @@ void testMain() async {
     final canvas = BitmapCanvas(bounds, RenderStrategy());
 
     final CanvasParagraph paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto'),
+      EngineParagraphStyle(fontFamily: 'Roboto'),
       (builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem ');
@@ -349,7 +348,7 @@ void testMain() async {
     ];
 
     final CanvasParagraph paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto'),
+      EngineParagraphStyle(fontFamily: 'Roboto'),
       (builder) {
         for (TextDecorationStyle decorationStyle in decorationStyles) {
           builder.pushStyle(EngineTextStyle.only(
@@ -382,7 +381,7 @@ void testMain() async {
     final FontFeature disableLigatures = FontFeature('liga', 0);
 
     final CanvasParagraph paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto'),
+      EngineParagraphStyle(fontFamily: 'Roboto'),
       (CanvasParagraphBuilder builder) {
         // Small Caps
         builder.pushStyle(EngineTextStyle.only(
