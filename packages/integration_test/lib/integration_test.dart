@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -31,6 +32,38 @@ const bool _shouldReportResultsToNative = bool.fromEnvironment(
   'INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE',
   defaultValue: true,
 );
+
+/// Gets a PNG image buffer from the device that contains the pixels of the element's
+/// bounding rect found matched in the finder.
+///
+// {@tool snippet}
+/// Sample invocations of [deviceScreenshot].
+///
+/// ```dart
+/// await expectLater(
+///   deviceScreenshot(find.text('Save')),
+///   matchesGoldenFile('save.png'),
+/// );
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [matchesGoldenFile], which asserts that the returned [Future<ByteData>]
+///    matches the golden image file identified by [key], with an optional
+///    [version] number.
+Future<ByteData> deviceScreenshot(Finder item) async {
+  final Iterable<Element> elements = item.evaluate();
+  if (elements.isEmpty) {
+    throw 'could not be rendered because no widget was found';
+  }
+  if (elements.length > 1) {
+    throw 'matched too many widgets';
+  }
+
+  final List<int> rawBytes = <int>[]; // TODO(egarciad)
+  return ByteData.sublistView(Uint8List.fromList(rawBytes))
+}
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.

@@ -48,6 +48,19 @@ class MatchesGoldenFile extends AsyncMatcher {
 
   @override
   Future<String?> matchAsync(dynamic item) async {
+    if (item is Future<ByteData>) {
+      final ByteData bytes = await (item as Future<ByteData>);
+      if (autoUpdateGoldenFiles) {
+        await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
+        return null;
+      }
+      try {
+        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
+        return success ? null : 'does not match';
+      } on TestFailure catch (ex) {
+        return ex.message;
+      }
+    }
     Future<ui.Image?> imageFuture;
     if (item is Future<ui.Image?>) {
       imageFuture = item;

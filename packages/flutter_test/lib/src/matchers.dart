@@ -299,8 +299,9 @@ Matcher isMethodCall(String name, { required dynamic arguments }) {
 Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int sampleSize = 20 })
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
-/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
-/// golden image file identified by [key], with an optional [version] number.
+/// Asserts that a [Finder], [Future<ui.Image>], [ui.Image], or [Future<ByteData>]
+/// matches the golden image file identified by [key], with an optional
+/// [version] number.
 ///
 /// For the case of a [Finder], the [Finder] must match exactly one widget and
 /// the rendered image of the first [RepaintBoundary] ancestor of the widget is
