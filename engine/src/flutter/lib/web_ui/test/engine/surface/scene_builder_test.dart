@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 @TestOn('chrome || firefox')
 
 import 'dart:async';
@@ -12,9 +11,7 @@ import 'dart:js_util' as js_util;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui.dart' hide window;
-
-
+import 'package:ui/ui.dart' as ui;
 
 import '../../matchers.dart';
 
@@ -23,33 +20,32 @@ void main() {
 }
 
 void testMain() {
-  setUpAll(() async {
-    await webOnlyInitializeEngine();
+  setUpAll(() {
+    ui.webOnlyInitializeEngine();
   });
 
-  group('SceneBuilder', ()
-  {
+  group('SceneBuilder', () {
     test('pushOffset implements surface lifecycle', () {
-      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
-        return sceneBuilder.pushOffset(10, 20, oldLayer: oldLayer);
+      testLayerLifeCycle((ui.SceneBuilder sceneBuilder, ui.EngineLayer? oldLayer) {
+        return sceneBuilder.pushOffset(10, 20, oldLayer: oldLayer as ui.OffsetEngineLayer?);
       }, () {
         return '''<s><flt-offset></flt-offset></s>''';
       });
     });
 
     test('pushTransform implements surface lifecycle', () {
-      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
+      testLayerLifeCycle((ui.SceneBuilder sceneBuilder, ui.EngineLayer? oldLayer) {
         return sceneBuilder.pushTransform(
-            (Matrix4.identity()..scale(html.window.devicePixelRatio)).toFloat64());
+            (Matrix4.identity()..scale(html.window.devicePixelRatio as double)).toFloat64());
       }, () {
         return '''<s><flt-transform></flt-transform></s>''';
       });
     });
 
     test('pushClipRect implements surface lifecycle', () {
-      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
-        return sceneBuilder.pushClipRect(const Rect.fromLTRB(10, 20, 30, 40),
-            oldLayer: oldLayer);
+      testLayerLifeCycle((ui.SceneBuilder sceneBuilder, ui.EngineLayer? oldLayer) {
+        return sceneBuilder.pushClipRect(const ui.Rect.fromLTRB(10, 20, 30, 40),
+            oldLayer: oldLayer as ui.ClipRectEngineLayer?);
       }, () {
         return '''
 <s>
@@ -60,11 +56,11 @@ void testMain() {
     });
 
     test('pushClipRRect implements surface lifecycle', () {
-      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
+      testLayerLifeCycle((ui.SceneBuilder sceneBuilder, ui.EngineLayer? oldLayer) {
         return sceneBuilder.pushClipRRect(
-            RRect.fromLTRBR(10, 20, 30, 40, const Radius.circular(3)),
-            oldLayer: oldLayer,
-            clipBehavior: Clip.none);
+            ui.RRect.fromLTRBR(10, 20, 30, 40, const ui.Radius.circular(3)),
+            oldLayer: oldLayer as ui.ClipRRectEngineLayer?,
+            clipBehavior: ui.Clip.none);
       }, () {
         return '''
 <s>
@@ -75,9 +71,9 @@ void testMain() {
     });
 
     test('pushClipPath implements surface lifecycle', () {
-      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
-        final Path path = Path()..addRect(const Rect.fromLTRB(10, 20, 30, 40));
-        return sceneBuilder.pushClipPath(path, oldLayer: oldLayer);
+      testLayerLifeCycle((ui.SceneBuilder sceneBuilder, ui.EngineLayer? oldLayer) {
+        final ui.Path path = ui.Path()..addRect(const ui.Rect.fromLTRB(10, 20, 30, 40));
+        return sceneBuilder.pushClipPath(path, oldLayer: oldLayer as ui.ClipPathEngineLayer?);
       }, () {
         return '''
 <s>
@@ -90,22 +86,22 @@ void testMain() {
     });
 
     test('pushOpacity implements surface lifecycle', () {
-      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
-        return sceneBuilder.pushOpacity(10, oldLayer: oldLayer);
+      testLayerLifeCycle((ui.SceneBuilder sceneBuilder, ui.EngineLayer? oldLayer) {
+        return sceneBuilder.pushOpacity(10, oldLayer: oldLayer as ui.OpacityEngineLayer?);
       }, () {
         return '''<s><o></o></s>''';
       });
     });
 
     test('pushPhysicalShape implements surface lifecycle', () {
-      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
-        final Path path = Path()..addRect(const Rect.fromLTRB(10, 20, 30, 40));
+      testLayerLifeCycle((ui.SceneBuilder sceneBuilder, ui.EngineLayer? oldLayer) {
+        final ui.Path path = ui.Path()..addRect(const ui.Rect.fromLTRB(10, 20, 30, 40));
         return sceneBuilder.pushPhysicalShape(
           path: path,
           elevation: 2,
-          color: const Color.fromRGBO(0, 0, 0, 1),
-          shadowColor: const Color.fromRGBO(0, 0, 0, 1),
-          oldLayer: oldLayer,
+          color: const ui.Color.fromRGBO(0, 0, 0, 1),
+          shadowColor: const ui.Color.fromRGBO(0, 0, 0, 1),
+          oldLayer: oldLayer as ui.PhysicalShapeEngineLayer?,
         );
       }, () {
         return '''<s><pshape><clip-i></clip-i></pshape></s>''';
@@ -113,10 +109,10 @@ void testMain() {
     });
 
     test('pushBackdropFilter implements surface lifecycle', () {
-      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
+      testLayerLifeCycle((ui.SceneBuilder sceneBuilder, ui.EngineLayer? oldLayer) {
         return sceneBuilder.pushBackdropFilter(
-          ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
-          oldLayer: oldLayer,
+          ui.ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
+          oldLayer: oldLayer as ui.BackdropFilterEngineLayer?,
         );
       }, () {
         return '<s><flt-backdrop>'
@@ -133,9 +129,9 @@ void testMain() {
         () {
       final PersistedScene scene1 = PersistedScene(null);
       final PersistedClipRect clip1 =
-          PersistedClipRect(null, const Rect.fromLTRB(10, 10, 20, 20),
-              Clip.antiAlias);
-      final PersistedOpacity opacity = PersistedOpacity(null, 100, Offset.zero);
+          PersistedClipRect(null, const ui.Rect.fromLTRB(10, 10, 20, 20),
+              ui.Clip.antiAlias);
+      final PersistedOpacity opacity = PersistedOpacity(null, 100, ui.Offset.zero);
       final MockPersistedPicture picture = MockPersistedPicture();
 
       scene1.appendChild(clip1);
@@ -159,8 +155,8 @@ void testMain() {
       // because the clip didn't change no repaints should happen.
       final PersistedScene scene2 = PersistedScene(scene1);
       final PersistedClipRect clip2 =
-          PersistedClipRect(clip1, const Rect.fromLTRB(10, 10, 20, 20),
-              Clip.antiAlias);
+          PersistedClipRect(clip1, const ui.Rect.fromLTRB(10, 10, 20, 20),
+              ui.Clip.antiAlias);
       clip1.state = PersistedSurfaceState.pendingUpdate;
       scene2.appendChild(clip2);
       opacity.state = PersistedSurfaceState.pendingRetention;
@@ -178,8 +174,8 @@ void testMain() {
       // This should cause the picture to repaint despite being retained.
       final PersistedScene scene3 = PersistedScene(scene2);
       final PersistedClipRect clip3 =
-          PersistedClipRect(clip2, const Rect.fromLTRB(10, 10, 50, 50),
-          Clip.antiAlias);
+          PersistedClipRect(clip2, const ui.Rect.fromLTRB(10, 10, 50, 50),
+          ui.Clip.antiAlias);
       clip2.state = PersistedSurfaceState.pendingUpdate;
       scene3.appendChild(clip3);
       opacity.state = PersistedSurfaceState.pendingRetention;
@@ -203,54 +199,54 @@ void testMain() {
     // canvas needs to have a -1 zIndex so it can preserve compositing order.
     test('Canvas element should retain -1 zIndex after update', () async {
       final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
-      final Picture picture1 = _drawPicture();
-      EngineLayer oldLayer = builder.pushClipRect(
-        const Rect.fromLTRB(10, 10, 300, 300),
+      final ui.Picture picture1 = _drawPicture();
+      final ui.ClipRectEngineLayer oldLayer = builder.pushClipRect(
+        const ui.Rect.fromLTRB(10, 10, 300, 300),
       );
-      builder.addPicture(Offset.zero, picture1);
+      builder.addPicture(ui.Offset.zero, picture1);
       builder.pop();
 
-      html.HtmlElement content = builder.build().webOnlyRootElement;
-      expect(content.querySelector('canvas').style.zIndex, '-1');
+      html.Element content = builder.build().webOnlyRootElement!;
+      expect(content.querySelector('canvas')!.style.zIndex, '-1');
 
       // Force update to scene which will utilize reuse code path.
       final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
       builder2.pushClipRect(
-          const Rect.fromLTRB(5, 10, 300, 300),
+          const ui.Rect.fromLTRB(5, 10, 300, 300),
           oldLayer: oldLayer
       );
-      final Picture picture2 = _drawPicture();
-      builder2.addPicture(Offset.zero, picture2);
+      final ui.Picture picture2 = _drawPicture();
+      builder2.addPicture(ui.Offset.zero, picture2);
       builder2.pop();
 
-      html.HtmlElement contentAfterReuse = builder2.build().webOnlyRootElement;
-      expect(contentAfterReuse.querySelector('canvas').style.zIndex, '-1');
+      html.Element contentAfterReuse = builder2.build().webOnlyRootElement!;
+      expect(contentAfterReuse.querySelector('canvas')!.style.zIndex, '-1');
     });
 
     test('Multiple canvas elements should retain zIndex after update', () async {
       final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
-      final Picture picture1 = _drawPathImagePath();
-      EngineLayer oldLayer = builder.pushClipRect(
-        const Rect.fromLTRB(10, 10, 300, 300),
+      final ui.Picture picture1 = _drawPathImagePath();
+      ui.ClipRectEngineLayer oldLayer = builder.pushClipRect(
+        const ui.Rect.fromLTRB(10, 10, 300, 300),
       );
-      builder.addPicture(Offset.zero, picture1);
+      builder.addPicture(ui.Offset.zero, picture1);
       builder.pop();
 
-      html.HtmlElement content = builder.build().webOnlyRootElement;
-      html.document.body.append(content);
-      expect(content.querySelector('canvas').style.zIndex, '-1');
+      html.Element content = builder.build().webOnlyRootElement!;
+      html.document.body!.append(content);
+      expect(content.querySelector('canvas')!.style.zIndex, '-1');
 
       // Force update to scene which will utilize reuse code path.
       final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
       builder2.pushClipRect(
-          const Rect.fromLTRB(5, 10, 300, 300),
+          const ui.Rect.fromLTRB(5, 10, 300, 300),
           oldLayer: oldLayer
       );
-      final Picture picture2 = _drawPathImagePath();
-      builder2.addPicture(Offset.zero, picture2);
+      final ui.Picture picture2 = _drawPathImagePath();
+      builder2.addPicture(ui.Offset.zero, picture2);
       builder2.pop();
 
-      html.HtmlElement contentAfterReuse = builder2.build().webOnlyRootElement;
+      html.Element contentAfterReuse = builder2.build().webOnlyRootElement!;
       List<html.CanvasElement> list =
           contentAfterReuse.querySelectorAll('canvas');
       expect(list[0].style.zIndex, '-1');
@@ -262,15 +258,15 @@ void testMain() {
   /// image elements.
   test('Should retain same image element', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
-    final Picture picture1 = _drawPathImagePath();
-    EngineLayer oldLayer = builder.pushClipRect(
-      const Rect.fromLTRB(10, 10, 300, 300),
+    final ui.Picture picture1 = _drawPathImagePath();
+    ui.ClipRectEngineLayer oldLayer = builder.pushClipRect(
+      const ui.Rect.fromLTRB(10, 10, 300, 300),
     );
-    builder.addPicture(Offset.zero, picture1);
+    builder.addPicture(ui.Offset.zero, picture1);
     builder.pop();
 
-    html.HtmlElement content = builder.build().webOnlyRootElement;
-    html.document.body.append(content);
+    html.Element content = builder.build().webOnlyRootElement!;
+    html.document.body!.append(content);
     List<html.ImageElement> list = content.querySelectorAll('img');
     for (html.ImageElement image in list) {
       image.alt = 'marked';
@@ -279,14 +275,14 @@ void testMain() {
     // Force update to scene which will utilize reuse code path.
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
     builder2.pushClipRect(
-        const Rect.fromLTRB(5, 10, 300, 300),
+        const ui.Rect.fromLTRB(5, 10, 300, 300),
         oldLayer: oldLayer
     );
-    final Picture picture2 = _drawPathImagePath();
-    builder2.addPicture(Offset.zero, picture2);
+    final ui.Picture picture2 = _drawPathImagePath();
+    builder2.addPicture(ui.Offset.zero, picture2);
     builder2.pop();
 
-    html.HtmlElement contentAfterReuse = builder2.build().webOnlyRootElement;
+    html.Element contentAfterReuse = builder2.build().webOnlyRootElement!;
     list = contentAfterReuse.querySelectorAll('img');
     for (html.ImageElement image in list) {
       expect(image.alt, 'marked');
@@ -294,24 +290,24 @@ void testMain() {
     expect(list.length, 1);
   });
 
-  PersistedPicture findPictureSurfaceChild(PersistedContainerSurface parent) {
-    PersistedPicture pictureSurface;
+  PersistedPicture? findPictureSurfaceChild(PersistedContainerSurface parent) {
+    PersistedPicture? pictureSurface;
     parent.visitChildren((PersistedSurface child) {
-      pictureSurface = child;
+      pictureSurface = child as PersistedPicture;
     });
     return pictureSurface;
   }
 
   test('skips painting picture when picture fully clipped out', () async {
-    final Picture picture = _drawPicture();
+    final ui.Picture picture = _drawPicture();
 
     // Picture not clipped out, so we should see a `<flt-canvas>`
     {
       final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
       builder.pushOffset(0, 0);
-      builder.addPicture(Offset.zero, picture);
+      builder.addPicture(ui.Offset.zero, picture);
       builder.pop();
-      html.HtmlElement content = builder.build().webOnlyRootElement;
+      html.Element content = builder.build().webOnlyRootElement!;
       expect(content.querySelectorAll('flt-picture').single.children, isNotEmpty);
     }
 
@@ -319,69 +315,69 @@ void testMain() {
     {
       final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
       builder.pushOffset(0, 0);
-      final PersistedContainerSurface clip = builder.pushClipRect(const Rect.fromLTRB(1000, 1000, 2000, 2000)) as PersistedContainerSurface;
-      builder.addPicture(Offset.zero, picture);
+      final PersistedContainerSurface clip = builder.pushClipRect(const ui.Rect.fromLTRB(1000, 1000, 2000, 2000)) as PersistedContainerSurface;
+      builder.addPicture(ui.Offset.zero, picture);
       builder.pop();
       builder.pop();
-      html.HtmlElement content = builder.build().webOnlyRootElement;
+      html.Element content = builder.build().webOnlyRootElement!;
       expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
-      expect(findPictureSurfaceChild(clip).debugCanvas, isNull);
+      expect(findPictureSurfaceChild(clip)!.debugCanvas, isNull);
     }
   });
 
   test('does not skip painting picture when picture is '
       'inside transform with offset', () async {
-    final Picture picture = _drawPicture();
+    final ui.Picture picture = _drawPicture();
     // Picture should not be clipped out since transform will offset it to 500,500
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushOffset(0, 0);
-    builder.pushClipRect(const Rect.fromLTRB(0, 0, 1000, 1000)) as PersistedContainerSurface;
+    builder.pushClipRect(const ui.Rect.fromLTRB(0, 0, 1000, 1000)) as PersistedContainerSurface;
     builder.pushTransform((Matrix4.identity()..scale(0.5, 0.5)).toFloat64());
-    builder.addPicture(Offset(1000, 1000), picture);
+    builder.addPicture(ui.Offset(1000, 1000), picture);
     builder.pop();
     builder.pop();
     builder.pop();
-    html.HtmlElement content = builder.build().webOnlyRootElement;
+    html.Element content = builder.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-picture').single.children, isNotEmpty);
   });
 
   test('does not skip painting picture when picture is '
       'inside transform', () async {
-    final Picture picture = _drawPicture();
+    final ui.Picture picture = _drawPicture();
     // Picture should not be clipped out since transform will offset it to 500,500
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushOffset(0, 0);
-    builder.pushClipRect(const Rect.fromLTRB(0, 0, 1000, 1000)) as PersistedContainerSurface;
+    builder.pushClipRect(const ui.Rect.fromLTRB(0, 0, 1000, 1000)) as PersistedContainerSurface;
     builder.pushTransform((Matrix4.identity()..scale(0.5, 0.5)).toFloat64());
     builder.pushOffset(1000, 1000);
-    builder.addPicture(Offset.zero, picture);
+    builder.addPicture(ui.Offset.zero, picture);
     builder.pop();
     builder.pop();
     builder.pop();
-    html.HtmlElement content = builder.build().webOnlyRootElement;
+    html.Element content = builder.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-picture').single.children, isNotEmpty);
   });
 
   test(
       'skips painting picture when picture fully clipped out with'
           ' transform and offset', () async {
-    final Picture picture = _drawPicture();
+    final ui.Picture picture = _drawPicture();
     // Picture should be clipped out since transform will offset it to 500,500
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushOffset(50, 50);
     builder.pushClipRect(
-        const Rect.fromLTRB(0, 0, 1000, 1000)) as PersistedContainerSurface;
+        const ui.Rect.fromLTRB(0, 0, 1000, 1000)) as PersistedContainerSurface;
     builder.pushTransform((Matrix4.identity()
       ..scale(2, 2)).toFloat64());
     builder.pushOffset(500, 500);
-    builder.addPicture(Offset.zero, picture);
+    builder.addPicture(ui.Offset.zero, picture);
     builder.pop();
     builder.pop();
     builder.pop();
     builder.pop();
-    html.HtmlElement content = builder
+    html.Element content = builder
         .build()
-        .webOnlyRootElement;
+        .webOnlyRootElement!;
     expect(content
         .querySelectorAll('flt-picture')
         .single
@@ -389,40 +385,40 @@ void testMain() {
   });
 
   test('releases old canvas when picture is fully clipped out after addRetained', () async {
-    final Picture picture = _drawPicture();
+    final ui.Picture picture = _drawPicture();
 
     // Frame 1: picture visible
     final SurfaceSceneBuilder builder1 = SurfaceSceneBuilder();
     final PersistedOffset offset1 = builder1.pushOffset(0, 0) as PersistedOffset;
-    builder1.addPicture(Offset.zero, picture);
+    builder1.addPicture(ui.Offset.zero, picture);
     builder1.pop();
-    html.HtmlElement content1 = builder1.build().webOnlyRootElement;
+    html.Element content1 = builder1.build().webOnlyRootElement!;
     expect(content1.querySelectorAll('flt-picture').single.children, isNotEmpty);
-    expect(findPictureSurfaceChild(offset1).debugCanvas, isNotNull);
+    expect(findPictureSurfaceChild(offset1)!.debugCanvas, isNotNull);
 
     // Frame 2: picture is clipped out after an update
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
-    final PersistedOffset offset2 = builder2.pushOffset(-10000, -10000, oldLayer: offset1);
-    builder2.addPicture(Offset.zero, picture);
+    final PersistedOffset offset2 = builder2.pushOffset(-10000, -10000, oldLayer: offset1) as PersistedOffset;
+    builder2.addPicture(ui.Offset.zero, picture);
     builder2.pop();
-    html.HtmlElement content = builder2.build().webOnlyRootElement;
+    html.Element content = builder2.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
-    expect(findPictureSurfaceChild(offset2).debugCanvas, isNull);
+    expect(findPictureSurfaceChild(offset2)!.debugCanvas, isNull);
   });
 
   test('releases old canvas when picture is fully clipped out after addRetained', () async {
-    final Picture picture = _drawPicture();
+    final ui.Picture picture = _drawPicture();
 
     // Frame 1: picture visible
     final SurfaceSceneBuilder builder1 = SurfaceSceneBuilder();
     final PersistedOffset offset1 = builder1.pushOffset(0, 0) as PersistedOffset;
     final PersistedOffset subOffset1 = builder1.pushOffset(0, 0) as PersistedOffset;
-    builder1.addPicture(Offset.zero, picture);
+    builder1.addPicture(ui.Offset.zero, picture);
     builder1.pop();
     builder1.pop();
-    html.HtmlElement content1 = builder1.build().webOnlyRootElement;
+    html.Element content1 = builder1.build().webOnlyRootElement!;
     expect(content1.querySelectorAll('flt-picture').single.children, isNotEmpty);
-    expect(findPictureSurfaceChild(subOffset1).debugCanvas, isNotNull);
+    expect(findPictureSurfaceChild(subOffset1)!.debugCanvas, isNotNull);
 
     // Frame 2: picture is clipped out after addRetained
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
@@ -433,20 +429,20 @@ void testMain() {
     // the clipped area. We should see the canvas being released.
     builder2.addRetained(subOffset1);
     builder2.pop();
-    html.HtmlElement content = builder2.build().webOnlyRootElement;
+    html.Element content = builder2.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
-    expect(findPictureSurfaceChild(subOffset1).debugCanvas, isNull);
+    expect(findPictureSurfaceChild(subOffset1)!.debugCanvas, isNull);
   });
 
   test('auto-pops pushed layers', () async {
-    final Picture picture = _drawPicture();
+    final ui.Picture picture = _drawPicture();
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushOffset(0, 0);
     builder.pushOffset(0, 0);
     builder.pushOffset(0, 0);
     builder.pushOffset(0, 0);
     builder.pushOffset(0, 0);
-    builder.addPicture(Offset.zero, picture);
+    builder.addPicture(ui.Offset.zero, picture);
 
     // Intentionally pop fewer layers than we pushed
     builder.pop();
@@ -454,7 +450,7 @@ void testMain() {
     builder.pop();
 
     // Expect as many layers as we pushed (not popped).
-    html.HtmlElement content = builder.build().webOnlyRootElement;
+    html.Element content = builder.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-offset'), hasLength(5));
   });
 
@@ -465,27 +461,27 @@ void testMain() {
     // an offset layer. Test cases use this to control how layers are reused.
     // Layers of the same type can be reused even if they are not explicitly
     // updated. Conversely, layers of different types are never reused.
-    EngineLayer pushChild(SurfaceSceneBuilder builder, String char, {EngineLayer oldLayer}) {
+    ui.EngineLayer pushChild(SurfaceSceneBuilder builder, String char, {ui.EngineLayer? oldLayer}) {
       // Numbers use opacity layers, letters use offset layers. This is used to
       // control DOM reuse. Layers of the same type can reuse DOM nodes from other
       // dropped layers.
       final bool useOffset = int.tryParse(char) == null;
-      final EnginePictureRecorder recorder = PictureRecorder();
-      final RecordingCanvas canvas = recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
-      final DomParagraph paragraph = (DomParagraphBuilder(ParagraphStyle())..addText(char)).build();
-      paragraph.layout(ParagraphConstraints(width: 1000));
-      canvas.drawParagraph(paragraph, Offset.zero);
-      final EngineLayer newLayer = useOffset
-          ? builder.pushOffset(0, 0, oldLayer: oldLayer)
-          : builder.pushOpacity(100, oldLayer: oldLayer);
-      builder.addPicture(Offset.zero, recorder.endRecording());
+      final EnginePictureRecorder recorder = EnginePictureRecorder();
+      final RecordingCanvas canvas = recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 400, 400));
+      final DomParagraph paragraph = (DomParagraphBuilder(EngineParagraphStyle())..addText(char)).build() as DomParagraph;
+      paragraph.layout(ui.ParagraphConstraints(width: 1000));
+      canvas.drawParagraph(paragraph, ui.Offset.zero);
+      final ui.EngineLayer newLayer = useOffset
+          ? builder.pushOffset(0, 0, oldLayer: oldLayer as ui.OffsetEngineLayer)
+          : builder.pushOpacity(100, oldLayer: oldLayer as ui.OpacityEngineLayer);
+      builder.addPicture(ui.Offset.zero, recorder.endRecording());
       builder.pop();
       return newLayer;
     }
 
     // Maps letters to layers used to render them in the last frame, used to
     // supply `oldLayer` to guarantee update.
-    final Map<String, EngineLayer> renderedLayers = <String, EngineLayer>{};
+    final Map<String, ui.EngineLayer> renderedLayers = <String, ui.EngineLayer>{};
 
     // Pump an empty scene to reset it, otherwise the first frame will attempt
     // to diff left-overs from a previous test, which results in unpredictable
@@ -502,11 +498,11 @@ void testMain() {
       // list of the `<flt-scene>` element.
       final html.MutationObserver observer = html.MutationObserver((List mutations, _) {
         for (html.MutationRecord record in mutations.cast<html.MutationRecord>()) {
-          actualDeletions.addAll(record.removedNodes);
-          actualAdditions.addAll(record.addedNodes);
+          actualDeletions.addAll(record.removedNodes!);
+          actualAdditions.addAll(record.addedNodes!);
         }
       });
-      observer.observe(SurfaceSceneBuilder.debugLastFrameScene.rootElement, childList: true);
+      observer.observe(SurfaceSceneBuilder.debugLastFrameScene!.rootElement!, childList: true);
 
       final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
       for (int i = 0; i < string.length; i++) {
@@ -514,10 +510,10 @@ void testMain() {
         renderedLayers[char] = pushChild(builder, char, oldLayer: renderedLayers[char]);
       }
       final SurfaceScene scene = builder.build();
-      final List<html.HtmlElement> pTags = scene.webOnlyRootElement.querySelectorAll('p');
+      final List<html.Element> pTags = scene.webOnlyRootElement!.querySelectorAll('p');
       expect(pTags, hasLength(string.length));
       expect(
-        scene.webOnlyRootElement.querySelectorAll('p').map((p) => p.innerText).join(''),
+        scene.webOnlyRootElement!.querySelectorAll('p').map((p) => p.innerText).join(''),
         string,
       );
       renderedLayers.removeWhere((key, value) => !string.contains(key));
@@ -586,105 +582,105 @@ void testMain() {
 
   test('Canvas should allocate fewer pixels when zoomed out', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
-    final Picture picture1 = _drawPicture();
-    builder.pushClipRect(const Rect.fromLTRB(10, 10, 300, 300));
-    builder.addPicture(Offset.zero, picture1);
+    final ui.Picture picture1 = _drawPicture();
+    builder.pushClipRect(const ui.Rect.fromLTRB(10, 10, 300, 300));
+    builder.addPicture(ui.Offset.zero, picture1);
     builder.pop();
 
-    html.HtmlElement content = builder.build().webOnlyRootElement;
-    html.CanvasElement canvas = content.querySelector('canvas');
-    final int unscaledWidth = canvas.width;
-    final int unscaledHeight = canvas.height;
+    html.Element content = builder.build().webOnlyRootElement!;
+    html.CanvasElement canvas = content.querySelector('canvas') as html.CanvasElement;
+    final int unscaledWidth = canvas.width!;
+    final int unscaledHeight = canvas.height!;
 
     // Force update to scene which will utilize reuse code path.
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
     builder2.pushOffset(0, 0);
     builder2.pushTransform(Matrix4.identity().scaled(0.5, 0.5).toFloat64());
     builder2.pushClipRect(
-      const Rect.fromLTRB(10, 10, 300, 300),
+      const ui.Rect.fromLTRB(10, 10, 300, 300),
     );
-    builder2.addPicture(Offset.zero, picture1);
+    builder2.addPicture(ui.Offset.zero, picture1);
     builder2.pop();
     builder2.pop();
     builder2.pop();
 
-    html.HtmlElement contentAfterScale = builder2.build().webOnlyRootElement;
-    html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas');
+    html.Element contentAfterScale = builder2.build().webOnlyRootElement!;
+    html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas') as html.CanvasElement;
     // Although we are drawing same picture, due to scaling the new canvas
     // should have fewer pixels.
-    expect(canvas2.width < unscaledWidth, isTrue);
-    expect(canvas2.height < unscaledHeight, isTrue);
+    expect(canvas2.width! < unscaledWidth, isTrue);
+    expect(canvas2.height! < unscaledHeight, isTrue);
   });
 
   test('Canvas should allocate more pixels when zoomed in', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
-    final Picture picture1 = _drawPicture();
-    builder.pushClipRect(const Rect.fromLTRB(10, 10, 300, 300));
-    builder.addPicture(Offset.zero, picture1);
+    final ui.Picture picture1 = _drawPicture();
+    builder.pushClipRect(const ui.Rect.fromLTRB(10, 10, 300, 300));
+    builder.addPicture(ui.Offset.zero, picture1);
     builder.pop();
 
-    html.HtmlElement content = builder.build().webOnlyRootElement;
-    html.CanvasElement canvas = content.querySelector('canvas');
-    final int unscaledWidth = canvas.width;
-    final int unscaledHeight = canvas.height;
+    html.Element content = builder.build().webOnlyRootElement!;
+    html.CanvasElement canvas = content.querySelector('canvas') as html.CanvasElement;
+    final int unscaledWidth = canvas.width!;
+    final int unscaledHeight = canvas.height!;
 
     // Force update to scene which will utilize reuse code path.
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
     builder2.pushOffset(0, 0);
     builder2.pushTransform(Matrix4.identity().scaled(2, 2).toFloat64());
     builder2.pushClipRect(
-      const Rect.fromLTRB(10, 10, 300, 300),
+      const ui.Rect.fromLTRB(10, 10, 300, 300),
     );
-    builder2.addPicture(Offset.zero, picture1);
+    builder2.addPicture(ui.Offset.zero, picture1);
     builder2.pop();
     builder2.pop();
     builder2.pop();
 
-    html.HtmlElement contentAfterScale = builder2.build().webOnlyRootElement;
-    html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas');
+    html.Element contentAfterScale = builder2.build().webOnlyRootElement!;
+    html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas') as html.CanvasElement;
     // Although we are drawing same picture, due to scaling the new canvas
     // should have more pixels.
-    expect(canvas2.width > unscaledWidth, isTrue);
-    expect(canvas2.height > unscaledHeight, isTrue);
+    expect(canvas2.width! > unscaledWidth, isTrue);
+    expect(canvas2.height! > unscaledHeight, isTrue);
   });
 
   test('Should recycle canvas once', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
-    final Picture picture1 = _drawPicture();
-    EngineLayer oldLayer = builder.pushClipRect(
-      const Rect.fromLTRB(10, 10, 300, 300),
+    final ui.Picture picture1 = _drawPicture();
+    ui.ClipRectEngineLayer oldLayer = builder.pushClipRect(
+      const ui.Rect.fromLTRB(10, 10, 300, 300),
     );
-    builder.addPicture(Offset.zero, picture1);
+    builder.addPicture(ui.Offset.zero, picture1);
     builder.pop();
     builder.build();
 
     // Force update to scene which will utilize reuse code path.
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
-    EngineLayer oldLayer2 = builder2.pushClipRect(
-        const Rect.fromLTRB(5, 10, 300, 300),
+    ui.ClipRectEngineLayer oldLayer2 = builder2.pushClipRect(
+        const ui.Rect.fromLTRB(5, 10, 300, 300),
         oldLayer: oldLayer
     );
-    builder2.addPicture(Offset.zero, _drawEmptyPicture());
+    builder2.addPicture(ui.Offset.zero, _drawEmptyPicture());
     builder2.pop();
 
-    html.HtmlElement contentAfterReuse = builder2.build().webOnlyRootElement;
+    html.Element contentAfterReuse = builder2.build().webOnlyRootElement!;
     expect(contentAfterReuse, isNotNull);
 
     final SurfaceSceneBuilder builder3 = SurfaceSceneBuilder();
     builder3.pushClipRect(
-        const Rect.fromLTRB(25, 10, 300, 300),
+        const ui.Rect.fromLTRB(25, 10, 300, 300),
         oldLayer: oldLayer2
     );
-    builder3.addPicture(Offset.zero, _drawEmptyPicture());
+    builder3.addPicture(ui.Offset.zero, _drawEmptyPicture());
     builder3.pop();
     // This build will crash if canvas gets recycled twice.
-    html.HtmlElement contentAfterReuse2 = builder3.build().webOnlyRootElement;
+    html.Element contentAfterReuse2 = builder3.build().webOnlyRootElement!;
     expect(contentAfterReuse2, isNotNull);
   });
 }
 
-typedef TestLayerBuilder = EngineLayer Function(
-    SceneBuilder sceneBuilder, EngineLayer oldLayer);
+typedef TestLayerBuilder = ui.EngineLayer Function(
+    ui.SceneBuilder sceneBuilder, ui.EngineLayer? oldLayer);
 typedef ExpectedHtmlGetter = String Function();
 
 void testLayerLifeCycle(
@@ -694,8 +690,8 @@ void testLayerLifeCycle(
   SurfaceSceneBuilder.debugForgetFrameScene();
 
   // Build: builds a brand new layer.
-  SceneBuilder sceneBuilder = SceneBuilder();
-  final EngineLayer layer1 = layerBuilder(sceneBuilder, null);
+  SurfaceSceneBuilder sceneBuilder = SurfaceSceneBuilder();
+  final ui.EngineLayer layer1 = layerBuilder(sceneBuilder, null);
   final Type surfaceType = layer1.runtimeType;
   sceneBuilder.pop();
 
@@ -709,24 +705,24 @@ void testLayerLifeCycle(
   }
 
   final PersistedSurface surface1 = findSurface();
-  final html.Element surfaceElement1 = surface1.rootElement;
+  final html.Element surfaceElement1 = surface1.rootElement!;
 
   // Retain: reuses a layer as is along with its DOM elements.
-  sceneBuilder = SceneBuilder();
+  sceneBuilder = SurfaceSceneBuilder();
   sceneBuilder.addRetained(layer1);
 
   tester = SceneTester(sceneBuilder.build());
   tester.expectSceneHtml(expectedHtmlGetter());
 
   final PersistedSurface surface2 = findSurface();
-  final html.Element surfaceElement2 = surface2.rootElement;
+  final html.Element surfaceElement2 = surface2.rootElement!;
 
   expect(surface2, same(surface1));
   expect(surfaceElement2, same(surfaceElement1));
 
   // Reuse: reuses a layer's DOM elements by matching it.
-  sceneBuilder = SceneBuilder();
-  final EngineLayer layer3 = layerBuilder(sceneBuilder, layer1);
+  sceneBuilder = SurfaceSceneBuilder();
+  final ui.EngineLayer layer3 = layerBuilder(sceneBuilder, layer1);
   sceneBuilder.pop();
   expect(layer3, isNot(same(layer1)));
   tester = SceneTester(sceneBuilder.build());
@@ -734,13 +730,13 @@ void testLayerLifeCycle(
 
   final PersistedSurface surface3 = findSurface();
   expect(surface3, same(layer3));
-  final html.Element surfaceElement3 = surface3.rootElement;
+  final html.Element surfaceElement3 = surface3.rootElement!;
   expect(surface3, isNot(same(surface2)));
   expect(surfaceElement3, isNotNull);
   expect(surfaceElement3, same(surfaceElement2));
 
   // Recycle: discards all the layers.
-  sceneBuilder = SceneBuilder();
+  sceneBuilder = SurfaceSceneBuilder();
   tester = SceneTester(sceneBuilder.build());
   tester.expectSceneHtml('<s></s>');
 
@@ -749,7 +745,7 @@ void testLayerLifeCycle(
   // Retain again: the framework should be able to request that a layer is added
   //               as retained even after it has been recycled. In this case the
   //               engine would "rehydrate" the layer with new DOM elements.
-  sceneBuilder = SceneBuilder();
+  sceneBuilder = SurfaceSceneBuilder();
   sceneBuilder.addRetained(layer3);
   tester = SceneTester(sceneBuilder.build());
   tester.expectSceneHtml(expectedHtmlGetter());
@@ -761,21 +757,21 @@ void testLayerLifeCycle(
 
 class MockPersistedPicture extends PersistedPicture {
   factory MockPersistedPicture() {
-    final EnginePictureRecorder recorder = PictureRecorder();
+    final EnginePictureRecorder recorder = EnginePictureRecorder();
     // Use the largest cull rect so that layer clips are effective. The tests
     // rely on this.
-    recorder.beginRecording(Rect.largest)..drawPaint(Paint());
+    recorder.beginRecording(ui.Rect.largest)..drawPaint(SurfacePaint());
     return MockPersistedPicture._(recorder.endRecording());
   }
 
-  MockPersistedPicture._(Picture picture) : super(0, 0, picture, 0);
+  MockPersistedPicture._(EnginePicture picture) : super(0, 0, picture, 0);
 
   int retainCount = 0;
   int buildCount = 0;
   int updateCount = 0;
   int applyPaintCount = 0;
 
-  final BitmapCanvas _fakeCanvas = BitmapCanvas(const Rect.fromLTRB(0, 0, 10, 10), RenderStrategy());
+  final BitmapCanvas _fakeCanvas = BitmapCanvas(const ui.Rect.fromLTRB(0, 0, 10, 10), RenderStrategy());
 
   @override
   EngineCanvas get debugCanvas {
@@ -788,7 +784,7 @@ class MockPersistedPicture extends PersistedPicture {
   }
 
   @override
-  Matrix4 get localTransformInverse => null;
+  Matrix4 get localTransformInverse => Matrix4.identity();
 
   @override
   void build() {
@@ -803,7 +799,7 @@ class MockPersistedPicture extends PersistedPicture {
   }
 
   @override
-  void applyPaint(EngineCanvas oldCanvas) {
+  void applyPaint(EngineCanvas? oldCanvas) {
     applyPaintCount++;
   }
 
@@ -818,89 +814,89 @@ class MockPersistedPicture extends PersistedPicture {
 }
 
 /// Draw 4 circles within 50, 50, 120, 120 bounds
-Picture _drawPicture() {
+ui.Picture _drawPicture() {
   const double offsetX = 50;
   const double offsetY = 50;
-  final EnginePictureRecorder recorder = PictureRecorder();
+  final EnginePictureRecorder recorder = EnginePictureRecorder();
   final RecordingCanvas canvas =
-  recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
-  Shader gradient = Gradient.radial(
-      Offset(100, 100), 50, [
-    const Color.fromARGB(255, 0, 0, 0),
-    const Color.fromARGB(255, 0, 0, 255)
+  recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 400, 400));
+  ui.Shader gradient = ui.Gradient.radial(
+      ui.Offset(100, 100), 50, [
+    const ui.Color.fromARGB(255, 0, 0, 0),
+    const ui.Color.fromARGB(255, 0, 0, 255)
   ]);
   canvas.drawCircle(
-      Offset(offsetX + 10, offsetY + 10), 10,
-      Paint()
-        ..style = PaintingStyle.fill
+      ui.Offset(offsetX + 10, offsetY + 10), 10,
+      SurfacePaint()
+        ..style = ui.PaintingStyle.fill
         ..shader = gradient);
   canvas.drawCircle(
-      Offset(offsetX + 60, offsetY + 10),
+      ui.Offset(offsetX + 60, offsetY + 10),
       10,
-      Paint()
-        ..style = PaintingStyle.fill
-        ..color = const Color.fromRGBO(255, 0, 0, 1));
+      SurfacePaint()
+        ..style = ui.PaintingStyle.fill
+        ..color = const ui.Color.fromRGBO(255, 0, 0, 1));
   canvas.drawCircle(
-      Offset(offsetX + 10, offsetY + 60),
+      ui.Offset(offsetX + 10, offsetY + 60),
       10,
-      Paint()
-        ..style = PaintingStyle.fill
-        ..color = const Color.fromRGBO(0, 255, 0, 1));
+      SurfacePaint()
+        ..style = ui.PaintingStyle.fill
+        ..color = const ui.Color.fromRGBO(0, 255, 0, 1));
   canvas.drawCircle(
-      Offset(offsetX + 60, offsetY + 60),
+      ui.Offset(offsetX + 60, offsetY + 60),
       10,
-      Paint()
-        ..style = PaintingStyle.fill
-        ..color = const Color.fromRGBO(0, 0, 255, 1));
+      SurfacePaint()
+        ..style = ui.PaintingStyle.fill
+        ..color = const ui.Color.fromRGBO(0, 0, 255, 1));
   return recorder.endRecording();
 }
 
-Picture _drawEmptyPicture() {
-  final EnginePictureRecorder recorder = PictureRecorder();
-  recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
+EnginePicture _drawEmptyPicture() {
+  final EnginePictureRecorder recorder = EnginePictureRecorder();
+  recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 400, 400));
   return recorder.endRecording();
 }
 
-Picture _drawPathImagePath() {
+EnginePicture _drawPathImagePath() {
   const double offsetX = 50;
   const double offsetY = 50;
-  final EnginePictureRecorder recorder = PictureRecorder();
+  final EnginePictureRecorder recorder = EnginePictureRecorder();
   final RecordingCanvas canvas =
-  recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
-  Shader gradient = Gradient.radial(
-      Offset(100, 100), 50, [
-    const Color.fromARGB(255, 0, 0, 0),
-    const Color.fromARGB(255, 0, 0, 255)
+  recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 400, 400));
+  ui.Shader gradient = ui.Gradient.radial(
+      ui.Offset(100, 100), 50, [
+    const ui.Color.fromARGB(255, 0, 0, 0),
+    const ui.Color.fromARGB(255, 0, 0, 255)
   ]);
   canvas.drawCircle(
-      Offset(offsetX + 10, offsetY + 10), 10,
-      Paint()
-        ..style = PaintingStyle.fill
+      ui.Offset(offsetX + 10, offsetY + 10), 10,
+      SurfacePaint()
+        ..style = ui.PaintingStyle.fill
         ..shader = gradient);
   canvas.drawCircle(
-      Offset(offsetX + 60, offsetY + 10),
+      ui.Offset(offsetX + 60, offsetY + 10),
       10,
-      Paint()
-        ..style = PaintingStyle.fill
-        ..color = const Color.fromRGBO(255, 0, 0, 1));
+      SurfacePaint()
+        ..style = ui.PaintingStyle.fill
+        ..color = const ui.Color.fromRGBO(255, 0, 0, 1));
   canvas.drawCircle(
-      Offset(offsetX + 10, offsetY + 60),
+      ui.Offset(offsetX + 10, offsetY + 60),
       10,
-      Paint()
-        ..style = PaintingStyle.fill
-        ..color = const Color.fromRGBO(0, 255, 0, 1));
-  canvas.drawImage(createTestImage(), Offset(0, 0), Paint());
+      SurfacePaint()
+        ..style = ui.PaintingStyle.fill
+        ..color = const ui.Color.fromRGBO(0, 255, 0, 1));
+  canvas.drawImage(createTestImage(), ui.Offset(0, 0), SurfacePaint());
   canvas.drawCircle(
-      Offset(offsetX + 10, offsetY + 10), 10,
-      Paint()
-        ..style = PaintingStyle.fill
+      ui.Offset(offsetX + 10, offsetY + 10), 10,
+      SurfacePaint()
+        ..style = ui.PaintingStyle.fill
         ..shader = gradient);
   canvas.drawCircle(
-      Offset(offsetX + 60, offsetY + 60),
+      ui.Offset(offsetX + 60, offsetY + 60),
       10,
-      Paint()
-        ..style = PaintingStyle.fill
-        ..color = const Color.fromRGBO(0, 0, 255, 1));
+      SurfacePaint()
+        ..style = ui.PaintingStyle.fill
+        ..color = const ui.Color.fromRGBO(0, 0, 255, 1));
   return recorder.endRecording();
 }
 

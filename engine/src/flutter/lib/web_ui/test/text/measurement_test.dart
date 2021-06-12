@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 @TestOn('chrome || firefox')
 
 import 'package:test/bootstrap/browser.dart';
@@ -21,13 +20,13 @@ const ui.ParagraphConstraints infiniteConstraints =
     ui.ParagraphConstraints(width: double.infinity);
 
 DomParagraph build(ui.ParagraphStyle style, String text,
-    {ui.TextStyle textStyle}) {
-  final DomParagraphBuilder builder = DomParagraphBuilder(style);
+    {ui.TextStyle? textStyle}) {
+  final DomParagraphBuilder builder = DomParagraphBuilder(style as EngineParagraphStyle);
   if (textStyle != null) {
     builder.pushStyle(textStyle);
   }
   builder.addText(text);
-  return builder.build();
+  return builder.build() as DomParagraph;
 }
 
 typedef MeasurementTestBody = void Function(TextMeasurementService instance);
@@ -35,17 +34,17 @@ typedef MeasurementTestBody = void Function(TextMeasurementService instance);
 /// Runs the same test twice - once with dom measurement and once with canvas
 /// measurement.
 void testMeasurements(String description, MeasurementTestBody body, {
-  bool skipDom,
-  bool skipCanvas,
+  bool? skipDom,
+  bool? skipCanvas,
 }) {
   test(
     '$description (dom)',
     () {
       try {
-        WebExperiments.instance.useCanvasRichText = false;
+        WebExperiments.instance!.useCanvasRichText = false;
         return body(TextMeasurementService.domInstance);
       } finally {
-        WebExperiments.instance.useCanvasRichText = null;
+        WebExperiments.instance!.useCanvasRichText = null;
       }
     },
     skip: skipDom,
@@ -54,10 +53,10 @@ void testMeasurements(String description, MeasurementTestBody body, {
     '$description (canvas)',
     () {
       try {
-        WebExperiments.instance.useCanvasRichText = false;
+        WebExperiments.instance!.useCanvasRichText = false;
         return body(TextMeasurementService.canvasInstance);
       } finally {
-        WebExperiments.instance.useCanvasRichText = null;
+        WebExperiments.instance!.useCanvasRichText = null;
       }
     },
     skip: skipCanvas,
@@ -77,9 +76,9 @@ void testMain()  async {
     );
     final ui.ParagraphStyle s3 = ui.ParagraphStyle(fontSize: 22.0);
 
-    ParagraphGeometricStyle style1, style2, style3;
-    DomParagraph style1Text1, style1Text2; // two paragraphs sharing style
-    DomParagraph style2Text1, style3Text3;
+    late ParagraphGeometricStyle style1, style2, style3;
+    late DomParagraph style1Text1, style1Text2; // two paragraphs sharing style
+    late DomParagraph style2Text1, style3Text3;
 
     setUp(() {
       style1Text1 = build(s1, '1');
@@ -152,11 +151,11 @@ void testMain()  async {
       expect(ruler2.debugIsDisposed, isFalse);
       expect(ruler3.debugIsDisposed, isTrue);
 
-      ruler1 = rulerManager.rulers[style1];
+      ruler1 = rulerManager.rulers[style1]!;
       expect(ruler1.style, style1);
       expect(ruler1.hitCount, 0); // hit counts are reset
 
-      ruler2 = rulerManager.rulers[style2];
+      ruler2 = rulerManager.rulers[style2]!;
       expect(ruler2.style, style2);
       expect(ruler2.hitCount, 0); // hit counts are reset
     });
@@ -173,12 +172,12 @@ void testMain()  async {
     testMeasurements(
       'preserves whitespace when measuring',
       (TextMeasurementService instance) {
-        ui.Paragraph text;
+        DomParagraph text;
         MeasurementResult result;
 
         // leading whitespaces
         text = build(ahemStyle, '   abc');
-        result = instance.measure(text, infiniteConstraints);
+        result = instance.measure(text, infiniteConstraints)!;
         expect(result.maxIntrinsicWidth, 60);
         expect(result.minIntrinsicWidth, 30);
         expect(result.height, 10);
@@ -188,7 +187,7 @@ void testMain()  async {
 
         // trailing whitespaces
         text = build(ahemStyle, 'abc   ');
-        result = instance.measure(text, infiniteConstraints);
+        result = instance.measure(text, infiniteConstraints)!;
         expect(result.maxIntrinsicWidth, 60);
         expect(result.minIntrinsicWidth, 30);
         expect(result.height, 10);
@@ -206,7 +205,7 @@ void testMain()  async {
 
         // mixed whitespaces
         text = build(ahemStyle, '  ab   c  ');
-        result = instance.measure(text, infiniteConstraints);
+        result = instance.measure(text, infiniteConstraints)!;
         expect(result.maxIntrinsicWidth, 100);
         expect(result.minIntrinsicWidth, 20);
         expect(result.height, 10);
@@ -224,7 +223,7 @@ void testMain()  async {
 
         // single whitespace
         text = build(ahemStyle, ' ');
-        result = instance.measure(text, infiniteConstraints);
+        result = instance.measure(text, infiniteConstraints)!;
         expect(result.maxIntrinsicWidth, 10);
         expect(result.minIntrinsicWidth, 0);
         expect(result.height, 10);
@@ -242,7 +241,7 @@ void testMain()  async {
 
         // whitespace only
         text = build(ahemStyle, '     ');
-        result = instance.measure(text, infiniteConstraints);
+        result = instance.measure(text, infiniteConstraints)!;
         expect(result.maxIntrinsicWidth, 50);
         expect(result.minIntrinsicWidth, 0);
         expect(result.height, 10);
@@ -264,7 +263,7 @@ void testMain()  async {
       'uses single-line when text can fit without wrapping',
       (TextMeasurementService instance) {
         final MeasurementResult result =
-            instance.measure(build(ahemStyle, '12345'), constraints);
+            instance.measure(build(ahemStyle, '12345'), constraints)!;
 
         // Should fit on a single line.
         expect(result.isSingleLine, isTrue);
@@ -287,7 +286,7 @@ void testMain()  async {
         MeasurementResult result;
 
         // The long text doesn't fit in 70px of width, so it needs to wrap.
-        result = instance.measure(build(ahemStyle, 'foo bar baz'), constraints);
+        result = instance.measure(build(ahemStyle, 'foo bar baz'), constraints)!;
         expect(result.isSingleLine, isFalse);
         expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 110);
@@ -313,7 +312,7 @@ void testMain()  async {
         MeasurementResult result;
 
         // The long text doesn't fit in 50px of width, so it needs to wrap.
-        result = instance.measure(build(ahemStyle, '1234567890'), constraints);
+        result = instance.measure(build(ahemStyle, '1234567890'), constraints)!;
         expect(result.isSingleLine, isFalse);
         expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 100);
@@ -333,7 +332,7 @@ void testMain()  async {
 
         // The first word is force-broken twice.
         result =
-            instance.measure(build(ahemStyle, 'abcdefghijk lm'), constraints);
+            instance.measure(build(ahemStyle, 'abcdefghijk lm'), constraints)!;
         expect(result.isSingleLine, isFalse);
         expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 140);
@@ -356,7 +355,7 @@ void testMain()  async {
         // we show a minimum of one character per line.
         const ui.ParagraphConstraints narrowConstraints =
             ui.ParagraphConstraints(width: 8);
-        result = instance.measure(build(ahemStyle, 'AA'), narrowConstraints);
+        result = instance.measure(build(ahemStyle, 'AA'), narrowConstraints)!;
         expect(result.isSingleLine, isFalse);
         expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 20);
@@ -375,7 +374,7 @@ void testMain()  async {
         }
 
         // Extremely narrow constraints with new line in the middle.
-        result = instance.measure(build(ahemStyle, 'AA\nA'), narrowConstraints);
+        result = instance.measure(build(ahemStyle, 'AA\nA'), narrowConstraints)!;
         expect(result.isSingleLine, isFalse);
         expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 20);
@@ -395,7 +394,7 @@ void testMain()  async {
         }
 
         // Extremely narrow constraints with new line in the end.
-        result = instance.measure(build(ahemStyle, 'AAA\n'), narrowConstraints);
+        result = instance.measure(build(ahemStyle, 'AAA\n'), narrowConstraints)!;
         expect(result.isSingleLine, isFalse);
         expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 30);
@@ -422,7 +421,7 @@ void testMain()  async {
       'uses multi-line for text that contains new-line',
       (TextMeasurementService instance) {
         final MeasurementResult result =
-            instance.measure(build(ahemStyle, '12\n34'), constraints);
+            instance.measure(build(ahemStyle, '12\n34'), constraints)!;
 
         // Text containing newlines should always be drawn in multi-line mode.
         expect(result.isSingleLine, isFalse);
@@ -447,7 +446,7 @@ void testMain()  async {
       MeasurementResult result;
 
       // Empty lines in the beginning.
-      result = instance.measure(build(ahemStyle, '\n\n1234'), constraints);
+      result = instance.measure(build(ahemStyle, '\n\n1234'), constraints)!;
       expect(result.maxIntrinsicWidth, 40);
       expect(result.minIntrinsicWidth, 40);
       expect(result.height, 30);
@@ -464,7 +463,7 @@ void testMain()  async {
       }
 
       // Empty lines in the middle.
-      result = instance.measure(build(ahemStyle, '12\n\n345'), constraints);
+      result = instance.measure(build(ahemStyle, '12\n\n345'), constraints)!;
       expect(result.maxIntrinsicWidth, 30);
       expect(result.minIntrinsicWidth, 30);
       expect(result.height, 30);
@@ -481,7 +480,7 @@ void testMain()  async {
       }
 
       // Empty lines in the end.
-      result = instance.measure(build(ahemStyle, '1234\n\n'), constraints);
+      result = instance.measure(build(ahemStyle, '1234\n\n'), constraints)!;
       expect(result.maxIntrinsicWidth, 40);
       expect(result.minIntrinsicWidth, 40);
       if (instance.isCanvas) {
@@ -504,7 +503,7 @@ void testMain()  async {
       (TextMeasurementService instance) {
         final DomParagraph paragraph = build(ahemStyle, '123\n456 789');
         final MeasurementResult result =
-            instance.measure(paragraph, infiniteConstraints);
+            instance.measure(paragraph, infiniteConstraints)!;
 
         expect(result.isSingleLine, isFalse);
         expect(result.maxIntrinsicWidth, 70);
@@ -531,11 +530,11 @@ void testMain()  async {
         const ui.ParagraphConstraints constraints =
             ui.ParagraphConstraints(width: 100);
         final ui.TextStyle spacedTextStyle = ui.TextStyle(letterSpacing: 3);
-        final ui.Paragraph spacedText =
+        final DomParagraph spacedText =
             build(ahemStyle, 'abc', textStyle: spacedTextStyle);
 
         final MeasurementResult spacedResult =
-            instance.measure(spacedText, constraints);
+            instance.measure(spacedText, constraints)!;
 
         expect(spacedResult.minIntrinsicWidth, 39);
         expect(spacedResult.maxIntrinsicWidth, 39);
@@ -556,9 +555,9 @@ void testMain()  async {
       expect(instance, const TypeMatcher<DomTextMeasurementService>());
 
       final MeasurementResult normalResult =
-          instance.measure(normalText, constraints);
+          instance.measure(normalText, constraints)!;
       final MeasurementResult spacedResult =
-          instance.measure(spacedText, constraints);
+          instance.measure(spacedText, constraints)!;
 
       expect(
         normalResult.maxIntrinsicWidth < spacedResult.maxIntrinsicWidth,
@@ -570,7 +569,7 @@ void testMain()  async {
       MeasurementResult result;
 
       // Simple case.
-      result = instance.measure(build(ahemStyle, 'abc de fghi'), constraints);
+      result = instance.measure(build(ahemStyle, 'abc de fghi'), constraints)!;
       expect(result.minIntrinsicWidth, 40);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -585,7 +584,7 @@ void testMain()  async {
       }
 
       // With new lines.
-      result = instance.measure(build(ahemStyle, 'abcd\nef\nghi'), constraints);
+      result = instance.measure(build(ahemStyle, 'abcd\nef\nghi'), constraints)!;
       expect(result.minIntrinsicWidth, 40);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -600,7 +599,7 @@ void testMain()  async {
       }
 
       // With trailing whitespace.
-      result = instance.measure(build(ahemStyle, 'abcd      efg'), constraints);
+      result = instance.measure(build(ahemStyle, 'abcd      efg'), constraints)!;
       expect(result.minIntrinsicWidth, 40);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -614,7 +613,7 @@ void testMain()  async {
       }
 
       // With trailing whitespace and new lines.
-      result = instance.measure(build(ahemStyle, 'abc    \ndefg'), constraints);
+      result = instance.measure(build(ahemStyle, 'abc    \ndefg'), constraints)!;
       expect(result.minIntrinsicWidth, 40);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -628,7 +627,7 @@ void testMain()  async {
       }
 
       // Very long text.
-      result = instance.measure(build(ahemStyle, 'AAAAAAAAAAAA'), constraints);
+      result = instance.measure(build(ahemStyle, 'AAAAAAAAAAAA'), constraints)!;
       expect(result.minIntrinsicWidth, 120);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -647,7 +646,7 @@ void testMain()  async {
       MeasurementResult result;
 
       // Simple case.
-      result = instance.measure(build(ahemStyle, 'abc de fghi'), constraints);
+      result = instance.measure(build(ahemStyle, 'abc de fghi'), constraints)!;
       expect(result.maxIntrinsicWidth, 110);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -662,7 +661,7 @@ void testMain()  async {
       }
 
       // With new lines.
-      result = instance.measure(build(ahemStyle, 'abcd\nef\nghi'), constraints);
+      result = instance.measure(build(ahemStyle, 'abcd\nef\nghi'), constraints)!;
       expect(result.maxIntrinsicWidth, 40);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -677,7 +676,7 @@ void testMain()  async {
       }
 
       // With long whitespace.
-      result = instance.measure(build(ahemStyle, 'abcd   efg'), constraints);
+      result = instance.measure(build(ahemStyle, 'abcd   efg'), constraints)!;
       expect(result.maxIntrinsicWidth, 100);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -691,7 +690,7 @@ void testMain()  async {
       }
 
       // With trailing whitespace.
-      result = instance.measure(build(ahemStyle, 'abc def   '), constraints);
+      result = instance.measure(build(ahemStyle, 'abc def   '), constraints)!;
       expect(result.maxIntrinsicWidth, 100);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -705,7 +704,7 @@ void testMain()  async {
       }
 
       // With trailing whitespace and new lines.
-      result = instance.measure(build(ahemStyle, 'abc \ndef   '), constraints);
+      result = instance.measure(build(ahemStyle, 'abc \ndef   '), constraints)!;
       expect(result.maxIntrinsicWidth, 60);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -719,7 +718,7 @@ void testMain()  async {
       }
 
       // Very long text.
-      result = instance.measure(build(ahemStyle, 'AAAAAAAAAAAA'), constraints);
+      result = instance.measure(build(ahemStyle, 'AAAAAAAAAAAA'), constraints)!;
       expect(result.maxIntrinsicWidth, 120);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -747,11 +746,11 @@ void testMain()  async {
 
         // The text shouldn't be broken into multiple lines, so the height should
         // be equal to a height of a single line.
-        final ui.Paragraph longText = build(
+        final DomParagraph longText = build(
           overflowStyle,
           'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
         );
-        result = instance.measure(longText, constraints);
+        result = instance.measure(longText, constraints)!;
         expect(result.minIntrinsicWidth, 480);
         expect(result.maxIntrinsicWidth, 480);
         expect(result.height, 10);
@@ -767,11 +766,11 @@ void testMain()  async {
 
         // The short prefix should make the text break into two lines, but the
         // second line should remain unbroken.
-        final ui.Paragraph longTextShortPrefix = build(
+        final DomParagraph longTextShortPrefix = build(
           overflowStyle,
           'AAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
         );
-        result = instance.measure(longTextShortPrefix, constraints);
+        result = instance.measure(longTextShortPrefix, constraints)!;
         expect(result.minIntrinsicWidth, 450);
         expect(result.maxIntrinsicWidth, 450);
         expect(result.height, 20);
@@ -789,8 +788,8 @@ void testMain()  async {
         // Tiny constraints.
         const ui.ParagraphConstraints tinyConstraints =
             ui.ParagraphConstraints(width: 30);
-        final ui.Paragraph text = build(overflowStyle, 'AAAA');
-        result = instance.measure(text, tinyConstraints);
+        final DomParagraph text = build(overflowStyle, 'AAAA');
+        result = instance.measure(text, tinyConstraints)!;
         expect(result.minIntrinsicWidth, 40);
         expect(result.maxIntrinsicWidth, 40);
         expect(result.height, 10);
@@ -807,7 +806,7 @@ void testMain()  async {
         // Tinier constraints (not enough for the ellipsis).
         const ui.ParagraphConstraints tinierConstraints =
             ui.ParagraphConstraints(width: 10);
-        result = instance.measure(text, tinierConstraints);
+        result = instance.measure(text, tinierConstraints)!;
         expect(result.minIntrinsicWidth, 40);
         expect(result.maxIntrinsicWidth, 40);
         expect(result.height, 10);
@@ -838,17 +837,17 @@ void testMain()  async {
       MeasurementResult result;
 
       // The height should be that of a single line.
-      final ui.Paragraph oneline = build(maxlinesStyle, 'One line');
-      result = instance.measure(oneline, infiniteConstraints);
+      final DomParagraph oneline = build(maxlinesStyle, 'One line');
+      result = instance.measure(oneline, infiniteConstraints)!;
       expect(result.height, 10);
       expect(result.lines, <EngineLineMetrics>[
         line('One line', 0, 8, hardBreak: true, width: 80.0, lineNumber: 0, left: 0.0),
       ]);
 
       // The height should respect max lines and be limited to two lines here.
-      final ui.Paragraph threelines =
+      final DomParagraph threelines =
           build(maxlinesStyle, 'First\nSecond\nThird');
-      result = instance.measure(threelines, infiniteConstraints);
+      result = instance.measure(threelines, infiniteConstraints)!;
       expect(result.height, 20);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -862,11 +861,11 @@ void testMain()  async {
       }
 
       // The height should respect max lines and be limited to two lines here.
-      final ui.Paragraph veryLong = build(
+      final DomParagraph veryLong = build(
         maxlinesStyle,
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       );
-      result = instance.measure(veryLong, constraints);
+      result = instance.measure(veryLong, constraints)!;
       expect(result.height, 20);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -880,11 +879,11 @@ void testMain()  async {
       }
 
       // Case when last line is a long unbreakable word.
-      final ui.Paragraph veryLongLastLine = build(
+      final DomParagraph veryLongLastLine = build(
         maxlinesStyle,
         'AAA AAAAAAAAAAAAAAAAAAA',
       );
-      result = instance.measure(veryLongLastLine, constraints);
+      result = instance.measure(veryLongLastLine, constraints)!;
       expect(result.height, 20);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
@@ -916,12 +915,12 @@ void testMain()  async {
           ellipsis: '...',
         );
 
-        ui.Paragraph p;
+        DomParagraph p;
         MeasurementResult result;
 
         // Simple no overflow case.
         p = build(onelineStyle, 'abcdef');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         expect(result.height, 10);
         expect(result.lines, <EngineLineMetrics>[
           line('abcdef', 0, 6, hardBreak: true, width: 60.0, lineNumber: 0, left: 0.0),
@@ -929,7 +928,7 @@ void testMain()  async {
 
         // Simple overflow case.
         p = build(onelineStyle, 'abcd efg');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         expect(result.height, 10);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
@@ -943,7 +942,7 @@ void testMain()  async {
 
         // Another simple overflow case.
         p = build(onelineStyle, 'a bcde fgh');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         expect(result.height, 10);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
@@ -958,7 +957,7 @@ void testMain()  async {
         // The ellipsis is supposed to go on the second line, but because the
         // 2nd line doesn't overflow, no ellipsis is shown.
         p = build(multilineStyle, 'abcdef ghijkl');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         // This can only be done correctly in the canvas-based implementation.
         if (instance.isCanvas) {
           expect(result.height, 20);
@@ -975,7 +974,7 @@ void testMain()  async {
 
         // But when the 2nd line is long enough, the ellipsis is shown.
         p = build(multilineStyle, 'abcd efghijkl');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         // This can only be done correctly in the canvas-based implementation.
         if (instance.isCanvas) {
           expect(result.height, 20);
@@ -993,7 +992,7 @@ void testMain()  async {
         // Even if the second line can be broken, we don't break it, we just
         // insert the ellipsis.
         p = build(multilineStyle, 'abcde f gh ijk');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         // This can only be done correctly in the canvas-based implementation.
         if (instance.isCanvas) {
           expect(result.height, 20);
@@ -1010,7 +1009,7 @@ void testMain()  async {
 
         // First line overflows but second line doesn't.
         p = build(multilineStyle, 'abcdefg hijk');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         // This can only be done correctly in the canvas-based implementation.
         if (instance.isCanvas) {
           expect(result.height, 20);
@@ -1027,7 +1026,7 @@ void testMain()  async {
 
         // Both first and second lines overflow.
         p = build(multilineStyle, 'abcdefg hijklmnop');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         // This can only be done correctly in the canvas-based implementation.
         if (instance.isCanvas) {
           expect(result.height, 20);
@@ -1046,7 +1045,7 @@ void testMain()  async {
 
     test('handles textAlign', () {
       TextMeasurementService instance = TextMeasurementService.canvasInstance;
-      ui.Paragraph p;
+      DomParagraph p;
       MeasurementResult result;
 
       ui.ParagraphStyle createStyle(ui.TextAlign textAlign) {
@@ -1059,7 +1058,7 @@ void testMain()  async {
       }
 
       p = build(createStyle(ui.TextAlign.start), 'abc\ndefghi');
-      result = instance.measure(p, constraints);
+      result = instance.measure(p, constraints)!;
       expect(result.lines, <EngineLineMetrics>[
         line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
         line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
@@ -1067,7 +1066,7 @@ void testMain()  async {
       ]);
 
       p = build(createStyle(ui.TextAlign.end), 'abc\ndefghi');
-      result = instance.measure(p, constraints);
+      result = instance.measure(p, constraints)!;
       expect(result.lines, <EngineLineMetrics>[
         line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 20.0),
         line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
@@ -1075,7 +1074,7 @@ void testMain()  async {
       ]);
 
       p = build(createStyle(ui.TextAlign.center), 'abc\ndefghi');
-      result = instance.measure(p, constraints);
+      result = instance.measure(p, constraints)!;
       expect(result.lines, <EngineLineMetrics>[
         line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 10.0),
         line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
@@ -1083,7 +1082,7 @@ void testMain()  async {
       ]);
 
       p = build(createStyle(ui.TextAlign.left), 'abc\ndefghi');
-      result = instance.measure(p, constraints);
+      result = instance.measure(p, constraints)!;
       expect(result.lines, <EngineLineMetrics>[
         line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
         line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
@@ -1091,7 +1090,7 @@ void testMain()  async {
       ]);
 
       p = build(createStyle(ui.TextAlign.right), 'abc\ndefghi');
-      result = instance.measure(p, constraints);
+      result = instance.measure(p, constraints)!;
       expect(result.lines, <EngineLineMetrics>[
         line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 20.0),
         line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
@@ -1103,7 +1102,7 @@ void testMain()  async {
       'handles rtl with textAlign',
       (TextMeasurementService instance) {
         TextMeasurementService instance = TextMeasurementService.canvasInstance;
-        ui.Paragraph p;
+        DomParagraph p;
         MeasurementResult result;
 
         ui.ParagraphStyle createStyle(ui.TextAlign textAlign) {
@@ -1116,7 +1115,7 @@ void testMain()  async {
         }
 
         p = build(createStyle(ui.TextAlign.start), 'abc\ndefghi');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         expect(result.lines, <EngineLineMetrics>[
           line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 20.0),
           line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
@@ -1124,7 +1123,7 @@ void testMain()  async {
         ]);
 
         p = build(createStyle(ui.TextAlign.end), 'abc\ndefghi');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         expect(result.lines, <EngineLineMetrics>[
           line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
           line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
@@ -1132,7 +1131,7 @@ void testMain()  async {
         ]);
 
         p = build(createStyle(ui.TextAlign.center), 'abc\ndefghi');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         expect(result.lines, <EngineLineMetrics>[
           line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 10.0),
           line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
@@ -1140,7 +1139,7 @@ void testMain()  async {
         ]);
 
         p = build(createStyle(ui.TextAlign.left), 'abc\ndefghi');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         expect(result.lines, <EngineLineMetrics>[
           line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
           line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
@@ -1148,7 +1147,7 @@ void testMain()  async {
         ]);
 
         p = build(createStyle(ui.TextAlign.right), 'abc\ndefghi');
-        result = instance.measure(p, constraints);
+        result = instance.measure(p, constraints)!;
         expect(result.lines, <EngineLineMetrics>[
           line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 20.0),
           line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
@@ -1164,10 +1163,10 @@ EngineLineMetrics line(
   String displayText,
   int startIndex,
   int endIndex, {
-  double width,
-  int lineNumber,
-  bool hardBreak,
-  double left,
+  required double width,
+  required int lineNumber,
+  required bool hardBreak,
+  required double left,
 }) {
   return EngineLineMetrics.withText(
     displayText,
