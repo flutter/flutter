@@ -102,7 +102,7 @@ void validateLocalizations(
   Map<LocaleInfo, Map<String, dynamic>> localeToAttributes,
 ) {
   final Map<String, String> canonicalLocalizations = localeToResources[LocaleInfo.fromString('en')]!;
-  final Set<String?> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
+  final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
   final StringBuffer errorMessages = StringBuffer();
   bool explainMissingKeys = false;
   for (final LocaleInfo locale in localeToResources.keys) {
@@ -135,10 +135,10 @@ void validateLocalizations(
     if (locale.length == 1) {
       final Map<String, dynamic>? attributes = localeToAttributes[locale];
       final List<String?> missingKeys = <String?>[];
-       for (final String? missingKey in canonicalKeys.difference(keys)) {
+       for (final String missingKey in canonicalKeys.difference(keys)) {
         final dynamic attribute = attributes?[missingKey];
         final bool intentionallyOmitted = attribute is Map && attribute.containsKey('notUsed');
-        if (!intentionallyOmitted && !isPluralVariation(missingKey!))
+        if (!intentionallyOmitted && !isPluralVariation(missingKey))
           missingKeys.add(missingKey);
       }
       if (missingKeys.isNotEmpty) {

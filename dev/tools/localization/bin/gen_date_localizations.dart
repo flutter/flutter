@@ -93,10 +93,10 @@ Future<void> main(List<String> rawArgs) async {
 /// The subset of date symbols supported by the intl package which are also
 /// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, dynamic> dateSymbols = <String, dynamic> {');
-  symbolFiles.forEach((String locale, File? data) {
+  symbolFiles.forEach((String locale, File data) {
     currentLocale = locale;
     if (supportedLocales.contains(locale))
-      buffer.writeln(_jsonToMapEntry(locale, json.decode(data!.readAsStringSync())));
+      buffer.writeln(_jsonToMapEntry(locale, json.decode(data.readAsStringSync())));
   });
   currentLocale = null;
   buffer.writeln('};');
@@ -107,9 +107,9 @@ Future<void> main(List<String> rawArgs) async {
 /// The subset of date patterns supported by the intl package which are also
 /// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = <String, Map<String, String>> {');
-  patternFiles.forEach((String locale, File? data) {
+  patternFiles.forEach((String locale, File data) {
     if (supportedLocales.contains(locale)) {
-      final Map<String, dynamic> patterns = json.decode(data!.readAsStringSync()) as Map<String, dynamic>;
+      final Map<String, dynamic> patterns = json.decode(data.readAsStringSync()) as Map<String, dynamic>;
       buffer.writeln("'$locale': <String, String>{");
       patterns.forEach((String key, dynamic value) {
         assert(value is String);

@@ -269,7 +269,7 @@ class GeneratorOptions {
 // See also //master/tools/gen_locale.dart in the engine repo.
 Map<String, List<String>> _parseSection(String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
-  List<String> lastHeading = <String>[];
+  late List<String> lastHeading;
   for (final String line in section.split('\n')) {
     if (line == '')
       continue;
