@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:math' as math;
 
 import 'package:test/bootstrap/browser.dart';
@@ -107,12 +106,12 @@ const Rect testBounds = Rect.fromLTRB(50, 50, 230, 220);
 void drawBackground(RecordingCanvas canvas) {
   canvas.drawRect(
       testBounds,
-      Paint()
+      SurfacePaint()
         ..style = PaintingStyle.fill
         ..color = const Color(0xFF9E9E9E));
   canvas.drawRect(
       testBounds.inflate(-40),
-      Paint()
+      SurfacePaint()
         ..strokeWidth = 1
         ..style = PaintingStyle.stroke
         ..color = const Color(0xFF009688));
@@ -158,7 +157,7 @@ void paintTextWithClipRoundRect(RecordingCanvas canvas) {
   drawBackground(canvas);
   canvas.drawRRect(
       roundRect,
-      Paint()
+      SurfacePaint()
         ..color = deepOrange
         ..style = PaintingStyle.fill);
   canvas.clipRRect(roundRect);
@@ -180,7 +179,7 @@ void paintTextWithClipPath(RecordingCanvas canvas) {
   path.close();
   canvas.drawPath(
       path,
-      Paint()
+      SurfacePaint()
         ..color = deepOrange
         ..style = PaintingStyle.fill);
   canvas.clipPath(path);
@@ -196,7 +195,7 @@ void paintTextWithClipStack(RecordingCanvas canvas) {
   canvas.clipRect(inflatedRect, ClipOp.intersect);
   canvas.drawRect(
       inflatedRect,
-      Paint()
+      SurfacePaint()
         ..color = deepOrange
         ..style = PaintingStyle.fill);
   drawQuickBrownFox(canvas);

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html';
 
 import 'package:test/bootstrap/browser.dart';
@@ -22,7 +21,7 @@ void testMain() async {
 
   await webOnlyInitializeTestDomRenderer();
 
-  String fallback;
+  late String fallback;
   setUp(() {
     if (operatingSystem == OperatingSystem.macOs ||
         operatingSystem == OperatingSystem.iOs) {
@@ -89,14 +88,14 @@ void testMain() async {
   });
 
   test('lay out unattached paragraph', () {
-    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
       fontSize: 14.0,
     ));
     builder.addText('How do you do this fine morning?');
-    final DomParagraph paragraph = builder.build();
+    final DomParagraph paragraph = builder.build() as DomParagraph;
 
     expect(paragraph.paragraphElement.parent, isNull);
     expect(paragraph.height, 0.0);
@@ -155,18 +154,18 @@ void testMain() async {
   });
 
   test('$ParagraphBuilder detects plain text', () {
-    DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
+    DomParagraphBuilder builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
       fontSize: 15.0,
     ));
     builder.addText('hi');
-    DomParagraph paragraph = builder.build();
+    DomParagraph paragraph = builder.build() as DomParagraph;
     expect(paragraph.plainText, isNotNull);
     expect(paragraph.geometricStyle.fontWeight, FontWeight.normal);
 
-    builder = DomParagraphBuilder(ParagraphStyle(
+    builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
@@ -174,13 +173,13 @@ void testMain() async {
     ));
     builder.pushStyle(TextStyle(fontWeight: FontWeight.bold));
     builder.addText('hi');
-    paragraph = builder.build();
+    paragraph = builder.build() as DomParagraph;
     expect(paragraph.plainText, isNotNull);
     expect(paragraph.geometricStyle.fontWeight, FontWeight.bold);
   });
 
   test('$ParagraphBuilder detects rich text', () {
-    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
@@ -189,27 +188,27 @@ void testMain() async {
     builder.addText('h');
     builder.pushStyle(TextStyle(fontWeight: FontWeight.bold));
     builder.addText('i');
-    final DomParagraph paragraph = builder.build();
+    final DomParagraph paragraph = builder.build() as DomParagraph;
     expect(paragraph.plainText, isNull);
     expect(paragraph.geometricStyle.fontWeight, FontWeight.normal);
   });
 
   test('$ParagraphBuilder treats empty text as plain', () {
-    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
       fontSize: 15.0,
     ));
     builder.pushStyle(TextStyle(fontWeight: FontWeight.bold));
-    final DomParagraph paragraph = builder.build();
+    final DomParagraph paragraph = builder.build() as DomParagraph;
     expect(paragraph.plainText, '');
     expect(paragraph.geometricStyle.fontWeight, FontWeight.bold);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/34931.
   test('hit test on styled text returns correct span offset', () {
-    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
@@ -223,7 +222,7 @@ void testMain() async {
     builder.addText(secondSpanText);
     builder.pushStyle(TextStyle(fontStyle: FontStyle.italic));
     builder.addText('followed by a link');
-    final DomParagraph paragraph = builder.build();
+    final DomParagraph paragraph = builder.build() as DomParagraph;
     paragraph.layout(const ParagraphConstraints(width: 800.0));
     expect(paragraph.plainText, isNull);
     const int secondSpanStartPosition = firstSpanText.length;
@@ -239,7 +238,7 @@ void testMain() async {
     const fontFamily = 'sans-serif';
     const fontSize = 20.0;
     final style = TextStyle(fontFamily: fontFamily, fontSize: fontSize);
-    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: fontFamily,
       fontSize: fontSize,
     ));
@@ -326,7 +325,7 @@ void testMain() async {
     'test te04 test050 '
     */
 
-    final DomParagraph paragraph = builder.build();
+    final DomParagraph paragraph = builder.build() as DomParagraph;
     paragraph.layout(ParagraphConstraints(width: 800));
 
     // Reference the offsets with the output of `Display arrangement`.
@@ -358,7 +357,7 @@ void testMain() async {
   test(
       'should not set fontFamily to effectiveFontFamily for spans in rich text',
       () {
-    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: 'Roboto',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
@@ -371,7 +370,7 @@ void testMain() async {
     builder.pushStyle(TextStyle(fontSize: 30.0, fontWeight: FontWeight.normal));
     const String secondSpanText = 'def';
     builder.addText(secondSpanText);
-    final DomParagraph paragraph = builder.build();
+    final DomParagraph paragraph = builder.build() as DomParagraph;
     paragraph.layout(const ParagraphConstraints(width: 800.0));
     expect(paragraph.plainText, isNull);
     final List<SpanElement> spans =
@@ -389,14 +388,14 @@ void testMain() async {
     // Set this to false so it doesn't default to 'Ahem' font.
     debugEmulateFlutterTesterEnvironment = false;
 
-    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: 'SomeFont',
       fontSize: 12.0,
     ));
 
     builder.addText('Hello');
 
-    final DomParagraph paragraph = builder.build();
+    final DomParagraph paragraph = builder.build() as DomParagraph;
     expect(paragraph.paragraphElement.style.fontFamily,
         'SomeFont, $fallback, sans-serif');
 
@@ -411,14 +410,14 @@ void testMain() async {
     // Set this to false so it doesn't default to 'Ahem' font.
     debugEmulateFlutterTesterEnvironment = false;
 
-    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: 'serif',
       fontSize: 12.0,
     ));
 
     builder.addText('Hello');
 
-    final DomParagraph paragraph = builder.build();
+    final DomParagraph paragraph = builder.build() as DomParagraph;
     expect(paragraph.paragraphElement.style.fontFamily, 'serif');
 
     debugEmulateFlutterTesterEnvironment = true;
@@ -428,14 +427,14 @@ void testMain() async {
     // Set this to false so it doesn't default to 'Ahem' font.
     debugEmulateFlutterTesterEnvironment = false;
 
-    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: 'MyFont 2000',
       fontSize: 12.0,
     ));
 
     builder.addText('Hello');
 
-    final DomParagraph paragraph = builder.build();
+    final DomParagraph paragraph = builder.build() as DomParagraph;
     expect(paragraph.paragraphElement.style.fontFamily,
         '"MyFont 2000", $fallback, sans-serif');
 

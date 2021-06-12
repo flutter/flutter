@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart';
@@ -15,8 +14,8 @@ void main() {
 }
 
 void testMain() {
-  RecordingCanvas underTest;
-  MockEngineCanvas mockCanvas;
+  late RecordingCanvas underTest;
+  late MockEngineCanvas mockCanvas;
   final Rect screenRect = Rect.largest;
 
   setUp(() {
@@ -113,62 +112,62 @@ void testMain() {
 
   test('Filters out paint commands outside the clip rect', () {
     // Outside to the left
-    underTest.drawRect(Rect.fromLTWH(0.0, 20.0, 10.0, 10.0), Paint());
+    underTest.drawRect(Rect.fromLTWH(0.0, 20.0, 10.0, 10.0), SurfacePaint());
 
     // Outside above
-    underTest.drawRect(Rect.fromLTWH(20.0, 0.0, 10.0, 10.0), Paint());
+    underTest.drawRect(Rect.fromLTWH(20.0, 0.0, 10.0, 10.0), SurfacePaint());
 
     // Visible
-    underTest.drawRect(Rect.fromLTWH(20.0, 20.0, 10.0, 10.0), Paint());
+    underTest.drawRect(Rect.fromLTWH(20.0, 20.0, 10.0, 10.0), SurfacePaint());
 
     // Inside the layer clip rect but zero-size
-    underTest.drawRect(Rect.fromLTRB(20.0, 20.0, 30.0, 20.0), Paint());
+    underTest.drawRect(Rect.fromLTRB(20.0, 20.0, 30.0, 20.0), SurfacePaint());
 
     // Inside the layer clip but clipped out by a canvas clip
     underTest.save();
     underTest.clipRect(Rect.fromLTWH(0, 0, 10, 10), ClipOp.intersect);
-    underTest.drawRect(Rect.fromLTWH(20.0, 20.0, 10.0, 10.0), Paint());
+    underTest.drawRect(Rect.fromLTWH(20.0, 20.0, 10.0, 10.0), SurfacePaint());
     underTest.restore();
 
     // Outside to the right
-    underTest.drawRect(Rect.fromLTWH(40.0, 20.0, 10.0, 10.0), Paint());
+    underTest.drawRect(Rect.fromLTWH(40.0, 20.0, 10.0, 10.0), SurfacePaint());
 
     // Outside below
-    underTest.drawRect(Rect.fromLTWH(20.0, 40.0, 10.0, 10.0), Paint());
+    underTest.drawRect(Rect.fromLTWH(20.0, 40.0, 10.0, 10.0), SurfacePaint());
 
     underTest.endRecording();
 
     expect(underTest.debugPaintCommands, hasLength(10));
-    final PaintDrawRect outsideLeft = underTest.debugPaintCommands[0];
+    final PaintDrawRect outsideLeft = underTest.debugPaintCommands[0] as PaintDrawRect;
     expect(outsideLeft.isClippedOut, isFalse);
     expect(outsideLeft.leftBound, 0);
     expect(outsideLeft.topBound, 20);
     expect(outsideLeft.rightBound, 10);
     expect(outsideLeft.bottomBound, 30);
 
-    final PaintDrawRect outsideAbove = underTest.debugPaintCommands[1];
+    final PaintDrawRect outsideAbove = underTest.debugPaintCommands[1] as PaintDrawRect;
     expect(outsideAbove.isClippedOut, isFalse);
 
-    final PaintDrawRect visible = underTest.debugPaintCommands[2];
+    final PaintDrawRect visible = underTest.debugPaintCommands[2] as PaintDrawRect;
     expect(visible.isClippedOut, isFalse);
 
-    final PaintDrawRect zeroSize = underTest.debugPaintCommands[3];
+    final PaintDrawRect zeroSize = underTest.debugPaintCommands[3] as PaintDrawRect;
     expect(zeroSize.isClippedOut, isTrue);
 
     expect(underTest.debugPaintCommands[4], isA<PaintSave>());
 
-    final PaintClipRect clip = underTest.debugPaintCommands[5];
+    final PaintClipRect clip = underTest.debugPaintCommands[5] as PaintClipRect;
     expect(clip.isClippedOut, isFalse);
 
-    final PaintDrawRect clippedOut = underTest.debugPaintCommands[6];
+    final PaintDrawRect clippedOut = underTest.debugPaintCommands[6] as PaintDrawRect;
     expect(clippedOut.isClippedOut, isTrue);
 
     expect(underTest.debugPaintCommands[7], isA<PaintRestore>());
 
-    final PaintDrawRect outsideRight = underTest.debugPaintCommands[8];
+    final PaintDrawRect outsideRight = underTest.debugPaintCommands[8] as PaintDrawRect;
     expect(outsideRight.isClippedOut, isFalse);
 
-    final PaintDrawRect outsideBelow = underTest.debugPaintCommands[9];
+    final PaintDrawRect outsideBelow = underTest.debugPaintCommands[9] as PaintDrawRect;
     expect(outsideBelow.isClippedOut, isFalse);
 
     // Give it the entire screen so everything paints.

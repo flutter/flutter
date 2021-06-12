@@ -23,7 +23,7 @@ class EnginePictureRecorder implements ui.PictureRecorder {
   bool get isRecording => _isRecording;
 
   @override
-  ui.Picture endRecording() {
+  EnginePicture endRecording() {
     if (!_isRecording) {
       // The mobile version returns an empty picture in this case. To match the
       // behavior we produce a blank picture too.

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -23,7 +22,7 @@ void testMain() async {
   const double screenWidth = 600.0;
   const double screenHeight = 800.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
-  final Paint testPaint = Paint()..color = const Color(0xFFFF0000);
+  final SurfacePaint testPaint = SurfacePaint()..color = const Color(0xFFFF0000);
 
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
@@ -37,7 +36,7 @@ void testMain() async {
     engineCanvas
       ..save()
       ..drawRect(
-        rc.pictureBounds,
+        rc.pictureBounds!,
         SurfacePaintData()
           ..color = const Color.fromRGBO(0, 0, 255, 1.0)
           ..style = PaintingStyle.stroke
@@ -51,7 +50,7 @@ void testMain() async {
     final html.Element sceneElement = html.Element.tag('flt-scene');
     try {
       sceneElement.append(engineCanvas.rootElement);
-      html.document.body.append(sceneElement);
+      html.document.body!.append(sceneElement);
       await matchGoldenFile('paint_bounds_for_$fileName.png', region: region,
         write: write);
     } finally {
@@ -219,7 +218,7 @@ void testMain() async {
 
   test('drawColor should cover full size', () async {
     final RecordingCanvas rc = RecordingCanvas(screenRect);
-    final Paint testPaint = Paint()..color = const Color(0xFF80FF00);
+    final SurfacePaint testPaint = SurfacePaint()..color = const Color(0xFF80FF00);
     rc.drawRect(const Rect.fromLTRB(10, 20, 30, 40), testPaint);
     rc.drawColor(const Color(0xFFFF0000), BlendMode.multiply);
     rc.drawRect(const Rect.fromLTRB(10, 60, 30, 80), testPaint);
@@ -287,7 +286,7 @@ void testMain() async {
 
   test('Computes paint bounds for draw image', () {
     final RecordingCanvas rc = RecordingCanvas(screenRect);
-    rc.drawImage(TestImage(), const Offset(50, 100), Paint());
+    rc.drawImage(TestImage(), const Offset(50, 100), SurfacePaint());
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(50.0, 100.0, 70.0, 110.0));
   });
@@ -295,7 +294,7 @@ void testMain() async {
   test('Computes paint bounds for draw image rect', () {
     final RecordingCanvas rc = RecordingCanvas(screenRect);
     rc.drawImageRect(TestImage(), const Rect.fromLTRB(1, 1, 20, 10),
-        const Rect.fromLTRB(5, 6, 400, 500), Paint());
+        const Rect.fromLTRB(5, 6, 400, 500), SurfacePaint());
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(5.0, 6.0, 400.0, 500.0));
   });
@@ -414,7 +413,7 @@ void testMain() async {
       ..translate(0, 100)
       ..scale(1, -1)
       ..clipRect(const Rect.fromLTRB(0, 0, 100, 50), ClipOp.intersect)
-      ..drawRect(const Rect.fromLTRB(0, 0, 100, 100), Paint());
+      ..drawRect(const Rect.fromLTRB(0, 0, 100, 100), SurfacePaint());
     rc.endRecording();
 
     expect(rc.pictureBounds, const Rect.fromLTRB(0.0, 50.0, 100.0, 100.0));
@@ -428,7 +427,7 @@ void testMain() async {
       ..translate(50, 50)
       ..rotate(math.pi / 4.0)
       ..clipRect(const Rect.fromLTWH(-20, -20, 40, 40), ClipOp.intersect)
-      ..drawRect(const Rect.fromLTWH(-80, -80, 160, 160), Paint());
+      ..drawRect(const Rect.fromLTWH(-80, -80, 160, 160), SurfacePaint());
     rc.endRecording();
 
     expect(
@@ -447,7 +446,7 @@ void testMain() async {
     rc
       ..translate(50, 50)
       ..rotate(math.pi / 4.0)
-      ..drawLine(const Offset(0, 0), const Offset(20, 20), Paint());
+      ..drawLine(const Offset(0, 0), const Offset(20, 20), SurfacePaint());
     rc.endRecording();
 
     expect(
@@ -467,7 +466,7 @@ void testMain() async {
     path.lineTo(100, 97);
     rc.drawPath(
         path,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color(0xFFFF0000));
@@ -476,7 +475,7 @@ void testMain() async {
     path.lineTo(97, 100);
     rc.drawPath(
         path,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color(0xFF00FF00));
@@ -498,7 +497,7 @@ void testMain() async {
         RRect.fromLTRBR(0.5, 100.5, 80.7, 150.7, const Radius.circular(10)));
     rc.drawPath(
         path,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color(0xFF404000));
@@ -522,7 +521,7 @@ void testMain() async {
     path.close();
     rc.drawPath(
         path,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = const Color(0xFF404000));
@@ -624,7 +623,7 @@ void testMain() async {
         final SurfacePaint zeroSpreadPaint = SurfacePaint();
         painter(canvas, zeroSpreadPaint);
         sb.addPicture(Offset.zero, recorder.endRecording());
-        sb.addPicture(Offset.zero, drawBounds(canvas.pictureBounds));
+        sb.addPicture(Offset.zero, drawBounds(canvas.pictureBounds!));
         sb.pop();
       }
 
@@ -638,7 +637,7 @@ void testMain() async {
           ..strokeWidth = 5.0;
         painter(canvas, thickStrokePaint);
         sb.addPicture(Offset.zero, recorder.endRecording());
-        sb.addPicture(Offset.zero, drawBounds(canvas.pictureBounds));
+        sb.addPicture(Offset.zero, drawBounds(canvas.pictureBounds!));
         sb.pop();
       }
 
@@ -651,7 +650,7 @@ void testMain() async {
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
         painter(canvas, maskFilterBlurPaint);
         sb.addPicture(Offset.zero, recorder.endRecording());
-        sb.addPicture(Offset.zero, drawBounds(canvas.pictureBounds));
+        sb.addPicture(Offset.zero, drawBounds(canvas.pictureBounds!));
         sb.pop();
       }
 
@@ -666,15 +665,15 @@ void testMain() async {
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
         painter(canvas, thickStrokeAndBlurPaint);
         sb.addPicture(Offset.zero, recorder.endRecording());
-        sb.addPicture(Offset.zero, drawBounds(canvas.pictureBounds));
+        sb.addPicture(Offset.zero, drawBounds(canvas.pictureBounds!));
         sb.pop();
       }
 
       sb.pop();
     }
 
-    final html.Element sceneElement = sb.build().webOnlyRootElement;
-    html.document.body.append(sceneElement);
+    final html.Element sceneElement = sb.build().webOnlyRootElement!;
+    html.document.body!.append(sceneElement);
     try {
       await matchGoldenFile(
         'paint_spread_bounds.png',

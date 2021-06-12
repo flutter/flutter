@@ -138,7 +138,7 @@ final ui.TextStyle _defaultTextStyle = ui.TextStyle(
   fontSize: 14,
 );
 
-ui.Paragraph paragraph(
+EngineParagraph paragraph(
   String text, {
   ui.ParagraphStyle? paragraphStyle,
   ui.TextStyle? textStyle,
@@ -149,7 +149,9 @@ ui.Paragraph paragraph(
   builder.pushStyle(textStyle ?? _defaultTextStyle);
   builder.addText(text);
   builder.pop();
-  return builder.build()..layout(ui.ParagraphConstraints(width: maxWidth));
+  final EngineParagraph paragraph = builder.build() as EngineParagraph;
+  paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
+  return paragraph;
 }
 
 /// Configures the test to use bundled Roboto and Ahem fonts to avoid golden
