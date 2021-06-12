@@ -903,7 +903,6 @@ void main() {
                steps: const <Step>[
                  Step(
                    title: Text('Regular title'),
-                   subtitle: Text('Text subtitle'),
                    content: Text('Text content'),
                  ),
                ],
@@ -913,9 +912,14 @@ void main() {
        ),
      );
 
-     final Stepper stepper = tester.widget(find.byType(Stepper));
+     final Material material = tester.firstWidget<Material>(
+       find.descendant(
+         of: find.byType(Stepper),
+         matching: find.byType(Material),
+       ),
+     );
 
-     expect(stepper.elevation, elevation);
+     expect(material.elevation, elevation);
    });
 
    testWidgets('Stepper with default elevation', (WidgetTester tester) async {
@@ -931,7 +935,6 @@ void main() {
                steps: const <Step>[
                  Step(
                    title: Text('Regular title'),
-                   subtitle: Text('Text subtitle'),
                    content: Text('Text content')
                  ),
                ],
@@ -941,8 +944,13 @@ void main() {
        ),
      );
 
-     final Stepper stepper = tester.widget(find.byType(Stepper));
+     final Material material = tester.firstWidget<Material>(
+       find.descendant(
+         of: find.byType(Stepper),
+         matching: find.byType(Material),
+       ),
+     );
 
-     expect(stepper.elevation, 2.0);
+     expect(material.elevation, 2.0);
    });
 }
