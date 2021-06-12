@@ -328,7 +328,7 @@ class IconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
-    final IconThemeData iconThemeData = IconTheme.of(context);
+    final IconThemeData iconTheme = IconTheme.of(context);
     Color? currentColor;
     if (onPressed != null)
       currentColor = color;
@@ -343,8 +343,7 @@ class IconButton extends StatelessWidget {
     );
     final BoxConstraints adjustedConstraints = effectiveVisualDensity.effectiveConstraints(unadjustedConstraints);
 
-    final IconThemeData iconTheme = iconThemeData.merge(IconThemeData(size: iconSize));
-    final double size = iconTheme.size ?? 24.0;
+    final double size = iconSize ?? iconTheme.size!;
 
     Widget result = ConstrainedBox(
       constraints: adjustedConstraints,
