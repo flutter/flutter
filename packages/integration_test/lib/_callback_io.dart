@@ -90,7 +90,7 @@ class IOCallbackManager implements CallbackManager {
     integrationTestChannel.setMethodCallHandler(_onMethodChannelCall);
     final List<int>? rawBytes = await integrationTestChannel.invokeMethod<List<int>>(
       'captureScreenshot',
-      null,
+      <String, dynamic>{'name': screenshot},
     );
     if (rawBytes == null) {
       throw StateError('Expected a list of bytes, but instead captureScreenshot returned null');

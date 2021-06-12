@@ -4,23 +4,40 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+@protocol FLTIntegrationTestScreenshotDelegate;
+
 @interface IntegrationTestIosTest : NSObject
 
-- (BOOL)testIntegrationTest:(NSString **)testResult;
+- (instancetype)initWithScreenshotDelegate:(nullable id<FLTIntegrationTestScreenshotDelegate>)delegate NS_DESIGNATED_INITIALIZER;
+
+- (BOOL)testIntegrationTest:(NSString *_Nullable *_Nullable)testResult;
 
 @end
 
 #define INTEGRATION_TEST_IOS_RUNNER(__test_class)                                           \
-  @interface __test_class : XCTestCase                                                      \
+  @interface __test_class : XCTestCase<FLTIntegrationTestScreenshotDelegate>                \
   @end                                                                                      \
                                                                                             \
   @implementation __test_class                                                              \
                                                                                             \
-  -(void)testIntegrationTest {                                                              \
+  - (void)testIntegrationTest {                                                             \
     NSString *testResult;                                                                   \
-    IntegrationTestIosTest *integrationTestIosTest = [[IntegrationTestIosTest alloc] init]; \
+    IntegrationTestIosTest *integrationTestIosTest = integrationTestIosTest = [[IntegrationTestIosTest alloc] initWithScreenshotDelegate:self]; \
     BOOL testPass = [integrationTestIosTest testIntegrationTest:&testResult];               \
     XCTAssertTrue(testPass, @"%@", testResult);                                             \
   }                                                                                         \
                                                                                             \
+  - (void)didTakeScreenshot:(UIImage *)screenshot attachmentName:(NSString *)name {         \
+    XCTAttachment *attachment = [XCTAttachment attachmentWithImage:screenshot];             \
+    attachment.lifetime = XCTAttachmentLifetimeKeepAlways;                                  \
+    if (name != nil) {                                                                      \
+      attachment.name = name;                                                               \
+    }                                                                                       \
+    [self addAttachment:attachment];                                                        \
+  }                                                                                         \
+                                                                                            \
   @end
+
+NS_ASSUME_NONNULL_END
