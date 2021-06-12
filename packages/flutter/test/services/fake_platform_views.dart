@@ -208,10 +208,11 @@ class FakeAndroidPlatformViewsController {
 
   Future<dynamic> _dispose(MethodCall call) {
     assert(call.arguments is Map);
-    final Map<String, dynamic> arguments = call.arguments as Map<String, dynamic>;
 
-    final int id = arguments['id'] as int;
-    final bool hybrid = arguments['hybrid'] as bool;
+    // ignore: avoid_dynamic_calls
+    final int id = call.arguments['id'] as int;
+    // ignore: avoid_dynamic_calls
+    final bool hybrid = call.arguments['hybrid'] as bool;
 
     if (hybrid && !_views[id]!.hybrid!) {
       throw ArgumentError('An $AndroidViewController using hybrid composition must pass `hybrid: true`');
