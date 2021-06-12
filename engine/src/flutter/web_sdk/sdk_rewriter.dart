@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
-
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -106,7 +104,7 @@ void main(List<String> arguments) {
   }
 }
 
-String rewriteFile(String source, {String filePath, bool isUi, bool isEngine}) {
+String rewriteFile(String source, {required String filePath, required bool isUi, required bool isEngine}) {
   final List<Replacer> replacementPatterns = <Replacer>[];
   replacementPatterns.addAll(sharedPatterns);
   if (isUi) {
