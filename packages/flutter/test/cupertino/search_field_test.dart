@@ -111,9 +111,7 @@ void main() {
       );
     },
   );
-  testWidgets(
-    'can change keyboard type',
-    (WidgetTester tester) async {
+  testWidgets('can change keyboard type', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
