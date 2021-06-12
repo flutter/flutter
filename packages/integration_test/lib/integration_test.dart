@@ -52,7 +52,7 @@ const bool _shouldReportResultsToNative = bool.fromEnvironment(
 ///  * [matchesGoldenFile], which asserts that the returned [Future<ByteData>]
 ///    matches the golden image file identified by [key], with an optional
 ///    [version] number.
-Future<ByteData> deviceScreenshot(Finder item) async {
+Future<Uint8List> deviceScreenshot(Finder item) async {
   final Iterable<Element> elements = item.evaluate();
   if (elements.isEmpty) {
     throw 'could not be rendered because no widget was found';
@@ -62,7 +62,7 @@ Future<ByteData> deviceScreenshot(Finder item) async {
   }
 
   final List<int> rawBytes = <int>[]; // TODO(egarciad)
-  return ByteData.sublistView(Uint8List.fromList(rawBytes))
+  return Uint8List.fromList(rawBytes);
 }
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results

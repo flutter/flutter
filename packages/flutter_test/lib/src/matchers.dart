@@ -299,7 +299,7 @@ Matcher isMethodCall(String name, { required dynamic arguments }) {
 Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int sampleSize = 20 })
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
-/// Asserts that a [Finder], [Future<ui.Image>], [ui.Image], or [Future<ByteData>]
+/// Asserts that a [Finder], [Future<ui.Image>], [ui.Image], or [Future<Uint8List>]
 /// matches the golden image file identified by [key], with an optional
 /// [version] number.
 ///
