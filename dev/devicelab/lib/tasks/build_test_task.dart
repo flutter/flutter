@@ -9,7 +9,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:flutter_devicelab/common.dart';
 
-import '../framework/adb.dart';
+import '../framework/devices.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 

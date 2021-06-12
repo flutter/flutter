@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -115,17 +115,17 @@ void main() {
     testWithoutContext('Continues on failed stamp file update', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final BufferLogger logger = BufferLogger.test();
-      final Cache mockCache = MockCache();
       final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
       final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+      final Cache cache = FakeSecondaryCache()
+        ..version = 'asdasd'
+        ..artifactDirectory = artifactDir
+        ..downloadDir = downloadDir
+        ..onSetStamp = (String name, String version) {
+          throw const FileSystemException('stamp write failed');
+        };
 
-      when(mockCache.getVersionFor(any)).thenReturn('asdasd');
-      when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
-      when(mockCache.getDownloadDir()).thenReturn(downloadDir);
-      when(mockCache.setStampFor(any, any)).thenAnswer((_) {
-        throw const FileSystemException('stamp write failed');
-      });
-      final FakeSimpleArtifact artifact = FakeSimpleArtifact(mockCache);
+      final FakeSimpleArtifact artifact = FakeSimpleArtifact(cache);
       await artifact.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
       expect(logger.errorText, contains('stamp write failed'));
@@ -134,14 +134,14 @@ void main() {
     testWithoutContext('Continues on missing version file', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final BufferLogger logger = BufferLogger.test();
-      final Cache mockCache = MockCache();
       final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
       final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+      final Cache cache = FakeSecondaryCache()
+        ..version = null // version is missing.
+        ..artifactDirectory = artifactDir
+        ..downloadDir = downloadDir;
 
-      when(mockCache.getVersionFor(any)).thenReturn(null); // version is missing.
-      when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
-      when(mockCache.getDownloadDir()).thenReturn(downloadDir);
-      final FakeSimpleArtifact artifact = FakeSimpleArtifact(mockCache);
+      final FakeSimpleArtifact artifact = FakeSimpleArtifact(cache);
       await artifact.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
       expect(logger.errorText, contains('No known version for the artifact name "fake"'));
@@ -317,13 +317,12 @@ void main() {
 
   testWithoutContext('EngineCachedArtifact makes binary dirs readable and executable by all', () async {
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MockCache cache = MockCache();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
     final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
-
-    when(cache.getArtifactDirectory(any)).thenReturn(artifactDir);
-    when(cache.getDownloadDir()).thenReturn(downloadDir);
+    final FakeSecondaryCache cache = FakeSecondaryCache()
+      ..artifactDirectory = artifactDir
+      ..downloadDir = downloadDir;
     artifactDir.childDirectory('bin_dir').createSync();
     artifactDir.childFile('unused_url_path').createSync();
 
@@ -347,13 +346,13 @@ void main() {
 
   testWithoutContext('EngineCachedArtifact removes unzipped FlutterMacOS.framework before replacing', () async {
     final OperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MockCache cache = MockCache();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
     final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+    final FakeSecondaryCache cache = FakeSecondaryCache()
+      ..artifactDirectory = artifactDir
+      ..downloadDir = downloadDir;
 
-    when(cache.getArtifactDirectory(any)).thenReturn(artifactDir);
-    when(cache.getDownloadDir()).thenReturn(downloadDir);
     final Directory binDir = artifactDir.childDirectory('bin_dir')..createSync();
     binDir.childFile('FlutterMacOS.framework.zip').createSync();
     final Directory unzippedFramework = binDir.childDirectory('FlutterMacOS.framework');
@@ -995,7 +994,40 @@ class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
   @override
   String stampName = 'ios-usb';
 }
-class MockCache extends Mock implements Cache {}
+
+class FakeSecondaryCache extends Fake implements Cache {
+  Directory downloadDir;
+  Directory artifactDirectory;
+  String version;
+  void Function(String artifactName, String version) onSetStamp;
+
+  @override
+  String get storageBaseUrl => 'https://storage.googleapis.com';
+
+  @override
+  Directory getDownloadDir() => artifactDirectory;
+
+  @override
+  Directory getArtifactDirectory(String name) => artifactDirectory;
+
+  @override
+  Directory getCacheDir(String name) {
+    return artifactDirectory.childDirectory(name);
+  }
+
+  @override
+  File getLicenseFile() {
+    return artifactDirectory.childFile('LICENSE');
+  }
+
+  @override
+  String getVersionFor(String artifactName) => version;
+
+  @override
+  void setStampFor(String artifactName, String version) {
+    onSetStamp(artifactName, version);
+  }
+}
 
 class FakeVersionedPackageResolver extends Fake implements VersionedPackageResolver {
   final List<List<String>> resolved = <List<String>>[];

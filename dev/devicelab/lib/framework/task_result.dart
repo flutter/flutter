@@ -9,8 +9,8 @@ import 'dart:io';
 
 /// A result of running a single task.
 class TaskResult {
-   TaskResult.buildOnly()
-       : succeeded = true,
+  TaskResult.buildOnly()
+      : succeeded = true,
         data = null,
         detailFiles = null,
         benchmarkScoreKeys = null,

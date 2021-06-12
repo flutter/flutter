@@ -10,7 +10,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter_devicelab/common.dart';
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
@@ -469,6 +469,18 @@ Future<int> flutter(String command, {
   final List<String> args = flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
     canFail: canFail, environment: environment);
+}
+
+Future<Process> startFlutter(String command, {
+  List<String> options = const <String>[],
+  Map<String, String> environment = const <String, String>{},
+}) {
+  final List<String> args = flutterCommandArgs(command, options);
+  return startProcess(
+    path.join(flutterDirectory.path, 'bin', 'flutter'),
+    args,
+    environment: environment,
+  );
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.

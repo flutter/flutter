@@ -39,15 +39,7 @@ void main() {
       final FakePlatform fakePlatform = FakePlatform(environment: <String, String>{}, operatingSystem: 'windows');
       final HostAgent agent = HostAgent(platform: fakePlatform, fileSystem: fs);
 
-      expect(agent.dumpDirectory.existsSync(), isTrue);
-    });
-
-    test('is the same between host agent instances', () async {
-      final FakePlatform fakePlatform = FakePlatform(environment: <String, String>{}, operatingSystem: 'windows');
-      final HostAgent agent1 = HostAgent(platform: fakePlatform, fileSystem: fs);
-      final HostAgent agent2 = HostAgent(platform: fakePlatform, fileSystem: fs);
-
-      expect(agent1.dumpDirectory.path, agent2.dumpDirectory.path);
+      expect(agent.dumpDirectory, null);
     });
   });
 }

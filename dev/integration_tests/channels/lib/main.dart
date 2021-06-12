@@ -19,7 +19,7 @@ void main() {
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({Key key}) : super(key: key);
+  const TestApp({Key? key}) : super(key: key);
 
   @override
   State<TestApp> createState() => _TestAppState();
@@ -155,7 +155,7 @@ class _TestAppState extends State<TestApp> {
     () => basicJsonMessageToUnknownChannel(),
     () => basicStandardMessageToUnknownChannel(),
   ];
-  Future<TestStepResult> _result;
+  Future<TestStepResult>? _result;
   int _step = 0;
 
   void _executeNextStep() {

@@ -6,7 +6,7 @@
 
 import 'dart:io' show Process, Directory;
 
-import 'package:flutter_devicelab/framework/adb.dart' as adb;
+import 'package:flutter_devicelab/framework/devices.dart' as adb;
 import 'package:flutter_devicelab/framework/framework.dart' show TaskFunction;
 import 'package:flutter_devicelab/framework/task_result.dart' show TaskResult;
 import 'package:flutter_devicelab/framework/utils.dart' as utils;
@@ -43,9 +43,9 @@ TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
         '-d',
         device.deviceId,
       ];
-      return microbenchmarks.startFlutter(
+      return utils.startFlutter(
+        'run',
         options: options,
-        canFail: false,
       );
     });
 

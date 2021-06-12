@@ -415,7 +415,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
-    this.isExperimentalInvalidationStrategyEnabled = false,
     this.isWindowsUwpEnabled = false,
   });
 
@@ -447,9 +446,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool areCustomDevicesEnabled;
 
   @override
-  final bool isExperimentalInvalidationStrategyEnabled;
-
-  @override
   final bool isWindowsUwpEnabled;
 
   @override
@@ -473,8 +469,6 @@ class TestFeatureFlags implements FeatureFlags {
         return isFuchsiaEnabled;
       case flutterCustomDevicesFeature:
         return areCustomDevicesEnabled;
-      case experimentalInvalidationStrategy:
-        return isExperimentalInvalidationStrategyEnabled;
       case windowsUwpEmbedding:
         return isWindowsUwpEnabled;
     }
@@ -534,4 +528,57 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   Future<int> findFreePort({bool ipv6 = false}) async => 12345;
+}
+
+class FakeStopwatch implements Stopwatch {
+  @override
+  bool get isRunning => _isRunning;
+  bool _isRunning = false;
+
+  @override
+  void start() => _isRunning = true;
+
+  @override
+  void stop() => _isRunning = false;
+
+  @override
+  Duration elapsed = Duration.zero;
+
+  @override
+  int get elapsedMicroseconds => elapsed.inMicroseconds;
+
+  @override
+  int get elapsedMilliseconds => elapsed.inMilliseconds;
+
+  @override
+  int get elapsedTicks => elapsed.inMilliseconds;
+
+  @override
+  int get frequency => 1000;
+
+  @override
+  void reset() {
+    _isRunning = false;
+    elapsed = Duration.zero;
+  }
+
+  @override
+  String toString() => '$runtimeType $elapsed $isRunning';
+}
+
+class FakeStopwatchFactory implements StopwatchFactory {
+  FakeStopwatchFactory({
+    Stopwatch? stopwatch,
+    Map<String, Stopwatch>? stopwatches
+  }) : stopwatches = <String, Stopwatch>{
+         if (stopwatches != null) ...stopwatches,
+         if (stopwatch != null) '': stopwatch,
+       };
+
+  Map<String, Stopwatch> stopwatches;
+
+  @override
+  Stopwatch createStopwatch([String name = '']) {
+    return stopwatches[name] ?? FakeStopwatch();
+  }
 }

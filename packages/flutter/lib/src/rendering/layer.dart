@@ -2282,8 +2282,10 @@ class FollowerLayer extends ContainerLayer {
   /// Returns null if [a] [b] do not share a common ancestor, in which case the
   /// results in [ancestorsA] and [ancestorsB] are undefined.
   static Layer? _pathsToCommonAncestor(
-    Layer? a, Layer? b,
-    List<ContainerLayer?> ancestorsA, List<ContainerLayer?> ancestorsB,
+    Layer? a,
+    Layer? b,
+    List<ContainerLayer?> ancestorsA,
+    List<ContainerLayer?> ancestorsB,
   ) {
     // No common ancestor found.
     if (a == null || b == null)

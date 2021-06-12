@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import '../framework/adb.dart';
+import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/host_agent.dart';
 import '../framework/task_result.dart';
