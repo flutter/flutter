@@ -788,7 +788,7 @@ class MediaQuery extends InheritedWidget {
     );
   }
 
-  /// Creates a [MediaQueryFromWindow] which is builds and updates a
+  /// Creates a [_MediaQueryFromWindow] which is builds and updates a
   /// [MediaQuery] using the latest [WidgetsBinding.window] values.
   ///
   /// The [MediaQuery] is wrapped in a separate widget to ensure that only it
@@ -803,12 +803,12 @@ class MediaQuery extends InheritedWidget {
   ///
   /// See also:
   ///
-  ///  * [MediaQueryFromWindow], the underlying widget.
-  static MediaQueryFromWindow fromWindow({
+  ///  * [_MediaQueryFromWindow], the underlying widget.
+  static Widget fromWindow({
     Key? key,
     required Widget child,
   }) {
-    return MediaQueryFromWindow(
+    return _MediaQueryFromWindow(
       key: key,
       child: child,
     );
@@ -965,21 +965,24 @@ enum NavigationMode {
 ///
 ///  * [MediaQuery], which establishes a subtree in which media queries resolve
 ///    to a [MediaQueryData].
-class MediaQueryFromWindow extends StatefulWidget {
-  /// Creates a [MediaQueryFromWindow] that provides a [MediaQuery] to its
+class _MediaQueryFromWindow extends StatefulWidget {
+  /// Creates a [_MediaQueryFromWindow] that provides a [MediaQuery] to its
   /// descendants using the `window` to keep [MediaQueryData] up to date.
   ///
   /// The [child] must not be null.
-  const MediaQueryFromWindow({Key? key, required this.child}) : super(key: key);
+  const _MediaQueryFromWindow({
+    Key? key,
+    required this.child,
+  }) : super(key: key);
 
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
-  State<MediaQueryFromWindow> createState() => _MediaQueryFromWindowState();
+  State<_MediaQueryFromWindow> createState() => _MediaQueryFromWindowState();
 }
 
-class _MediaQueryFromWindowState extends State<MediaQueryFromWindow> with WidgetsBindingObserver {
+class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();

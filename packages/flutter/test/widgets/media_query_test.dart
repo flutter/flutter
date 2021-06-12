@@ -628,20 +628,20 @@ void main() {
     expect(insideBoldTextOverride, true);
   });
 
-  testWidgets('MediaQuery.fromWindow creates a MediaQueryFromWindow', (WidgetTester tester) async {
-    bool hasMediaQueryFromWindowAsParentOutside = false;
-    bool hasMediaQueryFromWindowAsParentInside = false;
+  testWidgets('MediaQuery.fromWindow creates a MediaQuery', (WidgetTester tester) async {
+    bool hasMediaQueryAsParentOutside = false;
+    bool hasMediaQueryAsParentInside = false;
 
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          hasMediaQueryFromWindowAsParentOutside =
-              context.findAncestorWidgetOfExactType<MediaQueryFromWindow>() != null;
+          hasMediaQueryAsParentOutside =
+              context.findAncestorWidgetOfExactType<MediaQuery>() != null;
           return MediaQuery.fromWindow(
             child: Builder(
               builder: (BuildContext context) {
-                hasMediaQueryFromWindowAsParentInside =
-                    context.findAncestorWidgetOfExactType<MediaQueryFromWindow>() != null;
+                hasMediaQueryAsParentInside =
+                    context.findAncestorWidgetOfExactType<MediaQuery>() != null;
                 return const SizedBox();
               },
             ),
@@ -650,8 +650,8 @@ void main() {
       ),
     );
 
-    expect(hasMediaQueryFromWindowAsParentOutside, false);
-    expect(hasMediaQueryFromWindowAsParentInside, true);
+    expect(hasMediaQueryAsParentOutside, false);
+    expect(hasMediaQueryAsParentInside, true);
   });
 
   testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester)
