@@ -34,7 +34,7 @@ const bool _shouldReportResultsToNative = bool.fromEnvironment(
 );
 
 /// Gets a PNG image buffer from the device that contains the pixels of the element's
-/// bounding rect found matched in the finder.
+/// bounding rect found in the finder.
 ///
 // {@tool snippet}
 /// Sample invocations of [deviceScreenshot].
