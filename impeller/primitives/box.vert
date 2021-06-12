@@ -4,6 +4,10 @@
 
 uniform UniformBuffer {
   mat4 mvp;
+  mat4 mvp2;
+  mat4 mvp3;
+  mat4 mvp4;
+  mat4 mvp5;
 } uniforms;
 
 in vec3 vertexPosition;
