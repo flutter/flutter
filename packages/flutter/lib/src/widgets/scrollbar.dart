@@ -1345,12 +1345,12 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
     gestures[_ThumbPressGestureRecognizer] =
       GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(
-          () => _ThumbPressGestureRecognizer(
+        () => _ThumbPressGestureRecognizer(
           debugOwner: this,
           customPaintKey: _scrollbarPainterKey,
           pressDuration: widget.pressDuration,
         ),
-          (_ThumbPressGestureRecognizer instance) {
+        (_ThumbPressGestureRecognizer instance) {
           instance.onLongPress = handleThumbPress;
           instance.onLongPressStart = (LongPressStartDetails details) => handleThumbPressStart(details.localPosition);
           instance.onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) => handleThumbPressUpdate(details.localPosition);
@@ -1360,11 +1360,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
     gestures[_TrackTapGestureRecognizer] =
       GestureRecognizerFactoryWithHandlers<_TrackTapGestureRecognizer>(
-          () => _TrackTapGestureRecognizer(
+        () => _TrackTapGestureRecognizer(
           debugOwner: this,
           customPaintKey: _scrollbarPainterKey,
         ),
-          (_TrackTapGestureRecognizer instance) {
+        (_TrackTapGestureRecognizer instance) {
           instance.onTapDown = _handleTrackTapDown;
         },
       );
