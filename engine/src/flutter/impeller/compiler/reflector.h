@@ -64,6 +64,16 @@ class Reflector {
   std::optional<nlohmann::json::object_t> ReflectType(
       const spirv_cross::TypeID& type_id) const;
 
+  std::optional<nlohmann::json::object_t> ReflectStructDefinition(
+      const spirv_cross::TypeID& type_id) const;
+
+  std::optional<std::string> GetMemberNameAtIndexIfExists(
+      const spirv_cross::SPIRType& parent_type,
+      size_t index) const;
+
+  std::string GetMemberNameAtIndex(const spirv_cross::SPIRType& parent_type,
+                                   size_t index) const;
+
   FML_DISALLOW_COPY_AND_ASSIGN(Reflector);
 };
 

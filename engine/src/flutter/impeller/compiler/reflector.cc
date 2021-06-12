@@ -62,40 +62,6 @@ static std::string BaseTypeToString(SPIRType::BaseType type) {
   }
 }
 
-static std::optional<std::string> GetMemberNameAtIndexIfExists(
-    const ParsedIR& ir,
-    const CompilerMSL& compiler,
-    const SPIRType& type,
-    size_t index) {
-  if (type.type_alias != 0) {
-    return GetMemberNameAtIndexIfExists(
-        ir, compiler, compiler.get_type(type.type_alias), index);
-  }
-
-  if (auto found = ir.meta.find(type.self); found != ir.meta.end()) {
-    const auto& members = found->second.members;
-    if (index < members.size() && !members[index].alias.empty()) {
-      return members[index].alias;
-    }
-  }
-  return std::nullopt;
-}
-
-std::string GetMemberNameAtIndex(const ParsedIR& ir,
-                                 const CompilerMSL& compiler,
-                                 const SPIRType& type,
-                                 size_t index) {
-  if (auto name = GetMemberNameAtIndexIfExists(ir, compiler, type, index);
-      name.has_value()) {
-    return name.value();
-  }
-
-  static std::atomic_size_t sUnnamedMembersID;
-  std::stringstream stream;
-  stream << "unnamed_" << sUnnamedMembersID++;
-  return stream.str();
-}
-
 static std::string ExecutionModelToString(spv::ExecutionModel model) {
   switch (model) {
     case spv::ExecutionModel::ExecutionModelVertex:
@@ -218,6 +184,14 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     return std::nullopt;
   }
 
+  auto& struct_definitions = root["struct_definitions"] =
+      nlohmann::json::array_t{};
+  ir_->for_each_typed_id<SPIRType>([&](uint32_t, const SPIRType& type) {
+    if (auto struc = ReflectStructDefinition(type.self); struc.has_value()) {
+      struct_definitions.emplace_back(std::move(struc.value()));
+    }
+  });
+
   return root;
 }
 
@@ -298,6 +272,53 @@ std::optional<nlohmann::json::array_t> Reflector::ReflectResources(
     }
   }
   return result;
+}
+
+std::optional<nlohmann::json::object_t> Reflector::ReflectStructDefinition(
+    const TypeID& type_id) const {
+  const auto& type = compiler_->get_type(type_id);
+  if (type.basetype != SPIRType::BaseType::Struct) {
+    return std::nullopt;
+  }
+
+  nlohmann::json::object_t struc;
+  struc["name"] = compiler_->get_name(type_id);
+  struc["members"] = nlohmann::json::array_t{};
+  for (size_t i = 0; i < type.member_types.size(); i++) {
+    auto& member = struc["members"].emplace_back(nlohmann::json::object_t{});
+    member["name"] = GetMemberNameAtIndex(type, i);
+  }
+  return struc;
+}
+
+std::optional<std::string> Reflector::GetMemberNameAtIndexIfExists(
+    const spirv_cross::SPIRType& parent_type,
+    size_t index) const {
+  if (parent_type.type_alias != 0) {
+    return GetMemberNameAtIndexIfExists(
+        compiler_->get_type(parent_type.type_alias), index);
+  }
+
+  if (auto found = ir_->meta.find(parent_type.self); found != ir_->meta.end()) {
+    const auto& members = found->second.members;
+    if (index < members.size() && !members[index].alias.empty()) {
+      return members[index].alias;
+    }
+  }
+  return std::nullopt;
+}
+
+std::string Reflector::GetMemberNameAtIndex(
+    const spirv_cross::SPIRType& parent_type,
+    size_t index) const {
+  if (auto name = GetMemberNameAtIndexIfExists(parent_type, index);
+      name.has_value()) {
+    return name.value();
+  }
+  static std::atomic_size_t sUnnamedMembersID;
+  std::stringstream stream;
+  stream << "unnamed_" << sUnnamedMembersID++;
+  return stream.str();
 }
 
 }  // namespace compiler
