@@ -694,18 +694,18 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
         if (bundleIdentifier == fromPlist) {
           return true;
         }
-        
+
         // The key WKCompanionAppBundleIdentifier might contain an xcode variable
         // that needs to be substituted before comparing it with bundle id
         if (fromPlist != null && fromPlist.contains(r'$')) {
           final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(buildInfo);
           if (allBuildSettings != null) {
-            final String substituedVariable = substituteXcodeVariables(fromPlist, allBuildSettings); 
+            final String substituedVariable = substituteXcodeVariables(fromPlist, allBuildSettings);
             if (substituedVariable == bundleIdentifier) {
               return true;
             }
           }
-        } 
+        }
       }
     }
     return false;
