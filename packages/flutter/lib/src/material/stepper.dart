@@ -545,7 +545,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildHeaderText(int index) {
     return Column(
-      crossAxisAlignment: widget.type == StepperType.horizontal && widget.steps[index].isStepperTypeHorizontalBottom == true ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      crossAxisAlignment: widget.type == StepperType.horizontal && widget.steps[index].isStepperTypeHorizontalBottom ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         AnimatedDefaultTextStyle(
@@ -680,7 +680,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         Container(
           child: _buildHeaderText(i),
         ),
-        SizedBox(height: 12,),
+        SizedBox(
+          height: 12,
+        ),
       ],
     );
   }
@@ -693,7 +695,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             widget.onStepTapped?.call(i);
           } : null,
           canRequestFocus: widget.steps[i].state != StepState.disabled,
-          child: widget.type == StepperType.horizontal && widget.steps[i].isStepperTypeHorizontalBottom == true ? _buildHorizontalBottom(i) : Row(
+          child: widget.type == StepperType.horizontal && widget.steps[i].isStepperTypeHorizontalBottom ? _buildHorizontalBottom(i) : Row(
             children: <Widget>[
               SizedBox(
                 height: 72.0,
@@ -717,9 +719,16 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                   height: 1.0,
                   color: Colors.grey.shade400,
                 ),
-                widget.type == StepperType.horizontal
-                    && widget.steps[i].isStepperTypeHorizontalBottom == true
-                    && widget.steps[i].isStepperTypeHorizontalBottomLineFollowIconMidY == true? const SizedBox(height: 44) : const SizedBox(height: 0),
+                if (widget.type == StepperType.horizontal
+                    && widget.steps[i].isStepperTypeHorizontalBottom
+                    && widget.steps[i].isStepperTypeHorizontalBottomLineFollowIconMidY)
+                  SizedBox(
+                      height: 44
+                  )
+                else
+                  SizedBox(
+                      height: 0
+                  ),
               ],
             ),
           ),
