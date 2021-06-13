@@ -670,7 +670,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildHorizontalBottom(int i) {
     return Column(
-      children: [
+      children: <Widget>[
         SizedBox(
           height: 48.0,
           child: Center(
@@ -711,7 +711,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         if (!_isLast(i))
           Expanded(
             child: Column(
-              children: [
+              children: <Widget>[
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 8.0),
                   height: 1.0,
@@ -719,7 +719,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 ),
                 widget.type == StepperType.horizontal
                     && widget.steps[i].isStepperTypeHorizontalBottom == true
-                    && widget.steps[i].isStepperTypeHorizontalBottomLineFollowIconMidY  == true? SizedBox(height: 44) : SizedBox(height: 0),
+                    && widget.steps[i].isStepperTypeHorizontalBottomLineFollowIconMidY == true? const SizedBox(height: 44) : const SizedBox(height: 0),
               ],
             ),
           ),
