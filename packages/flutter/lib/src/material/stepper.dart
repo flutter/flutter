@@ -680,9 +680,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         Container(
           child: _buildHeaderText(i),
         ),
-        SizedBox(
-          height: 12,
-        ),
+        const SizedBox(height: 12,),
       ],
     );
   }
@@ -722,13 +720,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 if (widget.type == StepperType.horizontal
                     && widget.steps[i].isStepperTypeHorizontalBottom
                     && widget.steps[i].isStepperTypeHorizontalBottomLineFollowIconMidY)
-                  SizedBox(
-                      height: 44
-                  )
+                  const SizedBox(height: 44)
                 else
-                  SizedBox(
-                      height: 0
-                  ),
+                  const SizedBox(height: 0),
               ],
             ),
           ),
