@@ -87,6 +87,8 @@ class Step {
     required this.content,
     this.state = StepState.indexed,
     this.isActive = false,
+    this.isStepperTypeHorizontalBottom = false,
+    this.isStepperTypeHorizontalBottomLineFollowIconMidY = false,
   }) : assert(title != null),
        assert(content != null),
        assert(state != null);
@@ -111,6 +113,11 @@ class Step {
 
   /// Whether or not the step is active. The flag only influences styling.
   final bool isActive;
+
+  /// title and subtitle below the StepIcon
+  final bool isStepperTypeHorizontalBottom;
+
+  final bool isStepperTypeHorizontalBottomLineFollowIconMidY;
 }
 
 /// A material stepper widget that displays progress through a sequence of
@@ -537,7 +544,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildHeaderText(int index) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: widget.type == StepperType.horizontal && widget.steps[index].isStepperTypeHorizontalBottom == true ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         AnimatedDefaultTextStyle(
@@ -660,6 +667,23 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildHorizontalBottom(int i) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 48.0,
+          child: Center(
+            child: _buildIcon(i),
+          ),
+        ),
+        Container(
+          child: _buildHeaderText(i),
+        ),
+        SizedBox(height: 12,),
+      ],
+    );
+  }
+
   Widget _buildHorizontal() {
     final List<Widget> children = <Widget>[
       for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
@@ -668,7 +692,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             widget.onStepTapped?.call(i);
           } : null,
           canRequestFocus: widget.steps[i].state != StepState.disabled,
-          child: Row(
+          child: widget.type == StepperType.horizontal && widget.steps[i].isStepperTypeHorizontalBottom == true ? _buildHorizontalBottom(i) : Row(
             children: <Widget>[
               SizedBox(
                 height: 72.0,
@@ -685,10 +709,17 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         ),
         if (!_isLast(i))
           Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              height: 1.0,
-              color: Colors.grey.shade400,
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                  height: 1.0,
+                  color: Colors.grey.shade400,
+                ),
+                widget.type == StepperType.horizontal
+                    && widget.steps[i].isStepperTypeHorizontalBottom == true
+                    && widget.steps[i].isStepperTypeHorizontalBottomLineFollowIconMidY  == true? SizedBox(height: 44) : SizedBox(height: 0),
+              ],
             ),
           ),
       ],
