@@ -513,7 +513,7 @@ void main() {
           expect(devices, hasLength(3));
           expect(devices[0].id, '00008027-00192736010F802E');
           expect(devices[0].name, 'An iPhone (Space Gray)');
-          expect(await devices[0].sdkNameAndVersion, 'iOS 13.3');
+          expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
           expect(devices[0].cpuArchitecture, DarwinArch.arm64);
           expect(devices[1].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
           expect(devices[1].name, 'iPad 1');
