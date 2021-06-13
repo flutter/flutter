@@ -123,6 +123,9 @@ abstract class Device {
   /// Whether the device is asleep.
   Future<bool> isAsleep();
 
+  /// Whether the device has a low battery level.
+  Future<bool> hasLowBatteryLevel();
+
   /// Wake up the device if it is not awake.
   Future<void> wakeUp();
 
@@ -247,8 +250,18 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
       }
 
     } else {
-      // TODO(yjbanov): filter out and warn about those with low battery level
-      _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
+      final AndroidDevice device = allDevices[math.Random().nextInt(allDevices.length)];
+      final bool hasLowBatteryLevel = await device.hasLowBatteryLevel();
+      if (!hasLowBatteryLevel) {
+        _workingDevice = device;
+      }
+
+      for (final AndroidDevice device in allDevices) {
+        final String deviceId = device.deviceId;
+        if (await device.hasLowBatteryLevel()) {
+          print('Device with ID $deviceId has low battery level');
+        }
+      }
     }
 
     if (_workingDevice == null)
@@ -313,7 +326,12 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
       try {
         final AndroidDevice device = AndroidDevice(deviceId: deviceId);
         // Just a smoke test that we can read wakefulness state
-        // TODO(yjbanov): check battery level
+        if (await device.hasLowBatteryLevel()) {
+          throw DeviceException(
+              'Device with ID $deviceId has low battery level'
+          );
+        }
+
         await device._getWakefulness();
         results['android-device-$deviceId'] = HealthCheckResult.success();
       } on Exception catch (e, s) {
@@ -462,6 +480,12 @@ class AndroidDevice extends Device {
     return await _getWakefulness() == 'Asleep';
   }
 
+  /// Whether the device has a battery level smaller than or equal to 15 percent.
+  @override
+  Future<bool> hasLowBatteryLevel() async {
+    return await _getBatteryLevel() <= 15;
+  }
+
   /// Wake up the device if it is not awake using [togglePower].
   @override
   Future<void> wakeUp() async {
@@ -504,6 +528,12 @@ class AndroidDevice extends Device {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
     final String wakefulness = grep('mWakefulness=', from: powerInfo).single.split('=')[1].trim();
     return wakefulness;
+  }
+
+  Future<int> _getBatteryLevel() async {
+    final String batteryInfo = await shellEval('dumpsys', <String>['battery']);
+    final String batteryLevel = grep('level:', from: batteryInfo).single.split(':')[1].trim();
+    return int.parse(batteryLevel);
   }
 
   Future<bool> isArm64() async {
@@ -895,6 +925,9 @@ class IosDevice extends Device {
   Future<bool> isAsleep() async => false;
 
   @override
+  Future<bool> hasLowBatteryLevel() async => false;
+
+  @override
   Future<void> wakeUp() async {}
 
   @override
@@ -943,6 +976,9 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<bool> isAsleep() async => false;
+
+  @override
+  Future<bool> hasLowBatteryLevel() async => false;
 
   @override
   Future<void> wakeUp() async {}
@@ -1009,6 +1045,9 @@ class FakeDevice extends Device {
 
   @override
   Future<bool> isAsleep() async => false;
+
+  @override
+  Future<bool> hasLowBatteryLevel() async => false;
 
   @override
   Future<void> wakeUp() async {}

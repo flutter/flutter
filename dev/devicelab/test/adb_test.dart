@@ -50,6 +50,18 @@ void main() {
       });
     });
 
+    group('batteryLevel', () {
+      test('has enough battery', () async {
+        FakeDevice.pretendHasEnoughBattery();
+        expect(await device.hasLowBatteryLevel(), isFalse);
+      });
+
+      test('has not enough battery', () async {
+        FakeDevice.pretendHasNotEnoughBattery();
+        expect(await device.hasLowBatteryLevel(), isTrue);
+      });
+    });
+
     group('togglePower', () {
       test('sends power event', () async {
         await device.togglePower();
@@ -197,6 +209,18 @@ class FakeDevice extends AndroidDevice {
   static void pretendAsleep() {
     output = '''
       mWakefulness=Asleep
+    ''';
+  }
+
+  static void pretendHasNotEnoughBattery() {
+    output = '''
+      level: 15
+    ''';
+  }
+
+  static void pretendHasEnoughBattery() {
+    output = '''
+      level: 20
     ''';
   }
 
