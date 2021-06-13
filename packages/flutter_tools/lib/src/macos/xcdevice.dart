@@ -362,11 +362,8 @@ class XCDevice {
 
   static String _sdkVersion(Map<String, dynamic> deviceProperties) {
     if (deviceProperties.containsKey('operatingSystemVersion')) {
-      // Parse out the OS version, ignore the build number in parentheses.
-      // "13.3 (17C54)"
-      final RegExp operatingSystemRegex = RegExp(r'(.*) \(.*\)$');
       final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
-      return operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
+      return operatingSystemVersion.replaceAll(RegExp('[()]'), '');
     }
     return null;
   }
