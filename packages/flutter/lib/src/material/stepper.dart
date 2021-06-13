@@ -114,9 +114,10 @@ class Step {
   /// Whether or not the step is active. The flag only influences styling.
   final bool isActive;
 
-  /// title and subtitle below the StepIcon
+  /// title and subtitle below the StepIcon, default value false
   final bool isStepperTypeHorizontalBottom;
 
+  /// line flow StepIcon's midY, default value false
   final bool isStepperTypeHorizontalBottomLineFollowIconMidY;
 }
 
