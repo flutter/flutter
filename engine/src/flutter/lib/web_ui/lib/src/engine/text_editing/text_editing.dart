@@ -26,11 +26,9 @@ const String transparentTextEditingClass = 'transparentTextEditing';
 
 void _emptyCallback(dynamic _) {}
 
-/// The default root that hosts all DOM required for text editing when a11y is not enabled.
-///
-/// This is something similar to [html.Document]. Currently, it's a [html.ShadowRoot].
+/// The default [HostNode] that hosts all DOM required for text editing when a11y is not enabled.
 @visibleForTesting
-html.ShadowRoot get defaultTextEditingRoot => domRenderer.glassPaneShadow!;
+HostNode get defaultTextEditingRoot => domRenderer.glassPaneShadow!;
 
 /// These style attributes are constant throughout the life time of an input
 /// element.
