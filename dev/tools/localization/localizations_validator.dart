@@ -106,7 +106,7 @@ void validateLocalizations(
   final StringBuffer errorMessages = StringBuffer();
   bool explainMissingKeys = false;
   for (final LocaleInfo locale in localeToResources.keys) {
-    final Map<String, String>? resources = localeToResources[locale];
+    final Map<String, String> resources = localeToResources[locale]!;
 
     // Whether `key` corresponds to one of the plural variations of a key with
     // the same prefix and suffix "Other".
@@ -118,11 +118,11 @@ void validateLocalizations(
       if (pluralMatch == null)
         return false;
       final String? prefix = pluralMatch[1];
-      return resources?.containsKey('${prefix}Other') ?? false;
+      return resources.containsKey('${prefix}Other');
     }
 
     final Set<String> keys = Set<String>.from(
-      resources!.keys.where((String key) => !isPluralVariation(key))
+      resources.keys.where((String key) => !isPluralVariation(key))
     );
 
     // Make sure keys are valid (i.e. they also exist in the canonical
