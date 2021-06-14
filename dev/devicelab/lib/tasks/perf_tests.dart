@@ -1474,10 +1474,10 @@ class DevToolsMemoryTest {
       final Map<String, dynamic> data = json.decode(
         file('$project/$_kJsonFileName').readAsStringSync(),
       ) as Map<String, dynamic>;
-      final List<Map<String, dynamic>> samples = (data['samples'] as Map<String, dynamic>)['data'] as List<Map<String, dynamic>>;
+      final List<dynamic> samples = (data['samples'] as Map<String, dynamic>)['data'] as List<dynamic>;
       int maxRss = 0;
       int maxAdbTotal = 0;
-      for (final Map<String, dynamic> sample in samples) {
+      for (final Map<String, dynamic> sample in samples.cast<Map<String, dynamic>>()) {
         if (sample['rss'] != null) {
           maxRss = math.max(maxRss, sample['rss'] as int);
         }
