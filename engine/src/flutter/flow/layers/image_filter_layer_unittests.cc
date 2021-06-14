@@ -376,13 +376,14 @@ TEST_F(ImageFilterLayerDiffTest, ImageFilterLayer) {
   damage = DiffLayerTree(l3, l2);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(130, 130, 140, 140));
 
-  // path intersecting ImageFilterLayer, should trigger ImageFilterLayer repaint
+  // path intersecting ImageFilterLayer, shouldn't trigger entire
+  // ImageFilterLayer repaint
   MockLayerTree l4;
   l4.root()->Add(scale);
   auto path2 = SkPath().addRect(SkRect::MakeLTRB(130, 130, 141, 141));
   l4.root()->Add(std::make_shared<MockLayer>(path2));
   damage = DiffLayerTree(l4, l3);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(130, 130, 280, 280));
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(130, 130, 141, 141));
 }
 
 #endif
