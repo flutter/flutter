@@ -209,7 +209,9 @@ class FakeAndroidPlatformViewsController {
   Future<dynamic> _dispose(MethodCall call) {
     assert(call.arguments is Map);
 
+    // ignore: avoid_dynamic_calls
     final int id = call.arguments['id'] as int;
+    // ignore: avoid_dynamic_calls
     final bool hybrid = call.arguments['hybrid'] as bool;
 
     if (hybrid && !_views[id]!.hybrid!) {

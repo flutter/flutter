@@ -2549,14 +2549,14 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(
-     bool isEnabled,
-     bool isDiscrete, {
-     TextPainter? labelPainter,
-     double? textScaleFactor,
+    bool isEnabled,
+    bool isDiscrete, {
+    TextPainter? labelPainter,
+    double? textScaleFactor,
   }) {
-     assert(labelPainter != null);
-     assert(textScaleFactor != null && textScaleFactor >= 0);
-     return _pathPainter.getPreferredSize(labelPainter!, textScaleFactor!);
+    assert(labelPainter != null);
+    assert(textScaleFactor != null && textScaleFactor >= 0);
+    return _pathPainter.getPreferredSize(labelPainter!, textScaleFactor!);
   }
 
   @override

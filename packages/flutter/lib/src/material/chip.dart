@@ -1869,7 +1869,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
             ? () {
                 Feedback.forTap(context);
                 widget.onDeleted!();
-            }
+              }
             : null,
           child: IconTheme(
             data: theme.iconTheme.copyWith(

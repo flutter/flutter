@@ -968,16 +968,16 @@ void main() {
   });
 }
 
-/// This function will verify the format of the script
-/// and return the actual script.
-/// script will be in the following format:
+// This function will verify the format of the script and return the actual
+// script. The script will be in the following format:
 //   window.flutterDriver('[actual script]')
-String? _checkAndEncode(dynamic script) {
+String _checkAndEncode(dynamic script) {
   expect(script, isA<String>());
-  expect(script.startsWith(_kWebScriptPrefix), isTrue);
-  expect(script.endsWith(_kWebScriptSuffix), isTrue);
+  final String scriptString = script as String;
+  expect(scriptString.startsWith(_kWebScriptPrefix), isTrue);
+  expect(scriptString.endsWith(_kWebScriptSuffix), isTrue);
   // Strip prefix and suffix
-  return script.substring(_kWebScriptPrefix.length, script.length - 2) as String?;
+  return scriptString.substring(_kWebScriptPrefix.length, script.length - 2);
 }
 
 vms.Response? makeFakeResponse(
@@ -999,7 +999,7 @@ class FakeFlutterWebConnection extends Fake implements FlutterWebConnection {
   @override
   Future<dynamic> sendCommand(String script, Duration? duration) async {
     commandLog.add('$script $duration');
-    final Map<String, dynamic> decoded = jsonDecode(_checkAndEncode(script)!) as Map<String, dynamic>;
+    final Map<String, dynamic> decoded = jsonDecode(_checkAndEncode(script)) as Map<String, dynamic>;
     final dynamic response = responses[decoded['command']];
     assert(response != null, 'Missing ${decoded['command']} in responses.');
     return response;
