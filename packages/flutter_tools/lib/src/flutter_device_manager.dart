@@ -30,6 +30,7 @@ import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
+import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
 import 'tester/flutter_tester.dart';
@@ -100,6 +101,14 @@ class FlutterDeviceManager extends DeviceManager {
     MacOSDevices(
       processManager: processManager,
       macOSWorkflow: macOSWorkflow,
+      logger: logger,
+      platform: platform,
+      fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
+    ),
+    MacOSDesignedForIPadDevices(
+      processManager: processManager,
+      iosWorkflow: iosWorkflow,
       logger: logger,
       platform: platform,
       fileSystem: fileSystem,
