@@ -35,13 +35,6 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
         filter->filterBounds(screen_bounds.roundOut(), SkMatrix::I(),
                              SkImageFilter::kForward_MapDirection);
     context->AddLayerBounds(inverse.mapRect(SkRect::Make(filter_bounds)));
-
-    // Technically, there is no readback with ImageFilterLayer, but we can't
-    // clip the filter (because it may sample out of clip rect) so if any part
-    // of layer is repainted the whole layer needs to be.
-    // TODO(knopp) There is a room for optimization here - this doesn't need to
-    // be done if we know for sure that we're using raster cache
-    context->AddReadbackRegion(filter_bounds);
   }
 
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
