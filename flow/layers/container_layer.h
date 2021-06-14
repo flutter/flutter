@@ -33,13 +33,14 @@ class ContainerLayer : public Layer {
 
   const std::vector<std::shared_ptr<Layer>>& layers() const { return layers_; }
 
- protected:
 #ifdef FLUTTER_ENABLE_DIFF_CONTEXT
 
-  void DiffChildren(DiffContext* context, const ContainerLayer* old_layer);
+  virtual void DiffChildren(DiffContext* context,
+                            const ContainerLayer* old_layer);
 
 #endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
+ protected:
   void PrerollChildren(PrerollContext* context,
                        const SkMatrix& child_matrix,
                        SkRect* child_paint_bounds);
@@ -114,9 +115,12 @@ class MergedContainerLayer : public ContainerLayer {
  public:
   MergedContainerLayer();
 
-  void AssignOldLayer(Layer* old_layer) override;
-
   void Add(std::shared_ptr<Layer> layer) override;
+
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+  void DiffChildren(DiffContext* context,
+                    const ContainerLayer* old_layer) override;
+#endif
 
  protected:
   /**
