@@ -439,6 +439,13 @@ class RenderImage extends RenderBox {
   }
 
   @override
+  void dispose() {
+    _image?.dispose();
+    _image = null;
+    super.dispose();
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ui.Image>('image', image));

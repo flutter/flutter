@@ -10,8 +10,8 @@ import 'package:conductor/roll_dev.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
-import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import './common.dart';
+import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 
 void main() {
   group('rollDev()', () {

@@ -2036,7 +2036,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   Color _getDefaultBorderColor(ThemeData themeData) {
     if (isFocused) {
-        return themeData.colorScheme.primary;
+      return themeData.colorScheme.primary;
     }
     if (decoration!.filled!) {
       return themeData.hintColor;

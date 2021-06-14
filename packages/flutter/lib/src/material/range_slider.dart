@@ -1513,12 +1513,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   // Create the semantics configuration for a single value.
   SemanticsConfiguration _createSemanticsConfiguration(
-      double value,
-      double increasedValue,
-      double decreasedValue,
-      String? label,
-      VoidCallback increaseAction,
-      VoidCallback decreaseAction,
+    double value,
+    double increasedValue,
+    double decreasedValue,
+    String? label,
+    VoidCallback increaseAction,
+    VoidCallback decreaseAction,
   ) {
     final SemanticsConfiguration config = SemanticsConfiguration();
     config.isEnabled = isEnabled;
@@ -1544,9 +1544,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   @override
   void assembleSemanticsNode(
-      SemanticsNode node,
-      SemanticsConfiguration config,
-      Iterable<SemanticsNode> children,
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
   ) {
     assert(children.isEmpty);
 
@@ -1609,7 +1609,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   void _increaseStartAction() {
     if (isEnabled) {
-        onChanged!(RangeValues(_increasedStartValue, values.end));
+      onChanged!(RangeValues(_increasedStartValue, values.end));
     }
   }
 

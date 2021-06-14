@@ -1171,6 +1171,7 @@ targets:
 
   - name: mac_android_microbenchmarks
     builder: Mac_android microbenchmarks
+    bringup: true
     presubmit: false
     scheduler: luci
 

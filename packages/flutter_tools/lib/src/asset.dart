@@ -413,7 +413,7 @@ class ManifestAssetBundle implements AssetBundle {
       entries[asset.entryUri.path] ??= DevFSFileContent(assetFile);
     }
 
-    // Update wildcard directories we we can detect changes in them.
+    // Update wildcard directories we can detect changes in them.
     for (final Uri uri in wildcardDirectories) {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }

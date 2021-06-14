@@ -256,7 +256,7 @@ class WindowsUWPDevice extends Device {
     final List<String> dependencyUris = _getDependencyPaths(buildDirectory, 'x64')
         .map((String path) => Uri.file(path).toString())
         .toList();
-    return _uwptool.installApp(packageUri.toString(), dependencyUris);
+    return _uwptool.installApp(packageUri, dependencyUris);
   }
 
   @override

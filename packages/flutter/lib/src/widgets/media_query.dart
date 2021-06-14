@@ -274,7 +274,7 @@ class MediaQueryData {
   ///         right: systemGestureInsets.right,
   ///       ),
   ///       child: Slider(
-  ///         value: _currentValue.toDouble(),
+  ///         value: _currentValue,
   ///         onChanged: (double newValue) {
   ///           setState(() {
   ///             _currentValue = newValue;

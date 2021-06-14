@@ -287,7 +287,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The primary widget displayed in the app bar.
   ///
   /// Becomes the middle component of the [NavigationToolbar] built by this widget.
-  //.
+  ///
   /// Typically a [Text] widget that contains a description of the current
   /// contents of the app.
   /// {@endtemplate}
@@ -762,7 +762,9 @@ class _AppBarState extends State<AppBar> {
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification) {
       final bool oldScrolledUnder = _scrolledUnder;
-      _scrolledUnder = notification.depth == 0 && notification.metrics.extentBefore > 0;
+      _scrolledUnder = notification.depth == 0
+          && notification.metrics.extentBefore > 0
+          && notification.metrics.axis == Axis.vertical;
       if (_scrolledUnder != oldScrolledUnder) {
         setState(() {
           // React to a change in MaterialState.scrolledUnder

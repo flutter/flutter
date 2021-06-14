@@ -2455,6 +2455,11 @@ class InspectorSelection {
 
   Element? _currentElement;
   set currentElement(Element? element) {
+    if (element?.debugIsDefunct == true) {
+      _currentElement = null;
+      _current = null;
+      return;
+    }
     if (currentElement != element) {
       _currentElement = element;
       _current = element!.findRenderObject();
@@ -2846,8 +2851,8 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
-    required this.name,
-    required this.parameterLocations,
+    this.name,
+    this.parameterLocations,
   });
 
   /// File path of the location.
