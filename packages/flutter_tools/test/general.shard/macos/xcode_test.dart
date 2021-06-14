@@ -513,15 +513,15 @@ void main() {
           expect(devices, hasLength(3));
           expect(devices[0].id, '00008027-00192736010F802E');
           expect(devices[0].name, 'An iPhone (Space Gray)');
-          expect(await devices[0].sdkNameAndVersion, 'iOS 13.3');
+          expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
           expect(devices[0].cpuArchitecture, DarwinArch.arm64);
           expect(devices[1].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
           expect(devices[1].name, 'iPad 1');
-          expect(await devices[1].sdkNameAndVersion, 'iOS 10.1');
+          expect(await devices[1].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[1].cpuArchitecture, DarwinArch.armv7);
           expect(devices[2].id, 'f577a7903cc54959be2e34bc4f7f80b7009efcf4');
           expect(devices[2].name, 'iPad 2');
-          expect(await devices[2].sdkNameAndVersion, 'iOS 10.1');
+          expect(await devices[2].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[2].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         }, overrides: <Type, Generator>{
