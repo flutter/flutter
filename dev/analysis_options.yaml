@@ -11,4 +11,3 @@ linter:
   rules:
     # Disable temporarily to unblock an SDK roll (https://github.com/flutter/flutter/issues/84577)
     directives_ordering: false
-
