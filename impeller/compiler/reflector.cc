@@ -281,13 +281,26 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectStructDefinition(
     return std::nullopt;
   }
 
+  const auto struct_name = compiler_->get_name(type_id);
+  if (struct_name.find("_RESERVED_IDENTIFIER_") != std::string::npos) {
+    return std::nullopt;
+  }
+
   nlohmann::json::object_t struc;
-  struc["name"] = compiler_->get_name(type_id);
+  struc["name"] = struct_name;
   struc["members"] = nlohmann::json::array_t{};
+  size_t total_size = 0u;
   for (size_t i = 0; i < type.member_types.size(); i++) {
+    const auto& member_type = compiler_->get_type(type.member_types[i]);
+    const auto byte_length =
+        (member_type.width * member_type.vecsize * member_type.columns) / 8u;
     auto& member = struc["members"].emplace_back(nlohmann::json::object_t{});
     member["name"] = GetMemberNameAtIndex(type, i);
+    member["byte_length"] = byte_length;
+    member["offset"] = total_size;
+    total_size += byte_length;
   }
+  struc["byte_length"] = total_size;
   return struc;
 }
 
