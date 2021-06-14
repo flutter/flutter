@@ -87,7 +87,7 @@ void _testEngineSemanticsOwner() {
 
     // Synthesize a click on the placeholder.
     final html.Element placeholder =
-        appShadowRoot.querySelector('flt-semantics-placeholder')!;
+        appHostNode.querySelector('flt-semantics-placeholder')!;
 
     expect(placeholder.isConnected, isTrue);
 
@@ -113,7 +113,7 @@ void _testEngineSemanticsOwner() {
     expect(semantics().semanticsEnabled, isFalse);
 
     final html.Element placeholder =
-        appShadowRoot.querySelector('flt-semantics-placeholder')!;
+        appHostNode.querySelector('flt-semantics-placeholder')!;
 
     expect(placeholder.isConnected, isTrue);
 
@@ -382,9 +382,9 @@ void _testContainer() {
 </sem>''');
 
     final html.Element parentElement =
-        appShadowRoot.querySelector('flt-semantics')!;
+        appHostNode.querySelector('flt-semantics')!;
     final html.Element container =
-        appShadowRoot.querySelector('flt-semantics-container')!;
+        appHostNode.querySelector('flt-semantics-container')!;
 
     if (isMacOrIOS) {
       expect(parentElement.style.top, '0px');
@@ -430,9 +430,9 @@ void _testContainer() {
 </sem>''');
 
     final html.Element parentElement =
-        appShadowRoot.querySelector('flt-semantics')!;
+        appHostNode.querySelector('flt-semantics')!;
     final html.Element container =
-        appShadowRoot.querySelector('flt-semantics-container')!;
+        appHostNode.querySelector('flt-semantics-container')!;
 
     expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
     expect(parentElement.style.transformOrigin, '0px 0px 0px');
@@ -476,9 +476,9 @@ void _testContainer() {
     }
 
     final html.Element parentElement =
-        appShadowRoot.querySelector('flt-semantics')!;
+        appHostNode.querySelector('flt-semantics')!;
     final html.Element container =
-        appShadowRoot.querySelector('flt-semantics-container')!;
+        appHostNode.querySelector('flt-semantics-container')!;
 
     if (isMacOrIOS) {
       expect(parentElement.style.top, '0px');
@@ -834,7 +834,7 @@ void _testIncrementables() {
   <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="2" aria-valuemin="1">
 </sem>''');
 
-    final html.InputElement input = appShadowRoot.querySelector('input') as html.InputElement;
+    final html.InputElement input = appHostNode.querySelector('input') as html.InputElement;
     input.value = '2';
     input.dispatchEvent(html.Event('change'));
 
@@ -868,7 +868,7 @@ void _testIncrementables() {
   <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="0">
 </sem>''');
 
-    final html.InputElement input = appShadowRoot.querySelector('input') as html.InputElement;
+    final html.InputElement input = appHostNode.querySelector('input') as html.InputElement;
     input.value = '0';
     input.dispatchEvent(html.Event('change'));
 
@@ -962,13 +962,13 @@ void _testTextField() {
     semantics().updateSemantics(builder.build());
 
     final html.Element textField =
-        appShadowRoot.querySelector('input[data-semantics-role="text-field"]')!;
+        appHostNode.querySelector('input[data-semantics-role="text-field"]')!;
 
-    expect(appShadowRoot.activeElement, isNot(textField));
+    expect(appHostNode.activeElement, isNot(textField));
 
     textField.focus();
 
-    expect(appShadowRoot.activeElement, textField);
+    expect(appHostNode.activeElement, textField);
     expect(await logger.idLog.first, 0);
     expect(await logger.actionLog.first, ui.SemanticsAction.tap);
 

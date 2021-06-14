@@ -18,14 +18,7 @@ import '../../matchers.dart';
 /// so we don't have to hardcode html.document across the test. (The host of a
 /// normal flutter app used to be html.document, but now that the app is wrapped
 /// in a Shadow DOM, that's not the case anymore.)
-///
-/// A [html.ShadowRoot] quacks very similarly to a [html.Document], but
-/// unfortunately they don't share any class/implement any interface that let us
-/// use them interchangeably.
-///
-/// This flutterRoot can be changed to return ShadowRoot or Document without
-/// the need to modify (most of) your code.
-html.ShadowRoot get appShadowRoot => domRenderer.glassPaneShadow!;
+HostNode get appHostNode => domRenderer.glassPaneShadow!;
 
 /// CSS style applied to the root of the semantics tree.
 // TODO(yjbanov): this should be handled internally by [expectSemanticsTree].
@@ -351,14 +344,14 @@ class SemanticsTester {
 /// Verifies the HTML structure of the current semantics tree.
 void expectSemanticsTree(String semanticsHtml) {
   expect(
-    canonicalizeHtml(appShadowRoot.querySelector('flt-semantics')!.outerHtml!),
+    canonicalizeHtml(appHostNode.querySelector('flt-semantics')!.outerHtml!),
     canonicalizeHtml(semanticsHtml),
   );
 }
 
 /// Finds the first HTML element in the semantics tree used for scrolling.
 html.Element? findScrollable() {
-  return appShadowRoot.querySelectorAll('flt-semantics').cast<html.Element?>().firstWhere(
+  return appHostNode.querySelectorAll('flt-semantics').cast<html.Element?>().firstWhere(
         (html.Element? element) =>
             element!.style.overflow == 'hidden' ||
             element.style.overflowY == 'scroll' ||

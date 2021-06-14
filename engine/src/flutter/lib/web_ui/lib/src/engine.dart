@@ -224,6 +224,7 @@ part 'engine/dom_renderer.dart';
 part 'engine/engine_canvas.dart';
 part 'engine/font_change_util.dart';
 part 'engine/frame_reference.dart';
+part 'engine/host_node.dart';
 part 'engine/html/backdrop_filter.dart';
 part 'engine/html/canvas.dart';
 part 'engine/html/clip.dart';

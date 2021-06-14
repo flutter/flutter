@@ -14,7 +14,7 @@ class DomRenderer {
 
     TextMeasurementService.initialize(
       rulerCacheCapacity: 10,
-      root: _glassPaneShadow!,
+      root: _glassPaneShadow!.node,
     );
 
     assert(() {
@@ -160,9 +160,9 @@ class DomRenderer {
   html.Element? get glassPaneElement => _glassPaneElement;
   html.Element? _glassPaneElement;
 
-  /// The ShadowRoot of the [glassPaneElement].
-  html.ShadowRoot? get glassPaneShadow => _glassPaneShadow;
-  html.ShadowRoot? _glassPaneShadow;
+  /// The [HostNode] of the [glassPaneElement], which contains the whole Flutter app.
+  HostNode? get glassPaneShadow => _glassPaneShadow;
+  HostNode? _glassPaneShadow;
 
   final html.Element rootElement = html.document.body!;
 
@@ -262,113 +262,6 @@ class DomRenderer {
   static const String defaultCssFont =
       '$defaultFontStyle $defaultFontWeight ${defaultFontSize}px $defaultFontFamily';
 
-  // Applies the required global CSS to an incoming [html.CssStyleSheet] `sheet`.
-  void _applyCssRulesToSheet(html.CssStyleSheet sheet) {
-    final bool isWebKit = browserEngine == BrowserEngine.webkit;
-    final bool isFirefox = browserEngine == BrowserEngine.firefox;
-    // TODO(butterfly): use more efficient CSS selectors; descendant selectors
-    //                  are slow. More info:
-    //
-    //                  https://csswizardry.com/2011/09/writing-efficient-css-selectors/
-
-    // This undoes browser's default layout attributes for paragraphs. We
-    // compute paragraph layout ourselves.
-    if (isFirefox) {
-      // For firefox set line-height, otherwise textx at same font-size will
-      // measure differently in ruler.
-      sheet.insertRule(
-          'flt-ruler-host p, flt-scene p '
-          '{ margin: 0; line-height: 100%;}',
-          sheet.cssRules.length);
-    } else {
-      sheet.insertRule(
-          'flt-ruler-host p, flt-scene p '
-          '{ margin: 0; }',
-          sheet.cssRules.length);
-    }
-
-    // This undoes browser's default painting and layout attributes of range
-    // input, which is used in semantics.
-    sheet.insertRule('''
-flt-semantics input[type=range] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 100%;
-  position: absolute;
-  border: none;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}''', sheet.cssRules.length);
-
-    if (isWebKit) {
-      sheet.insertRule(
-          'flt-semantics input[type=range]::-webkit-slider-thumb {'
-          '  -webkit-appearance: none;'
-          '}',
-          sheet.cssRules.length);
-    }
-
-    if (isFirefox) {
-      sheet.insertRule(
-          'input::-moz-selection {'
-          '  background-color: transparent;'
-          '}',
-          sheet.cssRules.length);
-      sheet.insertRule(
-          'textarea::-moz-selection {'
-          '  background-color: transparent;'
-          '}',
-          sheet.cssRules.length);
-    } else {
-      // On iOS, the invisible semantic text field has a visible cursor and
-      // selection highlight. The following 2 CSS rules force everything to be
-      // transparent.
-      sheet.insertRule(
-          'input::selection {'
-          '  background-color: transparent;'
-          '}',
-          sheet.cssRules.length);
-      sheet.insertRule(
-          'textarea::selection {'
-          '  background-color: transparent;'
-          '}',
-          sheet.cssRules.length);
-    }
-    sheet.insertRule('''
-flt-semantics input,
-flt-semantics textarea,
-flt-semantics [contentEditable="true"] {
-  caret-color: transparent;
-}
-''', sheet.cssRules.length);
-
-    // By default on iOS, Safari would highlight the element that's being tapped
-    // on using gray background. This CSS rule disables that.
-    if (isWebKit) {
-      sheet.insertRule('''
-$_glassPaneTagName * {
-  -webkit-tap-highlight-color: transparent;
-}
-''', sheet.cssRules.length);
-    }
-
-    // This css prevents an autofill overlay brought by the browser during
-    // text field autofill by delaying the transition effect.
-    // See: https://github.com/flutter/flutter/issues/61132.
-    if (browserHasAutofillOverlay()) {
-      sheet.insertRule('''
-.transparentTextEditing:-webkit-autofill,
-.transparentTextEditing:-webkit-autofill:hover,
-.transparentTextEditing:-webkit-autofill:focus,
-.transparentTextEditing:-webkit-autofill:active {
-    -webkit-transition-delay: 99999s;
-}
-''', sheet.cssRules.length);
-    }
-  }
-
   void reset() {
     final bool isWebKit = browserEngine == BrowserEngine.webkit;
 
@@ -376,7 +269,10 @@ $_glassPaneTagName * {
     _styleElement = html.StyleElement();
     html.document.head!.append(_styleElement!);
     final html.CssStyleSheet sheet = _styleElement!.sheet as html.CssStyleSheet;
-    _applyCssRulesToSheet(sheet);
+    applyGlobalCssRulesToSheet(sheet,
+      browserEngine: browserEngine,
+      hasAutofillOverlay: browserHasAutofillOverlay(),
+    );
 
     final html.BodyElement bodyElement = html.document.body!;
 
@@ -458,22 +354,13 @@ $_glassPaneTagName * {
       ..bottom = '0'
       ..left = '0';
 
-    // Create a Shadow Root under the glass panel, and attach everything there,
-    // instead of directly underneath the glass panel.
-    final html.ShadowRoot glassPaneElementShadowRoot = glassPaneElement.attachShadow(<String, String>{
-      'mode': 'open',
-      'delegatesFocus': 'true',
-    });
-    _glassPaneShadow = glassPaneElementShadowRoot;
-
+    // This must be appended to the body, so we can create a host node properly.
     bodyElement.append(glassPaneElement);
 
-    final html.StyleElement shadowRootStyleElement = html.StyleElement();
-    // The shadowRootStyleElement must be appended to the DOM, or its `sheet` will be null later...
-    glassPaneElementShadowRoot.append(shadowRootStyleElement);
-
-    final html.CssStyleSheet shadowRootStyleSheet = shadowRootStyleElement.sheet as html.CssStyleSheet;
-    _applyCssRulesToSheet(shadowRootStyleSheet); // TODO: Apply only rules for the shadow root
+    // Create a [HostNode] under the glass pane element, and attach everything
+    // there, instead of directly underneath the glass panel.
+    final HostNode glassPaneElementHostNode = _createHostNode(glassPaneElement);
+    _glassPaneShadow = glassPaneElementHostNode;
 
     // Don't allow the scene to receive pointer events.
     _sceneHostElement = createElement('flt-scene-host')
@@ -492,7 +379,7 @@ $_glassPaneTagName * {
         .instance.semanticsHelper
         .prepareAccessibilityPlaceholder();
 
-    glassPaneElementShadowRoot.nodes.addAll([
+    glassPaneElementHostNode.nodes.addAll([
       semanticsHostElement,
       _accessibilityPlaceholder,
       _sceneHostElement!,
@@ -628,6 +515,16 @@ $_glassPaneTagName * {
     _localeSubscription =
         languageChangeEvent.forTarget(html.window).listen(_languageDidChange);
     EnginePlatformDispatcher.instance._updateLocales();
+  }
+
+  // Creates a [HostNode] into a `root` [html.Element].
+  HostNode _createHostNode(html.Element root) {
+    if (js_util.getProperty(root, 'attachShadow') != null) {
+      return ShadowDomHostNode(root);
+    } else {
+      // attachShadow not available, fall back to ElementHostNode.
+      return ElementHostNode(root);
+    }
   }
 
   /// The framework specifies semantics in physical pixels, but CSS uses
@@ -813,6 +710,117 @@ $_glassPaneTagName * {
   void debugRichTextLayout() => _debugFrameStatistics!.richTextLayouts++;
   void debugPlainTextLayout() => _debugFrameStatistics!.plainTextLayouts++;
 }
+
+// Applies the required global CSS to an incoming [html.CssStyleSheet] `sheet`.
+void applyGlobalCssRulesToSheet(html.CssStyleSheet sheet, {
+  required BrowserEngine browserEngine,
+  required bool hasAutofillOverlay,
+  String glassPaneTagName = DomRenderer._glassPaneTagName,
+}) {
+  final bool isWebKit = browserEngine == BrowserEngine.webkit;
+  final bool isFirefox = browserEngine == BrowserEngine.firefox;
+  // TODO(web): use more efficient CSS selectors; descendant selectors are slow.
+  // More info: https://csswizardry.com/2011/09/writing-efficient-css-selectors
+
+  // This undoes browser's default layout attributes for paragraphs. We
+  // compute paragraph layout ourselves.
+  if (isFirefox) {
+    // For firefox set line-height, otherwise textx at same font-size will
+    // measure differently in ruler.
+    sheet.insertRule(
+        'flt-ruler-host p, flt-scene p '
+        '{ margin: 0; line-height: 100%;}',
+        sheet.cssRules.length);
+  } else {
+    sheet.insertRule(
+        'flt-ruler-host p, flt-scene p '
+        '{ margin: 0; }',
+        sheet.cssRules.length);
+  }
+
+  // This undoes browser's default painting and layout attributes of range
+  // input, which is used in semantics.
+  sheet.insertRule('''
+flt-semantics input[type=range] {
+appearance: none;
+-webkit-appearance: none;
+width: 100%;
+position: absolute;
+border: none;
+top: 0;
+right: 0;
+bottom: 0;
+left: 0;
+}''', sheet.cssRules.length);
+
+  if (isWebKit) {
+    sheet.insertRule(
+        'flt-semantics input[type=range]::-webkit-slider-thumb {'
+        '  -webkit-appearance: none;'
+        '}',
+        sheet.cssRules.length);
+  }
+
+  if (isFirefox) {
+    sheet.insertRule(
+        'input::-moz-selection {'
+        '  background-color: transparent;'
+        '}',
+        sheet.cssRules.length);
+    sheet.insertRule(
+        'textarea::-moz-selection {'
+        '  background-color: transparent;'
+        '}',
+        sheet.cssRules.length);
+  } else {
+    // On iOS, the invisible semantic text field has a visible cursor and
+    // selection highlight. The following 2 CSS rules force everything to be
+    // transparent.
+    sheet.insertRule(
+        'input::selection {'
+        '  background-color: transparent;'
+        '}',
+        sheet.cssRules.length);
+    sheet.insertRule(
+        'textarea::selection {'
+        '  background-color: transparent;'
+        '}',
+        sheet.cssRules.length);
+  }
+  sheet.insertRule('''
+flt-semantics input,
+flt-semantics textarea,
+flt-semantics [contentEditable="true"] {
+caret-color: transparent;
+}
+''', sheet.cssRules.length);
+
+  // By default on iOS, Safari would highlight the element that's being tapped
+  // on using gray background. This CSS rule disables that.
+  if (isWebKit) {
+    sheet.insertRule('''
+$glassPaneTagName * {
+-webkit-tap-highlight-color: transparent;
+}
+''', sheet.cssRules.length);
+  }
+
+  // This css prevents an autofill overlay brought by the browser during
+  // text field autofill by delaying the transition effect.
+  // See: https://github.com/flutter/flutter/issues/61132.
+  if (browserHasAutofillOverlay()) {
+    sheet.insertRule('''
+.transparentTextEditing:-webkit-autofill,
+.transparentTextEditing:-webkit-autofill:hover,
+.transparentTextEditing:-webkit-autofill:focus,
+.transparentTextEditing:-webkit-autofill:active {
+  -webkit-transition-delay: 99999s;
+}
+''', sheet.cssRules.length);
+  }
+}
+
+
 
 /// Miscellaneous statistics collecting during a single frame's execution.
 ///
