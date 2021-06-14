@@ -421,13 +421,15 @@ TaskFunction createsScrollSmoothnessPerfTest() {
       final Map<String, dynamic> result = <String, dynamic>{};
       void addResult(dynamic data, String suffix) {
         assert(data is Map<String, dynamic>);
-        const List<String> metricKeys = <String>[
-          'janky_count',
-          'average_abs_jerk',
-          'dropped_frame_count',
-        ];
-        for (final String key in metricKeys) {
-          result[key+suffix] = data[key];
+        if (data is Map<String, dynamic>) {
+          const List<String> metricKeys = <String>[
+            'janky_count',
+            'average_abs_jerk',
+            'dropped_frame_count',
+          ];
+          for (final String key in metricKeys) {
+            result[key + suffix] = data[key];
+          }
         }
       }
       addResult(data['resample on with 90Hz input'], '_with_resampler_90Hz');
@@ -1472,15 +1474,15 @@ class DevToolsMemoryTest {
       final Map<String, dynamic> data = json.decode(
         file('$project/$_kJsonFileName').readAsStringSync(),
       ) as Map<String, dynamic>;
-      final List<dynamic> samples = data['samples']['data'] as List<dynamic>;
+      final List<Map<String, dynamic>> samples = (data['samples'] as Map<String, dynamic>)['data'] as List<Map<String, dynamic>>;
       int maxRss = 0;
       int maxAdbTotal = 0;
-      for (final dynamic sample in samples) {
+      for (final Map<String, dynamic> sample in samples) {
         if (sample['rss'] != null) {
           maxRss = math.max(maxRss, sample['rss'] as int);
         }
         if (sample['adb_memoryInfo'] != null) {
-          maxAdbTotal = math.max(maxAdbTotal, sample['adb_memoryInfo']['Total'] as int);
+          maxAdbTotal = math.max(maxAdbTotal, (sample['adb_memoryInfo'] as Map<String, dynamic>)['Total'] as int);
         }
       }
 

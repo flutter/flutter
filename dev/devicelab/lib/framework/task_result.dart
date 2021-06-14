@@ -31,7 +31,7 @@ class TaskResult {
               'result data ${prettyJson.convert(data)}';
         } else if (data[key] is! num) {
           throw 'Invalid benchmark score for key "$key". It is expected to be a num '
-              'but was ${data[key].runtimeType}: ${prettyJson.convert(data[key])}';
+              'but was ${(data[key] as Object).runtimeType}: ${prettyJson.convert(data[key])}';
         }
       }
     }

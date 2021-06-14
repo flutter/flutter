@@ -394,7 +394,7 @@ void main() {
         // Make sure the new entry is first (and hopefully it takes less than a
         // minute to go from publishArchive above to this line!).
         expect(
-          DateTime.now().difference(DateTime.parse(releases[0]['release_date'] as String)),
+          DateTime.now().difference(DateTime.parse((releases[0] as Map<String, dynamic>)['release_date'] as String)),
           lessThan(const Duration(minutes: 1)),
         );
         const JsonEncoder encoder = JsonEncoder.withIndent('  ');

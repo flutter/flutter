@@ -81,7 +81,7 @@ void main() {
     ]);
 
     // contains all of the experiments in features.dart
-    expect(result.stdout.split('\n'), containsAll(<Matcher>[
+    expect((result.stdout as String).split('\n'), containsAll(<Matcher>[
       for (final Feature feature in allFeatures)
         contains(feature.configSetting),
     ]));
