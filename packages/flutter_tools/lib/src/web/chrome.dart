@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -24,6 +25,9 @@ const String kEdgeEnvironment = 'EDGE_ENVIRONMENT';
 
 /// The expected executable name on linux.
 const String kLinuxExecutable = 'google-chrome';
+
+/// The expected Chromium executable name on linux.
+const String kLinuxChromiumExecutable = 'chromium';
 
 /// The expected executable name on macOS.
 const String kMacOSExecutable =
@@ -51,12 +55,23 @@ typedef BrowserFinder = String Function(Platform, FileSystem);
 
 /// Find the chrome executable on the current platform.
 ///
-/// Does not verify whether the executable exists.
+/// Does not always verify whether the executable exists.
 String findChromeExecutable(Platform platform, FileSystem fileSystem) {
   if (platform.environment.containsKey(kChromeEnvironment)) {
     return platform.environment[kChromeEnvironment]!;
   }
   if (platform.isLinux) {
+    io.ProcessResult which =
+      io.Process.runSync('which', <String>['google-chrome']);
+
+    if (which.exitCode == 0) {
+      return kLinuxExecutable;
+    }
+
+    which = io.Process.runSync('which', <String>['chromium']);
+    if (which.exitCode == 0) {
+      return kLinuxChromiumExecutable;
+    }
     return kLinuxExecutable;
   }
   if (platform.isMacOS) {
