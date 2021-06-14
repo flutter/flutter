@@ -17,4 +17,6 @@ impeller_component("shader_glue") {
     "shader_types.cc",
     "shader_types.h",
   ]
+
+  deps = [ "../geometry" ]
 }

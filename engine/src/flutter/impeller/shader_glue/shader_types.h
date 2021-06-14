@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <string_view>
 
+#include "impeller/geometry/matrix.h"
+
 namespace impeller {
 
 enum class ShaderStage {
@@ -45,6 +47,12 @@ struct ShaderStageIOSlot {
   size_t bit_width;
   size_t vec_size;
   size_t columns;
+};
+
+template <size_t Size>
+struct Padding {
+ private:
+  uint8_t pad_[Size];
 };
 
 }  // namespace impeller
