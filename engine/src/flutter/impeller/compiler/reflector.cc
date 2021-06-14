@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include <optional>
+#include <set>
 #include <sstream>
 
 #include "flutter/fml/closure.h"
@@ -186,7 +187,14 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
 
   auto& struct_definitions = root["struct_definitions"] =
       nlohmann::json::array_t{};
+  std::set<spirv_cross::ID> known_structs;
   ir_->for_each_typed_id<SPIRType>([&](uint32_t, const SPIRType& type) {
+    if (known_structs.find(type.self) != known_structs.end()) {
+      // Iterating over types this way leads to duplicates which may cause
+      // duplicate struct definitions.
+      return;
+    }
+    known_structs.insert(type.self);
     if (auto struc = ReflectStructDefinition(type.self); struc.has_value()) {
       struct_definitions.emplace_back(std::move(struc.value()));
     }
@@ -274,6 +282,21 @@ std::optional<nlohmann::json::array_t> Reflector::ReflectResources(
   return result;
 }
 
+std::string GetHostStructMemberType(const SPIRType& type) {
+  if (type.width == 32 && type.columns == 1 && type.vecsize == 1) {
+    return "float";
+  }
+
+  if (type.width == 32 && type.columns == 4 && type.vecsize == 4) {
+    return "Matrix";
+  }
+
+  const auto byte_length = (type.width * type.vecsize * type.columns) / 8u;
+  std::stringstream stream;
+  stream << "Padding<" << byte_length << ">";
+  return stream.str();
+}
+
 std::optional<nlohmann::json::object_t> Reflector::ReflectStructDefinition(
     const TypeID& type_id) const {
   const auto& type = compiler_->get_type(type_id);
@@ -296,6 +319,7 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectStructDefinition(
         (member_type.width * member_type.vecsize * member_type.columns) / 8u;
     auto& member = struc["members"].emplace_back(nlohmann::json::object_t{});
     member["name"] = GetMemberNameAtIndex(type, i);
+    member["type"] = GetHostStructMemberType(member_type);
     member["byte_length"] = byte_length;
     member["offset"] = total_size;
     total_size += byte_length;

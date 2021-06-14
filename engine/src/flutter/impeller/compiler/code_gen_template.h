@@ -26,6 +26,20 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   static constexpr std::string_view kEntrypointName = "{{entrypoint}}";
   static constexpr ShaderStage kShaderStage = {{to_shader_stage(shader_stage)}};
 
+
+  // ===========================================================================
+  // Struct Definitions ========================================================
+  // ===========================================================================
+{% for def in struct_definitions %}
+
+  struct {{def.name}} {
+{% for member in def.members %}
+    {{member.type}} {{member.name}};
+{% endfor %}
+  }; // struct {{def.name}}
+  static_assert(sizeof({{def.name}}) == {{def.byte_length}}, "Size of {{def.name}} does not match {{def.byte_length}} in the shader.");
+{% endfor %}
+
   // ===========================================================================
   // Stage Uniforms ============================================================
   // ===========================================================================
