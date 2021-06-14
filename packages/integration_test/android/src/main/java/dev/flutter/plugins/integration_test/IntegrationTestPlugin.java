@@ -57,11 +57,7 @@ public class IntegrationTestPlugin implements MethodCallHandler, FlutterPlugin {
         result.success(null);
         break;
       case "captureScreenshot":
-        final Integer x = call.argument("x");
-        final Integer y = call.argument("y");
-        final Integer width = call.argument("width");
-        final Integer height = call.argument("height");
-        final byte[] image = FlutterDeviceScreenshot.capture(x, y, width, height);
+        final byte[] image = FlutterDeviceScreenshot.capture();
         result.success(image);
         break;
       default:

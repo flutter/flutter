@@ -15,16 +15,14 @@ class FlutterDeviceScreenshot {
   /**
    * Captures a screenshot of the device, then it crops the image by the given components.
    *
-   * @param x The x component of the crop window.
-   * @param y The y component of the crop window.
-   * @param width The width component of the crop window.
-   * @param height The height component of the crop window.
    * @return byte array containing the cropped image in PNG format.
    */
-  static byte[] capture(int x, int y, int width, int height) {
+  static byte[] capture() {
     final Bitmap originalBitmap =
         InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
-    final Bitmap croppedBitmap = Bitmap.createBitmap(originalBitmap, x, y, width, height);
+    final int width = originalBitmap.getWidth();
+    final int height = originalBitmap.getHeight();
+    final Bitmap croppedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, width, height);
 
     final ByteArrayOutputStream output = new ByteArrayOutputStream();
     croppedBitmap.compress(Bitmap.CompressFormat.PNG, /* irrelevant for PNG */ 100, output);

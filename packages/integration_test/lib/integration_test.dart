@@ -33,36 +33,30 @@ const bool _shouldReportResultsToNative = bool.fromEnvironment(
   defaultValue: true,
 );
 
-/// Gets a PNG image buffer from the device that contains the pixels of the element's
-/// bounding rect found in the finder.
+// The channel name used to call platform methods.
+const MethodChannel _channel = MethodChannel('plugins.flutter.io/integration_test');
+
+/// Takes a screenshot of the device, and returns the PNG representation of it.
 ///
 // {@tool snippet}
 /// Sample invocations of [deviceScreenshot].
 ///
 /// ```dart
 /// await expectLater(
-///   deviceScreenshot(find.text('Save')),
-///   matchesGoldenFile('save.png'),
+///   deviceScreenshot(),
+///   matchesGoldenFile('device.png'),
 /// );
 /// ```
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [matchesGoldenFile], which asserts that the returned [Future<ByteData>]
+///  * [matchesGoldenFile], which asserts that the returned [Future<Uint8List>]
 ///    matches the golden image file identified by [key], with an optional
 ///    [version] number.
-Future<Uint8List> deviceScreenshot(Finder item) async {
-  final Iterable<Element> elements = item.evaluate();
-  if (elements.isEmpty) {
-    throw 'could not be rendered because no widget was found';
-  }
-  if (elements.length > 1) {
-    throw 'matched too many widgets';
-  }
-
-  final List<int> rawBytes = <int>[]; // TODO(egarciad)
-  return Uint8List.fromList(rawBytes);
+Future<Uint8List> deviceScreenshot() async {
+  // final List<int> rawBytes = await _channel.invokeMethod<<int>[]>('captureScreenshot', null);
+  return Uint8List.fromList(<int>[]);
 }
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
@@ -176,9 +170,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     assert(WidgetsBinding.instance is IntegrationTestWidgetsFlutterBinding);
     return WidgetsBinding.instance!;
   }
-
-  static const MethodChannel _channel =
-      MethodChannel('plugins.flutter.io/integration_test');
 
   /// Test results that will be populated after the tests have completed.
   ///
