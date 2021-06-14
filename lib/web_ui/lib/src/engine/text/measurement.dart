@@ -36,7 +36,7 @@ class RulerHost {
       ..width = '0'
       ..height = '0';
 
-    (root ?? domRenderer.glassPaneShadow!).append(_rulerHost);
+    (root ?? domRenderer.glassPaneShadow!.node).append(_rulerHost);
     registerHotRestartListener(dispose);
   }
 
