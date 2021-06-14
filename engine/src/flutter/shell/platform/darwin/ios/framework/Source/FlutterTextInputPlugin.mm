@@ -1371,8 +1371,11 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
     _autofillContext = [[NSMutableDictionary alloc] init];
     _inputHider = [[FlutterTextInputViewAccessibilityHider alloc] init];
     // Initialize activeView with a dummy view to keep tests
-    // passing.
+    // passing. This dummy view needs to be replace once the
+    // framework initializes an input connection, and thus
+    // should never have access to the textInputDelegate.
     _activeView = [[FlutterTextInputView alloc] init];
+    [_activeView decommission];
   }
 
   return self;
@@ -1383,6 +1386,9 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   _activeView.textInputDelegate = nil;
   [_activeView release];
   [_inputHider release];
+  for (FlutterTextInputView* autofillView in _autofillContext.allValues) {
+    autofillView.textInputDelegate = nil;
+  }
   [_autofillContext release];
   [super dealloc];
 }
@@ -1477,13 +1483,12 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   [self removeEnableFlutterTextInputViewAccessibilityTimer];
   _activeView.accessibilityEnabled = NO;
   [_activeView resignFirstResponder];
-  [_activeView decommission];
   [_activeView removeFromSuperview];
   [_inputHider removeFromSuperview];
 }
 
 - (void)triggerAutofillSave:(BOOL)saveEntries {
-  [self hideTextInput];
+  [_activeView resignFirstResponder];
 
   if (saveEntries) {
     // Make all the input fields in the autofill context visible,
