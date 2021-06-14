@@ -15,32 +15,6 @@
 version: 1
 transforms:
 
-  # Change made in https://github.com/flutter/flutter/pull/48547
-  # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
-  - title: "Migrate to 'material2018'"
-    date: 2020-01-09
-    bulkApply: false
-    element:
-      uris: [ 'material.dart' ]
-      constructor: ''
-      inClass: 'Typography'
-    changes:
-      - kind: 'rename'
-        newName: 'material2018'
-
-  # Change made in https://github.com/flutter/flutter/pull/48547
-  # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
-  - title: "Migrate to 'material2014'"
-    date: 2020-01-09
-    bulkApply: false
-    element:
-      uris: [ 'material.dart' ]
-      constructor: ''
-      inClass: 'Typography'
-    changes:
-      - kind: 'rename'
-        newName: 'material2014'
-
   # Changes made in https://github.com/flutter/flutter/pull/81858
   - title: "Migrate to 'supportedDevices'"
     date: 2021-05-04

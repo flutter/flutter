@@ -79,6 +79,17 @@ enum ScriptCategory {
 ///  * <https://material.io/design/typography/>
 @immutable
 class Typography with Diagnosticable {
+  /// Creates a typography instance.
+  ///
+  /// This constructor is identical to [Typography.material2018].
+  factory Typography({
+    TargetPlatform? platform,
+    TextTheme? black,
+    TextTheme? white,
+    TextTheme? englishLike,
+    TextTheme? dense,
+    TextTheme? tall,
+  }) = Typography.material2018;
 
   /// Creates a typography instance using material design's 2014 defaults.
   ///
