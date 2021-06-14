@@ -421,7 +421,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 
     if (widget.buildDefaultDragHandles) {
       switch (Theme.of(context).platform) {
-        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
         case TargetPlatform.macOS:
@@ -470,6 +469,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 
         case TargetPlatform.iOS:
         case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
           return ReorderableDelayedDragStartListener(
             key: itemGlobalKey,
             index: index,

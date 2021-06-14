@@ -1062,6 +1062,25 @@ void main() {
     Logger: () => logger,
   });
 
+  testUsingContext('app creates maskable icons for web', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=web',
+      projectDir.path,
+    ]);
+
+    final Directory iconsDir = projectDir.childDirectory('web').childDirectory('icons');
+
+    expect(iconsDir.childFile('Icon-maskable-192.png'), exists);
+    expect(iconsDir.childFile('Icon-maskable-512.png'), exists);
+  });
+
   testUsingContext('plugin uses new platform schema', () async {
     Cache.flutterRoot = '../..';
 
@@ -1099,17 +1118,13 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.fs.path.join(
-            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
-          ),
-          <String>[file.path],
+          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
 
-        expect(original, formatted, reason: file.path);
+        expect(formatted, contains(original), reason: file.path);
       }
     }
 
@@ -1205,17 +1220,13 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.fs.path.join(
-            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
-          ),
-          <String>[file.path],
+          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
 
-        expect(original, formatted, reason: file.path);
+        expect(formatted, contains(original), reason: file.path);
       }
     }
 
@@ -1912,7 +1923,7 @@ void main() {
     Logger: () => logger,
   });
 
-  testUsingContext('plugin doe not support web if feature is not enabled', () async {
+  testUsingContext('plugin does not support web if feature is not enabled', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();

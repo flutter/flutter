@@ -34,7 +34,7 @@ void main() {
       final String original = srcFile.readAsStringSync();
       srcFile.writeAsStringSync(original.replaceFirst('main()', 'main(  )'));
 
-      final FormatCommand command = FormatCommand();
+      final FormatCommand command = FormatCommand(verboseHelp: false);
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['format', srcFile.path]);
 
@@ -51,7 +51,7 @@ void main() {
           'main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
 
-      final FormatCommand command = FormatCommand();
+      final FormatCommand command = FormatCommand(verboseHelp: false);
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['format', '--dry-run', srcFile.path]);
 
@@ -68,7 +68,7 @@ void main() {
           'main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
 
-      final FormatCommand command = FormatCommand();
+      final FormatCommand command = FormatCommand(verboseHelp: false);
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       expect(runner.run(<String>[
@@ -92,7 +92,7 @@ void main() {
               'main(anArgument1, anArgument2, anArgument3, anArgument4, anArgument5)'));
 
       final String nonFormattedWithLongLine = srcFile.readAsStringSync();
-      final FormatCommand command = FormatCommand();
+      final FormatCommand command = FormatCommand(verboseHelp: false);
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['format', '--line-length', '$lineLengthLong', srcFile.path]);

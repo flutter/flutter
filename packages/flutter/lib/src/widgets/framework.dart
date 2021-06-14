@@ -376,7 +376,7 @@ abstract class Widget extends DiagnosticableTree {
     return widget is StatefulWidget ? 1 :
            widget is StatelessWidget ? 2 :
            0;
-    }
+  }
 }
 
 /// A widget that does not require mutable state.

@@ -106,7 +106,7 @@ class ImageCache {
       return;
     TimelineTask? timelineTask;
     if (!kReleaseMode) {
-       timelineTask = TimelineTask()..start(
+      timelineTask = TimelineTask()..start(
         'ImageCache.setMaximumSize',
         arguments: <String, dynamic>{'value': value},
       );
