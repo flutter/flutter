@@ -190,6 +190,8 @@ enum _PickerColumnType {
 /// The class will display its children as consecutive columns. Its children
 /// order is based on internationalization.
 ///
+/// The default order can be overridden by using the [dateOrder] property.
+///
 /// Example of the picker in date mode:
 ///
 ///  * US-English: `| July | 13 | 2012 |`
@@ -245,6 +247,8 @@ class CupertinoDatePicker extends StatefulWidget {
   /// positive integer factor of 60.
   ///
   /// [use24hFormat] decides whether 24 hour format is used. Defaults to false.
+  ///
+  /// [dateOrder] is the date-picker date order. Defaults to localizations.datePickerDateOrder.
   CupertinoDatePicker({
     Key? key,
     this.mode = CupertinoDatePickerMode.dateAndTime,
@@ -256,6 +260,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.maximumYear,
     this.minuteInterval = 1,
     this.use24hFormat = false,
+    this.dateOrder,
     this.backgroundColor,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
@@ -355,6 +360,9 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Whether to use 24 hour format. Defaults to false.
   final bool use24hFormat;
 
+  /// Date-picker date order. Defaults to localizations.datePickerDateOrder.
+  final DatePickerDateOrder? dateOrder;
+
   /// Callback called when the selected date and/or time changes. If the new
   /// selected [DateTime] is not valid, or is not in the [minimumDate] through
   /// [maximumDate] range, this callback will not be called.
@@ -378,7 +386,7 @@ class CupertinoDatePicker extends StatefulWidget {
       case CupertinoDatePickerMode.dateAndTime:
         return _CupertinoDatePickerDateTimeState();
       case CupertinoDatePickerMode.date:
-        return _CupertinoDatePickerDateState();
+        return _CupertinoDatePickerDateState(dateOrder: dateOrder);
     }
   }
 
@@ -1049,6 +1057,13 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 }
 
 class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
+
+  _CupertinoDatePickerDateState({
+    required this.dateOrder,
+  });
+
+  final DatePickerDateOrder? dateOrder;
+
   late int textDirectionFactor;
   late CupertinoLocalizations localizations;
 
@@ -1331,7 +1346,10 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     List<_ColumnBuilder> pickerBuilders = <_ColumnBuilder>[];
     List<double> columnWidths = <double>[];
 
-    switch (localizations.datePickerDateOrder) {
+    final DatePickerDateOrder datePickerDateOrder =
+        dateOrder ?? localizations.datePickerDateOrder;
+
+    switch (datePickerDateOrder) {
       case DatePickerDateOrder.mdy:
         pickerBuilders = <_ColumnBuilder>[_buildMonthPicker, _buildDayPicker, _buildYearPicker];
         columnWidths = <double>[
