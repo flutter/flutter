@@ -34,7 +34,7 @@ Future<void> integrationDriver(
       assert(onScreenshot != null, 'screenshot command requires an onScreenshot callback');
       // Use `driver.screenshot()` method to get a screenshot of the web page.
       final List<int> screenshotImage = await driver.screenshot();
-      final String screenshotName = (response.data!['screenshot_name'] ?? '') as String;
+      final String screenshotName = response.data!['screenshot_name']! as String;
 
       final bool screenshotSuccess = await onScreenshot!(screenshotName, screenshotImage);
       if (screenshotSuccess) {
