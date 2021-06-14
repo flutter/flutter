@@ -31,7 +31,7 @@ constexpr int32_t kRootNodeId = 0;
  * The parent of this node in the node tree. Will be nil for the root node and
  * during transient state changes.
  */
-@property(nonatomic, readonly) SemanticsObject* parent;
+@property(nonatomic, assign) SemanticsObject* parent;
 
 /**
  * The accessibility bridge that this semantics object is attached to. This
@@ -93,6 +93,14 @@ constexpr int32_t kRootNodeId = 0;
 - (NSString*)routeName;
 
 - (BOOL)onCustomAccessibilityAction:(FlutterCustomAccessibilityAction*)action;
+
+/**
+ * Called after accessibility bridge finishes a semantics update.
+ *
+ * Subclasses can override this method if they contain states that can only be
+ * updated once every node in the accessibility tree has finished updating.
+ */
+- (void)accessibilityBridgeDidFinishUpdate;
 
 #pragma mark - Designated initializers
 
@@ -156,6 +164,18 @@ constexpr int32_t kRootNodeId = 0;
 /// The semantics object for switch buttons. This class creates an UISwitch to interact with the
 /// iOS.
 @interface FlutterSwitchSemanticsObject : SemanticsObject
+
+@end
+
+/// The semantics object for scrollable. This class creates an UIScrollView to interact with the
+/// iOS.
+@interface FlutterScrollableSemanticsObject : UIScrollView
+
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithFrame:(CGRect)frame NS_UNAVAILABLE;
+- (instancetype)initWithCoder:(NSCoder*)coder NS_UNAVAILABLE;
+- (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject NS_DESIGNATED_INITIALIZER;
+- (void)accessibilityBridgeDidFinishUpdate;
 
 @end
 
