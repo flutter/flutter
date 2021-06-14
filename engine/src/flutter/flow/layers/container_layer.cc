@@ -242,11 +242,23 @@ MergedContainerLayer::MergedContainerLayer() {
   ContainerLayer::Add(std::make_shared<ContainerLayer>());
 }
 
-void MergedContainerLayer::AssignOldLayer(Layer* old_layer) {
-  ContainerLayer::AssignOldLayer(old_layer);
-  auto layer = static_cast<MergedContainerLayer*>(old_layer);
-  GetChildContainer()->AssignOldLayer(layer->GetChildContainer());
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+void MergedContainerLayer::DiffChildren(DiffContext* context,
+                                        const ContainerLayer* old_layer) {
+  if (context->IsSubtreeDirty()) {
+    GetChildContainer()->Diff(context, nullptr);
+    return;
+  }
+  FML_DCHECK(old_layer);
+
+  // For MergedContainerLayer we want to diff children of ChildContainer
+  // instead of the ChildContainer itself. This works around the fact
+  // that ChildContainerLayer is ephemeral and its original_layer_id_ is always
+  // different.
+  auto layer = static_cast<const MergedContainerLayer*>(old_layer);
+  GetChildContainer()->DiffChildren(context, layer->GetChildContainer());
 }
+#endif
 
 void MergedContainerLayer::Add(std::shared_ptr<Layer> layer) {
   GetChildContainer()->Add(std::move(layer));
