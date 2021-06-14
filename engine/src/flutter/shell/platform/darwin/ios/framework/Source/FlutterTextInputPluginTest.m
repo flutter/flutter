@@ -80,6 +80,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)tearDown {
+  for (FlutterTextInputView* autofillView in textInputPlugin.autofillContext.allValues) {
+    autofillView.textInputDelegate = nil;
+  }
   [textInputPlugin.autofillContext removeAllObjects];
   [textInputPlugin cleanUpViewHierarchy:YES clearText:YES delayRemoval:NO];
   [[[[textInputPlugin textInputView] superview] subviews]
@@ -894,6 +897,38 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(self.installedInputViews.count, 2);
 
   [self commitAutofillContextAndVerify];
+}
+
+- (void)testDecommissionedViewAreNotReusedByAutofill {
+  // Regression test for https://github.com/flutter/flutter/issues/84407.
+  NSMutableDictionary* configuration = self.mutableTemplateCopy;
+  [configuration setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ UITextContentTypePassword ],
+    @"editingValue" : @{@"text" : @""}
+  }
+                   forKey:@"autofill"];
+  [configuration setValue:@[ [configuration copy] ] forKey:@"fields"];
+
+  [self setClientId:123 configuration:configuration];
+
+  [self setTextInputHide];
+  UIView* previousActiveView = textInputPlugin.activeView;
+
+  [self setClientId:124 configuration:configuration];
+
+  // Make sure the autofillable view is reused.
+  XCTAssertEqual(previousActiveView, textInputPlugin.activeView);
+  XCTAssertNotNil(previousActiveView);
+  // Does not crash.
+}
+
+- (void)testInitialActiveViewCantAccessTextInputDelegate {
+  textInputPlugin.activeView.textInputDelegate = engine;
+  // Before the framework sends the first text input configuration,
+  // the dummy "activeView" we use should never have access to
+  // its textInputDelegate.
+  XCTAssertNil(textInputPlugin.activeView.textInputDelegate);
 }
 
 #pragma mark - Accessibility - Tests
