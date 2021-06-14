@@ -59,7 +59,7 @@ void main() {
     Logger: () => BufferLogger.test(),
   });
 
-  testUsingContext('TestCompiler does not try top cache the dill file when precompiled dill is passed', () async {
+  testUsingContext('TestCompiler does not try to cache the dill file when precompiled dill is passed', () async {
     residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
