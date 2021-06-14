@@ -49,10 +49,6 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
     }
     currentDemoCategory = demoCategory;
 
-    final Finder demoItem = find.text(demoName);
-    await controller.scrollUntilVisible(demoItem, 48.0);
-    await controller.pumpAndSettle();
-
     Future<void> pageBack() {
       Finder backButton = find.byTooltip('Back');
       if (backButton.evaluate().isEmpty) {
@@ -62,6 +58,9 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
     }
 
     for (int i = 0; i < 2; i += 1) {
+      final Finder demoItem = find.text(demoName);
+      await controller.scrollUntilVisible(demoItem, 48.0);
+      await controller.pumpAndSettle();
       await controller.tap(demoItem); // Launch the demo
 
       if (kUnsynchronizedDemos.contains(demo)) {
