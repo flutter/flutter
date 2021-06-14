@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:path/path.dart' as path;
-
 import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/host_agent.dart';
