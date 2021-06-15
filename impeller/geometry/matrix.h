@@ -39,8 +39,6 @@ struct Matrix {
     };
 
     uint64_t GetComponentsMask() const;
-
-    std::string ToString() const;
   };
 
   using DecompositionResult =
@@ -279,10 +277,6 @@ struct Matrix {
   Matrix operator*(const Matrix& m) const { return Multiply(m); }
 
   Matrix operator+(const Matrix& m) const;
-
-  std::string ToString() const;
-
-  void FromString(const std::string& str);
 };
 
 static_assert(sizeof(struct Matrix) == sizeof(Scalar) * 16,

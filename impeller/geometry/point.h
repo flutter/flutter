@@ -69,10 +69,6 @@ struct Point {
   constexpr Scalar GetDistance(const Point& p) const {
     return sqrt(GetDistanceSquared(p));
   }
-
-  std::string ToString() const;
-
-  void FromString(const std::string& str);
 };
 
 static_assert(sizeof(Point) == 2 * sizeof(Scalar));

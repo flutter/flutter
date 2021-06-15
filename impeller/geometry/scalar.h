@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cfloat>
+
 namespace impeller {
 
 using Scalar = float;
