@@ -841,6 +841,67 @@ void main() {
     expect(find.text('Suggestions'), findsNothing);
     expect(selectedResults, <String>['Result']);
   });
+
+  testWidgets('showSearch with useRootNavigator', (tester) async{
+
+    final MyNavigatorObserver rootObserver = MyNavigatorObserver();
+    final MyNavigatorObserver localObserver = MyNavigatorObserver();
+
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
+      result: 'Result',
+      suggestions: 'Suggestions',
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: [rootObserver],
+      home: Navigator(
+        observers: [localObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == 'nested') {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) => Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  TextButton(
+                      onPressed: () async {
+                        await showSearch(context: context, delegate: delegate);
+                      },
+                      child: const Text('showSearchNormal')),
+                  TextButton(
+                      onPressed: () async {
+                        await showSearch(context: context, delegate: delegate, useRootNavigator: true);
+                      },
+                      child: const Text('showSearchRootNavigator')),
+                ],
+              ),
+              settings: settings,
+            );
+          }
+          throw UnimplementedError();
+        },
+        initialRoute: 'nested',
+      ),
+    ));
+
+    expect(rootObserver.pushCount,0);
+    expect(localObserver.pushCount,0);
+
+    // showSearch normal and back
+    await tester.tap(find.text('showSearchNormal'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(rootObserver.pushCount,0);
+    expect(localObserver.pushCount,1);
+
+    // showSearch with rootNavigator
+    await tester.tap(find.text('showSearchRootNavigator'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(rootObserver.pushCount,1);
+    expect(localObserver.pushCount,1);
+  });
 }
 
 class TestHomePage extends StatelessWidget {
@@ -1024,5 +1085,18 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
         },
       ),
     );
+  }
+}
+
+class MyNavigatorObserver extends NavigatorObserver {
+  int pushCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    // don't count the root route
+    if(['nested','/'].contains(route.settings.name)){
+      return;
+    }
+    pushCount++;
   }
 }
