@@ -27,9 +27,11 @@ void main() {
     // Trace the timeline of the following operation. The timeline result will
     // be written to `build/integration_response_data.json` with the key
     // `timeline`.
-    await binding.traceAction(() async {
+    // await binding.traceAction(() async {
       // Trigger a frame.
       await tester.pumpAndSettle();
+
+      print(await deviceScreenshot());
 
       // Verify that platform version is retrieved.
       expect(
@@ -40,6 +42,6 @@ void main() {
         ),
         findsOneWidget,
       );
-    });
+    // });
   });
 }

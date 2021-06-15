@@ -55,8 +55,11 @@ const MethodChannel _channel = MethodChannel('plugins.flutter.io/integration_tes
 ///    matches the golden image file identified by [key], with an optional
 ///    [version] number.
 Future<Uint8List> deviceScreenshot() async {
-  // final List<int> rawBytes = await _channel.invokeMethod<<int>[]>('captureScreenshot', null);
-  return Uint8List.fromList(<int>[]);
+  final List<int>? rawBytes = await _channel.invokeMethod<List<int>>('captureScreenshot', null);
+  if (rawBytes == null) {
+    throw 'Expected a list of bytes, but instead captureScreenshot returned null';
+  }
+  return Uint8List.fromList(rawBytes);
 }
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
