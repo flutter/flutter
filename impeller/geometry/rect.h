@@ -5,8 +5,10 @@
 #pragma once
 
 #include <vector>
-#include "point.h"
-#include "size.h"
+
+#include "impeller/geometry/point.h"
+#include "impeller/geometry/scalar.h"
+#include "impeller/geometry/size.h"
 
 namespace impeller {
 
@@ -20,11 +22,11 @@ struct Rect {
 
   constexpr Rect(Point origin, Size size) : origin(origin), size(size) {}
 
-  constexpr Rect(const double components[4])
+  constexpr Rect(const Scalar components[4])
       : origin(components[0], components[1]),
         size(components[2], components[3]) {}
 
-  constexpr Rect(double x, double y, double width, double height)
+  constexpr Rect(Scalar x, Scalar y, Scalar width, Scalar height)
       : origin(x, y), size(width, height) {}
 
   /*
@@ -40,7 +42,7 @@ struct Rect {
                 {size.width - r.size.width, size.height - r.size.height});
   }
 
-  constexpr Rect operator*(double scale) const {
+  constexpr Rect operator*(Scalar scale) const {
     return Rect({origin.x * scale, origin.y * scale},
                 {size.width * scale, size.height * scale});
   }
@@ -69,5 +71,7 @@ struct Rect {
 
   void FromString(const std::string& str);
 };
+
+static_assert(sizeof(Rect) == 4 * sizeof(Scalar));
 
 }  // namespace impeller

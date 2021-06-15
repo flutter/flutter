@@ -6,54 +6,75 @@
 
 #include <cmath>
 #include <string>
-#include "size.h"
+
+#include "impeller/geometry/scalar.h"
+#include "impeller/geometry/size.h"
 
 namespace impeller {
 
 struct Point {
-  double x = 0.0;
-  double y = 0.0;
+  Scalar x = 0.0;
+  Scalar y = 0.0;
 
   constexpr Point() = default;
 
-  constexpr Point(double x, double y) : x(x), y(y) {}
+  constexpr Point(Scalar x, Scalar y) : x(x), y(y) {}
 
-  /*
-   *  Operator overloads
-   */
-  bool operator==(const Point& p) const { return p.x == x && p.y == y; }
+  constexpr bool operator==(const Point& p) const {
+    return p.x == x && p.y == y;
+  }
 
-  bool operator!=(const Point& p) const { return p.x != x || p.y != y; }
+  constexpr bool operator!=(const Point& p) const {
+    return p.x != x || p.y != y;
+  }
 
-  Point operator-() const { return {-x, -y}; }
+  constexpr Point operator-() const { return {-x, -y}; }
 
-  Point operator+(const Point& p) const { return {x + p.x, y + p.y}; }
+  constexpr Point operator+(const Point& p) const { return {x + p.x, y + p.y}; }
 
-  Point operator+(const Size& s) const { return {x + s.width, y + s.height}; }
+  constexpr Point operator+(const Size& s) const {
+    return {x + s.width, y + s.height};
+  }
 
-  Point operator-(const Point& p) const { return {x - p.x, y - p.y}; }
+  constexpr Point operator-(const Point& p) const { return {x - p.x, y - p.y}; }
 
-  Point operator-(const Size& s) const { return {x - s.width, y - s.height}; }
+  constexpr Point operator-(const Size& s) const {
+    return {x - s.width, y - s.height};
+  }
 
-  Point operator*(double scale) const { return {x * scale, y * scale}; }
+  constexpr Point operator*(Scalar scale) const {
+    return {x * scale, y * scale};
+  }
 
-  Point operator*(const Point& p) const { return {x * p.x, y * p.y}; }
+  constexpr Point operator*(const Point& p) const { return {x * p.x, y * p.y}; }
 
-  Point operator*(const Size& s) const { return {x * s.width, y * s.height}; }
+  constexpr Point operator*(const Size& s) const {
+    return {x * s.width, y * s.height};
+  }
 
-  Point operator/(double d) const { return {x / d, y / d}; }
+  constexpr Point operator/(Scalar d) const { return {x / d, y / d}; }
 
-  Point operator/(const Point& p) const { return {x / p.x, y / p.y}; }
+  constexpr Point operator/(const Point& p) const { return {x / p.x, y / p.y}; }
 
-  Point operator/(const Size& s) const { return {x / s.width, y / s.height}; }
+  constexpr Point operator/(const Size& s) const {
+    return {x / s.width, y / s.height};
+  }
 
-  double GetDistanceSquared(const Point& p) const;
+  constexpr Scalar GetDistanceSquared(const Point& p) const {
+    double dx = p.x - x;
+    double dy = p.y - y;
+    return dx * dx + dy * dy;
+  }
 
-  double GetDistance(const Point& p) const;
+  constexpr Scalar GetDistance(const Point& p) const {
+    return sqrt(GetDistanceSquared(p));
+  }
 
   std::string ToString() const;
 
   void FromString(const std::string& str);
 };
+
+static_assert(sizeof(Point) == 2 * sizeof(Scalar));
 
 }  // namespace impeller

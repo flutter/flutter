@@ -6,7 +6,7 @@
 
 namespace impeller {
 
-static const double kArcApproximationMagic = 0.551915024494;
+static const Scalar kArcApproximationMagic = 0.551915024494;
 
 PathBuilder::PathBuilder() = default;
 
@@ -34,7 +34,7 @@ PathBuilder& PathBuilder::LineTo(Point point, bool relative) {
   return *this;
 }
 
-PathBuilder& PathBuilder::HorizontalLineTo(double x, bool relative) {
+PathBuilder& PathBuilder::HorizontalLineTo(Scalar x, bool relative) {
   Point endpoint =
       relative ? Point{current_.x + x, current_.y} : Point{x, current_.y};
   prototype_.AddLinearComponent(current_, endpoint);
@@ -42,7 +42,7 @@ PathBuilder& PathBuilder::HorizontalLineTo(double x, bool relative) {
   return *this;
 }
 
-PathBuilder& PathBuilder::VerticalLineTo(double y, bool relative) {
+PathBuilder& PathBuilder::VerticalLineTo(Scalar y, bool relative) {
   Point endpoint =
       relative ? Point{current_.x, current_.y + y} : Point{current_.x, y};
   prototype_.AddLinearComponent(current_, endpoint);
@@ -158,11 +158,11 @@ PathBuilder& PathBuilder::AddRect(Rect rect) {
   return *this;
 }
 
-PathBuilder& PathBuilder::AddCircle(const Point& center, double radius) {
+PathBuilder& PathBuilder::AddCircle(const Point& center, Scalar radius) {
   current_ = center + Point{0.0, radius};
 
-  const double diameter = radius * 2.0;
-  const double magic = kArcApproximationMagic * radius;
+  const Scalar diameter = radius * 2.0;
+  const Scalar magic = kArcApproximationMagic * radius;
 
   prototype_.AddCubicComponent(
       {center.x + radius, center.y},                     //
@@ -194,7 +194,7 @@ PathBuilder& PathBuilder::AddCircle(const Point& center, double radius) {
   return *this;
 }
 
-PathBuilder& PathBuilder::AddRoundedRect(Rect rect, double radius) {
+PathBuilder& PathBuilder::AddRoundedRect(Rect rect, Scalar radius) {
   return radius == 0.0 ? AddRect(rect)
                        : AddRoundedRect(rect, {radius, radius, radius, radius});
 }
@@ -202,10 +202,10 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, double radius) {
 PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   current_ = rect.origin + Point{radii.topLeft, 0.0};
 
-  const double magicTopRight = kArcApproximationMagic * radii.topRight;
-  const double magicBottomRight = kArcApproximationMagic * radii.bottomRight;
-  const double magicBottomLeft = kArcApproximationMagic * radii.bottomLeft;
-  const double magicTopLeft = kArcApproximationMagic * radii.topLeft;
+  const Scalar magicTopRight = kArcApproximationMagic * radii.topRight;
+  const Scalar magicBottomRight = kArcApproximationMagic * radii.bottomRight;
+  const Scalar magicBottomLeft = kArcApproximationMagic * radii.bottomLeft;
+  const Scalar magicTopLeft = kArcApproximationMagic * radii.topLeft;
 
   /*
    *  Top line.
@@ -287,7 +287,7 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
 PathBuilder& PathBuilder::AddEllipse(const Point& center, const Size& radius) {
   current_ = center + Point{0.0, radius.height};
 
-  const Size diameter = {radius.width * 2.0, radius.height * 2.0};
+  const Size diameter = {radius.width * 2.0f, radius.height * 2.0f};
   const Size magic = {kArcApproximationMagic * radius.width,
                       kArcApproximationMagic * radius.height};
 

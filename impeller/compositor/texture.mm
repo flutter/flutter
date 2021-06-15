@@ -11,8 +11,8 @@ Texture::Texture(id<MTLTexture> texture) : texture_(texture) {}
 Texture::~Texture() = default;
 
 Size Texture::GetSize() const {
-  return {static_cast<double>(texture_.width),
-          static_cast<double>(texture_.height)};
+  return {static_cast<Scalar>(texture_.width),
+          static_cast<Scalar>(texture_.height)};
 }
 
 id<MTLTexture> Texture::GetMTLTexture() const {
