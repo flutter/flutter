@@ -7,18 +7,19 @@
 #include <cmath>
 #include <utility>
 
-#include "point.h"
-#include "quaternion.h"
-#include "shear.h"
-#include "size.h"
-#include "vector.h"
+#include "impeller/geometry/point.h"
+#include "impeller/geometry/quaternion.h"
+#include "impeller/geometry/scalar.h"
+#include "impeller/geometry/shear.h"
+#include "impeller/geometry/size.h"
+#include "impeller/geometry/vector.h"
 
 namespace impeller {
 
 struct Matrix {
   union {
-    double m[16];
-    double e[4][4];
+    Scalar m[16];
+    Scalar e[4][4];
     Vector4 vec[4];
   };
 
@@ -45,7 +46,7 @@ struct Matrix {
   using DecompositionResult =
       std::pair<bool /* success */, Decomposition /* result */>;
 
-  Matrix()
+  constexpr Matrix()
       // clang-format off
       : vec{ Vector4(1.0,  0.0,  0.0,  0.0),
              Vector4(0.0,  1.0,  0.0,  0.0),
@@ -54,10 +55,10 @@ struct Matrix {
   // clang-format on
 
   // clang-format off
-  Matrix(double m0,  double m1,  double m2,  double m3,
-         double m4,  double m5,  double m6,  double m7,
-         double m8,  double m9,  double m10, double m11,
-         double m12, double m13, double m14, double m15)
+  constexpr Matrix(Scalar m0,  Scalar m1,  Scalar m2,  Scalar m3,
+                   Scalar m4,  Scalar m5,  Scalar m6,  Scalar m7,
+                   Scalar m8,  Scalar m9,  Scalar m10, Scalar m11,
+                   Scalar m12, Scalar m13, Scalar m14, Scalar m15)
       : vec{Vector4(m0,  m1,  m2,  m3),
             Vector4(m4,  m5,  m6,  m7),
             Vector4(m8,  m9,  m10, m11),
@@ -66,7 +67,7 @@ struct Matrix {
 
   Matrix(const Decomposition& decomposition);
 
-  static Matrix MakeTranslation(const Vector3& t) {
+  static constexpr Matrix MakeTranslation(const Vector3& t) {
     // clang-format off
     return Matrix(1.0, 0.0, 0.0, 0.0,
                   0.0, 1.0, 0.0, 0.0,
@@ -75,7 +76,7 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix MakeScale(const Vector3& s) {
+  static constexpr Matrix MakeScale(const Vector3& s) {
     // clang-format off
     return Matrix(s.x, 0.0, 0.0, 0.0,
                   0.0, s.y, 0.0, 0.0,
@@ -84,12 +85,12 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix MakeRotation(double radians, const Vector4& r) {
+  static Matrix MakeRotation(Scalar radians, const Vector4& r) {
     const Vector4 v = r.Normalize();
 
-    const double cosine = cos(radians);
-    const double cosp = 1.0f - cosine;
-    const double sine = sin(radians);
+    const Scalar cosine = cos(radians);
+    const Scalar cosp = 1.0f - cosine;
+    const Scalar sine = sin(radians);
 
     // clang-format off
     return Matrix(
@@ -115,9 +116,9 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix MakeRotationX(double radians) {
-    double cosine = cos(radians);
-    double sine = sin(radians);
+  static Matrix MakeRotationX(Scalar radians) {
+    Scalar cosine = cos(radians);
+    Scalar sine = sin(radians);
     // clang-format off
     return Matrix(
       1.0,  0.0,    0.0,    0.0,
@@ -128,9 +129,9 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix MakeRotationY(double radians) {
-    double cosine = cos(radians);
-    double sine = sin(radians);
+  static Matrix MakeRotationY(Scalar radians) {
+    Scalar cosine = cos(radians);
+    Scalar sine = sin(radians);
 
     // clang-format off
     return Matrix(
@@ -142,9 +143,9 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix MakeRotationZ(double radians) {
-    double cosine = cos(radians);
-    double sine = sin(radians);
+  static Matrix MakeRotationZ(Scalar radians) {
+    Scalar cosine = cos(radians);
+    Scalar sine = sin(radians);
 
     // clang-format off
     return Matrix (
@@ -156,12 +157,12 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix MakeOrthographic(double left,
-                                 double right,
-                                 double bottom,
-                                 double top,
-                                 double nearZ,
-                                 double farZ);
+  static Matrix MakeOrthographic(Scalar left,
+                                 Scalar right,
+                                 Scalar bottom,
+                                 Scalar top,
+                                 Scalar nearZ,
+                                 Scalar farZ);
 
   static Matrix MakeOrthographic(const Size& size);
 
@@ -175,16 +176,16 @@ struct Matrix {
    *
    *  @return the perspective projection matrix.
    */
-  static Matrix MakePerspective(double fov,
-                                double aspect,
-                                double nearZ,
-                                double farZ);
+  static Matrix MakePerspective(Scalar fov,
+                                Scalar aspect,
+                                Scalar nearZ,
+                                Scalar farZ);
 
   static Matrix MakeLookAt(const Vector3& eye,
                            const Vector3& center,
                            const Vector3& up);
 
-  Matrix Translate(const Vector3& t) const {
+  constexpr Matrix Translate(const Vector3& t) const {
     // clang-format off
     return Matrix(m[0], m[1], m[2], m[3],
                   m[4], m[5], m[6], m[7],
@@ -196,7 +197,7 @@ struct Matrix {
     // clang-format on
   }
 
-  Matrix Scale(const Vector3& s) const {
+  constexpr Matrix Scale(const Vector3& s) const {
     // clang-format off
     return Matrix(m[0] * s.x, m[1] * s.x, m[2] * s.x , m[3] * s.x,
                   m[4] * s.y, m[5] * s.y, m[6] * s.y , m[7] * s.y,
@@ -205,7 +206,7 @@ struct Matrix {
     // clang-format on
   }
 
-  Matrix Multiply(const Matrix& o) const {
+  constexpr Matrix Multiply(const Matrix& o) const {
     // clang-format off
     return Matrix(
         m[0] * o.m[0]  + m[4] * o.m[1]  + m[8]  * o.m[2]  + m[12] * o.m[3],
@@ -231,14 +232,14 @@ struct Matrix {
 
   Matrix Invert() const;
 
-  double GetDeterminant() const;
+  Scalar GetDeterminant() const;
 
-  bool IsAffine() const {
+  constexpr bool IsAffine() const {
     return (m[2] == 0 && m[3] == 0 && m[6] == 0 && m[7] == 0 && m[8] == 0 &&
             m[9] == 0 && m[10] == 1 && m[11] == 0 && m[14] == 0 && m[15] == 1);
   }
 
-  bool IsIdentity() const {
+  constexpr bool IsIdentity() const {
     return (
         // clang-format off
         m[0]  == 1.0 && m[1]  == 0.0 && m[2]  == 0.0 && m[3]  == 0.0 &&
@@ -251,7 +252,7 @@ struct Matrix {
 
   DecompositionResult Decompose() const;
 
-  bool operator==(const Matrix& m) const {
+  constexpr bool operator==(const Matrix& m) const {
     // clang-format off
     return vec[0] == m.vec[0]
         && vec[1] == m.vec[1]
@@ -260,7 +261,7 @@ struct Matrix {
     // clang-format on
   }
 
-  bool operator!=(const Matrix& m) const {
+  constexpr bool operator!=(const Matrix& m) const {
     // clang-format off
     return vec[0] != m.vec[0]
         || vec[1] != m.vec[1]
@@ -284,7 +285,7 @@ struct Matrix {
   void FromString(const std::string& str);
 };
 
-static_assert(sizeof(struct Matrix) == sizeof(double) * 16,
+static_assert(sizeof(struct Matrix) == sizeof(Scalar) * 16,
               "The matrix must be of consistent size.");
 
 inline Vector4 operator*(const Vector4& v, const Matrix& m) {

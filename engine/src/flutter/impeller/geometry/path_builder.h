@@ -5,8 +5,9 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
-#include "path.h"
-#include "rect.h"
+#include "impeller/geometry/path.h"
+#include "impeller/geometry/rect.h"
+#include "impeller/geometry/scalar.h"
 
 namespace impeller {
 
@@ -24,9 +25,9 @@ class PathBuilder {
 
   PathBuilder& LineTo(Point point, bool relative = false);
 
-  PathBuilder& HorizontalLineTo(double x, bool relative = false);
+  PathBuilder& HorizontalLineTo(Scalar x, bool relative = false);
 
-  PathBuilder& VerticalLineTo(double y, bool relative = false);
+  PathBuilder& VerticalLineTo(Scalar y, bool relative = false);
 
   PathBuilder& QuadraticCurveTo(Point point,
                                 Point controlPoint,
@@ -45,24 +46,24 @@ class PathBuilder {
 
   PathBuilder& AddRect(Rect rect);
 
-  PathBuilder& AddRoundedRect(Rect rect, double radius);
+  PathBuilder& AddRoundedRect(Rect rect, Scalar radius);
 
-  PathBuilder& AddCircle(const Point& center, double radius);
+  PathBuilder& AddCircle(const Point& center, Scalar radius);
 
   PathBuilder& AddEllipse(const Point& center, const Size& size);
 
   struct RoundingRadii {
-    double topLeft = 0.0;
-    double bottomLeft = 0.0;
-    double topRight = 0.0;
-    double bottomRight = 0.0;
+    Scalar topLeft = 0.0;
+    Scalar bottomLeft = 0.0;
+    Scalar topRight = 0.0;
+    Scalar bottomRight = 0.0;
 
     RoundingRadii() {}
 
-    RoundingRadii(double pTopLeft,
-                  double pBottomLeft,
-                  double pTopRight,
-                  double pBottomRight)
+    RoundingRadii(Scalar pTopLeft,
+                  Scalar pBottomLeft,
+                  Scalar pTopRight,
+                  Scalar pBottomRight)
         : topLeft(pTopLeft),
           bottomLeft(pBottomLeft),
           topRight(pTopRight),

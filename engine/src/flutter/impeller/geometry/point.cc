@@ -20,14 +20,4 @@ void Point::FromString(const std::string& str) {
   stream >> y;
 }
 
-double Point::GetDistanceSquared(const Point& p) const {
-  double dx = p.x - x;
-  double dy = p.y - y;
-  return dx * dx + dy * dy;
-}
-
-double Point::GetDistance(const Point& p) const {
-  return sqrt(GetDistanceSquared(p));
-}
-
 }  // namespace impeller

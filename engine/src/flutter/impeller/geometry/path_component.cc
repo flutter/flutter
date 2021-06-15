@@ -8,54 +8,54 @@
 namespace impeller {
 
 static const size_t kRecursionLimit = 32;
-static const double kCurveCollinearityEpsilon = 1e-30;
-static const double kCurveAngleToleranceEpsilon = 0.01;
+static const Scalar kCurveCollinearityEpsilon = 1e-30;
+static const Scalar kCurveAngleToleranceEpsilon = 0.01;
 
 /*
  *  Based on: https://en.wikipedia.org/wiki/B%C3%A9zier_curve#Specific_cases
  */
 
-static inline double LinearSolve(double t, double p0, double p1) {
+static inline Scalar LinearSolve(Scalar t, Scalar p0, Scalar p1) {
   return p0 + t * (p1 - p0);
 }
 
-static inline double QuadraticSolve(double t, double p0, double p1, double p2) {
+static inline Scalar QuadraticSolve(Scalar t, Scalar p0, Scalar p1, Scalar p2) {
   return (1 - t) * (1 - t) * p0 +  //
          2 * (1 - t) * t * p1 +    //
          t * t * p2;
 }
 
-static inline double QuadraticSolveDerivative(double t,
-                                              double p0,
-                                              double p1,
-                                              double p2) {
+static inline Scalar QuadraticSolveDerivative(Scalar t,
+                                              Scalar p0,
+                                              Scalar p1,
+                                              Scalar p2) {
   return 2 * (1 - t) * (p1 - p0) +  //
          2 * t * (p2 - p1);
 }
 
-static inline double CubicSolve(double t,
-                                double p0,
-                                double p1,
-                                double p2,
-                                double p3) {
+static inline Scalar CubicSolve(Scalar t,
+                                Scalar p0,
+                                Scalar p1,
+                                Scalar p2,
+                                Scalar p3) {
   return (1 - t) * (1 - t) * (1 - t) * p0 +  //
          3 * (1 - t) * (1 - t) * t * p1 +    //
          3 * (1 - t) * t * t * p2 +          //
          t * t * t * p3;
 }
 
-static inline double CubicSolveDerivative(double t,
-                                          double p0,
-                                          double p1,
-                                          double p2,
-                                          double p3) {
+static inline Scalar CubicSolveDerivative(Scalar t,
+                                          Scalar p0,
+                                          Scalar p1,
+                                          Scalar p2,
+                                          Scalar p3) {
   return -3 * p0 * (1 - t) * (1 - t) +  //
          p1 * (3 * (1 - t) * (1 - t) - 6 * (1 - t) * t) +
          p2 * (6 * (1 - t) * t - 3 * t * t) +  //
          3 * p3 * t * t;
 }
 
-Point LinearPathComponent::Solve(double time) const {
+Point LinearPathComponent::Solve(Scalar time) const {
   return {
       LinearSolve(time, p1.x, p2.x),  // x
       LinearSolve(time, p1.y, p2.y),  // y
@@ -70,14 +70,14 @@ std::vector<Point> LinearPathComponent::Extrema() const {
   return {p1, p2};
 }
 
-Point QuadraticPathComponent::Solve(double time) const {
+Point QuadraticPathComponent::Solve(Scalar time) const {
   return {
       QuadraticSolve(time, p1.x, cp.x, p2.x),  // x
       QuadraticSolve(time, p1.y, cp.y, p2.y),  // y
   };
 }
 
-Point QuadraticPathComponent::SolveDerivative(double time) const {
+Point QuadraticPathComponent::SolveDerivative(Scalar time) const {
   return {
       QuadraticSolveDerivative(time, p1.x, cp.x, p2.x),  // x
       QuadraticSolveDerivative(time, p1.y, cp.y, p2.y),  // y
@@ -95,14 +95,14 @@ std::vector<Point> QuadraticPathComponent::Sxtrema() const {
   return elevated.Extrema();
 }
 
-Point CubicPathComponent::Solve(double time) const {
+Point CubicPathComponent::Solve(Scalar time) const {
   return {
       CubicSolve(time, p1.x, cp1.x, cp2.x, p2.x),  // x
       CubicSolve(time, p1.y, cp1.y, cp2.y, p2.y),  // y
   };
 }
 
-Point CubicPathComponent::SolveDerivative(double time) const {
+Point CubicPathComponent::SolveDerivative(Scalar time) const {
   return {
       CubicSolveDerivative(time, p1.x, cp1.x, cp2.x, p2.x),  // x
       CubicSolveDerivative(time, p1.y, cp1.y, cp2.y, p2.y),  // y
@@ -141,12 +141,12 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
    *  Attempt approximation using single straight line.
    */
   auto d = p4 - p1;
-  double d2 = fabs(((p2.x - p4.x) * d.y - (p2.y - p4.y) * d.x));
-  double d3 = fabs(((p3.x - p4.x) * d.y - (p3.y - p4.y) * d.x));
+  Scalar d2 = fabs(((p2.x - p4.x) * d.y - (p2.y - p4.y) * d.x));
+  Scalar d3 = fabs(((p3.x - p4.x) * d.y - (p3.y - p4.y) * d.x));
 
-  double da1 = 0;
-  double da2 = 0;
-  double k = 0;
+  Scalar da1 = 0;
+  Scalar da2 = 0;
+  Scalar k = 0;
 
   switch ((static_cast<int>(d2 > kCurveCollinearityEpsilon) << 1) +
           static_cast<int>(d3 > kCurveCollinearityEpsilon)) {
@@ -342,22 +342,22 @@ std::vector<Point> CubicPathComponent::SmoothPoints(
   return points;
 }
 
-static inline bool NearEqual(double a, double b, double epsilon) {
+static inline bool NearEqual(Scalar a, Scalar b, Scalar epsilon) {
   return (a > (b - epsilon)) && (a < (b + epsilon));
 }
 
-static inline bool NearZero(double a) {
+static inline bool NearZero(Scalar a) {
   return NearEqual(a, 0.0, 1e-12);
 }
 
-static void CubicPathBoundingPopulateValues(std::vector<double>& values,
-                                            double p1,
-                                            double p2,
-                                            double p3,
-                                            double p4) {
-  const double a = 3.0 * (-p1 + 3.0 * p2 - 3.0 * p3 + p4);
-  const double b = 6.0 * (p1 - 2.0 * p2 + p3);
-  const double c = 3.0 * (p2 - p1);
+static void CubicPathBoundingPopulateValues(std::vector<Scalar>& values,
+                                            Scalar p1,
+                                            Scalar p2,
+                                            Scalar p3,
+                                            Scalar p4) {
+  const Scalar a = 3.0 * (-p1 + 3.0 * p2 - 3.0 * p3 + p4);
+  const Scalar b = 6.0 * (p1 - 2.0 * p2 + p3);
+  const Scalar c = 3.0 * (p2 - p1);
 
   /*
    *  Boundary conditions.
@@ -367,30 +367,30 @@ static void CubicPathBoundingPopulateValues(std::vector<double>& values,
       return;
     }
 
-    double t = -c / b;
+    Scalar t = -c / b;
     if (t >= 0.0 && t <= 1.0) {
       values.emplace_back(t);
     }
     return;
   }
 
-  double b2Minus4AC = (b * b) - (4.0 * a * c);
+  Scalar b2Minus4AC = (b * b) - (4.0 * a * c);
 
   if (b2Minus4AC < 0.0) {
     return;
   }
 
-  double rootB2Minus4AC = ::sqrt(b2Minus4AC);
+  Scalar rootB2Minus4AC = ::sqrt(b2Minus4AC);
 
   {
-    double t = (-b + rootB2Minus4AC) / (2.0 * a);
+    Scalar t = (-b + rootB2Minus4AC) / (2.0 * a);
     if (t >= 0.0 && t <= 1.0) {
       values.emplace_back(t);
     }
   }
 
   {
-    double t = (-b - rootB2Minus4AC) / (2.0 * a);
+    Scalar t = (-b - rootB2Minus4AC) / (2.0 * a);
     if (t >= 0.0 && t <= 1.0) {
       values.emplace_back(t);
     }
@@ -401,7 +401,7 @@ std::vector<Point> CubicPathComponent::Extrema() const {
   /*
    *  As described in: https://pomax.github.io/bezierinfo/#extremities
    */
-  std::vector<double> values;
+  std::vector<Scalar> values;
 
   CubicPathBoundingPopulateValues(values, p1.x, cp1.x, cp2.x, p2.x);
   CubicPathBoundingPopulateValues(values, p1.y, cp1.y, cp2.y, p2.y);

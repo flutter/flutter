@@ -92,7 +92,8 @@ static ColorRenderPassAttachment FromMTLRenderPassColorAttachmentDescriptor(
   ConfigureRenderPassAttachment(attachment, desc);
   auto clear = desc.clearColor;
   attachment.clear_color =
-      Color{clear.red, clear.green, clear.blue, clear.alpha};
+      Color{static_cast<Scalar>(clear.red), static_cast<Scalar>(clear.green),
+            static_cast<Scalar>(clear.blue), static_cast<Scalar>(clear.alpha)};
   return attachment;
 }
 
