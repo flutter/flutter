@@ -84,18 +84,18 @@ Matrix::Matrix(const Decomposition& d) : Matrix() {
   }
 }
 
-Matrix Matrix::MakeOrthographic(double left,
-                                double right,
-                                double bottom,
-                                double top,
-                                double nearZ,
-                                double farZ) {
-  double ral = right + left;
-  double rsl = right - left;
-  double tab = top + bottom;
-  double tsb = top - bottom;
-  double fan = farZ + nearZ;
-  double fsn = farZ - nearZ;
+Matrix Matrix::MakeOrthographic(Scalar left,
+                                Scalar right,
+                                Scalar bottom,
+                                Scalar top,
+                                Scalar nearZ,
+                                Scalar farZ) {
+  Scalar ral = right + left;
+  Scalar rsl = right - left;
+  Scalar tab = top + bottom;
+  Scalar tsb = top - bottom;
+  Scalar fan = farZ + nearZ;
+  Scalar fsn = farZ - nearZ;
 
   // clang-format off
   return Matrix(2.0 / rsl,   0.0,          0.0,        0.0,
@@ -110,11 +110,11 @@ Matrix Matrix::MakeOrthographic(const Size& size) {
                                   INT_MAX);
 }
 
-Matrix Matrix::MakePerspective(double fov,
-                               double aspect,
-                               double nearZ,
-                               double farZ) {
-  double cotan = 1.0 / tan(fov / 2.0);
+Matrix Matrix::MakePerspective(Scalar fov,
+                               Scalar aspect,
+                               Scalar nearZ,
+                               Scalar farZ) {
+  Scalar cotan = 1.0 / tan(fov / 2.0);
 
   return Matrix(cotan / aspect, 0.0, 0.0, 0.0,                        //
                 0.0, cotan, 0.0, 0.0,                                 //
@@ -213,7 +213,7 @@ Matrix Matrix::Invert() const {
       m[0] * m[5] * m[10] - m[0] * m[6] * m[9] - m[4] * m[1] * m[10] +
           m[4] * m[2] * m[9] + m[8] * m[1] * m[6] - m[8] * m[2] * m[5]};
 
-  double det =
+  Scalar det =
       m[0] * tmp.m[0] + m[1] * tmp.m[4] + m[2] * tmp.m[8] + m[3] * tmp.m[12];
 
   if (det == 0) {
@@ -237,7 +237,7 @@ Matrix Matrix::Transpose() const {
   };
 }
 
-double Matrix::GetDeterminant() const {
+Scalar Matrix::GetDeterminant() const {
   auto a00 = e[0][0];
   auto a01 = e[0][1];
   auto a02 = e[0][2];

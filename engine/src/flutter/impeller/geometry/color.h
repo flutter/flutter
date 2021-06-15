@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <string>
 
+#include "impeller/geometry/scalar.h"
+
 namespace impeller {
 
 struct ColorHSB;
@@ -18,28 +20,28 @@ struct Color {
   /**
    *  The red color component (0 to 1)
    */
-  double red = 0.0;
+  Scalar red = 0.0;
 
   /**
    *  The green color component (0 to 1)
    */
-  double green = 0.0;
+  Scalar green = 0.0;
 
   /**
    *  The blue color component (0 to 1)
    */
-  double blue = 0.0;
+  Scalar blue = 0.0;
 
   /**
    *  The alpha component of the color (0 to 1)
    */
-  double alpha = 0.0;
+  Scalar alpha = 0.0;
 
   constexpr Color() {}
 
   Color(const ColorHSB& hsbColor);
 
-  constexpr Color(double r, double g, double b, double a)
+  constexpr Color(Scalar r, Scalar g, Scalar b, Scalar a)
       : red(r), green(g), blue(b), alpha(a) {}
 
   constexpr bool operator==(const Color& c) const {
@@ -641,24 +643,24 @@ struct ColorHSB {
   /**
    *  The hue of the color (0 to 1)
    */
-  double hue;
+  Scalar hue;
 
   /**
    *  The saturation of the color (0 to 1)
    */
-  double saturation;
+  Scalar saturation;
 
   /**
    *  The brightness of the color (0 to 1)
    */
-  double brightness;
+  Scalar brightness;
 
   /**
    *  The alpha of the color (0 to 1)
    */
-  double alpha;
+  Scalar alpha;
 
-  ColorHSB(double h, double s, double b, double a)
+  constexpr ColorHSB(Scalar h, Scalar s, Scalar b, Scalar a)
       : hue(h), saturation(s), brightness(b), alpha(a) {}
 
   static ColorHSB FromRGB(Color rgb);
@@ -667,5 +669,7 @@ struct ColorHSB {
 
   std::string ToString() const;
 };
+
+static_assert(sizeof(Color) == 4 * sizeof(Scalar));
 
 }  // namespace impeller

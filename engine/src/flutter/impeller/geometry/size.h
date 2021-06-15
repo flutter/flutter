@@ -7,25 +7,24 @@
 #include <limits>
 #include <string>
 
+#include "impeller/geometry/scalar.h"
+
 namespace impeller {
 
 struct Size {
-  double width = 0.0;
-  double height = 0.0;
+  Scalar width = 0.0;
+  Scalar height = 0.0;
 
   constexpr Size() {}
 
-  constexpr Size(double width, double height) : width(width), height(height) {}
+  constexpr Size(Scalar width, Scalar height) : width(width), height(height) {}
 
   static constexpr Size Infinite() {
-    return Size{std::numeric_limits<double>::max(),
-                std::numeric_limits<double>::max()};
+    return Size{std::numeric_limits<Scalar>::max(),
+                std::numeric_limits<Scalar>::max()};
   }
 
-  /*
-   *  Operator overloads
-   */
-  constexpr Size operator*(double scale) const {
+  constexpr Size operator*(Scalar scale) const {
     return {width * scale, height * scale};
   }
 
@@ -69,5 +68,7 @@ struct Size {
 
   void FromString(const std::string& str);
 };
+
+static_assert(sizeof(Size) == 2 * sizeof(Scalar));
 
 }  // namespace impeller

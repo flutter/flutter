@@ -6,24 +6,25 @@
 
 #include <vector>
 
-#include "rect.h"
+#include "impeller/geometry/rect.h"
+#include "impeller/geometry/scalar.h"
 
 namespace impeller {
 
 struct SmoothingApproximation {
-  const double scale;
-  const double angleTolerance;
-  const double cuspLimit;
-  const double distanceToleranceSquare;
+  const Scalar scale;
+  const Scalar angleTolerance;
+  const Scalar cuspLimit;
+  const Scalar distanceToleranceSquare;
 
   SmoothingApproximation(/* default */)
       : SmoothingApproximation(1.0 /* scale */,
                                0.0 /* angle tolerance */,
                                0.0 /* cusp limit */) {}
 
-  SmoothingApproximation(double pScale,
-                         double pAngleTolerance,
-                         double pCuspLimit)
+  SmoothingApproximation(Scalar pScale,
+                         Scalar pAngleTolerance,
+                         Scalar pCuspLimit)
       : scale(pScale),
         angleTolerance(pAngleTolerance),
         cuspLimit(pCuspLimit),
@@ -38,7 +39,7 @@ struct LinearPathComponent {
 
   LinearPathComponent(Point ap1, Point ap2) : p1(ap1), p2(ap2) {}
 
-  Point Solve(double time) const;
+  Point Solve(Scalar time) const;
 
   std::vector<Point> SmoothPoints() const;
 
@@ -59,9 +60,9 @@ struct QuadraticPathComponent {
   QuadraticPathComponent(Point ap1, Point acp, Point ap2)
       : p1(ap1), cp(acp), p2(ap2) {}
 
-  Point Solve(double time) const;
+  Point Solve(Scalar time) const;
 
-  Point SolveDerivative(double time) const;
+  Point SolveDerivative(Scalar time) const;
 
   std::vector<Point> SmoothPoints(
       const SmoothingApproximation& approximation) const;
@@ -90,9 +91,9 @@ struct CubicPathComponent {
   CubicPathComponent(Point ap1, Point acp1, Point acp2, Point ap2)
       : p1(ap1), cp1(acp1), cp2(acp2), p2(ap2) {}
 
-  Point Solve(double time) const;
+  Point Solve(Scalar time) const;
 
-  Point SolveDerivative(double time) const;
+  Point SolveDerivative(Scalar time) const;
 
   std::vector<Point> SmoothPoints(
       const SmoothingApproximation& approximation) const;

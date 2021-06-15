@@ -71,7 +71,7 @@ ImageResult Image::Decode() const {
   }
 
   return ImageResult{
-      Size{static_cast<double>(width), static_cast<double>(height)},  // size
+      Size{static_cast<Scalar>(width), static_cast<Scalar>(height)},  // size
       components,                       // components
       std::move(destinationAllocation)  // allocation
   };
