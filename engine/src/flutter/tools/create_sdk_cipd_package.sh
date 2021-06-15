@@ -3,7 +3,7 @@
 # This script requires depot_tools to be on path.
 
 print_usage () {
-  echo "Usage: create_ndk_cipd_package.sh <PACKAGE_TYPE> <PATH_TO_ASSETS> <PLATFORM_NAME> <VERSION_TAG>"
+  echo "Usage: create_sdk_cipd_package.sh <PACKAGE_TYPE> <PATH_TO_ASSETS> <PLATFORM_NAME> <VERSION_TAG>"
   echo "  where:"
   echo "    - PACKAGE_TYPE is one of build-tools, platform-tools, platforms, or tools"
   echo "    - PATH_TO_ASSETS is the path to the unzipped asset folder"
