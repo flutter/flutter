@@ -842,8 +842,7 @@ void main() {
     expect(selectedResults, <String>['Result']);
   });
 
-  testWidgets('showSearch with useRootNavigator', (tester) async{
-
+  testWidgets('showSearch with useRootNavigator', (WidgetTester tester) async {
     final MyNavigatorObserver rootObserver = MyNavigatorObserver();
     final MyNavigatorObserver localObserver = MyNavigatorObserver();
 
@@ -853,9 +852,9 @@ void main() {
     );
 
     await tester.pumpWidget(MaterialApp(
-      navigatorObservers: [rootObserver],
+      navigatorObservers: <NavigatorObserver>[rootObserver],
       home: Navigator(
-        observers: [localObserver],
+        observers: <NavigatorObserver>[localObserver],
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == 'nested') {
             return MaterialPageRoute<dynamic>(
@@ -883,24 +882,24 @@ void main() {
       ),
     ));
 
-    expect(rootObserver.pushCount,0);
-    expect(localObserver.pushCount,0);
+    expect(rootObserver.pushCount, 0);
+    expect(localObserver.pushCount, 0);
 
     // showSearch normal and back
     await tester.tap(find.text('showSearchNormal'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
-    expect(rootObserver.pushCount,0);
-    expect(localObserver.pushCount,1);
+    expect(rootObserver.pushCount, 0);
+    expect(localObserver.pushCount, 1);
 
     // showSearch with rootNavigator
     await tester.tap(find.text('showSearchRootNavigator'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
-    expect(rootObserver.pushCount,1);
-    expect(localObserver.pushCount,1);
+    expect(rootObserver.pushCount, 1);
+    expect(localObserver.pushCount, 1);
   });
 }
 
@@ -1094,7 +1093,7 @@ class MyNavigatorObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     // don't count the root route
-    if(['nested','/'].contains(route.settings.name)){
+    if (<String>['nested', '/'].contains(route.settings.name)) {
       return;
     }
     pushCount++;
