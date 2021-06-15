@@ -28,11 +28,12 @@ class TestStdio extends Stdio {
   String get error => logs.where((String log) => log.startsWith(r'[error] ')).join('\n');
 
   String get stdout => logs.where((String log) {
-    return log.startsWith(r'[status] ') || log.startsWith(r'[trace] ');
+    return log.startsWith(r'[status] ') || log.startsWith(r'[trace] ') || log.startsWith(r'[write] ');
   }).join('\n');
 
   final bool verbose;
   late final List<String> _stdin;
+  List<String> get stdin => _stdin;
 
   @override
   String readLineSync() {

@@ -24,7 +24,7 @@ const String kYesFlag = 'yes';
 class NextCommand extends Command<void> {
   NextCommand({
     @required this.checkouts,
-  }) : platform = checkouts.platform, stdio = checkouts.stdio {
+  })  : platform = checkouts.platform {
     final String defaultPath = defaultStateFilePath(platform);
     argParser.addOption(
       kStateOption,
@@ -40,9 +40,6 @@ class NextCommand extends Command<void> {
 
   final Checkouts checkouts;
   final Platform platform;
-  final Stdio stdio;
-
-  bool get autoAccept => argResults[kYesFlag] as bool;
 
   @override
   String get name => 'next';
@@ -52,91 +49,112 @@ class NextCommand extends Command<void> {
 
   @override
   void run() {
-    const List<CherrypickState> finishedStates = <CherrypickState>[
-      CherrypickState.COMPLETED,
-      CherrypickState.ABANDONED,
-    ];
-    final File stateFile = checkouts.fileSystem.file(argResults[kStateOption]);
-    if (!stateFile.existsSync()) {
-      throw ConductorException(
-        'No persistent state file found at ${argResults[kStateOption]}.',
-      );
-    }
+    runNext(
+      autoAccept: argResults[kYesFlag] as bool,
+      checkouts: checkouts,
+      platform: platform,
+      stateFile: checkouts.fileSystem.file(argResults[kStateOption]),
+    );
+  }
+}
 
-    final pb.ConductorState state = readStateFromFile(stateFile);
-    stdio.printTrace(state.toString());
-    switch (state.lastPhase) {
-      case pb.ReleasePhase.INITIALIZE:
-        // At this time, the conductor tool will only know if a cherrypick has
-        // been applied 
-        bool allCherrypicksVerifiedApplied = true;
-        for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
-          if (!finishedStates.contains(cherrypick.state)) {
-            allCherrypicksVerifiedApplied = false;
-            break;
-          }
-        }
-        if (allCherrypicksVerifiedApplied == false) {
-          final bool response = prompt('Did you apply all engine cherrypicks?');
-          if (!response) {
-            stdio.printError('Aborting command.');
-            return;
-          }
-        }
-        break;
-      case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
-        if (platform.isMacOS) {
-          throw ConductorException('TODO: actually test this'); // TODO
-        } else {
-          final bool response = prompt(
-            'Have binaries for the engine commit been codesigned?',
-          );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            return;
-          }
-        }
-        break;
-      case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
-        break;
-      case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-        break;
-      case pb.ReleasePhase.PUBLISH_VERSION:
-        break;
-      case pb.ReleasePhase.PUBLISH_CHANNEL:
-        break;
-      case pb.ReleasePhase.VERIFY_RELEASE:
-        throw ConductorException('This release is finished.');
-        break;
-    }
-    final pb.ReleasePhase nextPhase = getNextPhase(state.lastPhase);
-    state.lastPhase = nextPhase;
+@visibleForTesting
+bool prompt(String message, Stdio stdio) {
+  stdio.write('${message.trim()} (y/n) ');
+  final String response = stdio.readLineSync().trim();
+  final String firstChar = response[0].toUpperCase();
+  if (firstChar == 'Y') {
+    return true;
+  } else if (firstChar == 'N') {
+    return false;
+  } else {
+    throw ConductorException(
+      'Unknown user input (expected "y" or "n"): $response',
+    );
+  }
+}
 
-    writeStateToFile(stateFile, state);
+@visibleForTesting
+void runNext({
+  @required bool autoAccept,
+  @required Checkouts checkouts,
+  @required Platform platform,
+  @required File stateFile,
+}) {
+  final Stdio stdio = checkouts.stdio;
+  const List<CherrypickState> finishedStates = <CherrypickState>[
+    CherrypickState.COMPLETED,
+    CherrypickState.ABANDONED,
+  ];
+  if (!stateFile.existsSync()) {
+    throw ConductorException(
+      'No persistent state file found at ${stateFile.path}.',
+    );
   }
 
-  /// Prompt the user for a boolean value.
-  ///
-  /// If the force flag is provided, this method will immediately return true.
-  /// Otherwise, it will print [message] and read a line from STDIN and check if
-  /// it starts with a `y` or a `n`. This method will throw a
-  /// [ConductorException] if the provided input matches neither.
-  @visibleForTesting
-  bool prompt(String message) {
-    if (autoAccept) {
-      return true;
-    }
-    stdio.write('${message.trim()} (y/n) ');
-    final String response = stdio.readLineSync().trim();
-    final String firstChar = response[0].toUpperCase();
-    if (firstChar == 'Y') {
-      return true;
-    } else if (firstChar == 'N') {
-      return false;
-    } else {
-      throw ConductorException(
-        'Unknown user input (expected "y" or "n"): $response',
-      );
-    }
+  final pb.ConductorState state = readStateFromFile(stateFile);
+  stdio.printTrace(state.toString());
+  switch (state.lastPhase) {
+    case pb.ReleasePhase.INITIALIZE:
+      bool allEngineCherrypicksVerified = true;
+      for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
+        if (!finishedStates.contains(cherrypick.state)) {
+          allEngineCherrypicksVerified = false;
+          break;
+        }
+      }
+      // At this time, the conductor tool only knows about cherrypicks that it
+      // has auto-applied. To proceed to the next phase when some cherrypicks
+      // were applied manually, the user will have to confirm.
+      if (allEngineCherrypicksVerified == false && autoAccept == false) {
+        final bool response = prompt('Did you apply and merge all engine cherrypicks?', stdio);
+        if (!response) {
+          stdio.printError('Aborting command.');
+          return;
+        }
+      }
+      break;
+    case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
+      if (autoAccept == false) {
+        // TODO(fujino): actually test if binaries have been codesigned on macOS
+        final bool response = prompt(
+          'Have binaries for the engine commit been codesigned?',
+          stdio,
+        );
+        if (!response) {
+          stdio.printError('Aborting command.');
+          return;
+        }
+      }
+      break;
+    case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
+      bool allFrameworkCherrypicksVerified = true;
+      for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
+        if (!finishedStates.contains(cherrypick.state)) {
+          allFrameworkCherrypicksVerified = false;
+          break;
+        }
+      }
+      if (allFrameworkCherrypicksVerified == false && autoAccept == false) {
+        final bool response = prompt('Did you apply and merge all framework cherrypicks?', stdio);
+        if (!response) {
+          stdio.printError('Aborting command.');
+          return;
+        }
+      }
+      break;
+    case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
+      break;
+    case pb.ReleasePhase.PUBLISH_VERSION:
+      break;
+    case pb.ReleasePhase.PUBLISH_CHANNEL:
+      break;
+    case pb.ReleasePhase.VERIFY_RELEASE:
+      throw ConductorException('This release is finished.');
+      break;
   }
+  final pb.ReleasePhase nextPhase = getNextPhase(state.lastPhase);
+  state.lastPhase = nextPhase;
+
+  writeStateToFile(stateFile, state);
 }
