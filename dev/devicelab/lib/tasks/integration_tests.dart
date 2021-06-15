@@ -7,7 +7,6 @@
 import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/host_agent.dart';
-import '../framework/ios.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -193,19 +192,6 @@ class IntegrationTest {
         testTarget,
       ];
       await flutter('test', options: options);
-
-      if (device is IosDevice) {
-        section('Run integration_test from Xcode');
-
-        final List<String> options = <String>[
-          'ios',
-          '--config-only',
-          testTarget,
-        ];
-        await flutter('build', options: options);
-
-        await runNativeIosXcodeTests(device, testDirectory);
-      }
 
       return TaskResult.success(null);
     });
