@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:spirv/spirv.dart' as spirv;
-import 'package:path/path.dart' as path;
 import 'package:litetest/litetest.dart';
+import 'package:path/path.dart' as path;
+import 'package:spirv/spirv.dart' as spirv;
 
 const List<spirv.TargetLanguage> targets = <spirv.TargetLanguage>[
   spirv.TargetLanguage.sksl,
@@ -53,4 +52,3 @@ Stream<Uint8List> exceptionShaders() async* {
     yield file.readAsBytesSync();
   }
 }
-
