@@ -118,7 +118,7 @@ void runNext({
       if (autoAccept == false) {
         // TODO(fujino): actually test if binaries have been codesigned on macOS
         final bool response = prompt(
-          'Have binaries for the engine commit been codesigned?',
+          'Has CI passed for the engine PR and binaries been codesigned?',
           stdio,
         );
         if (!response) {
@@ -144,6 +144,17 @@ void runNext({
       }
       break;
     case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
+      if (autoAccept == false) {
+        // TODO(fujino): actually test if binaries have been codesigned on macOS
+        final bool response = prompt(
+          'Has CI passed for the framework PR?',
+          stdio,
+        );
+        if (!response) {
+          stdio.printError('Aborting command.');
+          return;
+        }
+      }
       break;
     case pb.ReleasePhase.PUBLISH_VERSION:
       break;

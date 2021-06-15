@@ -204,7 +204,7 @@ void main() {
         fileSystem.file(stateFile),
       );
 
-      expect(stdio.stdout, contains('Have binaries for the engine commit been codesigned? (y/n) '));
+      expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
       expect(finalState.lastPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(stdio.error.contains('Aborting command.'), true);
     });
@@ -246,7 +246,7 @@ void main() {
         fileSystem.file(stateFile),
       );
 
-      expect(stdio.stdout, contains('Have binaries for the engine commit been codesigned? (y/n) '));
+      expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
       expect(finalState.lastPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
     });
 
