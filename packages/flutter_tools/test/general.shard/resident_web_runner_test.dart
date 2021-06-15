@@ -94,7 +94,6 @@ const List<VmServiceExpectation> kAttachIsolateExpectations = <VmServiceExpectat
   ),
 ];
 
-
 const List<VmServiceExpectation> kAttachExpectations = <VmServiceExpectation>[
   ...kAttachLogExpectations,
   ...kAttachIsolateExpectations,
