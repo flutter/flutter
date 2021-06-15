@@ -879,8 +879,8 @@ class IosDevice extends Device {
   Future<void> stopLoggingToSink() async {
     assert(_loggingProcess != null);
     _abortedLogging = true;
-    _loggingProcess.kill();
-    await _loggingProcess.exitCode;
+    _loggingProcess?.kill();
+    await _loggingProcess?.exitCode;
   }
 
   // The methods below are stubs for now. They will need to be expanded.
