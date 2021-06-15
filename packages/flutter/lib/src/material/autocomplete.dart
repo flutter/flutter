@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';
@@ -292,15 +293,24 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
             itemCount: options.length,
             itemBuilder: (BuildContext context, int index) {
               final T option = options.elementAt(index);
-              final bool highlight = AutocompleteHighlightedOption.of(context) == index;
               return InkWell(
                 onTap: () {
                   onSelected(option);
                 },
-                child: Container(
-                  color: highlight ? Theme.of(context).focusColor : null,
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(displayStringForOption(option)),
+                child: Builder(
+                  builder: (BuildContext context) {
+                    final bool highlight = AutocompleteHighlightedOption.of(context) == index;
+                    if (highlight) {
+                      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+                        Scrollable.ensureVisible(context, alignment: 0.5);
+                      });
+                    }
+                    return Container(
+                      color: highlight ? Theme.of(context).focusColor : null,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(displayStringForOption(option)),
+                    );
+                  }
                 ),
               );
             },

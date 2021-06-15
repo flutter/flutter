@@ -15,6 +15,7 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../cache.dart';
+import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../globals_null_migrated.dart' as globals;
@@ -198,6 +199,16 @@ class Dart2JSTarget extends Target {
     'dart2js.d',
   ];
 
+  String _collectOutput(ProcessResult result) {
+    final String stdout = result.stdout is List<int>
+        ? utf8.decode(result.stdout as List<int>)
+        : result.stdout as String;
+    final String stderr = result.stderr is List<int>
+        ? utf8.decode(result.stderr as List<int>)
+        : result.stderr as String;
+    return stdout + stderr;
+  }
+
   @override
   Future<void> build(Environment environment) async {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
@@ -233,7 +244,7 @@ class Dart2JSTarget extends Target {
       environment.buildDir.childFile('main.dart').path, // dartfile
     ]);
     if (kernelResult.exitCode != 0) {
-      throw Exception(kernelResult.stdout + kernelResult.stderr);
+      throw Exception(_collectOutput(kernelResult));
     }
 
     final String dart2jsOptimization = environment.defines[kDart2jsOptimization];
@@ -250,7 +261,7 @@ class Dart2JSTarget extends Target {
       environment.buildDir.childFile('app.dill').path, // dartfile
     ]);
     if (javaScriptResult.exitCode != 0) {
-      throw Exception(javaScriptResult.stdout + javaScriptResult.stderr);
+      throw Exception(_collectOutput(javaScriptResult));
     }
     final File dart2jsDeps = environment.buildDir
       .childFile('app.dill.deps');

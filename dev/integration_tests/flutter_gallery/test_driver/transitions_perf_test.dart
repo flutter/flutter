@@ -42,7 +42,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
         frameStart = timestamp;
       } else {
         assert(phase == 'E');
-        final String routeName = startEvent['args']['to'] as String;
+        final String routeName = (startEvent['args'] as Map<String, dynamic>)['to'] as String;
         durations[routeName] ??= <int>[];
         durations[routeName]!.add(timestamp - frameStart!);
         startEvent = null;
@@ -79,7 +79,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
         continue;
 
       final String routeName = eventName == 'Start Transition'
-        ? eventIter.current['args']['to'] as String
+        ? (eventIter.current['args'] as Map<String, dynamic>)['to'] as String
         : '';
 
       if (eventName == lastEventName && routeName == lastRouteName) {

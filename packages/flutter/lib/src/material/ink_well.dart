@@ -107,7 +107,7 @@ abstract class InteractiveInkFeature extends InkFeature {
     ShapeBorder? customBorder,
     BorderRadius borderRadius = BorderRadius.zero,
     RectCallback? clipCallback,
-    }) {
+  }) {
     assert(canvas != null);
     assert(transform != null);
     assert(paint != null);

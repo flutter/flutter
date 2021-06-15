@@ -153,6 +153,7 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.inactiveColor,
+    this.thumbColor,
     this.mouseCursor,
     this.semanticFormatterCallback,
     this.focusNode,
@@ -190,6 +191,7 @@ class Slider extends StatefulWidget {
     this.mouseCursor,
     this.activeColor,
     this.inactiveColor,
+    this.thumbColor,
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
@@ -381,6 +383,14 @@ class Slider extends StatefulWidget {
   ///
   /// Ignored if this slider is created with [Slider.adaptive].
   final Color? inactiveColor;
+
+  /// The color of the thumb.
+  ///
+  /// If this color is null:
+  /// * [Slider] will use [activeColor].
+  /// * [CupertinoSlider] will have a white thumb
+  /// (like the native default iOS slider).
+  final Color? thumbColor;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -679,7 +689,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       inactiveTickMarkColor: widget.activeColor ?? sliderTheme.inactiveTickMarkColor ?? theme.colorScheme.primary.withOpacity(0.54),
       disabledActiveTickMarkColor: sliderTheme.disabledActiveTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.12),
       disabledInactiveTickMarkColor: sliderTheme.disabledInactiveTickMarkColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
-      thumbColor: widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
+      thumbColor: widget.thumbColor ?? widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
       disabledThumbColor: sliderTheme.disabledThumbColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(.38), theme.colorScheme.surface),
       overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
       valueIndicatorColor: valueIndicatorColor,
@@ -757,6 +767,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         max: widget.max,
         divisions: widget.divisions,
         activeColor: widget.activeColor,
+        thumbColor: widget.thumbColor ?? CupertinoColors.white,
       ),
     );
   }
