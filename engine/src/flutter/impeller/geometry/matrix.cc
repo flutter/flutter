@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "matrix.h"
+#include "impeller/geometry/matrix.h"
+
 #include <climits>
 #include <sstream>
 
@@ -142,25 +143,6 @@ Matrix Matrix::operator+(const Matrix& o) const {
       m[8] + o.m[8], m[9] + o.m[9], m[10] + o.m[10], m[11] + o.m[11],     //
       m[12] + o.m[12], m[13] + o.m[13], m[14] + o.m[14], m[15] + o.m[15]  //
   );
-}
-
-std::string Matrix::ToString() const {
-  std::stringstream stream;
-  for (int i = 0, limit = 16; i < limit; i++) {
-    stream << m[i];
-    if (i != limit - 1) {
-      stream << ",";
-    }
-  }
-  return stream.str();
-}
-
-void Matrix::FromString(const std::string& str) {
-  std::stringstream stream(str);
-  for (int i = 0; i < 16; i++) {
-    stream >> m[i];
-    stream.ignore();
-  }
 }
 
 Matrix Matrix::Invert() const {
@@ -465,18 +447,6 @@ uint64_t Matrix::Decomposition::GetComponentsMask() const {
   }
 
   return mask;
-}
-
-std::string Matrix::Decomposition::ToString() const {
-  std::stringstream stream;
-
-  stream << "Translation: " << translation.ToString() << std::endl;
-  stream << "Scale: " << scale.ToString() << std::endl;
-  stream << "Shear: " << shear.ToString() << std::endl;
-  stream << "Perspective: " << perspective.ToString() << std::endl;
-  stream << "Rotation: " << rotation.ToString() << std::endl;
-
-  return stream.str();
 }
 
 }  // namespace impeller
