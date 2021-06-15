@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 /// This library defines a transpiler for converting SPIR-V into SkSL or GLSL.
-// @dart = 2.12
 library spirv;
 
 import 'dart:convert';
