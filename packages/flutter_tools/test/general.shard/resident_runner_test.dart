@@ -85,6 +85,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
         tokenPos: 0,
         script: vm_service.ScriptRef(id: 'test-script', uri: 'foo.dart'),
       ),
+      enabled: true,
       resolved: true,
     ),
   ],
