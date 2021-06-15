@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-#
 # Copyright (c) 2013 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -77,7 +75,7 @@ def _FormatAsEnvironmentBlock(envvar_dict):
   CreateProcess documentation for more details."""
   block = ''
   nul = '\0'
-  for key, value in envvar_dict.items():
+  for key, value in envvar_dict.iteritems():
     block += key + '=' + value + nul
   block += nul
   return block
@@ -148,7 +146,7 @@ def main():
       f.write(env_block)
 
   assert vc_bin_dir
-  print('vc_bin_dir = "%s"' % vc_bin_dir)
+  print 'vc_bin_dir = "%s"' % vc_bin_dir
 
 
 if __name__ == '__main__':

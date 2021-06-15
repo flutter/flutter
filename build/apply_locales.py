@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-#
+#!/usr/bin/env python
 # Copyright (c) 2009 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -21,7 +20,7 @@ def main(argv):
   (options, arglist) = parser.parse_args(argv)
 
   if len(arglist) < 3:
-    print('ERROR: need string and list of locales')
+    print 'ERROR: need string and list of locales'
     return 1
 
   str_template = arglist[1]
@@ -40,7 +39,7 @@ def main(argv):
 
   # Quote each element so filename spaces don't mess up GYP's attempt to parse
   # it into a list.
-  print(' '.join(["'%s'" % x for x in results]))
+  print ' '.join(["'%s'" % x for x in results])
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv))

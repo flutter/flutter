@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-#
 # Copyright (c) 2012 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -21,7 +19,7 @@ def apply_gyp_environment_from_file(file_path):
     file_contents = f.read()
   try:
     file_data = eval(file_contents, {'__builtins__': None}, None)
-  except SyntaxError as e:
+  except SyntaxError, e:
     e.filename = os.path.abspath(file_path)
     raise
   supported_vars = (
@@ -52,12 +50,12 @@ def apply_gyp_environment_from_file(file_path):
           behavior = 'merges with, and individual components override,'
         else:
           result = os.environ[var]
-        print('INFO: Environment value for "%s" %s value in %s' % (
+        print 'INFO: Environment value for "%s" %s value in %s' % (
             var, behavior, os.path.abspath(file_path)
-        ))
+        )
         string_padding = max(len(var), len(file_path), len('result'))
-        print('      %s: %s' % (var.rjust(string_padding), os.environ[var]))
-        print('      %s: %s' % (file_path.rjust(string_padding), file_val))
+        print '      %s: %s' % (var.rjust(string_padding), os.environ[var])
+        print '      %s: %s' % (file_path.rjust(string_padding), file_val)
         os.environ[var] = result
       else:
         os.environ[var] = file_val

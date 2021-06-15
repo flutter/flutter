@@ -1,20 +1,16 @@
-#!/usr/bin/env python3
-#
+#!/usr/bin/env python
 # Copyright 2017 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 """Adds an analysis build step to invocations of the Clang C/C++ compiler.
 Usage: clang_static_analyzer_wrapper.py <compiler> [args...]
 """
-
 import argparse
 import fnmatch
 import itertools
 import os
 import sys
 import wrapper_utils
-
-
 # Flags used to enable analysis for Clang invocations.
 analyzer_enable_flags = [
     '--analyze',
@@ -38,7 +34,7 @@ analyzer_option_flags = [
 # e.g. ['-analyzer-foo', '-analyzer-bar'] => ['-Xanalyzer', '-analyzer-foo',
 #                                             '-Xanalyzer', '-analyzer-bar']
 def interleave_args(args, token):
-  return list(sum(list(zip([token] * len(args), args)), ()))
+  return list(sum(zip([token] * len(args), args), ()))
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--mode',

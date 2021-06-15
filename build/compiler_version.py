@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-#
+#!/usr/bin/env python
 # Copyright (c) 2012 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -20,9 +19,9 @@ compiler_version_cache = {}  # Map from (compiler, tool) -> version.
 
 
 def Usage(program_name):
-  print('%s MODE TOOL' % os.path.basename(program_name))
-  print('MODE: host or target.')
-  print('TOOL: assembler or compiler or linker.')
+  print '%s MODE TOOL' % os.path.basename(program_name)
+  print 'MODE: host or target.'
+  print 'TOOL: assembler or compiler or linker.'
   return 1
 
 
@@ -92,24 +91,24 @@ def GetVersion(compiler, tool):
     result = parsed_output.group(1) + parsed_output.group(2)
     compiler_version_cache[cache_key] = result
     return result
-  except Exception as e:
+  except Exception, e:
     if tool_error:
       sys.stderr.write(tool_error)
-    print("compiler_version.py failed to execute:", compiler, file=sys.stderr)
-    print(e, file=sys.stderr)
+    print >> sys.stderr, "compiler_version.py failed to execute:", compiler
+    print >> sys.stderr, e
     return ""
 
 
 def main(args):
   try:
     (mode, tool) = ParseArgs(args[1:])
-  except Exception as e:
+  except Exception, e:
     sys.stderr.write(e.message + '\n\n')
     return Usage(args[0])
 
   ret_code, result = ExtractVersion(mode, tool)
   if ret_code == 0:
-    print(result)
+    print result
   return ret_code
 
 

@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-#
+#!/usr/bin/env python
 # Copyright 2013 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -31,7 +30,7 @@ def print_landmines():
   # dependency problems, fix the dependency problems instead of adding a
   # landmine.
 
-  print('Lets start a new landmines file.')
+  print 'Lets start a new landmines file.'
 
 
 def main():
