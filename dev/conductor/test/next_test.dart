@@ -154,6 +154,7 @@ void main() {
         fileSystem.file(stateFile),
       );
 
+      expect(stdio.stdout, contains('Did you apply and merge all engine cherrypicks? (y/n) '));
       expect(finalState.lastPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(stdio.error, isEmpty);
     });
@@ -203,6 +204,7 @@ void main() {
         fileSystem.file(stateFile),
       );
 
+      expect(stdio.stdout, contains('Have binaries for the engine commit been codesigned? (y/n) '));
       expect(finalState.lastPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(stdio.error.contains('Aborting command.'), true);
     });
@@ -244,6 +246,7 @@ void main() {
         fileSystem.file(stateFile),
       );
 
+      expect(stdio.stdout, contains('Have binaries for the engine commit been codesigned? (y/n) '));
       expect(finalState.lastPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
     });
 
@@ -283,6 +286,7 @@ void main() {
         fileSystem.file(stateFile),
       );
 
+      expect(stdio.stdout, isNot(contains('Did you apply and merge all framework cherrypicks? (y/n) ')));
       expect(finalState.lastPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
       expect(stdio.error, isEmpty);
     });
