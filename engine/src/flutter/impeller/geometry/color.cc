@@ -85,30 +85,6 @@ Color ColorHSB::ToRGBA() const {
   return Color(0, 0, 0, alpha);
 }
 
-std::string ColorHSB::ToString() const {
-  std::stringstream stream;
-  stream << "{" << hue << ", " << saturation << ", " << brightness << ", "
-         << alpha << "}";
-  return stream.str();
-}
-
 Color::Color(const ColorHSB& hsbColor) : Color(hsbColor.ToRGBA()) {}
-
-std::string Color::ToString() const {
-  std::stringstream stream;
-  stream << red << "," << green << "," << blue << "," << alpha;
-  return stream.str();
-}
-
-void Color::FromString(const std::string& str) {
-  std::stringstream stream(str);
-  stream >> red;
-  stream.ignore();
-  stream >> green;
-  stream.ignore();
-  stream >> blue;
-  stream.ignore();
-  stream >> alpha;
-}
 
 }  // namespace impeller

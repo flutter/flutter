@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <string>
-
 #include "impeller/geometry/scalar.h"
 
 namespace impeller {
@@ -48,10 +45,6 @@ struct Color {
     return red == c.red && green == c.green && blue == c.blue &&
            alpha == c.alpha;
   }
-
-  std::string ToString() const;
-
-  void FromString(const std::string& str);
 
   static constexpr Color White() { return {1.0, 1.0, 1.0, 1.0}; }
 
@@ -666,8 +659,6 @@ struct ColorHSB {
   static ColorHSB FromRGB(Color rgb);
 
   Color ToRGBA() const;
-
-  std::string ToString() const;
 };
 
 static_assert(sizeof(Color) == 4 * sizeof(Scalar));

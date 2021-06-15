@@ -66,10 +66,6 @@ struct Rect {
   Rect WithPoint(const Point& p) const;
 
   Rect WithPoints(const std::vector<Point>& points) const;
-
-  std::string ToString() const;
-
-  void FromString(const std::string& str);
 };
 
 static_assert(sizeof(Rect) == 4 * sizeof(Scalar));

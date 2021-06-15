@@ -7,17 +7,6 @@
 
 namespace impeller {
 
-std::string Point::ToString() const {
-  std::stringstream stream;
-  stream << x << "," << y;
-  return stream.str();
-}
-
-void Point::FromString(const std::string& str) {
-  std::stringstream stream(str);
-  stream >> x;
-  stream.ignore();
-  stream >> y;
-}
+//
 
 }  // namespace impeller

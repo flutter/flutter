@@ -63,10 +63,6 @@ struct Size {
   constexpr bool IsPositive() const { return width * height > 0.0; }
 
   constexpr bool IsEmpty() { return !IsPositive(); }
-
-  std::string ToString() const;
-
-  void FromString(const std::string& str);
 };
 
 static_assert(sizeof(Size) == 2 * sizeof(Scalar));

@@ -7,17 +7,6 @@
 
 namespace impeller {
 
-std::string Size::ToString() const {
-  std::stringstream stream;
-  stream << width << "," << height;
-  return stream.str();
-}
-
-void Size::FromString(const std::string& str) {
-  std::stringstream stream(str);
-  stream >> width;
-  stream.ignore();
-  stream >> height;
-}
+//
 
 }  // namespace impeller

@@ -38,22 +38,4 @@ Rect Rect::WithPoints(const std::vector<Point>& points) const {
   return box;
 }
 
-std::string Rect::ToString() const {
-  std::stringstream stream;
-  stream << origin.x << "," << origin.y << "," << size.width << ","
-         << size.height;
-  return stream.str();
-}
-
-void Rect::FromString(const std::string& str) {
-  std::stringstream stream(str);
-  stream >> origin.x;
-  stream.ignore();
-  stream >> origin.y;
-  stream.ignore();
-  stream >> size.width;
-  stream.ignore();
-  stream >> size.height;
-}
-
 }  // namespace impeller
