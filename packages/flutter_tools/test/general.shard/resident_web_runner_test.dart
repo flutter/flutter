@@ -10,8 +10,10 @@ import 'dart:io';
 
 import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -25,14 +27,15 @@ import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
@@ -91,22 +94,23 @@ const List<VmServiceExpectation> kAttachIsolateExpectations = <VmServiceExpectat
   ),
 ];
 
+
 const List<VmServiceExpectation> kAttachExpectations = <VmServiceExpectation>[
   ...kAttachLogExpectations,
   ...kAttachIsolateExpectations,
 ];
 
 void main() {
-  MockDebugConnection mockDebugConnection;
+  FakeDebugConnection debugConnection;
   FakeChromeDevice chromeDevice;
-  MockAppConnection mockAppConnection;
-  MockFlutterDevice mockFlutterDevice;
+  FakeAppConnection appConnection;
+  FakeFlutterDevice flutterDevice;
   FakeWebDevFS webDevFS;
   FakeResidentCompiler residentCompiler;
   FakeChromeConnection chromeConnection;
   FakeChromeTab chromeTab;
-  MockWebServerDevice mockWebServerDevice;
-  MockDevice mockDevice;
+  FakeWebServerDevice webServerDevice;
+  FakeDevice mockDevice;
   FakeVmServiceHost fakeVmServiceHost;
   FileSystem fileSystem;
   ProcessManager processManager;
@@ -116,17 +120,18 @@ void main() {
     testUsage = TestUsage();
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.any();
-    mockDebugConnection = MockDebugConnection();
-    mockDevice = MockDevice();
-    mockAppConnection = MockAppConnection();
-    mockFlutterDevice = MockFlutterDevice();
+    debugConnection = FakeDebugConnection();
+    mockDevice = FakeDevice();
+    appConnection = FakeAppConnection();
     webDevFS = FakeWebDevFS();
     residentCompiler = FakeResidentCompiler();
     chromeConnection = FakeChromeConnection();
     chromeTab = FakeChromeTab('index.html');
-    mockWebServerDevice = MockWebServerDevice();
-    when(mockFlutterDevice.devFS).thenReturn(webDevFS);
-    when(mockFlutterDevice.device).thenReturn(mockDevice);
+    webServerDevice = FakeWebServerDevice();
+    flutterDevice = FakeFlutterDevice()
+      .._devFS = webDevFS
+      ..device = mockDevice
+      ..generator = residentCompiler;
     fileSystem.file('.packages').writeAsStringSync('\n');
   });
 
@@ -135,31 +140,24 @@ void main() {
     fileSystem.file('lib/main.dart').createSync(recursive: true);
     fileSystem.file('web/index.html').createSync(recursive: true);
     webDevFS.report = UpdateFSReport(success: true, syncedBytes: 0);
-    when(mockDebugConnection.vmService).thenAnswer((Invocation invocation) {
-      return fakeVmServiceHost.vmService.service;
-    });
-    when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
-      return Completer<void>().future;
-    });
+    debugConnection.fakeVmServiceHost = () => fakeVmServiceHost;
     webDevFS.result = ConnectionResult(
-      mockAppConnection,
-      mockDebugConnection,
-      mockDebugConnection.vmService,
+      appConnection,
+      debugConnection,
+      debugConnection.vmService,
     );
-    when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
-    when(mockFlutterDevice.devFS).thenReturn(webDevFS);
-    when(mockFlutterDevice.generator).thenReturn(residentCompiler);
+    debugConnection.uri = 'ws://127.0.0.1/abcd/';
     chromeConnection.tabs.add(chromeTab);
   }
 
   testUsingContext('runner with web server device does not support debugging without --start-paused', () {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    when(mockFlutterDevice.device).thenReturn(WebServerDevice(
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+    flutterDevice.device = WebServerDevice(
       logger: BufferLogger.test(),
-    ));
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
-      mockFlutterDevice,
+      flutterDevice,
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
@@ -173,7 +171,7 @@ void main() {
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
 
-    when(mockFlutterDevice.device).thenReturn(FakeChromeDevice());
+    flutterDevice.device = FakeChromeDevice();
 
     expect(residentWebRunner.debuggingEnabled, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -185,11 +183,11 @@ void main() {
   testUsingContext('runner with web server device supports debugging with --start-paused', () {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
-    when(mockFlutterDevice.device).thenReturn(WebServerDevice(
+    flutterDevice.device = WebServerDevice(
       logger: BufferLogger.test(),
-    ));
+    );
     final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
-      mockFlutterDevice,
+      flutterDevice,
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
@@ -209,7 +207,7 @@ void main() {
   });
   testUsingContext('profile does not supportsServiceProtocol', () {
     final ResidentRunner residentWebRunner = ResidentWebRunner(
-      mockFlutterDevice,
+      flutterDevice,
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
@@ -221,9 +219,9 @@ void main() {
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    when(mockFlutterDevice.device).thenReturn(chromeDevice);
+    flutterDevice.device = chromeDevice;
     final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
-      mockFlutterDevice,
+      flutterDevice,
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
@@ -244,7 +242,7 @@ void main() {
 
   testUsingContext('Can successfully run and connect to vmservice', () async {
     final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
 
@@ -254,7 +252,7 @@ void main() {
     ));
     final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
-    verify(mockAppConnection.runMain()).called(1);
+    expect(appConnection.ranMain, true);
     expect(logger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }, overrides: <Type, Generator>{
@@ -263,7 +261,7 @@ void main() {
   });
 
   testUsingContext('WebRunner copies compiled app.dill to cache during startup', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
 
@@ -283,7 +281,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/60613
   testUsingContext('ResidentWebRunner calls appFailedToStart if initial compilation fails', () async {
     _setupMocks();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fileSystem.file(globals.fs.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
@@ -304,7 +302,7 @@ void main() {
     fileSystem.file(fileSystem.path.join('web', 'index.html'))
       .deleteSync();
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
-      mockFlutterDevice,
+      flutterDevice,
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
@@ -328,7 +326,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
     final ResidentRunner residentWebRunner = ResidentWebRunner(
-      mockFlutterDevice,
+      flutterDevice,
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
@@ -348,7 +346,7 @@ void main() {
 
   testUsingContext('Listens to stdout and stderr streams before running main', () async {
     final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachLogExpectations,
       FakeVmServiceStreamResponse(
@@ -384,7 +382,7 @@ void main() {
   });
 
   testUsingContext('Listens to extension events with structured errors', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: testLogger);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: testLogger);
     final Map<String, String> extensionData = <String, String>{
       'test': 'data',
       'renderedErrorText': 'error text',
@@ -446,7 +444,7 @@ void main() {
 
   testUsingContext('Does not run main with --start-paused', () async {
     final ResidentRunner residentWebRunner = ResidentWebRunner(
-      mockFlutterDevice,
+      flutterDevice,
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
@@ -466,7 +464,7 @@ void main() {
     ));
     await connectionInfoCompleter.future;
 
-    verifyNever(mockAppConnection.runMain());
+    expect(appConnection.ranMain, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -475,7 +473,7 @@ void main() {
   testUsingContext('Can hot reload after attaching', () async {
     final BufferLogger logger = BufferLogger.test();
     final ResidentRunner residentWebRunner = setUpResidentRunner(
-      mockFlutterDevice,
+      flutterDevice,
       logger: logger,
       systemClock: SystemClock.fixed(DateTime(2001, 1, 1)),
     );
@@ -487,19 +485,25 @@ void main() {
           'type': 'Success',
         }
       ),
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+      ),
     ]);
     _setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
     chromiumLauncher.instance = chrome;
 
-    when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
+    flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
       chromiumLauncher: chromiumLauncher,
       logger: BufferLogger.test(),
       platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
-    ));
+    );
     webDevFS.report = UpdateFSReport(success: true);
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -532,7 +536,7 @@ void main() {
   testUsingContext('Can hot restart after attaching', () async {
     final BufferLogger logger = BufferLogger.test();
     final ResidentRunner residentWebRunner = setUpResidentRunner(
-      mockFlutterDevice,
+      flutterDevice,
       logger: logger,
       systemClock: SystemClock.fixed(DateTime(2001, 1, 1)),
     );
@@ -550,13 +554,13 @@ void main() {
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
     chromiumLauncher.instance = chrome;
 
-    when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
+    flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
       chromiumLauncher: chromiumLauncher,
       logger: BufferLogger.test(),
       platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
-    ));
+    );
     webDevFS.report = UpdateFSReport(success: true);
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -592,13 +596,13 @@ void main() {
   testUsingContext('Can hot restart after attaching with web-server device', () async {
     final BufferLogger logger = BufferLogger.test();
     final ResidentRunner residentWebRunner = setUpResidentRunner(
-      mockFlutterDevice,
+      flutterDevice,
       logger: logger,
       systemClock: SystemClock.fixed(DateTime(2001, 1, 1)),
     );
     fakeVmServiceHost = FakeVmServiceHost(requests :kAttachExpectations);
     _setupMocks();
-    when(mockFlutterDevice.device).thenReturn(mockWebServerDevice);
+    flutterDevice.device = webServerDevice;
     webDevFS.report = UpdateFSReport(success: true);
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -621,7 +625,7 @@ void main() {
   });
 
   testUsingContext('web resident runner is debuggable', () {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
 
     expect(residentWebRunner.debuggingEnabled, true);
@@ -631,7 +635,7 @@ void main() {
   });
 
   testUsingContext('Exits when initial compile fails', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
     webDevFS.report = UpdateFSReport(success: false,  syncedBytes: 0);
@@ -652,7 +656,7 @@ void main() {
 
   testUsingContext('Faithfully displays stdout messages with leading/trailing spaces', () async {
     final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachLogExpectations,
       FakeVmServiceStreamResponse(
@@ -683,7 +687,7 @@ void main() {
   });
 
   testUsingContext('Fails on compilation errors in hot restart', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -706,7 +710,7 @@ void main() {
   });
 
   testUsingContext('Fails non-fatally on vmservice response error for hot restart', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
@@ -732,7 +736,7 @@ void main() {
   });
 
   testUsingContext('Fails fatally on Vm Service error response', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
@@ -759,7 +763,7 @@ void main() {
 
   testUsingContext('printHelp without details shows hot restart help message', () async {
     final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     residentWebRunner.printHelp(details: false);
 
@@ -770,19 +774,11 @@ void main() {
   });
 
   testUsingContext('cleanup of resources is safe to call multiple times', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
     ]);
     _setupMocks();
-    bool debugClosed = false;
-    when(mockDevice.stopApp(any, userIdentifier: anyNamed('userIdentifier'))).thenAnswer((Invocation invocation) async {
-      if (debugClosed) {
-        throw StateError('debug connection closed twice');
-      }
-      debugClosed = true;
-      return true;
-    });
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -792,7 +788,7 @@ void main() {
     await residentWebRunner.exit();
     await residentWebRunner.exit();
 
-    verifyNever(mockDebugConnection.close());
+    expect(debugConnection.didClose, false);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -800,21 +796,17 @@ void main() {
   });
 
   testUsingContext('cleans up Chrome if tab is closed', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
     ]);
     _setupMocks();
-    final Completer<void> onDone = Completer<void>();
-    when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
-      return onDone.future;
-    });
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     final Future<int> result = residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     );
     await connectionInfoCompleter.future;
-    onDone.complete();
+    debugConnection.completer.complete();
 
     await result;
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -825,12 +817,12 @@ void main() {
 
   testUsingContext('Prints target and device name on run', () async {
     final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
     ]);
     _setupMocks();
-    when(mockDevice.name).thenReturn('Chromez');
+    mockDevice.name = 'Chromez';
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -859,20 +851,20 @@ void main() {
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
     chromiumLauncher.instance = chrome;
 
-    when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
+    flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
       chromiumLauncher: chromiumLauncher,
       logger: logger,
       platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
-    ));
+    );
     webDevFS.baseUri = Uri.parse('http://localhost:8765/app/');
 
     final FakeChromeTab chromeTab = FakeChromeTab('index.html');
     chromeConnection.tabs.add(chromeTab);
 
     final ResidentWebRunner runner = ResidentWebRunner(
-      mockFlutterDevice,
+      flutterDevice,
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
@@ -910,13 +902,13 @@ void main() {
     final BufferLogger logger = BufferLogger.test();
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
-    when(mockFlutterDevice.device).thenReturn(WebServerDevice(
+    flutterDevice.device = WebServerDevice(
       logger: logger,
-    ));
+    );
     webDevFS.baseUri = Uri.parse('http://localhost:8765/app/');
 
     final ResidentWebRunner runner = ResidentWebRunner(
-      mockFlutterDevice,
+      flutterDevice,
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
@@ -951,7 +943,7 @@ void main() {
   });
 
   testUsingContext('Successfully turns WebSocketException into ToolExit', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
     webDevFS.exception = const WebSocketException();
@@ -964,7 +956,7 @@ void main() {
   });
 
   testUsingContext('Successfully turns AppConnectionException into ToolExit', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
     webDevFS.exception = AppConnectionException('');
@@ -977,7 +969,7 @@ void main() {
   });
 
   testUsingContext('Successfully turns ChromeDebugError into ToolExit', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
 
@@ -991,7 +983,7 @@ void main() {
   });
 
   testUsingContext('Rethrows unknown Exception type from dwds', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
     webDevFS.exception = Exception();
@@ -1005,7 +997,7 @@ void main() {
 
   testUsingContext('Rethrows unknown Error type from dwds tooling', () async {
     final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
     webDevFS.exception = StateError('');
@@ -1033,16 +1025,83 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
+    devtoolsHandler: createNoOpHandler,
   );
 }
 
-class MockDebugConnection extends Mock implements DebugConnection {}
-class MockAppConnection extends Mock implements AppConnection {}
-class MockFlutterDevice extends Mock implements FlutterDevice {}
-class MockWebServerDevice extends Mock implements WebServerDevice {}
-class MockDevice extends Mock implements Device {}
+class FakeWebServerDevice extends FakeDevice implements WebServerDevice {}
+
+class FakeDevice extends Fake implements Device {
+  @override
+  String name;
+
+  int count = 0;
+
+  @override
+  Future<String> get sdkNameAndVersion async => 'SDK Name and Version';
+
+  @override
+  DartDevelopmentService dds;
+
+  @override
+  Future<LaunchResult> startApp(
+    covariant ApplicationPackage package, {
+    String mainPath,
+    String route,
+    DebuggingOptions debuggingOptions,
+    Map<String, dynamic> platformArgs,
+    bool prebuiltApplication = false,
+    bool ipv6 = false,
+    String userIdentifier,
+  }) async {
+    return LaunchResult.succeeded();
+  }
+
+  @override
+  Future<bool> stopApp(
+    covariant ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
+    if (count > 0) {
+      throw StateError('stopApp called more than once.');
+    }
+    count += 1;
+    return true;
+  }
+}
+
+class FakeDebugConnection extends Fake implements DebugConnection {
+  FakeVmServiceHost Function() fakeVmServiceHost;
+
+  @override
+  vm_service.VmService get vmService => fakeVmServiceHost.call().vmService.service;
+
+  @override
+  String uri;
+
+  final Completer<void> completer = Completer<void>();
+  bool didClose = false;
+
+  @override
+  Future<void> get onDone => completer.future;
+
+  @override
+  Future<void> close() async {
+    didClose = true;
+  }
+}
+
+class FakeAppConnection extends Fake implements AppConnection {
+  bool ranMain = false;
+
+  @override
+  void runMain() {
+    ranMain = true;
+  }
+}
 
 class FakeChromeDevice extends Fake implements ChromiumDevice {}
+
 class FakeWipDebugger extends Fake implements WipDebugger {}
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
@@ -1188,4 +1247,87 @@ class TestChromiumLauncher implements ChromiumLauncher {
   Future<Chromium> launch(String url, {bool headless = false, int debugPort, bool skipCheck = false, Directory cacheDir}) async {
     return currentCompleter.future;
   }
+}
+
+class FakeFlutterDevice extends Fake implements FlutterDevice {
+  Uri testUri;
+  UpdateFSReport report = UpdateFSReport(
+    success: true,
+    syncedBytes: 0,
+    invalidatedSourcesCount: 1,
+  );
+  Object reportError;
+
+  @override
+  ResidentCompiler generator;
+
+  @override
+  Stream<Uri> get observatoryUris => Stream<Uri>.value(testUri);
+
+  @override
+  FlutterVmService vmService;
+
+  DevFS _devFS;
+
+  @override
+  DevFS get devFS => _devFS;
+
+  @override
+  set devFS(DevFS value) { }
+
+  @override
+  Device device;
+
+  @override
+  Future<void> stopEchoingDeviceLog() async { }
+
+  @override
+  Future<void> initLogReader() async { }
+
+  @override
+  Future<Uri> setupDevFS(String fsName, Directory rootDirectory) async {
+    return testUri;
+  }
+
+  @override
+  Future<void> exitApps({Duration timeoutDelay = const Duration(seconds: 10)}) async { }
+
+  @override
+  Future<void> connect({
+    ReloadSources reloadSources,
+    Restart restart,
+    CompileExpression compileExpression,
+    GetSkSLMethod getSkSLMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    int hostVmServicePort,
+    int ddsPort,
+    bool disableServiceAuthCodes = false,
+    bool enableDds = true,
+    @required bool allowExistingDdsInstance,
+    bool ipv6 = false,
+  }) async { }
+
+  @override
+  Future<UpdateFSReport> updateDevFS({
+    Uri mainUri,
+    String target,
+    AssetBundle bundle,
+    DateTime firstBuildTime,
+    bool bundleFirstUpload = false,
+    bool bundleDirty = false,
+    bool fullRestart = false,
+    String projectRootPath,
+    String pathToReload,
+    String dillOutputPath,
+    List<Uri> invalidatedFiles,
+    PackageConfig packageConfig,
+  }) async {
+    if (reportError != null) {
+      throw reportError;
+    }
+    return report;
+  }
+
+  @override
+  Future<void> updateReloadStatus(bool wasReloadSuccessful) async { }
 }
