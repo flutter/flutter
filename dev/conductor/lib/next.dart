@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:convert' show jsonDecode;
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
 import 'package:meta/meta.dart' show required, visibleForTesting;
@@ -145,7 +143,6 @@ void runNext({
       break;
     case pb.ReleasePhase.PUBLISH_VERSION:
       if (autoAccept == false) {
-        // TODO(fujino): actually test if binaries have been codesigned on macOS
         final bool response = prompt(
           'Has CI passed for the framework PR?',
           stdio,
