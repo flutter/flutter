@@ -94,6 +94,7 @@ abstract class ShaderWarmUp {
         shaderWarmUpTask.finish();
       }
     }
+    picture.dispose();
   }
 }
 
