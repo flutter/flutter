@@ -390,6 +390,90 @@ void main() {
       expect(stdio.stdout, contains('Did you apply and merge all framework cherrypicks? (y/n)'));
     });
 
+
+    test('does not update state.currentPhase from PUBLISH_VERSION if user responds no', () async {
+      stdio.stdin.add('n');
+      final FakeProcessManager processManager = FakeProcessManager.list(
+        <FakeCommand>[],
+      );
+      final FakePlatform platform = FakePlatform(
+        environment: <String, String>{
+          'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+        },
+        operatingSystem: localOperatingSystem,
+        pathSeparator: localPathSeparator,
+      );
+      final pb.ConductorState state = pb.ConductorState(
+        currentPhase: ReleasePhase.PUBLISH_VERSION,
+      );
+      writeStateToFile(
+        fileSystem.file(stateFile),
+        state,
+      );
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+      await runner.run(<String>[
+        'next',
+        '--$kStateOption',
+        stateFile,
+      ]);
+
+      final pb.ConductorState finalState = readStateFromFile(
+        fileSystem.file(stateFile),
+      );
+
+      expect(stdio.stdout, contains('Has CI passed for the framework PR?'));
+      expect(stdio.error, contains('Aborting command.'));
+      expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
+    });
+
+    test('updates state.currentPhase from PUBLISH_VERSION to PUBLISH_CHANNEL if user responds yes', () async {
+      stdio.stdin.add('y');
+      final FakeProcessManager processManager = FakeProcessManager.list(
+        <FakeCommand>[],
+      );
+      final FakePlatform platform = FakePlatform(
+        environment: <String, String>{
+          'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+        },
+        operatingSystem: localOperatingSystem,
+        pathSeparator: localPathSeparator,
+      );
+      final pb.ConductorState state = pb.ConductorState(
+        currentPhase: ReleasePhase.PUBLISH_VERSION,
+      );
+      writeStateToFile(
+        fileSystem.file(stateFile),
+        state,
+      );
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+      await runner.run(<String>[
+        'next',
+        '--$kStateOption',
+        stateFile,
+      ]);
+
+      final pb.ConductorState finalState = readStateFromFile(
+        fileSystem.file(stateFile),
+      );
+
+      expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
+      expect(stdio.stdout, contains('Has CI passed for the framework PR?'));
+    });
+
     test('throws exception if state.currentPhase is RELEASE_COMPLETED', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],

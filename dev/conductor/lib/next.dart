@@ -155,6 +155,7 @@ void runNext({
           return;
         }
       }
+      throw ConductorException('Unimplemented PUBLISH_VERSION!');
       break;
     case pb.ReleasePhase.PUBLISH_CHANNEL:
       break;
