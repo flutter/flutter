@@ -29,14 +29,17 @@ class GitStatusFailed implements Exception {
 
 String getChannelName() {
   final RegExp gitBranchRegexp = RegExp(r'^## (?<branch>.*)');
-  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain'], environment: <String, String>{
-    'GIT_TRACE': '2',
-    'GIT_TRACE_SETUP': '2',
-  }, includeParentEnvironment: true);
-  if (gitResult.exitCode != 0)
-    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}:\n${gitResult.stderr}';
-  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(
-      (gitResult.stdout as String).trim().split('\n').first);
+  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain'],
+    environment: <String, String>{
+      'GIT_TRACE': '2',
+      'GIT_TRACE_SETUP': '2'
+    },
+    includeParentEnvironment: true
+  );
+  if (gitResult.exitCode != 0) {
+    throw GitStatusFailed(gitResult);
+  }
+  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch((gitResult.stdout as String).trim().split('\n').first);
   return gitBranchMatch == null ? '<unknown>' : gitBranchMatch.namedGroup('branch')!.split('...').first;
 }
 
