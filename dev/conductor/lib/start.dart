@@ -18,6 +18,7 @@ import './proto/conductor_state.pbenum.dart' show ReleasePhase;
 import './repository.dart';
 import './state.dart';
 import './stdio.dart';
+import './version.dart';
 
 const String kCandidateOption = 'candidate-branch';
 const String kDartRevisionOption = 'dart-revision';
@@ -26,6 +27,7 @@ const String kEngineUpstreamOption = 'engine-upstream';
 const String kFrameworkCherrypicksOption = 'framework-cherrypicks';
 const String kFrameworkMirrorOption = 'framework-mirror';
 const String kFrameworkUpstreamOption = 'framework-upstream';
+const String kIncrementOption = 'increment';
 const String kEngineMirrorOption = 'engine-mirror';
 const String kReleaseOption = 'release-channel';
 const String kStateOption = 'state-file';
@@ -88,6 +90,18 @@ class StartCommand extends Command<void> {
     argParser.addOption(
       kDartRevisionOption,
       help: 'New Dart revision to cherrypick.',
+    );
+    argParser.addOption(
+      kIncrementOption,
+      help: 'Specifies which part of the x.y.z version number to increment. Required.',
+      valueHelp: 'level',
+      allowed: <String>['y', 'z', 'm', 'n'],
+      allowedHelp: <String, String>{
+        'y': 'Indicates the first dev release after a beta release.',
+        'z': 'Indicates a hotfix to a stable release.',
+        'm': 'Indicates a standard dev release.',
+        'n': 'Indicates a hotfix to a dev release.',
+      },
     );
     final Git git = Git(processManager);
     conductorVersion = git.getOutput(
@@ -181,6 +195,12 @@ class StartCommand extends Command<void> {
       platform.environment,
       allowNull: true,
     );
+    final String incrementLetter = getValueFromEnvOrArgs(
+      kIncrementOption,
+      argResults,
+      platform.environment,
+    );
+
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
       throw ConductorException(
         'Invalid release candidate branch "$candidateBranch". Text should '
@@ -284,6 +304,16 @@ class StartCommand extends Command<void> {
         cherrypick.state = pb.CherrypickState.PENDING_WITH_CONFLICT;
       }
     }
+
+    // Get framework version
+    final Version lastVersion = Version.fromString(framework.getFullTag(framework.fetchRemote.name, candidateBranch, exact: false));
+    Version nextVersion;
+    if (incrementLetter == 'm') {
+      nextVersion = Version.fromCandidateBranch(candidateBranch);
+    } else {
+      nextVersion = Version.increment(lastVersion, incrementLetter);
+    }
+    state.releaseVersion = nextVersion.toString();
 
     final String frameworkHead = framework.reverseParse('HEAD');
     state.framework = pb.Repository(

@@ -47,7 +47,7 @@ class TestStdio extends Stdio {
 class FakeArgResults implements ArgResults {
   FakeArgResults({
     required String level,
-    required String commit,
+    required String candidateBranch,
     String remote = 'upstream',
     bool justPrint = false,
     bool autoApprove = true, // so we don't have to mock stdin
@@ -56,7 +56,7 @@ class FakeArgResults implements ArgResults {
     bool skipTagging = false,
   }) : _parsedArgs = <String, dynamic>{
     'increment': level,
-    'commit': commit,
+    'candidate-branch': candidateBranch,
     'remote': remote,
     'just-print': justPrint,
     'yes': autoApprove,

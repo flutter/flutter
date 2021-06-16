@@ -217,13 +217,25 @@ abstract class Repository {
     );
   }
 
-  /// Obtain the version tag of the previous dev release.
-  String getFullTag(String remoteName) {
-    const String glob = '*.*.*-*.*.pre';
+  /// Obtain the version tag at the tip of a release branch.
+  String getFullTag(
+    String remoteName,
+    String branchName, {
+    bool exact = true,
+  }) {
+    // includes both stable (e.g. 1.2.3) and dev tags (e.g. 1.2.3-4.5.pre)
+    const String glob = '*.*.*';
     // describe the latest dev release
-    final String ref = 'refs/remotes/$remoteName/dev';
+    final String ref = 'refs/remotes/$remoteName/$branchName';
     return git.getOutput(
-      <String>['describe', '--match', glob, '--exact-match', '--tags', ref],
+      <String>[
+        'describe',
+        '--match',
+        glob,
+        if (exact) '--exact-match',
+        '--tags',
+        ref,
+      ],
       'obtain last released version number',
       workingDirectory: checkoutDirectory.path,
     );
@@ -235,7 +247,7 @@ abstract class Repository {
         .getOutput(
           <String>['rev-list', ...args],
           'rev-list with args ${args.join(' ')}',
-          workingDirectory: checkoutDirectory.path,
+          workingDirectory: checkoutDirectory.path
         )
         .trim()
         .split('\n');

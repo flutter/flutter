@@ -40,6 +40,7 @@ String presentState(pb.ConductorState state) {
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('Conductor version: ${state.conductorVersion}');
   buffer.writeln('Release channel: ${state.releaseChannel}');
+  buffer.writeln('Release version: ${state.releaseVersion}');
   buffer.writeln('');
   buffer.writeln(
       'Release started at: ${DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt())}');
