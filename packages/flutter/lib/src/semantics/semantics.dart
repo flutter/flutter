@@ -238,7 +238,7 @@ class AttributedString {
     return other.runtimeType == runtimeType
         && other is AttributedString
         && other.string == string
-        && other.attributes == attributes;
+        && listEquals<StringAttribute>(other.attributes, attributes);
   }
 
   @override
