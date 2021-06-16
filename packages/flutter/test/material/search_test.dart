@@ -865,12 +865,12 @@ void main() {
                       onPressed: () async {
                         await showSearch(context: context, delegate: delegate);
                       },
-                      child: const Text('showSearchNormal')),
+                      child: const Text('showSearchRootNavigator')),
                   TextButton(
                       onPressed: () async {
-                        await showSearch(context: context, delegate: delegate, useRootNavigator: true);
+                        await showSearch(context: context, delegate: delegate, useRootNavigator: false);
                       },
-                      child: const Text('showSearchRootNavigator')),
+                      child: const Text('showSearchLocalNavigator')),
                 ],
               ),
               settings: settings,
@@ -886,7 +886,7 @@ void main() {
     expect(localObserver.pushCount, 0);
 
     // showSearch normal and back
-    await tester.tap(find.text('showSearchNormal'));
+    await tester.tap(find.text('showSearchLocalNavigator'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
