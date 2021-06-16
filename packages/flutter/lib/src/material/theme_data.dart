@@ -225,12 +225,16 @@ class ThemeData with Diagnosticable {
     Color? primaryColorLight,
     Color? primaryColorDark,
     @Deprecated(
-      'Use colorScheme.secondary instead. '
+      'Use colorScheme.secondary instead. For more information, consult the '
+      'migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     Color? accentColor,
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
+      'No longer used by the framework, please remove any reference to it. For more information, consult the '
+      'migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     Brightness? accentColorBrightness,
@@ -281,7 +285,9 @@ class ThemeData with Diagnosticable {
     TextTheme? textTheme,
     TextTheme? primaryTextTheme,
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
+      'No longer used by the framework, please remove any reference to it. For more information, consult the '
+      'migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     TextTheme? accentTextTheme,
