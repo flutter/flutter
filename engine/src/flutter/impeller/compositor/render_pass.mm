@@ -118,7 +118,9 @@ MTLRenderPassDescriptor* RenderPassDescriptor::ToMTLRenderPassDescriptor()
 
 RenderPass::RenderPass(id<MTLCommandBuffer> buffer,
                        const RenderPassDescriptor& desc)
-    : buffer_(buffer), desc_(desc.ToMTLRenderPassDescriptor()) {
+    : buffer_(buffer),
+      desc_(desc.ToMTLRenderPassDescriptor()),
+      transients_buffer_(HostBuffer::Create()) {
   if (!buffer_ || !desc_) {
     return;
   }
@@ -126,6 +128,10 @@ RenderPass::RenderPass(id<MTLCommandBuffer> buffer,
 }
 
 RenderPass::~RenderPass() = default;
+
+HostBuffer& RenderPass::GetHostBuffer() {
+  return *transients_buffer_;
+}
 
 bool RenderPass::IsValid() const {
   return is_valid_;

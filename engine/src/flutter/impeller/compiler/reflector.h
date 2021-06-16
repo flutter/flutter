@@ -72,7 +72,17 @@ class Reflector {
       size_t index) const;
 
   std::string GetMemberNameAtIndex(const spirv_cross::SPIRType& parent_type,
-                                   size_t index) const;
+                                   size_t index,
+                                   std::string suffix = "") const;
+
+  struct StructMember {
+    std::string type;
+    std::string name;
+    size_t offset;
+    size_t byte_length;
+  };
+  std::vector<StructMember> ReadStructMembers(
+      const spirv_cross::TypeID& type_id) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Reflector);
 };
