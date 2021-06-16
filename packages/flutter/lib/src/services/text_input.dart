@@ -174,7 +174,7 @@ class TextInputType {
   /// [TYPE_TEXT_VARIATION_POSTAL_ADDRESS](https://developer.android.com/reference/android/text/InputType#TYPE_TEXT_VARIATION_POSTAL_ADDRESS).
   static const TextInputType streetAddress = TextInputType._(9);
 
-  /// No keyboard.
+  /// Prevent the OS from showing the on-screen virtual keyboard.
   static const TextInputType none = TextInputType._(10);
 
   /// All possible enum values.
