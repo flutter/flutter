@@ -155,8 +155,6 @@ Future<void> runNativeIosXcodeTests(Device device, String projectDirectory) asyn
   final Map<String, String> environment = Platform.environment;
   // If not running on CI, inject the Flutter team code signing properties.
   final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-  final String codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-  final String provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
 
   final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_native_ios_tests_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
@@ -176,8 +174,6 @@ Future<void> runNativeIosXcodeTests(Device device, String projectDirectory) asyn
       'test',
       'COMPILER_INDEX_STORE_ENABLE=NO',
       'DEVELOPMENT_TEAM=$developmentTeam',
-      if (codeSignStyle != null) 'CODE_SIGN_STYLE=$codeSignStyle',
-      if (provisioningProfile != null) 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
     ],
     workingDirectory: path.join(projectDirectory, 'ios'),
     canFail: true,
@@ -185,7 +181,7 @@ Future<void> runNativeIosXcodeTests(Device device, String projectDirectory) asyn
 
   if (testResultExit != 0) {
     final Directory dumpDirectory = hostAgent.dumpDirectory;
-      if (dumpDirectory != null) {
+    if (dumpDirectory != null) {
       // Zip the test results to the artifacts directory for upload.
       final String zipPath = path.join(
           dumpDirectory.path, 'xcode_test_results_-${DateTime.now().toLocal().toIso8601String()}.zip');
