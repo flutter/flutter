@@ -98,6 +98,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
@@ -121,6 +122,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
@@ -145,6 +147,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
@@ -169,6 +172,7 @@ void main() {
       _ninjaPresentCommand('0.8.1'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
@@ -193,6 +197,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.27.0'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
@@ -217,6 +222,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final UserMessages userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -241,6 +247,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final UserMessages userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -265,6 +272,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final UserMessages userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -289,6 +297,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final UserMessages userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -313,6 +322,7 @@ void main() {
       _missingBinaryCommand('ninja'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final UserMessages userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -337,6 +347,7 @@ void main() {
       _ninjaPresentCommand('bogus'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final UserMessages userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -361,6 +372,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _missingBinaryCommand('pkg-config'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final UserMessages userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -385,6 +397,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('bogus'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final UserMessages userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -409,6 +422,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesMissingCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final UserMessages userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -427,6 +441,32 @@ void main() {
     ]);
   });
 
+  testWithoutContext('Missing validation when liblzma is not available', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('4.0.1'),
+      _cmakePresentCommand('3.16.3'),
+      _ninjaPresentCommand('1.10.0'),
+      _pkgConfigPresentCommand('0.29'),
+      ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma', exists: false),
+    ]);
+    final UserMessages userMessages = UserMessages();
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: userMessages,
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
+
+    expect(result.type, ValidationType.missing);
+    expect(result.messages, <ValidationMessage>[
+      const ValidationMessage('clang version 4.0.1-6+build1'),
+      const ValidationMessage('cmake version 3.16.3'),
+      const ValidationMessage('ninja version 1.10.0'),
+      const ValidationMessage('pkg-config version 0.29'),
+      ValidationMessage.error(userMessages.lzmaLibraryMissing),
+    ]);
+  });
+
   testWithoutContext('Missing validation when multiple dependencies are not available', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _missingBinaryCommand('clang++'),
@@ -434,6 +474,7 @@ void main() {
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
       ..._gtkLibrariesPresentCommands(),
+      _libraryCheckCommand('liblzma'),
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
