@@ -250,21 +250,21 @@ class AOTSnapshotter {
     }
 
     final List<String> commonBuildOptions = <String>[
-      '-arch', targetArch,
+      '-arch',
+      targetArch,
       if (isIOS)
         // When the minimum version is updated, remember to update
         // template MinimumOSVersion.
         // https://github.com/flutter/flutter/pull/62902
         '-miphoneos-version-min=8.0',
+      if (sdkRoot != null) ...<String>[
+        '-isysroot',
+        sdkRoot,
+      ],
     ];
 
     const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
-    if (sdkRoot != null) {
-      commonBuildOptions.addAll(<String>[
-        '-isysroot', sdkRoot,
-      ]);
-    }
 
     final RunResult compileResult = await _xcode.cc(<String>[
       ...commonBuildOptions,
