@@ -13,6 +13,8 @@
 #include "flutter/fml/logging.h"
 #include "flutter/impeller/compiler/code_gen_template.h"
 #include "flutter/impeller/compiler/utilities.h"
+#include "flutter/impeller/geometry/matrix.h"
+#include "flutter/impeller/geometry/scalar.h"
 
 namespace impeller {
 namespace compiler {
@@ -282,19 +284,120 @@ std::optional<nlohmann::json::array_t> Reflector::ReflectResources(
   return result;
 }
 
-std::string GetHostStructMemberType(const SPIRType& type) {
-  if (type.width == 32 && type.columns == 1 && type.vecsize == 1) {
-    return "float";
-  }
-
-  if (type.width == 32 && type.columns == 4 && type.vecsize == 4) {
-    return "Matrix";
-  }
-
-  const auto byte_length = (type.width * type.vecsize * type.columns) / 8u;
+static std::string TypeNameWithPaddingOfSize(size_t size) {
   std::stringstream stream;
-  stream << "Padding<" << byte_length << ">";
+  stream << "Padding<" << size << ">";
   return stream.str();
+}
+
+struct KnownType {
+  std::string name;
+  size_t byte_size = 0;
+};
+
+static std::optional<KnownType> ReadKnownScalarType(SPIRType::BaseType type) {
+  switch (type) {
+    case SPIRType::BaseType::Boolean:
+      return KnownType{
+          .name = "bool",
+          .byte_size = sizeof(bool),
+      };
+    case SPIRType::BaseType::Float:
+      return KnownType{
+          .name = "Scalar",
+          .byte_size = sizeof(Scalar),
+      };
+    case SPIRType::BaseType::UInt:
+      return KnownType{
+          .name = "uint32_t",
+          .byte_size = sizeof(uint32_t),
+      };
+    case SPIRType::BaseType::Int:
+      return KnownType{
+          .name = "int32_t",
+          .byte_size = sizeof(int32_t),
+      };
+    default:
+      break;
+  }
+  return std::nullopt;
+}
+
+std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
+    const spirv_cross::TypeID& type_id) const {
+  const auto& struct_type = compiler_->get_type(type_id);
+  FML_CHECK(struct_type.basetype == SPIRType::BaseType::Struct);
+
+  std::vector<StructMember> result;
+
+  size_t total_byte_length = 0;
+  for (size_t i = 0; i < struct_type.member_types.size(); i++) {
+    const auto& member = compiler_->get_type(struct_type.member_types[i]);
+
+    // Tightly packed 4x4 Matrix is special cased as we know how to work with
+    // those.
+    if (member.basetype == SPIRType::BaseType::Float &&  //
+        member.width == sizeof(Scalar) * 8 &&            //
+        member.columns == 4 &&                           //
+        member.vecsize == 4                              //
+    ) {
+      result.emplace_back(StructMember{
+          .type = "Matrix",
+          .name = GetMemberNameAtIndex(struct_type, i),
+          .offset = total_byte_length,
+          .byte_length = sizeof(Matrix),
+      });
+      total_byte_length += sizeof(Matrix);
+      continue;
+    }
+
+    // Other single isolated scalars.
+    {
+      auto maybe_known_type = ReadKnownScalarType(member.basetype);
+      if (maybe_known_type.has_value() &&  //
+          member.columns == 1 &&           //
+          member.vecsize == 1              //
+      ) {
+        // Add the type directly.
+        result.emplace_back(StructMember{
+            .type = maybe_known_type.value().name,
+            .name = GetMemberNameAtIndex(struct_type, i),
+            .offset = total_byte_length,
+            .byte_length = maybe_known_type.value().byte_size,
+        });
+        total_byte_length += maybe_known_type.value().byte_size;
+
+        // Consider any excess padding.
+        const auto padding =
+            (member.width / 8u) - maybe_known_type.value().byte_size;
+        if (padding != 0) {
+          result.emplace_back(StructMember{
+              .type = TypeNameWithPaddingOfSize(padding),
+              .name = GetMemberNameAtIndex(struct_type, i, "_pad"),
+              .offset = total_byte_length,
+              .byte_length = padding,
+          });
+          total_byte_length += padding;
+        }
+        continue;
+      }
+    }
+
+    // Catch all for unknown types. Just add the necessary padding to the struct
+    // and move on.
+    {
+      const size_t byte_length =
+          (member.width * member.columns * member.vecsize) / 8u;
+      result.emplace_back(StructMember{
+          .type = TypeNameWithPaddingOfSize(byte_length),
+          .name = GetMemberNameAtIndex(struct_type, i),
+          .offset = total_byte_length,
+          .byte_length = byte_length,
+      });
+      total_byte_length += byte_length;
+    }
+  }
+  return result;
 }
 
 std::optional<nlohmann::json::object_t> Reflector::ReflectStructDefinition(
@@ -311,20 +414,26 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectStructDefinition(
 
   nlohmann::json::object_t struc;
   struc["name"] = struct_name;
-  struc["members"] = nlohmann::json::array_t{};
+
   size_t total_size = 0u;
-  for (size_t i = 0; i < type.member_types.size(); i++) {
-    const auto& member_type = compiler_->get_type(type.member_types[i]);
-    const auto byte_length =
+  for (const auto& member_type_id : type.member_types) {
+    const auto& member_type = compiler_->get_type(member_type_id);
+    total_size +=
         (member_type.width * member_type.vecsize * member_type.columns) / 8u;
-    auto& member = struc["members"].emplace_back(nlohmann::json::object_t{});
-    member["name"] = GetMemberNameAtIndex(type, i);
-    member["type"] = GetHostStructMemberType(member_type);
-    member["byte_length"] = byte_length;
-    member["offset"] = total_size;
-    total_size += byte_length;
   }
   struc["byte_length"] = total_size;
+
+  size_t members_size = 0u;
+  struc["members"] = nlohmann::json::array_t{};
+  const auto struct_members = ReadStructMembers(type_id);
+  for (const auto& struct_member : struct_members) {
+    auto& member = struc["members"].emplace_back(nlohmann::json::object_t{});
+    member["name"] = struct_member.name;
+    member["type"] = struct_member.type;
+    member["offset"] = struct_member.offset;
+    member["byte_length"] = struct_member.byte_length;
+  }
+
   return struc;
 }
 
@@ -347,14 +456,15 @@ std::optional<std::string> Reflector::GetMemberNameAtIndexIfExists(
 
 std::string Reflector::GetMemberNameAtIndex(
     const spirv_cross::SPIRType& parent_type,
-    size_t index) const {
+    size_t index,
+    std::string suffix) const {
   if (auto name = GetMemberNameAtIndexIfExists(parent_type, index);
       name.has_value()) {
     return name.value();
   }
   static std::atomic_size_t sUnnamedMembersID;
   std::stringstream stream;
-  stream << "unnamed_" << sUnnamedMembersID++;
+  stream << "unnamed_" << sUnnamedMembersID++ << suffix;
   return stream.str();
 }
 
