@@ -1830,6 +1830,11 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
         && entry.name != 'skia' // treated as a separate component
         && entry.name != 'fontconfig' // not used in standard configurations
         && entry.name != 'swiftshader' // only used on hosts for tests
+        && entry.name != 'shaderc' // only used on hosts for tests
+        && entry.name != 'glslang' // only used on hosts for tests
+        && entry.name != 'spirv_tools' // only used on hosts for tests
+        && entry.name != 'spirv_headers' // only used on hosts for tests
+        && entry.name != 'spirv_cross' // only used on hosts for tests
         && entry.name != 'ocmock' // only used for tests
         && super.shouldRecurse(entry);
   }

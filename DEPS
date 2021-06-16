@@ -98,7 +98,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '3ae5da28db8cb028e21150f7472d0938fba2e057',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'da131f62020132fa0df9008ad5951bb8ac591746',
 
    # Fuchsia compatibility
    #
@@ -123,6 +123,22 @@ deps = {
 
   'src/third_party/glfw':
    Var('fuchsia_git') + '/third_party/glfw' + '@' + '999f3556fdd80983b10051746264489f2cb1ef16',
+
+  'src/third_party/shaderc':
+   Var('github_git') + '/google/shaderc.git' + '@' + '948660cccfbbc303d2590c7f44a4cee40b66fdd6',
+
+  'src/third_party/glslang':
+   Var('github_git') + '/KhronosGroup/glslang.git' + '@' + '9431c53c84c14fa9e9cd37678262ebba55c62c87',
+
+  'src/third_party/spirv_tools':
+   Var('github_git') + '/KhronosGroup/SPIRV-Tools.git' + '@' + '1020e394cb1267332d58497150d2b024371a8e41',
+
+  'src/third_party/spirv_headers':
+   Var('github_git') + '/KhronosGroup/SPIRV-Headers.git' + '@' + '85b7e00c7d785962ffe851a177c84353d037dcb6',
+
+  'src/third_party/spirv_cross':
+   Var('github_git') + '/KhronosGroup/SPIRV-Cross.git' + '@' + '418542eaefdb609f548d25a1e3962fb69d80da63',
+
 
    # Chromium-style
    #
