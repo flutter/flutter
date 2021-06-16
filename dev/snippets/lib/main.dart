@@ -23,8 +23,11 @@ const String _kShowDartPad = 'dartpad';
 
 class GitStatusFailed implements Exception {
   GitStatusFailed(this.gitResult);
+
   final ProcessResult gitResult;
-  String errMsg() => 'git status exited with a non-zero exit code: ${gitResult.exitCode}:\n${gitResult.stderr}\n${gitResult.stdout}';
+
+  @override
+  String toString() => 'git status exited with a non-zero exit code: ${gitResult.exitCode}:\n${gitResult.stderr}\n${gitResult.stdout}';
 }
 
 String getChannelName() {
