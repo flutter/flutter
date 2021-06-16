@@ -94,8 +94,8 @@ void runNext({
 
   final pb.ConductorState state = readStateFromFile(stateFile);
   stdio.printTrace(state.toString());
-  switch (state.lastPhase) {
-    case pb.ReleasePhase.INITIALIZE:
+  switch (state.currentPhase) {
+    case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
       bool allEngineCherrypicksVerified = true;
       for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
         if (!finishedStates.contains(cherrypick.state)) {
@@ -114,7 +114,7 @@ void runNext({
         }
       }
       break;
-    case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
+    case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
       if (autoAccept == false) {
         // TODO(fujino): actually test if binaries have been codesigned on macOS
         final bool response = prompt(
@@ -127,7 +127,7 @@ void runNext({
         }
       }
       break;
-    case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
+    case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       bool allFrameworkCherrypicksVerified = true;
       for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
         if (!finishedStates.contains(cherrypick.state)) {
@@ -143,7 +143,7 @@ void runNext({
         }
       }
       break;
-    case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
+    case pb.ReleasePhase.PUBLISH_VERSION:
       if (autoAccept == false) {
         // TODO(fujino): actually test if binaries have been codesigned on macOS
         final bool response = prompt(
@@ -156,16 +156,15 @@ void runNext({
         }
       }
       break;
-    case pb.ReleasePhase.PUBLISH_VERSION:
-      break;
     case pb.ReleasePhase.PUBLISH_CHANNEL:
       break;
     case pb.ReleasePhase.VERIFY_RELEASE:
+      break;
+    case pb.ReleasePhase.RELEASE_COMPLETED:
       throw ConductorException('This release is finished.');
       break;
   }
-  final pb.ReleasePhase nextPhase = getNextPhase(state.lastPhase);
-  state.lastPhase = nextPhase;
+  state.currentPhase = getNextPhase(state.currentPhase);
 
   writeStateToFile(stateFile, state);
 }

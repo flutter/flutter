@@ -68,7 +68,7 @@ void main() {
       );
     });
 
-    test('does not prompt user and updates state.lastPhase from INITIALIZE to APPLY_ENGINE_CHERRYPICKS if there are no engine cherrypicks', () async {
+    test('does not prompt user and updates state.currentPhase from APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES if there are no engine cherrypicks', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
       );
@@ -80,7 +80,7 @@ void main() {
         pathSeparator: localPathSeparator,
       );
       final pb.ConductorState state = pb.ConductorState(
-        lastPhase: ReleasePhase.INITIALIZE,
+        currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
       );
       writeStateToFile(
         fileSystem.file(stateFile),
@@ -104,12 +104,12 @@ void main() {
         fileSystem.file(stateFile),
       );
 
-      expect(finalState.lastPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
+      expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
       expect(stdio.error, isEmpty);
     });
 
 
-    test('updates state.lastPhase from INITIALIZE to APPLY_ENGINE_CHERRYPICKS if user responds yes', () async {
+    test('updates state.lastPhase from APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES if user responds yes', () async {
       stdio.stdin.add('y');
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
@@ -130,7 +130,7 @@ void main() {
             ),
           ],
         ),
-        lastPhase: ReleasePhase.INITIALIZE,
+        currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
       );
       writeStateToFile(
         fileSystem.file(stateFile),
@@ -155,11 +155,11 @@ void main() {
       );
 
       expect(stdio.stdout, contains('Did you apply and merge all engine cherrypicks? (y/n) '));
-      expect(finalState.lastPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
+      expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
       expect(stdio.error, isEmpty);
     });
 
-    test('does not update state.lastPhase from APPLY_ENGINE_CHERRYPICKS if user responds no', () async {
+    test('does not update state.currentPhase from CODESIGN_ENGINE_BINARIES if user responds no', () async {
       stdio.stdin.add('n');
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
@@ -180,7 +180,7 @@ void main() {
             ),
           ],
         ),
-        lastPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
+        currentPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
       );
       writeStateToFile(
         fileSystem.file(stateFile),
@@ -205,11 +205,11 @@ void main() {
       );
 
       expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
-      expect(finalState.lastPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
+      expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
       expect(stdio.error.contains('Aborting command.'), true);
     });
 
-    test('updates state.lastPhase from APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES if user responds yes', () async {
+    test('updates state.currentPhase from CODESIGN_ENGINE_BINARIES to APPLY_FRAMEWORK_CHERRYPICKS if user responds yes', () async {
       stdio.stdin.add('y');
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
@@ -222,7 +222,7 @@ void main() {
         pathSeparator: localPathSeparator,
       );
       final pb.ConductorState state = pb.ConductorState(
-        lastPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
+        currentPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
       );
       writeStateToFile(
         fileSystem.file(stateFile),
@@ -247,10 +247,10 @@ void main() {
       );
 
       expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
-      expect(finalState.lastPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
+      expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
     });
 
-    test('does not prompt user and updates state.lastPhase from CODESIGN_ENGINE_BINARIES to APPLY_FRAMEWORK_CHERRYPICKS if there are no framework cherrypicks', () async {
+    test('does not prompt user and updates state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION if there are no framework cherrypicks', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
       );
@@ -262,7 +262,7 @@ void main() {
         pathSeparator: localPathSeparator,
       );
       final pb.ConductorState state = pb.ConductorState(
-        lastPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
+        currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
       );
       writeStateToFile(
         fileSystem.file(stateFile),
@@ -287,11 +287,11 @@ void main() {
       );
 
       expect(stdio.stdout, isNot(contains('Did you apply and merge all framework cherrypicks? (y/n) ')));
-      expect(finalState.lastPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
+      expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
       expect(stdio.error, isEmpty);
     });
 
-    test('does not update state.lastPhase from CODESIGN_ENGINE_BINARIES if user responds no', () async {
+    test('does not update state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS if user responds no', () async {
       stdio.stdin.add('n');
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
@@ -312,7 +312,7 @@ void main() {
             ),
           ],
         ),
-        lastPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
+        currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
       );
       writeStateToFile(
         fileSystem.file(stateFile),
@@ -338,10 +338,10 @@ void main() {
 
       expect(stdio.stdout, contains('Did you apply and merge all framework cherrypicks? (y/n) '));
       expect(stdio.error, contains('Aborting command.'));
-      expect(finalState.lastPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
+      expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
     });
 
-    test('updates state.lastPhase from CODESIGN_ENGINE_BINARIES to APPLY_FRAMEWORK_CHERRYPICKS if user responds yes', () async {
+    test('updates state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION if user responds yes', () async {
       stdio.stdin.add('y');
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
@@ -362,7 +362,7 @@ void main() {
             ),
           ],
         ),
-        lastPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
+        currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
       );
       writeStateToFile(
         fileSystem.file(stateFile),
@@ -386,11 +386,11 @@ void main() {
         fileSystem.file(stateFile),
       );
 
-      expect(finalState.lastPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
+      expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
       expect(stdio.stdout, contains('Did you apply and merge all framework cherrypicks? (y/n)'));
     });
 
-    test('throws exception if state.lastPhase is VERIFY_RELEASE', () async {
+    test('throws exception if state.currentPhase is RELEASE_COMPLETED', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
       );
@@ -402,7 +402,7 @@ void main() {
         pathSeparator: localPathSeparator,
       );
       final pb.ConductorState state = pb.ConductorState(
-        lastPhase: ReleasePhase.VERIFY_RELEASE,
+        currentPhase: ReleasePhase.RELEASE_COMPLETED,
       );
       writeStateToFile(
         fileSystem.file(stateFile),

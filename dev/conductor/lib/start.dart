@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:convert' show jsonEncode;
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
@@ -296,7 +294,7 @@ class StartCommand extends Command<void> {
       cherrypicks: frameworkCherrypicks,
     );
 
-    state.lastPhase = ReleasePhase.INITIALIZE;
+    state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
 
     state.conductorVersion = conductorVersion;
 

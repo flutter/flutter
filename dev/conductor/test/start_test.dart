@@ -270,7 +270,7 @@ void main() {
       expect(state.engine.dartRevision, nextDartRevision);
       expect(state.framework.candidateBranch, candidateBranch);
       expect(state.framework.startingGitHead, revision3);
-      expect(state.lastPhase, ReleasePhase.INITIALIZE);
+      expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, revision);
     });
   }, onPlatform: <String, dynamic>{

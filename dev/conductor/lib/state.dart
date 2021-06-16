@@ -79,14 +79,14 @@ String presentState(pb.ConductorState state) {
     buffer.writeln('0 Framework cherrypicks.');
   }
   buffer.writeln('');
-  if (state.lastPhase == ReleasePhase.VERIFY_RELEASE) {
+  if (state.currentPhase == ReleasePhase.VERIFY_RELEASE) {
     buffer.writeln(
       '${state.releaseChannel} release ${state.releaseVersion} has been published and verified.\n',
     );
     return buffer.toString();
   }
-  buffer.writeln('The next step is:');
-  buffer.writeln(presentPhases(state.lastPhase));
+  buffer.writeln('The current phase is:');
+  buffer.writeln(presentPhases(state.currentPhase));
 
   buffer.writeln(phaseInstructions(state));
   buffer.writeln('');
@@ -94,15 +94,14 @@ String presentState(pb.ConductorState state) {
   return buffer.toString();
 }
 
-String presentPhases(ReleasePhase lastPhase) {
-  final ReleasePhase nextPhase = getNextPhase(lastPhase);
+String presentPhases(ReleasePhase currentPhase) {
   final StringBuffer buffer = StringBuffer();
   bool phaseCompleted = true;
 
   for (final ReleasePhase phase in ReleasePhase.values) {
-    if (phase == nextPhase) {
+    if (phase == currentPhase) {
       // This phase will execute the next time `conductor next` is run.
-      buffer.writeln('> ${phase.name} (next)');
+      buffer.writeln('> ${phase.name} (current)');
       phaseCompleted = false;
     } else if (phaseCompleted) {
       // This phase was already completed.
@@ -116,8 +115,8 @@ String presentPhases(ReleasePhase lastPhase) {
 }
 
 String phaseInstructions(pb.ConductorState state) {
-  switch (state.lastPhase) {
-    case ReleasePhase.INITIALIZE:
+  switch (state.currentPhase) {
+    case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
       if (state.engine.cherrypicks.isEmpty) {
         return <String>[
           'There are no engine cherrypicks, so issue `conductor next` to continue',
@@ -131,31 +130,31 @@ String phaseInstructions(pb.ConductorState state) {
           '\t${cherrypick.trunkRevision}',
         'See $kReleaseDocumentationUrl for more information.',
       ].join('\n');
-    case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
+    case ReleasePhase.CODESIGN_ENGINE_BINARIES:
       return <String>[
         'You must verify Engine CI builds are successful and then codesign the',
         'binaries at revision ${state.engine.currentGitHead}.',
       ].join('\n');
-    case ReleasePhase.CODESIGN_ENGINE_BINARIES:
+    case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       return <String>[
         'You must now manually apply the following framework cherrypicks to the checkout',
         'at ${state.framework.checkoutPath} in order:',
         for (final pb.Cherrypick cherrypick in state.framework.cherrypicks)
           '\t${cherrypick.trunkRevision}',
       ].join('\n');
-    case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
+    case ReleasePhase.PUBLISH_VERSION:
       return <String>[
         'You must verify Framework CI builds are successful.',
         'See $kReleaseDocumentationUrl for more information.',
       ].join('\n');
-    case ReleasePhase.PUBLISH_VERSION:
-      return 'Issue `conductor next` to publish your release to the release branch.';
     case ReleasePhase.PUBLISH_CHANNEL:
+      return 'Issue `conductor next` to publish your release to the release branch.';
+    case ReleasePhase.VERIFY_RELEASE:
       return <String>[
         'Release archive packages must be verified on cloud storage. Issue',
         '`conductor next` to check if they are ready.',
       ].join('\n');
-    case ReleasePhase.VERIFY_RELEASE:
+    case ReleasePhase.RELEASE_COMPLETED:
       return 'This release has been completed.';
   }
   assert(false);
@@ -164,11 +163,11 @@ String phaseInstructions(pb.ConductorState state) {
 
 /// Returns the next phase in the ReleasePhase enum.
 ///
-/// Will throw a [ConductorException] if [ReleasePhase.RELEASE_VERIFIED] is
+/// Will throw a [ConductorException] if [ReleasePhase.RELEASE_COMPLETED] is
 /// passed as an argument, as there is no next phase.
 ReleasePhase getNextPhase(ReleasePhase previousPhase) {
   assert(previousPhase != null);
-  if (previousPhase == ReleasePhase.VERIFY_RELEASE) {
+  if (previousPhase == ReleasePhase.RELEASE_COMPLETED) {
     throw ConductorException('There is no next ReleasePhase!');
   }
   return ReleasePhase.valueOf(previousPhase.value + 1);
