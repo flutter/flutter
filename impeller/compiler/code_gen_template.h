@@ -32,7 +32,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   // ===========================================================================
 {% for def in struct_definitions %}
 
-  struct {{def.name}} {
+  struct alignas(16) {{def.name}} {
 {% for member in def.members %}
     {{member.type}} {{member.name}};
 {% endfor %}
@@ -117,8 +117,10 @@ using Info = {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info;
 {% for def in struct_definitions %}
 // Sanity checks for {{def.name}}
 static_assert(std::is_standard_layout_v<Info::{{def.name}}>);
-static_assert(sizeof(Info::{{def.name}}) == {{def.byte_length}},
-  "{{def.name}} size should match that in shader.");
+static_assert(sizeof(Info::{{def.name}}) == {{def.byte_length}});
+{% for member in def.members %}
+static_assert(offsetof(Info::{{def.name}}, {{member.name}}) == {{member.offset}});
+{% endfor %}
 {% endfor %}
 
 

@@ -20,6 +20,7 @@ source_set("compiler_lib") {
   ]
 
   public_deps = [
+    "../geometry",
     "//flutter/fml",
     "//flutter/runtime:libdart",
     "//third_party/inja",
