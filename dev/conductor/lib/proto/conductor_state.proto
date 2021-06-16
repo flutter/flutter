@@ -104,5 +104,5 @@ message ConductorState {
   ReleasePhase currentPhase = 9;
 
   // Commit hash of the Conductor tool.
-  string conductor_version = 10;
+  string conductorVersion = 10;
 }

@@ -383,7 +383,8 @@ class ConductorState extends $pb.GeneratedMessage {
         defaultOrMaker: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
         valueOf: ReleasePhase.valueOf,
         enumValues: ReleasePhase.values)
-    ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conductorVersion')
+    ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conductorVersion',
+        protoName: 'conductorVersion')
     ..hasRequiredFields = false;
 
   ConductorState._() : super();
