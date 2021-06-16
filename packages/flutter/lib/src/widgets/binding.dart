@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, PlatformDispatcher;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -470,6 +471,17 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
 
     assert(() {
+      registerServiceExtension(name: 'experimentalProfile', callback: (Map<String, Object> params) async {
+        if (Element.debugBuildRecorder == null) {
+          Element.debugBuildRecorder = BuildRecorder();
+          return <String, String>{'type': 'Success'};
+        }
+        final BuildRecorder buildRecorder = Element.debugBuildRecorder!;
+        Element.debugBuildRecorder = null;
+        final Map<String, Object> data = buildRecorder.toJson();
+        return <String, Object>{'type': 'Success', 'data': data};
+      });
+
       registerBoolServiceExtension(
         name: 'debugAllowBanner',
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
@@ -896,6 +908,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       _needToReportFirstFrame = true;
       SchedulerBinding.instance!.removeTimingsCallback(firstFrameCallback!);
     }
+    assert(() {
+      print(RendererBinding.instance!.frameNumber);
+      Element.debugBuildRecorder?.finishFrame(RendererBinding.instance!.frameNumber);
+      return true;
+    }());
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the

@@ -37,7 +37,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
-      ..onSemanticsAction = _handleSemanticsAction;
+      ..onSemanticsAction = _handleSemanticsAction
+      ..onFrameDataChanged = _handleFrameDataChanged;
     initRenderView();
     _handleSemanticsEnabledChanged();
     assert(renderView != null);
@@ -51,6 +52,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// The current [RendererBinding], if one has been created.
   static RendererBinding? get instance => _instance;
   static RendererBinding? _instance;
+
+  /// The current frame number.
+  int get frameNumber => _frameNumber;
+  int _frameNumber = -1;
 
   @override
   void initServiceExtensions() {
@@ -302,6 +307,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       _semanticsHandle?.dispose();
       _semanticsHandle = null;
     }
+  }
+
+  void _handleFrameDataChanged() {
+    _frameNumber = window.frameData.frameNumber;
   }
 
   void _handleWebFirstFrame(Duration _) {

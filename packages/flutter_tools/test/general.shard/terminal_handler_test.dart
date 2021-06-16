@@ -1233,6 +1233,37 @@ void main() {
     expect(logger.errorText, contains('Error'));
   });
 
+  testWithoutContext('x, debugToggleWidgetProfile can record a widget profile', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.experimentalProfile',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.experimentalProfile',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: <String, Object>{
+          'frames': <Object>[],
+        }
+      ),
+    ], logger: logger);
+
+    await terminalHandler.processTerminalInput('x');
+
+    expect(terminalHandler.logger.statusText, contains('Started recording rebuild profile. Try interacting with the application and then press "x" again to finish'));
+
+    await terminalHandler.processTerminalInput('x');
+
+    expect(terminalHandler.logger.statusText, contains('Recorded rebuild profile at flutter_01.json'));
+  });
+
   testWithoutContext('pidfile creation', () {
     final BufferLogger testLogger = BufferLogger.test();
     final Signals signals = _TestSignals(Signals.defaultExitSignals);
@@ -1389,7 +1420,6 @@ class FakeDevice extends Fake implements Device {
     }
     file.writeAsBytesSync(<int>[1, 2, 3, 4]);
   }
-
 }
 
 TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {

@@ -831,6 +831,34 @@ abstract class ResidentHandlers {
     return true;
   }
 
+  Future<void> toggleExperimentalProfile() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
+        final Map<String, Object> data = await device.vmService.flutterToggleExperimentalProfile(
+          isolateId: view.uiIsolate.id,
+        );
+        if (data != null && data.containsKey('frames')) {
+          final File outputFile = getUniqueFile(
+            fileSystem.currentDirectory,
+            'flutter',
+            'json',
+          );
+          outputFile.writeAsStringSync(json.encode(data['frames']));
+          logger.printStatus('Recorded rebuild profile at ${fileSystem.path.relative(outputFile.path)}.');
+        } else {
+          logger.printStatus(
+            'Started recording rebuild profile. Try interacting with the application and '
+            'then press "x" again to finish.'
+          );
+        }
+      }
+    }
+  }
+
   /// Toggle the operating system brightness (light or dark).
   Future<bool> debugToggleBrightness() async {
     if (!supportsServiceProtocol) {
@@ -1667,6 +1695,10 @@ class TerminalHandler {
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
+      case 'x':
+      case 'X':
+        await residentRunner.toggleExperimentalProfile();
+        return true;
       case 'z':
       case 'Z':
         return residentRunner.debugToggleDebugCheckElevationsEnabled();

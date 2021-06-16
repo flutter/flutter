@@ -25,6 +25,7 @@ const String kRunInViewMethod = '_flutter.runInView';
 const String kListViewsMethod = '_flutter.listViews';
 const String kScreenshotSkpMethod = '_flutter.screenshotSkp';
 const String kScreenshotMethod = '_flutter.screenshot';
+const String kExperimentalProfileMethod = 'ext.flutter.experimentalProfile';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -663,6 +664,16 @@ class FlutterVmService {
         'className': className,
       },
     );
+  }
+
+  Future<Map<String, dynamic>> flutterToggleExperimentalProfile({
+   @required String isolateId,
+  }) async {
+    final Map<String, dynamic> data = await invokeFlutterExtensionRpcRaw(
+      kExperimentalProfileMethod,
+      isolateId: isolateId,
+    );
+    return data['data'] as Map<String, dynamic>;
   }
 
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame({
