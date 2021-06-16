@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -198,10 +199,10 @@ class Xcode {
   }
 }
 
-EnvironmentType? environmentTypeFromSdkroot(Directory sdkroot) {
+EnvironmentType? environmentTypeFromSdkroot(String sdkroot) {
   assert(sdkroot != null);
   // iPhoneSimulator.sdk or iPhoneOS.sdk
-  final String sdkName = sdkroot.basename.toLowerCase();
+  final String sdkName = path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {
     return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
   }

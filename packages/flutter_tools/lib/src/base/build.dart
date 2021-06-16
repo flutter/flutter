@@ -260,14 +260,14 @@ class AOTSnapshotter {
 
     const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
-    List<String>? isysrootArgs;
     if (sdkRoot != null) {
-      isysrootArgs = <String>['-isysroot', sdkRoot];
+      commonBuildOptions.addAll(<String>[
+        '-isysroot', sdkRoot,
+      ]);
     }
 
     final RunResult compileResult = await _xcode.cc(<String>[
-      '-arch', targetArch,
-      if (isysrootArgs != null) ...isysrootArgs,
+      ...commonBuildOptions,
       if (bitcode) embedBitcodeArg,
       '-c',
       assemblyPath,
@@ -289,7 +289,6 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
       if (bitcode) embedBitcodeArg,
-      if (isysrootArgs != null) ...isysrootArgs,
       '-o', appLib,
       assemblyO,
     ];
