@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:convert' show jsonDecode;
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
