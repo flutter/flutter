@@ -5,16 +5,17 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:math';
 
 import 'package:async/async.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../convert.dart';
@@ -32,6 +33,7 @@ typedef PrintFn = void Function(Object);
 class CustomDevicesCommand extends FlutterCommand {
   factory CustomDevicesCommand({
     @required CustomDevicesConfig customDevicesConfig,
+    @required OperatingSystemUtils operatingSystemUtils,
     @required Terminal terminal,
     @required Platform platform,
     @required ProcessManager processManager,
@@ -41,6 +43,7 @@ class CustomDevicesCommand extends FlutterCommand {
   }) {
     return CustomDevicesCommand._common(
       customDevicesConfig: customDevicesConfig,
+      operatingSystemUtils: operatingSystemUtils,
       terminal: terminal,
       platform: platform,
       processManager: processManager,
@@ -53,6 +56,7 @@ class CustomDevicesCommand extends FlutterCommand {
   @visibleForTesting
   factory CustomDevicesCommand.test({
     @required CustomDevicesConfig customDevicesConfig,
+    @required OperatingSystemUtils operatingSystemUtils,
     @required Terminal terminal,
     @required Platform platform,
     @required ProcessManager processManager,
@@ -63,6 +67,7 @@ class CustomDevicesCommand extends FlutterCommand {
   }) {
     return CustomDevicesCommand._common(
       customDevicesConfig: customDevicesConfig,
+      operatingSystemUtils: operatingSystemUtils,
       terminal: terminal,
       platform: platform,
       processManager: processManager,
@@ -75,6 +80,7 @@ class CustomDevicesCommand extends FlutterCommand {
 
   CustomDevicesCommand._common({
     @required CustomDevicesConfig customDevicesConfig,
+    @required OperatingSystemUtils operatingSystemUtils,
     @required Terminal terminal,
     @required Platform platform,
     @required ProcessManager processManager,
@@ -83,6 +89,7 @@ class CustomDevicesCommand extends FlutterCommand {
     @required FeatureFlags featureFlags,
     PrintFn usagePrintFn = print,
   }) : assert(customDevicesConfig != null),
+       assert(operatingSystemUtils != null),
        assert(terminal != null),
        assert(platform != null),
        assert(processManager != null),
@@ -107,6 +114,7 @@ class CustomDevicesCommand extends FlutterCommand {
     ));
     addSubcommand(CustomDevicesAddCommand(
       customDevicesConfig: customDevicesConfig,
+      operatingSystemUtils: operatingSystemUtils,
       terminal: terminal,
       platform: platform,
       featureFlags: featureFlags,
@@ -273,7 +281,7 @@ If a file already exists at the backup location, it will be overwritten.
 
     await backup();
 
-    await fileSystem.file(customDevicesConfig.configPath).delete();
+    ErrorHandlingFileSystem.deleteIfExists(fileSystem.file(customDevicesConfig.configPath));
     customDevicesConfig.ensureFileExists();
 
     logger.printStatus(
@@ -287,13 +295,15 @@ If a file already exists at the backup location, it will be overwritten.
 class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   CustomDevicesAddCommand({
     @required CustomDevicesConfig customDevicesConfig,
+    @required OperatingSystemUtils operatingSystemUtils,
     @required Terminal terminal,
     @required Platform platform,
     @required FeatureFlags featureFlags,
     @required ProcessManager processManager,
     @required FileSystem fileSystem,
     @required Logger logger,
-  }) : _terminal = terminal,
+  }) : _operatingSystemUtils = operatingSystemUtils,
+       _terminal = terminal,
        _platform = platform,
        _processManager = processManager,
        super(
@@ -304,12 +314,16 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
        )
   {
     argParser.addFlag(
-        _kCheck,
-        help:
-          'Make sure the config actually works. This will execute some of the '
-          'commands in the config (if necessary with dummy arguments). This '
-          'flag is enabled by default when "--json" is not specified. If '
-          '"--json" is given, it is disabled by default.',
+      _kCheck,
+      help:
+        'Make sure the config actually works. This will execute some of the '
+        'commands in the config (if necessary with dummy arguments). This '
+        'flag is enabled by default when "--json" is not specified. If '
+        '"--json" is given, it is disabled by default.\n'
+        'For example, a config with "null" as the "runDebug" command is '
+        'invalid. If the "runDebug" command is valid (so it is an array of '
+        'strings) but the command is not found (because you have a typo, for '
+        'example), the config won\'t work and "--check" will spot that.'
     );
 
     argParser.addOption(
@@ -321,8 +335,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         'add" command from a script, or use it non-interactively for some '
         'other reason.\n'
         "By default, this won't check whether the passed in config actually "
-        'works (only if it is valid). To make sure the config works use the '
-        '"--check" option.',
+        'works. For more info see the "--check" option.',
       valueHelp: 'JSON config',
       aliases: _kJsonAliases
     );
@@ -350,6 +363,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   // but not as the first or last character of the name.
   static final RegExp _hostnameRegex = RegExp(r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$');
 
+  final OperatingSystemUtils _operatingSystemUtils;
   final Terminal _terminal;
   final Platform _platform;
   final ProcessManager _processManager;
@@ -427,7 +441,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
       try {
         // find a random port we can forward
-        final int port = Random().nextInt(65536 - 49152) + 49152;
+        final int port = await _operatingSystemUtils.findFreePort();
 
         final ForwardedPort forwardedPort = await portForwarder.tryForward(port, port);
         if (forwardedPort == null) {

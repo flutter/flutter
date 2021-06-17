@@ -152,6 +152,7 @@ List<FlutterCommand> generateCommands({
   ConfigCommand(verboseHelp: verboseHelp),
   CustomDevicesCommand(
     customDevicesConfig: globals.customDevicesConfig,
+    operatingSystemUtils: globals.os,
     terminal: globals.terminal,
     platform: globals.platform,
     featureFlags: featureFlags,

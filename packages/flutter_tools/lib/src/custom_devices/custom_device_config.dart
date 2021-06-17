@@ -346,13 +346,13 @@ class CustomDeviceConfig {
   static Map<String, dynamic> _castJsonObject(dynamic value, String fieldDescription, String expectedValueDescription) {
     if (value == null) {
       throw CustomDeviceRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
-    } else {
-      return _maybeRethrowAsRevivalException(
-        () => Map<String, dynamic>.from(value as Map<dynamic, dynamic>),
-        fieldDescription,
-        expectedValueDescription,
-      );
     }
+
+    return _maybeRethrowAsRevivalException(
+      () => Map<String, dynamic>.from(value as Map<dynamic, dynamic>),
+      fieldDescription,
+      expectedValueDescription,
+    );
   }
 
   /// Tries to cast [value] to a bool.
@@ -362,13 +362,13 @@ class CustomDeviceConfig {
   static bool _castBool(dynamic value, String fieldDescription, String expectedValueDescription) {
     if (value == null) {
       throw CustomDeviceRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
-    } else {
-      return _maybeRethrowAsRevivalException(
-        () => value as bool,
-        fieldDescription,
-        expectedValueDescription,
-      );
     }
+
+    return _maybeRethrowAsRevivalException(
+      () => value as bool,
+      fieldDescription,
+      expectedValueDescription,
+    );
   }
 
   /// Tries to cast [value] to a String.
@@ -378,13 +378,13 @@ class CustomDeviceConfig {
   static String _castString(dynamic value, String fieldDescription, String expectedValueDescription) {
     if (value == null) {
       throw CustomDeviceRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
-    } else {
-      return _maybeRethrowAsRevivalException(
-        () => value as String,
-        fieldDescription,
-        expectedValueDescription,
-      );
     }
+
+    return _maybeRethrowAsRevivalException(
+      () => value as String,
+      fieldDescription,
+      expectedValueDescription,
+    );
   }
 
   /// Tries to cast [value] to a nullable String.
@@ -394,9 +394,9 @@ class CustomDeviceConfig {
   static String? _castStringOrNull(dynamic value, String fieldDescription, String expectedValueDescription) {
     if (value == null) {
       return null;
-    } else {
-      return _castString(value, fieldDescription, expectedValueDescription);
     }
+
+    return _castString(value, fieldDescription, expectedValueDescription);
   }
 
   /// Tries to make a list of strings from [value].
@@ -412,19 +412,19 @@ class CustomDeviceConfig {
   }) {
     if (value == null) {
       throw CustomDeviceRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
-    } else {
-      final List<String> list = _maybeRethrowAsRevivalException(
-        () => List<String>.from(value as Iterable<dynamic>),
-        fieldDescription,
-        expectedValueDescription,
-      );
-
-      if (list.length < minLength) {
-        throw CustomDeviceRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
-      }
-
-      return list;
     }
+
+    final List<String> list = _maybeRethrowAsRevivalException(
+      () => List<String>.from(value as Iterable<dynamic>),
+      fieldDescription,
+      expectedValueDescription,
+    );
+
+    if (list.length < minLength) {
+      throw CustomDeviceRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
+    }
+
+    return list;
   }
 
   /// Tries to make a list of strings from [value], or returns null if [value]
@@ -441,9 +441,9 @@ class CustomDeviceConfig {
   }) {
     if (value == null) {
       return null;
-    } else {
-      return _castStringList(value, fieldDescription, expectedValueDescription, minLength: minLength);
     }
+
+    return _castStringList(value, fieldDescription, expectedValueDescription, minLength: minLength);
   }
 
   /// Tries to construct a RegExp from [value], or returns null if [value]
@@ -455,13 +455,13 @@ class CustomDeviceConfig {
   static RegExp? _convertToRegexOrNull(dynamic value, String fieldDescription, String expectedValueDescription) {
     if (value == null) {
       return null;
-    } else {
-      return _maybeRethrowAsRevivalException(
-        () => RegExp(value as String),
-        fieldDescription,
-        expectedValueDescription,
-      );
     }
+
+    return _maybeRethrowAsRevivalException(
+      () => RegExp(value as String),
+      fieldDescription,
+      expectedValueDescription,
+    );
   }
 
   dynamic toJson() {

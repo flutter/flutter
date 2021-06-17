@@ -14,6 +14,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
@@ -195,6 +196,12 @@ CustomDevicesCommand createCustomDevicesCommand({
         directory: fileSystem.directory('/'),
         logger: logger
       ),
+    operatingSystemUtils: FakeOperatingSystemUtils(
+      hostPlatform: platform.isLinux ? HostPlatform.linux_x64
+        : platform.isWindows ? HostPlatform.windows_x64
+        : platform.isMacOS ? HostPlatform.darwin_x64
+        : throw FallThroughError()
+    ),
     terminal: terminal != null
       ? terminal(platform)
       : FakeTerminal(platform: platform),
