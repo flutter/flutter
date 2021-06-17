@@ -427,6 +427,11 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     return reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
   }
 
+  /// Cleans up any listeners added by this CurvedAnimation.
+  void dispose() {
+    parent.removeStatusListener(_updateCurveDirection);
+  }
+
   @override
   double get value {
     final Curve? activeCurve = _useForwardCurve ? curve : reverseCurve;

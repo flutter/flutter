@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
@@ -302,55 +303,39 @@ FlutterError
     expect(curved.value, moreOrLessEquals(0.0));
   });
 
-  test('ReverseAnimation running with different forward and reverse durations.', () {
+  test('CurvedAnimation stops listening to parent when disposed.', () async {
+    const Interval forwardCurve = Interval(0.0, 0.5);
+    const Interval reverseCurve = Interval(0.5, 1.0);
+
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
-      reverseDuration: const Duration(milliseconds: 50),
+      reverseDuration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final ReverseAnimation reversed = ReverseAnimation(
-      CurvedAnimation(
-        parent: controller,
-        curve: Curves.linear,
-        reverseCurve: Curves.linear,
-      ),
-    );
+    final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: forwardCurve, reverseCurve: reverseCurve);
 
-    controller.forward();
-    tick(Duration.zero);
-    tick(const Duration(milliseconds: 10));
-    expect(reversed.value, moreOrLessEquals(0.9));
-    tick(const Duration(milliseconds: 20));
-    expect(reversed.value, moreOrLessEquals(0.8));
-    tick(const Duration(milliseconds: 30));
-    expect(reversed.value, moreOrLessEquals(0.7));
-    tick(const Duration(milliseconds: 40));
-    expect(reversed.value, moreOrLessEquals(0.6));
-    tick(const Duration(milliseconds: 50));
-    expect(reversed.value, moreOrLessEquals(0.5));
-    tick(const Duration(milliseconds: 60));
-    expect(reversed.value, moreOrLessEquals(0.4));
-    tick(const Duration(milliseconds: 70));
-    expect(reversed.value, moreOrLessEquals(0.3));
-    tick(const Duration(milliseconds: 80));
-    expect(reversed.value, moreOrLessEquals(0.2));
-    tick(const Duration(milliseconds: 90));
-    expect(reversed.value, moreOrLessEquals(0.1));
-    tick(const Duration(milliseconds: 100));
-    expect(reversed.value, moreOrLessEquals(0.0));
-    controller.reverse();
-    tick(const Duration(milliseconds: 110));
-    expect(reversed.value, moreOrLessEquals(0.0));
-    tick(const Duration(milliseconds: 120));
-    expect(reversed.value, moreOrLessEquals(0.2));
-    tick(const Duration(milliseconds: 130));
-    expect(reversed.value, moreOrLessEquals(0.4));
-    tick(const Duration(milliseconds: 140));
-    expect(reversed.value, moreOrLessEquals(0.6));
-    tick(const Duration(milliseconds: 150));
-    expect(reversed.value, moreOrLessEquals(0.8));
-    tick(const Duration(milliseconds: 160));
-    expect(reversed.value, moreOrLessEquals(1.0));
+    expect(forwardCurve.transform(0.5), 1.0);
+    expect(reverseCurve.transform(0.5), 0.0);
+
+    controller.forward(from:0.5);
+    expect(controller.status, equals(AnimationStatus.forward));
+    expect(curved.value, equals(1.0));
+
+    controller.value = 1.0;
+    expect(controller.status, equals(AnimationStatus.completed));
+
+    controller.reverse(from:0.5);
+    expect(controller.status, equals(AnimationStatus.reverse));
+    expect(curved.value, equals(0.0));
+
+    curved.dispose();
+
+    controller.value = 0.0;
+    expect(controller.status, equals(AnimationStatus.dismissed));
+
+    controller.forward(from:0.5);
+    expect(controller.status, equals(AnimationStatus.forward));
+    expect(curved.value, equals(0.0));
   });
 
   test('TweenSequence', () {
