@@ -1920,7 +1920,6 @@ void main() {
 
   testWidgets('onDestinationSelected is not called if null', (WidgetTester tester) async {
     const int selectedIndex = 0;
-    
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
