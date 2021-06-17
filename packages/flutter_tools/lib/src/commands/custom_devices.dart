@@ -310,7 +310,6 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
           'commands in the config (if necessary with dummy arguments). This '
           'flag is enabled by default when "--json" is not specified. If '
           '"--json" is given, it is disabled by default.',
-        defaultsTo: null
     );
 
     argParser.addOption(
