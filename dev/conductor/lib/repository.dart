@@ -344,20 +344,6 @@ abstract class Repository {
     );
   }
 
-  /// Tag [commit] and push the tag to the remote.
-  void tag(String commit, String tagName, String remote) {
-    git.run(
-      <String>['tag', tagName, commit],
-      'tag the commit with the version label',
-      workingDirectory: checkoutDirectory.path,
-    );
-    git.run(
-      <String>['push', remote, tagName],
-      'publish the tag to the repo',
-      workingDirectory: checkoutDirectory.path,
-    );
-  }
-
   /// Push [commit] to the release channel [branch].
   void updateChannel(
     String commit,
@@ -484,6 +470,27 @@ class FrameworkRepository extends Repository {
         'bin',
         'cache',
       );
+
+  /// Tag [commit] and push the tag to the remote.
+  void tag(String commit, String tagName, String remote) {
+    assert(commit.isNotEmpty);
+    assert(tagName.isNotEmpty);
+    assert(remote.isNotEmpty);
+    stdio.printStatus('About to tag commit $commit as $tagName...');
+    git.run(
+      <String>['tag', tagName, commit],
+      'tag the commit with the version label',
+      workingDirectory: checkoutDirectory.path,
+    );
+    stdio.printStatus('Tagging successful.');
+    stdio.printStatus('About to push $tagName to remote $remote...');
+    git.run(
+      <String>['push', remote, tagName],
+      'publish the tag to the repo',
+      workingDirectory: checkoutDirectory.path,
+    );
+    stdio.printStatus('Tag push successful.');
+  }
 
   @override
   Repository cloneRepository(String? cloneName) {

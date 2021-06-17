@@ -141,6 +141,16 @@ void runNext({
       }
       break;
     case pb.ReleasePhase.PUBLISH_VERSION:
+      final Remote upstream = Remote(
+        name: RemoteName.upstream,
+        url: state.framework.upstream.url,
+      );
+      final FrameworkRepository framework = FrameworkRepository(
+        checkouts,
+        initialRef: state.framework.candidateBranch,
+        fetchRemote: upstream,
+      );
+      final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {
         final bool response = prompt(
           'Has CI passed for the framework PR?',
@@ -151,7 +161,7 @@ void runNext({
           return;
         }
       }
-      throw ConductorException('Unimplemented PUBLISH_VERSION!');
+      framework.tag(headRevision, state.releaseVersion, upstream.name);
       break;
     case pb.ReleasePhase.PUBLISH_CHANNEL:
       break;

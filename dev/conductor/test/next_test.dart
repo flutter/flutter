@@ -21,8 +21,10 @@ void main() {
   group('next command', () {
     const String flutterRoot = '/flutter';
     const String checkoutsParentDirectory = '$flutterRoot/dev/tools/';
+    const String candidateBranch = 'flutter-1.2-candidate.3';
     final String localPathSeparator = const LocalPlatform().pathSeparator;
     final String localOperatingSystem = const LocalPlatform().pathSeparator;
+    const String revision1 = 'abc123';
     MemoryFileSystem fileSystem;
     TestStdio stdio;
     const String stateFile = '/state-file.json';
@@ -394,9 +396,37 @@ void main() {
 
 
     test('does not update state.currentPhase from PUBLISH_VERSION if user responds no', () async {
+      const String remoteName = 'upstream';
       stdio.stdin.add('n');
       final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[],
+        <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              remoteName,
+              '--',
+              FrameworkRepository.defaultUpstream,
+              fileSystem.path.join(
+                checkoutsParentDirectory,
+                'flutter_conductor_checkouts',
+                'framework',
+              ),
+            ],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision1,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision1,
+          ),
+        ],
       );
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{
@@ -407,6 +437,10 @@ void main() {
       );
       final pb.ConductorState state = pb.ConductorState(
         currentPhase: ReleasePhase.PUBLISH_VERSION,
+        framework: pb.Repository(
+          candidateBranch: candidateBranch,
+          upstream: pb.Remote(url: FrameworkRepository.defaultUpstream),
+        ),
       );
       writeStateToFile(
         fileSystem.file(stateFile),
@@ -436,10 +470,43 @@ void main() {
     });
 
     test('updates state.currentPhase from PUBLISH_VERSION to PUBLISH_CHANNEL if user responds yes', () async {
+      const String remoteName = 'upstream';
+      const String releaseVersion = '1.2.0-3.0.pre';
       stdio.stdin.add('y');
-      final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[],
-      );
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'git',
+            'clone',
+            '--origin',
+            remoteName,
+            '--',
+            FrameworkRepository.defaultUpstream,
+            fileSystem.path.join(
+              checkoutsParentDirectory,
+              'flutter_conductor_checkouts',
+              'framework',
+            ),
+          ],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision1,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision1,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'tag', releaseVersion, revision1],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'push', remoteName, releaseVersion],
+        ),
+      ]);
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{
           'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
@@ -449,6 +516,11 @@ void main() {
       );
       final pb.ConductorState state = pb.ConductorState(
         currentPhase: ReleasePhase.PUBLISH_VERSION,
+        framework: pb.Repository(
+          candidateBranch: candidateBranch,
+          upstream: pb.Remote(url: FrameworkRepository.defaultUpstream),
+        ),
+        releaseVersion: releaseVersion,
       );
       writeStateToFile(
         fileSystem.file(stateFile),
