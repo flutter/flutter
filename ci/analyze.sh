@@ -59,6 +59,7 @@ function analyze() (
 )
 
 echo "Analyzing dart:ui library..."
+autoninja -C "$SRC_DIR/out/host_debug_unopt" generate_dart_ui
 analyze \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
   "$SRC_DIR/out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart"
@@ -106,6 +107,8 @@ analyze \
   "$FLUTTER_DIR/testing/smoke_test_failure"
 
 echo "Analyzing testing/dart..."
+"$FLUTTER_DIR/tools/gn" --unoptimized
+autoninja -C "$SRC_DIR/out/host_debug_unopt" sky_engine sky_services
 (cd "$FLUTTER_DIR/testing/dart" && "$PUB" get --offline)
 analyze \
   --packages="$FLUTTER_DIR/testing/dart/.dart_tool/package_config.json" \
