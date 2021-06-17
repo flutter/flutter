@@ -35,7 +35,7 @@ const List<String> _kSharedConfig = <String>[
   '-install_name',
   '@rpath/App.framework/App',
   '-isysroot',
-  'path/to/sdk',
+  'path/to/iPhoneOS.sdk',
 ];
 
 void main() {
@@ -69,9 +69,53 @@ void main() {
     expect(const AotAssemblyProfile().analyticsName, 'ios_aot');
   });
 
+  testUsingContext('DebugUniveralFramework creates simulator binary', () async {
+    environment.defines[kIosArchs] = 'x86_64';
+    environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
+    processManager.addCommand(
+      FakeCommand(command: <String>[
+        'xcrun',
+        'clang',
+        '-x',
+        'c',
+        '-arch',
+        'x86_64',
+        fileSystem.path.absolute(fileSystem.path.join(
+            '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
+        '-dynamiclib',
+        '-fembed-bitcode-marker',
+        '-miphonesimulator-version-min=8.0',
+        '-Xlinker',
+        '-rpath',
+        '-Xlinker',
+        '@executable_path/Frameworks',
+        '-Xlinker',
+        '-rpath',
+        '-Xlinker',
+        '@loader_path/Frameworks',
+        '-install_name',
+        '@rpath/App.framework/App',
+        '-isysroot',
+        'path/to/iPhoneSimulator.sdk',
+        '-o',
+        environment.buildDir
+            .childDirectory('App.framework')
+            .childFile('App')
+            .path,
+      ]),
+    );
+
+    await const DebugUniversalFramework().build(environment);
+    expect(processManager.hasRemainingExpectations, isFalse);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => macPlatform,
+  });
+
   testUsingContext('DebugUniveralFramework creates expected binary with arm64 only arch', () async {
     environment.defines[kIosArchs] = 'arm64';
-    environment.defines[kSdkRoot] = 'path/to/sdk';
+    environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
     processManager.addCommand(
       FakeCommand(command: <String>[
         'xcrun',

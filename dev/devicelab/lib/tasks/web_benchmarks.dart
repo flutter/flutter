@@ -69,7 +69,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
             final BlinkTraceSummary traceSummary = BlinkTraceSummary.fromJson(latestPerformanceTrace);
             profile['totalUiFrame.average'] = traceSummary.averageTotalUIFrameTime.inMicroseconds;
             profile['scoreKeys'] ??= <dynamic>[]; // using dynamic for consistency with JSON
-            profile['scoreKeys'].add('totalUiFrame.average');
+            (profile['scoreKeys'] as List<dynamic>).add('totalUiFrame.average');
             latestPerformanceTrace = null;
           }
           collectedProfiles.add(profile);

@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('TestWindow can handle new methods without breaking', () {
     final dynamic testWindow = TestWindow(window: ui.window);
+    // ignore: avoid_dynamic_calls
     expect(testWindow.someNewProperty, null);
   });
 
