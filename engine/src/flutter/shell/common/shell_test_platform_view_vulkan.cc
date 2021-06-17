@@ -119,6 +119,7 @@ bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaGrContext() {
   }
   PersistentCache::MarkStrategySet();
   options.fPersistentCache = PersistentCache::GetCacheForProcess();
+  options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
 
   sk_sp<GrDirectContext> context =
       GrDirectContext::MakeVulkan(backend_context, options);
