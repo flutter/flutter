@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -670,20 +671,36 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// [ScrollNotification]s the Scrollbar should listen to.
 ///
 /// Scrollbars are interactive and will also use the [PrimaryScrollController] if
-/// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
-/// of the [ScrollView] to change the [ScrollPosition]. Tapping along the track
-/// exclusive of the thumb will trigger a [ScrollIncrementType.page] based on
-/// the relative position to the thumb.
+/// a [controller] is not set. Interactive Scrollbar thumbs can be dragged along
+/// the main axis of the [ScrollView] to change the [ScrollPosition]. Tapping
+/// along the track exclusive of the thumb will trigger a
+/// [ScrollIncrementType.page] based on the relative position to the thumb.
+///
+/// When using the [PrimaryScrollController], it should not be attached to more
+/// than one [ScrollPosition]. [ScrollView]s that have not been provided a
+/// [ScrollController] and have a [ScrollView.scrollDirection] of
+/// [Axis.vertical] will automatically attach their ScrollPosition to the
+/// PrimaryScrollController. Provide a unique ScrollController to each
+/// [Scrollable] that would otherwise result in multiple ScrollPositions
+/// attached to the PrimaryScrollController.
 ///
 /// If the child [ScrollView] is infinitely long, the [RawScrollbar] will not be
 /// painted. In this case, the scrollbar cannot accurately represent the
 /// relative location of the visible area, or calculate the accurate delta to
 /// apply when  dragging on the thumb or tapping on the track.
 ///
-/// Scrollbars are added to most [Scrollable] widgets by default on Desktop
-/// platforms in [ScrollBehavior.buildScrollbar] as part of an app's
-/// [ScrollConfiguration]. Scrollable widgets that do not have automatically
-/// applied Scrollbars include
+/// ### Automatic Scrollbars on Desktop Platforms
+///
+/// Scrollbars are added to most [Scrollable] widgets by default on
+/// [TargetPlatformVariant.desktop] platforms. This is done through
+/// [ScrollBehavior.buildScrollbar] as part of an app's
+/// [ScrollConfiguration]. Scrollables that do not use the
+/// [PrimaryScrollController] or have a [ScrollController] provided to them
+/// will receive a unique ScrollController for use with the Scrollbar. In this
+/// case, only one Scrollable can be using the PrimaryScrollController, unless
+/// [interactive] is false. To prevent a [Axis.vertical] Scrollables from using
+/// the PrimaryScrollController, set [ScrollView.primary] to false. Scrollable
+/// widgets that do not have automatically applied Scrollbars include
 ///
 ///   * [EditableText]
 ///   * [ListWheelScrollView]
@@ -1032,19 +1049,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         // Wait one frame and cause an empty scroll event.  This allows the
         // thumb to show immediately when isAlwaysShown is true. A scroll
         // event is required in order to paint the thumb.
-        _checkForValidScrollPosition();
+        _debugCheckHasValidScrollPosition();
         scrollController!.position.didUpdateScrollPositionBy(0);
-      }
-
-      // Interactive scrollbars need to be properly configured.
-      // If there is no scroll controller, there will not be gestures at all.
-      if (scrollController != null && enableGestures) {
-        _checkForValidScrollPosition();
       }
     });
   }
 
-  void _checkForValidScrollPosition() {
+  void _debugCheckHasValidScrollPosition() {
     final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
     final bool tryPrimary = widget.controller == null;
     final String controllerForError = tryPrimary
@@ -1212,7 +1223,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPress() {
-    _checkForValidScrollPosition();
+    _debugCheckHasValidScrollPosition();
     if (getScrollbarDirection() == null) {
       return;
     }
@@ -1225,7 +1236,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPressStart(Offset localPosition) {
-    _checkForValidScrollPosition();
+    _debugCheckHasValidScrollPosition();
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
@@ -1242,7 +1253,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPressUpdate(Offset localPosition) {
-    _checkForValidScrollPosition();
+    _debugCheckHasValidScrollPosition();
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
@@ -1255,7 +1266,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
-    _checkForValidScrollPosition();
+    _debugCheckHasValidScrollPosition();
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
@@ -1267,7 +1278,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   void _handleTrackTapDown(TapDownDetails details) {
     // The Scrollbar should page towards the position of the tap on the track.
-    _checkForValidScrollPosition();
+    _debugCheckHasValidScrollPosition();
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
 
     double scrollIncrement;
@@ -1340,8 +1351,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
     final ScrollController? controller = widget.controller ?? PrimaryScrollController.of(context);
-    if (controller == null || !enableGestures)
+    // A ScrollController is required to support gestures, if the scrollbar is
+    // not visible it cannot be interacted with.
+    if (controller == null || !enableGestures || _fadeoutOpacityAnimation.value == 0.0)
       return gestures;
+
+    // print(controller);
+    // print(controller.positions);
+    _debugCheckHasValidScrollPosition();
 
     gestures[_ThumbPressGestureRecognizer] =
       GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(
