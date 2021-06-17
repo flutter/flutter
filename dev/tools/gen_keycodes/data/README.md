@@ -9,7 +9,6 @@
 | [`supplemental_hid_codes.inc`](supplemental_hid_codes.inc) | A supplementary HID list on top of Chromium's list of HID codes for extra physical keys. Certain entries may also overwrite Chromium's corresponding entries. |
 | [`supplemental_key_data.inc`](supplemental_key_data.inc) | A supplementary key list on top of Chromium's list of keys for extra logical keys.|
 | [`chromium_modifiers.json`](chromium_modifiers.json) | Maps the web's `key` for modifier keys to the names of the logical keys for these keys' left and right variations.This is used when generating logical keys to provide independent values for sided logical keys. Web uses the same `key` for modifier keys of different sides, but Flutter's logical key model treats them as different keys.|
-| [`printable_to_numpads.json`](printable_to_numpads.json) | Maps a character to the names of the logical keys for these keys' number pad variations. This is used when generating logical keys to provide independent values for number pad logical keys. The web uses the character as the `key` for number pad keys, but Flutter's logical key model treats them as independent keys.|
 | [`printable.json`](printable.json) | Maps Flutter key name to its printable character. This character is used as the key label.|
 | [`synonyms.json`](synonyms.json) | Maps pseudo-keys that represent other keys to the sets of keys they represent. For example, this contains the "shift" key that represents either a "shiftLeft" or "shiftRight" key.|
 

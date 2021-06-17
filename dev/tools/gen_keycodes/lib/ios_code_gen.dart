@@ -25,10 +25,6 @@ const List<String> kModifiersOfInterest = <String>[
 const List<String> kSpecialPhysicalKeys = <String>['CapsLock'];
 const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 
-String _toConstantVariableName(String variableName) {
-  return 'k${variableName[0].toUpperCase()}${variableName.substring(1)}';
-}
-
 /// Generates the key mapping for iOS, based on the information in the key
 /// data structure given to it.
 class IOSCodeGenerator extends PlatformCodeGenerator {
@@ -59,13 +55,16 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
     final StringBuffer buffer = StringBuffer();
+    const List<MaskConstant> maskConstants = <MaskConstant>[
+      kValueMask,
+      kUnicodePlane,
+      kIosPlane,
+    ];
     for (final MaskConstant constant in maskConstants) {
       buffer.writeln('/**');
-      buffer.write(constant.description
-          .map((String line) => wrapString(line, prefix: ' * '))
-          .join(' *\n'));
+      buffer.write(wrapString(constant.description, prefix: ' * '));
       buffer.writeln(' */');
-      buffer.writeln('const uint64_t ${_toConstantVariableName(constant.name)} = ${toHex(constant.value, digits: 11)};');
+      buffer.writeln('const uint64_t k${constant.upperCamelName} = ${toHex(constant.value, digits: 11)};');
       buffer.writeln('');
     }
     return buffer.toString().trimRight();

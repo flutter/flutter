@@ -5,7 +5,6 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'constants.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -26,7 +25,6 @@ class SynonymKeyInfo {
   // It won't end up being the same value because it'll be in the pseudo-key
   // plane.
   LogicalKeyEntry get primaryKey => keys[0];
-  int get value => (primaryKey.value & ~kVariationMask) + kSynonymPlane;
   String get constantName => upperCamelToLowerCamel(name);
 }
 
@@ -42,7 +40,7 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
       final String firstComment = _wrapString('Represents the location of the '
         '"${entry.commentName}" key on a generalized keyboard.');
       final String otherComments = _wrapString('See the function '
-        '[KeyEvent.physical] for more information.');
+        '[RawKeyEvent.physicalKey] for more information.');
       definitions.write('''
 
 $firstComment  ///
@@ -67,7 +65,7 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
     final StringBuffer definitions = StringBuffer();
     void printKey(int flutterId, String constantName, String commentName, {String? otherComments}) {
       final String firstComment = _wrapString('Represents the logical "$commentName" key on the keyboard.');
-      otherComments ??= _wrapString('See the function [KeyEvent.logical] for more information.');
+      otherComments ??= _wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
       definitions.write('''
 
 $firstComment  ///
@@ -80,28 +78,29 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
         entry.value,
         entry.constantName,
         entry.commentName,
+        otherComments: _otherComments(entry.constantName),
       );
-    }
-    for (final SynonymKeyInfo synonymInfo in synonyms) {
-      // Use the first item in the synonyms as a template for the ID to use.
-      // It won't end up being the same value because it'll be in the pseudo-key
-      // plane.
-      final Set<String> unionNames = synonymInfo.keys.map(
-        (LogicalKeyEntry entry) => entry.constantName).toSet();
-      printKey(synonymInfo.value, synonymInfo.constantName, PhysicalKeyEntry.getCommentName(synonymInfo.name),
-          otherComments: _wrapString('This key represents the union of the keys '
-              '$unionNames when comparing keys. This key will never be generated '
-              'directly, its main use is in defining key maps.'));
     }
     return definitions.toString();
   }
 
+  String? _otherComments(String constantName) {
+    if (synonyms.containsKey(constantName)) {
+      final Set<String> unionNames = synonyms[constantName]!.keys.map(
+        (LogicalKeyEntry entry) => entry.constantName).toSet();
+      return 'This key represents the union of the keys '
+              '$unionNames when comparing keys. This key will never be generated '
+              'directly, its main use is in defining key maps.';
+    }
+    return null;
+  }
+
   String get _logicalSynonyms {
     final StringBuffer result = StringBuffer();
-    for (final SynonymKeyInfo synonymInfo in synonyms) {
+    for (final SynonymKeyInfo synonymInfo in synonyms.values) {
       for (final LogicalKeyEntry key in synonymInfo.keys) {
-        final String synonymName = upperCamelToLowerCamel(synonymInfo.name);
-        result.writeln('    ${key.constantName}: $synonymName,');
+        final LogicalKeyEntry synonnym = logicalData.entryByName(synonymInfo.name);
+        result.writeln('    ${key.constantName}: ${synonnym.constantName},');
       }
     }
     return result.toString();
@@ -112,11 +111,6 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     for (final LogicalKeyEntry entry in logicalData.entries) {
       result.write('''
     ${toHex(entry.value, digits: 11)}: '${entry.commentName}',
-''');
-    }
-    for (final SynonymKeyInfo synonymInfo in synonyms) {
-      result.write('''
-    ${toHex(synonymInfo.value)}: '${synonymInfo.name}',
 ''');
     }
     return result.toString();
@@ -137,9 +131,6 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     for (final LogicalKeyEntry entry in logicalData.entries) {
       keyCodeMap.writeln('    ${toHex(entry.value, digits: 11)}: ${entry.constantName},');
     }
-    for (final SynonymKeyInfo synonymInfo in synonyms) {
-      keyCodeMap.writeln('    ${toHex(synonymInfo.value, digits: 11)}: ${synonymInfo.constantName},');
-    }
     return keyCodeMap.toString().trimRight();
   }
 
@@ -159,14 +150,17 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     };
   }
 
-  late final List<SynonymKeyInfo> synonyms = LogicalKeyData.synonyms.entries.map(
-    (MapEntry<String, List<String>> synonymDefinition) {
+  late final Map<String, SynonymKeyInfo> synonyms = Map<String, SynonymKeyInfo>.fromEntries(
+    LogicalKeyData.synonyms.entries.map((MapEntry<String, List<String>> synonymDefinition) {
       final List<LogicalKeyEntry> entries = synonymDefinition.value.map(
         (String name) => logicalData.entryByName(name)).toList();
-      return SynonymKeyInfo(
-        entries,
+      return MapEntry<String, SynonymKeyInfo>(
         synonymDefinition.key,
+        SynonymKeyInfo(
+          entries,
+          synonymDefinition.key,
+        ),
       );
-    }
-  ).toList();
+    }),
+  );
 }

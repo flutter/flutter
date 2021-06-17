@@ -71,7 +71,20 @@ String readDataFile(String fileName) {
   return File(path.join(dataRoot, fileName)).readAsStringSync();
 }
 
+bool _assertsEnabled() {
+  bool enabledAsserts = false;
+  assert(() {
+    enabledAsserts = true;
+    return true;
+  }());
+  return enabledAsserts;
+}
+
 Future<void> main(List<String> rawArguments) async {
+  if (!_assertsEnabled()) {
+    print('The gen_keycodes script must be run with --enable-asserts.');
+    return;
+  }
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'engine-root',
