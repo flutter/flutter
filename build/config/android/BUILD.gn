@@ -8,8 +8,7 @@ import("//build/config/sysroot.gni")
 config("sdk") {
   if (sysroot != "") {
     cflags = [ "--sysroot=" + sysroot ]
-    ldflags = [ "--sysroot=" +
-                rebase_path("$android_ndk_root/$android_sysroot_subdir") ]
+    ldflags = [ "-L" + rebase_path("$android_lib") ]
 
     # Need to get some linker flags out of the sysroot.
     sysroot_ld_path = rebase_path("//build/config/linux/sysroot_ld_path.py")

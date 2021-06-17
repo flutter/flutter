@@ -579,19 +579,7 @@ config("runtime_library") {
     }
     ldflags += [ "-nostdlib" ]
 
-    # NOTE: The libc++ header include paths below are specified in cflags
-    # rather than include_dirs because they need to come after include_dirs.
-    # Think of them like system headers, but don't use '-isystem' because the
-    # arm-linux-androideabi-4.4.3 toolchain (circa Gingerbread) will exhibit
-    # strange errors. The include ordering here is important; change with
-    # caution.
     cflags += [
-      "-isystem" +
-          rebase_path("$android_ndk_root/sources/android/support/include",
-                      root_build_dir),
-      "-isystem" + rebase_path(
-              "$android_ndk_root/sysroot/usr/include/$android_target_triple",
-              root_build_dir),
       "-D__ANDROID_API__=$android_api_level",
     ]
 

@@ -12,10 +12,8 @@ import("//build/toolchain/gcc_toolchain.gni")
 # wrapper around gcc_toolchain to avoid duplication of logic.
 #
 # Parameters:
-#  - android_ndk_sysroot
-#      Sysroot for this architecture.
 #  - android_ndk_lib_dir
-#      Subdirectory inside of android_ndk_sysroot where libs go.
+#      Libraries for this architecture
 #  - tool_prefix
 #      Prefix to be added to the tool names.
 #  - toolchain_cpu
@@ -23,9 +21,7 @@ import("//build/toolchain/gcc_toolchain.gni")
 template("android_gcc_toolchain") {
   gcc_toolchain(target_name) {
     # Make our manually injected libs relative to the build dir.
-    android_ndk_lib = rebase_path(
-            invoker.android_ndk_sysroot + "/" + invoker.android_ndk_lib_dir,
-            root_build_dir)
+    android_ndk_lib = rebase_path(invoker.android_ndk_lib_dir, root_build_dir)
 
     libs_section_prefix = "$android_ndk_lib/crtbegin_dynamic.o"
     libs_section_postfix = "$android_ndk_lib/crtend_android.o"
@@ -101,13 +97,11 @@ template("android_gcc_toolchain") {
 
 template("android_gcc_toolchains_helper") {
   android_gcc_toolchain(target_name) {
-    android_ndk_sysroot = invoker.android_ndk_sysroot
     android_ndk_lib_dir = invoker.android_ndk_lib_dir
     tool_prefix = invoker.tool_prefix
     toolchain_cpu = invoker.toolchain_cpu
   }
   android_gcc_toolchain("clang_$target_name") {
-    android_ndk_sysroot = invoker.android_ndk_sysroot
     android_ndk_lib_dir = invoker.android_ndk_lib_dir
     tool_prefix = invoker.tool_prefix
     toolchain_cpu = invoker.toolchain_cpu
@@ -116,49 +110,29 @@ template("android_gcc_toolchains_helper") {
 }
 
 android_gcc_toolchains_helper("x86") {
-  android_ndk_sysroot = "$android_ndk_root/$x86_android_sysroot_subdir"
-  android_ndk_lib_dir = "usr/lib"
+  android_ndk_lib_dir = x86_android_lib
 
-  tool_prefix = "$x86_android_toolchain_root/bin/i686-linux-android-"
+  tool_prefix = "$llvm_android_toolchain_root/bin/i686-linux-android-"
   toolchain_cpu = "x86"
 }
 
 android_gcc_toolchains_helper("arm") {
-  android_ndk_sysroot = "$android_ndk_root/$arm_android_sysroot_subdir"
-  android_ndk_lib_dir = "usr/lib"
+  android_ndk_lib_dir = arm_android_lib
 
-  tool_prefix = "$arm_android_toolchain_root/bin/arm-linux-androideabi-"
+  tool_prefix = "$llvm_android_toolchain_root/bin/arm-linux-androideabi-"
   toolchain_cpu = "arm"
 }
 
-android_gcc_toolchains_helper("mipsel") {
-  android_ndk_sysroot = "$android_ndk_root/$mips_android_sysroot_subdir"
-  android_ndk_lib_dir = "usr/lib"
-
-  tool_prefix = "$mips_android_toolchain_root/bin/mipsel-linux-android-"
-  toolchain_cpu = "mipsel"
-}
-
 android_gcc_toolchains_helper("x64") {
-  android_ndk_sysroot = "$android_ndk_root/$x86_64_android_sysroot_subdir"
-  android_ndk_lib_dir = "usr/lib64"
+  android_ndk_lib_dir = x86_64_android_lib
 
-  tool_prefix = "$x86_64_android_toolchain_root/bin/x86_64-linux-android-"
+  tool_prefix = "$llvm_android_toolchain_root/bin/x86_64-linux-android-"
   toolchain_cpu = "x86_64"
 }
 
 android_gcc_toolchains_helper("arm64") {
-  android_ndk_sysroot = "$android_ndk_root/$arm64_android_sysroot_subdir"
-  android_ndk_lib_dir = "usr/lib"
+  android_ndk_lib_dir = arm64_android_lib
 
-  tool_prefix = "$arm64_android_toolchain_root/bin/aarch64-linux-android-"
+  tool_prefix = "$llvm_android_toolchain_root/bin/aarch64-linux-android-"
   toolchain_cpu = "aarch64"
-}
-
-android_gcc_toolchains_helper("mips64el") {
-  android_ndk_sysroot = "$android_ndk_root/$mips64_android_sysroot_subdir"
-  android_ndk_lib_dir = "usr/lib64"
-
-  tool_prefix = "$mips64_android_toolchain_root/bin/mipsel-linux-android-"
-  toolchain_cpu = "mipsel64el"
 }

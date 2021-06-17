@@ -25,7 +25,7 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
   sysroot = target_sysroot
 } else if (is_android) {
   import("//build/config/android/config.gni")
-  sysroot = rebase_path("$android_ndk_root/sysroot")
+  sysroot = rebase_path("$llvm_android_toolchain_root/sysroot")
 } else if (is_linux && !is_chromeos) {
   if (current_cpu == "mipsel") {
     sysroot = rebase_path("//mipsel-sysroot/sysroot")
