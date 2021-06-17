@@ -498,7 +498,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                           padding: widget.destinations[i].padding,
                           onTap: () {
-                            if(widget.onDestinationSelected != null)
+                            if (widget.onDestinationSelected != null)
                               widget.onDestinationSelected!(i);
                           },
                           indexLabel: localizations.tabLabel(
