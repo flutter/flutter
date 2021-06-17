@@ -138,7 +138,7 @@ class CustomDeviceConfig {
       platform = archString == null
         ? null
         : getTargetPlatformForName(archString);
-    } on FallThroughError catch (_) {
+    } on FallThroughError {
       throw const CustomDeviceRevivalException.fromDescriptions(
         _kPlatform,
         'null or one of linux-arm64, linux-x64'
