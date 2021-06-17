@@ -2137,6 +2137,25 @@ class _ElementLocationStatsTracker {
       }
       json['newLocations'] = locationsJson;
     }
+
+    // Add in a data structure for the location names.
+    if (newLocations.isNotEmpty) {
+      final Map<String, Map<int, String>> namesJson = <String, Map<int, String>>{};
+      for (final _LocationCount entry in newLocations) {
+        final _Location location = entry.location;
+        if (location.file != null) {
+          final Map<int, String> jsonForFile = namesJson.putIfAbsent(
+            location.file!,
+                () => <int, String>{},
+          );
+          if (location.name != null) {
+            jsonForFile[entry.id] = location.name!;
+          }
+        }
+      }
+      json['newLocationsNames'] = namesJson;
+    }
+
     resetCounts();
     newLocations.clear();
     return json;
@@ -2852,7 +2871,6 @@ class _Location {
     required this.line,
     required this.column,
     this.name,
-    this.parameterLocations,
   });
 
   /// File path of the location.
@@ -2860,14 +2878,12 @@ class _Location {
 
   /// 1-based line number.
   final int line;
+
   /// 1-based column number.
   final int column;
 
   /// Optional name of the parameter or function at this location.
   final String? name;
-
-  /// Optional locations of the parameters of the member at this location.
-  final List<_Location>? parameterLocations;
 
   Map<String, Object?> toJsonMap() {
     final Map<String, Object?> json = <String, Object?>{
@@ -2877,11 +2893,6 @@ class _Location {
     };
     if (name != null) {
       json['name'] = name;
-    }
-    if (parameterLocations != null) {
-      json['parameterLocations'] = parameterLocations!.map<Map<String, Object?>>(
-        (_Location location) => location.toJsonMap(),
-      ).toList();
     }
     return json;
   }
