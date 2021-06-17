@@ -711,6 +711,62 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///   * [DropdownButton]
 /// {@endtemplate}
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+/// This sample shows a [RawScrollbar] that executes a fade animation as
+/// scrolling occurs. The RawScrollbar will fade into view as the user scrolls,
+/// and fade out when scrolling stops. The [GridView] uses the
+/// [PrimaryScrollController] since it has an [Axis.vertical] scroll direction
+/// and has not been provided a [ScrollController].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return RawScrollbar(
+///     child: GridView.builder(
+///       itemCount: 120,
+///       gridDelegate:
+///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+///       itemBuilder: (BuildContext context, int index) {
+///         return Center(
+///           child: Text('item $index'),
+///         );
+///       },
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+/// When `isAlwaysShown` is true, the scrollbar thumb will remain visible without
+/// the fade animation. This requires that a [ScrollController] is provided to
+/// `controller` for both the [RawScrollbar] and the [GridView].
+/// Alternatively, the [PrimaryScrollController] can be used automatically so long
+/// as it is attached to the singular [ScrollPosition] associated with the GridView.
+///
+/// ```dart
+/// final ScrollController _controllerOne = ScrollController();
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return RawScrollbar(
+///     controller: _controllerOne,
+///     isAlwaysShown: true,
+///     child: GridView.builder(
+///       controller: _controllerOne,
+///       itemCount: 120,
+///       gridDelegate:
+///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+///       itemBuilder: (BuildContext context, int index) {
+///         return Center(
+///           child: Text('item $index'),
+///         );
+///       },
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ListView], which displays a linear, scrollable list of children.
@@ -1041,10 +1097,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
       if (showScrollbar) {
         _fadeoutTimer?.cancel();
-        _debugCheckHasValidScrollPosition();
         // Wait one frame and cause an empty scroll event.  This allows the
         // thumb to show immediately when isAlwaysShown is true. A scroll
         // event is required in order to paint the thumb.
+        _debugCheckHasValidScrollPosition();
         scrollController!.position.didUpdateScrollPositionBy(0);
       }
     });
@@ -1359,8 +1415,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
     final ScrollController? controller = widget.controller ?? PrimaryScrollController.of(context);
-    // A ScrollController is required to support gestures, if the scrollbar is
-    // not visible it cannot be interacted with.
     if (controller == null || !enableGestures)
       return gestures;
 
