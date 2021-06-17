@@ -92,7 +92,9 @@ bool AndroidSurfaceGL::ResourceContextMakeCurrent() {
 
 bool AndroidSurfaceGL::ResourceContextClearCurrent() {
   FML_DCHECK(IsValid());
-  return GLContextPtr()->ClearCurrent();
+  EGLBoolean result = eglMakeCurrent(eglGetCurrentDisplay(), EGL_NO_SURFACE,
+                                     EGL_NO_SURFACE, EGL_NO_CONTEXT);
+  return result == EGL_TRUE;
 }
 
 bool AndroidSurfaceGL::SetNativeWindow(
