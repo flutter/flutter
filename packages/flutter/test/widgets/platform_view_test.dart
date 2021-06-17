@@ -1074,10 +1074,10 @@ void main() {
       containerFocusNode.requestFocus();
       await tester.pump();
 
-      late int lastPlatformViewTextClient;
+      late Map<String, dynamic> lastPlatformViewTextClient;
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall call) {
         if (call.method == 'TextInput.setPlatformViewClient') {
-          lastPlatformViewTextClient = call.arguments as int;
+          lastPlatformViewTextClient = call.arguments as Map<String, dynamic>;
         }
         return null;
       });
@@ -1085,7 +1085,11 @@ void main() {
       viewsController.invokeViewFocused(currentViewId + 1);
       await tester.pump();
 
-      expect(lastPlatformViewTextClient, currentViewId + 1);
+      expect(lastPlatformViewTextClient.containsKey('platformViewId'), true);
+      expect(lastPlatformViewTextClient['platformViewId'], currentViewId + 1);
+
+      expect(lastPlatformViewTextClient.containsKey('usesVirtualDisplay'), true);
+      expect(lastPlatformViewTextClient['usesVirtualDisplay'], true);
     });
 
     testWidgets('AndroidView clears platform focus when unfocused', (WidgetTester tester) async {
@@ -2559,6 +2563,57 @@ void main() {
       expect(containerFocusNode.hasFocus, true);
       expect(platformViewFocusNode.hasFocus, false);
       expect(controller.focusCleared, true);
+    });
+
+    testWidgets('PlatformViewLink sets a platform view text input client when focused', (WidgetTester tester) async {
+      late FakePlatformViewController controller;
+      late int viewId;
+
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        viewType: 'test',
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          viewId = params.id;
+          params.onPlatformViewCreated(params.id);
+          controller = FakePlatformViewController(params.id);
+          return controller;
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+      );
+      await tester.pumpWidget(SizedBox(width: 300, height: 300, child: platformViewLink));
+
+      final Focus platformViewFocusWidget = tester.widget(
+        find.descendant(
+          of: find.byType(PlatformViewLink),
+          matching: find.byType(Focus),
+        ),
+      );
+
+      final FocusNode? focusNode = platformViewFocusWidget.focusNode;
+      expect(focusNode, isNotNull);
+      expect(focusNode!.hasFocus, false);
+
+      late Map<String, dynamic> lastPlatformViewTextClient;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall call) {
+        if (call.method == 'TextInput.setPlatformViewClient') {
+          lastPlatformViewTextClient = call.arguments as Map<String, dynamic>;
+        }
+        return null;
+      });
+
+      platformViewFocusWidget.focusNode!.requestFocus();
+      await tester.pump();
+
+      expect(focusNode.hasFocus, true);
+      expect(lastPlatformViewTextClient.containsKey('platformViewId'), true);
+      expect(lastPlatformViewTextClient['platformViewId'], viewId);
+
+      expect(lastPlatformViewTextClient.containsKey('usesVirtualDisplay'), false);
     });
   });
 

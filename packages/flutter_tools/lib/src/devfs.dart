@@ -399,18 +399,34 @@ class UpdateFSReport {
     int invalidatedSourcesCount = 0,
     int syncedBytes = 0,
     this.fastReassembleClassName,
+    int scannedSourcesCount = 0,
+    Duration compileDuration = Duration.zero,
+    Duration transferDuration = Duration.zero,
+    Duration findInvalidatedDuration = Duration.zero,
   }) : _success = success,
        _invalidatedSourcesCount = invalidatedSourcesCount,
-       _syncedBytes = syncedBytes;
+       _syncedBytes = syncedBytes,
+       _scannedSourcesCount = scannedSourcesCount,
+       _compileDuration = compileDuration,
+       _transferDuration = transferDuration,
+       _findInvalidatedDuration = findInvalidatedDuration;
 
   bool get success => _success;
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
   int get syncedBytes => _syncedBytes;
+  int get scannedSourcesCount => _scannedSourcesCount;
+  Duration get compileDuration => _compileDuration;
+  Duration get transferDuration => _transferDuration;
+  Duration get findInvalidatedDuration => _findInvalidatedDuration;
 
   bool _success;
   String fastReassembleClassName;
   int _invalidatedSourcesCount;
   int _syncedBytes;
+  int _scannedSourcesCount;
+  Duration _compileDuration;
+  Duration _transferDuration;
+  Duration _findInvalidatedDuration;
 
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
@@ -419,6 +435,10 @@ class UpdateFSReport {
     fastReassembleClassName ??= report.fastReassembleClassName;
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
+    _scannedSourcesCount += report._scannedSourcesCount;
+    _compileDuration += report._compileDuration;
+    _transferDuration += report._transferDuration;
+    _findInvalidatedDuration += report._findInvalidatedDuration;
   }
 }
 
@@ -435,6 +455,7 @@ class DevFS {
     @required FileSystem fileSystem,
     HttpClient httpClient,
     Duration uploadRetryThrottle,
+    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -446,13 +467,14 @@ class DevFS {
         uploadRetryThrottle: uploadRetryThrottle,
         httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
           ? HttpClient()
-          : context.get<HttpClientFactory>()())
-      );
+          : context.get<HttpClientFactory>()())),
+       _stopwatchFactory = stopwatchFactory;
 
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
+  final StopwatchFactory _stopwatchFactory;
 
   final String fsName;
   final Directory rootDirectory;
@@ -575,6 +597,7 @@ class DevFS {
 
     // Await the compiler response after checking if the bundle is updated. This allows the file
     // stating to be done while waiting for the frontend_server response.
+    final Stopwatch compileTimer = _stopwatchFactory.createStopwatch('compile')..start();
     final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(
       mainUri,
       invalidatedFiles,
@@ -582,7 +605,11 @@ class DevFS {
       fs: _fileSystem,
       projectRootPath: projectRootPath,
       packageConfig: packageConfig,
-    );
+    ).then((CompilerOutput result) {
+      compileTimer.stop();
+      return result;
+    });
+
     if (bundle != null) {
       // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
@@ -627,15 +654,19 @@ class DevFS {
       }
     }
     _logger.printTrace('Updating files.');
+    final Stopwatch transferTimer = _stopwatchFactory.createStopwatch('transfer')..start();
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri, _httpWriter);
     }
+    transferTimer.stop();
     _logger.printTrace('DevFS: Sync finished');
     return UpdateFSReport(
       success: true,
       syncedBytes: syncedBytes,
       invalidatedSourcesCount: invalidatedFiles.length,
       fastReassembleClassName: _checkIfSingleWidgetReloadApplied(),
+      compileDuration: compileTimer.elapsed,
+      transferDuration: transferTimer.elapsed,
     );
   }
 

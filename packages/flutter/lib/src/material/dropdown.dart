@@ -1622,7 +1622,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
              child: Builder(builder: (BuildContext context) {
                return InputDecorator(
                  decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-                 isEmpty: state.value == null,
+                 isEmpty: items == null || items.where((DropdownMenuItem<T> item) => item.value == state.value).isEmpty,
                  isFocused: Focus.of(context).hasFocus,
                  child: DropdownButtonHideUnderline(
                    child: DropdownButton<T>(

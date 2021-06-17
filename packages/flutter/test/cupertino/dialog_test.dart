@@ -1286,6 +1286,32 @@ void main() {
     // one for the content.
     expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('CupertinoAlertDialog scrollbars controllers should be different', (WidgetTester tester) async {
+    // https://github.com/flutter/flutter/pull/81278
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(viewInsets: EdgeInsets.zero),
+          child: CupertinoAlertDialog(
+            actions: <Widget>[
+              CupertinoDialogAction(child: Text('OK')),
+            ],
+            content: Placeholder(fallbackHeight: 200.0),
+          ),
+        ),
+      ),
+    );
+
+    final List<CupertinoScrollbar> scrollbars =
+      find.descendant(
+        of: find.byType(CupertinoAlertDialog),
+        matching: find.byType(CupertinoScrollbar),
+      ).evaluate().map((Element e) => e.widget as CupertinoScrollbar).toList();
+
+    expect(scrollbars.length, 2);
+    expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
+  });
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {

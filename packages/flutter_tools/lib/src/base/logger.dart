@@ -19,7 +19,10 @@ class StopwatchFactory {
   const StopwatchFactory();
 
   /// Create a new [Stopwatch] instance.
-  Stopwatch createStopwatch() => Stopwatch();
+  ///
+  /// The optional [name] parameter is useful in tests when there are multiple
+  /// instances being created.
+  Stopwatch createStopwatch([String name = '']) => Stopwatch();
 }
 
 typedef VoidCallback = void Function();

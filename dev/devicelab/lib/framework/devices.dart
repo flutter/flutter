@@ -344,15 +344,15 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   static FuchsiaDeviceDiscovery _instance;
 
- FuchsiaDevice _workingDevice;
+  FuchsiaDevice _workingDevice;
 
- String get _ffx {
+  String get _ffx {
     final String ffx = path.join(getArtifactPath(), 'fuchsia', 'tools','x64', 'ffx');
     if (!File(ffx).existsSync()) {
       throw FileSystemException("Couldn't find ffx at location $ffx");
     }
     return ffx;
- }
+  }
 
   @override
   Future<FuchsiaDevice> get workingDevice async {

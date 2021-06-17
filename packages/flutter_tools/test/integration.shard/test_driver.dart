@@ -387,11 +387,14 @@ abstract class FlutterTestDriver {
         await subscription.cancel();
         final StringBuffer error = StringBuffer();
         error.write('Received app.stop event while waiting for $interestingOccurrence\n\n$_errorBuffer');
-        if (json['params'] != null && json['params']['error'] != null) {
-          error.write('${json['params']['error']}\n\n');
-        }
-        if (json['params'] != null && json['params']['trace'] != null) {
-          error.write('${json['params']['trace']}\n\n');
+        if (json['params'] != null) {
+          final Map<String, dynamic> params = json['params'] as Map<String, dynamic>;
+          if (params['error'] != null) {
+            error.write('${params['error']}\n\n');
+          }
+          if (json['params'] != null && params['trace'] != null) {
+            error.write('${params['trace']}\n\n');
+          }
         }
         response.completeError(Exception(error.toString()));
       }
@@ -563,7 +566,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         // _process.kill() (`flutter` is a shell script so _process itself is a
         // shell, not the flutter tool's Dart process).
         final Map<String, dynamic> connected = await _waitFor(event: 'daemon.connected');
-        _processPid = connected['params']['pid'] as int;
+        _processPid = (connected['params'] as Map<String, dynamic>)['pid'] as int;
 
         // Set this up now, but we don't wait it yet. We want to make sure we don't
         // miss it while waiting for debugPort below.
@@ -571,7 +574,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
         if (withDebugger) {
           final Map<String, dynamic> debugPort = await _waitFor(event: 'app.debugPort', timeout: appStartTimeout);
-          final String wsUriString = debugPort['params']['wsUri'] as String;
+          final String wsUriString = (debugPort['params'] as Map<String, dynamic>)['wsUri'] as String;
           _vmServiceWsUri = Uri.parse(wsUriString);
           await connectToVmService(pauseOnExceptions: pauseOnExceptions);
           if (!startPaused) {
@@ -588,7 +591,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
         // Now await the started event; if it had already happened the future will
         // have already completed.
-        _currentRunningAppId = (await started)['params']['appId'] as String;
+        _currentRunningAppId = ((await started)['params'] as Map<String, dynamic>)['appId'] as String;
         prematureExitGuard.complete();
       } on Exception catch (error, stackTrace) {
         prematureExitGuard.completeError(Exception(error.toString()), stackTrace);
@@ -618,10 +621,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     }
 
     _debugPrint('Performing ${ pause ? "paused " : "" }${ fullRestart ? "hot restart" : "hot reload" }...');
-    final dynamic hotReloadResponse = await _sendRequest(
+    final Map<String, dynamic> hotReloadResponse = await _sendRequest(
       'app.restart',
       <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause, 'debounce': debounce, 'debounceDurationOverrideMs': debounceDurationOverrideMs},
-    );
+    ) as Map<String, dynamic>;
     _debugPrint('${fullRestart ? "Hot restart" : "Hot reload"} complete.');
 
     if (hotReloadResponse == null || hotReloadResponse['code'] != 0) {
@@ -760,8 +763,9 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     _processPid = version['pid'] as int;
 
     if (withDebugger) {
-      final Map<String, dynamic> startedProcess = await _waitFor(event: 'test.startedProcess', timeout: appStartTimeout);
-      final String vmServiceHttpString = startedProcess['params']['observatoryUri'] as String;
+      final Map<String, dynamic> startedProcessParams =
+          (await _waitFor(event: 'test.startedProcess', timeout: appStartTimeout))['params'] as Map<String, dynamic>;
+      final String vmServiceHttpString = startedProcessParams['observatoryUri'] as String;
       _vmServiceWsUri = Uri.parse(vmServiceHttpString).replace(scheme: 'ws', path: '/ws');
       await connectToVmService(pauseOnExceptions: pauseOnExceptions);
       // Allow us to run code before we start, eg. to set up breakpoints.
@@ -824,7 +828,7 @@ Stream<String> transformToLines(Stream<List<int>> byteStream) {
 Map<String, dynamic> parseFlutterResponse(String line) {
   if (line.startsWith('[') && line.endsWith(']') && line.length > 2) {
     try {
-      final Map<String, dynamic> response = castStringKeyedMap(json.decode(line)[0]);
+      final Map<String, dynamic> response = castStringKeyedMap((json.decode(line) as List<dynamic>)[0]);
       return response;
     } on FormatException {
       // Not valid JSON, so likely some other output that was surrounded by [brackets]

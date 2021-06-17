@@ -156,12 +156,12 @@ class WebFlutterDriver extends FlutterDriver {
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
     for (final async_io.LogEntry entry in await _connection.logs.toList()) {
       if (_startTime.isBefore(entry.timestamp)) {
-        final Map<String, dynamic> data = jsonDecode(entry.message!)['message'] as Map<String, dynamic>;
+        final Map<String, dynamic> data = (jsonDecode(entry.message!) as Map<String, dynamic>)['message'] as Map<String, dynamic>;
         if (data['method'] == 'Tracing.dataCollected') {
           // 'ts' data collected from Chrome is in double format, conversion needed
           try {
-            data['params']['ts'] =
-                double.parse(data['params']['ts'].toString()).toInt();
+            final Map<String, dynamic> params = data['params'] as Map<String, dynamic>;
+            params['ts'] = double.parse(params['ts'].toString()).toInt();
           } on FormatException catch (_) {
             // data is corrupted, skip
             continue;

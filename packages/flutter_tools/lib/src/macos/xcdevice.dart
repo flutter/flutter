@@ -269,55 +269,52 @@ class XCDevice {
 
     final List<IOSDevice> devices = <IOSDevice>[];
     for (final dynamic device in allAvailableDevices) {
-      if (device is! Map) {
-        continue;
-      }
-      final Map<String, dynamic> deviceProperties = device as Map<String, dynamic>;
-
-      // Only include iPhone, iPad, iPod, or other iOS devices.
-      if (!_isIPhoneOSDevice(deviceProperties)) {
-        continue;
-      }
-
-      final Map<String, dynamic> errorProperties = _errorProperties(deviceProperties);
-      if (errorProperties != null) {
-        final String errorMessage = _parseErrorMessage(errorProperties);
-        if (errorMessage.contains('not paired')) {
-          UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
-        }
-        _logger.printTrace(errorMessage);
-
-        final int code = _errorCode(errorProperties);
-
-        // Temporary error -10: iPhone is busy: Preparing debugger support for iPhone.
-        // Sometimes the app launch will fail on these devices until Xcode is done setting up the device.
-        // Other times this is a false positive and the app will successfully launch despite the error.
-        if (code != -10) {
+      if (device is Map<String, dynamic>) {
+        // Only include iPhone, iPad, iPod, or other iOS devices.
+        if (!_isIPhoneOSDevice(device)) {
           continue;
         }
+
+        final Map<String, dynamic> errorProperties = _errorProperties(device);
+        if (errorProperties != null) {
+          final String errorMessage = _parseErrorMessage(errorProperties);
+          if (errorMessage.contains('not paired')) {
+            UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
+          }
+          _logger.printTrace(errorMessage);
+
+          final int code = _errorCode(errorProperties);
+
+          // Temporary error -10: iPhone is busy: Preparing debugger support for iPhone.
+          // Sometimes the app launch will fail on these devices until Xcode is done setting up the device.
+          // Other times this is a false positive and the app will successfully launch despite the error.
+          if (code != -10) {
+            continue;
+          }
+        }
+
+        final IOSDeviceInterface interface = _interfaceType(device);
+
+        // Only support USB devices, skip "network" interface (Xcode > Window > Devices and Simulators > Connect via network).
+        // TODO(jmagman): Remove this check once wirelessly detected devices can be observed and attached, https://github.com/flutter/flutter/issues/15072.
+        if (interface != IOSDeviceInterface.usb) {
+          continue;
+        }
+
+        devices.add(IOSDevice(
+          device['identifier'] as String,
+          name: device['name'] as String,
+          cpuArchitecture: _cpuArchitecture(device),
+          interfaceType: interface,
+          sdkVersion: _sdkVersion(device),
+          iProxy: _iProxy,
+          fileSystem: globals.fs,
+          logger: _logger,
+          iosDeploy: _iosDeploy,
+          iMobileDevice: _iMobileDevice,
+          platform: globals.platform,
+        ));
       }
-
-      final IOSDeviceInterface interface = _interfaceType(deviceProperties);
-
-      // Only support USB devices, skip "network" interface (Xcode > Window > Devices and Simulators > Connect via network).
-      // TODO(jmagman): Remove this check once wirelessly detected devices can be observed and attached, https://github.com/flutter/flutter/issues/15072.
-      if (interface != IOSDeviceInterface.usb) {
-        continue;
-      }
-
-      devices.add(IOSDevice(
-        device['identifier'] as String,
-        name: device['name'] as String,
-        cpuArchitecture: _cpuArchitecture(deviceProperties),
-        interfaceType: interface,
-        sdkVersion: _sdkVersion(deviceProperties),
-        iProxy: _iProxy,
-        fileSystem: globals.fs,
-        logger: _logger,
-        iosDeploy: _iosDeploy,
-        iMobileDevice: _iMobileDevice,
-        platform: globals.platform,
-      ));
     }
     return devices;
   }

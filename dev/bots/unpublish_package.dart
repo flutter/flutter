@@ -255,7 +255,7 @@ class ArchiveUnpublisher {
     });
     jsonData['releases'] = releases;
     for (final Channel channel in channels) {
-      if (!revisionsBeingRemoved.contains(jsonData['current_release'][getChannelName(channel)])) {
+      if (!revisionsBeingRemoved.contains((jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)])) {
         // Don't replace the current release if it's not one of the revisions we're removing.
         continue;
       }
@@ -263,7 +263,7 @@ class ArchiveUnpublisher {
       if (replacementRelease == null) {
         throw UnpublishException('Unable to find previous release for channel ${getChannelName(channel)}.');
       }
-      jsonData['current_release'][getChannelName(channel)] = replacementRelease['hash'];
+      (jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)] = replacementRelease['hash'];
       print(
         '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
         '${getPublishedPlatform(platform)} release to ${replacementRelease['hash']} (version ${replacementRelease['version']}).'

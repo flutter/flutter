@@ -284,7 +284,7 @@ void main() {
     version: 1.0.0+3
     ''', logger: BufferLogger.test());
         final FlutterProject project = FlutterProject(fileSystem.systemTempDirectory,manifest,manifest);
-        final dynamic versionInfo = jsonDecode(project.getVersionInfo());
+        final Map<String, dynamic> versionInfo = jsonDecode(project.getVersionInfo()) as Map<String, dynamic>;
         expect(versionInfo['app_name'],'test');
         expect(versionInfo['version'],'1.0.0');
         expect(versionInfo['build_number'],'3');
