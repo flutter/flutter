@@ -1013,7 +1013,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _fadeoutAnimationController = AnimationController(
       vsync: this,
       duration: widget.fadeDuration,
-    );
+    )..addStatusListener(_validateInteractions);
     _fadeoutOpacityAnimation = CurvedAnimation(
       parent: _fadeoutAnimationController,
       curve: Curves.fastOutSlowIn,
@@ -1041,13 +1041,26 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
       if (showScrollbar) {
         _fadeoutTimer?.cancel();
+        _debugCheckHasValidScrollPosition();
         // Wait one frame and cause an empty scroll event.  This allows the
         // thumb to show immediately when isAlwaysShown is true. A scroll
         // event is required in order to paint the thumb.
-        _debugCheckHasValidScrollPosition();
         scrollController!.position.didUpdateScrollPositionBy(0);
       }
     });
+  }
+
+  void _validateInteractions(AnimationStatus status) {
+    final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
+    if (status == AnimationStatus.dismissed) {
+      assert(_fadeoutOpacityAnimation.value == 0.0);
+      // We do not check for a valid scroll position if the scrollbar is not
+      // visible, because it cannot be interacted with.
+    } else if (scrollController != null && enableGestures) {
+      // Interactive scrollbars need to be properly configured. If it is visible
+      // for interaction, ensure we are set up properly.
+      _debugCheckHasValidScrollPosition();
+    }
   }
 
   void _debugCheckHasValidScrollPosition() {
@@ -1348,12 +1361,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final ScrollController? controller = widget.controller ?? PrimaryScrollController.of(context);
     // A ScrollController is required to support gestures, if the scrollbar is
     // not visible it cannot be interacted with.
-    if (controller == null || !enableGestures || _fadeoutOpacityAnimation.value == 0.0)
+    if (controller == null || !enableGestures)
       return gestures;
-
-    // print(controller);
-    // print(controller.positions);
-    _debugCheckHasValidScrollPosition();
 
     gestures[_ThumbPressGestureRecognizer] =
       GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(

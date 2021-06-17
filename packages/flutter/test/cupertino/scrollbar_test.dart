@@ -961,7 +961,13 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    final dynamic exception = tester.takeException();
+    dynamic exception = tester.takeException();
+    // The scrollbar is not visible and cannot be interacted with, so no assertion.
+    expect(exception, isNull);
+    // Scroll to trigger the scrollbar to come into view.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    exception = tester.takeException();
     expect(exception, isAssertionError);
     expect(
       (exception as AssertionError).message,
