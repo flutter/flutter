@@ -11,7 +11,7 @@ import 'package:platform/platform.dart';
 
 import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
-import './proto/conductor_state.pbenum.dart' show CherrypickState;
+import './proto/conductor_state.pbenum.dart';
 import './repository.dart';
 import './state.dart';
 import './stdio.dart';
@@ -91,7 +91,6 @@ void runNext({
   }
 
   final pb.ConductorState state = readStateFromFile(stateFile);
-  stdio.printTrace(state.toString());
   switch (state.currentPhase) {
     case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
       bool allEngineCherrypicksVerified = true;
@@ -162,7 +161,9 @@ void runNext({
       throw ConductorException('This release is finished.');
       break;
   }
-  state.currentPhase = getNextPhase(state.currentPhase);
+  final ReleasePhase nextPhase = getNextPhase(state.currentPhase);
+  stdio.printStatus('Updating phase from ${state.currentPhase} to $nextPhase');
+  state.currentPhase = nextPhase;
 
   writeStateToFile(stateFile, state);
 }
