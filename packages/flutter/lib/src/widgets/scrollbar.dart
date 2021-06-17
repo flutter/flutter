@@ -666,11 +666,18 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// the [PrimaryScrollController] is being used by that Scrollable widget.
 ///
 /// If the scrollbar is wrapped around multiple [ScrollView]s, it only responds to
-/// the nearest scrollView and shows the corresponding scrollbar thumb by default.
+/// the nearest ScrollView and shows the corresponding scrollbar thumb by default.
 /// The [notificationPredicate] allows the ability to customize which
 /// [ScrollNotification]s the Scrollbar should listen to.
 ///
-/// Scrollbars are interactive and will also use the [PrimaryScrollController] if
+/// If the child [ScrollView] is infinitely long, the [RawScrollbar] will not be
+/// painted. In this case, the scrollbar cannot accurately represent the
+/// relative location of the visible area, or calculate the accurate delta to
+/// apply when  dragging on the thumb or tapping on the track.
+///
+/// ### Interaction
+///
+/// Scrollbars are interactive and can use the [PrimaryScrollController] if
 /// a [controller] is not set. Interactive Scrollbar thumbs can be dragged along
 /// the main axis of the [ScrollView] to change the [ScrollPosition]. Tapping
 /// along the track exclusive of the thumb will trigger a
@@ -681,13 +688,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// [ScrollController] and have a [ScrollView.scrollDirection] of
 /// [Axis.vertical] will automatically attach their ScrollPosition to the
 /// PrimaryScrollController. Provide a unique ScrollController to each
-/// [Scrollable] that would otherwise result in multiple ScrollPositions
+/// [Scrollable] in this case to prevent having multiple ScrollPositions
 /// attached to the PrimaryScrollController.
-///
-/// If the child [ScrollView] is infinitely long, the [RawScrollbar] will not be
-/// painted. In this case, the scrollbar cannot accurately represent the
-/// relative location of the visible area, or calculate the accurate delta to
-/// apply when  dragging on the thumb or tapping on the track.
 ///
 /// ### Automatic Scrollbars on Desktop Platforms
 ///
@@ -698,7 +700,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// [PrimaryScrollController] or have a [ScrollController] provided to them
 /// will receive a unique ScrollController for use with the Scrollbar. In this
 /// case, only one Scrollable can be using the PrimaryScrollController, unless
-/// [interactive] is false. To prevent a [Axis.vertical] Scrollables from using
+/// [interactive] is false. To prevent [Axis.vertical] Scrollables from using
 /// the PrimaryScrollController, set [ScrollView.primary] to false. Scrollable
 /// widgets that do not have automatically applied Scrollbars include
 ///
@@ -709,17 +711,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///   * [DropdownButton]
 /// {@endtemplate}
 ///
-// TODO(Piinks): Add code sample
-///
 /// See also:
 ///
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
-// TODO(Piinks): Add support for passing a shape instead of thickness/radius.
-// Will need to update painter to support as well.
-// Also, expose helpful properties like main/crossAxis margins, minThumbLength,
-// etc. on the RawScrollbar in follow-up changes
-// part of https://github.com/flutter/flutter/issues/13253
 class RawScrollbar extends StatefulWidget {
   /// Creates a basic raw scrollbar that wraps the given [child].
   ///
