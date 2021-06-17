@@ -16,8 +16,9 @@ namespace testing {
 
 namespace {
 static constexpr char kScanCodeKey[] = "scanCode";
-static constexpr int kHandledScanCode = 20;
-static constexpr int kUnhandledScanCode = 21;
+static constexpr int kHandledScanCode = 0x14;
+static constexpr int kUnhandledScanCode = 0x15;
+static constexpr int kUnhandledScanCodeExtended = 0xe015;
 
 static std::unique_ptr<std::vector<uint8_t>> CreateResponse(bool handled) {
   auto response_doc =
@@ -96,7 +97,7 @@ TEST(KeyboardKeyChannelHandlerTest, ExtendedKeysAreSentToRedispatch) {
       64, kUnhandledScanCode, WM_KEYDOWN, L'b', true, false,
       [&last_handled](bool handled) { last_handled = handled; });
   EXPECT_EQ(last_handled, false);
-  EXPECT_EQ(received_scancode, kUnhandledScanCode);
+  EXPECT_EQ(received_scancode, kUnhandledScanCodeExtended);
 
   last_handled = true;
   // Extended key flag is not passed to redispatched events if not set.
