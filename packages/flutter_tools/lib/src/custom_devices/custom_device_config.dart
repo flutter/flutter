@@ -334,7 +334,7 @@ class CustomDeviceConfig {
   static T _maybeRethrowAsRevivalException<T>(T Function() closure, String fieldDescription, String expectedValueDescription) {
     try {
       return closure();
-    } on Object catch (_) {
+    } on Object {
       throw CustomDeviceRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
     }
   }
