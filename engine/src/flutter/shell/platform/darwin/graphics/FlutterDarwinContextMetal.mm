@@ -18,6 +18,7 @@ static GrContextOptions CreateMetalGrContextOptions() {
   }
   flutter::PersistentCache::MarkStrategySet();
   options.fPersistentCache = flutter::PersistentCache::GetCacheForProcess();
+  options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
   return options;
 }
 
