@@ -61,6 +61,9 @@ sk_sp<GrDirectContext> GPUSurfaceGL::MakeGLContext(
   // TODO(goderbauer): remove option when skbug.com/7523 is fixed.
   // A similar work-around is also used in shell/common/io_manager.cc.
   options.fDisableGpuYUVConversion = true;
+
+  options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
+
   auto context = GrDirectContext::MakeGL(delegate->GetGLInterface(), options);
 
   if (!context) {
