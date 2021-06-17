@@ -338,6 +338,57 @@ FlutterError
     expect(curved.value, equals(0.0));
   });
 
+  test('ReverseAnimation running with different forward and reverse durations.', () {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 50),
+      vsync: const TestVSync(),
+    );
+    final ReverseAnimation reversed = ReverseAnimation(
+      CurvedAnimation(
+        parent: controller,
+        curve: Curves.linear,
+        reverseCurve: Curves.linear,
+      ),
+    );
+
+    controller.forward();
+    tick(Duration.zero);
+    tick(const Duration(milliseconds: 10));
+    expect(reversed.value, moreOrLessEquals(0.9));
+    tick(const Duration(milliseconds: 20));
+    expect(reversed.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 30));
+    expect(reversed.value, moreOrLessEquals(0.7));
+    tick(const Duration(milliseconds: 40));
+    expect(reversed.value, moreOrLessEquals(0.6));
+    tick(const Duration(milliseconds: 50));
+    expect(reversed.value, moreOrLessEquals(0.5));
+    tick(const Duration(milliseconds: 60));
+    expect(reversed.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 70));
+    expect(reversed.value, moreOrLessEquals(0.3));
+    tick(const Duration(milliseconds: 80));
+    expect(reversed.value, moreOrLessEquals(0.2));
+    tick(const Duration(milliseconds: 90));
+    expect(reversed.value, moreOrLessEquals(0.1));
+    tick(const Duration(milliseconds: 100));
+    expect(reversed.value, moreOrLessEquals(0.0));
+    controller.reverse();
+    tick(const Duration(milliseconds: 110));
+    expect(reversed.value, moreOrLessEquals(0.0));
+    tick(const Duration(milliseconds: 120));
+    expect(reversed.value, moreOrLessEquals(0.2));
+    tick(const Duration(milliseconds: 130));
+    expect(reversed.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 140));
+    expect(reversed.value, moreOrLessEquals(0.6));
+    tick(const Duration(milliseconds: 150));
+    expect(reversed.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 160));
+    expect(reversed.value, moreOrLessEquals(1.0));
+  });
+  
   test('TweenSequence', () {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
