@@ -226,7 +226,7 @@ List the currently configured custom devices, both enabled and disabled, reachab
     List<CustomDeviceConfig> devices;
     try {
       devices = customDevicesConfig.devices;
-    } on Exception catch (_) {
+    } on Exception {
       throwToolExit('Could not list custom devices.');
     }
 
