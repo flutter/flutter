@@ -8,7 +8,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
-import './globals.dart';
 import './repository.dart';
 import './stdio.dart';
 import './version.dart';
