@@ -219,4 +219,13 @@ void main() {
     expect(tween.transform(1.0), null);
     expect(tween.lerp(0.0), null);
   });
+
+  test('DecorationTween null test', () {
+    final DecorationTween tween =
+        DecorationTween(begin: const BoxDecoration(), end: null);
+    expect(tween.transform(0.0), const TypeMatcher<BoxDecoration>());
+    expect(tween.transform(1.0), const TypeMatcher<BoxDecoration>());
+    expect(tween.lerp(0), const TypeMatcher<BoxDecoration>());
+    expect(tween.lerp(1), const TypeMatcher<BoxDecoration>());
+  });
 }
