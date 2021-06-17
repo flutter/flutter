@@ -328,7 +328,9 @@ FlutterError
     expect(controller.status, equals(AnimationStatus.reverse));
     expect(curved.value, equals(0.0));
 
+    expect(curved.isDisposed, isFalse);
     curved.dispose();
+    expect(curved.isDisposed, isTrue);
 
     controller.value = 0.0;
     expect(controller.status, equals(AnimationStatus.dismissed));
@@ -388,7 +390,7 @@ FlutterError
     tick(const Duration(milliseconds: 160));
     expect(reversed.value, moreOrLessEquals(1.0));
   });
-  
+
   test('TweenSequence', () {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),

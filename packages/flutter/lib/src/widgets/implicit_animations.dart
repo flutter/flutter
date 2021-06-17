@@ -403,6 +403,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 
   @override
   void dispose() {
+    (_animation as CurvedAnimation).dispose();
     _controller.dispose();
     super.dispose();
   }
