@@ -9,6 +9,16 @@ import 'package:test/test.dart';
 
 export 'package:test/test.dart' hide isInstanceOf;
 
+Matcher throwsAssertionWith(String messageSubString) {
+  return throwsA(
+      isA<AssertionError>().having(
+          (AssertionError e) => e.toString(),
+          'description',
+          contains(messageSubString),
+      ),
+  );
+}
+
 Matcher throwsExceptionWith(String messageSubString) {
   return throwsA(
       isA<Exception>().having(
