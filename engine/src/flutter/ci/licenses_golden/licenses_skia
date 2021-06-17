@@ -1,4 +1,4 @@
-Signature: aa9701c856ebb73620e425ef488a10cc
+Signature: f733f38cac177bc72d261e17074dbccc
 
 UNUSED LICENSES:
 
@@ -4639,7 +4639,6 @@ FILE: ../../../third_party/skia/docs/examples/Paint_getFillPath_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getFlags.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getFontMetrics.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getFontSpacing.cpp
-FILE: ../../../third_party/skia/docs/examples/Paint_getHash.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getHinting.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getImageFilter.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getMaskFilter.cpp
