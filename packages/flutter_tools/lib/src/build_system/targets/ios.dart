@@ -69,8 +69,7 @@ abstract class AotAssemblyBase extends Target {
     }
 
     final String sdkRoot = environment.defines[kSdkRoot];
-    final EnvironmentType environmentType =
-        environmentTypeFromSdkroot(environment.fileSystem.directory(sdkRoot));
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem);
     if (environmentType == EnvironmentType.simulator) {
       throw Exception(
         'release/profile builds are only supported for physical devices. '
@@ -222,6 +221,10 @@ class DebugUniversalFramework extends Target {
 
   @override
   Future<void> build(Environment environment) async {
+    if (environment.defines[kSdkRoot] == null) {
+      throw MissingDefineException(kSdkRoot, name);
+    }
+
     // Generate a trivial App.framework.
     final Set<String> iosArchNames = environment.defines[kIosArchs]
       ?.split(' ')
@@ -292,8 +295,8 @@ abstract class UnpackIOS extends Target {
   }
 
   void _copyFramework(Environment environment) {
-    final Directory sdkRoot = environment.fileSystem.directory(environment.defines[kSdkRoot]);
-    final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot);
+    final String sdkRoot = environment.defines[kSdkRoot];
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem);
     final String basePath = environment.artifacts.getArtifactPath(
       Artifact.flutterFramework,
       platform: TargetPlatform.ios,
@@ -584,7 +587,8 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
     throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
   }
 
-  final Directory tempDir = outputFile.fileSystem.systemTempDirectory
+  final FileSystem fileSystem = environment.fileSystem;
+  final Directory tempDir = fileSystem.systemTempDirectory
     .createTempSync('flutter_tools_stub_source.');
   try {
     final File stubSource = tempDir.childFile('debug_app.cc')
@@ -593,6 +597,8 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
   ''');
 
     final String sdkRoot = environment.defines[kSdkRoot];
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
+
     await globals.xcode.clang(<String>[
       '-x',
       'c',
@@ -601,7 +607,10 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
       '-dynamiclib',
       '-fembed-bitcode-marker',
       // Keep version in sync with AOTSnapshotter flag
-      '-miphoneos-version-min=8.0',
+      if (environmentType == EnvironmentType.physical)
+        '-miphoneos-version-min=8.0'
+      else
+        '-miphonesimulator-version-min=8.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
