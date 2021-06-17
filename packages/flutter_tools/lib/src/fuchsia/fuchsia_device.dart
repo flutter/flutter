@@ -354,7 +354,7 @@ class FuchsiaDevice extends Device {
       // Start up a package server.
       const String packageServerName = FuchsiaPackageServer.toolHost;
       fuchsiaPackageServer = FuchsiaPackageServer(
-          packageRepo.path, packageServerName, host, port);
+          packageRepo.path, packageServerName, ipv6 ? '[::]' : '0.0.0.0', port);
       if (!await fuchsiaPackageServer.start()) {
         globals.printError('Failed to start the Fuchsia package server');
         return LaunchResult.failed();
