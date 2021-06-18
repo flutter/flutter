@@ -374,7 +374,7 @@ void main() {
     final Animation<double>? firstAnimation = firstState?.animation;
     if (firstAnimation == null)
       fail('animation was null!');
-    
+
     final CurvedAnimation firstCurvedAnimation =
         firstAnimation as CurvedAnimation;
 
@@ -386,7 +386,7 @@ void main() {
     final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? secondState =
         key.currentState;
     final Animation<double>? secondAnimation = secondState?.animation;
-    if (secondAnimation == null) 
+    if (secondAnimation == null)
       fail('animation was null!');
 
     final CurvedAnimation secondCurvedAnimation =
