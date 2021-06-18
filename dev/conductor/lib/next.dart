@@ -151,7 +151,7 @@ void runNext({
       final FrameworkRepository framework = FrameworkRepository(
         checkouts,
         initialRef: state.framework.candidateBranch,
-        fetchRemote: upstream,
+        upstreamRemote: upstream,
         previousCheckoutLocation: state.framework.checkoutPath,
       );
       final String headRevision = framework.reverseParse('HEAD');

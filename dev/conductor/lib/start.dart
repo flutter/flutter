@@ -218,11 +218,11 @@ class StartCommand extends Command<void> {
     final EngineRepository engine = EngineRepository(
       checkouts,
       initialRef: candidateBranch,
-      fetchRemote: Remote(
+      upstreamRemote: Remote(
         name: RemoteName.upstream,
         url: engineUpstream,
       ),
-      pushRemote: Remote(
+      mirrorRemote: Remote(
         name: RemoteName.mirror,
         url: engineMirror,
       ),
@@ -267,17 +267,17 @@ class StartCommand extends Command<void> {
       checkoutPath: engine.checkoutDirectory.path,
       cherrypicks: engineCherrypicks,
       dartRevision: dartRevision,
-      upstream: pb.Remote(name: 'upstream', url: engine.fetchRemote.url),
-      mirror: pb.Remote(name: 'mirror', url: engine.pushRemote.url),
+      upstream: pb.Remote(name: 'upstream', url: engine.upstreamRemote.url),
+      mirror: pb.Remote(name: 'mirror', url: engine.mirrorRemote.url),
     );
     final FrameworkRepository framework = FrameworkRepository(
       checkouts,
       initialRef: candidateBranch,
-      fetchRemote: Remote(
+      upstreamRemote: Remote(
         name: RemoteName.upstream,
         url: frameworkUpstream,
       ),
-      pushRemote: Remote(
+      mirrorRemote: Remote(
         name: RemoteName.mirror,
         url: frameworkMirror,
       ),
@@ -308,7 +308,7 @@ class StartCommand extends Command<void> {
     }
 
     // Get framework version
-    final Version lastVersion = Version.fromString(framework.getFullTag(framework.fetchRemote.name, candidateBranch, exact: false));
+    final Version lastVersion = Version.fromString(framework.getFullTag(framework.upstreamRemote.name, candidateBranch, exact: false));
     Version nextVersion;
     if (incrementLetter == 'm') {
       nextVersion = Version.fromCandidateBranch(candidateBranch);
@@ -324,8 +324,8 @@ class StartCommand extends Command<void> {
       currentGitHead: frameworkHead,
       checkoutPath: framework.checkoutDirectory.path,
       cherrypicks: frameworkCherrypicks,
-      upstream: pb.Remote(name: 'upstream', url: framework.fetchRemote.url),
-      mirror: pb.Remote(name: 'mirror', url: framework.pushRemote.url),
+      upstream: pb.Remote(name: 'upstream', url: framework.upstreamRemote.url),
+      mirror: pb.Remote(name: 'mirror', url: framework.mirrorRemote.url),
     );
 
     state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
@@ -369,8 +369,8 @@ class StartCommand extends Command<void> {
     }
 
     final String branchPoint = repository.branchPoint(
-      '${repository.fetchRemote.name}/$upstreamRef',
-      '${repository.fetchRemote.name}/$releaseRef',
+      '${repository.upstreamRemote.name}/$upstreamRef',
+      '${repository.upstreamRemote.name}/$releaseRef',
     );
 
     // `git rev-list` returns newest first, so reverse this list

@@ -47,7 +47,7 @@ class Remote {
 abstract class Repository {
   Repository({
     required this.name,
-    required this.fetchRemote,
+    required this.upstreamRemote,
     required this.processManager,
     required this.stdio,
     required this.platform,
@@ -56,10 +56,10 @@ abstract class Repository {
     this.initialRef,
     this.localUpstream = false,
     String? previousCheckoutLocation,
-    this.pushRemote,
+    this.mirrorRemote,
   })  : git = Git(processManager),
         assert(localUpstream != null),
-        assert(fetchRemote.url.isNotEmpty) {
+        assert(upstreamRemote.url.isNotEmpty) {
     if (previousCheckoutLocation != null) {
       _checkoutDirectory = fileSystem.directory(previousCheckoutLocation);
       if (!_checkoutDirectory!.existsSync()) {
@@ -67,7 +67,7 @@ abstract class Repository {
       }
       if (initialRef != null) {
         git.run(
-          <String>['checkout', '${fetchRemote.name}/$initialRef'],
+          <String>['checkout', '${upstreamRemote.name}/$initialRef'],
           'Checking out initialRef $initialRef',
           workingDirectory: _checkoutDirectory!.path,
         );
@@ -76,13 +76,13 @@ abstract class Repository {
   }
 
   final String name;
-  final Remote fetchRemote;
+  final Remote upstreamRemote;
 
-  /// Remote to publish tags and commits to.
+  /// Remote for user's mirror.
   ///
-  /// This value can be null, in which case attempting to publish will lead to
+  /// This value can be null, in which case attempting to access it will lead to
   /// a [ConductorException].
-  final Remote? pushRemote;
+  final Remote? mirrorRemote;
 
   /// The initial ref (branch or commit name) to check out.
   final String? initialRef;
@@ -119,29 +119,29 @@ abstract class Repository {
     }
 
     stdio.printTrace(
-      'Cloning $name from ${fetchRemote.url} to ${checkoutDirectory.path}...',
+      'Cloning $name from ${upstreamRemote.url} to ${checkoutDirectory.path}...',
     );
     git.run(
       <String>[
         'clone',
         '--origin',
-        fetchRemote.name,
+        upstreamRemote.name,
         '--',
-        fetchRemote.url,
+        upstreamRemote.url,
         checkoutDirectory.path
       ],
       'Cloning $name repo',
       workingDirectory: parentDirectory.path,
     );
-    if (pushRemote != null) {
+    if (mirrorRemote != null) {
       git.run(
-        <String>['remote', 'add', pushRemote!.name, pushRemote!.url],
-        'Adding remote ${pushRemote!.url} as ${pushRemote!.name}',
+        <String>['remote', 'add', mirrorRemote!.name, mirrorRemote!.url],
+        'Adding remote ${mirrorRemote!.url} as ${mirrorRemote!.name}',
         workingDirectory: checkoutDirectory.path,
       );
       git.run(
-        <String>['fetch', pushRemote!.name],
-        'Fetching git remote ${pushRemote!.name}',
+        <String>['fetch', mirrorRemote!.name],
+        'Fetching git remote ${mirrorRemote!.name}',
         workingDirectory: checkoutDirectory.path,
       );
     }
@@ -159,7 +159,7 @@ abstract class Repository {
 
     if (initialRef != null) {
       git.run(
-        <String>['checkout', '${fetchRemote.name}/$initialRef'],
+        <String>['checkout', '${upstreamRemote.name}/$initialRef'],
         'Checking out initialRef $initialRef',
         workingDirectory: checkoutDirectory.path,
       );
@@ -428,16 +428,16 @@ class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
     String name = 'framework',
-    Remote fetchRemote = const Remote(
+    Remote upstreamRemote = const Remote(
         name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
     bool localUpstream = false,
     String? previousCheckoutLocation,
     String? initialRef,
-    Remote? pushRemote,
+    Remote? mirrorRemote,
   }) : super(
           name: name,
-          fetchRemote: fetchRemote,
-          pushRemote: pushRemote,
+          upstreamRemote: upstreamRemote,
+          mirrorRemote: mirrorRemote,
           initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
           localUpstream: localUpstream,
@@ -461,7 +461,7 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: name,
-      fetchRemote: Remote(
+      upstreamRemote: Remote(
         name: RemoteName.upstream,
         url: 'file://$upstreamPath/',
       ),
@@ -510,7 +510,7 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: cloneName,
-      fetchRemote: Remote(
+      upstreamRemote: Remote(
           name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
     );
   }
@@ -580,7 +580,7 @@ class HostFrameworkRepository extends FrameworkRepository {
   }) : super(
     checkouts,
     name: name,
-    fetchRemote: Remote(
+    upstreamRemote: Remote(
       name: RemoteName.upstream,
       url: 'file://$upstreamPath/',
     ),
@@ -640,15 +640,15 @@ class EngineRepository extends Repository {
     this.checkouts, {
     String name = 'engine',
     String initialRef = EngineRepository.defaultBranch,
-    Remote fetchRemote = const Remote(
+    Remote upstreamRemote = const Remote(
         name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
     bool localUpstream = false,
     String? previousCheckoutLocation,
-    Remote? pushRemote,
+    Remote? mirrorRemote,
   }) : super(
           name: name,
-          fetchRemote: fetchRemote,
-          pushRemote: pushRemote,
+          upstreamRemote: upstreamRemote,
+          mirrorRemote: mirrorRemote,
           initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
           localUpstream: localUpstream,
@@ -696,7 +696,7 @@ class EngineRepository extends Repository {
     return EngineRepository(
       checkouts,
       name: cloneName,
-      fetchRemote: Remote(
+      upstreamRemote: Remote(
           name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
     );
   }
