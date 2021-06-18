@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -54,7 +53,7 @@ void main() {
     recorderCanvas.drawRect(const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0), paint);
     final Picture picture = recorder.endRecording();
     final Image image = await picture.toImage(width, height);
-    final ByteData bytes = await image.toByteData();
+    final ByteData bytes = (await image.toByteData())!;
 
     expect(bytes.lengthInBytes, equals(width * height * 4));
     return bytes.buffer.asUint32List();
@@ -66,7 +65,7 @@ void main() {
     recorderCanvas.drawPaint(paint);
     final Picture picture = recorder.endRecording();
     final Image image = await picture.toImage(width, height);
-    final ByteData bytes = await image.toByteData();
+    final ByteData bytes = (await image.toByteData())!;
 
     expect(bytes.lengthInBytes, width * height * 4);
     return bytes.buffer.asUint32List();
@@ -91,11 +90,9 @@ void main() {
   List<ColorFilter> colorFilters() {
     // Create new color filter instances on each invocation.
     return <ColorFilter> [                        // ignore: prefer_const_constructors
-      ColorFilter.mode(null, null),               // ignore: prefer_const_constructors
       ColorFilter.mode(green, BlendMode.color),   // ignore: prefer_const_constructors
       ColorFilter.mode(red, BlendMode.color),     // ignore: prefer_const_constructors
       ColorFilter.mode(red, BlendMode.screen),    // ignore: prefer_const_constructors
-      ColorFilter.matrix(null),                   // ignore: prefer_const_constructors
       ColorFilter.matrix(grayscaleColorMatrix),   // ignore: prefer_const_constructors
       ColorFilter.linearToSrgbGamma(),            // ignore: prefer_const_constructors
       ColorFilter.srgbToLinearGamma(),            // ignore: prefer_const_constructors
@@ -199,20 +196,6 @@ void main() {
     expect(filter.toString(), originalDescription);
   });
 
-  test('ImageFilter - null color filters do not throw', () {
-    dynamic error;
-    final Paint paint = Paint();
-    try {
-      paint
-        ..color = green
-        ..imageFilter = const ColorFilter.mode(null, null);
-    } catch (e) {
-      error = e;
-    }
-
-    expect(error, isNull);
-  });
-
   test('ImageFilter - from color filters', () async {
     final Paint paint = Paint()
       ..color = green
@@ -220,30 +203,6 @@ void main() {
 
     final Uint32List bytes = await getBytesForColorPaint(paint);
     expect(bytes[0], 0xFF020202);
-  });
-
-  test('ImageFilter - null filter composition', () async {
-    const ImageFilter nullFilter = ColorFilter.mode(null, null);
-    const ImageFilter identityFilter = ColorFilter.matrix(identityColorMatrix);
-
-    // Verify that null filter == identity.
-    Future<void> verifyAgainst(ImageFilter filter) async {
-      final ImageFilter comp0 = ImageFilter.compose(outer: filter, inner: identityFilter);
-      final ImageFilter comp1 = ImageFilter.compose(outer: filter, inner: nullFilter);
-      final ImageFilter comp2 = ImageFilter.compose(outer: nullFilter, inner: filter);
-      final Paint paint = Paint()..color = green;
-
-      paint.imageFilter = comp0;
-      final Uint32List bytes = await getBytesForColorPaint(paint);
-
-      paint.imageFilter = comp1;
-      expect(bytes, equals(await getBytesForColorPaint(paint)));
-
-      paint.imageFilter = comp2;
-      expect(bytes, equals(await getBytesForColorPaint(paint)));
-    }
-
-    makeList().forEach(verifyAgainst);
   });
 
   test('ImageFilter - color filter composition', () async {
@@ -282,13 +241,13 @@ void main() {
       ImageFilter.compose(
         outer: ImageFilter.compose(outer: makeBlur(30.0, 30.0, TileMode.mirror), inner: makeBlur(20.0, 20.0, TileMode.repeated)),
         inner: ImageFilter.compose(
-          outer: const ColorFilter.mode(null, null),
+          outer: const ColorFilter.mode(Color(0xFFABCDEF), BlendMode.color),
           inner: makeScale(10.0, 10.0),
         ),
       ).toString(),
       contains(
         'matrix([10.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, -0.0, 0.0, 1.0], FilterQuality.low) -> '
-        'ColorFilter.mode(null, null) -> '
+        'ColorFilter.mode(Color(0xffabcdef), BlendMode.color) -> '
         'blur(20.0, 20.0, repeated) -> '
         'blur(30.0, 30.0, mirror)'
       ),

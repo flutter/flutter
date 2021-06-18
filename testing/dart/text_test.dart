@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -173,12 +172,13 @@ void testTextRange() {
 
 void testLoadFontFromList() {
   test('loadFontFromList will send platform message after font is loaded', () async {
-    final PlatformMessageCallback oldHandler = window.onPlatformMessage;
-    String actualName;
-    String message;
-    window.onPlatformMessage = (String name, ByteData data, PlatformMessageResponseCallback callback) {
+    final PlatformMessageCallback? oldHandler = window.onPlatformMessage;
+    late String actualName;
+    late String message;
+    window.onPlatformMessage = (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+      assert(data != null);
       actualName = name;
-      final Uint8List list = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      final Uint8List list = data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
       message = utf8.decode(list);
     };
     final Uint8List fontData = Uint8List(0);

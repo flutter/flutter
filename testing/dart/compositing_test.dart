@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:typed_data' show Float64List;
 import 'dart:ui';
 
@@ -292,28 +291,28 @@ void main() {
   }
 
   test('SceneBuilder does not share a layer between addRetained and push*', () {
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
-      return builder.pushOffset(0, 0, oldLayer: oldLayer as OffsetEngineLayer);
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
+      return builder.pushOffset(0, 0, oldLayer: oldLayer as OffsetEngineLayer?);
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
-      return builder.pushTransform(Float64List(16), oldLayer: oldLayer as TransformEngineLayer);
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
+      return builder.pushTransform(Float64List(16), oldLayer: oldLayer as TransformEngineLayer?);
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
-      return builder.pushClipRect(Rect.zero, oldLayer: oldLayer as ClipRectEngineLayer);
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
+      return builder.pushClipRect(Rect.zero, oldLayer: oldLayer as ClipRectEngineLayer?);
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
-      return builder.pushClipRRect(RRect.zero, oldLayer: oldLayer as ClipRRectEngineLayer);
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
+      return builder.pushClipRRect(RRect.zero, oldLayer: oldLayer as ClipRRectEngineLayer?);
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
-      return builder.pushClipPath(Path(), oldLayer: oldLayer as ClipPathEngineLayer);
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
+      return builder.pushClipPath(Path(), oldLayer: oldLayer as ClipPathEngineLayer?);
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
-      return builder.pushOpacity(100, oldLayer: oldLayer as OpacityEngineLayer);
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
+      return builder.pushOpacity(100, oldLayer: oldLayer as OpacityEngineLayer?);
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
-      return builder.pushBackdropFilter(ImageFilter.blur(), oldLayer: oldLayer as BackdropFilterEngineLayer);
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
+      return builder.pushBackdropFilter(ImageFilter.blur(), oldLayer: oldLayer as BackdropFilterEngineLayer?);
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
       return builder.pushShaderMask(
         Gradient.radial(
           const Offset(0, 0),
@@ -322,22 +321,22 @@ void main() {
         ),
         Rect.zero,
         BlendMode.color,
-        oldLayer: oldLayer as ShaderMaskEngineLayer,
+        oldLayer: oldLayer as ShaderMaskEngineLayer?,
       );
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
-      return builder.pushPhysicalShape(path: Path(), color: const Color.fromARGB(0, 0, 0, 0), oldLayer: oldLayer as PhysicalShapeEngineLayer, elevation: 0.0);
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
+      return builder.pushPhysicalShape(path: Path(), color: const Color.fromARGB(0, 0, 0, 0), oldLayer: oldLayer as PhysicalShapeEngineLayer?, elevation: 0.0);
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
       return builder.pushColorFilter(
         const ColorFilter.mode(
           Color.fromARGB(0, 0, 0, 0),
           BlendMode.color,
         ),
-        oldLayer: oldLayer as ColorFilterEngineLayer,
+        oldLayer: oldLayer as ColorFilterEngineLayer?,
       );
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
       return builder.pushColorFilter(
         const ColorFilter.matrix(<double>[
           1, 0, 0, 0, 0,
@@ -345,28 +344,28 @@ void main() {
           0, 0, 1, 0, 0,
           0, 0, 0, 1, 0,
         ]),
-        oldLayer: oldLayer as ColorFilterEngineLayer,
+        oldLayer: oldLayer as ColorFilterEngineLayer?,
       );
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
       return builder.pushColorFilter(
         const ColorFilter.linearToSrgbGamma(),
-        oldLayer: oldLayer as ColorFilterEngineLayer,
+        oldLayer: oldLayer as ColorFilterEngineLayer?,
       );
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
       return builder.pushColorFilter(
         const ColorFilter.srgbToLinearGamma(),
-        oldLayer: oldLayer as ColorFilterEngineLayer,
+        oldLayer: oldLayer as ColorFilterEngineLayer?,
       );
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
       return builder.pushImageFilter(
         ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-        oldLayer: oldLayer as ImageFilterEngineLayer,
+        oldLayer: oldLayer as ImageFilterEngineLayer?,
       );
     });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
       return builder.pushImageFilter(
         ImageFilter.matrix(Float64List.fromList(<double>[
           1, 0, 0, 0,
@@ -374,10 +373,10 @@ void main() {
           0, 0, 1, 0,
           0, 0, 0, 1,
         ])),
-        oldLayer: oldLayer as ImageFilterEngineLayer,
+        oldLayer: oldLayer as ImageFilterEngineLayer?,
       );
     });
   });
 }
 
-typedef _TestNoSharingFunction = EngineLayer Function(SceneBuilder builder, EngineLayer oldLayer);
+typedef _TestNoSharingFunction = EngineLayer Function(SceneBuilder builder, EngineLayer? oldLayer);
