@@ -34,13 +34,30 @@ size_t HostBuffer::GetReservedLength() const {
 BufferView HostBuffer::Emplace(const void* buffer,
                                size_t length,
                                size_t align) {
+  if (align == 0 || (length_ % align) == 0) {
+    return Emplace(buffer, length);
+  }
+
+  {
+    auto pad = Emplace(nullptr, align - (length_ % align));
+    if (!pad) {
+      return {};
+    }
+  }
+
+  return Emplace(buffer, length);
+}
+
+BufferView HostBuffer::Emplace(const void* buffer, size_t length) {
   auto old_length = length_;
   if (!Truncate(length_ + length)) {
     return {};
   }
   FML_DCHECK(buffer_);
   generation_++;
-  ::memmove(buffer_, buffer, length);
+  if (buffer) {
+    ::memmove(buffer_, buffer, length);
+  }
   return BufferView{shared_from_this(), Range{old_length, length}};
 }
 

@@ -55,8 +55,23 @@ TEST(HostBufferTest, CanEmplaceWithAlignment) {
   {
     auto view = buffer->Emplace(Align16{});
     ASSERT_TRUE(view);
+    ASSERT_EQ(view.range.offset, 16u);
+    ASSERT_EQ(view.range.length, 16u);
     ASSERT_EQ(buffer->GetLength(), 32u);
-    ASSERT_EQ(view.range, Range(16u, 16u));
+  }
+  {
+    auto view = buffer->Emplace(Length2{});
+    ASSERT_TRUE(view);
+    ASSERT_EQ(buffer->GetLength(), 34u);
+    ASSERT_EQ(view.range, Range(32u, 2u));
+  }
+
+  {
+    auto view = buffer->Emplace(Align16{});
+    ASSERT_TRUE(view);
+    ASSERT_EQ(view.range.offset, 48u);
+    ASSERT_EQ(view.range.length, 16u);
+    ASSERT_EQ(buffer->GetLength(), 64u);
   }
 }
 

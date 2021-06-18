@@ -48,6 +48,8 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
                                    size_t length,
                                    size_t align);
 
+  [[nodiscard]] BufferView Emplace(const void* buffer, size_t length);
+
   [[nodiscard]] bool Reserve(size_t reserved);
 
   [[nodiscard]] bool ReserveNPOT(size_t reserved);
