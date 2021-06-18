@@ -106,7 +106,7 @@ void runNext({
       // has auto-applied. To proceed to the next phase when some cherrypicks
       // were applied manually, the user will have to confirm.
       if (unappliedCherrypicks.isNotEmpty && autoAccept == false) {
-        final bool response = prompt('Did you apply and merge all engine cherrypicks?', stdio);
+        final bool response = prompt('Did you apply all engine cherrypicks?', stdio);
         if (!response) {
           stdio.printError('Aborting command.');
           return;
@@ -134,8 +134,9 @@ void runNext({
           break;
         }
       }
+      // No need to prompt user if all cherrypicks were auto-applied
       if (allFrameworkCherrypicksVerified == false && autoAccept == false) {
-        final bool response = prompt('Did you apply and merge all framework cherrypicks?', stdio);
+        final bool response = prompt('Did you apply all framework cherrypicks?', stdio);
         if (!response) {
           stdio.printError('Aborting command.');
           return;

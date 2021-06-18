@@ -158,7 +158,7 @@ void main() {
         fileSystem.file(stateFile),
       );
 
-      expect(stdio.stdout, contains('Did you apply and merge all engine cherrypicks? (y/n) '));
+      expect(stdio.stdout, contains('Did you apply all engine cherrypicks? (y/n) '));
       expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
       expect(stdio.error, isEmpty);
     });
@@ -290,7 +290,7 @@ void main() {
         fileSystem.file(stateFile),
       );
 
-      expect(stdio.stdout, isNot(contains('Did you apply and merge all framework cherrypicks? (y/n) ')));
+      expect(stdio.stdout, isNot(contains('Did you apply all framework cherrypicks? (y/n) ')));
       expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
       expect(stdio.error, isEmpty);
     });
@@ -340,7 +340,7 @@ void main() {
         fileSystem.file(stateFile),
       );
 
-      expect(stdio.stdout, contains('Did you apply and merge all framework cherrypicks? (y/n) '));
+      expect(stdio.stdout, contains('Did you apply all framework cherrypicks? (y/n) '));
       expect(stdio.error, contains('Aborting command.'));
       expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
     });
@@ -391,7 +391,7 @@ void main() {
       );
 
       expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
-      expect(stdio.stdout, contains('Did you apply and merge all framework cherrypicks? (y/n)'));
+      expect(stdio.stdout, contains('Did you apply all framework cherrypicks? (y/n)'));
     });
 
 
