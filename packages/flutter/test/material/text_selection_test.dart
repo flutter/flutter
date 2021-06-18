@@ -608,11 +608,10 @@ void main() {
         ),
       ));
 
-      expect(
-        // CustomPaint is inserted by the Material text selection controls.
-        find.byType(CustomPaint),
-        findsOneWidget,
-      );
+      // No expect here as this should simply combile / not throw any
+      // exceptions while building. The test will fail if this either does
+      // not compile or if the tester catches an exception, which we do
+      // not take here.
     });
   });
 
