@@ -152,6 +152,7 @@ void runNext({
         checkouts,
         initialRef: state.framework.candidateBranch,
         fetchRemote: upstream,
+        previousCheckoutLocation: state.framework.checkoutPath,
       );
       final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {

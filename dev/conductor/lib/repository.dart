@@ -55,12 +55,25 @@ abstract class Repository {
     required this.parentDirectory,
     this.initialRef,
     this.localUpstream = false,
-    this.useExistingCheckout = false,
+    String? previousCheckoutLocation,
     this.pushRemote,
   })  : git = Git(processManager),
         assert(localUpstream != null),
-        assert(useExistingCheckout != null),
-        assert(fetchRemote.url.isNotEmpty);
+        assert(fetchRemote.url.isNotEmpty) {
+    if (previousCheckoutLocation != null) {
+      _checkoutDirectory = fileSystem.directory(previousCheckoutLocation);
+      if (!_checkoutDirectory!.existsSync()) {
+        throw ConductorException('Provided previousCheckoutLocation $previousCheckoutLocation does not exist on disk!');
+      }
+      if (initialRef != null) {
+        git.run(
+          <String>['checkout', '${fetchRemote.name}/$initialRef'],
+          'Checking out initialRef $initialRef',
+          workingDirectory: _checkoutDirectory!.path,
+        );
+      }
+    }
+  }
 
   final String name;
   final Remote fetchRemote;
@@ -79,7 +92,6 @@ abstract class Repository {
   final Platform platform;
   final FileSystem fileSystem;
   final Directory parentDirectory;
-  final bool useExistingCheckout;
 
   /// If the repository will be used as an upstream for a test repo.
   final bool localUpstream;
@@ -101,49 +113,47 @@ abstract class Repository {
 
   /// Ensure the repository is cloned to disk and initialized with proper state.
   void lazilyInitialize(Directory checkoutDirectory) {
-    if (!useExistingCheckout && checkoutDirectory.existsSync()) {
+    if (checkoutDirectory.existsSync()) {
       stdio.printTrace('Deleting $name from ${checkoutDirectory.path}...');
       checkoutDirectory.deleteSync(recursive: true);
     }
 
-    if (!checkoutDirectory.existsSync()) {
-      stdio.printTrace(
-        'Cloning $name from ${fetchRemote.url} to ${checkoutDirectory.path}...',
+    stdio.printTrace(
+      'Cloning $name from ${fetchRemote.url} to ${checkoutDirectory.path}...',
+    );
+    git.run(
+      <String>[
+        'clone',
+        '--origin',
+        fetchRemote.name,
+        '--',
+        fetchRemote.url,
+        checkoutDirectory.path
+      ],
+      'Cloning $name repo',
+      workingDirectory: parentDirectory.path,
+    );
+    if (pushRemote != null) {
+      git.run(
+        <String>['remote', 'add', pushRemote!.name, pushRemote!.url],
+        'Adding remote ${pushRemote!.url} as ${pushRemote!.name}',
+        workingDirectory: checkoutDirectory.path,
       );
       git.run(
-        <String>[
-          'clone',
-          '--origin',
-          fetchRemote.name,
-          '--',
-          fetchRemote.url,
-          checkoutDirectory.path
-        ],
-        'Cloning $name repo',
-        workingDirectory: parentDirectory.path,
+        <String>['fetch', pushRemote!.name],
+        'Fetching git remote ${pushRemote!.name}',
+        workingDirectory: checkoutDirectory.path,
       );
-      if (pushRemote != null) {
+    }
+    if (localUpstream) {
+      // These branches must exist locally for the repo that depends on it
+      // to fetch and push to.
+      for (final String channel in kReleaseChannels) {
         git.run(
-          <String>['remote', 'add', pushRemote!.name, pushRemote!.url],
-          'Adding remote ${pushRemote!.url} as ${pushRemote!.name}',
+          <String>['checkout', channel, '--'],
+          'check out branch $channel locally',
           workingDirectory: checkoutDirectory.path,
         );
-        git.run(
-          <String>['fetch', pushRemote!.name],
-          'Fetching git remote ${pushRemote!.name}',
-          workingDirectory: checkoutDirectory.path,
-        );
-      }
-      if (localUpstream) {
-        // These branches must exist locally for the repo that depends on it
-        // to fetch and push to.
-        for (final String channel in kReleaseChannels) {
-          git.run(
-            <String>['checkout', channel, '--'],
-            'check out branch $channel locally',
-            workingDirectory: checkoutDirectory.path,
-          );
-        }
       }
     }
 
@@ -421,7 +431,7 @@ class FrameworkRepository extends Repository {
     Remote fetchRemote = const Remote(
         name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
     bool localUpstream = false,
-    bool useExistingCheckout = false,
+    String? previousCheckoutLocation,
     String? initialRef,
     Remote? pushRemote,
   }) : super(
@@ -435,7 +445,7 @@ class FrameworkRepository extends Repository {
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          useExistingCheckout: useExistingCheckout,
+          previousCheckoutLocation: previousCheckoutLocation,
         );
 
   /// A [FrameworkRepository] with the host conductor's repo set as upstream.
@@ -445,7 +455,7 @@ class FrameworkRepository extends Repository {
   factory FrameworkRepository.localRepoAsUpstream(
     Checkouts checkouts, {
     String name = 'framework',
-    bool useExistingCheckout = false,
+    String? previousCheckoutLocation,
     required String upstreamPath,
   }) {
     return FrameworkRepository(
@@ -456,7 +466,7 @@ class FrameworkRepository extends Repository {
         url: 'file://$upstreamPath/',
       ),
       localUpstream: false,
-      useExistingCheckout: useExistingCheckout,
+      previousCheckoutLocation: previousCheckoutLocation,
     );
   }
 
@@ -502,7 +512,6 @@ class FrameworkRepository extends Repository {
       name: cloneName,
       fetchRemote: Remote(
           name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
-      useExistingCheckout: useExistingCheckout,
     );
   }
 
@@ -567,7 +576,6 @@ class HostFrameworkRepository extends FrameworkRepository {
   HostFrameworkRepository({
     required Checkouts checkouts,
     String name = 'host-framework',
-    bool useExistingCheckout = false,
     required String upstreamPath,
   }) : super(
     checkouts,
@@ -577,7 +585,6 @@ class HostFrameworkRepository extends FrameworkRepository {
       url: 'file://$upstreamPath/',
     ),
     localUpstream: false,
-    useExistingCheckout: useExistingCheckout,
   ) {
     _checkoutDirectory = checkouts.fileSystem.directory(upstreamPath);
   }
@@ -636,7 +643,7 @@ class EngineRepository extends Repository {
     Remote fetchRemote = const Remote(
         name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
     bool localUpstream = false,
-    bool useExistingCheckout = false,
+    String? previousCheckoutLocation,
     Remote? pushRemote,
   }) : super(
           name: name,
@@ -649,7 +656,7 @@ class EngineRepository extends Repository {
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          useExistingCheckout: useExistingCheckout,
+          previousCheckoutLocation: previousCheckoutLocation,
         );
 
   final Checkouts checkouts;
@@ -691,7 +698,6 @@ class EngineRepository extends Repository {
       name: cloneName,
       fetchRemote: Remote(
           name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
-      useExistingCheckout: useExistingCheckout,
     );
   }
 }

@@ -400,27 +400,8 @@ void main() {
       stdio.stdin.add('n');
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'git',
-              'clone',
-              '--origin',
-              remoteName,
-              '--',
-              FrameworkRepository.defaultUpstream,
-              fileSystem.path.join(
-                checkoutsParentDirectory,
-                'flutter_conductor_checkouts',
-                'framework',
-              ),
-            ],
-          ),
           const FakeCommand(
             command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
-          ),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision1,
           ),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -467,6 +448,7 @@ void main() {
       expect(stdio.stdout, contains('Has CI passed for the framework PR?'));
       expect(stdio.error, contains('Aborting command.'));
       expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
+      expect(processManager.hasRemainingExpectations, false);
     });
 
     test('updates state.currentPhase from PUBLISH_VERSION to PUBLISH_CHANNEL if user responds yes', () async {
@@ -474,27 +456,8 @@ void main() {
       const String releaseVersion = '1.2.0-3.0.pre';
       stdio.stdin.add('y');
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <String>[
-            'git',
-            'clone',
-            '--origin',
-            remoteName,
-            '--',
-            FrameworkRepository.defaultUpstream,
-            fileSystem.path.join(
-              checkoutsParentDirectory,
-              'flutter_conductor_checkouts',
-              'framework',
-            ),
-          ],
-        ),
         const FakeCommand(
           command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'rev-parse', 'HEAD'],
-          stdout: revision1,
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
