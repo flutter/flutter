@@ -71,7 +71,7 @@ class RenderPass {
 
   bool IsValid() const;
 
-  HostBuffer& GetHostBuffer();
+  HostBuffer& GetTransientsBuffer();
 
   bool RecordCommand(Command command);
 

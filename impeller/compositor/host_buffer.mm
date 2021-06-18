@@ -4,6 +4,8 @@
 
 #include "impeller/compositor/host_buffer.h"
 
+#include <algorithm>
+
 #include "flutter/fml/logging.h"
 
 #include "impeller/compositor/allocator.h"
@@ -21,7 +23,17 @@ HostBuffer::~HostBuffer() {
   ::free(buffer_);
 }
 
-BufferView HostBuffer::Emplace(const void* buffer, size_t length) {
+size_t HostBuffer::GetLength() const {
+  return length_;
+}
+
+size_t HostBuffer::GetReservedLength() const {
+  return reserved_;
+}
+
+BufferView HostBuffer::Emplace(const void* buffer,
+                               size_t length,
+                               size_t align) {
   auto old_length = length_;
   if (!Truncate(length_ + length)) {
     return {};
@@ -61,9 +73,13 @@ bool HostBuffer::ReserveNPOT(size_t reserved) {
 }
 
 bool HostBuffer::Reserve(size_t reserved) {
+  // Reserve at least one page of data.
+  reserved = std::max<size_t>(4096u, reserved);
+
   if (reserved == reserved_) {
     return true;
   }
+
   auto new_allocation = ::realloc(buffer_, reserved);
   if (!new_allocation) {
     // If new length is zero, a minimum non-zero sized allocation is returned.
@@ -72,8 +88,10 @@ bool HostBuffer::Reserve(size_t reserved) {
     FML_LOG(ERROR) << "Allocation failed. Out of memory.";
     return false;
   }
+
   buffer_ = static_cast<uint8_t*>(new_allocation);
   reserved_ = reserved;
+
   return true;
 }
 

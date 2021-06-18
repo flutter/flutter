@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/buffer.h"
@@ -20,7 +21,14 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
 
   static std::shared_ptr<HostBuffer> Create();
 
-  BufferView Emplace(const void* buffer, size_t length);
+  size_t GetLength() const;
+
+  size_t GetReservedLength() const;
+
+  template <class T, class = std::enable_if_t<std::is_standard_layout_v<T>>>
+  [[nodiscard]] BufferView Emplace(const T& t) {
+    return Emplace(reinterpret_cast<const void*>(&t), sizeof(T), alignof(T));
+  }
 
   [[nodiscard]] bool Truncate(size_t length);
 
@@ -35,6 +43,10 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
   // |Buffer|
   std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
       Allocator& allocator) const override;
+
+  [[nodiscard]] BufferView Emplace(const void* buffer,
+                                   size_t length,
+                                   size_t align);
 
   [[nodiscard]] bool Reserve(size_t reserved);
 

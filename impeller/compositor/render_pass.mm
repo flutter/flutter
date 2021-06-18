@@ -129,7 +129,7 @@ RenderPass::RenderPass(id<MTLCommandBuffer> buffer,
 
 RenderPass::~RenderPass() = default;
 
-HostBuffer& RenderPass::GetHostBuffer() {
+HostBuffer& RenderPass::GetTransientsBuffer() {
   return *transients_buffer_;
 }
 
