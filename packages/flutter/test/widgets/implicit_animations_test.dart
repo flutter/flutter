@@ -355,8 +355,7 @@ void main() {
       (WidgetTester tester) async {
     final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key =
         GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
-    final ValueNotifier<Curve> curve =
-        ValueNotifier<Curve>(const Interval(0.0, 0.5));
+    final ValueNotifier<Curve> curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
     await tester.pumpWidget(wrap(
       child: ValueListenableBuilder<Curve>(
         valueListenable: curve,
@@ -369,8 +368,7 @@ void main() {
       ),
     ));
 
-    final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? firstState =
-        key.currentState;
+    final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? firstState = key.currentState;
     final Animation<double>? firstAnimation = firstState?.animation;
     if (firstAnimation == null)
       fail('animation was null!');
@@ -383,14 +381,12 @@ void main() {
     curve.value = const Interval(0.0, 0.6);
     await tester.pumpAndSettle();
 
-    final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? secondState =
-        key.currentState;
+    final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? secondState = key.currentState;
     final Animation<double>? secondAnimation = secondState?.animation;
     if (secondAnimation == null)
       fail('animation was null!');
 
-    final CurvedAnimation secondCurvedAnimation =
-        secondAnimation as CurvedAnimation;
+    final CurvedAnimation secondCurvedAnimation = secondAnimation as CurvedAnimation;
 
     expect(firstState, equals(secondState));
     expect(firstAnimation, isNot(equals(secondAnimation)));
