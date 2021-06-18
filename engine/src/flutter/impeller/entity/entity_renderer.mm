@@ -43,7 +43,9 @@ bool EntityRenderer::OnRender(RenderPass& pass) {
   cmd.vertex_bindings
       .buffers[shader::BoxVertexInfo::kUniformUniformBuffer.location] =
       pass.GetTransientsBuffer().Emplace(uniforms);
-  pass.RecordCommand(std::move(cmd));
+  if (!pass.RecordCommand(std::move(cmd))) {
+    return false;
+  }
   return true;
 }
 
