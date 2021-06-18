@@ -44,5 +44,5 @@ void main() {
     //await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
 
     expect(find.text('UPDATE'), findsNothing);
-  }, variant: TargetPlatformVariant.all());
+  });
 }
