@@ -309,7 +309,6 @@ class FuchsiaDevice extends Device {
     }
     // Stop the app if it's currently running.
     await stopApp(package);
-    final String host = await hostAddress;
     // Find out who the device thinks we are.
     final int port = await globals.os.findFreePort();
     if (port == 0) {
