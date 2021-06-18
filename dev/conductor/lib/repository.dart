@@ -25,7 +25,7 @@ class Remote {
   const Remote({
     required RemoteName name,
     required this.url,
-  }) : _name = name;
+  }) : _name = name, assert(url != null), assert (url != '');
 
   final RemoteName _name;
 
@@ -59,7 +59,8 @@ abstract class Repository {
     this.pushRemote,
   })  : git = Git(processManager),
         assert(localUpstream != null),
-        assert(useExistingCheckout != null);
+        assert(useExistingCheckout != null),
+        assert(fetchRemote.url.isNotEmpty);
 
   final String name;
   final Remote fetchRemote;
