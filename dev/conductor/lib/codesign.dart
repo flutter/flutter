@@ -115,8 +115,7 @@ class CodesignCommand extends Command<void> {
       revision = (processManager.runSync(
         <String>['git', 'rev-parse', 'HEAD'],
         workingDirectory: framework.checkoutDirectory.path,
-      ).stdout as String)
-          .trim();
+      ).stdout as String).trim();
       assert(revision.isNotEmpty);
     }
 
@@ -291,7 +290,7 @@ class CodesignCommand extends Command<void> {
     if (wrongEntitlementBinaries.isNotEmpty) {
       stdio.printError(
           'Found ${wrongEntitlementBinaries.length} binaries with unexpected entitlements:');
-      wrongEntitlementBinaries.forEach(print);
+      wrongEntitlementBinaries.forEach(stdio.printError);
     }
 
     if (unexpectedBinaries.isNotEmpty) {
