@@ -267,6 +267,8 @@ class StartCommand extends Command<void> {
       checkoutPath: engine.checkoutDirectory.path,
       cherrypicks: engineCherrypicks,
       dartRevision: dartRevision,
+      upstream: pb.Remote(name: 'upstream', url: engine.fetchRemote.url),
+      mirror: pb.Remote(name: 'mirror', url: engine.pushRemote.url),
     );
     final FrameworkRepository framework = FrameworkRepository(
       checkouts,
@@ -322,6 +324,8 @@ class StartCommand extends Command<void> {
       currentGitHead: frameworkHead,
       checkoutPath: framework.checkoutDirectory.path,
       cherrypicks: frameworkCherrypicks,
+      upstream: pb.Remote(name: 'upstream', url: framework.fetchRemote.url),
+      mirror: pb.Remote(name: 'mirror', url: framework.pushRemote.url),
     );
 
     state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
