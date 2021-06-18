@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -20,13 +19,13 @@ const Color _kGreen = Color.fromRGBO(0, 255, 0, 1.0);
 void main() {
   test('Image.toByteData RGBA format works with simple image', () async {
     final Image image = await Square4x4Image.image;
-    final ByteData data = await image.toByteData();
+    final ByteData data = (await image.toByteData())!;
     expect(Uint8List.view(data.buffer), Square4x4Image.bytes);
   });
 
   test('Image.toByteData RGBA format converts grayscale images', () async {
     final Image image = await GrayscaleImage.load();
-    final ByteData data = await image.toByteData();
+    final ByteData data = (await image.toByteData())!;
     final Uint8List bytes = data.buffer.asUint8List();
     expect(bytes, hasLength(16));
     expect(bytes, GrayscaleImage.bytesAsRgba);
@@ -34,13 +33,13 @@ void main() {
 
   test('Image.toByteData Unmodified format works with simple image', () async {
     final Image image = await Square4x4Image.image;
-    final ByteData data = await image.toByteData(format: ImageByteFormat.rawUnmodified);
+    final ByteData data = (await image.toByteData(format: ImageByteFormat.rawUnmodified))!;
     expect(Uint8List.view(data.buffer), Square4x4Image.bytes);
   });
 
   test('Image.toByteData Unmodified format works with grayscale images', () async {
     final Image image = await GrayscaleImage.load();
-    final ByteData data = await image.toByteData(format: ImageByteFormat.rawUnmodified);
+    final ByteData data = (await image.toByteData(format: ImageByteFormat.rawUnmodified))!;
     final Uint8List bytes = data.buffer.asUint8List();
     expect(bytes, hasLength(4));
     expect(bytes, GrayscaleImage.bytesUnmodified);
@@ -48,7 +47,7 @@ void main() {
 
   test('Image.toByteData PNG format works with simple image', () async {
     final Image image = await Square4x4Image.image;
-    final ByteData data = await image.toByteData(format: ImageByteFormat.png);
+    final ByteData data = (await image.toByteData(format: ImageByteFormat.png))!;
     final List<int> expected = await readFile('square.png');
     expect(Uint8List.view(data.buffer), expected);
   });

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:ui';
 
 import 'package:litetest/litetest.dart';
@@ -20,21 +19,17 @@ const Foo foo = Foo();
 void main() {
   test('PluginUtilities Callback Handles', () {
     // Top level callback.
-    final CallbackHandle hTop = PluginUtilities.getCallbackHandle(top);
-    expect(hTop, isNotNull);
+    final CallbackHandle hTop = PluginUtilities.getCallbackHandle(top)!;
     expect(hTop, notEquals(0));
     expect(PluginUtilities.getCallbackHandle(top), hTop);
-    final Function topClosure = PluginUtilities.getCallbackFromHandle(hTop);
-    expect(topClosure, isNotNull);
+    final Function topClosure = PluginUtilities.getCallbackFromHandle(hTop)!;
     expect(topClosure(), 'top');
 
     // Static method callback.
-    final CallbackHandle hGetInt = PluginUtilities.getCallbackHandle(Foo.getInt);
-    expect(hGetInt, isNotNull);
+    final CallbackHandle hGetInt = PluginUtilities.getCallbackHandle(Foo.getInt)!;
     expect(hGetInt, notEquals(0));
     expect(PluginUtilities.getCallbackHandle(Foo.getInt), hGetInt);
-    final Function getIntClosure = PluginUtilities.getCallbackFromHandle(hGetInt);
-    expect(getIntClosure, isNotNull);
+    final Function getIntClosure = PluginUtilities.getCallbackFromHandle(hGetInt)!;
     expect(getIntClosure(), 1);
 
     // Instance method callbacks cannot be looked up.

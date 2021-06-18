@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -127,7 +126,7 @@ void main() {
         blackSquare.width,
         blackSquare.height,
         PixelFormat.rgba8888,
-        (Image image) => null,
+        (Image image) {},
         targetHeight: 10,
         allowUpscaling: false,
       );
@@ -155,7 +154,7 @@ void main() {
         blackSquare.width,
         blackSquare.height,
         PixelFormat.rgba8888,
-        (Image image) => null,
+        (Image image) {},
         targetHeight: 10,
         targetWidth: 1,
         allowUpscaling: false,
@@ -184,7 +183,7 @@ class BlackSquare {
     return BlackSquare._(width, height, pixels);
   }
 
-  Future<Image> resize({int targetWidth, int targetHeight, bool allowUpscaling = false}) async {
+  Future<Image> resize({int? targetWidth, int? targetHeight, bool allowUpscaling = false}) async {
     final Completer<Image> imageCompleter = Completer<Image>();
     decodeImageFromPixels(
       pixels,

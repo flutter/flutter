@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -58,9 +57,9 @@ void main() {
     final Picture picture = recorder.endRecording();
 
     final Image rasterizedImage = await picture.toImage(2, 2);
-    final ByteData sourceData = await frame.image.toByteData();
-    final ByteData handleData = await handle1.toByteData();
-    final ByteData rasterizedData = await rasterizedImage.toByteData();
+    final ByteData sourceData = (await frame.image.toByteData())!;
+    final ByteData handleData = (await handle1.toByteData())!;
+    final ByteData rasterizedData = (await rasterizedImage.toByteData())!;
 
     expect(sourceData.buffer.asUint8List(), equals(handleData.buffer.asUint8List()));
     expect(sourceData.buffer.asUint8List(), equals(rasterizedData.buffer.asUint8List()));
@@ -74,17 +73,17 @@ void main() {
     final Image handle1 = frame.image.clone();
     final Image handle2 = handle1.clone();
 
-    List<StackTrace> stackTraces = frame.image.debugGetOpenHandleStackTraces();
+    List<StackTrace> stackTraces = (frame.image.debugGetOpenHandleStackTraces())!;
     expect(stackTraces.length, 3);
     expect(stackTraces, equals(handle1.debugGetOpenHandleStackTraces()));
 
     handle1.dispose();
-    stackTraces = frame.image.debugGetOpenHandleStackTraces();
+    stackTraces = (frame.image.debugGetOpenHandleStackTraces())!;
     expect(stackTraces.length, 2);
     expect(stackTraces, equals(handle2.debugGetOpenHandleStackTraces()));
 
     handle2.dispose();
-    stackTraces = frame.image.debugGetOpenHandleStackTraces();
+    stackTraces = (frame.image.debugGetOpenHandleStackTraces())!;
     expect(stackTraces.length, 1);
     expect(stackTraces, equals(frame.image.debugGetOpenHandleStackTraces()));
 
