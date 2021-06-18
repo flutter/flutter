@@ -28,14 +28,14 @@ class BottomNavigationBarItem {
       'Use "label" instead, as it allows for an improved text-scaling experience. '
       'This feature was deprecated after v1.19.0.',
     )
-    this.title,
-    this.label,
+        this.title,
+    required this.label,
     Widget? activeIcon,
     this.backgroundColor,
     this.tooltip,
-  }) : activeIcon = activeIcon ?? icon,
-       assert(label == null || title == null),
-       assert(icon != null);
+  })  : activeIcon = activeIcon ?? icon,
+        assert(label == null || title == null),
+        assert(icon != null);
 
   /// The icon of the item.
   ///
