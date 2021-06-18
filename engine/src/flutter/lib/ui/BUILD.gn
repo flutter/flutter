@@ -202,6 +202,7 @@ if (enable_unittests) {
 
     sources = [
       "compositing/scene_builder_unittests.cc",
+      "hooks_unittests.cc",
       "painting/image_dispose_unittests.cc",
       "painting/image_encoding_unittests.cc",
       "painting/image_generator_registry_unittests.cc",
