@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -86,7 +84,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     return skTextStyle;
   }
 
-  static SkStrutStyleProperties toSkStrutStyleProperties(ui.StrutStyle value, ui.TextHeightBehavior? paragraphHeightBehavior) {
+  static SkStrutStyleProperties toSkStrutStyleProperties(
+      ui.StrutStyle value, ui.TextHeightBehavior? paragraphHeightBehavior) {
     CkStrutStyle style = value as CkStrutStyle;
     final SkStrutStyleProperties skStrutStyle = SkStrutStyleProperties();
     skStrutStyle.fontFamilies =
@@ -100,7 +99,9 @@ class CkParagraphStyle implements ui.ParagraphStyle {
       skStrutStyle.heightMultiplier = style._height;
     }
 
-    final ui.TextLeadingDistribution? effectiveLeadingDistribution = style._leadingDistribution ?? paragraphHeightBehavior?.leadingDistribution;
+    final ui.TextLeadingDistribution? effectiveLeadingDistribution =
+        style._leadingDistribution ??
+            paragraphHeightBehavior?.leadingDistribution;
     switch (effectiveLeadingDistribution) {
       case null:
         break;
@@ -172,7 +173,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     }
 
     if (strutStyle != null) {
-      properties.strutStyle = toSkStrutStyleProperties(strutStyle, textHeightBehavior);
+      properties.strutStyle =
+          toSkStrutStyleProperties(strutStyle, textHeightBehavior);
     }
 
     properties.textStyle = toSkTextStyleProperties(
@@ -536,8 +538,7 @@ SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
 /// [SynchronousSkiaObjectCache] is used that limits the number of live laid out
 /// paragraphs at any point in time within or outside the frame.
 class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
-  CkParagraph(
-      this._skParagraph, this._paragraphStyle, this._paragraphCommands);
+  CkParagraph(this._skParagraph, this._paragraphStyle, this._paragraphCommands);
 
   /// The result of calling `build()` on the JS CkParagraphBuilder.
   ///
@@ -609,7 +610,8 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
         _maxIntrinsicWidth = paragraph.getMaxIntrinsicWidth();
         _minIntrinsicWidth = paragraph.getMinIntrinsicWidth();
         _width = paragraph.getMaxWidth();
-        _boxesForPlaceholders = skRectsToTextBoxes(paragraph.getRectsForPlaceholders());
+        _boxesForPlaceholders =
+            skRectsToTextBoxes(paragraph.getRectsForPlaceholders());
       } catch (e) {
         printWarning('CanvasKit threw an exception while laying '
             'out the paragraph. The font was "${_paragraphStyle._fontFamily}". '
@@ -633,7 +635,8 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   //                lot of paragraphs are laid out _and_ rendered. To support
   //                this use-case without blowing up memory usage we need this:
   //                https://github.com/flutter/flutter/issues/81224
-  static SynchronousSkiaObjectCache _paragraphCache = SynchronousSkiaObjectCache(500);
+  static SynchronousSkiaObjectCache _paragraphCache =
+      SynchronousSkiaObjectCache(500);
 
   /// Marks this paragraph as having been used this frame.
   ///
@@ -902,176 +905,21 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     return properties;
   }
 
-  /// Determines if the given [text] contains any code points which are not
-  /// supported by the current set of fonts.
-  void _ensureFontsSupportText(String text) {
-    // TODO(hterkelsen): Make this faster for the common case where the text
-    // is supported by the given fonts.
-
-    // A list of unique code units in the text.
-    final List<int> codeUnits = text.runes.toSet().toList();
-
-    // First, check if every code unit in the text is known to be covered by one
-    // of our global fallback fonts. We cache the set of code units covered by
-    // the global fallback fonts since this set is growing monotonically over
-    // the lifetime of the app.
-    if (_checkIfGlobalFallbacksSupport(codeUnits)) {
-      return;
-    }
-
-    // Next, check if all of the remaining code units are ones which are known
-    // to have no global font fallback. This means we know of no font we can
-    // download which will cover the remaining code units. In this case we can
-    // just skip the checks below, since we know there's nothing we can do to
-    // cover the code units.
-    if (_checkIfNoFallbackFontSupports(codeUnits)) {
-      return;
-    }
-
-    // If the text is ASCII, then skip this check.
-    bool isAscii = true;
-    for (int i = 0; i < text.length; i++) {
-      if (text.codeUnitAt(i) >= 160) {
-        isAscii = false;
-        break;
-      }
-    }
-    if (isAscii) {
-      return;
-    }
-
-    CkTextStyle style = _peekStyle();
+  @override
+  void addText(String text) {
     List<String> fontFamilies = <String>[];
+    CkTextStyle style = _peekStyle();
     if (style.fontFamily != null) {
       fontFamilies.add(style.fontFamily!);
     }
     if (style.fontFamilyFallback != null) {
       fontFamilies.addAll(style.fontFamilyFallback!);
     }
-    List<SkTypeface> typefaces = <SkTypeface>[];
-    for (var font in fontFamilies) {
-      List<SkTypeface>? typefacesForFamily =
-          skiaFontCollection.familyToTypefaceMap[font];
-      if (typefacesForFamily != null) {
-        typefaces.addAll(typefacesForFamily);
-      }
-    }
-    List<bool> codeUnitsSupported = List<bool>.filled(codeUnits.length, false);
-    String testString = String.fromCharCodes(codeUnits);
-    for (SkTypeface typeface in typefaces) {
-      SkFont font = SkFont(typeface);
-      Uint8List glyphs = font.getGlyphIDs(testString);
-      assert(glyphs.length == codeUnitsSupported.length);
-      for (int i = 0; i < glyphs.length; i++) {
-        codeUnitsSupported[i] |= glyphs[i] != 0 || _isControlCode(codeUnits[i]);
-      }
-    }
-
-    if (codeUnitsSupported.any((x) => !x)) {
-      List<int> missingCodeUnits = <int>[];
-      for (int i = 0; i < codeUnitsSupported.length; i++) {
-        if (!codeUnitsSupported[i]) {
-          missingCodeUnits.add(codeUnits[i]);
-        }
-      }
-      findFontsForMissingCodeunits(missingCodeUnits);
-    }
-  }
-
-  /// Returns [true] if [codepoint] is a Unicode control code.
-  bool _isControlCode(int codepoint) {
-    return codepoint < 32 || (codepoint > 127 && codepoint < 160);
-  }
-
-  /// Returns `true` if every code unit in [codeUnits] is covered by a global
-  /// fallback font.
-  ///
-  /// Calling this method has 2 side effects:
-  ///   1. Updating the cache of known covered code units in the
-  ///      [FontFallbackData] instance.
-  ///   2. Removing known covered code units from [codeUnits]. When the list
-  ///      is used again in [_ensureFontsSupportText]
-  bool _checkIfGlobalFallbacksSupport(List<int> codeUnits) {
-    final FontFallbackData fallbackData = FontFallbackData.instance;
-    codeUnits.removeWhere((int codeUnit) =>
-        fallbackData.knownCoveredCodeUnits.contains(codeUnit));
-    if (codeUnits.isEmpty) {
-      return true;
-    }
-
-    // We don't know if the remaining code units are covered by our fallback
-    // fonts. Check them and update the cache.
-    List<bool> codeUnitsSupported = List<bool>.filled(codeUnits.length, false);
-    String testString = String.fromCharCodes(codeUnits);
-
-    for (String font in fallbackData.globalFontFallbacks) {
-      List<SkTypeface>? typefacesForFamily =
-          skiaFontCollection.familyToTypefaceMap[font];
-      if (typefacesForFamily == null) {
-        printWarning('A fallback font was registered but we '
-            'cannot retrieve the typeface for it.');
-        continue;
-      }
-      for (SkTypeface typeface in typefacesForFamily) {
-        SkFont font = SkFont(typeface);
-        Uint8List glyphs = font.getGlyphIDs(testString);
-        assert(glyphs.length == codeUnitsSupported.length);
-        for (int i = 0; i < glyphs.length; i++) {
-          bool codeUnitSupported = glyphs[i] != 0;
-          if (codeUnitSupported) {
-            fallbackData.knownCoveredCodeUnits.add(codeUnits[i]);
-          }
-          codeUnitsSupported[i] |=
-              codeUnitSupported || _isControlCode(codeUnits[i]);
-        }
-      }
-
-      // Once we've checked every typeface for this family, check to see if
-      // every code unit has been covered in order to avoid unnecessary checks.
-      bool keepGoing = false;
-      for (bool supported in codeUnitsSupported) {
-        if (!supported) {
-          keepGoing = true;
-          break;
-        }
-      }
-
-      if (!keepGoing) {
-        // Every code unit is supported, clear [codeUnits] and return `true`.
-        codeUnits.clear();
-        return true;
-      }
-    }
-
-    // If we reached here, then there are some code units which aren't covered
-    // by the global fallback fonts. Remove the ones which were covered and
-    // return false.
-    for (int i = codeUnits.length - 1; i >= 0; i--) {
-      if (codeUnitsSupported[i]) {
-        codeUnits.removeAt(i);
-      }
-    }
-    return false;
-  }
-
-  /// Returns `true` if every code unit in [codeUnits] is known to not have any
-  /// fallback font which can cover it.
-  ///
-  /// This method has a side effect of removing every code unit from [codeUnits]
-  /// which is known not to have a fallback font which covers it.
-  bool _checkIfNoFallbackFontSupports(List<int> codeUnits) {
-    final FontFallbackData fallbackData = FontFallbackData.instance;
-    codeUnits.removeWhere((int codeUnit) =>
-        fallbackData.codeUnitsWithNoKnownFont.contains(codeUnit));
-    return codeUnits.isEmpty;
-  }
-
-  @override
-  void addText(String text) {
-    _ensureFontsSupportText(text);
+    FontFallbackData.instance.ensureFontsSupportText(text, fontFamilies);
     _commands.add(_ParagraphCommand.addText(text));
     _paragraphBuilder.addText(text);
   }
+
   @override
   CkParagraph build() {
     final builtParagraph = _buildSkParagraph();

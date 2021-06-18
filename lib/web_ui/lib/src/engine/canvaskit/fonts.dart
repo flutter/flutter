@@ -29,8 +29,7 @@ class SkiaFontCollection {
   /// Fonts which have been registered and loaded.
   final List<RegisteredFont> _registeredFonts = <RegisteredFont>[];
 
-  final Map<String, List<SkTypeface>> familyToTypefaceMap =
-      <String, List<SkTypeface>>{};
+  final Map<String, List<SkFont>> familyToFontMap = <String, List<SkFont>>{};
 
   Future<void> ensureFontsLoaded() async {
     await _loadFonts();
@@ -40,20 +39,20 @@ class SkiaFontCollection {
       fontProvider = null;
     }
     fontProvider = canvasKit.TypefaceFontProvider.Make();
-    familyToTypefaceMap.clear();
+    familyToFontMap.clear();
 
     for (var font in _registeredFonts) {
       fontProvider!.registerFont(font.bytes, font.family);
-      familyToTypefaceMap
-          .putIfAbsent(font.family, () => <SkTypeface>[])
-          .add(font.typeface);
+      familyToFontMap
+          .putIfAbsent(font.family, () => <SkFont>[])
+          .add(SkFont(font.typeface));
     }
 
     for (var font in FontFallbackData.instance.registeredFallbackFonts) {
       fontProvider!.registerFont(font.bytes, font.family);
-      familyToTypefaceMap
-          .putIfAbsent(font.family, () => <SkTypeface>[])
-          .add(font.typeface);
+      familyToFontMap
+          .putIfAbsent(font.family, () => <SkFont>[])
+          .add(SkFont(font.typeface));
     }
   }
 
