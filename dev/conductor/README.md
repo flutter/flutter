@@ -57,11 +57,17 @@ persistent state file:
 
 ## Steps
 
-### Initialize
+Once the user has finished manual steps for each step, they proceed to the next
+step with the command:
 
-This step is triggered by the command `conductor start [...args]`
+`conductor next`
 
 ### Apply Engine Cherrypicks
+
+The tool will attempt to auto-apply all engine cherrypicks. However, any
+cherrypicks that result in a merge conflict will be reverted and it is left to
+the user to manually cherry-pick them (with the command `git cherry-pick
+$REVISION`) and resolve the merge conflict in their checkout.
 
 Once a PR is opened, the user must validate CI builds. If there are regressions
 (or if the `licenses_check` fails, then
@@ -71,18 +77,22 @@ checkout and push their changes again.
 
 ### Codesign Engine Binaries
 
-Automated engine binary codesigning is not yet supported.
-
-The user must manually codesign engine binaries for the **merged** engine
-commit.
+The user must validate post-submit CI builds for their merged engine PR have
+passed. A link to the web dashboard is available via `conductor status`. Once
+the post-submit CI builds have all passed, the user must codesign engine
+binaries for the **merged** engine commit.
 
 ### Apply Framework Cherrypicks
+
+The tool will attempt to auto-apply all framework cherrypicks. However, any
+cherrypicks that result in a merge conflict will be reverted and it is left to
+the user to manually cherry-pick them (with the command `git cherry-pick
+$REVISION`) and resolve the merge conflict in their checkout.
+
 ### Publish Version
 
 This step will add a version git tag to the final Framework commit and push it
 to the upstream repository.
-
-No user intervention is necessary.
 
 ### Publish Channel
 
