@@ -73,9 +73,9 @@ class RenderPass {
 
   HostBuffer& GetTransientsBuffer();
 
-  bool RecordCommand(Command command);
+  [[nodiscard]] bool RecordCommand(Command command);
 
-  bool FinishEncoding(Allocator& transients_allocator) const;
+  [[nodiscard]] bool FinishEncoding(Allocator& transients_allocator) const;
 
  private:
   friend class CommandBuffer;
