@@ -190,8 +190,14 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
   /// Copies the current config file to [configBackupPath], overwriting it
   /// if necessary.
   @protected
-  Future<void> backup() async
-    => fileSystem.file(customDevicesConfig.configPath).copy(configBackupPath);
+  Future<bool> backup() async {
+    final File configFile = fileSystem.file(customDevicesConfig.configPath);
+    if (await configFile.exists()) {
+      await configFile.copy(configBackupPath);
+      return true;
+    }
+    return false;
+  }
 
   /// Checks if the custom devices feature is enabled and returns true/false
   /// accordingly. Additionally, logs an error if it's not enabled with a hint
@@ -279,14 +285,16 @@ If a file already exists at the backup location, it will be overwritten.
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    await backup();
+    final bool wasBackedUp = await backup();
 
     ErrorHandlingFileSystem.deleteIfExists(fileSystem.file(customDevicesConfig.configPath));
     customDevicesConfig.ensureFileExists();
 
     logger.printStatus(
-      'Successfully resetted the custom devices config file and created a '
-      'backup at "$configBackupPath".'
+        wasBackedUp
+        ? 'Successfully resetted the custom devices config file and created a '
+          'backup at "$configBackupPath".'
+        : 'Successfully resetted the custom devices config file.'
     );
     return FlutterCommandResult.success();
   }

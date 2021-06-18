@@ -34,6 +34,135 @@ import '../../src/test_flutter_command_runner.dart';
 const String linuxFlutterRoot = '/flutter';
 const String windowsFlutterRoot = r'C:\flutter';
 
+const String defaultConfigLinux1 = r'''
+{
+  "$schema": "file:///flutter/packages/flutter_tools/static/custom-devices.schema.json",
+  "custom-devices": [
+    {
+      "id": "pi",
+      "label": "Raspberry Pi",
+      "sdkNameAndVersion": "Raspberry Pi 4 Model B+",
+      "platform": "linux-arm64",
+      "enabled": false,
+      "ping": [
+        "ping",
+        "-w",
+        "1",
+        "-c",
+        "1",
+        "raspberrypi"
+      ],
+      "pingSuccessRegex": null,
+      "postBuild": null,
+      "install": [
+        "scp",
+        "-r",
+        "-o",
+        "BatchMode=yes",
+        "${localPath}",
+        "pi@raspberrypi:/tmp/${appName}"
+      ],
+      "uninstall": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "rm -rf \"/tmp/${appName}\""
+      ],
+      "runDebug": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "flutter-pi \"/tmp/${appName}\""
+      ],
+      "forwardPort": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ExitOnForwardFailure=yes",
+        "-L",
+        "127.0.0.1:${hostPort}:127.0.0.1:${devicePort}",
+        "pi@raspberrypi"
+      ],
+      "forwardPortSuccessRegex": "Linux",
+      "screenshot": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
+      ]
+    }
+  ]
+}
+''';
+const String defaultConfigLinux2 = r'''
+{
+  "custom-devices": [
+    {
+      "id": "pi",
+      "label": "Raspberry Pi",
+      "sdkNameAndVersion": "Raspberry Pi 4 Model B+",
+      "platform": "linux-arm64",
+      "enabled": false,
+      "ping": [
+        "ping",
+        "-w",
+        "1",
+        "-c",
+        "1",
+        "raspberrypi"
+      ],
+      "pingSuccessRegex": null,
+      "postBuild": null,
+      "install": [
+        "scp",
+        "-r",
+        "-o",
+        "BatchMode=yes",
+        "${localPath}",
+        "pi@raspberrypi:/tmp/${appName}"
+      ],
+      "uninstall": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "rm -rf \"/tmp/${appName}\""
+      ],
+      "runDebug": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "flutter-pi \"/tmp/${appName}\""
+      ],
+      "forwardPort": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ExitOnForwardFailure=yes",
+        "-L",
+        "127.0.0.1:${hostPort}:127.0.0.1:${devicePort}",
+        "pi@raspberrypi"
+      ],
+      "forwardPortSuccessRegex": "Linux",
+      "screenshot": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
+      ]
+    }
+  ],
+  "$schema": "file:///flutter/packages/flutter_tools/static/custom-devices.schema.json"
+}
+''';
+
 final Platform linuxPlatform = FakePlatform(
   operatingSystem: 'linux',
   environment: <String, String>{
@@ -1008,6 +1137,40 @@ void main() {
 
         final Uint8List backupContents = fs.file('.flutter_custom_devices.json.bak').readAsBytesSync();
         expect(contentsBefore, equals(backupContents));
+        expect(
+          fs.file('.flutter_custom_devices.json').readAsStringSync(),
+          anyOf(equals(defaultConfigLinux1), equals(defaultConfigLinux2))
+        );
+      }
+    );
+
+    testUsingContext(
+      "custom-devices reset outputs correct msg when config file didn't exist",
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final BufferLogger logger = BufferLogger.test();
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          logger: logger,
+          fileSystem: fs,
+          featureEnabled: true
+        );
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'reset']),
+          completes
+        );
+        expect(
+          logger.statusText,
+          contains(
+            'Successfully resetted the custom devices config file.'
+          )
+        );
+
+        expect(fs.file('.flutter_custom_devices.json.bak'), isNot(exists));
+        expect(
+          fs.file('.flutter_custom_devices.json').readAsStringSync(),
+          anyOf(equals(defaultConfigLinux1), equals(defaultConfigLinux2))
+        );
       }
     );
   });
