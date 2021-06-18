@@ -44,11 +44,16 @@ enum class SemanticsAction : int32_t {
   kSetText = 1 << 21,
 };
 
-const int kScrollableSemanticsActions =
-    static_cast<int32_t>(SemanticsAction::kScrollLeft) |
-    static_cast<int32_t>(SemanticsAction::kScrollRight) |
+const int kVerticalScrollSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollUp) |
     static_cast<int32_t>(SemanticsAction::kScrollDown);
+
+const int kHorizontalScrollSemanticsActions =
+    static_cast<int32_t>(SemanticsAction::kScrollLeft) |
+    static_cast<int32_t>(SemanticsAction::kScrollRight);
+
+const int kScrollableSemanticsActions =
+    kVerticalScrollSemanticsActions | kHorizontalScrollSemanticsActions;
 
 /// C/C++ representation of `SemanticsFlags` defined in
 /// `lib/ui/semantics.dart`.
