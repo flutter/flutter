@@ -53,13 +53,18 @@ bool Renderer::Render(const Surface& surface) {
     return false;
   }
 
-  render_pass->FinishEncoding(*GetContext()->GetTransientsAllocator());
+  if (!render_pass->FinishEncoding(*GetContext()->GetTransientsAllocator())) {
+    return false;
+  }
 
   ::dispatch_semaphore_wait(frames_in_flight_sema_, DISPATCH_TIME_FOREVER);
 
   command_buffer->Commit(
-      [sema = frames_in_flight_sema_](CommandBuffer::CommitResult) {
+      [sema = frames_in_flight_sema_](CommandBuffer::CommitResult result) {
         ::dispatch_semaphore_signal(sema);
+        if (result != CommandBuffer::CommitResult::kCompleted) {
+          FML_LOG(ERROR) << "Could not commit command buffer.";
+        }
       });
 
   return true;
