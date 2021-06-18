@@ -87,6 +87,7 @@ void main() {
     void listener() {
       didReceiveCallback = true;
     }
+
     final ReverseAnimation animation = ReverseAnimation(controller)
       ..addListener(listener);
     expect(didReceiveCallback, isFalse);
@@ -236,7 +237,8 @@ void main() {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
     );
-    final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: BogusCurve());
+    final CurvedAnimation curved =
+        CurvedAnimation(parent: controller, curve: BogusCurve());
     FlutterError? error;
     try {
       curved.value;
@@ -258,13 +260,15 @@ FlutterError
     );
   });
 
-  test('CurvedAnimation running with different forward and reverse durations.', () {
+  test('CurvedAnimation running with different forward and reverse durations.',
+      () {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 50),
       vsync: const TestVSync(),
     );
-    final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: Curves.linear, reverseCurve: Curves.linear);
+    final CurvedAnimation curved = CurvedAnimation(
+        parent: controller, curve: Curves.linear, reverseCurve: Curves.linear);
 
     controller.forward();
     tick(Duration.zero);
@@ -312,19 +316,20 @@ FlutterError
       reverseDuration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: forwardCurve, reverseCurve: reverseCurve);
+    final CurvedAnimation curved = CurvedAnimation(
+        parent: controller, curve: forwardCurve, reverseCurve: reverseCurve);
 
     expect(forwardCurve.transform(0.5), 1.0);
     expect(reverseCurve.transform(0.5), 0.0);
 
-    controller.forward(from:0.5);
+    controller.forward(from: 0.5);
     expect(controller.status, equals(AnimationStatus.forward));
     expect(curved.value, equals(1.0));
 
     controller.value = 1.0;
     expect(controller.status, equals(AnimationStatus.completed));
 
-    controller.reverse(from:0.5);
+    controller.reverse(from: 0.5);
     expect(controller.status, equals(AnimationStatus.reverse));
     expect(curved.value, equals(0.0));
 
@@ -335,12 +340,13 @@ FlutterError
     controller.value = 0.0;
     expect(controller.status, equals(AnimationStatus.dismissed));
 
-    controller.forward(from:0.5);
+    controller.forward(from: 0.5);
     expect(controller.status, equals(AnimationStatus.forward));
     expect(curved.value, equals(0.0));
   });
 
-  test('ReverseAnimation running with different forward and reverse durations.', () {
+  test('ReverseAnimation running with different forward and reverse durations.',
+      () {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 50),
@@ -440,17 +446,17 @@ FlutterError
       <TweenSequenceItem<double>>[
         TweenSequenceItem<double>(
           tween: Tween<double>(begin: 5.0, end: 10.0)
-            .chain(CurveTween(curve: const Interval(0.5, 1.0))),
+              .chain(CurveTween(curve: const Interval(0.5, 1.0))),
           weight: 4.0,
         ),
         TweenSequenceItem<double>(
           tween: ConstantTween<double>(10.0)
-            .chain(CurveTween(curve: Curves.linear)), // linear is a no-op
+              .chain(CurveTween(curve: Curves.linear)), // linear is a no-op
           weight: 2.0,
         ),
         TweenSequenceItem<double>(
           tween: Tween<double>(begin: 10.0, end: 5.0)
-            .chain(CurveTween(curve: const Interval(0.0, 0.5))),
+              .chain(CurveTween(curve: const Interval(0.0, 0.5))),
           weight: 4.0,
         ),
       ],
@@ -496,5 +502,4 @@ FlutterError
     controller.value = 1.0;
     expect(animation.value, 10.0);
   });
-
 }

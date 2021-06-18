@@ -13,8 +13,8 @@ class MockOnEndFunction {
   }
 }
 
-const Duration animationDuration = Duration(milliseconds:1000);
-const Duration additionalDelay = Duration(milliseconds:1);
+const Duration animationDuration = Duration(milliseconds: 1000);
+const Duration additionalDelay = Duration(milliseconds: 1);
 
 void main() {
   late MockOnEndFunction mockOnEndFunction;
@@ -66,7 +66,8 @@ void main() {
     expect(result, equals(Matrix4.translationValues(11.0, 21.0, 31.0)));
   });
 
-  testWidgets('AnimatedContainer onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedContainer onEnd callback test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -87,7 +88,8 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
-  testWidgets('AnimatedPadding onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedPadding onEnd callback test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -129,7 +131,8 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
-  testWidgets('AnimatedPositioned onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedPositioned onEnd callback test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -150,7 +153,8 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
-  testWidgets('AnimatedPositionedDirectional onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedPositionedDirectional onEnd callback test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -171,7 +175,8 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
-  testWidgets('AnimatedOpacity onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedOpacity onEnd callback test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -201,10 +206,12 @@ void main() {
 
     final Finder switchFinder = find.byKey(switchKey);
     final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(FadeTransition),
-      ).first,
+      find
+          .ancestor(
+            of: find.byType(Placeholder),
+            matching: find.byType(FadeTransition),
+          )
+          .first,
     );
 
     await tester.tap(switchFinder);
@@ -219,8 +226,8 @@ void main() {
     expect(opacityWidget.opacity.value, equals(1.0));
   });
 
-
-  testWidgets('SliverAnimatedOpacity onEnd callback test', (WidgetTester tester) async {
+  testWidgets('SliverAnimatedOpacity onEnd callback test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(TestAnimatedWidget(
       callback: mockOnEndFunction.handler,
       switchKey: switchKey,
@@ -239,7 +246,8 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
-  testWidgets('SliverAnimatedOpacity transition test', (WidgetTester tester) async {
+  testWidgets('SliverAnimatedOpacity transition test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         switchKey: switchKey,
@@ -248,11 +256,14 @@ void main() {
     ));
 
     final Finder switchFinder = find.byKey(switchKey);
-    final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(SliverFadeTransition),
-      ).first,
+    final SliverFadeTransition opacityWidget =
+        tester.widget<SliverFadeTransition>(
+      find
+          .ancestor(
+            of: find.byType(Placeholder),
+            matching: find.byType(SliverFadeTransition),
+          )
+          .first,
     );
 
     await tester.tap(switchFinder);
@@ -267,7 +278,8 @@ void main() {
     expect(opacityWidget.opacity.value, equals(1.0));
   });
 
-  testWidgets('AnimatedDefaultTextStyle onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedDefaultTextStyle onEnd callback test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -288,7 +300,8 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
-  testWidgets('AnimatedPhysicalModel onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedPhysicalModel onEnd callback test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -309,7 +322,8 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
-  testWidgets('TweenAnimationBuilder onEnd callback test', (WidgetTester tester) async {
+  testWidgets('TweenAnimationBuilder onEnd callback test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -351,37 +365,46 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
-  testWidgets('Ensure CurvedAnimations are disposed on widget change', (WidgetTester tester) async {
-    final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key = GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
-    final ValueNotifier<Curve> curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
+  testWidgets('Ensure CurvedAnimations are disposed on widget change',
+      (WidgetTester tester) async {
+    final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key =
+        GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
+    final ValueNotifier<Curve> curve =
+        ValueNotifier<Curve>(const Interval(0.0, 0.5));
     await tester.pumpWidget(wrap(
-      child: ValueListenableBuilder<Curve>(valueListenable: curve, builder: (_, Curve c, __) => AnimatedOpacity(
-        key: key,
-        opacity: 1.0,
-        duration: const Duration(seconds: 1),
-        curve: c,
-        child: Container(color:Colors.green)
-      ),),
+      child: ValueListenableBuilder<Curve>(
+        valueListenable: curve,
+        builder: (_, Curve c, __) => AnimatedOpacity(
+            key: key,
+            opacity: 1.0,
+            duration: const Duration(seconds: 1),
+            curve: c,
+            child: Container(color: Colors.green)),
+      ),
     ));
 
-    final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? firstState = key.currentState;
+    final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? firstState =
+        key.currentState;
     final Animation<double>? firstAnimation = firstState?.animation;
     if (firstAnimation == null) {
       fail('animation was null!');
     }
-    final CurvedAnimation firstCurvedAnimation = firstAnimation as CurvedAnimation;
+    final CurvedAnimation firstCurvedAnimation =
+        firstAnimation as CurvedAnimation;
 
     expect(firstCurvedAnimation.isDisposed, isFalse);
 
     curve.value = const Interval(0.0, 0.6);
     await tester.pumpAndSettle();
 
-    final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? secondState = key.currentState;
+    final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? secondState =
+        key.currentState;
     final Animation<double>? secondAnimation = secondState?.animation;
     if (secondAnimation == null) {
       fail('animation was null!');
     }
-    final CurvedAnimation secondCurvedAnimation = secondAnimation as CurvedAnimation;
+    final CurvedAnimation secondCurvedAnimation =
+        secondAnimation as CurvedAnimation;
 
     expect(firstState, equals(secondState));
     expect(firstAnimation, isNot(equals(secondAnimation)));
@@ -389,13 +412,14 @@ void main() {
     expect(firstCurvedAnimation.isDisposed, isTrue);
     expect(secondCurvedAnimation.isDisposed, isFalse);
 
-    await tester.pumpWidget(wrap(
-      child: const Offstage(),),
+    await tester.pumpWidget(
+      wrap(
+        child: const Offstage(),
+      ),
     );
     await tester.pumpAndSettle();
 
     expect(secondCurvedAnimation.isDisposed, isTrue);
-
   });
 }
 
@@ -420,7 +444,8 @@ class TestAnimatedWidget extends StatefulWidget {
   final State<StatefulWidget> state;
 
   @override
-  State<StatefulWidget> createState() => state; // ignore: no_logic_in_create_state, this test predates the lint
+  State<StatefulWidget> createState() =>
+      state; // ignore: no_logic_in_create_state, this test predates the lint
 }
 
 abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
@@ -467,8 +492,7 @@ class _TestAnimatedPaddingWidgetState extends _TestAnimatedWidgetState {
     return AnimatedPadding(
       duration: duration,
       onEnd: widget.callback,
-      padding:
-      toggle ? const EdgeInsets.all(8.0) : const EdgeInsets.all(16.0),
+      padding: toggle ? const EdgeInsets.all(8.0) : const EdgeInsets.all(16.0),
       child: child,
     );
   }
@@ -498,7 +522,8 @@ class _TestAnimatedPositionedWidgetState extends _TestAnimatedWidgetState {
   }
 }
 
-class _TestAnimatedPositionedDirectionalWidgetState extends _TestAnimatedWidgetState {
+class _TestAnimatedPositionedDirectionalWidgetState
+    extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedPositionedDirectional(
@@ -557,15 +582,16 @@ class _TestSliverAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
   }
 }
 
-class _TestAnimatedDefaultTextStyleWidgetState extends _TestAnimatedWidgetState {
+class _TestAnimatedDefaultTextStyleWidgetState
+    extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedDefaultTextStyle(
       duration: duration,
       onEnd: widget.callback,
       style: toggle
-        ? const TextStyle(fontStyle: FontStyle.italic)
-        : const TextStyle(fontStyle: FontStyle.normal),
+          ? const TextStyle(fontStyle: FontStyle.italic)
+          : const TextStyle(fontStyle: FontStyle.normal),
       child: child,
     );
   }
