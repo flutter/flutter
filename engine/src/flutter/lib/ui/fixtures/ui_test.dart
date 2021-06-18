@@ -1,4 +1,3 @@
-// @dart = 2.6
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -288,3 +287,358 @@ Future<void> pumpImage() async {
 }
 void _captureImageAndPicture(Image image, Picture picture) native 'CaptureImageAndPicture';
 Future<void> _onBeginFrameDone() native 'OnBeginFrameDone';
+
+@pragma('vm:entry-point')
+void hooksTests() {
+  void test(String name, VoidCallback testFunction) {
+    try {
+      testFunction();
+    } catch (e) {
+      print('Test "$name" failed!');
+      rethrow;
+    }
+  }
+
+  void expectEquals(Object? value, Object? expected) {
+    if (value != expected) {
+      throw 'Expected $value to be $expected.';
+    }
+  }
+
+  void expectIdentical(Zone originalZone, Zone callbackZone) {
+    if (!identical(callbackZone, originalZone)) {
+      throw 'Callback called in wrong zone.';
+    }
+  }
+
+
+  test('onMetricsChanged preserves callback zone', () {
+    late Zone originalZone;
+    late Zone callbackZone;
+    late double devicePixelRatio;
+
+    runZoned(() {
+      originalZone = Zone.current;
+      window.onMetricsChanged = () {
+        callbackZone = Zone.current;
+        devicePixelRatio = window.devicePixelRatio;
+      };
+    });
+
+    window.onMetricsChanged!();
+    _callHook(
+      '_updateWindowMetrics',
+      16,
+      0, // window Id
+      0.1234, // device pixel ratio
+      0.0,    // width
+      0.0,    // height
+      0.0,    // padding top
+      0.0,    // padding right
+      0.0,    // padding bottom
+      0.0,    // padding left
+      0.0,    // inset top
+      0.0,    // inset right
+      0.0,    // inset bottom
+      0.0,    // inset left
+      0.0,    // system gesture inset top
+      0.0,    // system gesture inset right
+      0.0,    // system gesture inset bottom
+      0.0,    // system gesture inset left
+    );
+
+    expectIdentical(originalZone, callbackZone);
+    if (devicePixelRatio != 0.1234) {
+      throw 'Expected devicePixelRatio to be 0.1234 but got $devicePixelRatio.';
+    }
+  });
+
+  test('updateUserSettings can handle an empty object', () {
+    _callHook('_updateUserSettingsData', 1, '{}');
+  });
+
+  test('PlatformDispatcher.locale returns unknown locale when locales is set to empty list', () {
+    late Locale locale;
+    int callCount = 0;
+    runZoned(() {
+      window.onLocaleChanged = () {
+        locale = PlatformDispatcher.instance.locale;
+        callCount += 1;
+      };
+    });
+
+    const Locale fakeLocale = Locale.fromSubtags(languageCode: '1', countryCode: '2', scriptCode: '3');
+    _callHook('_updateLocales', 1, <String>[fakeLocale.languageCode, fakeLocale.countryCode!, fakeLocale.scriptCode!, '']);
+    if (callCount != 1) {
+      throw 'Expected 1 call, have $callCount';
+    }
+    if (locale != fakeLocale) {
+      throw 'Expected $locale to match $fakeLocale';
+    }
+    _callHook('_updateLocales', 1, <String>[]);
+    if (callCount != 2) {
+      throw 'Expected 2 calls, have $callCount';
+    }
+
+    if (locale != const Locale.fromSubtags()) {
+      throw '$locale did not equal ${Locale.fromSubtags()}';
+    }
+    if (locale.languageCode != 'und') {
+      throw '${locale.languageCode} did not equal "und"';
+    }
+  });
+
+  test('Window padding/insets/viewPadding/systemGestureInsets', () {
+    _callHook(
+      '_updateWindowMetrics',
+      16,
+      0, // window Id
+      1.0, // devicePixelRatio
+      800.0, // width
+      600.0, // height
+      50.0, // paddingTop
+      0.0, // paddingRight
+      40.0, // paddingBottom
+      0.0, // pattingLeft
+      0.0, // insetTop
+      0.0, // insetRight
+      0.0, // insetBottom
+      0.0, // insetLeft
+      0.0, // systemGestureInsetTop
+      0.0, // systemGestureInsetRight
+      0.0, // systemGestureInsetBottom
+      0.0, // systemGestureInsetLeft
+    );
+
+    expectEquals(window.viewInsets.bottom, 0.0);
+    expectEquals(window.viewPadding.bottom, 40.0);
+    expectEquals(window.padding.bottom, 40.0);
+    expectEquals(window.systemGestureInsets.bottom, 0.0);
+
+    _callHook(
+      '_updateWindowMetrics',
+      16,
+      0, // window Id
+      1.0, // devicePixelRatio
+      800.0, // width
+      600.0, // height
+      50.0, // paddingTop
+      0.0, // paddingRight
+      40.0, // paddingBottom
+      0.0, // pattingLeft
+      0.0, // insetTop
+      0.0, // insetRight
+      400.0, // insetBottom
+      0.0, // insetLeft
+      0.0, // systemGestureInsetTop
+      0.0, // systemGestureInsetRight
+      44.0, // systemGestureInsetBottom
+      0.0, // systemGestureInsetLeft
+    );
+
+    expectEquals(window.viewInsets.bottom, 400.0);
+    expectEquals(window.viewPadding.bottom, 40.0);
+    expectEquals(window.padding.bottom, 0.0);
+    expectEquals(window.systemGestureInsets.bottom, 44.0);
+  });
+
+  test('onLocaleChanged preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    Locale? locale;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onLocaleChanged = () {
+        runZone = Zone.current;
+        locale = window.locale;
+      };
+    });
+
+    _callHook('_updateLocales', 1, <String>['en', 'US', '', '']);
+    expectIdentical(runZone, innerZone);
+    expectEquals(locale, const Locale('en', 'US'));
+  });
+
+  test('onBeginFrame preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late Duration start;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onBeginFrame = (Duration value) {
+        runZone = Zone.current;
+        start = value;
+      };
+    });
+
+    _callHook('_beginFrame', 1, 1234);
+    expectIdentical(runZone, innerZone);
+    expectEquals(start, const Duration(microseconds: 1234));
+  });
+
+  test('onDrawFrame preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onDrawFrame = () {
+        runZone = Zone.current;
+      };
+    });
+
+    _callHook('_drawFrame');
+    expectIdentical(runZone, innerZone);
+  });
+
+  test('onReportTimings preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onReportTimings = (List<FrameTiming> timings) {
+        runZone = Zone.current;
+      };
+    });
+
+    _callHook('_reportTimings', 1, <int>[]);
+    expectIdentical(runZone, innerZone);
+  });
+
+  test('onPointerDataPacket preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late PointerDataPacket data;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onPointerDataPacket = (PointerDataPacket value) {
+        runZone = Zone.current;
+        data = value;
+      };
+    });
+
+    final ByteData testData = ByteData.view(Uint8List(0).buffer);
+    _callHook('_dispatchPointerDataPacket', 1, testData);
+    expectIdentical(runZone, innerZone);
+    expectEquals(data.data.length, 0);
+  });
+
+  test('onSemanticsEnabledChanged preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late bool enabled;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onSemanticsEnabledChanged = () {
+        runZone = Zone.current;
+        enabled = window.semanticsEnabled;
+      };
+    });
+
+    final bool newValue = !window.semanticsEnabled; // needed?
+    _callHook('_updateSemanticsEnabled', 1, newValue);
+    expectIdentical(runZone, innerZone);
+    expectEquals(enabled, newValue);
+  });
+
+  test('onSemanticsAction preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late int id;
+    late int action;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onSemanticsAction = (int i, SemanticsAction a, ByteData? _) {
+        runZone = Zone.current;
+        action = a.index;
+        id = i;
+      };
+    });
+
+    _callHook('_dispatchSemanticsAction', 3, 1234, 4, null);
+    expectIdentical(runZone, innerZone);
+    expectEquals(id, 1234);
+    expectEquals(action, 4);
+  });
+
+  test('onPlatformMessage preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late String name;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onPlatformMessage = (String value, _, __) {
+        runZone = Zone.current;
+        name = value;
+      };
+    });
+
+    _callHook('_dispatchPlatformMessage', 3, 'testName', null, 123456789);
+    expectIdentical(runZone, innerZone);
+    expectEquals(name, 'testName');
+  });
+
+  test('onTextScaleFactorChanged preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZoneTextScaleFactor;
+    late Zone runZonePlatformBrightness;
+    late double? textScaleFactor;
+    late Brightness? platformBrightness;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onTextScaleFactorChanged = () {
+        runZoneTextScaleFactor = Zone.current;
+        textScaleFactor = window.textScaleFactor;
+      };
+      window.onPlatformBrightnessChanged = () {
+        runZonePlatformBrightness = Zone.current;
+        platformBrightness = window.platformBrightness;
+      };
+    });
+
+    window.onTextScaleFactorChanged!();
+
+    _callHook('_updateUserSettingsData', 1, '{"textScaleFactor": 0.5, "platformBrightness": "light", "alwaysUse24HourFormat": true}');
+    expectIdentical(runZoneTextScaleFactor, innerZone);
+    expectEquals(textScaleFactor, 0.5);
+
+    textScaleFactor = null;
+    platformBrightness = null;
+
+    window.onPlatformBrightnessChanged!();
+    _callHook('_updateUserSettingsData', 1, '{"textScaleFactor": 0.5, "platformBrightness": "dark", "alwaysUse24HourFormat": true}');
+    expectIdentical(runZonePlatformBrightness, innerZone);
+    expectEquals(platformBrightness, Brightness.dark);
+  });
+
+  _finish();
+}
+
+void _callHook(
+  String name, [
+  int argCount = 0,
+  Object? arg0,
+  Object? arg1,
+  Object? arg2,
+  Object? arg3,
+  Object? arg4,
+  Object? arg5,
+  Object? arg6,
+  Object? arg8,
+  Object? arg9,
+  Object? arg10,
+  Object? arg11,
+  Object? arg12,
+  Object? arg13,
+  Object? arg14,
+  Object? arg15,
+  Object? arg16,
+]) native 'CallHook';
