@@ -33,23 +33,24 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of macOS key codes to physical keys.
   String get _scanCodeMap {
-    final StringBuffer scanCodeMap = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('macOS scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.macOSScanCode != null) {
-        scanCodeMap.writeln('  @${toHex(entry.macOSScanCode)} : @${toHex(entry.usbHidCode)},  // ${entry.constantName}');
+        lines.add(entry.macOSScanCode!, '  @${toHex(entry.macOSScanCode)} : @${toHex(entry.usbHidCode)},  // ${entry.constantName}');
       }
     }
-    return scanCodeMap.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   String get _keyCodeToLogicalMap {
-    final StringBuffer result = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('macOS keycode map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.macOSKeyCodeValues, entry.macOSKeyCodeNames, (int macOSValue, String macOSName) {
-        result.writeln('  @${toHex(macOSValue)} : @${toHex(entry.value, digits: 11)},  // $macOSName');
+        lines.add(macOSValue,
+            '  @${toHex(macOSValue)} : @${toHex(entry.value, digits: 11)},  // $macOSName -> ${entry.constantName}');
       });
     }
-    return result.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the mask values for the part of a key code that defines its plane.

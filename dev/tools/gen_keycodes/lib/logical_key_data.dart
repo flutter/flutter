@@ -33,10 +33,6 @@ List<T> _toNonEmptyArray<T>(dynamic source) {
   return dynamicList.cast<T>();
 }
 
-int _toPlane(int value, int plane) {
-  return (value & kValueMask.value) + (plane & kPlaneMask.value);
-}
-
 /// The data structure used to manage keyboard key entries.
 ///
 /// The main constructor parses the given input data into the data structure.
@@ -167,7 +163,7 @@ class LogicalKeyData {
         || value == 0; // "None" key
       data.putIfAbsent(name, () {
         return LogicalKeyEntry.fromName(
-          value: _toPlane(value, _sourceToPlane(source, isPrintable)),
+          value: toPlane(value, _sourceToPlane(source, isPrintable)),
           name: name,
           keyLabel: keyLabel,
         )..webNames.add(webName);
@@ -325,11 +321,11 @@ class LogicalKeyData {
           return 0;
         final String? keyLabel = printable[entry.constantName];
         if (keyLabel != null && !entry.constantName.startsWith('numpad')) {
-          return _toPlane(keyLabel.codeUnitAt(0), kUnicodePlane.value);
+          return toPlane(keyLabel.codeUnitAt(0), kUnicodePlane.value);
         } else {
           final PhysicalKeyEntry? physicalEntry = physicalData.tryEntryByName(entry.name);
           if (physicalEntry != null) {
-            return _toPlane(physicalEntry.usbHidCode, kFuchsiaPlane.value);
+            return toPlane(physicalEntry.usbHidCode, kFuchsiaPlane.value);
           }
         }
       })();

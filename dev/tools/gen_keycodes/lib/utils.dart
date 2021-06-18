@@ -7,6 +7,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import 'constants.dart';
+
 /// The location of the Flutter root directory, based on the known location of
 /// this script.
 final Directory flutterRoot = Directory(path.dirname(Platform.script.toFilePath())).parent.parent.parent.parent;
@@ -249,4 +251,12 @@ class OutputLines<T extends Comparable<Object>> {
       .map((MapEntry<T, String> entry) => entry.value)
       .join('\n');
   }
+}
+
+int toPlane(int value, int plane) {
+  return (value & kValueMask.value) + (plane & kPlaneMask.value);
+}
+
+int getPlane(int value) {
+  return value & kPlaneMask.value;
 }

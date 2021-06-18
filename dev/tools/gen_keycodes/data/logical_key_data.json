@@ -3301,17 +3301,11 @@
       ],
       "gtk": [
         "Hangul_Hanja"
-      ],
-      "windows": [
-        "HANJA"
       ]
     },
     "values": {
       "gtk": [
         65332
-      ],
-      "windows": [
-        25
       ]
     }
   },
@@ -3437,7 +3431,7 @@
         "Kanji"
       ],
       "windows": [
-        "KANJI"
+        "HANJA, KANJI"
       ],
       "android": [
         "KANA"
@@ -8203,6 +8197,9 @@
       "ios": [
         "NumpadComma"
       ],
+      "windows": [
+        "SEPARATOR"
+      ],
       "android": [
         "NUMPAD_COMMA"
       ]
@@ -8213,6 +8210,9 @@
       ],
       "ios": [
         133
+      ],
+      "windows": [
+        108
       ],
       "android": [
         159

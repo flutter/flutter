@@ -33,23 +33,24 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of iOS key codes to physical keys.
   String get _scanCodeMap {
-    final StringBuffer scanCodeMap = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('iOS scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.iOSScanCode != null) {
-        scanCodeMap.writeln('  {${toHex(entry.iOSScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
+        lines.add(entry.iOSScanCode!,
+            '  {${toHex(entry.iOSScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
       }
     }
-    return scanCodeMap.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   String get _keyCodeToLogicalMap {
-    final StringBuffer result = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('iOS keycode map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.iOSKeyCodeValues, entry.iOSKeyCodeNames, (int iOSValue, String iOSName) {
-        result.writeln('  {${toHex(iOSValue)}, ${toHex(entry.value, digits: 11)}},  // $iOSName');
+        lines.add(iOSValue, '  {${toHex(iOSValue)}, ${toHex(entry.value, digits: 11)}},  // $iOSName');
       });
     }
-    return result.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the mask values for the part of a key code that defines its plane.
