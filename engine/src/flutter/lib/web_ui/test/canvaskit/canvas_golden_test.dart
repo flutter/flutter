@@ -781,6 +781,31 @@ void testMain() {
             'საბეჭდი და ტიპოგრაფიული ინდუსტრიის უშინაარსო ტექსტია ',
       );
     });
+
+    // Make sure we clear the canvas in between frames.
+    test('empty frame after contentful frame', () async {
+      // First draw a frame with a red rectangle
+      final CkPictureRecorder recorder = CkPictureRecorder();
+      final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+      canvas.drawRect(ui.Rect.fromLTRB(20, 20, 100, 100),
+          CkPaint()..color = ui.Color(0xffff0000));
+      final CkPicture picture = recorder.endRecording();
+      final LayerSceneBuilder builder = LayerSceneBuilder();
+      builder.pushOffset(0, 0);
+      builder.addPicture(ui.Offset.zero, picture);
+      final LayerTree layerTree = builder.build().layerTree;
+      EnginePlatformDispatcher.instance.rasterizer!.draw(layerTree);
+
+      // Now draw an empty layer tree and confirm that the red rectangle is
+      // no longer drawn.
+      final LayerSceneBuilder emptySceneBuilder = LayerSceneBuilder();
+      emptySceneBuilder.pushOffset(0, 0);
+      final LayerTree emptyLayerTree = emptySceneBuilder.build().layerTree;
+      EnginePlatformDispatcher.instance.rasterizer!.draw(emptyLayerTree);
+
+      await matchGoldenFile('canvaskit_empty_scene.png',
+          region: ui.Rect.fromLTRB(0, 0, 100, 100));
+    });
     // TODO: https://github.com/flutter/flutter/issues/60040
     // TODO: https://github.com/flutter/flutter/issues/71520
   }, skip: isIosSafari || isFirefox);
