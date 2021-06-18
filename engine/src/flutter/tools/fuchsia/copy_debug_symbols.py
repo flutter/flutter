@@ -12,6 +12,7 @@
 
 import argparse
 import errno
+import hashlib
 import json
 import os
 import re
@@ -19,6 +20,18 @@ import shutil
 import subprocess
 import sys
 import time
+
+
+def HashFile(filepath):
+  """Calculates the hash of a file without reading it all in memory at once."""
+  digest = hashlib.sha1()
+  with open(filepath, 'rb') as f:
+    while True:
+      chunk = f.read(1024*1024)
+      if not chunk:
+        break
+      digest.update(chunk)
+  return digest.hexdigest()
 
 
 def Touch(fname):
@@ -111,9 +124,14 @@ def main():
   dbg_file_name = '%s%s' % (parts['exec_name'], dbg_suffix)
   dbg_file_path = os.path.join(dbg_prefix_base, dbg_file_name)
 
+  # If the debug file hasn't changed, don't rewrite the debug and completion
+  # file, speeding up incremental builds.
+  if os.path.exists(dbg_file_path) and HashFile(args.exec_path) == HashFile(dbg_file_path):
+    return 0
+
   shutil.copyfile(args.exec_path, dbg_file_path)
 
-  # Note this needs to be in sync with debug_symbols.gni
+  # Note this needs to be in sync with fuchsia_debug_symbols.gni
   completion_file = os.path.join(args.dest, '.%s_dbg_success' % args.exec_name)
   Touch(completion_file)
 
