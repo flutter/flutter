@@ -608,7 +608,7 @@ void main() {
         ),
       ));
 
-      // No expect here as this should simply combile / not throw any
+      // No expect here as this should simply compile / not throw any
       // exceptions while building. The test will fail if this either does
       // not compile or if the tester catches an exception, which we do
       // not take here.
