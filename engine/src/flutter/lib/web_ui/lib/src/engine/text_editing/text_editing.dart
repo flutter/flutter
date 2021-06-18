@@ -860,6 +860,10 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
       activeDomElement.setAttribute('type', 'password');
     }
 
+    if (config.inputType == EngineInputType.none) {
+      activeDomElement.setAttribute('inputmode', 'none');
+    }
+
     config.autofill?.applyToDomElement(activeDomElement, focusedElement: true);
 
     final String autocorrectValue = config.autocorrect ? 'on' : 'off';
