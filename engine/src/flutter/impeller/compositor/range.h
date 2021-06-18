@@ -13,6 +13,15 @@ namespace impeller {
 struct Range {
   size_t offset = 0;
   size_t length = 0;
+
+  constexpr Range() {}
+
+  constexpr Range(size_t p_offset, size_t p_length)
+      : offset(p_offset), length(p_length) {}
+
+  constexpr bool operator==(const Range& o) const {
+    return offset == o.offset && length == o.length;
+  }
 };
 
 }  // namespace impeller

@@ -58,12 +58,17 @@ impeller_component("compositor") {
     "../geometry",
     "../shader_glue",
   ]
+
+  libs = [ "Metal.framework" ]
 }
 
 source_set("compositor_unittests") {
   testonly = true
 
-  sources = []
+  sources = [ "host_buffer_unittests.mm" ]
 
-  deps = [ "//flutter/testing:testing_lib" ]
+  deps = [
+    ":compositor",
+    "//flutter/testing:testing_lib",
+  ]
 }

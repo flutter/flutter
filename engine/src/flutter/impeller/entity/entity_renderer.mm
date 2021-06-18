@@ -35,8 +35,14 @@ bool EntityRenderer::OnIsValid() const {
 }
 
 bool EntityRenderer::OnRender(RenderPass& pass) {
+  shader::BoxVertexInfo::UniformBuffer uniforms;
+  uniforms.mvp = Matrix::MakeOrthographic({800, 600});
+
   Command cmd;
   cmd.pipeline = box_primitive_->GetPipeline();
+  cmd.vertex_bindings
+      .buffers[shader::BoxVertexInfo::kUniformUniformBuffer.location] =
+      pass.GetTransientsBuffer().Emplace(uniforms);
   pass.RecordCommand(std::move(cmd));
   return true;
 }
