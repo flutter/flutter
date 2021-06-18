@@ -91,19 +91,21 @@ void runNext({
   }
 
   final pb.ConductorState state = readStateFromFile(stateFile);
+
+  stdio.printStatus(phaseInstructions(state));
+
   switch (state.currentPhase) {
     case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
-      bool allEngineCherrypicksVerified = true;
+      final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
       for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
         if (!finishedStates.contains(cherrypick.state)) {
-          allEngineCherrypicksVerified = false;
-          break;
+          unappliedCherrypicks.add(cherrypick);
         }
       }
       // At this time, the conductor tool only knows about cherrypicks that it
       // has auto-applied. To proceed to the next phase when some cherrypicks
       // were applied manually, the user will have to confirm.
-      if (allEngineCherrypicksVerified == false && autoAccept == false) {
+      if (unappliedCherrypicks.isNotEmpty && autoAccept == false) {
         final bool response = prompt('Did you apply and merge all engine cherrypicks?', stdio);
         if (!response) {
           stdio.printError('Aborting command.');
@@ -166,6 +168,16 @@ void runNext({
     case pb.ReleasePhase.PUBLISH_CHANNEL:
       break;
     case pb.ReleasePhase.VERIFY_RELEASE:
+      if (autoAccept == false) {
+        final bool response = prompt(
+          'Have all packaging builds finished successfully?',
+          stdio,
+        );
+        if (!response) {
+          stdio.printError('Aborting command.');
+          return;
+        }
+      }
       break;
     case pb.ReleasePhase.RELEASE_COMPLETED:
       throw ConductorException('This release is finished.');
@@ -174,6 +186,7 @@ void runNext({
   final ReleasePhase nextPhase = getNextPhase(state.currentPhase);
   stdio.printStatus('Updating phase from ${state.currentPhase} to $nextPhase');
   state.currentPhase = nextPhase;
+  stdio.printStatus(phaseInstructions(state));
 
   writeStateToFile(stateFile, state);
 }
