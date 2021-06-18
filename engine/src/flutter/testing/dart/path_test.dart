@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:typed_data' show Float64List;
 import 'dart:ui';
 
@@ -130,8 +129,7 @@ void main() {
     expect(simpleHorizontalMetrics.iterator.current.isClosed, isFalse);
     final Path simpleExtract = simpleHorizontalMetrics.iterator.current.extractPath(1.0, 9.0);
     expect(simpleExtract.getBounds(), equals(const Rect.fromLTRB(1.0, 0.0, 9.0, 0.0)));
-    final Tangent posTan = simpleHorizontalMetrics.iterator.current.getTangentForOffset(1.0);
-    expect(posTan, isNotNull);
+    final Tangent posTan = simpleHorizontalMetrics.iterator.current.getTangentForOffset(1.0)!;
     expect(posTan.position, equals(const Offset(1.0, 0.0)));
     expect(posTan.angle, equals(0.0));
 
@@ -152,7 +150,7 @@ void main() {
     // test getTangentForOffset with vertical line
     final Path simpleVerticalLine = Path()..lineTo(0.0, 10.0);
     final PathMetrics simpleMetricsVertical = simpleVerticalLine.computeMetrics()..iterator.moveNext();
-    final Tangent posTanVertical = simpleMetricsVertical.iterator.current.getTangentForOffset(5.0);
+    final Tangent posTanVertical = simpleMetricsVertical.iterator.current.getTangentForOffset(5.0)!;
     expect(posTanVertical.position, equals(const Offset(0.0, 5.0)));
     expect(posTanVertical.angle, closeTo(-1.5708, .0001)); // 90 degrees
 
@@ -160,7 +158,7 @@ void main() {
     final Path simpleDiagonalLine = Path()..lineTo(10.0, 10.0);
     final PathMetrics simpleMetricsDiagonal = simpleDiagonalLine.computeMetrics()..iterator.moveNext();
     final double midPoint = simpleMetricsDiagonal.iterator.current.length / 2;
-    final Tangent posTanDiagonal = simpleMetricsDiagonal.iterator.current.getTangentForOffset(midPoint);
+    final Tangent posTanDiagonal = simpleMetricsDiagonal.iterator.current.getTangentForOffset(midPoint)!;
     expect(posTanDiagonal.position, equals(const Offset(5.0, 5.0)));
     expect(posTanDiagonal.angle, closeTo(-0.7853981633974483, .00001)); // ~45 degrees
 
@@ -191,11 +189,11 @@ void main() {
     expect(metrics.length, 2);
     expect(metrics[0].length, 20);
     expect(metrics[0].isClosed, true);
-    expect(metrics[0].getTangentForOffset(4.0).vector, const Offset(0.0, 1.0));
+    expect(metrics[0].getTangentForOffset(4.0)!.vector, const Offset(0.0, 1.0));
     expect(metrics[0].extractPath(4.0, 10.0).computeMetrics().first.length, 6.0);
     expect(metrics[1].length, 10);
     expect(metrics[1].isClosed, false);
-    expect(metrics[1].getTangentForOffset(4.0).vector, const Offset(1.0, 0.0));
+    expect(metrics[1].getTangentForOffset(4.0)!.vector, const Offset(1.0, 0.0));
     expect(metrics[1].extractPath(4.0, 6.0).computeMetrics().first.length, 2.0);
   });
 
@@ -207,7 +205,7 @@ void main() {
     expect(metrics, isEmpty);
     expect(firstMetric.length, 10);
     expect(firstMetric.isClosed, false);
-    expect(firstMetric.getTangentForOffset(4.0).vector, const Offset(0.0, 1.0));
+    expect(firstMetric.getTangentForOffset(4.0)!.vector, const Offset(0.0, 1.0));
     expect(firstMetric.extractPath(4.0, 10.0).computeMetrics().first.length, 6.0);
 
     path..lineTo(10, 10)..lineTo(10, 0)..close();
@@ -215,7 +213,7 @@ void main() {
     expect(metrics, isEmpty);
     expect(firstMetric.length, 10);
     expect(firstMetric.isClosed, false);
-    expect(firstMetric.getTangentForOffset(4.0).vector, const Offset(0.0, 1.0));
+    expect(firstMetric.getTangentForOffset(4.0)!.vector, const Offset(0.0, 1.0));
     expect(firstMetric.extractPath(4.0, 10.0).computeMetrics().first.length, 6.0);
 
     // getting a new iterator should update us.
@@ -224,7 +222,7 @@ void main() {
     expect(newMetrics, isEmpty);
     expect(newFirstMetric.length, 40);
     expect(newFirstMetric.isClosed, true);
-    expect(newFirstMetric.getTangentForOffset(4.0).vector, const Offset(0.0, 1.0));
+    expect(newFirstMetric.getTangentForOffset(4.0)!.vector, const Offset(0.0, 1.0));
     expect(newFirstMetric.extractPath(4.0, 10.0).computeMetrics().first.length, 6.0);
   });
 }

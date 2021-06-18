@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
@@ -28,7 +27,7 @@ void isolateSpawnEntrypoint(IsolateSpawnInfo info) {
     port.send(<dynamic>[code, message]);
   }
 
-  final SendPort shared = IsolateNameServer.lookupPortByName(portName);
+  final SendPort? shared = IsolateNameServer.lookupPortByName(portName);
   if (shared == null) {
     sendHelper(kErrorCode, 'Could not find port: $portName');
     return;

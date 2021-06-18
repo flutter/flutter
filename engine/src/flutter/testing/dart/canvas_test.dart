@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -54,8 +52,6 @@ void testNoCrashes() {
     final Picture picture = recorder.endRecording();
     final Image image = await picture.toImage(1, 1);
 
-    try { Canvas(null, null); } catch (error) { } // ignore: empty_catches
-    try { Canvas(null, rect); } catch (error) { } // ignore: empty_catches
     try { Canvas(PictureRecorder(), null); } catch (error) { } // ignore: empty_catches
     try { Canvas(PictureRecorder(), rect); } catch (error) { } // ignore: empty_catches
 
@@ -88,19 +84,18 @@ void testNoCrashes() {
     testCanvas((Canvas canvas) => canvas.drawRawPoints(PointMode.points, Float32List(0), paint));
     testCanvas((Canvas canvas) => canvas.drawRect(rect, paint));
     testCanvas((Canvas canvas) => canvas.drawRRect(rrect, paint));
-    testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.nan, null));
     testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.nan, false));
     testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.nan, true));
-    testCanvas((Canvas canvas) => canvas.drawVertices(Vertices(VertexMode.triangles, <Offset>[]), null, paint));
+    testCanvas((Canvas canvas) => canvas.drawVertices(Vertices(VertexMode.triangles, <Offset>[]), BlendMode.screen, paint));
     testCanvas((Canvas canvas) => canvas.getSaveCount());
     testCanvas((Canvas canvas) => canvas.restore());
     testCanvas((Canvas canvas) => canvas.rotate(double.nan));
     testCanvas((Canvas canvas) => canvas.save());
     testCanvas((Canvas canvas) => canvas.saveLayer(rect, paint));
-    testCanvas((Canvas canvas) => canvas.saveLayer(null, null));
+    testCanvas((Canvas canvas) => canvas.saveLayer(null, paint));
     testCanvas((Canvas canvas) => canvas.scale(double.nan, double.nan));
     testCanvas((Canvas canvas) => canvas.skew(double.nan, double.nan));
-    testCanvas((Canvas canvas) => canvas.transform(null));
+    testCanvas((Canvas canvas) => canvas.transform(Float64List(16)));
     testCanvas((Canvas canvas) => canvas.translate(double.nan, double.nan));
   });
 }
@@ -112,8 +107,8 @@ Future<bool> fuzzyCompareImages(Image golden, Image img) async {
     return false;
   }
   int getPixel(ByteData data, int x, int y) => data.getUint32((x + y * golden.width) * 4);
-  final ByteData goldenData = await golden.toByteData();
-  final ByteData imgData = await img.toByteData();
+  final ByteData goldenData = (await golden.toByteData())!;
+  final ByteData imgData = (await img.toByteData())!;
   for (int y = 0; y < golden.height; y++) {
     for (int x = 0; x < golden.width; x++) {
       if (getPixel(goldenData, x, y) != getPixel(imgData, x, y)) {
@@ -144,7 +139,7 @@ Future<bool> fuzzyGoldenImageCompare(
   }
 
   if (!areEqual) {
-    final ByteData pngData = await image.toByteData(format: ImageByteFormat.png);
+    final ByteData pngData = (await image.toByteData(format: ImageByteFormat.png))!;
     final String outPath = path.join(imagesPath, 'found_' + goldenImageName);
     File(outPath).writeAsBytesSync(pngData.buffer.asUint8List());
     print('wrote: ' + outPath);
@@ -231,11 +226,7 @@ void main() {
     canvas.drawRawAtlas(image, Float32List(0), Float32List(0), Int32List(0), BlendMode.src, null, paint);
     canvas.drawRawAtlas(image, Float32List(0), Float32List(0), null, null, rect, paint);
 
-    expectAssertion(() => canvas.drawAtlas(image, <RSTransform>[transform], <Rect>[rect], <Color>[color], BlendMode.src, rect, null));
     expectAssertion(() => canvas.drawAtlas(image, <RSTransform>[transform], <Rect>[rect], <Color>[color], null, rect, paint));
-    expectAssertion(() => canvas.drawAtlas(image, <RSTransform>[transform], null, <Color>[color], BlendMode.src, rect, paint));
-    expectAssertion(() => canvas.drawAtlas(image, null, <Rect>[rect], <Color>[color], BlendMode.src, rect, paint));
-    expectAssertion(() => canvas.drawAtlas(null, <RSTransform>[transform], <Rect>[rect], <Color>[color], BlendMode.src, rect, paint));
   });
 
   test('Data lengths must match for drawAtlas methods', () async {

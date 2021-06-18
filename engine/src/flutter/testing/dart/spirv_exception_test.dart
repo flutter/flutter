@@ -45,7 +45,7 @@ Stream<Uint8List> exceptionShaders() async* {
     if (entry is! File) {
       continue;
     }
-    final File file = entry as File;
+    final File file = entry;
     if (path.extension(file.path) != '.spv') {
       continue;
     }
