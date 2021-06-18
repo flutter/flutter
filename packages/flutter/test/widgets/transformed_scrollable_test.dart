@@ -5,10 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart';
 
 void main() {
   testWidgets('Scrollable scaled up', (WidgetTester tester) async {
@@ -18,7 +15,7 @@ void main() {
         home: Transform.scale(
           scale: 2.0,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 200,
               child: ListView.builder(
                 controller: controller,
@@ -62,7 +59,7 @@ void main() {
         home: Transform.scale(
           scale: 0.5,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 200,
               child: ListView.builder(
                 controller: controller,
@@ -106,7 +103,7 @@ void main() {
         home: Transform.rotate(
           angle: math.pi / 2,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 200,
               child: ListView.builder(
                 controller: controller,
@@ -148,7 +145,7 @@ void main() {
             ..setEntry(3, 2, 0.001)
             ..rotateX(math.pi / 4),
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 200,
               child: ListView.builder(
                 controller: controller,

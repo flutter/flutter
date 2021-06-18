@@ -70,7 +70,7 @@ BuildApp() {
 
   local bundle_sksl_path=""
   if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
-    bundle_sksl_path="-iBundleSkSLPath=${BUNDLE_SKSL_PATH}"
+    bundle_sksl_path="-dBundleSkSLPath=${BUNDLE_SKSL_PATH}"
   fi
 
   local code_size_directory=""
@@ -83,8 +83,10 @@ BuildApp() {
       ${flutter_engine_flag}                                                  \
       ${local_engine_flag}                                                    \
       assemble                                                                \
+      --no-version-check                                                      \
       ${performance_measurement_option}                                       \
-      -dTargetPlatform=darwin-x64                                             \
+      -dTargetPlatform=darwin                                                 \
+      -dDarwinArchs=x86_64                                                    \
       -dTargetFile="${target_path}"                                           \
       -dBuildMode="${build_mode}"                                             \
       -dTreeShakeIcons="${TREE_SHAKE_ICONS}"                                  \
@@ -109,13 +111,13 @@ EmbedFrameworks() {
   # if it doesn't already exist).
   local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
   RunCommand mkdir -p -- "${xcode_frameworks_dir}"
-  RunCommand rsync -av --delete --filter "- .DS_Store/" "${BUILT_PRODUCTS_DIR}/App.framework" "${xcode_frameworks_dir}"
+  RunCommand rsync -av --delete --filter "- .DS_Store" "${BUILT_PRODUCTS_DIR}/App.framework" "${xcode_frameworks_dir}"
 
   # Embed the actual FlutterMacOS.framework that the Flutter app expects to run against,
   # which could be a local build or an arch/type specific build.
 
   # Copy Xcode behavior and don't copy over headers or modules.
-  RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${BUILT_PRODUCTS_DIR}/FlutterMacOS.framework" "${xcode_frameworks_dir}/"
+  RunCommand rsync -av --delete --filter "- .DS_Store" --filter "- Headers" --filter "- Modules" "${BUILT_PRODUCTS_DIR}/FlutterMacOS.framework" "${xcode_frameworks_dir}/"
 
   # Sign the binaries we moved.
   if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then

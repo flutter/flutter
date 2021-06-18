@@ -27,7 +27,7 @@ String getEnumName(dynamic enumItem) {
 /// A class to compute the configuration of the snippets input and output
 /// locations based in the current location of the snippets main.dart.
 class Configuration {
-  Configuration({@required this.flutterRoot}) : assert(flutterRoot != null);
+  Configuration({required this.flutterRoot}) : assert(flutterRoot != null);
 
   final Directory flutterRoot;
 
@@ -37,20 +37,22 @@ class Configuration {
   Directory get configDirectory {
     _configPath ??= Directory(
         path.canonicalize(path.join(flutterRoot.absolute.path, 'dev', 'snippets', 'config')));
-    return _configPath;
+    return _configPath!;
   }
 
-  Directory _configPath;
+  // Nullable so that we can use it as a lazy cache.
+  Directory? _configPath;
 
   /// This is where the snippets themselves will be written, in order to be
   /// uploaded to the docs site.
   Directory get outputDirectory {
     _docsDirectory ??= Directory(
         path.canonicalize(path.join(flutterRoot.absolute.path, 'dev', 'docs', 'doc', 'snippets')));
-    return _docsDirectory;
+    return _docsDirectory!;
   }
 
-  Directory _docsDirectory;
+  // Nullable so that we can use it as a lazy cache.
+  Directory? _docsDirectory;
 
   /// This makes sure that the output directory exists.
   void createOutputDirectory() {

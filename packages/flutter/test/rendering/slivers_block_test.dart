@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/animation.dart';
-
-import '../flutter_test_alternative.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -140,8 +139,8 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
-    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
+    expect(a.localToGlobal(Offset.zero), Offset.zero);
+    expect(b.localToGlobal(Offset.zero), const Offset(0.0, 400.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -149,8 +148,8 @@ void main() {
     // make sure that layout is stable by laying out again
     inner.markNeedsLayout();
     pumpFrame();
-    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
-    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
+    expect(a.localToGlobal(Offset.zero), Offset.zero);
+    expect(b.localToGlobal(Offset.zero), const Offset(0.0, 400.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -158,8 +157,8 @@ void main() {
     // now try various scroll offsets
     root.offset = ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
-    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
+    expect(a.localToGlobal(Offset.zero), const Offset(0.0, -200.0));
+    expect(b.localToGlobal(Offset.zero), const Offset(0.0, 200.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -167,8 +166,8 @@ void main() {
     root.offset = ViewportOffset.fixed(600.0);
     pumpFrame();
     expect(a.attached, false);
-    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
-    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
+    expect(b.localToGlobal(Offset.zero), const Offset(0.0, -200.0));
+    expect(c.localToGlobal(Offset.zero), const Offset(0.0, 200.0));
     expect(d.attached, false);
     expect(e.attached, false);
 
@@ -176,15 +175,15 @@ void main() {
     pumpFrame();
     expect(a.attached, false);
     expect(b.attached, false);
-    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
-    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
+    expect(c.localToGlobal(Offset.zero), const Offset(0.0, -100.0));
+    expect(d.localToGlobal(Offset.zero), const Offset(0.0, 300.0));
     expect(e.attached, false);
 
     // try going back up
     root.offset = ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
-    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
+    expect(a.localToGlobal(Offset.zero), const Offset(0.0, -200.0));
+    expect(b.localToGlobal(Offset.zero), const Offset(0.0, 200.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -216,8 +215,8 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
-    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
+    expect(a.localToGlobal(Offset.zero), const Offset(0.0, 200.0));
+    expect(b.localToGlobal(Offset.zero), const Offset(0.0, -200.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -225,8 +224,8 @@ void main() {
     // make sure that layout is stable by laying out again
     inner.markNeedsLayout();
     pumpFrame();
-    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
-    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
+    expect(a.localToGlobal(Offset.zero), const Offset(0.0, 200.0));
+    expect(b.localToGlobal(Offset.zero), const Offset(0.0, -200.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -234,8 +233,8 @@ void main() {
     // now try various scroll offsets
     root.offset = ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
-    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(a.localToGlobal(Offset.zero), const Offset(0.0, 400.0));
+    expect(b.localToGlobal(Offset.zero), Offset.zero);
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -243,8 +242,8 @@ void main() {
     root.offset = ViewportOffset.fixed(600.0);
     pumpFrame();
     expect(a.attached, false);
-    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
-    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(b.localToGlobal(Offset.zero), const Offset(0.0, 400.0));
+    expect(c.localToGlobal(Offset.zero), Offset.zero);
     expect(d.attached, false);
     expect(e.attached, false);
 
@@ -252,15 +251,15 @@ void main() {
     pumpFrame();
     expect(a.attached, false);
     expect(b.attached, false);
-    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
-    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
+    expect(c.localToGlobal(Offset.zero), const Offset(0.0, 300.0));
+    expect(d.localToGlobal(Offset.zero), const Offset(0.0, -100.0));
     expect(e.attached, false);
 
     // try going back up
     root.offset = ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
-    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(a.localToGlobal(Offset.zero), const Offset(0.0, 400.0));
+    expect(b.localToGlobal(Offset.zero), Offset.zero);
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);

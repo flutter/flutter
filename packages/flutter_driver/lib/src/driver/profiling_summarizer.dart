@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'percentile_utils.dart';
 import 'timeline.dart';
 
@@ -63,7 +61,7 @@ class ProfilingSummarizer {
       assert(kProfilingEvents.contains(event.name));
       final ProfileType type = _getProfileType(event.name);
       eventsByType[type] ??= <TimelineEvent>[];
-      eventsByType[type].add(event);
+      eventsByType[type]!.add(event);
     }
     return ProfilingSummarizer._(eventsByType);
   }
@@ -96,7 +94,7 @@ class ProfilingSummarizer {
   /// Returns true if there are events in the timeline corresponding to [profileType].
   bool hasProfilingInfo(ProfileType profileType) {
     if (eventByType.containsKey(profileType)) {
-      return eventByType[profileType].isNotEmpty;
+      return eventByType[profileType]!.isNotEmpty;
     } else {
       return false;
     }
@@ -104,7 +102,7 @@ class ProfilingSummarizer {
 
   /// Computes the average of the `profileType` over the recorded events.
   double computeAverage(ProfileType profileType) {
-    final List<TimelineEvent> events = eventByType[profileType];
+    final List<TimelineEvent> events = eventByType[profileType]!;
     assert(events.isNotEmpty);
     final double total = events
         .map((TimelineEvent e) => _getProfileValue(profileType, e))
@@ -114,7 +112,7 @@ class ProfilingSummarizer {
 
   /// The [percentile]-th percentile `profileType` over the recorded events.
   double computePercentile(ProfileType profileType, double percentile) {
-    final List<TimelineEvent> events = eventByType[profileType];
+    final List<TimelineEvent> events = eventByType[profileType]!;
     assert(events.isNotEmpty);
     final List<double> doubles = events
         .map((TimelineEvent e) => _getProfileValue(profileType, e))
@@ -122,7 +120,7 @@ class ProfilingSummarizer {
     return findPercentile(doubles, percentile);
   }
 
-  static ProfileType _getProfileType(String eventName) {
+  static ProfileType _getProfileType(String? eventName) {
     switch (eventName) {
       case _kCpuProfile:
         return ProfileType.CPU;
@@ -147,13 +145,11 @@ class ProfilingSummarizer {
             _getArgValue('owned_shared_memory_usage', e);
         return dirtyMem + ownedSharedMem;
     }
-
-    throw Exception('Invalid $profileType.');
   }
 
   double _getArgValue(String argKey, TimelineEvent e) {
-    assert(e.arguments.containsKey(argKey));
-    final dynamic argVal = e.arguments[argKey];
+    assert(e.arguments!.containsKey(argKey));
+    final dynamic argVal = e.arguments![argKey];
     assert(argVal is String);
     return double.parse(argVal as String);
   }

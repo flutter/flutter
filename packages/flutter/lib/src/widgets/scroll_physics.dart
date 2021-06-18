@@ -113,7 +113,7 @@ class ScrollPhysics {
   /// `x` has the same behavior as `y`.
   ///
   /// ```dart
-  /// final FooScrollPhysics x = FooScrollPhysics().applyTo(BarScrollPhysics());
+  /// final FooScrollPhysics x = const FooScrollPhysics().applyTo(const BarScrollPhysics());
   /// const FooScrollPhysics y = FooScrollPhysics(parent: BarScrollPhysics());
   /// ```
   /// {@end-tool}
@@ -420,7 +420,7 @@ class ScrollPhysics {
   @override
   String toString() {
     if (parent == null)
-      return objectRuntimeType(this, 'ScrollPhsyics');
+      return objectRuntimeType(this, 'ScrollPhysics');
     return '${objectRuntimeType(this, 'ScrollPhysics')} -> $parent';
   }
 }
@@ -563,7 +563,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
 ///
 /// {@tool snippet}
 /// ```dart
-/// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+/// const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
 /// ```
 /// {@end-tool}
 ///
@@ -694,7 +694,8 @@ class BouncingScrollPhysics extends ScrollPhysics {
 ///  * [GlowingOverscrollIndicator], which is used by [ScrollConfiguration] to
 ///    provide the glowing effect that is usually found with this clamping effect
 ///    on Android. When using a [MaterialApp], the [GlowingOverscrollIndicator]'s
-///    glow color is specified to use [ThemeData.accentColor].
+///    glow color is specified to use the overall theme's
+///    [ColorScheme.secondary] color.
 class ClampingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that prevent the scroll offset from exceeding the
   /// bounds of the content.
@@ -715,10 +716,10 @@ class ClampingScrollPhysics extends ScrollPhysics {
             'The proposed new position, $value, is exactly equal to the current position of the '
             'given ${position.runtimeType}, ${position.pixels}.\n'
             'The applyBoundaryConditions method should only be called when the value is '
-            'going to actually change the pixels, otherwise it is redundant.'
+            'going to actually change the pixels, otherwise it is redundant.',
           ),
           DiagnosticsProperty<ScrollPhysics>('The physics object in question was', this, style: DiagnosticsTreeStyle.errorProperty),
-          DiagnosticsProperty<ScrollMetrics>('The position object in question was', position, style: DiagnosticsTreeStyle.errorProperty)
+          DiagnosticsProperty<ScrollMetrics>('The position object in question was', position, style: DiagnosticsTreeStyle.errorProperty),
         ]);
       }
       return true;

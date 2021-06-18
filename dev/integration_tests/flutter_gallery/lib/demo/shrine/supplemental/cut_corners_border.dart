@@ -5,7 +5,6 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class CutCornersBorder extends OutlineInputBorder {
   const CutCornersBorder({

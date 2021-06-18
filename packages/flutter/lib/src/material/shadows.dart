@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, Offset;
-
 import 'package:flutter/painting.dart';
 
 // Based on https://material.io/design/environment/elevation.html

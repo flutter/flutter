@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 
 import '../src/common.dart';
@@ -49,10 +51,11 @@ void main() {
       .map(_asFile);
     for (final File file in files) {
       for (final String line in file.readAsLinesSync()) {
-        if (line.startsWith(RegExp(r'import.*globals.dart'))
-         && !line.contains(r'as globals')) {
+        if ((line.startsWith(RegExp(r'import.*globals.dart')) ||
+                line.startsWith(RegExp(r'import.*globals_null_migrated.dart'))) &&
+            !line.contains(r'as globals')) {
           final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
-          fail('$relativePath imports globals.dart without a globals prefix.');
+          fail('$relativePath imports globals_null_migrated.dart or globals.dart without a globals prefix.');
         }
       }
     }
@@ -63,6 +66,7 @@ void main() {
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'platform.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_io.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'multi_root_file_system.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 
@@ -75,9 +79,34 @@ void main() {
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*dart:io')) &&
-              !line.contains('ignore: dart_io_import')) {
+              !line.contains('flutter_ignore: dart_io_import')) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'dart:io'; import 'lib/src/base/io.dart' instead");
+          }
+        }
+      }
+    }
+  });
+
+  test('no unauthorized imports of package:http', () {
+    final List<String> allowedPaths = <String>[
+      // Used only for multi-part file uploads, which are non-trivial to reimplement.
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'reporting', 'crash_reporting.dart'),
+    ];
+    bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
+
+    for (final String dirName in <String>['lib', 'bin']) {
+      final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
+        .listSync(recursive: true)
+        .where(_isDartFile)
+        .where(_isNotAllowed)
+        .map(_asFile);
+      for (final File file in files) {
+        for (final String line in file.readAsLinesSync()) {
+          if (line.startsWith(RegExp(r'import.*package:http/')) &&
+              !line.contains('flutter_ignore: package_http_import')) {
+            final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
+            fail("$relativePath imports 'package:http'; import 'lib/src/base/io.dart' instead");
           }
         }
       }
@@ -101,7 +130,7 @@ void main() {
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*package:test_api')) &&
-              !line.contains('ignore: test_api_import')) {
+              !line.contains('flutter_ignore: test_api_import')) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'package:test_api/test_api.dart';");
           }
@@ -124,7 +153,7 @@ void main() {
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*package:path/path.dart')) &&
-              !line.contains('ignore: package_path_import')) {
+              !line.contains('flutter_ignore: package_path_import')) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'package:path/path.dart'; use 'fileSystem.path' instead");
           }
@@ -171,7 +200,7 @@ void main() {
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*dart:convert')) &&
-              !line.contains('ignore: dart_convert_import')) {
+              !line.contains('flutter_ignore: dart_convert_import')) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'dart:convert'; import 'lib/src/convert.dart' instead");
           }

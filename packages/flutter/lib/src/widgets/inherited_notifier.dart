@@ -28,7 +28,7 @@ import 'framework.dart';
 /// changed. When it returns true, the dependents are marked as needing to be
 /// rebuilt this frame.
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material_ticker}
 ///
 /// This example shows three spinning squares that use the value of the notifier
 /// on an ancestor [InheritedNotifier] (`SpinModel`) to give them their
@@ -43,25 +43,25 @@ import 'framework.dart';
 /// just need to know that there is one in their ancestry. This can help with
 /// decoupling widgets from their models.
 ///
-/// ```dart imports
+/// ```dart dartImports
 /// import 'dart:math' as math;
 /// ```
 ///
 /// ```dart preamble
 /// class SpinModel extends InheritedNotifier<AnimationController> {
-///   SpinModel({
-///     Key key,
-///     AnimationController notifier,
-///     Widget child,
+///   const SpinModel({
+///     Key? key,
+///     AnimationController? notifier,
+///     required Widget child,
 ///   }) : super(key: key, notifier: notifier, child: child);
 ///
 ///   static double of(BuildContext context) {
-///     return context.dependOnInheritedWidgetOfExactType<SpinModel>().notifier.value;
+///     return context.dependOnInheritedWidgetOfExactType<SpinModel>()!.notifier!.value;
 ///   }
 /// }
 ///
 /// class Spinner extends StatelessWidget {
-///   const Spinner();
+///   const Spinner({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -81,7 +81,7 @@ import 'framework.dart';
 /// ```
 ///
 /// ```dart
-/// AnimationController _controller;
+/// late AnimationController _controller;
 ///
 /// @override
 /// void initState() {
@@ -157,7 +157,7 @@ abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
   }
 
   @override
-  _InheritedNotifierElement<T> createElement() => _InheritedNotifierElement<T>(this);
+  InheritedElement createElement() => _InheritedNotifierElement<T>(this);
 }
 
 class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {

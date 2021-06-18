@@ -22,6 +22,10 @@ const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
+  /// Creates a [SkiaGoldClient] with the given [workDirectory].
+  ///
+  /// All other parameters are optional. They may be provided in tests to
+  /// override the defaults for [fs], [process], [platform], and [httpClient].
   SkiaGoldClient(
     this.workDirectory, {
     this.fs = const LocalFileSystem(),
@@ -79,7 +83,8 @@ class SkiaGoldClient {
   Future<void> auth() async {
     if (await clientIsAuthorized())
       return;
-    final List<String> authArguments = <String>[
+    final List<String> authCommand = <String>[
+      _goldctl,
       'auth',
       '--work-dir', workDirectory
         .childDirectory('temp')
@@ -87,10 +92,7 @@ class SkiaGoldClient {
       '--luci',
     ];
 
-    final io.ProcessResult result = await io.Process.run(
-      _goldctl,
-      authArguments,
-    );
+    final io.ProcessResult result = await process.run(authCommand);
 
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
@@ -118,7 +120,8 @@ class SkiaGoldClient {
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
-    final List<String> imgtestInitArguments = <String>[
+    final List<String> imgtestInitCommand = <String>[
+      _goldctl,
       'imgtest', 'init',
       '--instance', 'flutter',
       '--work-dir', workDirectory
@@ -130,19 +133,16 @@ class SkiaGoldClient {
       '--passfail',
     ];
 
-    if (imgtestInitArguments.contains(null)) {
+    if (imgtestInitCommand.contains(null)) {
       final StringBuffer buf = StringBuffer()
         ..writeln('A null argument was provided for Skia Gold imgtest init.')
         ..writeln('Please confirm the settings of your golden file test.')
         ..writeln('Arguments provided:');
-      imgtestInitArguments.forEach(buf.writeln);
+      imgtestInitCommand.forEach(buf.writeln);
       throw Exception(buf.toString());
     }
 
-    final io.ProcessResult result = await io.Process.run(
-      _goldctl,
-      imgtestInitArguments,
-    );
+    final io.ProcessResult result = await process.run(imgtestInitCommand);
 
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
@@ -167,7 +167,8 @@ class SkiaGoldClient {
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPostSubmitFileComparator].
   Future<bool> imgtestAdd(String testName, File goldenFile) async {
-    final List<String> imgtestArguments = <String>[
+    final List<String> imgtestCommand = <String>[
+      _goldctl,
       'imgtest', 'add',
       '--work-dir', workDirectory
         .childDirectory('temp')
@@ -176,10 +177,7 @@ class SkiaGoldClient {
       '--png-file', goldenFile.path,
     ];
 
-    final io.ProcessResult result = await io.Process.run(
-      _goldctl,
-      imgtestArguments,
-    );
+    final io.ProcessResult result = await process.run(imgtestCommand);
 
     if (result.exitCode != 0) {
       // We do not want to throw for non-zero exit codes here, as an intentional
@@ -205,7 +203,8 @@ class SkiaGoldClient {
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
-    final List<String> imgtestInitArguments = <String>[
+    final List<String> imgtestInitCommand = <String>[
+      _goldctl,
       'imgtest', 'init',
       '--instance', 'flutter',
       '--work-dir', workDirectory
@@ -220,19 +219,16 @@ class SkiaGoldClient {
       ...getCIArguments(),
     ];
 
-    if (imgtestInitArguments.contains(null)) {
+    if (imgtestInitCommand.contains(null)) {
       final StringBuffer buf = StringBuffer()
         ..writeln('A null argument was provided for Skia Gold tryjob init.')
         ..writeln('Please confirm the settings of your golden file test.')
         ..writeln('Arguments provided:');
-      imgtestInitArguments.forEach(buf.writeln);
+      imgtestInitCommand.forEach(buf.writeln);
       throw Exception(buf.toString());
     }
 
-    final io.ProcessResult result = await io.Process.run(
-      _goldctl,
-      imgtestInitArguments,
-    );
+    final io.ProcessResult result = await process.run(imgtestInitCommand);
 
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
@@ -257,7 +253,8 @@ class SkiaGoldClient {
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPreSubmitFileComparator].
   Future<void> tryjobAdd(String testName, File goldenFile) async {
-    final List<String> imgtestArguments = <String>[
+    final List<String> imgtestCommand = <String>[
+      _goldctl,
       'imgtest', 'add',
       '--work-dir', workDirectory
         .childDirectory('temp')
@@ -266,10 +263,7 @@ class SkiaGoldClient {
       '--png-file', goldenFile.path,
     ];
 
-    final io.ProcessResult result = await io.Process.run(
-      _goldctl,
-      imgtestArguments,
-    );
+    final io.ProcessResult result = await process.run(imgtestCommand);
 
     final String/*!*/ resultStdout = result.stdout.toString();
     if (result.exitCode != 0 &&
@@ -374,7 +368,7 @@ class SkiaGoldClient {
     };
     if (platform.environment[_kTestBrowserKey] != null) {
       keys['Browser'] = platform.environment[_kTestBrowserKey];
-      keys['Platform'] = keys['Platform'] + '-browser';
+      keys['Platform'] = '${keys['Platform']}-browser';
     }
     return json.encode(keys);
   }
@@ -382,7 +376,7 @@ class SkiaGoldClient {
   /// Removes the file extension from the [fileName] to represent the test name
   /// properly.
   String cleanTestName(String fileName) {
-    return fileName.split(path.extension(fileName.toString()))[0];
+    return fileName.split(path.extension(fileName))[0];
   }
 
   /// Returns a boolean value to prevent the client from re-authorizing itself

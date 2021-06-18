@@ -11,8 +11,7 @@ import 'ticker_provider.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// bool _first;
+// bool _first = false;
 
 /// Specifies which of two children to show. See [AnimatedCrossFade].
 ///
@@ -235,7 +234,7 @@ class AnimatedCrossFade extends StatefulWidget {
   }
 
   @override
-  _AnimatedCrossFadeState createState() => _AnimatedCrossFadeState();
+  State<AnimatedCrossFade> createState() => _AnimatedCrossFadeState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -367,7 +366,6 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         duration: widget.duration,
         reverseDuration: widget.reverseDuration,
         curve: widget.sizeCurve,
-        vsync: this,
         child: widget.layoutBuilder(topChild, topKey, bottomChild, bottomKey),
       ),
     );

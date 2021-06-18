@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -66,7 +65,7 @@ void _animateColumnControllerToItem(FixedExtentScrollController controller, int 
 }
 
 const Widget _leftSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capRightEdge: false);
-const Widget _centerSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capLeftEdge: false, capRightEdge: false,);
+const Widget _centerSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capLeftEdge: false, capRightEdge: false);
 const Widget _rightSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capLeftEdge: false);
 
 // Lays out the date picker based on how much space each single column needs.
@@ -705,7 +704,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
           final DateTime now = DateTime.now();
 
-          if (widget.minimumDate?.isAfter(rangeEnd) == true)
+          if (widget.minimumDate?.isBefore(rangeEnd) == false)
             return null;
           if (widget.maximumDate?.isAfter(rangeStart) == false)
             return null;
@@ -719,6 +718,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             Text(dateText, style: _themeTextStyle(context)),
           );
         },
+        selectionOverlay: selectionOverlay,
       ),
     );
   }
@@ -802,7 +802,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           );
         }),
         looping: true,
-      )
+        selectionOverlay: selectionOverlay,
+      ),
     );
   }
 
@@ -1756,10 +1757,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         setState(() {
           selectedHour = index;
           widget.onTimerDurationChanged(
-              Duration(
-                  hours: selectedHour!,
-                  minutes: selectedMinute,
-                  seconds: selectedSecond ?? 0));
+            Duration(
+              hours: selectedHour!,
+              minutes: selectedMinute,
+              seconds: selectedSecond ?? 0,
+            ),
+          );
         });
       },
       children: List<Widget>.generate(24, (int index) {
@@ -1809,7 +1812,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(
           additionalPadding.start,
-          widget.mode == CupertinoTimerPickerMode.ms ? 0 : 1
+          widget.mode == CupertinoTimerPickerMode.ms ? 0 : 1,
       ),
       itemExtent: _kItemExtent,
       backgroundColor: widget.backgroundColor,
@@ -1819,10 +1822,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         setState(() {
           selectedMinute = index * widget.minuteInterval;
           widget.onTimerDurationChanged(
-              Duration(
-                  hours: selectedHour ?? 0,
-                  minutes: selectedMinute,
-                  seconds: selectedSecond ?? 0));
+            Duration(
+              hours: selectedHour ?? 0,
+              minutes: selectedMinute,
+              seconds: selectedSecond ?? 0,
+            ),
+          );
         });
       },
       children: List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
@@ -1873,7 +1878,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(
           additionalPadding.start,
-          widget.mode == CupertinoTimerPickerMode.ms ? 1 : 2
+          widget.mode == CupertinoTimerPickerMode.ms ? 1 : 2,
       ),
       itemExtent: _kItemExtent,
       backgroundColor: widget.backgroundColor,
@@ -1883,10 +1888,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         setState(() {
           selectedSecond = index * widget.secondInterval;
           widget.onTimerDurationChanged(
-              Duration(
-                  hours: selectedHour ?? 0,
-                  minutes: selectedMinute,
-                  seconds: selectedSecond!));
+            Duration(
+              hours: selectedHour ?? 0,
+              minutes: selectedMinute,
+              seconds: selectedSecond!,
+            ),
+          );
         });
       },
       children: List<Widget>.generate(60 ~/ widget.secondInterval, (int index) {
@@ -1934,7 +1941,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   TextStyle _textStyleFrom(BuildContext context, [double magnification = 1.0]) {
     final TextStyle textStyle = CupertinoTheme.of(context).textTheme.pickerTextStyle;
     return textStyle.copyWith(
-      fontSize: textStyle.fontSize! * magnification
+      fontSize: textStyle.fontSize! * magnification,
     );
   }
 
@@ -1999,16 +2006,16 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
               _buildHourColumn(
                   EdgeInsetsDirectional.only(
                       start: hourColumnStartPadding,
-                      end: pickerColumnWidth - hourColumnStartPadding - hourLabelContentWidth
+                      end: pickerColumnWidth - hourColumnStartPadding - hourLabelContentWidth,
                   ),
-                  _leftSelectionOverlay
+                  _leftSelectionOverlay,
               ),
               _buildMinuteColumn(
                   EdgeInsetsDirectional.only(
                       start: pickerColumnWidth - minuteColumnEndPadding - minuteLabelContentWidth,
-                      end: minuteColumnEndPadding
+                      end: minuteColumnEndPadding,
                   ),
-                  _rightSelectionOverlay
+                  _rightSelectionOverlay,
               ),
             ];
             break;
@@ -2028,16 +2035,16 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
               _buildMinuteColumn(
                   EdgeInsetsDirectional.only(
                       start: minuteColumnStartPadding,
-                      end: pickerColumnWidth - minuteColumnStartPadding - minuteLabelContentWidth
+                      end: pickerColumnWidth - minuteColumnStartPadding - minuteLabelContentWidth,
                   ),
-                  _leftSelectionOverlay
+                  _leftSelectionOverlay,
               ),
               _buildSecondColumn(
                   EdgeInsetsDirectional.only(
                       start: pickerColumnWidth - secondColumnEndPadding - minuteLabelContentWidth,
-                      end: secondColumnEndPadding
+                      end: secondColumnEndPadding,
                   ),
-                  _rightSelectionOverlay
+                  _rightSelectionOverlay,
               ),
             ];
             break;
@@ -2053,23 +2060,23 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
               _buildHourColumn(
                   EdgeInsetsDirectional.only(
                       start: _kTimerPickerMinHorizontalPadding,
-                      end: math.max(hourColumnEndPadding, 0)
+                      end: math.max(hourColumnEndPadding, 0),
                   ),
-                  _leftSelectionOverlay
+                  _leftSelectionOverlay,
               ),
               _buildMinuteColumn(
                   EdgeInsetsDirectional.only(
                       start: minuteColumnPadding,
-                      end: minuteColumnPadding
+                      end: minuteColumnPadding,
                   ),
-                  _centerSelectionOverlay
+                  _centerSelectionOverlay,
               ),
               _buildSecondColumn(
                   EdgeInsetsDirectional.only(
                       start: math.max(secondColumnStartPadding, 0),
-                      end: _kTimerPickerMinHorizontalPadding
+                      end: _kTimerPickerMinHorizontalPadding,
                   ),
-                  _rightSelectionOverlay
+                  _rightSelectionOverlay,
               ),
             ];
             break;

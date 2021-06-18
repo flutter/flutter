@@ -6,12 +6,15 @@ import 'package:flutter/material.dart';
 
 import 'common.dart';
 
+import 'src/animated_image.dart';
 import 'src/animated_placeholder.dart';
+import 'src/animation_with_microtasks.dart';
 import 'src/backdrop_filter.dart';
 import 'src/color_filter_and_fade.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
 import 'src/filtered_child_animation.dart';
+import 'src/fullscreen_textfield.dart';
 import 'src/heavy_grid_view.dart';
 import 'src/large_image_changer.dart';
 import 'src/large_images.dart';
@@ -20,6 +23,7 @@ import 'src/picture_cache.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
+import 'src/stack_size.dart';
 import 'src/text.dart';
 
 const String kMacrobenchmarks = 'Macrobenchmarks';
@@ -27,7 +31,7 @@ const String kMacrobenchmarks = 'Macrobenchmarks';
 void main() => runApp(const MacrobenchmarksApp());
 
 class MacrobenchmarksApp extends StatelessWidget {
-  const MacrobenchmarksApp({this.initialRoute = '/'});
+  const MacrobenchmarksApp({Key key, this.initialRoute = '/'}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,23 +39,27 @@ class MacrobenchmarksApp extends StatelessWidget {
       title: kMacrobenchmarks,
       initialRoute: initialRoute,
       routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) => HomePage(),
-        kCullOpacityRouteName: (BuildContext context) => CullOpacityPage(),
-        kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
-        kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
-        kPostBackdropFilterRouteName: (BuildContext context) => PostBackdropFilterPage(),
-        kSimpleAnimationRouteName: (BuildContext context) => SimpleAnimationPage(),
-        kPictureCacheRouteName: (BuildContext context) => PictureCachePage(),
-        kLargeImageChangerRouteName: (BuildContext context) => LargeImageChangerPage(),
-        kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
-        kTextRouteName: (BuildContext context) => TextPage(),
-        kAnimatedPlaceholderRouteName: (BuildContext context) => AnimatedPlaceholderPage(),
-        kColorFilterAndFadeRouteName: (BuildContext context) => ColorFilterAndFadePage(),
+        '/': (BuildContext context) => const HomePage(),
+        kCullOpacityRouteName: (BuildContext context) => const CullOpacityPage(),
+        kCubicBezierRouteName: (BuildContext context) => const CubicBezierPage(),
+        kBackdropFilterRouteName: (BuildContext context) => const BackdropFilterPage(),
+        kPostBackdropFilterRouteName: (BuildContext context) => const PostBackdropFilterPage(),
+        kSimpleAnimationRouteName: (BuildContext context) => const SimpleAnimationPage(),
+        kPictureCacheRouteName: (BuildContext context) => const PictureCachePage(),
+        kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
+        kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
+        kTextRouteName: (BuildContext context) => const TextPage(),
+        kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
+        kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
+        kColorFilterAndFadeRouteName: (BuildContext context) => const ColorFilterAndFadePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
-        kHeavyGridViewRouteName: (BuildContext context) => HeavyGridViewPage(),
-        kSimpleScrollRouteName: (BuildContext context) => SimpleScroll(),
+        kHeavyGridViewRouteName: (BuildContext context) => const HeavyGridViewPage(),
+        kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
+        kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
+        kAnimationWithMicrotasksRouteName: (BuildContext context) => const AnimationWithMicrotasks(),
+        kAnimatedImageRouteName: (BuildContext context) => const AnimatedImagePage(),
       },
     );
   }
@@ -60,6 +68,8 @@ class MacrobenchmarksApp extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
+  const HomePage({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,6 +134,13 @@ class HomePage extends StatelessWidget {
             },
           ),
           ElevatedButton(
+            key: const Key(kFullscreenTextRouteName),
+            child: const Text('Fullscreen Text'),
+            onPressed: () {
+              Navigator.pushNamed(context, kFullscreenTextRouteName);
+            },
+          ),
+          ElevatedButton(
             key: const Key(kAnimatedPlaceholderRouteName),
             child: const Text('Animated Placeholder'),
             onPressed: () {
@@ -170,6 +187,27 @@ class HomePage extends StatelessWidget {
             child: const Text('Large Image Changer'),
             onPressed: () {
               Navigator.pushNamed(context, kLargeImageChangerRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kStackSizeRouteName),
+            child: const Text('Stack Size'),
+            onPressed: () {
+              Navigator.pushNamed(context, kStackSizeRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimationWithMicrotasksRouteName),
+            child: const Text('Animation With Microtasks'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimationWithMicrotasksRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimatedImageRouteName),
+            child: const Text('Animated Image'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedImageRouteName);
             },
           ),
         ],

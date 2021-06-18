@@ -32,6 +32,8 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithWrappedHandler extends StatelessWidget {
+///   const WidgetWithWrappedHandler({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return GestureDetector(
@@ -58,6 +60,8 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithExplicitCall extends StatelessWidget {
+///   const WidgetWithExplicitCall({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return GestureDetector(
@@ -80,7 +84,6 @@ import 'theme.dart';
 class Feedback {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   Feedback._();
 
   /// Provides platform-specific feedback for a tap.

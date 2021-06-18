@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -64,7 +66,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
-    if (_androidSdk == null || _androidSdk.adbPath == null) {
+    if (_doesNotHaveAdb()) {
       return <AndroidDevice>[];
     }
     String text;
@@ -88,7 +90,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async {
-    if (_androidSdk == null || _androidSdk.adbPath == null) {
+    if (_doesNotHaveAdb()) {
       return <String>[];
     }
 
@@ -102,6 +104,12 @@ class AndroidDevices extends PollingDeviceDiscovery {
       diagnostics: diagnostics,
     );
     return diagnostics;
+  }
+
+  bool _doesNotHaveAdb() {
+    return _androidSdk == null ||
+      _androidSdk.adbPath == null ||
+      !_processManager.canRun(_androidSdk.adbPath);
   }
 
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper

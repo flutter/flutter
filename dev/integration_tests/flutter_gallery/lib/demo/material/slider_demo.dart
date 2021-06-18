@@ -9,10 +9,12 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class SliderDemo extends StatefulWidget {
+  const SliderDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/slider';
 
   @override
-  _SliderDemoState createState() => _SliderDemoState();
+  State<SliderDemo> createState() => _SliderDemoState();
 }
 
 Path _downTriangle(double size, Offset thumbCenter, { bool invert = false }) {
@@ -217,13 +219,13 @@ class _SliderDemoState extends State<SliderDemo> {
         tabName: 'SINGLE',
         description: 'Sliders containing 1 thumb',
         demoWidget: _Sliders(),
-        documentationUrl: 'https://docs.flutter.io/flutter/material/Slider-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/Slider-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'RANGE',
         description: 'Sliders containing 2 thumbs',
         demoWidget: _RangeSliders(),
-        documentationUrl: 'https://docs.flutter.io/flutter/material/RangeSlider-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/RangeSlider-class.html',
       ),
     ];
 
@@ -280,7 +282,7 @@ class _SlidersState extends State<_Sliders> {
                 ),
               ),
               Slider.adaptive(
-                label: _continuousValue.toStringAsFixed(6).toString(),
+                label: _continuousValue.toStringAsFixed(6),
                 value: _continuousValue,
                 min: 0.0,
                 max: 100.0,
@@ -332,7 +334,7 @@ class _SlidersState extends State<_Sliders> {
                   valueIndicatorColor: Colors.deepPurpleAccent,
                   thumbShape: _CustomThumbShape(),
                   valueIndicatorShape: _CustomValueIndicatorShape(),
-                  valueIndicatorTextStyle: theme.accentTextTheme.bodyText1!.copyWith(color: theme.colorScheme.onSurface),
+                  valueIndicatorTextStyle: theme.textTheme.bodyText1!.copyWith(color: theme.colorScheme.onSurface),
                 ),
                 child: Slider(
                   value: _discreteCustomValue,

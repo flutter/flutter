@@ -242,8 +242,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// the [State] base class calls [debugFillDescription] to collect useful
   /// information from subclasses to incorporate into its return value.
   ///
-  /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillDescription(description)`.
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.debugFillDescription(description)`.
   @mustCallSuper
   void debugFillDescription(List<String> description) {
     if (hasPixels) {

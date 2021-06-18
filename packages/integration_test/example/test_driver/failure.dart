@@ -33,7 +33,7 @@ void main() {
     await expectLater(
       find.byWidgetPredicate(
         (Widget widget) =>
-            widget is Text && widget.data.startsWith('This should fail'),
+            widget is Text && widget.data!.startsWith('This should fail'),
       ),
       findsOneWidget,
     );

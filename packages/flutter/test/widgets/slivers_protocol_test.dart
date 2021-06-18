@@ -4,9 +4,9 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
   final RenderObject target = key.currentContext!.findRenderObject()!;
@@ -45,10 +45,10 @@ void main() {
     expect(position.pixels, max);
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);
-    verifyPaintPosition(key1, const Offset(0.0, 0.0));
-    verifyPaintPosition(key2, const Offset(0.0, 0.0));
-    verifyPaintPosition(key3, const Offset(0.0, 0.0));
-    verifyPaintPosition(key4, const Offset(0.0, 0.0));
+    verifyPaintPosition(key1, Offset.zero);
+    verifyPaintPosition(key2, Offset.zero);
+    verifyPaintPosition(key3, Offset.zero);
+    verifyPaintPosition(key4, Offset.zero);
     verifyPaintPosition(key5, const Offset(0.0, 50.0));
   });
 }

@@ -63,22 +63,34 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// [dragStartBehavior] must not be null.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   DragGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
+    Set<PointerDeviceKind>? supportedDevices,
   }) : assert(dragStartBehavior != null),
-       super(debugOwner: debugOwner, kind: kind);
+       super(
+         debugOwner: debugOwner,
+         kind: kind,
+         supportedDevices: supportedDevices,
+       );
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
-  /// Configure the behavior of offsets sent to [onStart].
+
+  /// Configure the behavior of offsets passed to [onStart].
   ///
   /// If set to [DragStartBehavior.start], the [onStart] callback will be called
-  /// at the time and position when this gesture recognizer wins the arena. If
-  /// [DragStartBehavior.down], [onStart] will be called at the time and
-  /// position when a down event was first detected.
+  /// with the position of the pointer at the time this gesture recognizer won
+  /// the arena. If [DragStartBehavior.down], [onStart] will be called with
+  /// the position of the first detected down event for the pointer. When there
+  /// are no other gestures competing with this gesture in the arena, there's
+  /// no difference in behavior between the two settings.
   ///
   /// For more information about the gesture arena:
   /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
@@ -87,13 +99,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// ## Example:
   ///
-  /// A finger presses down on the screen with offset (500.0, 500.0), and then
-  /// moves to position (510.0, 500.0) before winning the arena. With
+  /// A [HorizontalDragGestureRecognizer] and a [VerticalDragGestureRecognizer]
+  /// compete with each other. A finger presses down on the screen with
+  /// offset (500.0, 500.0), and then moves to position (510.0, 500.0) before
+  /// the [HorizontalDragGestureRecognizer] wins the arena. With
   /// [dragStartBehavior] set to [DragStartBehavior.down], the [onStart]
-  /// callback will be called at the time corresponding to the touch's position
-  /// at (500.0, 500.0). If it is instead set to [DragStartBehavior.start],
-  /// [onStart] will be called at the time corresponding to the touch's position
-  /// at (510.0, 500.0).
+  /// callback will be called with position (500.0, 500.0). If it is
+  /// instead set to [DragStartBehavior.start], [onStart] will be called with
+  /// position (510.0, 500.0).
   DragStartBehavior dragStartBehavior;
 
   /// A pointer has contacted the screen with a primary button and might begin
@@ -112,12 +125,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// move.
   ///
   /// The position of the pointer is provided in the callback's `details`
-  /// argument, which is a [DragStartDetails] object.
-  ///
-  /// Depending on the value of [dragStartBehavior], this function will be
-  /// called on the initial touch down, if set to [DragStartBehavior.down] or
-  /// when the drag gesture is first detected, if set to
-  /// [DragStartBehavior.start].
+  /// argument, which is a [DragStartDetails] object. The [dragStartBehavior]
+  /// determines this position.
   ///
   /// See also:
   ///
@@ -253,8 +262,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void addAllowedPointer(PointerEvent event) {
-    startTrackingPointer(event.pointer, event.transform);
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
     _velocityTrackers[event.pointer] = velocityTrackerBuilder(event);
     if (_state == _DragState.ready) {
       _state = _DragState.possible;
@@ -309,15 +318,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       }
     }
     if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _giveUpPointer(
-        event.pointer,
-        reject: event is PointerCancelEvent || _state ==_DragState.possible,
-      );
+      _giveUpPointer(event.pointer);
     }
   }
 
+  final Set<int> _acceptedActivePointers = <int>{};
+
   @override
   void acceptGesture(int pointer) {
+    assert(!_acceptedActivePointers.contains(pointer));
+    _acceptedActivePointers.add(pointer);
     if (_state != _DragState.accepted) {
       _state = _DragState.accepted;
       final OffsetPair delta = _pendingDragOffset;
@@ -355,6 +365,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           localPosition: correctedPosition.local,
         );
       }
+      // This acceptGesture might have been called only for one pointer, instead
+      // of all pointers. Resolve all pointers to `accepted`. This won't cause
+      // infinite recursion because an accepted pointer won't be accepted again.
+      resolve(GestureDisposition.accepted);
     }
   }
 
@@ -384,32 +398,36 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _state = _DragState.ready;
   }
 
-  void _giveUpPointer(int pointer, {bool reject = true}) {
+  void _giveUpPointer(int pointer) {
     stopTrackingPointer(pointer);
-    if (reject)
+    // If we never accepted the pointer, we reject it since we are no longer
+    // interested in winning the gesture arena for it.
+    if (!_acceptedActivePointers.remove(pointer))
       resolvePointer(pointer, GestureDisposition.rejected);
   }
 
   void _checkDown() {
     assert(_initialButtons == kPrimaryButton);
-    final DragDownDetails details = DragDownDetails(
-      globalPosition: _initialPosition.global,
-      localPosition: _initialPosition.local,
-    );
-    if (onDown != null)
+    if (onDown != null) {
+      final DragDownDetails details = DragDownDetails(
+        globalPosition: _initialPosition.global,
+        localPosition: _initialPosition.local,
+      );
       invokeCallback<void>('onDown', () => onDown!(details));
+    }
   }
 
   void _checkStart(Duration timestamp, int pointer) {
     assert(_initialButtons == kPrimaryButton);
-    final DragStartDetails details = DragStartDetails(
-      sourceTimeStamp: timestamp,
-      globalPosition: _initialPosition.global,
-      localPosition: _initialPosition.local,
-      kind: getKindForPointer(pointer),
-    );
-    if (onStart != null)
+    if (onStart != null) {
+      final DragStartDetails details = DragStartDetails(
+        sourceTimeStamp: timestamp,
+        globalPosition: _initialPosition.global,
+        localPosition: _initialPosition.local,
+        kind: getKindForPointer(pointer),
+      );
       invokeCallback<void>('onStart', () => onStart!(details));
+    }
   }
 
   void _checkUpdate({
@@ -420,15 +438,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     Offset? localPosition,
   }) {
     assert(_initialButtons == kPrimaryButton);
-    final DragUpdateDetails details = DragUpdateDetails(
-      sourceTimeStamp: sourceTimeStamp,
-      delta: delta,
-      primaryDelta: primaryDelta,
-      globalPosition: globalPosition,
-      localPosition: localPosition,
-    );
-    if (onUpdate != null)
+    if (onUpdate != null) {
+      final DragUpdateDetails details = DragUpdateDetails(
+        sourceTimeStamp: sourceTimeStamp,
+        delta: delta,
+        primaryDelta: primaryDelta,
+        globalPosition: globalPosition,
+        localPosition: localPosition,
+      );
       invokeCallback<void>('onUpdate', () => onUpdate!(details));
+    }
   }
 
   void _checkEnd(int pointer) {
@@ -498,11 +517,20 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the vertical axis.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   VerticalDragGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : super(
+         debugOwner: debugOwner,
+         kind: kind,
+         supportedDevices: supportedDevices,
+       );
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
@@ -539,11 +567,20 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   HorizontalDragGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : super(
+         debugOwner: debugOwner,
+         kind: kind,
+         supportedDevices: supportedDevices,
+       );
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {

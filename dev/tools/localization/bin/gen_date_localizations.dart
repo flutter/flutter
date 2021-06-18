@@ -40,7 +40,7 @@ const String _kCommandName = 'gen_date_localizations.dart';
 // Date symbols for the Kannada locale ('kn') are handled specially because
 // some of the strings contain characters that can crash Emacs on Linux.
 // See packages/flutter_localizations/lib/src/l10n/README for more information.
-String currentLocale;
+String? currentLocale;
 
 Future<void> main(List<String> rawArgs) async {
   checkCwdIsRepoRoot(_kCommandName);
@@ -64,7 +64,7 @@ Future<void> main(List<String> rawArgs) async {
       (String line) => line.startsWith('intl:'),
       orElse: () {
         exitWithError('intl dependency not found in ${dotPackagesFile.path}');
-        return null; // unreachable
+        return ''; // unreachable
       },
     )
     .split(':')
@@ -141,7 +141,7 @@ String _jsonToMap(dynamic json) {
     return '$json';
 
   if (json is String)
-    return generateEncodedString(currentLocale, json);
+    return generateEncodedString(currentLocale!, json);
 
   if (json is Iterable) {
     final StringBuffer buffer = StringBuffer('<dynamic>[');
@@ -178,7 +178,7 @@ Set<String> _supportedLocales() {
   for (final FileSystemEntity entity in supportedLocalesDirectory.listSync()) {
     final String filePath = entity.path;
     if (FileSystemEntity.isFileSync(filePath) && filenameRE.hasMatch(filePath)) {
-      supportedLocales.add(filenameRE.firstMatch(filePath)[1]);
+      supportedLocales.add(filenameRE.firstMatch(filePath)![1]!);
     }
   }
 
@@ -198,5 +198,5 @@ Map<String, File> _listIntlData(Directory directory) {
 
   final List<String> locales = localeFiles.keys.toList(growable: false);
   locales.sort();
-  return Map<String, File>.fromIterable(locales, value: (dynamic locale) => localeFiles[locale]);
+  return Map<String, File>.fromIterable(locales, value: (dynamic locale) => localeFiles[locale]!);
 }

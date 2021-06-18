@@ -4,8 +4,8 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -121,9 +121,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: RaisedButton(
-              child: const Text('RaisedButton'),
               onPressed: () { },
               focusNode: focusNode,
+              child: const Text('RaisedButton'),
             ),
           ),
         ),
@@ -185,10 +185,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: RaisedButton(
-              child: const Text('RaisedButton'),
               onPressed: () {},
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
+              child: const Text('RaisedButton'),
             ),
           ),
         ),
@@ -312,10 +312,10 @@ void main() {
           body: Center(
             child: RaisedButton(
               onPressed: null,
-              child: const Text('RaisedButton'),
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
               disabledTextColor: unusedDisabledTextColor,
+              child: const Text('RaisedButton'),
             ),
           ),
         ),
@@ -340,9 +340,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RaisedButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -633,7 +633,7 @@ void main() {
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
@@ -650,7 +650,7 @@ void main() {
       );
     }
 
-    await buildTest(const VisualDensity());
+    await buildTest(VisualDensity.standard);
     final RenderBox box = tester.renderObject(find.byKey(key));
     Rect childRect = tester.getRect(find.byKey(childKey));
     await tester.pumpAndSettle();
@@ -669,7 +669,7 @@ void main() {
     expect(box.size, equals(const Size(108, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
-    await buildTest(const VisualDensity(), useText: true);
+    await buildTest(VisualDensity.standard, useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(88, 48)));

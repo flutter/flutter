@@ -12,8 +12,8 @@
 ///    for a catalog of commonly-used Flutter widgets.
 library widgets;
 
-export 'package:vector_math/vector_math_64.dart' show Matrix4;
 export 'package:characters/characters.dart';
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';
@@ -33,6 +33,9 @@ export 'src/widgets/bottom_navigation_bar_item.dart';
 export 'src/widgets/color_filter.dart';
 export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
+export 'src/widgets/default_text_editing_actions.dart';
+export 'src/widgets/default_text_editing_shortcuts.dart';
+export 'src/widgets/desktop_text_selection_toolbar_layout_delegate.dart';
 export 'src/widgets/dismissible.dart';
 export 'src/widgets/disposable_build_context.dart';
 export 'src/widgets/drag_target.dart';
@@ -82,6 +85,7 @@ export 'src/widgets/platform_view.dart';
 export 'src/widgets/preferred_size.dart';
 export 'src/widgets/primary_scroll_controller.dart';
 export 'src/widgets/raw_keyboard_listener.dart';
+export 'src/widgets/reorderable_list.dart';
 export 'src/widgets/restoration.dart';
 export 'src/widgets/restoration_properties.dart';
 export 'src/widgets/router.dart';
@@ -94,6 +98,7 @@ export 'src/widgets/scroll_context.dart';
 export 'src/widgets/scroll_controller.dart';
 export 'src/widgets/scroll_metrics.dart';
 export 'src/widgets/scroll_notification.dart';
+export 'src/widgets/scroll_notification_observer.dart';
 export 'src/widgets/scroll_physics.dart';
 export 'src/widgets/scroll_position.dart';
 export 'src/widgets/scroll_position_with_single_context.dart';
@@ -114,7 +119,10 @@ export 'src/widgets/spacer.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';
+export 'src/widgets/text_editing_action.dart';
+export 'src/widgets/text_editing_intents.dart';
 export 'src/widgets/text_selection.dart';
+export 'src/widgets/text_selection_toolbar_layout_delegate.dart';
 export 'src/widgets/texture.dart';
 export 'src/widgets/ticker_provider.dart';
 export 'src/widgets/title.dart';

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -132,7 +131,7 @@ void main() {
           key: painterKey,
           child: Center(
             child: Card(
-              child: SizedBox.fromSize(size: const Size(200, 300),),
+              child: SizedBox.fromSize(size: const Size(200, 300)),
             ),
           ),
         ),

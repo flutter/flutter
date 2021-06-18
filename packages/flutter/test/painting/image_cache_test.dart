@@ -8,8 +8,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart';
 import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
 
@@ -136,9 +136,9 @@ void main() {
   });
 
   test('Returns null if an error is caught resolving an image', () {
-    final DecoderCallback _basicDecoder = (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    Future<ui.Codec> _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
       return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
-    };
+    }
     final ErrorImageProvider errorImage = ErrorImageProvider();
     expect(() => imageCache!.putIfAbsent(errorImage, () => errorImage.load(errorImage, _basicDecoder)), throwsA(isA<Error>()));
     bool caughtError = false;

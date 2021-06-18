@@ -8,8 +8,8 @@ import 'dart:ui' show window;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart';
 import 'scheduler_tester.dart';
 
 class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBinding {
@@ -117,7 +117,7 @@ void main() {
         scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
       },
       zoneSpecification: ZoneSpecification(
-        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
           // Don't actually run the tasks, just record that it was scheduled.
           timerQueueTasks.add(f);
           return DummyTimer();
@@ -143,13 +143,14 @@ void main() {
       buildFinish: 15000,
       rasterStart: 16000,
       rasterFinish: 20000,
+      frameNumber: 1991
     )]);
 
     final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
     expect(events, hasLength(1));
 
     final Map<String, dynamic> event = events.first;
-    expect(event['number'], isNonNegative);
+    expect(event['number'], 1991);
     expect(event['startTime'], 10000);
     expect(event['elapsed'], 15000);
     expect(event['build'], 5000);

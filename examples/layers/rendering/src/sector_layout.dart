@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/gestures.dart';
 
 const double kTwoPi = 2 * math.pi;
 
@@ -288,9 +287,11 @@ class RenderSectorRing extends RenderSectorWithChildren {
         remainingDeltaTheta -= paddingTheta;
       }
     }
-    return SectorDimensions.withConstraints(constraints,
-                                                deltaRadius: outerDeltaRadius,
-                                                deltaTheta: innerTheta);
+    return SectorDimensions.withConstraints(
+      constraints,
+      deltaRadius: outerDeltaRadius,
+      deltaTheta: innerTheta,
+    );
   }
 
   @override
@@ -400,9 +401,11 @@ class RenderSectorSlice extends RenderSectorWithChildren {
       childRadius += padding;
       remainingDeltaRadius -= padding;
     }
-    return SectorDimensions.withConstraints(constraints,
-                                                deltaRadius: childRadius - parentData!.radius,
-                                                deltaTheta: outerDeltaTheta);
+    return SectorDimensions.withConstraints(
+      constraints,
+      deltaRadius: childRadius - parentData!.radius,
+      deltaTheta: outerDeltaTheta,
+    );
   }
 
   @override
@@ -452,7 +455,6 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 }
 
 class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChildMixin<RenderSector> {
-
   RenderBoxToRenderSectorAdapter({ double innerRadius = 0.0, RenderSector? child })
     : _innerRadius = innerRadius {
     this.child = child;
@@ -564,7 +566,6 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
     result.add(BoxHitTestEntry(this, position));
     return true;
   }
-
 }
 
 class RenderSolidColor extends RenderDecoratedSector {

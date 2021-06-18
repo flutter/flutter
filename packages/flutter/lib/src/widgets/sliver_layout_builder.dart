@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -40,7 +39,7 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   SliverLayoutWidgetBuilder get builder => super.builder;
 
   @override
-  _RenderSliverLayoutBuilder createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
 }
 
 class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> {

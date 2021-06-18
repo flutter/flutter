@@ -192,9 +192,9 @@ void main() {
     );
     expect(
       const Border(
-        left: BorderSide(style: BorderStyle.none, width: 0.0),
-        top: BorderSide(style: BorderStyle.none, width: 0.0),
-        right: BorderSide(style: BorderStyle.none, width: 0.0),
+        left: BorderSide.none,
+        top: BorderSide.none,
+        right: BorderSide.none,
         bottom: BorderSide.none,
       ).isUniform,
       true,

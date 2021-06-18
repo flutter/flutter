@@ -71,10 +71,13 @@ void main() {
       ),
     ) as FlexibleSpaceBarSettings;
 
+    const Key dragTarget = Key('orange box');
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
+            key: dragTarget,
             primary: true,
             slivers: <Widget>[
               SliverPersistentHeader(
@@ -112,13 +115,45 @@ void main() {
     expect(effectiveStyle.color?.alpha, 128); // Which is alpha of .5
 
     // We drag up to fully collapse the space bar.
-    await tester.drag(find.byType(Container).first, const Offset(0, -400.0));
+    await tester.drag(find.byKey(dragTarget), const Offset(0, -400.0));
     await tester.pumpAndSettle();
 
     expect(clipRect.size.height, minExtent);
   });
 
-  testWidgets('Collpased FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar.background is visible when using height other than kToolbarHeight', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/80451
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 300,
+            flexibleSpace: const FlexibleSpaceBar(
+              title: Text('Title'),
+              background:  Text('Background'),
+              collapseMode: CollapseMode.pin,
+            ),
+          ),
+          body: CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                  color: Colors.orange[400],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Opacity backgroundOpacity = tester.firstWidget(find.byType(Opacity));
+    expect(backgroundOpacity.opacity, 1.0);
+  });
+
+  testWidgets('Collapsed FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const double expandedHeight = 200;
     await tester.pumpWidget(
@@ -138,7 +173,7 @@ void main() {
                 delegate: SliverChildListDelegate(
                   <Widget>[
                     for (int i = 0; i < 50; i++)
-                      Container(
+                      SizedBox(
                         height: 200,
                         child: Center(child: Text('Item $i')),
                       ),
@@ -183,7 +218,7 @@ void main() {
                                   rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
                                   flags: <SemanticsFlag>[
                                     SemanticsFlag.isHeader,
-                                    SemanticsFlag.namesRoute
+                                    SemanticsFlag.namesRoute,
                                   ],
                                   label: 'Title',
                                   textDirection: TextDirection.ltr,
@@ -289,7 +324,7 @@ void main() {
                                   rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
                                   flags: <SemanticsFlag>[
                                     SemanticsFlag.isHeader,
-                                    SemanticsFlag.namesRoute
+                                    SemanticsFlag.namesRoute,
                                   ],
                                   label: 'Title',
                                   textDirection: TextDirection.ltr,
@@ -414,7 +449,7 @@ void main() {
                   ),
                 ],
               );
-            }
+            },
           ),
         ),
       ),

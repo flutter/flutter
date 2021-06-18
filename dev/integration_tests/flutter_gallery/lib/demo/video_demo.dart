@@ -4,11 +4,12 @@
 
 import 'dart:async';
 import 'dart:io';
+
 import 'package:connectivity/connectivity.dart';
+import 'package:device_info/device_info.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:device_info/device_info.dart';
 
 class VideoCard extends StatelessWidget {
   const VideoCard({ Key? key, this.controller, this.title, this.subtitle }) : super(key: key);
@@ -92,12 +93,12 @@ class VideoCard extends StatelessWidget {
 }
 
 class VideoPlayerLoading extends StatefulWidget {
-  const VideoPlayerLoading(this.controller);
+  const VideoPlayerLoading(this.controller, {Key? key}) : super(key: key);
 
   final VideoPlayerController? controller;
 
   @override
-  _VideoPlayerLoadingState createState() => _VideoPlayerLoadingState();
+  State<VideoPlayerLoading> createState() => _VideoPlayerLoadingState();
 }
 
 class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
@@ -126,17 +127,17 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
       return VideoPlayer(widget.controller!);
     }
     return Stack(
+      fit: StackFit.expand,
       children: <Widget>[
         VideoPlayer(widget.controller!),
         const Center(child: CircularProgressIndicator()),
       ],
-      fit: StackFit.expand,
     );
   }
 }
 
 class VideoPlayPause extends StatefulWidget {
-  const VideoPlayPause(this.controller);
+  const VideoPlayPause(this.controller, {Key? key}) : super(key: key);
 
   final VideoPlayerController? controller;
 
@@ -202,15 +203,16 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
 
 class FadeAnimation extends StatefulWidget {
   const FadeAnimation({
+    Key? key,
     this.child,
     this.duration = const Duration(milliseconds: 500),
-  });
+  }) : super(key: key);
 
   final Widget? child;
   final Duration duration;
 
   @override
-  _FadeAnimationState createState() => _FadeAnimationState();
+  State<FadeAnimation> createState() => _FadeAnimationState();
 }
 
 class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProviderStateMixin {
@@ -264,15 +266,16 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
 
 class ConnectivityOverlay extends StatefulWidget {
   const ConnectivityOverlay({
+    Key? key,
     this.child,
     this.connectedCompleter,
-  });
+  }) : super(key: key);
 
   final Widget? child;
   final Completer<void>? connectedCompleter;
 
   @override
-  _ConnectivityOverlayState createState() => _ConnectivityOverlayState();
+  State<ConnectivityOverlay> createState() => _ConnectivityOverlayState();
 }
 
 class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
@@ -345,7 +348,7 @@ class VideoDemo extends StatefulWidget {
   static const String routeName = '/video';
 
   @override
-  _VideoDemoState createState() => _VideoDemoState();
+  State<VideoDemo> createState() => _VideoDemoState();
 }
 
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -416,6 +419,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       ),
       body: isSupported
         ? ConnectivityOverlay(
+            connectedCompleter: connectedCompleter,
             child: Scrollbar(
               child: ListView(
                 children: <Widget>[
@@ -432,7 +436,6 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
                 ],
               ),
             ),
-            connectedCompleter: connectedCompleter,
           )
         : const Center(
             child: Text(

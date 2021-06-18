@@ -5,9 +5,8 @@
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -16,7 +15,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
-      return Container(
+      return SizedBox(
         height: 200.0,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -190,7 +189,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
-      return Container(
+      return SizedBox(
         height: 200.0,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -330,7 +329,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
-      return Container(
+      return SizedBox(
         height: 200.0,
         child: Text('Item $i'),
       );
@@ -460,7 +459,7 @@ void main() {
 
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SliverToBoxAdapter(
-        child: Container(
+        child: SizedBox(
           height: 200.0,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -596,7 +595,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
-      return Container(
+      return SizedBox(
         height: 200.0,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -743,7 +742,7 @@ void main() {
                   final int item = i - 15;
                   return SliverToBoxAdapter(
                     key: ValueKey<int>(item),
-                    child: Container(
+                    child: SizedBox(
                       height: 200.0,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,

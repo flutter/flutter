@@ -102,6 +102,12 @@ abstract class MaterialLocalizations {
   /// The tooltip for the [MonthPicker]'s "previous month" button.
   String get previousMonthTooltip;
 
+  /// The tooltip for the [PaginatedDataTable]'s "first page" button.
+  String get firstPageTooltip;
+
+  /// The tooltip for the [PaginatedDataTable]'s "last page" button.
+  String get lastPageTooltip;
+
   /// The tooltip for the [PaginatedDataTable]'s "next page" button.
   String get nextPageTooltip;
 
@@ -442,7 +448,7 @@ abstract class MaterialLocalizations {
   /// Tooltip used to put the time picker into [TimePickerEntryMode.input].
   String get inputTimeModeButtonLabel;
 
-  /// The semantics label used to indicate which account is signed in in the
+  /// The semantics label used to indicate which account is signed in the
   /// [UserAccountsDrawerHeader] widget.
   String get signedInLabel;
 
@@ -887,6 +893,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get previousPageTooltip => 'Previous page';
+
+  @override
+  String get firstPageTooltip => 'First page';
+
+  @override
+  String get lastPageTooltip => 'Last page';
 
   @override
   String get showMenuTooltip => 'Show menu';

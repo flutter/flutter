@@ -3,16 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../src/common.dart';
 
 void main() {
   testWithoutContext('DoctorResultEvent sends usage event for each sub validator', () async {
-    final Usage usage = MockUsage();
+    final TestUsage usage = TestUsage();
     final GroupedValidator groupedValidator = FakeGroupedValidator(<DoctorValidator>[
       FakeDoctorValidator('a'),
       FakeDoctorValidator('b'),
@@ -27,14 +26,16 @@ void main() {
     );
 
     expect(doctorResultEvent.send, returnsNormally);
-
-    verify(usage.sendEvent('doctor-result', any, label: anyNamed('label'))).called(3);
+    expect(usage.events.length, 3);
+    expect(usage.events, contains(
+      const TestUsageEvent('doctor-result', 'FakeDoctorValidator', label: 'crash'),
+    ));
   });
 
   testWithoutContext('DoctorResultEvent does not crash if a synthetic crash result was used instead'
     ' of validation. This happens when a grouped validator throws an exception, causing subResults to never '
     ' be instantiated.', () async {
-    final Usage usage = MockUsage();
+    final TestUsage usage = TestUsage();
     final GroupedValidator groupedValidator = FakeGroupedValidator(<DoctorValidator>[
       FakeDoctorValidator('a'),
       FakeDoctorValidator('b'),
@@ -50,11 +51,14 @@ void main() {
 
     expect(doctorResultEvent.send, returnsNormally);
 
-    verify(usage.sendEvent('doctor-result', any, label: anyNamed('label'))).called(1);
+    expect(usage.events.length, 1);
+    expect(usage.events, contains(
+      const TestUsageEvent('doctor-result', 'FakeGroupedValidator', label: 'crash'),
+    ));
   });
 
   testWithoutContext('Reports null safe analytics events', () {
-    final Usage usage = MockUsage();
+    final TestUsage usage = TestUsage();
     final PackageConfig packageConfig = PackageConfig(<Package>[
       Package('foo', Uri.parse('file:///foo/'), languageVersion: LanguageVersion(2, 12)),
       Package('bar', Uri.parse('file:///fizz/'), languageVersion: LanguageVersion(2, 1)),
@@ -68,15 +72,17 @@ void main() {
       usage,
     ).send();
 
-    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
-    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
+    expect(usage.events, unorderedEquals(<TestUsageEvent>[
+      const TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound'),
+      TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: CustomDimensions.fromMap(<String, String>{
       'cd49': '1', 'cd50': '3',
-    })).called(1);
-    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: '2.12')).called(1);
+      })),
+      const TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: '2.12'),
+    ]));
   });
 
   testWithoutContext('Does not crash if main package is missing', () {
-    final Usage usage = MockUsage();
+    final TestUsage usage = TestUsage();
     final PackageConfig packageConfig = PackageConfig(<Package>[
       Package('foo', Uri.parse('file:///foo/lib/'), languageVersion: LanguageVersion(2, 12)),
       Package('bar', Uri.parse('file:///fizz/lib/'), languageVersion: LanguageVersion(2, 1)),
@@ -90,11 +96,33 @@ void main() {
       usage,
     ).send();
 
-    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
-    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
-      'cd49': '1', 'cd50': '3',
-    })).called(1);
-    verifyNever(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: anyNamed('label')));
+    expect(usage.events, unorderedEquals(<TestUsageEvent>[
+      const TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound'),
+      TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: CustomDimensions.fromMap(<String, String>{
+        'cd49': '1', 'cd50': '3',
+      })),
+    ]));
+  });
+
+  testWithoutContext('a null language version is treated as unmigrated', () {
+    final TestUsage usage = TestUsage();
+    final PackageConfig packageConfig = PackageConfig(<Package>[
+      Package('foo', Uri.parse('file:///foo/lib/'), languageVersion: null),
+    ]);
+
+    NullSafetyAnalysisEvent(
+      packageConfig,
+      NullSafetyMode.sound,
+      'something-unrelated',
+      usage,
+    ).send();
+
+    expect(usage.events, unorderedEquals(<TestUsageEvent>[
+      const TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound'),
+      TestUsageEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: CustomDimensions.fromMap(<String, String>{
+        'cd49': '0', 'cd50': '1',
+      })),
+    ]));
   });
 }
 
@@ -110,5 +138,3 @@ class FakeDoctorValidator extends DoctorValidator {
     return ValidationResult.crash(Object());
   }
 }
-
-class MockUsage extends Mock implements Usage {}

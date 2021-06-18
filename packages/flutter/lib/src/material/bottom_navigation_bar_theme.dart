@@ -43,6 +43,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.type,
+    this.enableFeedback,
   });
 
   /// The color of the [BottomNavigationBar] itself.
@@ -114,6 +115,11 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// See [BottomNavigationBar.type].
   final BottomNavigationBarType? type;
 
+  /// If specified, defines the feedback property for [BottomNavigationBar].
+  ///
+  /// If [BottomNavigationBar.enableFeedback] is provided, [enableFeedback] is ignored.
+  final bool? enableFeedback;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BottomNavigationBarThemeData copyWith({
@@ -128,6 +134,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
     bool? showSelectedLabels,
     bool? showUnselectedLabels,
     BottomNavigationBarType? type,
+    bool? enableFeedback,
   }) {
     return BottomNavigationBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -141,6 +148,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
       showSelectedLabels: showSelectedLabels ?? this.showSelectedLabels,
       showUnselectedLabels: showUnselectedLabels ?? this.showUnselectedLabels,
       type: type ?? this.type,
+      enableFeedback: enableFeedback ?? this.enableFeedback,
     );
   }
 
@@ -163,6 +171,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
       showSelectedLabels: t < 0.5 ? a?.showSelectedLabels : b?.showSelectedLabels,
       showUnselectedLabels: t < 0.5 ? a?.showUnselectedLabels : b?.showUnselectedLabels,
       type: t < 0.5 ? a?.type : b?.type,
+      enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
     );
   }
 
@@ -180,6 +189,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
       showSelectedLabels,
       showUnselectedLabels,
       type,
+      enableFeedback,
     );
   }
 
@@ -200,7 +210,8 @@ class BottomNavigationBarThemeData with Diagnosticable {
         && other.unselectedLabelStyle == unselectedLabelStyle
         && other.showSelectedLabels == showSelectedLabels
         && other.showUnselectedLabels == showUnselectedLabels
-        && other.type == type;
+        && other.type == type
+        && other.enableFeedback == enableFeedback;
   }
 
   @override
@@ -217,6 +228,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('showSelectedLabels', showSelectedLabels, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showUnselectedLabels', showUnselectedLabels, defaultValue: null));
     properties.add(DiagnosticsProperty<BottomNavigationBarType>('type', type, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
   }
 }
 

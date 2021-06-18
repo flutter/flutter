@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../application_package.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../build_info.dart';
+import '../base/terminal.dart';
 import '../convert.dart' show utf8;
-import '../globals.dart' as globals;
 
 /// User message when no development certificates are found in the keychain.
 ///
@@ -70,9 +68,7 @@ const String fixWithDevelopmentTeamInstruction = '''
        open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
      in the project settings
-  3- Make sure a 'Development Team' is selected.\u0020
-     - For Xcode 10, look under General > Signing > Team.
-     - For Xcode 11 and newer, look under Signing & Capabilities > Team.
+  3- Make sure a 'Development Team' is selected under Signing & Capabilities > Team.\u0020
      You may need to:
          - Log in with your Apple ID in Xcode first
          - Ensure you have a valid unique Bundle ID
@@ -95,13 +91,13 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-z
 ///
 /// Will return null if none are found, if the user cancels or if the Xcode
 /// project has a development team set in the project's build settings.
-Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
-  @required BuildableIOSApp iosApp,
-  @required ProcessManager processManager,
-  @required Logger logger,
-  @required BuildInfo buildInfo,
+Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeam({
+  required Map<String, String>? buildSettings,
+  required ProcessManager processManager,
+  required Logger logger,
+  required Config config,
+  required Terminal terminal,
 }) async {
-  final Map<String, String> buildSettings = await iosApp.project.buildSettingsForBuildInfo(buildInfo);
   if (buildSettings == null) {
     return null;
   }
@@ -144,16 +140,17 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
 
   final List<String> validCodeSigningIdentities = findIdentityStdout
       .split('\n')
-      .map<String>((String outputLine) {
+      .map<String?>((String outputLine) {
         return _securityFindIdentityDeveloperIdentityExtractionPattern
             .firstMatch(outputLine)
             ?.group(1);
       })
       .where(_isNotEmpty)
+      .whereType<String>()
       .toSet() // Unique.
       .toList();
 
-  final String signingIdentity = await _chooseSigningIdentity(validCodeSigningIdentities, logger);
+  final String? signingIdentity = await _chooseSigningIdentity(validCodeSigningIdentities, logger, config, terminal);
 
   // If none are chosen, return null.
   if (signingIdentity == null) {
@@ -162,7 +159,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
 
   logger.printStatus('Signing iOS app for device deployment using developer identity: "$signingIdentity"');
 
-  final String signingCertificateId =
+  final String? signingCertificateId =
       _securityFindIdentityCertificateCnExtractionPattern
           .firstMatch(signingIdentity)
           ?.group(1);
@@ -196,14 +193,24 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
     return null;
   }
 
-  return <String, String>{
-    'DEVELOPMENT_TEAM': _certificateOrganizationalUnitExtractionPattern
+  final String? developmentTeam = _certificateOrganizationalUnitExtractionPattern
       .firstMatch(opensslOutput)
-      ?.group(1),
+      ?.group(1);
+  if (developmentTeam == null) {
+    return null;
+  }
+
+  return <String, String>{
+    'DEVELOPMENT_TEAM': developmentTeam,
   };
 }
 
-Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, Logger logger) async {
+Future<String?> _chooseSigningIdentity(
+  List<String> validCodeSigningIdentities,
+  Logger logger,
+  Config config,
+  Terminal terminal,
+) async {
   // The user has no valid code signing identities.
   if (validCodeSigningIdentities.isEmpty) {
     logger.printError(noCertificatesInstruction, emphasis: true);
@@ -215,7 +222,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, L
   }
 
   if (validCodeSigningIdentities.length > 1) {
-    final String savedCertChoice = globals.config.getValue('ios-signing-cert') as String;
+    final String? savedCertChoice = config.getValue('ios-signing-cert') as String?;
 
     if (savedCertChoice != null) {
       if (validCodeSigningIdentities.contains(savedCertChoice)) {
@@ -228,7 +235,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, L
 
     // If terminal UI can't be used, just attempt with the first valid certificate
     // since we can't ask the user.
-    if (!globals.terminal.usesTerminalUi) {
+    if (!terminal.usesTerminalUi) {
       return validCodeSigningIdentities.first;
     }
 
@@ -242,7 +249,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, L
     }
     logger.printStatus('  a) Abort', emphasis: true);
 
-    final String choice = await globals.terminal.promptForCharInput(
+    final String choice = await terminal.promptForCharInput(
       List<String>.generate(count, (int number) => '${number + 1}')
           ..add('a'),
       prompt: 'Please select a certificate for code signing',
@@ -256,7 +263,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, L
     } else {
       final String selectedCert = validCodeSigningIdentities[int.parse(choice) - 1];
       logger.printStatus('Certificate choice "$selectedCert" saved');
-      globals.config.setValue('ios-signing-cert', selectedCert);
+      config.setValue('ios-signing-cert', selectedCert);
       return selectedCert;
     }
   }
@@ -265,4 +272,4 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, L
 }
 
 /// Returns true if s is a not empty string.
-bool _isNotEmpty(String s) => s != null && s.isNotEmpty;
+bool _isNotEmpty(String? s) => s != null && s.isNotEmpty;

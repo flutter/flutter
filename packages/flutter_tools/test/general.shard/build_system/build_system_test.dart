@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -14,18 +16,18 @@ import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/convert.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
-  FileSystem fileSystem;
-  Environment environment;
-  Target fooTarget;
-  Target barTarget;
-  Target fizzTarget;
-  Target sharedTarget;
-  int fooInvocations;
-  int barInvocations;
-  int shared;
+  late FileSystem fileSystem;
+  late Environment environment;
+  late Target fooTarget;
+  late Target barTarget;
+  late Target fizzTarget;
+  late Target sharedTarget;
+  late int fooInvocations;
+  late int barInvocations;
+  late int shared;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -132,7 +134,7 @@ void main() {
 
     expect(stampFile, exists);
 
-    final Map<String, dynamic> stampContents = castStringKeyedMap(
+    final Map<String, Object?>? stampContents = castStringKeyedMap(
       json.decode(stampFile.readAsStringSync()));
 
     expect(stampContents, containsPair('inputs', <Object>['/foo.dart']));
@@ -225,7 +227,7 @@ void main() {
 
   testWithoutContext('Automatically cleans old outputs when build graph changes', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    final TestTarget testTarget = TestTarget((Environment envionment) async {
+    final TestTarget testTarget = TestTarget((Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -236,7 +238,7 @@ void main() {
 
     expect(environment.buildDir.childFile('foo.out'), exists);
 
-    final TestTarget testTarget2 = TestTarget((Environment envionment) async {
+    final TestTarget testTarget2 = TestTarget((Environment environment) async {
       environment.buildDir.childFile('bar.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -248,7 +250,7 @@ void main() {
     expect(environment.buildDir.childFile('foo.out'), isNot(exists));
   });
 
-  testWithoutContext('Does not crash when filesytem and cache are out of sync', () async {
+  testWithoutContext('Does not crash when filesystem and cache are out of sync', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     final TestTarget testWithoutContextTarget = TestTarget((Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
@@ -276,7 +278,7 @@ void main() {
 
   testWithoutContext('Reruns build if stamp is corrupted', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    final TestTarget testWithoutContextTarget = TestTarget((Environment envionment) async {
+    final TestTarget testWithoutContextTarget = TestTarget((Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -308,7 +310,7 @@ void main() {
   testWithoutContext('Can describe itself with JSON output', () {
     environment.buildDir.createSync(recursive: true);
 
-    expect(fooTarget.toJson(environment), <String, dynamic>{
+    expect(fooTarget.toJson(environment), <String, Object?>{
       'inputs':  <Object>[
         '/foo.dart',
       ],
@@ -564,7 +566,7 @@ void main() {
       logger: BufferLogger.test(),
       fileSystem: fileSystem,
     );
-    final Environment testEnvironmentProfle = Environment.test(
+    final Environment testEnvironmentProfile = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('output'),
       defines: <String, String>{
@@ -588,11 +590,11 @@ void main() {
     // Verify debug output was created
     expect(fileSystem.file('output/debug'), exists);
 
-    await buildSystem.build(releaseTarget, testEnvironmentProfle);
+    await buildSystem.build(releaseTarget, testEnvironmentProfile);
 
     // Last build config is updated properly
-    expect(testEnvironmentProfle.outputDir.childFile('.last_build_id'), exists);
-    expect(testEnvironmentProfle.outputDir.childFile('.last_build_id').readAsStringSync(),
+    expect(testEnvironmentProfile.outputDir.childFile('.last_build_id'), exists);
+    expect(testEnvironmentProfile.outputDir.childFile('.last_build_id').readAsStringSync(),
       'c20b3747fb2aa148cc4fd39bfbbd894f');
 
     // Verify debug output removeds
@@ -643,27 +645,64 @@ void main() {
     expect(thirdResult.outputFiles, isEmpty);
   });
 
+  testWithoutContext('Build completes all dependencies before failing', () async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem, FakePlatform(
+      operatingSystem: 'linux',
+      numberOfProcessors: 10, // Ensure the tool will process tasks concurrently.
+    ));
+    final Completer<void> startB = Completer<void>();
+    final Completer<void> startC = Completer<void>();
+    final Completer<void> finishB = Completer<void>();
+
+    final TestTarget a = TestTarget((Environment environment) {
+      throw StateError('Should not run');
+    })..name = 'A';
+    final TestTarget b = TestTarget((Environment environment) async {
+      startB.complete();
+      await finishB.future;
+      throw Exception('1');
+    })..name = 'B';
+    final TestTarget c = TestTarget((Environment environment) {
+      startC.complete();
+      throw Exception('2');
+    })..name = 'C';
+    a.dependencies.addAll(<Target>[b, c]);
+
+    final Future<BuildResult> pendingResult = buildSystem.build(a, environment);
+    await startB.future;
+    await startC.future;
+
+    finishB.complete();
+
+    final BuildResult result = await pendingResult;
+
+    expect(result.success, false);
+    expect(result.exceptions.keys, containsAll(<String>['B', 'C']));
+  });
+
 }
 
-BuildSystem setUpBuildSystem(FileSystem fileSystem) {
+BuildSystem setUpBuildSystem(FileSystem fileSystem, [FakePlatform? platform]) {
   return FlutterBuildSystem(
     fileSystem: fileSystem,
     logger: BufferLogger.test(),
-    platform: FakePlatform(operatingSystem: 'linux'),
+    platform: platform ?? FakePlatform(operatingSystem: 'linux'),
   );
 }
 
 class TestTarget extends Target {
-  TestTarget([this._build, this._canSkip]);
+  TestTarget([Future<void> Function(Environment environment)? build, this._canSkip])
+      : _build = build ?? ((Environment environment) async {});
 
   final Future<void> Function(Environment environment) _build;
 
-  final bool Function(Environment environment) _canSkip;
+  final bool Function(Environment environment)? _canSkip;
 
   @override
   bool canSkip(Environment environment) {
     if (_canSkip != null) {
-      return _canSkip(environment);
+      return _canSkip!(environment);
     }
     return super.canSkip(environment);
   }

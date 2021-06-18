@@ -5,8 +5,8 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
@@ -20,6 +20,7 @@ class TestCanvas implements Canvas {
 void main() {
   late ui.Image image300x300;
   late ui.Image image300x200;
+
   setUpAll(() async {
     image300x300 = await createTestImage(width: 300, height: 300, cache: false);
     image300x200 = await createTestImage(width: 300, height: 200, cache: false);
@@ -36,7 +37,7 @@ void main() {
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image300x300,
       fit: BoxFit.cover,
-      alignment: const Alignment(-1.0, 0.0),
+      alignment: Alignment.centerLeft,
     );
 
     final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
@@ -100,12 +101,42 @@ void main() {
 
     expect(
       messages.single,
-      'Image TestImage has a display size of 200×100 but a decode size of 300×300, which uses an additional 364kb.\n\n'
+      'Image TestImage has a display size of 200×100 but a decode size of 300×300, which uses an additional 364KB.\n\n'
       'Consider resizing the asset ahead of time, supplying a cacheWidth parameter of 200, a cacheHeight parameter of 100, or using a ResizeImage.',
     );
 
     debugInvertOversizedImages = false;
     FlutterError.onError = oldFlutterError;
+  });
+
+  test('debugInvertOversizedImages smaller than overhead allowance', () async {
+    debugInvertOversizedImages = true;
+    final FlutterExceptionHandler? oldFlutterError = FlutterError.onError;
+
+    final List<String> messages = <String>[];
+    FlutterError.onError = (FlutterErrorDetails details) {
+      messages.add(details.exceptionAsString());
+    };
+
+    try {
+      // Create a 290x290 sized image, which is ~24kb less than the allocated size,
+      // and below the default debugImageOverheadAllowance size of 128kb.
+      const Rect rect = Rect.fromLTWH(50.0, 50.0, 290.0, 290.0);
+      final TestCanvas canvas = TestCanvas();
+
+      paintImage(
+        canvas: canvas,
+        rect: rect,
+        image: image300x300,
+        debugImageLabel: 'TestImage',
+        fit: BoxFit.fill,
+      );
+
+      expect(messages, isEmpty);
+    } finally {
+      debugInvertOversizedImages = false;
+      FlutterError.onError = oldFlutterError;
+    }
   });
 
   test('centerSlice with scale ≠ 1', () async {

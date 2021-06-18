@@ -215,7 +215,7 @@ void main() {
     );
   });
 
-  void checkNeedsAddToScene(Layer layer, void mutateCallback()) {
+  void checkNeedsAddToScene(Layer layer, void Function() mutateCallback) {
     layer.debugMarkClean();
     layer.updateSubtreeNeedsAddToScene();
     expect(layer.debugSubtreeNeedsAddToScene, false);
@@ -294,8 +294,12 @@ void main() {
 
   test('mutating PerformanceOverlayLayer fields triggers needsAddToScene', () {
     final PerformanceOverlayLayer layer = PerformanceOverlayLayer(
-        overlayRect: Rect.zero, optionsMask: 0, rasterizerThreshold: 0,
-        checkerboardRasterCacheImages: false, checkerboardOffscreenLayers: false);
+      overlayRect: Rect.zero,
+      optionsMask: 0,
+      rasterizerThreshold: 0,
+      checkerboardRasterCacheImages: false,
+      checkerboardOffscreenLayers: false,
+    );
     checkNeedsAddToScene(layer, () {
       layer.overlayRect = unitRect;
     });
@@ -321,7 +325,7 @@ void main() {
   test('mutating ClipRRectLayer fields triggers needsAddToScene', () {
     final ClipRRectLayer layer = ClipRRectLayer(clipRRect: RRect.zero);
     checkNeedsAddToScene(layer, () {
-      layer.clipRRect = RRect.fromRectAndRadius(unitRect, const Radius.circular(0));
+      layer.clipRRect = RRect.fromRectAndRadius(unitRect, Radius.zero);
     });
     checkNeedsAddToScene(layer, () {
       layer.clipBehavior = Clip.antiAliasWithSaveLayer;
@@ -383,7 +387,11 @@ void main() {
 
   test('mutating PhysicalModelLayer fields triggers needsAddToScene', () {
     final PhysicalModelLayer layer = PhysicalModelLayer(
-        clipPath: Path(), elevation: 0, color: const Color(0x00000000), shadowColor: const Color(0x00000000));
+      clipPath: Path(),
+      elevation: 0,
+      color: const Color(0x00000000),
+      shadowColor: const Color(0x00000000),
+    );
     checkNeedsAddToScene(layer, () {
       final Path newPath = Path();
       newPath.addRect(unitRect);

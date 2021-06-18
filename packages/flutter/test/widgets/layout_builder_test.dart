@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('LayoutBuilder parent size', (WidgetTester tester) async {
@@ -110,7 +110,7 @@ void main() {
                   width: childWidth,
                   height: childHeight,
                 );
-              }
+              },
             );
           },
         ),
@@ -226,10 +226,10 @@ void main() {
                     width: layoutBuilderSize.width,
                     height: layoutBuilderSize.height,
                   );
-                }
+                },
               ),
             );
-          }
+          },
         ),
       ),
     );
@@ -253,7 +253,7 @@ void main() {
       builder: (BuildContext context, BoxConstraints constraints) {
         built += 1;
         return Container();
-      }
+      },
     );
     expect(built, 0);
 
@@ -277,7 +277,7 @@ void main() {
         built += 1;
         MediaQuery.of(context);
         return Container();
-      }
+      },
     );
     expect(built, 0);
 
@@ -325,9 +325,9 @@ void main() {
     expect(built, 1);
   });
 
-  testWidgets('SliverLayoutBuilder and Inherited -- do rebuild when not using inherited',
+  testWidgets(
+    'SliverLayoutBuilder and Inherited -- do rebuild when not using inherited',
     (WidgetTester tester) async {
-
       int built = 0;
       final Widget target = Directionality(
         textDirection: TextDirection.ltr,
@@ -357,7 +357,8 @@ void main() {
           child: target,
       ));
       expect(built, 2);
-  });
+    },
+  );
 
   testWidgets('nested SliverLayoutBuilder', (WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
@@ -662,6 +663,38 @@ void main() {
     expect(builderInvocationCount, 3);
     expect(spy.performLayoutCount, 3);
     expect(spy.performResizeCount, 2);
+  });
+
+  testWidgets('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (WidgetTester tester) async {
+    Size? childSize;
+    int buildCount = 0;
+
+    Future<void> pumpTestWidget(Size size) async {
+      await tester.pumpWidget(
+        // Center is used to give the SizedBox the power to determine constraints for LayoutBuilder
+        Center(
+          child: SizedBox.fromSize(
+            size: size,
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              buildCount++;
+              if (buildCount > 1) {
+                final _RenderLayoutSpy spy = tester.renderObject(find.byType(_LayoutSpy));
+                childSize = spy.size;
+              }
+              return ColoredBox(
+                color: const Color(0xffffffff),
+                child: _LayoutSpy(),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await pumpTestWidget(const Size(10.0, 10.0));
+    expect(childSize, isNull);
+    await pumpTestWidget(const Size(10.0, 10.0));
+    expect(childSize, const Size(10.0, 10.0));
   });
 }
 

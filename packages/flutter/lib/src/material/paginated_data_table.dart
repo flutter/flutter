@@ -4,9 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/widgets.dart';
 
 import 'button_bar.dart';
 import 'card.dart';
@@ -27,7 +26,7 @@ import 'theme.dart';
 /// A paginated data table shows [rowsPerPage] rows of data per page and
 /// provides controls for showing other pages.
 ///
-/// Data is read lazily from from a [DataTableSource]. The widget is presented
+/// Data is read lazily from a [DataTableSource]. The widget is presented
 /// as a [Card].
 ///
 /// See also:
@@ -78,13 +77,16 @@ class PaginatedDataTable extends StatefulWidget {
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
     this.showCheckboxColumn = true,
+    this.showFirstLastButtons = false,
     this.initialFirstRowIndex = 0,
     this.onPageChanged,
     this.rowsPerPage = defaultRowsPerPage,
     this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.arrowHeadColor,
     required this.source,
+    this.checkboxHorizontalMargin,
   }) : assert(actions == null || (actions != null && header != null)),
        assert(columns != null),
        assert(dragStartBehavior != null),
@@ -96,6 +98,7 @@ class PaginatedDataTable extends StatefulWidget {
        assert(horizontalMargin != null),
        assert(columnSpacing != null),
        assert(showCheckboxColumn != null),
+       assert(showFirstLastButtons != null),
        assert(rowsPerPage != null),
        assert(rowsPerPage > 0),
        assert(() {
@@ -164,6 +167,10 @@ class PaginatedDataTable extends StatefulWidget {
   /// the content in the first data column.
   ///
   /// This value defaults to 24.0 to adhere to the Material Design specifications.
+  ///
+  /// If [checkboxHorizontalMargin] is null, then [horizontalMargin] is also the
+  /// margin between the edge of the table and the checkbox, as well as the
+  /// margin between the checkbox and the content in the first data column.
   final double horizontalMargin;
 
   /// The horizontal margin between the contents of each data column.
@@ -173,6 +180,9 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// {@macro flutter.material.dataTable.showCheckboxColumn}
   final bool showCheckboxColumn;
+
+  /// Flag to display the pagination buttons to go to the first and last pages.
+  final bool showFirstLastButtons;
 
   /// The index of the first row to display when the widget is first created.
   final int? initialFirstRowIndex;
@@ -218,6 +228,16 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// Horizontal margin around the checkbox, if it is displayed.
+  ///
+  /// If null, then [horizontalMargin] is used as the margin between the edge
+  /// of the table and the checkbox, as well as the margin between the checkbox
+  /// and the content in the first data column. This value defaults to 24.0.
+  final double? checkboxHorizontalMargin;
+
+  /// Defines the color of the arrow heads in the footer.
+  final Color? arrowHeadColor;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -323,6 +343,10 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     return result;
   }
 
+  void _handleFirst() {
+    pageTo(0);
+  }
+
   void _handlePrevious() {
     pageTo(math.max(_firstRowIndex - widget.rowsPerPage, 0));
   }
@@ -330,6 +354,13 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   void _handleNext() {
     pageTo(_firstRowIndex + widget.rowsPerPage);
   }
+
+  void _handleLast() {
+    pageTo(((_rowCount - 1) / widget.rowsPerPage).floor() * widget.rowsPerPage);
+  }
+
+  bool _isNextPageUnavailable() => !_rowCountApproximate &&
+      (_firstRowIndex + widget.rowsPerPage >= _rowCount);
 
   final GlobalKey _tableKey = GlobalKey();
 
@@ -365,7 +396,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             padding: const EdgeInsetsDirectional.only(start: 24.0 - 8.0 * 2.0),
             child: action,
           );
-        }).toList()
+        }).toList(),
       );
     }
 
@@ -413,19 +444,35 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         ),
       ),
       Container(width: 32.0),
+      if (widget.showFirstLastButtons)
+        IconButton(
+          icon: Icon(Icons.skip_previous, color: widget.arrowHeadColor),
+          padding: EdgeInsets.zero,
+          tooltip: localizations.firstPageTooltip,
+          onPressed: _firstRowIndex <= 0 ? null : _handleFirst,
+        ),
       IconButton(
-        icon: const Icon(Icons.chevron_left),
+        icon: Icon(Icons.chevron_left, color: widget.arrowHeadColor),
         padding: EdgeInsets.zero,
         tooltip: localizations.previousPageTooltip,
         onPressed: _firstRowIndex <= 0 ? null : _handlePrevious,
       ),
       Container(width: 24.0),
       IconButton(
-        icon: const Icon(Icons.chevron_right),
+        icon: Icon(Icons.chevron_right, color: widget.arrowHeadColor),
         padding: EdgeInsets.zero,
         tooltip: localizations.nextPageTooltip,
-        onPressed: (!_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount)) ? null : _handleNext,
+        onPressed: _isNextPageUnavailable() ? null : _handleNext,
       ),
+      if (widget.showFirstLastButtons)
+        IconButton(
+          icon: Icon(Icons.skip_next, color: widget.arrowHeadColor),
+          padding: EdgeInsets.zero,
+          tooltip: localizations.lastPageTooltip,
+          onPressed: _isNextPageUnavailable()
+              ? null
+              : _handleLast,
+        ),
       Container(width: 14.0),
     ]);
 
@@ -444,11 +491,11 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
                     // list and then tweak them appropriately.
                     // See https://material.io/design/components/data-tables.html#tables-within-cards
-                    style: _selectedRowCount > 0 ? themeData.textTheme.subtitle1!.copyWith(color: themeData.accentColor)
+                    style: _selectedRowCount > 0 ? themeData.textTheme.subtitle1!.copyWith(color: themeData.colorScheme.secondary)
                                                  : themeData.textTheme.headline6!.copyWith(fontWeight: FontWeight.w400),
                     child: IconTheme.merge(
                       data: const IconThemeData(
-                        opacity: 0.54
+                        opacity: 0.54,
                       ),
                       child: Ink(
                         height: 64.0,
@@ -481,6 +528,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     dataRowHeight: widget.dataRowHeight,
                     headingRowHeight: widget.headingRowHeight,
                     horizontalMargin: widget.horizontalMargin,
+                    checkboxHorizontalMargin: widget.checkboxHorizontalMargin,
                     columnSpacing: widget.columnSpacing,
                     showCheckboxColumn: widget.showCheckboxColumn,
                     showBottomBorder: true,
@@ -492,9 +540,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 style: footerTextStyle!,
                 child: IconTheme.merge(
                   data: const IconThemeData(
-                    opacity: 0.54
+                    opacity: 0.54,
                   ),
-                  child: Container(
+                  child: SizedBox(
                     // TODO(bkonyi): this won't handle text zoom correctly,
                     //  https://github.com/flutter/flutter/issues/48522
                     height: 56.0,

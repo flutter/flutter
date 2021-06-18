@@ -20,7 +20,7 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   final Key? secondPanelKey;
   final bool canTapOnHeader;
   final Color? dividerColor;
-  final int elevation;
+  final double elevation;
 
   /// If null, the default [ExpansionPanelList]'s expanded header padding value is applied via [defaultExpandedHeaderPadding]
   final EdgeInsets? expandedHeaderPadding;
@@ -32,7 +32,7 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   }
 
   @override
-  _SimpleExpansionPanelListTestWidgetState createState() => _SimpleExpansionPanelListTestWidgetState();
+  State<SimpleExpansionPanelListTestWidget> createState() => _SimpleExpansionPanelListTestWidgetState();
 }
 
 class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPanelListTestWidget> {
@@ -103,9 +103,7 @@ class ExpansionPanelListSemanticsTestState extends State<ExpansionPanelListSeman
                   ),
                 );
               },
-              body: Container(
-                child: const Placeholder(),
-              ),
+              body: const Placeholder(),
             ),
           ],
         ),
@@ -730,8 +728,8 @@ void main() {
               home: Scaffold(
                 body: SingleChildScrollView(
                   child: isRadioList
-                  ? buildRadioExpansionPanelList()
-                  : buildExpansionPanelList(setState)
+                    ? buildRadioExpansionPanelList()
+                    : buildExpansionPanelList(setState),
                 ),
                 floatingActionButton: FloatingActionButton(
                   onPressed: () => setState(() { isRadioList = !isRadioList; }),
@@ -830,7 +828,7 @@ void main() {
                     ],
                   ),
                 );
-              }
+              },
             ),
           );
         },
@@ -893,7 +891,7 @@ void main() {
               ),
             ),
           );
-        }
+        },
       ),
     );
 
@@ -1399,7 +1397,7 @@ void main() {
   });
 
   testWidgets('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
-    const int _elevation = 8;
+    const double _elevation = 8;
 
     // Test for ExpansionPanelList.
     await tester.pumpWidget(const MaterialApp(
@@ -1455,7 +1453,7 @@ void main() {
     expect(exception, isAssertionError);
     expect((exception as AssertionError).toString(), contains(
       'Invalid value for elevation. See the kElevationToShadow constant for'
-      ' possible elevation values.'
+      ' possible elevation values.',
     ));
   });
 

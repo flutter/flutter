@@ -1022,7 +1022,7 @@ void main() {
 
     final TestPointer pointer1 = TestPointer(1);
 
-    final PointerDownEvent down = pointer1.down(const Offset(0.0, 0.0));
+    final PointerDownEvent down = pointer1.down(Offset.zero);
     drag.addPointer(down);
     tap.addPointer(down);
 

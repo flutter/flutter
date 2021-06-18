@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -31,7 +30,7 @@ const String _extensionMethodName = 'driver';
 /// eventually completes to a string response.
 typedef DataHandler = Future<String> Function(String? message);
 
-class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
+class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding, TestDefaultBinaryMessengerBinding {
   _DriverBinding(this._handler, this._silenceErrors, this._enableTextEntryEmulation, this.finders, this.commands);
 
   final DataHandler? _handler;
@@ -51,11 +50,6 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
     if (kIsWeb) {
       registerWebServiceExtension(extension.call);
     }
-  }
-
-  @override
-  BinaryMessenger createBinaryMessenger() {
-    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
 }
 
@@ -331,11 +325,11 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
       registerTextInput();
     }
 
-    for(final FinderExtension finder in finders) {
+    for (final FinderExtension finder in finders) {
       _finderExtensions[finder.finderType] = finder;
     }
 
-    for(final CommandExtension command in commands) {
+    for (final CommandExtension command in commands) {
       _commandExtensions[command.commandKind] = command;
     }
   }
@@ -419,7 +413,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
   @override
   Command deserializeCommand(Map<String, String> params, DeserializeFinderFactory finderFactory) {
     final String? kind = params['command'];
-    if(_commandExtensions.containsKey(kind)) {
+    if (_commandExtensions.containsKey(kind)) {
       return _commandExtensions[kind]!.deserialize(params, finderFactory, this);
     }
 
@@ -433,9 +427,9 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
   }
 
   @override
-  Future<Result?> handleCommand(Command command, WidgetController prober, CreateFinderFactory finderFactory) {
+  Future<Result> handleCommand(Command command, WidgetController prober, CreateFinderFactory finderFactory) {
     final String kind = command.kind;
-    if(_commandExtensions.containsKey(kind)) {
+    if (_commandExtensions.containsKey(kind)) {
       return _commandExtensions[kind]!.call(command, prober, finderFactory, this);
     }
 

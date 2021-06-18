@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('BorderSide control test', () {
@@ -101,11 +101,9 @@ void main() {
     final BoxShadow shadow4 = BoxShadow.lerp(shadow2, shadow3, 0.5)!;
     expect(shadow4.blurRadius, equals(2.0));
 
-    List<BoxShadow> shadowList = BoxShadow.lerpList(
-        <BoxShadow>[shadow2, shadow1], <BoxShadow>[shadow3], 0.5)!;
+    List<BoxShadow> shadowList = BoxShadow.lerpList(<BoxShadow>[shadow2, shadow1], <BoxShadow>[shadow3], 0.5)!;
     expect(shadowList, equals(<BoxShadow>[shadow4, shadow1.scale(0.5)]));
-    shadowList = BoxShadow.lerpList(
-        <BoxShadow>[shadow2], <BoxShadow>[shadow3, shadow1], 0.5)!;
+    shadowList = BoxShadow.lerpList(<BoxShadow>[shadow2], <BoxShadow>[shadow3, shadow1], 0.5)!;
     expect(shadowList, equals(<BoxShadow>[shadow4, shadow1.scale(0.5)]));
   });
 

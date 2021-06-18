@@ -4,7 +4,6 @@
 
 import 'package:flutter/rendering.dart';
 
-import 'basic.dart';
 import 'framework.dart';
 import 'sliver.dart';
 
@@ -51,13 +50,13 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   final Widget prototypeItem;
 
   @override
-  _RenderSliverPrototypeExtentList createRenderObject(BuildContext context) {
+  RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context) {
     final _SliverPrototypeExtentListElement element = context as _SliverPrototypeExtentListElement;
     return _RenderSliverPrototypeExtentList(childManager: element);
   }
 
   @override
-  _SliverPrototypeExtentListElement createElement() => _SliverPrototypeExtentListElement(this);
+  SliverMultiBoxAdaptorElement createElement() => _SliverPrototypeExtentListElement(this);
 }
 
 class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
@@ -73,7 +72,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   static final Object _prototypeSlot = Object();
 
   @override
-  void insertRenderObjectChild(covariant RenderObject child, covariant dynamic slot) {
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object slot) {
     if (slot == _prototypeSlot) {
       assert(child is RenderBox);
       renderObject.child = child as RenderBox;
@@ -89,7 +88,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderBox child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderBox child, Object oldSlot, Object newSlot) {
     if (newSlot == _prototypeSlot)
       assert(false); // There's only one prototype child so it cannot be moved.
     else
@@ -97,7 +96,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   }
 
   @override
-  void removeRenderObjectChild(RenderBox child, dynamic slot) {
+  void removeRenderObjectChild(RenderBox child, Object slot) {
     if (renderObject.child == child)
       renderObject.child = null;
     else
@@ -112,7 +111,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _prototype = updateChild(_prototype, widget.prototypeItem, _prototypeSlot);
   }

@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 @immutable
 class Pair<T> {
@@ -29,7 +28,7 @@ class Pair<T> {
 /// and the other child in the bottom half. It will swap which child is on top
 /// and which is on bottom every time the widget is rendered.
 abstract class Swapper extends RenderObjectWidget {
-  const Swapper({ this.stable, this.swapper });
+  const Swapper({ Key? key, this.stable, this.swapper }) : super(key: key);
 
   final Widget? stable;
   final Widget? swapper;
@@ -43,9 +42,10 @@ abstract class Swapper extends RenderObjectWidget {
 
 class SwapperWithProperOverrides extends Swapper {
   const SwapperWithProperOverrides({
+    Key? key,
     Widget? stable,
     Widget? swapper,
-  }) : super(stable: stable, swapper: swapper);
+  }) : super(key: key, stable: stable, swapper: swapper);
 
   @override
   SwapperElement createElement() => SwapperElementWithProperOverrides(this);
@@ -53,9 +53,10 @@ class SwapperWithProperOverrides extends Swapper {
 
 class SwapperWithNoOverrides extends Swapper {
   const SwapperWithNoOverrides({
+    Key? key,
     Widget? stable,
     Widget? swapper,
-  }) : super(stable: stable, swapper: swapper);
+  }) : super(key: key, stable: stable, swapper: swapper);
 
   @override
   SwapperElement createElement() => SwapperElementWithNoOverrides(this);
@@ -63,9 +64,10 @@ class SwapperWithNoOverrides extends Swapper {
 
 class SwapperWithDeprecatedOverrides extends Swapper {
   const SwapperWithDeprecatedOverrides({
+    Key? key,
     Widget? stable,
     Widget? swapper,
-  }) : super(stable: stable, swapper: swapper);
+  }) : super(key: key, stable: stable, swapper: swapper);
 
   @override
   SwapperElement createElement() => SwapperElementWithDeprecatedOverrides(this);
@@ -102,7 +104,7 @@ abstract class SwapperElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _updateChildren(widget);
   }
@@ -118,13 +120,13 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   SwapperElementWithProperOverrides(Swapper widget) : super(widget);
 
   @override
-  void insertRenderObjectChild(RenderBox child, dynamic slot) {
+  void insertRenderObjectChild(RenderBox child, Object? slot) {
     insertSlots.add(slot);
     assert(child != null);
     if (slot == 'stable')
       renderObject.stable = child;
     else
-      renderObject.setSwapper(child, slot as bool);
+      renderObject.setSwapper(child, slot! as bool);
   }
 
   @override
@@ -135,12 +137,12 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   }
 
   @override
-  void removeRenderObjectChild(RenderBox child, dynamic slot) {
+  void removeRenderObjectChild(RenderBox child, Object? slot) {
     removeSlots.add(slot);
     if (slot == 'stable')
       renderObject.stable = null;
     else
-      renderObject.setSwapper(null, slot as bool);
+      renderObject.setSwapper(null, slot! as bool);
   }
 }
 
@@ -153,13 +155,13 @@ class SwapperElementWithDeprecatedOverrides extends SwapperElement {
 
   @override
   // ignore: must_call_super
-  void insertChildRenderObject(RenderBox child, dynamic slot) {
+  void insertChildRenderObject(RenderBox child, Object? slot) {
     insertSlots.add(slot);
     assert(child != null);
     if (slot == 'stable')
       renderObject.stable = child;
     else
-      renderObject.setSwapper(child, slot as bool);
+      renderObject.setSwapper(child, slot! as bool);
   }
 
   @override

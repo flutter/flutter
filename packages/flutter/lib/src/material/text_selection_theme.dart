@@ -44,6 +44,10 @@ class TextSelectionThemeData with Diagnosticable {
   ///
   /// Selection handles are used to indicate the bounds of the selected text,
   /// or as a handle to drag the cursor to a new location in the text.
+  ///
+  /// On iOS [TextField] and [SelectableText] cannot access [selectionHandleColor].
+  /// To set the [selectionHandleColor] on iOS, you can change the
+  /// [CupertinoThemeData.primaryColor] in [ThemeData.cupertinoOverrideTheme].
   final Color? selectionHandleColor;
 
   /// Creates a copy of this object with the given fields replaced with the
@@ -118,7 +122,7 @@ class TextSelectionThemeData with Diagnosticable {
 /// color with light blue selection handles to the child text field.
 ///
 /// ```dart
-/// TextSelectionTheme(
+/// const TextSelectionTheme(
 ///   data: TextSelectionThemeData(
 ///     cursorColor: Colors.blue,
 ///     selectionHandleColor: Colors.lightBlue,

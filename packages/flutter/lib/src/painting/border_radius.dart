@@ -327,6 +327,22 @@ class BorderRadius extends BorderRadiusGeometry {
     this.bottomRight = Radius.zero,
   });
 
+  /// Returns a copy of this BorderRadius with the given fields replaced with
+  /// the new values.
+  BorderRadius copyWith({
+    Radius? topLeft,
+    Radius? topRight,
+    Radius? bottomLeft,
+    Radius? bottomRight,
+  }) {
+    return BorderRadius.only(
+      topLeft: topLeft ?? this.topLeft,
+      topRight: topRight ?? this.topRight,
+      bottomLeft: bottomLeft ?? this.bottomLeft,
+      bottomRight: bottomRight ?? this.bottomRight,
+    );
+  }
+
   /// A border radius with all zero radii.
   static const BorderRadius zero = BorderRadius.all(Radius.zero);
 

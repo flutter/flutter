@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -13,15 +12,14 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'debug.dart';
-import 'mouse_tracking.dart';
+import 'mouse_tracker.dart';
 import 'object.dart';
 import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 // Examples can assume:
-// // @dart = 2.9
-// dynamic context;
+// late BuildContext context;
 
 /// The glue between the render tree and the Flutter engine.
 mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable {
@@ -113,11 +111,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           return _forceRepaint();
         },
       );
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpLayerTree',
-        callback: () {
-          debugDumpLayerTree();
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.';
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
       return true;
@@ -125,27 +125,35 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
     if (!kReleaseMode) {
       // these service extensions work in debug or profile mode
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpRenderTree',
-        callback: () {
-          debugDumpRenderTree();
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.toStringDeep() ?? 'Render tree unavailable.';
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
 
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpSemanticsTreeInTraversalOrder',
-        callback: () {
-          debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.debugSemantics
+            ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder) ?? 'Semantics not collected.';
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
 
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
-        callback: () {
-          debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest);
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.debugSemantics
+            ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest) ?? 'Semantics not collected.';
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
     }
@@ -221,7 +229,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Querying [PlatformDispatcher.platformBrightness].
   ///
   /// ```dart
-  /// final Brightness brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+  /// final Brightness brightness = WidgetsBinding.instance!.platformDispatcher.platformBrightness;
   /// ```
   /// {@end-tool}
   ///
@@ -270,13 +278,14 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   @override // from GestureBinding
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
-    if (hitTestResult != null ||
-        event is PointerAddedEvent ||
-        event is PointerRemovedEvent) {
-      assert(event.position != null);
-      _mouseTracker!.updateWithEvent(event,
-          () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
-    }
+    _mouseTracker!.updateWithEvent(
+      event,
+      // Enter and exit events should be triggered with or without buttons
+      // pressed. When the button is pressed, normal hit test uses a cached
+      // result, but MouseTracker requires that the hit test is re-executed to
+      // update the hovering events.
+      () => (hitTestResult == null || event is PointerMoveEvent) ? renderView.hitTestMouseTrackers(event.position) : hitTestResult,
+    );
     super.dispatchEvent(event, hitTestResult);
   }
 
@@ -527,6 +536,9 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
   ///
   /// The `root` render box is attached directly to the [renderView] and is
   /// given constraints that require it to fill the window.
+  ///
+  /// This binding does not automatically schedule any frames. Callers are
+  /// responsible for deciding when to first call [scheduleFrame].
   RenderingFlutterBinding({ RenderBox? root }) {
     assert(renderView != null);
     renderView.child = root;

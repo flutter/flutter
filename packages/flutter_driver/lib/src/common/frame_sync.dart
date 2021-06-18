@@ -25,17 +25,3 @@ class SetFrameSync extends Command {
     'enabled': '$enabled',
   });
 }
-
-/// The result of a [SetFrameSync] command.
-class SetFrameSyncResult extends Result {
-  /// Creates a [SetFrameSyncResult].
-  const SetFrameSyncResult();
-
-  /// Deserializes this result from JSON.
-  static SetFrameSyncResult fromJson(Map<String, dynamic> json) {
-    return const SetFrameSyncResult();
-  }
-
-  @override
-  Map<String, dynamic> toJson() => <String, dynamic>{};
-}

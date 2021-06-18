@@ -4,9 +4,9 @@
 
 import 'dart:ui';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
@@ -45,13 +45,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Container(height: 600.0,)
-        )
-      )
+          child: Container(height: 600.0),
+        ),
+      ),
     );
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first; // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, height == widow.height test: check that the painting context does not call pushClipRect .
@@ -65,9 +65,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Container(height: 600.1,)
-        )
-      )
+          child: Container(height: 600.1),
+        ),
+      ),
     );
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
@@ -80,9 +80,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Container(width: 800.0,)
-        )
-      )
+          child: Container(width: 800.0),
+        ),
+      ),
     );
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
@@ -93,9 +93,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Container(width: 800.1,)
-        )
-      )
+          child: Container(width: 800.1),
+        ),
+      ),
     );
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
@@ -105,7 +105,7 @@ void main() {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first; // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.
@@ -272,7 +272,7 @@ void main() {
           controller: controller,
           child: Column(
             children: List<Widget>.generate(30, (int i) {
-              return Container(
+              return SizedBox(
                 height: 200.0,
                 child: Text('Tile $i'),
               );
@@ -443,14 +443,14 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 300.0,
             child: SingleChildScrollView(
               controller: ScrollController(initialScrollOffset: 300.0),
               child: Column(
                 children: children = List<Widget>.generate(20, (int i) {
-                  return Container(
+                  return SizedBox(
                     height: 100.0,
                     width: 300.0,
                     child: Text('Tile $i'),
@@ -485,7 +485,7 @@ void main() {
 
   testWidgets('SingleChildScrollView getOffsetToReveal - up', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(20, (int i) {
-      return Container(
+      return SizedBox(
         height: 100.0,
         width: 300.0,
         child: Text('Tile $i'),
@@ -495,7 +495,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 300.0,
             child: SingleChildScrollView(
@@ -537,7 +537,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 300.0,
             width: 200.0,
             child: SingleChildScrollView(
@@ -545,7 +545,7 @@ void main() {
               controller: ScrollController(initialScrollOffset: 300.0),
               child: Row(
                 children: children = List<Widget>.generate(20, (int i) {
-                  return Container(
+                  return SizedBox(
                     height: 300.0,
                     width: 100.0,
                     child: Text('Tile $i'),
@@ -580,7 +580,7 @@ void main() {
 
   testWidgets('SingleChildScrollView getOffsetToReveal - left', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(20, (int i) {
-      return Container(
+      return SizedBox(
         height: 300.0,
         width: 100.0,
         child: Text('Tile $i'),
@@ -591,7 +591,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 300.0,
             width: 200.0,
             child: SingleChildScrollView(
@@ -662,7 +662,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 200.0,
             child: SingleChildScrollView(
@@ -799,24 +799,24 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               height: 200.0,
               width: 300.0,
               child: SingleChildScrollView(
                 controller: outer,
                 child: Column(
                   children: <Widget>[
-                    Container(
+                    const SizedBox(
                       height: 200.0,
                     ),
-                    Container(
+                    SizedBox(
                       height: 200.0,
                       width: 300.0,
                       child: SingleChildScrollView(
                         controller: inner,
                         child: Column(
                           children: children = List<Widget>.generate(10, (int i) {
-                            return Container(
+                            return SizedBox(
                               height: 100.0,
                               width: 300.0,
                               child: Text('$i'),
@@ -825,7 +825,7 @@ void main() {
                         ),
                       ),
                     ),
-                    Container(
+                    const SizedBox(
                       height: 200.0,
                     ),
                   ],
@@ -921,5 +921,54 @@ void main() {
       expect(outer.offset, 200.0);
       expect(inner.offset, 0.0);
     });
+  });
+
+  testWidgets('keyboardDismissBehavior tests', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    Future<void> boilerplate(ScrollViewKeyboardDismissBehavior behavior) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              padding: EdgeInsets.zero,
+              keyboardDismissBehavior: behavior,
+              child: Column(
+                children: focusNodes.map((FocusNode focusNode) {
+                  return SizedBox(
+                    height: 50,
+                    child: TextField(focusNode: focusNode),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // ScrollViewKeyboardDismissBehavior.onDrag dismiss keyboard on drag
+    await boilerplate(ScrollViewKeyboardDismissBehavior.onDrag);
+
+    Finder finder = find.byType(TextField).first;
+    TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isFalse);
+
+    // ScrollViewKeyboardDismissBehavior.manual does no dismiss the keyboard
+    await boilerplate(ScrollViewKeyboardDismissBehavior.manual);
+
+    finder = find.byType(TextField).first;
+    textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isTrue);
   });
 }

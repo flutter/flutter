@@ -5,10 +5,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../flutter_test_alternative.dart' show Fake;
 
 void main() {
   setUp(() => _GestureBindingSpy());
@@ -44,6 +41,7 @@ void main() {
     editable.attach(owner);
     // This should register pointer into GestureBinding.instance.pointerRouter.
     editable.handleEvent(const PointerDownEvent(), BoxHitTestEntry(editable, const Offset(10,10)));
+    GestureBinding.instance!.pointerRouter.route(const PointerDownEvent());
     expect(spy.routeCount, greaterThan(0));
     editable.detach();
     expect(spy.routeCount, 0);
@@ -57,7 +55,7 @@ class _GestureBindingSpy extends AutomatedTestWidgetsFlutterBinding {
   PointerRouter get pointerRouter => _testPointerRouter;
 }
 
-class FakeEditableTextState extends TextSelectionDelegate with Fake { }
+class FakeEditableTextState extends Fake implements TextSelectionDelegate  { }
 
 class _PointerRouterSpy extends PointerRouter {
   int routeCount = 0;

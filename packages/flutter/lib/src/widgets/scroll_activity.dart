@@ -13,10 +13,8 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
-import 'gesture_detector.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
-import 'ticker_provider.dart';
 
 /// A backend for a [ScrollActivity].
 ///
@@ -216,8 +214,7 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 
   @override
   void dispose() {
-    if (onHoldCanceled != null)
-      onHoldCanceled!();
+    onHoldCanceled?.call();
     super.dispose();
   }
 }
@@ -243,7 +240,7 @@ class ScrollDragController implements Drag {
        assert(details != null),
        assert(
          motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
-         'motionStartDistanceThreshold must be a positive number or null'
+         'motionStartDistanceThreshold must be a positive number or null',
        ),
        _delegate = delegate,
        _lastDetails = details,
@@ -276,6 +273,14 @@ class ScrollDragController implements Drag {
   /// scroll activity.
   static const Duration momentumRetainStationaryDurationThreshold =
       Duration(milliseconds: 20);
+
+  /// The minimum amount of velocity needed to apply the [carriedVelocity] at
+  /// the end of a drag. Expressed as a factor. For example with a
+  /// [carriedVelocity] of 2000, we will need a velocity of at least 1000 to
+  /// apply the [carriedVelocity] as well. If the velocity does not meet the
+  /// threshold, the [carriedVelocity] is lost. Decided by fair eyeballing
+  /// with the scroll_overlay platform test.
+  static const double momentumRetainVelocityThresholdFactor = 0.5;
 
   /// Maximum amount of time interval the drag can have consecutive stationary
   /// pointer update events before needing to break the
@@ -393,9 +398,17 @@ class ScrollDragController implements Drag {
       velocity = -velocity;
     _lastDetails = details;
 
-    // Build momentum only if dragging in the same direction.
-    if (_retainMomentum && velocity.sign == carriedVelocity!.sign)
-      velocity += carriedVelocity!;
+    if (_retainMomentum) {
+      // Build momentum only if dragging in the same direction.
+      final bool isFlingingInSameDirection = velocity.sign == carriedVelocity!.sign;
+      // Build momentum only if the velocity of the last drag was not
+      // substantially lower than the carried momentum.
+      final bool isVelocityNotSubstantiallyLessThanCarriedMomentum =
+        velocity.abs() > carriedVelocity!.abs() * momentumRetainVelocityThresholdFactor;
+      if(isFlingingInSameDirection && isVelocityNotSubstantiallyLessThanCarriedMomentum) {
+        velocity += carriedVelocity!;
+      }
+    }
     delegate.goBallistic(velocity);
   }
 
@@ -408,8 +421,7 @@ class ScrollDragController implements Drag {
   @mustCallSuper
   void dispose() {
     _lastDetails = null;
-    if (onDragCanceled != null)
-      onDragCanceled!();
+    onDragCanceled?.call();
   }
 
   /// The most recently observed [DragStartDetails], [DragUpdateDetails], or
@@ -421,7 +433,7 @@ class ScrollDragController implements Drag {
   String toString() => describeIdentity(this);
 }
 
-/// The activity a scroll view performs when a the user drags their finger
+/// The activity a scroll view performs when the user drags their finger
 /// across the screen.
 ///
 /// See also:

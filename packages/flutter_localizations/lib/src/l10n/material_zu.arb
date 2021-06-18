@@ -9,6 +9,8 @@
   "previousMonthTooltip": "Inyanga edlule",
   "nextPageTooltip": "Ikhasi elilandelayo",
   "previousPageTooltip": "Ikhasi elidlule",
+  "firstPageTooltip": "Ikhasi lokuqala",
+  "lastPageTooltip": "Ikhasi lokugcina",
   "showMenuTooltip": "Bonisa imenyu",
   "aboutListTileTitle": "Mayelana no-$applicationName",
   "licensesPageTitle": "Amalayisense",

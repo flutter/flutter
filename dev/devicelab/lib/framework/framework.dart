@@ -2,17 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:path/path.dart' as path;
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
-import 'adb.dart';
+import 'devices.dart';
+import 'host_agent.dart';
 import 'running_processes.dart';
 import 'task_result.dart';
 import 'utils.dart';
@@ -25,7 +28,7 @@ final Set<String> noRebootForbidList = <String>{
 /// The maximum number of test runs before a device must be rebooted.
 ///
 /// This number was chosen arbitrarily.
-const int maxiumRuns = 30;
+const int maximumRuns = 30;
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
@@ -64,7 +67,11 @@ class _TaskRunner {
       final Duration taskTimeout = parameters.containsKey('timeoutInMinutes')
         ? Duration(minutes: int.parse(parameters['timeoutInMinutes']))
         : null;
-      final TaskResult result = await run(taskTimeout);
+      // This is only expected to be passed in unit test runs so they do not
+      // kill the Dart process that is running them and waste time running config.
+      final bool runFlutterConfig = parameters['runFlutterConfig'] != 'false';
+      final bool runProcessCleanup = parameters['runProcessCleanup'] != 'false';
+      final TaskResult result = await run(taskTimeout, runProcessCleanup: runProcessCleanup, runFlutterConfig: runFlutterConfig);
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady',
@@ -74,6 +81,14 @@ class _TaskRunner {
   }
 
   final TaskFunction task;
+
+  Future<Device/*?*/> _getWorkingDeviceIfAvailable() async {
+    try {
+      return await devices.workingDevice;
+    } on DeviceException {
+      return null;
+    }
+  }
 
   // TODO(ianh): workaround for https://github.com/dart-lang/sdk/issues/23797
   RawReceivePort _keepAlivePort;
@@ -87,58 +102,91 @@ class _TaskRunner {
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
 
-  Future<TaskResult> run(Duration taskTimeout) async {
+  Future<TaskResult> run(Duration taskTimeout, {
+    bool runFlutterConfig = true,
+    bool runProcessCleanup = true,
+  }) async {
     try {
       _taskStarted = true;
       print('Running task with a timeout of $taskTimeout.');
       final String exe = Platform.isWindows ? '.exe' : '';
-      section('Checking running Dart$exe processes');
-      final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
-        processName: 'dart$exe',
-      ).toSet();
-      final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
-      beforeRunningDartInstances.forEach(print);
-      for (final RunningProcessInfo info in allProcesses) {
-        if (info.commandLine.contains('iproxy')) {
-          print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
-        }
-      }
-      print('enabling configs for macOS, Linux, Windows, and Web...');
-      final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
-        'config',
-        '-v',
-        '--enable-macos-desktop',
-        '--enable-windows-desktop',
-        '--enable-linux-desktop',
-        '--enable-web'
-      ], canFail: true);
-      if (configResult != 0) {
-        print('Failed to enable configuration, tasks may not run.');
-      }
-
-      Future<TaskResult> futureResult = _performTask();
-      if (taskTimeout != null)
-        futureResult = futureResult.timeout(taskTimeout);
-
-      TaskResult result = await futureResult;
-
-      section('Checking running Dart$exe processes after task...');
-      final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
-        processName: 'dart$exe',
-      ).toList();
-      for (final RunningProcessInfo info in afterRunningDartInstances) {
-        if (!beforeRunningDartInstances.contains(info)) {
-          print('$info was leaked by this test.');
-          if (result is TaskResultCheckProcesses) {
-            result = TaskResult.failure('This test leaked dart processes');
-          }
-          final bool killed = await killProcess(info.pid);
-          if (!killed) {
-            print('Failed to kill process ${info.pid}.');
-          } else {
-            print('Killed process id ${info.pid}.');
+      Set<RunningProcessInfo> beforeRunningDartInstances;
+      if (runProcessCleanup) {
+        section('Checking running Dart$exe processes');
+        beforeRunningDartInstances = await getRunningProcesses(
+          processName: 'dart$exe',
+        ).toSet();
+        final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
+        beforeRunningDartInstances.forEach(print);
+        for (final RunningProcessInfo info in allProcesses) {
+          if (info.commandLine.contains('iproxy')) {
+            print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
           }
         }
+      } else {
+        section('Skipping check running Dart$exe processes');
+      }
+
+      if (runFlutterConfig) {
+        print('enabling configs for macOS, Linux, Windows, and Web...');
+        final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+          'config',
+          '-v',
+          '--enable-macos-desktop',
+          '--enable-windows-desktop',
+          '--enable-linux-desktop',
+          '--enable-web',
+          if (localEngine != null) ...<String>['--local-engine', localEngine],
+        ], canFail: true);
+        if (configResult != 0) {
+          print('Failed to enable configuration, tasks may not run.');
+        }
+      } else {
+        print('Skipping enabling configs for macOS, Linux, Windows, and Web');
+      }
+
+      final Device/*?*/ device = await _getWorkingDeviceIfAvailable();
+      /*late*/ TaskResult result;
+      IOSink/*?*/ sink;
+      try {
+        if (device != null && device.canStreamLogs && hostAgent.dumpDirectory != null) {
+          sink = File(path.join(hostAgent.dumpDirectory.path, '${device.deviceId}.log')).openWrite();
+          await device.startLoggingToSink(sink);
+        }
+
+        Future<TaskResult> futureResult = _performTask();
+        if (taskTimeout != null)
+          futureResult = futureResult.timeout(taskTimeout);
+
+        result = await futureResult;
+      } finally {
+        if (device != null && device.canStreamLogs) {
+          await device.stopLoggingToSink();
+          await sink?.close();
+        }
+      }
+
+      if (runProcessCleanup) {
+        section('Checking running Dart$exe processes after task...');
+        final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
+          processName: 'dart$exe',
+        ).toList();
+        for (final RunningProcessInfo info in afterRunningDartInstances) {
+          if (!beforeRunningDartInstances.contains(info)) {
+            print('$info was leaked by this test.');
+            if (result is TaskResultCheckProcesses) {
+              result = TaskResult.failure('This test leaked dart processes');
+            }
+            final bool killed = await killProcess(info.pid);
+            if (!killed) {
+              print('Failed to kill process ${info.pid}.');
+            } else {
+              print('Killed process id ${info.pid}.');
+            }
+          }
+        }
+      } else {
+        print('Skipping check running Dart$exe processes after task');
       }
       _completer.complete(result);
       return result;
@@ -168,7 +216,7 @@ class _TaskRunner {
       } else {
         runCount = 0;
       }
-      if (runCount < maxiumRuns) {
+      if (runCount < maximumRuns) {
         rebootFile
           ..createSync()
           ..writeAsStringSync((runCount + 1).toString());

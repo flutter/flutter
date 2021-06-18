@@ -46,9 +46,9 @@ void main() {
       child: Row(
         key: rowKey,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Expanded(child: Container(key: child1Key, width: 100.0, height: 100.0, child: log(2))),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          Expanded(child: SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2))),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -77,9 +77,9 @@ void main() {
       child: Row(
         key: rowKey,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -108,8 +108,8 @@ void main() {
         key: rowKey,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
         ],
       ),
     ));
@@ -139,9 +139,9 @@ void main() {
         key: rowKey,
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -171,9 +171,9 @@ void main() {
         key: rowKey,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -204,10 +204,10 @@ void main() {
         key: rowKey,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
-          Container(key: child3Key, width: 100.0, height: 100.0, child: log(4)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child3Key, width: 100.0, height: 100.0, child: log(4)),
         ],
       ),
     ));
@@ -237,9 +237,9 @@ void main() {
         key: rowKey,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          Container(key: child0Key, width: 200.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 200.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 200.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 200.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 200.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 200.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -268,8 +268,8 @@ void main() {
         key: rowKey,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 150.0, height: 100.0, child: log(2)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 150.0, height: 100.0, child: log(2)),
         ],
       ),
     ));
@@ -285,14 +285,14 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: Container(
+      child: SizedBox(
         width: 0.0,
         height: 0.0,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
+          children: const <Widget>[
+            SizedBox(
               key: childKey,
               width: 100.0,
               height: 100.0,
@@ -325,9 +325,9 @@ void main() {
         key: rowKey,
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Expanded(child: Container(key: child1Key, width: 100.0, height: 100.0, child: log(2))),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          Expanded(child: SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2))),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -375,9 +375,9 @@ void main() {
         key: rowKey,
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -424,8 +424,8 @@ void main() {
         mainAxisAlignment: MainAxisAlignment.center,
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
         ],
       ),
     ));
@@ -467,9 +467,9 @@ void main() {
         textDirection: TextDirection.ltr,
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -517,9 +517,9 @@ void main() {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -568,10 +568,10 @@ void main() {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
-          Container(key: child3Key, width: 100.0, height: 100.0, child: log(4)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child3Key, width: 100.0, height: 100.0, child: log(4)),
         ],
       ),
     ));
@@ -625,9 +625,9 @@ void main() {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: child0Key, width: 200.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 200.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 200.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 200.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 200.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 200.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -674,8 +674,8 @@ void main() {
         mainAxisSize: MainAxisSize.min,
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 150.0, height: 100.0, child: log(2)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 150.0, height: 100.0, child: log(2)),
         ],
       ),
     ));
@@ -707,15 +707,15 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: Container(
+      child: SizedBox(
         width: 0.0,
         height: 0.0,
         child: Row(
           textDirection: TextDirection.ltr,
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
+          children: const <Widget>[
+            SizedBox(
               key: childKey,
               width: 100.0,
               height: 100.0,
@@ -748,9 +748,9 @@ void main() {
         key: rowKey,
         textDirection: TextDirection.rtl,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Expanded(child: Container(key: child1Key, width: 100.0, height: 100.0, child: log(2))),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          Expanded(child: SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2))),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -798,9 +798,9 @@ void main() {
         key: rowKey,
         textDirection: TextDirection.rtl,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -847,8 +847,8 @@ void main() {
         mainAxisAlignment: MainAxisAlignment.center,
         textDirection: TextDirection.rtl,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
         ],
       ),
     ));
@@ -890,9 +890,9 @@ void main() {
         textDirection: TextDirection.rtl,
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -940,9 +940,9 @@ void main() {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         textDirection: TextDirection.rtl,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -991,10 +991,10 @@ void main() {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         textDirection: TextDirection.rtl,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
-          Container(key: child3Key, width: 100.0, height: 100.0, child: log(4)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
+          SizedBox(key: child3Key, width: 100.0, height: 100.0, child: log(4)),
         ],
       ),
     ));
@@ -1048,9 +1048,9 @@ void main() {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         textDirection: TextDirection.rtl,
         children: <Widget>[
-          Container(key: child0Key, width: 200.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 200.0, height: 100.0, child: log(2)),
-          Container(key: child2Key, width: 200.0, height: 100.0, child: log(3)),
+          SizedBox(key: child0Key, width: 200.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 200.0, height: 100.0, child: log(2)),
+          SizedBox(key: child2Key, width: 200.0, height: 100.0, child: log(3)),
         ],
       ),
     ));
@@ -1097,8 +1097,8 @@ void main() {
         mainAxisSize: MainAxisSize.min,
         textDirection: TextDirection.rtl,
         children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-          Container(key: child1Key, width: 150.0, height: 100.0, child: log(2)),
+          SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
+          SizedBox(key: child1Key, width: 150.0, height: 100.0, child: log(2)),
         ],
       ),
     ));
@@ -1130,15 +1130,15 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: Container(
+      child: SizedBox(
         width: 0.0,
         height: 0.0,
         child: Row(
           textDirection: TextDirection.rtl,
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
+          children: const <Widget>[
+            SizedBox(
               key: childKey,
               width: 100.0,
               height: 100.0,

@@ -11,6 +11,8 @@ import 'framework.dart';
 
 /// Applies an [ImageFilter] to its child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=7Lftorq4i2o}
+///
 /// See also:
 ///
 /// * [BackdropFilter], which applies an [ImageFilter] to everything
@@ -35,8 +37,8 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) => _ImageFilterRenderObject(imageFilter);
 
   @override
-  void updateRenderObject(BuildContext context, _ImageFilterRenderObject renderObject) {
-    renderObject.imageFilter = imageFilter;
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _ImageFilterRenderObject).imageFilter = imageFilter;
   }
 
   @override

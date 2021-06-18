@@ -24,8 +24,8 @@ const String kPlatformIntegrationPackageName = 'platform_integration';
 /// documentation to `//dev/docs/doc/api/`.
 ///
 /// This script also updates the index.html file so that it can be placed
-/// at the root of docs.flutter.io. We are keeping the files inside of
-/// docs.flutter.io/flutter for now, so we need to manipulate paths
+/// at the root of api.flutter.dev. We are keeping the files inside of
+/// api.flutter.dev/flutter for now, so we need to manipulate paths
 /// a bit. See https://github.com/flutter/flutter/issues/3900 for more info.
 ///
 /// This will only work on UNIX systems, not Windows. It requires that 'git' be
@@ -54,7 +54,6 @@ Future<void> main(List<String> arguments) async {
   final StringBuffer buf = StringBuffer();
   buf.writeln('name: $kDummyPackageName');
   buf.writeln('homepage: https://flutter.dev');
-  // TODO(dnfield): Re-factor for proper versioning, https://github.com/flutter/flutter/issues/55409
   buf.writeln('version: 0.0.0');
   buf.writeln('environment:');
   buf.writeln("  sdk: '>=2.10.0 <3.0.0'");
@@ -257,9 +256,9 @@ String getBranchName() {
   final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
   if (gitResult.exitCode != 0)
     throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
-  final Match gitBranchMatch = gitBranchRegexp.firstMatch(
+  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(
       (gitResult.stdout as String).trim().split('\n').first);
-  return gitBranchMatch == null ? '' : gitBranchMatch.group(1).split('...').first;
+  return gitBranchMatch == null ? '' : gitBranchMatch.group(1)!.split('...').first;
 }
 
 String gitRevision() {
@@ -303,7 +302,7 @@ void createSearchMetadata(String templatePath, String metadataPath) {
   final String branch = getBranchName();
   final String metadata = template.replaceAll(
     '{SITE_URL}',
-    branch == 'stable' ? 'https://docs.flutter.io/' : 'https://master-docs.flutter.io/',
+    branch == 'stable' ? 'https://api.flutter.dev/' : 'https://master-api.flutter.dev/',
   );
   Directory(path.dirname(metadataPath)).create(recursive: true);
   File(metadataPath).writeAsStringSync(metadata);
@@ -313,7 +312,7 @@ void createSearchMetadata(String templatePath, String metadataPath) {
 /// specified, for each source/destination file pair.
 ///
 /// Creates `destDir` if needed.
-void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(File srcFile, File destFile)]) {
+void copyDirectorySync(Directory srcDir, Directory destDir, [void Function(File srcFile, File destFile)? onFileCopied]) {
   if (!srcDir.existsSync())
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
 

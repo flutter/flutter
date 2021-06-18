@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -14,6 +16,7 @@ import '../base/platform.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../project.dart';
 import 'chrome.dart';
@@ -207,13 +210,15 @@ class GoogleChromeDevice extends ChromiumDevice {
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
     String version = 'unknown';
     if (_platform.isWindows) {
-      final ProcessResult result = await _processManager.run(<String>[
-        r'reg', 'query', r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon', '/v', 'version',
-      ]);
-      if (result.exitCode == 0) {
-        final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
-        if (parts.length > 2) {
-          version = 'Google Chrome ' + parts[parts.length - 2];
+      if (_processManager.canRun('reg')) {
+        final ProcessResult result = await _processManager.run(<String>[
+          r'reg', 'query', r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon', '/v', 'version',
+        ]);
+        if (result.exitCode == 0) {
+          final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
+          if (parts.length > 2) {
+            version = 'Google Chrome ${parts[parts.length - 2]}';
+          }
         }
       }
     } else {
@@ -228,7 +233,6 @@ class GoogleChromeDevice extends ChromiumDevice {
     }
     return version.trim();
   }
-
 }
 
 /// The Microsoft Edge browser based on Chromium.
@@ -267,13 +271,15 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   Future<String> get sdkNameAndVersion async => _sdkNameAndVersion ??= await _getSdkNameAndVersion();
   String _sdkNameAndVersion;
   Future<String> _getSdkNameAndVersion() async {
-    final ProcessResult result = await _processManager.run(<String>[
-      r'reg', 'query', r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon', '/v', 'version',
-    ]);
-    if (result.exitCode == 0) {
-      final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
-      if (parts.length > 2) {
-        return 'Microsoft Edge ' + parts[parts.length - 2];
+    if (_processManager.canRun('reg')) {
+      final ProcessResult result = await _processManager.run(<String>[
+        r'reg', 'query', r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon', '/v', 'version',
+      ]);
+      if (result.exitCode == 0) {
+        final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
+        if (parts.length > 2) {
+          return 'Microsoft Edge ${parts[parts.length - 2]}';
+        }
       }
     }
     // Return a non-null string so that the tool can validate the version

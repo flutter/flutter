@@ -21,10 +21,10 @@ import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
 import 'package:process/process.dart';
 
-const String gsBase = 'gs://flutter_infra';
+const String gsBase = 'gs://flutter_infra_release';
 const String releaseFolder = '/releases';
 const String gsReleaseFolder = '$gsBase$releaseFolder';
-const String baseUrl = 'https://storage.googleapis.com/flutter_infra';
+const String baseUrl = 'https://storage.googleapis.com/flutter_infra_release';
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
@@ -255,7 +255,7 @@ class ArchiveUnpublisher {
     });
     jsonData['releases'] = releases;
     for (final Channel channel in channels) {
-      if (!revisionsBeingRemoved.contains(jsonData['current_release'][getChannelName(channel)])) {
+      if (!revisionsBeingRemoved.contains((jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)])) {
         // Don't replace the current release if it's not one of the revisions we're removing.
         continue;
       }
@@ -263,7 +263,7 @@ class ArchiveUnpublisher {
       if (replacementRelease == null) {
         throw UnpublishException('Unable to find previous release for channel ${getChannelName(channel)}.');
       }
-      jsonData['current_release'][getChannelName(channel)] = replacementRelease['hash'];
+      (jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)] = replacementRelease['hash'];
       print(
         '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
         '${getPublishedPlatform(platform)} release to ${replacementRelease['hash']} (version ${replacementRelease['version']}).'
@@ -383,7 +383,7 @@ class ArchiveUnpublisher {
       if (mimeType != null) ...<String>['-h', 'Content-Type:$mimeType'],
       ...<String>['cp', src, dest],
     ];
-    return await _runGsUtil(args, confirm: confirmed);
+    return _runGsUtil(args, confirm: confirmed);
   }
 }
 

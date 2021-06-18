@@ -14,7 +14,6 @@ import 'theme.dart';
 import 'thumb_painter.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // int _cupertinoSliderValue = 1;
 // void setState(VoidCallback fn) { }
 
@@ -206,7 +205,7 @@ class CupertinoSlider extends StatefulWidget {
   final Color thumbColor;
 
   @override
-  _CupertinoSliderState createState() => _CupertinoSliderState();
+  State<CupertinoSlider> createState() => _CupertinoSliderState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -476,18 +475,14 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   void _startInteraction(Offset globalPosition) {
     if (isInteractive) {
-      if (onChangeStart != null) {
-        onChangeStart!(_discretizedCurrentDragValue);
-      }
+      onChangeStart?.call(_discretizedCurrentDragValue);
       _currentDragValue = _value;
       onChanged!(_discretizedCurrentDragValue);
     }
   }
 
   void _endInteraction() {
-    if (onChangeEnd != null) {
-      onChangeEnd!(_discretizedCurrentDragValue);
-    }
+    onChangeEnd?.call(_discretizedCurrentDragValue);
     _currentDragValue = 0.0;
   }
 

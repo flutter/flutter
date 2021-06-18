@@ -2,18 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../base/platform.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import '../features.dart';
-
 
 /// The macOS-specific implementation of a [Workflow].
 class MacOSWorkflow implements Workflow {
   const MacOSWorkflow({
-    @required Platform platform,
-    @required FeatureFlags featureFlags,
+    required Platform platform,
+    required FeatureFlags featureFlags,
   }) : _platform = platform,
        _featureFlags = featureFlags;
 

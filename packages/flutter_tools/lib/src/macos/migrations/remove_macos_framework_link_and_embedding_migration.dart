@@ -36,7 +36,7 @@ class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   }
 
   @override
-  String migrateLine(String line) {
+  String? migrateLine(String line) {
     // App.framework Frameworks reference.
     // isa = PBXFrameworksBuildPhase;
     // files = (

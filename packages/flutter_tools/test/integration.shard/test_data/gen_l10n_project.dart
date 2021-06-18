@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -33,7 +35,7 @@ class GenL10nProject extends Project {
 
   @override
   final String pubspec = '''
-name: test
+name: test_l10n_project
 environment:
   sdk: ">=2.12.0-0 <3.0.0"
 
@@ -42,7 +44,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: 0.17.0-nullsafety.2
+  intl: any # Pick up the pinned version from flutter_localizations
 ''';
 
   @override
@@ -197,6 +199,13 @@ class Home extends StatelessWidget {
               '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
               '${localizations.helloFor(123)}',
               '${localizations.helloCost("price", 123)}',
+              '${localizations.helloCostWithOptionalParam("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter1("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter2("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter3("price", .5)}',
+              '${localizations.helloDecimalPattern(1200000)}',
+              '${localizations.helloPercentPattern(1200000)}',
+              '${localizations.helloScientificPattern(1200000)}',
               '${localizations.helloWorlds(0)}',
               '${localizations.helloWorlds(1)}',
               '${localizations.helloWorlds(2)}',
@@ -405,6 +414,99 @@ void main() {
       "value": {
         "type": "int",
         "format": "currency"
+      }
+    }
+  },
+
+  "helloCostWithOptionalParam": "Hello for {price} {value} (with optional param)",
+  "@helloCostWithOptionalParam": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC"
+        }
+      }
+    }
+  },
+
+  "helloCostWithSpecialCharacter1": "Hello for {price} {value} (with special character)",
+  "@helloCostWithSpecialCharacter1": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC'"
+        }
+      }
+    }
+  },
+
+  "helloCostWithSpecialCharacter2": "Hello for {price} {value} (with special character)",
+  "@helloCostWithSpecialCharacter2": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC\""
+        }
+      }
+    }
+  },
+
+  "helloCostWithSpecialCharacter3": "Hello for {price} {value} (with special character)",
+  "@helloCostWithSpecialCharacter3": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC\"'"
+        }
+      }
+    }
+  },
+
+  "helloDecimalPattern": "Hello for Decimal Pattern {value}",
+  "@helloDecimalPattern": {
+    "description": "A message which displays a number in decimal pattern",
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "decimalPattern"
+      }
+    }
+  },
+
+  "helloPercentPattern": "Hello for Percent Pattern {value}",
+  "@helloPercentPattern": {
+    "description": "A message which displays a number in percent pattern",
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "percentPattern"
+      }
+    }
+  },
+
+  "helloScientificPattern": "Hello for Scientific Pattern {value}",
+  "@helloScientificPattern": {
+    "description": "A message which displays scientific notation of a number",
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "scientificPattern"
       }
     }
   },

@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 
 const String text = 'Hello World! How are you? Life is good!';
 const String alternativeText = 'Everything is awesome!!';

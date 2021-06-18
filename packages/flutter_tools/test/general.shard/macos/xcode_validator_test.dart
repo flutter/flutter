@@ -3,86 +3,182 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/user_messages.dart';
-import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/macos/xcode_validator.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
-
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockXcode extends Mock implements Xcode {}
+import '../../src/fake_process_manager.dart';
 
 void main() {
   group('Xcode validation', () {
-    MockXcode xcode;
-
-    setUp(() {
-      xcode = MockXcode();
-    });
-
     testWithoutContext('Emits missing status when Xcode is not installed', () async {
-      when(xcode.isInstalled).thenReturn(false);
-      when(xcode.xcodeSelectPath).thenReturn(null);
+      final ProcessManager processManager = FakeProcessManager.any();
+      final Xcode xcode = Xcode.test(
+        processManager: processManager,
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager, version: null),
+      );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.missing);
+      expect(result.messages.last.type, ValidationMessageType.error);
+      expect(result.messages.last.message, contains('Xcode not installed'));
     });
 
     testWithoutContext('Emits missing status when Xcode installation is incomplete', () async {
-      when(xcode.isInstalled).thenReturn(false);
-      when(xcode.xcodeSelectPath).thenReturn('/Library/Developer/CommandLineTools');
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['/usr/bin/xcode-select', '--print-path'],
+          stdout: '/Library/Developer/CommandLineTools',
+        ),
+      ]);
+      final Xcode xcode = Xcode.test(
+      processManager: processManager,
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager, version: null),
+      );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.missing);
+      expect(result.messages.last.type, ValidationMessageType.error);
+      expect(result.messages.last.message, contains('Xcode installation is incomplete'));
     });
 
     testWithoutContext('Emits partial status when Xcode version too low', () async {
-      when(xcode.isInstalled).thenReturn(true);
-      when(xcode.versionText)
-          .thenReturn('Xcode 7.0.1\nBuild version 7C1002\n');
-      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
-      when(xcode.eulaSigned).thenReturn(true);
-      when(xcode.isSimctlInstalled).thenReturn(true);
+      final ProcessManager processManager = FakeProcessManager.any();
+      final Xcode xcode = Xcode.test(
+        processManager: processManager,
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager, version: Version(7, 0, 1)),
+      );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
+      expect(result.messages.last.type, ValidationMessageType.error);
+      expect(result.messages.last.message, contains('Xcode 7.0.1 out of date (12.0.1 is recommended)'));
     });
 
-    testWithoutContext('Emits partial status when Xcode EULA not signed', () async {
-      when(xcode.isInstalled).thenReturn(true);
-      when(xcode.versionText)
-          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
-      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
-      when(xcode.eulaSigned).thenReturn(false);
-      when(xcode.isSimctlInstalled).thenReturn(true);
+    testWithoutContext('Emits partial status when Xcode below recommended version', () async {
+      final ProcessManager processManager = FakeProcessManager.any();
+      final Xcode xcode = Xcode.test(
+        processManager: processManager,
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager, version: Version(11, 0, 0)),
+      );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
+      expect(result.messages.last.type, ValidationMessageType.hint);
+      expect(result.messages.last.message, contains('Xcode 11.0.0 out of date (12.0.1 is recommended)'));
+    }, skip: true); // Unskip and update when minimum and required check versions diverge.
+
+    testWithoutContext('Emits partial status when Xcode EULA not signed', () async {
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['/usr/bin/xcode-select', '--print-path'],
+          stdout: '/Library/Developer/CommandLineTools',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'which',
+            'sysctl',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sysctl',
+            'hw.optional.arm64',
+          ],
+          exitCode: 1,
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', 'clang'],
+          exitCode: 1,
+          stderr:
+          'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.',
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', 'simctl', 'list'],
+        ),
+      ]);
+      final Xcode xcode = Xcode.test(
+        processManager: processManager,
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+      );
+      final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
+      final ValidationResult result = await validator.validate();
+      expect(result.type, ValidationType.partial);
+      expect(result.messages.last.type, ValidationMessageType.error);
+      expect(result.messages.last.message, contains('code end user license agreement not signed'));
     });
 
     testWithoutContext('Emits partial status when simctl is not installed', () async {
-      when(xcode.isInstalled).thenReturn(true);
-      when(xcode.versionText)
-          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
-      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
-      when(xcode.eulaSigned).thenReturn(true);
-      when(xcode.isSimctlInstalled).thenReturn(false);
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['/usr/bin/xcode-select', '--print-path'],
+          stdout: '/Library/Developer/CommandLineTools',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'which',
+            'sysctl',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sysctl',
+            'hw.optional.arm64',
+          ],
+          exitCode: 1,
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', 'clang'],
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', 'simctl', 'list'],
+          exitCode: 1,
+        ),
+      ]);
+      final Xcode xcode = Xcode.test(
+        processManager: processManager,
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+      );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
+      expect(result.messages.last.type, ValidationMessageType.error);
+      expect(result.messages.last.message, contains('Xcode requires additional components'));
     });
 
-
     testWithoutContext('Succeeds when all checks pass', () async {
-      when(xcode.isInstalled).thenReturn(true);
-      when(xcode.versionText)
-          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
-      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
-      when(xcode.eulaSigned).thenReturn(true);
-      when(xcode.isSimctlInstalled).thenReturn(true);
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['/usr/bin/xcode-select', '--print-path'],
+          stdout: '/Library/Developer/CommandLineTools',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'which',
+            'sysctl',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sysctl',
+            'hw.optional.arm64',
+          ],
+          exitCode: 1,
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', 'clang'],
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', 'simctl', 'list'],
+        ),
+      ]);
+      final Xcode xcode = Xcode.test(
+        processManager: processManager,
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+      );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.installed);

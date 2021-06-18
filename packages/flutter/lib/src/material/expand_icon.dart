@@ -97,7 +97,7 @@ class ExpandIcon extends StatefulWidget {
   final Color? expandedColor;
 
   @override
-  _ExpandIconState createState() => _ExpandIconState();
+  State<ExpandIcon> createState() => _ExpandIconState();
 }
 
 class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateMixin {
@@ -137,8 +137,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   }
 
   void _handlePressed() {
-    if (widget.onPressed != null)
-      widget.onPressed!(widget.isExpanded);
+    widget.onPressed?.call(widget.isExpanded);
   }
 
   /// Default icon colors and opacities for when [Theme.brightness] is set to

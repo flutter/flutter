@@ -5,8 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -38,6 +36,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
   ) {
     return _TextSelectionControlsToolbar(
       globalEditableRegion: globalEditableRegion,
@@ -55,7 +54,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style text selection handles.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight, [VoidCallback? onTap]) {
     final ThemeData theme = Theme.of(context);
     final Color handleColor = TextSelectionTheme.of(context).selectionHandleColor ?? theme.colorScheme.primary;
     final Widget handle = SizedBox(
@@ -64,6 +63,10 @@ class MaterialTextSelectionControls extends TextSelectionControls {
       child: CustomPaint(
         painter: _TextSelectionHandlePainter(
           color: handleColor,
+        ),
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.translucent,
         ),
       ),
     );
@@ -211,7 +214,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
       : widget.endpoints[0];
     final Offset anchorAbove = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
-      widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance
+      widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance,
     );
     final Offset anchorBelow = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ListView can handle shrinking top elements', (WidgetTester tester) async {
@@ -14,13 +14,13 @@ void main() {
         child: ListView(
           cacheExtent: 0.0,
           controller: controller,
-          children: <Widget>[
-            Container(height: 400.0, child: const Text('1')),
-            Container(height: 400.0, child: const Text('2')),
-            Container(height: 400.0, child: const Text('3')),
-            Container(height: 400.0, child: const Text('4')),
-            Container(height: 400.0, child: const Text('5')),
-            Container(height: 400.0, child: const Text('6')),
+          children: const <Widget>[
+            SizedBox(height: 400.0, child: Text('1')),
+            SizedBox(height: 400.0, child: Text('2')),
+            SizedBox(height: 400.0, child: Text('3')),
+            SizedBox(height: 400.0, child: Text('4')),
+            SizedBox(height: 400.0, child: Text('5')),
+            SizedBox(height: 400.0, child: Text('6')),
           ],
         ),
       ),
@@ -37,13 +37,13 @@ void main() {
         child: ListView(
           cacheExtent: 0.0,
           controller: controller,
-          children: <Widget>[
-            Container(height: 200.0, child: const Text('1')),
-            Container(height: 400.0, child: const Text('2')),
-            Container(height: 400.0, child: const Text('3')),
-            Container(height: 400.0, child: const Text('4')),
-            Container(height: 400.0, child: const Text('5')),
-            Container(height: 400.0, child: const Text('6')),
+          children: const <Widget>[
+            SizedBox(height: 200.0, child: Text('1')),
+            SizedBox(height: 400.0, child: Text('2')),
+            SizedBox(height: 400.0, child: Text('3')),
+            SizedBox(height: 400.0, child: Text('4')),
+            SizedBox(height: 400.0, child: Text('5')),
+            SizedBox(height: 400.0, child: Text('6')),
           ],
         ),
       ),
@@ -72,13 +72,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children: <Widget>[
-            Container(height: 400.0, child: const Text('1')),
-            Container(height: 400.0, child: const Text('2')),
-            Container(height: 400.0, child: const Text('3')),
-            Container(height: 400.0, child: const Text('4')),
-            Container(height: 400.0, child: const Text('5')),
-            Container(height: 400.0, child: const Text('6')),
+          children: const <Widget>[
+            SizedBox(height: 400.0, child: Text('1')),
+            SizedBox(height: 400.0, child: Text('2')),
+            SizedBox(height: 400.0, child: Text('3')),
+            SizedBox(height: 400.0, child: Text('4')),
+            SizedBox(height: 400.0, child: Text('5')),
+            SizedBox(height: 400.0, child: Text('6')),
           ],
         ),
       ),
@@ -94,13 +94,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children: <Widget>[
-            Container(height: 200.0, child: const Text('1')),
-            Container(height: 400.0, child: const Text('2')),
-            Container(height: 400.0, child: const Text('3')),
-            Container(height: 400.0, child: const Text('4')),
-            Container(height: 400.0, child: const Text('5')),
-            Container(height: 400.0, child: const Text('6')),
+          children: const <Widget>[
+            SizedBox(height: 200.0, child: Text('1')),
+            SizedBox(height: 400.0, child: Text('2')),
+            SizedBox(height: 400.0, child: Text('3')),
+            SizedBox(height: 400.0, child: Text('4')),
+            SizedBox(height: 400.0, child: Text('5')),
+            SizedBox(height: 400.0, child: Text('6')),
           ],
         ),
       ),
@@ -129,11 +129,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children: <Widget>[
-            Container(height: 400.0, child: const Text('0')),
-            Container(height: 400.0, child: const Text('1')),
-            Container(height: 400.0, child: const Text('2')),
-            Container(height: 400.0, child: const Text('3')),
+          children: const <Widget>[
+            SizedBox(height: 400.0, child: Text('0')),
+            SizedBox(height: 400.0, child: Text('1')),
+            SizedBox(height: 400.0, child: Text('2')),
+            SizedBox(height: 400.0, child: Text('3')),
           ],
         ),
       ),
@@ -143,20 +143,20 @@ void main() {
     expect(find.text('2'), findsNothing);
     expect(find.text('3'), findsNothing);
 
-    final Finder findItemA = find.descendant(of: find.byType(Container), matching: find.text('A'));
-    final Finder findItemB = find.descendant(of: find.byType(Container), matching: find.text('B'));
+    final Finder findItemA = find.descendant(of: find.byType(SizedBox), matching: find.text('A'));
+    final Finder findItemB = find.descendant(of: find.byType(SizedBox), matching: find.text('B'));
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children: <Widget>[
-            Container(height: 10.0, child: const Text('A')),
-            Container(height: 10.0, child: const Text('B')),
-            Container(height: 400.0, child: const Text('0')),
-            Container(height: 400.0, child: const Text('1')),
-            Container(height: 400.0, child: const Text('2')),
-            Container(height: 400.0, child: const Text('3')),
+          children: const <Widget>[
+            SizedBox(height: 10.0, child: Text('A')),
+            SizedBox(height: 10.0, child: Text('B')),
+            SizedBox(height: 400.0, child: Text('0')),
+            SizedBox(height: 400.0, child: Text('1')),
+            SizedBox(height: 400.0, child: Text('2')),
+            SizedBox(height: 400.0, child: Text('3')),
           ],
         ),
       ),
@@ -179,13 +179,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children: <Widget>[
-            Container(height: 200.0, child: const Text('A')),
-            Container(height: 200.0, child: const Text('B')),
-            Container(height: 400.0, child: const Text('0')),
-            Container(height: 400.0, child: const Text('1')),
-            Container(height: 400.0, child: const Text('2')),
-            Container(height: 400.0, child: const Text('3')),
+          children: const <Widget>[
+            SizedBox(height: 200.0, child: Text('A')),
+            SizedBox(height: 200.0, child: Text('B')),
+            SizedBox(height: 400.0, child: Text('0')),
+            SizedBox(height: 400.0, child: Text('1')),
+            SizedBox(height: 400.0, child: Text('2')),
+            SizedBox(height: 400.0, child: Text('3')),
           ],
         ),
       ),

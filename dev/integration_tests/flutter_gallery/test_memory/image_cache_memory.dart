@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/scheduler.dart';
 // See //dev/devicelab/bin/tasks/flutter_gallery__image_cache_memory.dart
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Once we provide an option for images to be resized to
@@ -20,7 +20,7 @@ Future<void> main() async {
       key: const Key('ImageList'),
       itemCount: numItems,
       itemBuilder: (BuildContext context, int position) {
-        return Container(
+        return SizedBox(
           width: 200,
           height: 200,
           child: Center(

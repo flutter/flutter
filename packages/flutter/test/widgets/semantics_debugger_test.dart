@@ -5,8 +5,6 @@
 import 'dart:ui' show window;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -129,12 +127,13 @@ void main() {
                 child: Stack(
                   children: <Widget>[
                     Positioned(
-                        key: key,
-                        left: 0.0,
-                        top: 0.0,
-                        width: 100.0,
-                        height: 100.0,
-                        child: Semantics(label: 'label2', textDirection: TextDirection.ltr)),
+                      key: key,
+                      left: 0.0,
+                      top: 0.0,
+                      width: 100.0,
+                      height: 100.0,
+                      child: Semantics(label: 'label2', textDirection: TextDirection.ltr),
+                    ),
                     Semantics(label: 'label3', textDirection: TextDirection.ltr),
                     Semantics(label: 'label4', textDirection: TextDirection.ltr),
                   ],
@@ -178,11 +177,11 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('TOP'));
+    await tester.tap(find.text('TOP'), warnIfMissed: false); // hitting the debugger
     expect(log, equals(<String>['top']));
     log.clear();
 
-    await tester.tap(find.text('BOTTOM'));
+    await tester.tap(find.text('BOTTOM'), warnIfMissed: false); // hitting the debugger
     expect(log, equals(<String>['bottom']));
     log.clear();
   });
@@ -218,11 +217,11 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('TOP'));
+    await tester.tap(find.text('TOP'), warnIfMissed: false); // hitting the debugger
     expect(log, equals(<String>['top']));
     log.clear();
 
-    await tester.tap(find.text('BOTTOM'));
+    await tester.tap(find.text('BOTTOM'), warnIfMissed: false); // hitting the debugger
     expect(log, equals(<String>[]));
     log.clear();
   });
@@ -249,22 +248,22 @@ void main() {
 
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
 
-    await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0);
+    await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0, warnIfMissed: false); // hitting the debugger);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
 
-    await tester.fling(find.byType(ListView), const Offset(200.0, 0.0), 200.0);
+    await tester.fling(find.byType(ListView), const Offset(200.0, 0.0), 200.0, warnIfMissed: false); // hitting the debugger);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
 
-    await tester.fling(find.byType(ListView), const Offset(-200.0, 0.0), 200.0);
+    await tester.fling(find.byType(ListView), const Offset(-200.0, 0.0), 200.0, warnIfMissed: false); // hitting the debugger);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
 
-    await tester.fling(find.byType(ListView), const Offset(0.0, 200.0), 200.0);
+    await tester.fling(find.byType(ListView), const Offset(0.0, 200.0), 200.0, warnIfMissed: false); // hitting the debugger);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
@@ -288,7 +287,7 @@ void main() {
       ),
     );
 
-    await tester.longPress(find.text('target'));
+    await tester.longPress(find.text('target'), warnIfMissed: false); // hitting the debugger
     expect(didLongPress, isTrue);
   });
 
@@ -324,7 +323,7 @@ void main() {
     // it won't trigger. The actual distance moved doesn't matter since this is
     // interpreted as a gesture by the semantics debugger and sent to the widget
     // as a semantic action that always moves by 10% of the complete track.
-    await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0);
+    await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0, warnIfMissed: false); // hitting the debugger
     expect(value, equals(0.70));
   });
 
@@ -360,12 +359,12 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byKey(keyTop));
+    await tester.tap(find.byKey(keyTop), warnIfMissed: false); // hitting the debugger
     expect(valueTop, isTrue);
     valueTop = false;
     expect(valueTop, isFalse);
 
-    await tester.tap(find.byKey(keyBottom));
+    await tester.tap(find.byKey(keyBottom), warnIfMissed: false); // hitting the debugger
     expect(valueTop, isFalse);
   });
 

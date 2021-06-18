@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
 
@@ -33,20 +33,18 @@ void main() {
       MaterialApp(
         routes: <String, WidgetBuilder>{
           '/': (BuildContext context) => RepaintBoundary(
-            child: Container(
-              child: RepaintBoundary(
-                child: FlipWidget(
-                  left: CustomPaint(
-                    painter: TestCustomPainter(
-                      log: log,
-                      name: 'left',
-                    ),
+            child: RepaintBoundary(
+              child: FlipWidget(
+                left: CustomPaint(
+                  painter: TestCustomPainter(
+                    log: log,
+                    name: 'left',
                   ),
-                  right: CustomPaint(
-                    painter: TestCustomPainter(
-                      log: log,
-                      name: 'right',
-                    ),
+                ),
+                right: CustomPaint(
+                  painter: TestCustomPainter(
+                    log: log,
+                    name: 'right',
                   ),
                 ),
               ),

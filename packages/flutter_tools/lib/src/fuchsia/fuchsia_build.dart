@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart';
+import '../bundle_builder.dart';
 import '../convert.dart';
 import '../devfs.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 
 import 'fuchsia_pm.dart';
@@ -184,7 +185,6 @@ Future<void> _buildPackage(
   final String appName = fuchsiaProject.project.manifest.appName;
   final String pkgassets = globals.fs.path.join(outDir, '${appName}_pkgassets');
   final String packageManifest = globals.fs.path.join(pkgDir, 'package_manifest');
-  final String devKeyPath = globals.fs.path.join(pkgDir, 'development.key');
 
   final Directory pkg = globals.fs.directory(pkgDir);
   if (!pkg.existsSync()) {
@@ -218,13 +218,10 @@ Future<void> _buildPackage(
   if (!await fuchsiaPM.init(pkgDir, appName)) {
     return;
   }
-  if (!await fuchsiaPM.genkey(pkgDir, devKeyPath)) {
+  if (!await fuchsiaPM.build(pkgDir, packageManifest)) {
     return;
   }
-  if (!await fuchsiaPM.build(pkgDir, devKeyPath, packageManifest)) {
-    return;
-  }
-  if (!await fuchsiaPM.archive(pkgDir, devKeyPath, packageManifest)) {
+  if (!await fuchsiaPM.archive(pkgDir, packageManifest)) {
     return;
   }
 }

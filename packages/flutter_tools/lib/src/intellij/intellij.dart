@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:archive/archive.dart';
-import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/version.dart';
 import '../convert.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 
 /// A parser for the Intellij and Android Studio plugin JAR files.
 ///
@@ -39,7 +38,7 @@ import '../doctor.dart';
 ///     plugin versions.
 class IntelliJPlugins {
   IntelliJPlugins(this.pluginsPath, {
-    @required FileSystem fileSystem
+    required FileSystem fileSystem
   }) : _fileSystem = fileSystem;
 
   final FileSystem _fileSystem;
@@ -54,15 +53,15 @@ class IntelliJPlugins {
     List<String> packageNames,
     String title,
     String url, {
-    Version minVersion,
+    Version? minVersion,
   }) {
     for (final String packageName in packageNames) {
       if (!_hasPackage(packageName)) {
         continue;
       }
 
-      final String versionText = _readPackageVersion(packageName);
-      final Version version = Version.parse(versionText);
+      final String? versionText = _readPackageVersion(packageName);
+      final Version? version = Version.parse(versionText);
       if (version != null && minVersion != null && version < minVersion) {
         messages.add(ValidationMessage.error(
           '$title plugin version $versionText - the recommended minimum version is $minVersion'),
@@ -88,7 +87,7 @@ class IntelliJPlugins {
     return _fileSystem.isDirectorySync(packagePath);
   }
 
-  ArchiveFile _findPluginXml(String packageName) {
+  ArchiveFile? _findPluginXml(String packageName) {
     final List<File> mainJarFileList = <File>[];
     if (packageName.endsWith('.jar')) {
       // package exists (checked in _hasPackage)
@@ -129,7 +128,7 @@ class IntelliJPlugins {
 
     for (final File file in mainJarFileList) {
       final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
-      final ArchiveFile archiveFile = archive.findFile('META-INF/plugin.xml');
+      final ArchiveFile? archiveFile = archive.findFile('META-INF/plugin.xml');
       if (archiveFile != null) {
         return archiveFile;
       }
@@ -137,9 +136,9 @@ class IntelliJPlugins {
     return null;
   }
 
-  String _readPackageVersion(String packageName) {
+  String? _readPackageVersion(String packageName) {
     try {
-      final ArchiveFile archiveFile = _findPluginXml(packageName);
+      final ArchiveFile? archiveFile = _findPluginXml(packageName);
       if (archiveFile == null) {
         return null;
       }

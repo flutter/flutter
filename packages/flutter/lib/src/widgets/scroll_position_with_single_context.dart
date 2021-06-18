@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
-import 'gesture_detector.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
 import 'scroll_notification.dart';
@@ -213,10 +212,11 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     if (targetPixels != pixels) {
       goIdle();
       updateUserScrollDirection(
-          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
+          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
       );
       final double oldPixels = pixels;
       forcePixels(targetPixels);
+      isScrollingNotifier.value = true;
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();
@@ -225,7 +225,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
 
-  @Deprecated('This will lead to bugs.') // ignore: flutter_deprecation_syntax, https://github.com/flutter/flutter/issues/44609
+  @Deprecated('This will lead to bugs.') // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
   @override
   void jumpToWithoutSettling(double value) {
     goIdle();

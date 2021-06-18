@@ -6,8 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart' show Fake;
-
 class TestCustomPainter extends CustomPainter {
   TestCustomPainter({ required this.log, this.name });
 
@@ -29,7 +27,7 @@ class TestCustomPainterWithCustomSemanticsBuilder extends TestCustomPainter {
   @override
   SemanticsBuilderCallback get semanticsBuilder => (Size size) {
     const Key key = Key('0');
-    const Rect rect = Rect.fromLTRB(0, 0, 0, 0);
+    const Rect rect = Rect.zero;
     const SemanticsProperties semanticsProperties = SemanticsProperties();
     return <CustomPainterSemantics>[
       const CustomPainterSemantics(key: key, rect: rect, properties: semanticsProperties),
@@ -79,8 +77,7 @@ void main() {
     expect(log, equals(<String>['background', 'child', 'foreground']));
   });
 
-  testWidgets('Throws FlutterError on custom painter incorrect restore/save calls', (
-      WidgetTester tester) async {
+  testWidgets('Throws FlutterError on custom painter incorrect restore/save calls', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
     final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
@@ -95,7 +92,7 @@ void main() {
     FlutterError getError() {
       late FlutterError error;
       try {
-        renderCustom.paint(paintingContext, const Offset(0, 0));
+        renderCustom.paint(paintingContext, Offset.zero);
       } on FlutterError catch (e) {
         error = e;
       }
@@ -111,7 +108,7 @@ void main() {
       '   This leaves the canvas in an inconsistent state and will probably\n'
       '   result in a broken display.\n'
       '   You must pair each call to save()/saveLayer() with a later\n'
-      '   matching call to restore().\n'
+      '   matching call to restore().\n',
     ));
 
     canvas.saveCountDelta = -1;
@@ -124,7 +121,7 @@ void main() {
       '   This leaves the canvas in an inconsistent state and will result\n'
       '   in a broken display.\n'
       '   You should only call restore() if you first called save() or\n'
-      '   saveLayer().\n'
+      '   saveLayer().\n',
     ));
 
     canvas.saveCountDelta = 2;
@@ -197,5 +194,21 @@ void main() {
   test('Raster cache hints cannot be set with null painters', () {
     expect(() => CustomPaint(isComplex: true), throwsAssertionError);
     expect(() => CustomPaint(willChange: true), throwsAssertionError);
+  });
+
+  test('RenderCustomPaint consults preferred size for intrinsics when it has no child', () {
+    final RenderCustomPaint inner = RenderCustomPaint(preferredSize: const Size(20, 30));
+    expect(inner.getMinIntrinsicWidth(double.infinity), 20);
+    expect(inner.getMaxIntrinsicWidth(double.infinity), 20);
+    expect(inner.getMinIntrinsicHeight(double.infinity), 30);
+    expect(inner.getMaxIntrinsicHeight(double.infinity), 30);
+  });
+
+  test('RenderCustomPaint does not return infinity for its intrinsics', () {
+    final RenderCustomPaint inner = RenderCustomPaint(preferredSize: Size.infinite);
+    expect(inner.getMinIntrinsicWidth(double.infinity), 0);
+    expect(inner.getMaxIntrinsicWidth(double.infinity), 0);
+    expect(inner.getMinIntrinsicHeight(double.infinity), 0);
+    expect(inner.getMaxIntrinsicHeight(double.infinity), 0);
   });
 }

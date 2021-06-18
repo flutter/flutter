@@ -6,8 +6,11 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+// A number of the hit tests below say "warnIfMissed: false". This is because
+// the way the CupertinoPicker works, the hits don't actually reach the labels,
+// the scroll view intercepts them.
 
 // scrolling by this offset will move the picker to the next item
 const Offset _kRowOffset = Offset(0.0, -50.0);
@@ -208,9 +211,7 @@ void main() {
       );
 
       // Distance between the first column and the last column.
-      final double distance = tester.getCenter(
-        find.text('sec.')).dx - tester.getCenter(find.text('12'),
-      ).dx;
+      final double distance = tester.getCenter(find.text('sec.')).dx - tester.getCenter(find.text('12')).dx;
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -252,10 +253,9 @@ void main() {
         ),
       ),
     );
-
-    await tester.drag(find.text('40'), _kRowOffset);
+    await tester.drag(find.text('40'), _kRowOffset, warnIfMissed: false); // see top of file
     await tester.pump();
-    await tester.drag(find.text('48'), -_kRowOffset);
+    await tester.drag(find.text('48'), -_kRowOffset, warnIfMissed: false); // see top of file
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
@@ -334,7 +334,7 @@ void main() {
       // Drag the minute picker to the next slot (03 -> 06).
       // The `initialDateTime` and the `minuteInterval` values are specifically chosen
       // so that `find.text` finds exactly one widget.
-      await tester.drag(find.text('03'), _kRowOffset);
+      await tester.drag(find.text('03'), _kRowOffset, warnIfMissed: false); // see top of file
       await tester.pump();
 
       expect(newDateTime.minute, 6);
@@ -380,7 +380,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('10'), const Offset(0.0, 32.0), touchSlopY: 0);
+      await tester.drag(find.text('10'), const Offset(0.0, 32.0), touchSlopY: 0, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -403,7 +403,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('9'), const Offset(0.0, 32.0), touchSlopY: 0);
+      await tester.drag(find.text('9'), const Offset(0.0, 32.0), touchSlopY: 0, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -605,7 +605,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('March'), const Offset(0, 32.0), touchSlopY: 0.0);
+      await tester.drag(find.text('March'), const Offset(0, 32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
 
       // Momentarily, the 2018 and the incorrect 30 of February is aligned.
       expect(
@@ -663,7 +663,7 @@ void main() {
           isSameColorAs(CupertinoColors.inactiveGray.color),
         );
 
-        await tester.drag(find.text('2017'), const Offset(0.0, 32.0), touchSlopY: 0.0);
+        await tester.drag(find.text('2017'), const Offset(0.0, 32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
         await tester.pump();
         await tester.pumpAndSettle(); // Now the autoscrolling should happen.
 
@@ -678,7 +678,7 @@ void main() {
           isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
         );
 
-        await tester.drag(find.text('2016'), const Offset(0.0, -32.0), touchSlopY: 0.0);
+        await tester.drag(find.text('2016'), const Offset(0.0, -32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
         await tester.pump(); // Once to trigger the post frame animate call.
         await tester.pumpAndSettle();
 
@@ -691,7 +691,8 @@ void main() {
           tester.widget<Text>(find.text('29')).style!.color,
           isSameColorAs(CupertinoColors.inactiveGray.color),
         );
-    });
+      },
+    );
 
     testWidgets(
       'dateTime picker automatically scrolls away from invalid date, '
@@ -740,7 +741,7 @@ void main() {
           isSameColorAs(CupertinoColors.inactiveGray.color),
         );
 
-        await tester.drag(find.text('AM'), const Offset(0.0, -32.0), touchSlopY: 0.0);
+        await tester.drag(find.text('AM'), const Offset(0.0, -32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
         await tester.pump();
         await tester.pumpAndSettle(); // Now the autoscrolling should happen.
 
@@ -759,7 +760,7 @@ void main() {
           isSameColorAs(CupertinoColors.inactiveGray.color),
         );
 
-        await tester.drag(find.text('PM'), const Offset(0.0, 32.0), touchSlopY: 0.0);
+        await tester.drag(find.text('PM'), const Offset(0.0, 32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
         await tester.pump(); // Once to trigger the post frame animate call.
         await tester.pumpAndSettle();
 
@@ -768,7 +769,8 @@ void main() {
           date,
           DateTime(2019, 11, 11, 3, 30),
         );
-    });
+      },
+    );
 
     testWidgets(
       'time picker automatically scrolls away from invalid date, '
@@ -817,7 +819,7 @@ void main() {
           isSameColorAs(CupertinoColors.inactiveGray.color),
         );
 
-        await tester.drag(find.text('AM'), const Offset(0.0, -32.0), touchSlopY: 0.0);
+        await tester.drag(find.text('AM'), const Offset(0.0, -32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
         await tester.pump();
         await tester.pumpAndSettle(); // Now the autoscrolling should happen.
 
@@ -836,7 +838,7 @@ void main() {
           isSameColorAs(CupertinoColors.inactiveGray.color),
         );
 
-        await tester.drag(find.text('PM'), const Offset(0.0, 32.0), touchSlopY: 0.0);
+        await tester.drag(find.text('PM'), const Offset(0.0, 32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
         await tester.pump(); // Once to trigger the post frame animate call.
         await tester.pumpAndSettle();
 
@@ -845,7 +847,8 @@ void main() {
           date,
           DateTime(2019, 11, 11, 3, 30),
         );
-    });
+      },
+    );
 
     testWidgets('picker automatically scrolls away from invalid date on day change', (WidgetTester tester) async {
       late DateTime date;
@@ -867,14 +870,14 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('27'), const Offset(0.0, -32.0), touchSlopY: 0.0);
+      await tester.drag(find.text('27'), const Offset(0.0, -32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
       await tester.pump();
       expect(
         date,
         DateTime(2018, 2, 28),
       );
 
-      await tester.drag(find.text('28'), const Offset(0.0, -32.0), touchSlopY: 0.0);
+      await tester.drag(find.text('28'), const Offset(0.0, -32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
       await tester.pump(); // Once to trigger the post frame animate call.
 
       // Callback doesn't transiently go into invalid dates.
@@ -925,12 +928,36 @@ void main() {
         );
 
         // Scroll to 2019.
-        await tester.drag(find.text('2020'), const Offset(0.0, 32.0), touchSlopY: 0.0);
+        await tester.drag(find.text('2020'), const Offset(0.0, 32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
         await tester.pump();
         await tester.pumpAndSettle();
         expect(date.year, minDate.year);
         expect(date.month, minDate.month);
         expect(date.day, minDate.day);
+      },
+    );
+
+    testWidgets('date picker does not display previous day of minimumDate if it is set at midnight', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/72932
+      final DateTime minDate = DateTime(2019, 12, 31);
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.dateAndTime,
+                minimumDate: minDate,
+                onDateTimeChanged: (DateTime newDate) { },
+                initialDateTime: minDate.add(const Duration(days: 1)),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Mon Dec 30'), findsNothing);
     });
 
 
@@ -956,7 +983,7 @@ void main() {
         );
 
         // 0:15 -> 0:16
-        await tester.drag(find.text('15'), _kRowOffset);
+        await tester.drag(find.text('15'), _kRowOffset, warnIfMissed: false); // see top of file
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
 
@@ -984,7 +1011,7 @@ void main() {
         );
 
         // 12:15 -> 12:16
-        await tester.drag(find.text('15'), _kRowOffset);
+        await tester.drag(find.text('15'), _kRowOffset, warnIfMissed: false); // see top of file
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
 
@@ -1013,7 +1040,7 @@ void main() {
         );
 
         // 12:25 -> 12:26
-        await tester.drag(find.text('25'), _kRowOffset);
+        await tester.drag(find.text('25'), _kRowOffset, warnIfMissed: false); // see top of file
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
 
@@ -1042,28 +1069,28 @@ void main() {
       );
 
       // 3:00 -> 15:00
-      await tester.drag(find.text('AM'), _kRowOffset);
+      await tester.drag(find.text('AM'), _kRowOffset, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2019, 1, 1, 15));
 
       // 15:00 -> 16:00
-      await tester.drag(find.text('3'), _kRowOffset);
+      await tester.drag(find.text('3'), _kRowOffset, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2019, 1, 1, 16));
 
       // 16:00 -> 4:00
-      await tester.drag(find.text('PM'), -_kRowOffset);
+      await tester.drag(find.text('PM'), -_kRowOffset, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2019, 1, 1, 4));
 
       // 4:00 -> 3:00
-      await tester.drag(find.text('4'), -_kRowOffset);
+      await tester.drag(find.text('4'), -_kRowOffset, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -1093,28 +1120,28 @@ void main() {
       const Offset deltaOffset = Offset(0.0, -18.0);
 
       // 11:59 -> 12:59
-      await tester.drag(find.text('11'), _kRowOffset);
+      await tester.drag(find.text('11'), _kRowOffset, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 12, 59));
 
       // 12:59 -> 11:59
-      await tester.drag(find.text('12'), -_kRowOffset);
+      await tester.drag(find.text('12'), -_kRowOffset, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 11, 59));
 
       // 11:59 -> 9:59
-      await tester.drag(find.text('11'), -((_kRowOffset - deltaOffset) * 2 + deltaOffset));
+      await tester.drag(find.text('11'), -((_kRowOffset - deltaOffset) * 2 + deltaOffset), warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 9, 59));
 
       // 9:59 -> 15:59
-      await tester.drag(find.text('9'), (_kRowOffset - deltaOffset) * 6 + deltaOffset);
+      await tester.drag(find.text('9'), (_kRowOffset - deltaOffset) * 6 + deltaOffset, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -1147,31 +1174,45 @@ void main() {
     });
 
     testWidgets('DatePicker golden tests', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
+      Widget _buildApp(CupertinoDatePickerMode mode) {
+        return CupertinoApp(
           home: Center(
             child: SizedBox(
               width: 500,
               height: 400,
               child: RepaintBoundary(
                 child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.dateAndTime,
-                  initialDateTime: DateTime(2019, 1, 1, 4),
+                  key: ValueKey<CupertinoDatePickerMode>(mode),
+                  mode: mode,
+                  initialDateTime: DateTime(2019, 1, 1, 4, 12, 30),
                   onDateTimeChanged: (_) {},
                 ),
               ),
             ),
           ),
-        ),
+        );
+      }
+
+      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.time));
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.time.initial.png'),
       );
 
+      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.date));
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.date.initial.png'),
+      );
+
+      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.dateAndTime));
       await expectLater(
         find.byType(CupertinoDatePicker),
         matchesGoldenFile('date_picker_test.datetime.initial.png'),
       );
 
       // Slightly drag the hour component to make the current hour off-center.
-      await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2));
+      await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
       await tester.pump();
 
       await expectLater(
@@ -1240,7 +1281,7 @@ void main() {
     );
 
     // Slightly drag the minute component to make the current minute off-center.
-    await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2));
+    await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
     await tester.pump();
 
     await expectLater(
@@ -1271,7 +1312,7 @@ void main() {
     expect(find.text('hour'), findsNothing);
     expect(find.text('hours'), findsOneWidget);
 
-    await tester.drag(find.text('2'), Offset(0, -_kRowOffset.dy));
+    await tester.drag(find.text('2'), Offset(0, -_kRowOffset.dy), warnIfMissed: false); // see top of file
     // Duration should change but not the label.
     expect(duration!.inHours, 1);
     expect(find.text('hour'), findsNothing);
@@ -1463,7 +1504,7 @@ Widget _buildPicker({
       onSelectedItemChanged: onSelectedItemChanged,
       children: List<Widget>.generate(100, (int index) {
         return Center(
-          child: Container(
+          child: SizedBox(
             width: 400.0,
             height: 100.0,
             child: Text(index.toString()),

@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart';
-import 'package:flutter/src/material/tooltip_theme.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -104,7 +103,7 @@ void main() {
           data: ThemeData(
             tooltipTheme: const TooltipThemeData(
               height: 100.0,
-              padding: EdgeInsets.all(0.0),
+              padding: EdgeInsets.zero,
               verticalOffset: 100.0,
               preferBelow: false,
             ),
@@ -163,7 +162,7 @@ void main() {
         child: TooltipTheme(
           data: const TooltipThemeData(
             height: 100.0,
-            padding: EdgeInsets.all(0.0),
+            padding: EdgeInsets.zero,
             verticalOffset: 100.0,
             preferBelow: false,
           ),
@@ -222,7 +221,7 @@ void main() {
           data: ThemeData(
             tooltipTheme: const TooltipThemeData(
               height: 190.0,
-              padding: EdgeInsets.all(0.0),
+              padding: EdgeInsets.zero,
               verticalOffset: 100.0,
               preferBelow: false,
             ),
@@ -292,7 +291,7 @@ void main() {
         child: TooltipTheme(
           data: const TooltipThemeData(
             height: 190.0,
-            padding: EdgeInsets.all(0.0),
+            padding: EdgeInsets.zero,
             verticalOffset: 100.0,
             preferBelow: false,
           ),
@@ -362,7 +361,7 @@ void main() {
           data: ThemeData(
             tooltipTheme: const TooltipThemeData(
               height: 190.0,
-              padding: EdgeInsets.all(0.0),
+              padding: EdgeInsets.zero,
               verticalOffset: 100.0,
               preferBelow: true,
             ),
@@ -420,7 +419,7 @@ void main() {
         child: TooltipTheme(
           data: const TooltipThemeData(
             height: 190.0,
-            padding: EdgeInsets.all(0.0),
+            padding: EdgeInsets.zero,
             verticalOffset: 100.0,
             preferBelow: true,
           ),
@@ -481,7 +480,7 @@ void main() {
                 return Theme(
                   data: ThemeData(
                     tooltipTheme: const TooltipThemeData(
-                      padding: EdgeInsets.all(0.0),
+                      padding: EdgeInsets.zero,
                       margin: EdgeInsets.all(_customPaddingValue),
                     ),
                   ),
@@ -538,7 +537,7 @@ void main() {
               builder: (BuildContext context) {
                 return TooltipTheme(
                   data: const TooltipThemeData(
-                    padding: EdgeInsets.all(0.0),
+                    padding: EdgeInsets.zero,
                     margin: EdgeInsets.all(_customPaddingValue),
                   ),
                   child: Tooltip(
@@ -866,7 +865,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
+    await tester.pump(customWaitDuration);
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -910,7 +909,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
+    await tester.pump(customWaitDuration); // Should disappear after customWaitDuration
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -1154,7 +1153,7 @@ void main() {
 
   testWidgets('has semantic events by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvents.add(message);
     });
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1192,12 +1191,12 @@ void main() {
       },
     ]));
     semantics.dispose();
-    SystemChannels.accessibility.setMockMessageHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
   testWidgets('has semantic events by default - TooltipTheme', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvents.add(message);
     });
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1237,13 +1236,13 @@ void main() {
       },
     ]));
     semantics.dispose();
-    SystemChannels.accessibility.setMockMessageHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
   testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-    const Tooltip(message: 'message',).debugFillProperties(builder);
+    const Tooltip(message: 'message').debugFillProperties(builder);
 
     final List<String> description = builder.properties
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))

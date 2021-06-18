@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 ScrollController _controller = ScrollController(
   initialScrollOffset: 110.0,
@@ -41,13 +39,13 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
           if (settings.name == '/') {
             return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => Container(child: const ThePositiveNumbers(from: 0)),
+              builder: (_) => const ThePositiveNumbers(from: 0),
               maintainState: maintainState,
             );
           } else if (settings.name == '/second') {
             return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => Container(child: const ThePositiveNumbers(from: 10000)),
+              builder: (_) => const ThePositiveNumbers(from: 10000),
               maintainState: maintainState,
             );
           }
@@ -139,7 +137,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
 }
 
 void main() {
-  testWidgets('ScrollPosition jumpTo() doesn\'t call notifyListeners twice', (WidgetTester tester) async {
+  testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
     int count = 0;
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
@@ -226,7 +224,7 @@ void main() {
     expect(controller.position.pixels, equals(0.0));
   });
 
-  testWidgets('jumpTo recomends deferred loading', (WidgetTester tester) async {
+  testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
     int loadedWithDeferral = 0;
     int buildCount = 0;
     const double height = 500;

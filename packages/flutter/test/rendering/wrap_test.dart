@@ -23,7 +23,7 @@ void main() {
         '   spacing: 0.0\n'
         '   runAlignment: start\n'
         '   runSpacing: 0.0\n'
-        '   crossAxisAlignment: 0.0\n'
+        '   crossAxisAlignment: 0.0\n',
       ),
     );
   });
@@ -103,7 +103,7 @@ void main() {
             style: TextStyle(fontSize: lineHeight),
           ),
           textDirection: TextDirection.ltr,
-        )
+        ),
       ),
     );
 

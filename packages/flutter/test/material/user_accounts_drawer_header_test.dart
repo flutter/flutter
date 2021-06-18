@@ -14,10 +14,12 @@ const Key avatarD = Key('D');
 
 Future<void> pumpTestWidget(
   WidgetTester tester, {
-  bool withName = true,
-  bool withEmail = true,
-  bool withOnDetailsPressedHandler = true,
-}) async {
+      bool withName = true,
+      bool withEmail = true,
+      bool withOnDetailsPressedHandler = true,
+      Size otherAccountsPictureSize = const Size.square(40.0),
+      Size currentAccountPictureSize  = const Size.square(72.0),
+    }) async {
   await tester.pumpWidget(
     MaterialApp(
       home: MediaQuery(
@@ -33,6 +35,8 @@ Future<void> pumpTestWidget(
           child: Center(
             child: UserAccountsDrawerHeader(
               onDetailsPressed: withOnDetailsPressedHandler ? () { } : null,
+              currentAccountPictureSize: currentAccountPictureSize,
+              otherAccountsPicturesSize: otherAccountsPictureSize,
               currentAccountPicture: const ExcludeSemantics(
                 child: CircleAvatar(
                   key: avatarA,
@@ -102,6 +106,23 @@ void main() {
     expect(topRight.dx - avatarDTopRight.dx, equals(16.0 + 30.0)); // right padding
     expect(avatarDTopRight.dy - topRight.dy, equals(16.0 + 20.0)); // add top padding
     expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
+  });
+
+  testWidgets('UserAccountsDrawerHeader change default size test', (WidgetTester tester) async {
+    const Size currentAccountPictureSize = Size.square(60.0);
+    const Size otherAccountsPictureSize = Size.square(30.0);
+
+    await pumpTestWidget(
+      tester,
+      currentAccountPictureSize: currentAccountPictureSize,
+      otherAccountsPictureSize: otherAccountsPictureSize,
+    );
+
+    final RenderBox currentAccountRenderBox = tester.renderObject(find.byKey(avatarA));
+    final RenderBox otherAccountRenderBox = tester.renderObject(find.byKey(avatarC));
+
+    expect(currentAccountRenderBox.size, currentAccountPictureSize);
+    expect(otherAccountRenderBox.size, otherAccountsPictureSize);
   });
 
   testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
@@ -480,35 +501,35 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                      label: 'Signed in\nname\nemail',
-                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: r'B',
+                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                          label: 'Signed in\nname\nemail',
                           textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          label: r'C',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          label: r'D',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
-                          label: r'Show accounts',
-                          textDirection: TextDirection.ltr,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: r'B',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'C',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'D',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: r'Show accounts',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
                   ],
                 ),
               ],

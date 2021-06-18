@@ -2,33 +2,41 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 // Do not add package imports to this file.
-import 'dart:convert'; // ignore: dart_convert_import.
-import 'dart:io'; // ignore: dart_io_import.
+import 'dart:convert'; // flutter_ignore: dart_convert_import.
+import 'dart:io'; // flutter_ignore: dart_io_import.
 
 /// Executes the required flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {
   final String targetPlatform = arguments[0];
   final String buildMode = arguments[1].toLowerCase();
 
-  final String dartDefines = Platform.environment['DART_DEFINES'];
+  final String? dartDefines = Platform.environment['DART_DEFINES'];
   final bool dartObfuscation = Platform.environment['DART_OBFUSCATION'] == 'true';
-  final String extraFrontEndOptions = Platform.environment['EXTRA_FRONT_END_OPTIONS'];
-  final String extraGenSnapshotOptions = Platform.environment['EXTRA_GEN_SNAPSHOT_OPTIONS'];
-  final String flutterEngine = Platform.environment['FLUTTER_ENGINE'];
-  final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  final String? extraFrontEndOptions = Platform.environment['EXTRA_FRONT_END_OPTIONS'];
+  final String? extraGenSnapshotOptions = Platform.environment['EXTRA_GEN_SNAPSHOT_OPTIONS'];
+  final String? flutterEngine = Platform.environment['FLUTTER_ENGINE'];
+  final String? flutterRoot = Platform.environment['FLUTTER_ROOT'];
   final String flutterTarget = Platform.environment['FLUTTER_TARGET']
     ?? pathJoin(<String>['lib', 'main.dart']);
-  final String codeSizeDirectory = Platform.environment['CODE_SIZE_DIRECTORY'];
-  final String localEngine = Platform.environment['LOCAL_ENGINE'];
-  final String projectDirectory = Platform.environment['PROJECT_DIR'];
-  final String splitDebugInfo = Platform.environment['SPLIT_DEBUG_INFO'];
-  final String bundleSkSLPath = Platform.environment['BUNDLE_SKSL_PATH'];
+  final String? codeSizeDirectory = Platform.environment['CODE_SIZE_DIRECTORY'];
+  final String? localEngine = Platform.environment['LOCAL_ENGINE'];
+  final String? projectDirectory = Platform.environment['PROJECT_DIR'];
+  final String? splitDebugInfo = Platform.environment['SPLIT_DEBUG_INFO'];
+  final String? bundleSkSLPath = Platform.environment['BUNDLE_SKSL_PATH'];
   final bool trackWidgetCreation = Platform.environment['TRACK_WIDGET_CREATION'] == 'true';
   final bool treeShakeIcons = Platform.environment['TREE_SHAKE_ICONS'] == 'true';
   final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] == 'true';
+  final bool prefixedErrors = Platform.environment['PREFIXED_ERROR_LOGGING'] == 'true';
+
+  if (projectDirectory == null) {
+    stderr.write('PROJECT_DIR environment variable must be set to the location of Flutter project to be built.');
+    exit(1);
+  }
+  if (flutterRoot == null || flutterRoot.isEmpty) {
+    stderr.write('FLUTTER_ROOT environment variable must be set to the location of the Flutter SDK.');
+    exit(1);
+  }
 
   Directory.current = projectDirectory;
 
@@ -53,17 +61,20 @@ or
     else
       'flutter'
   ]);
-  final String bundlePlatform = targetPlatform == 'windows-x64' ? 'windows' : 'linux';
-  final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
-
+  final bool uwp = targetPlatform.contains('uwp');
+  final String bundlePlatform = targetPlatform.startsWith('windows') ? 'windows' : targetPlatform;
+  final String target = '${buildMode}_bundle_${bundlePlatform}_assets${uwp ? '_uwp' : ''}';
   final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[
       if (verbose)
         '--verbose',
+      if (prefixedErrors)
+        '--prefixed-errors',
       if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
       if (localEngine != null) '--local-engine=$localEngine',
       'assemble',
+      '--no-version-check',
       '--output=build',
       '-dTargetPlatform=$targetPlatform',
       '-dTrackWidgetCreation=$trackWidgetCreation',
@@ -72,7 +83,7 @@ or
       '-dTreeShakeIcons="$treeShakeIcons"',
       '-dDartObfuscation=$dartObfuscation',
       if (bundleSkSLPath != null)
-        '-iBundleSkSLPath=$bundleSkSLPath',
+        '-dBundleSkSLPath=$bundleSkSLPath',
       if (codeSizeDirectory != null)
         '-dCodeSizeDirectory=$codeSizeDirectory',
       if (splitDebugInfo != null)

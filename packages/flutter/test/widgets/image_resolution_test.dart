@@ -14,12 +14,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
 
-class TestByteData implements ByteData {
-  TestByteData(this.scale);
-  final double scale;
+ByteData testByteData(double scale) => ByteData(8)..setFloat64(0, scale);
 
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
+extension on ByteData {
+  double get scale => getFloat64(0);
 }
 
 const String testManifest = '''
@@ -44,22 +42,22 @@ class TestAssetBundle extends CachingAssetBundle {
     late ByteData data;
     switch (key) {
       case 'assets/image.png':
-        data = TestByteData(1.0);
+        data = testByteData(1.0);
         break;
       case 'assets/1.0x/image.png':
-        data = TestByteData(10.0); // see "...with a main asset and a 1.0x asset"
+        data = testByteData(10.0); // see "...with a main asset and a 1.0x asset"
         break;
       case 'assets/1.5x/image.png':
-        data = TestByteData(1.5);
+        data = testByteData(1.5);
         break;
       case 'assets/2.0x/image.png':
-        data = TestByteData(2.0);
+        data = testByteData(2.0);
         break;
       case 'assets/3.0x/image.png':
-        data = TestByteData(3.0);
+        data = testByteData(3.0);
         break;
       case 'assets/4.0x/image.png':
-        data = TestByteData(4.0);
+        data = testByteData(4.0);
         break;
     }
     return SynchronousFuture<ByteData>(data);
@@ -91,13 +89,13 @@ class TestAssetImage extends AssetImage {
   ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
     late ImageInfo imageInfo;
     key.bundle.load(key.name).then<void>((ByteData data) {
-      final TestByteData testData = data as TestByteData;
+      final ByteData testData = data;
       final ui.Image image = images[testData.scale]!;
       assert(image != null, 'Expected ${testData.scale} to have a key in $images');
       imageInfo = ImageInfo(image: image, scale: key.scale);
     });
     return FakeImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(imageInfo)
+      SynchronousFuture<ImageInfo>(imageInfo),
     );
   }
 }
@@ -110,7 +108,7 @@ Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize
     data: MediaQueryData(
       size: const Size(windowSize, windowSize),
       devicePixelRatio: ratio,
-      padding: const EdgeInsets.all(0.0),
+      padding: EdgeInsets.zero,
     ),
     child: DefaultAssetBundle(
       bundle: bundle ?? TestAssetBundle(),
@@ -137,7 +135,7 @@ Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize
 Widget buildImageCacheResized(String name, Key key, int width, int height, int cacheWidth, int cacheHeight) {
   return Center(
     child: RepaintBoundary(
-      child: Container(
+      child: SizedBox(
         width: 250,
         height: 250,
         child: Center(
@@ -163,7 +161,7 @@ RenderImage getRenderImage(WidgetTester tester, Key key) {
 }
 
 Future<void> pumpTreeToLayout(WidgetTester tester, Widget widget) {
-  const Duration pumpDuration = Duration(milliseconds: 0);
+  const Duration pumpDuration = Duration.zero;
   const EnginePhase pumpPhase = EnginePhase.layout;
   return tester.pumpWidget(widget, pumpDuration, pumpPhase);
 }
@@ -312,12 +310,12 @@ void main() {
     Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images, bundle));
     expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
-    // Verify we got the 10x scaled image, since the TestByteData said it should be 10x.
+    // Verify we got the 10x scaled image, since the test ByteData said it should be 10x.
     expect(getRenderImage(tester, key).image!.height, 480);
     key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true, images, bundle));
     expect(getRenderImage(tester, key).size, const Size(480.0, 480.0));
-    // Verify we got the 10x scaled image, since the TestByteData said it should be 10x.
+    // Verify we got the 10x scaled image, since the test ByteData said it should be 10x.
     expect(getRenderImage(tester, key).image!.height, 480);
   });
 

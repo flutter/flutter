@@ -2,45 +2,45 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/shell_completion.dart';
-import 'package:process/process.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
-import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
+import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   group('shell_completion', () {
-    MockStdio mockStdio;
+    FakeStdio fakeStdio;
 
     setUp(() {
       Cache.disableLocking();
-      mockStdio = MockStdio()..stdout.terminalColumns = 80;
+      fakeStdio = FakeStdio()..stdout.terminalColumns = 80;
     });
 
     testUsingContext('generates bash initialization script to stdout', () async {
       final ShellCompletionCommand command = ShellCompletionCommand();
       await createTestCommandRunner(command).run(<String>['bash-completion']);
-      expect(mockStdio.writtenToStdout.length, equals(1));
-      expect(mockStdio.writtenToStdout.first, contains('__flutter_completion'));
+      expect(fakeStdio.writtenToStdout.length, equals(1));
+      expect(fakeStdio.writtenToStdout.first, contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
-      Stdio: () => mockStdio,
+      Stdio: () => fakeStdio,
     });
 
     testUsingContext('generates bash initialization script to stdout with arg', () async {
       final ShellCompletionCommand command = ShellCompletionCommand();
       await createTestCommandRunner(command).run(<String>['bash-completion', '-']);
-      expect(mockStdio.writtenToStdout.length, equals(1));
-      expect(mockStdio.writtenToStdout.first, contains('__flutter_completion'));
+      expect(fakeStdio.writtenToStdout.length, equals(1));
+      expect(fakeStdio.writtenToStdout.first, contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
-      Stdio: () => mockStdio,
+      Stdio: () => fakeStdio,
     });
 
     testUsingContext('generates bash initialization script to output file', () async {
@@ -54,28 +54,29 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      Stdio: () => mockStdio,
+      Stdio: () => fakeStdio,
     });
 
     testUsingContext("won't overwrite existing output file ", () async {
       final ShellCompletionCommand command = ShellCompletionCommand();
       const String outputFile = 'bash-setup.sh';
       globals.fs.file(outputFile).createSync();
-      try {
-        await createTestCommandRunner(command).run(
+      await expectLater(
+        () => createTestCommandRunner(command).run(
           <String>['bash-completion', outputFile],
-        );
-        fail('Expect ToolExit exception');
-      } on ToolExit catch (error) {
-        expect(error.exitCode ?? 1, 1);
-        expect(error.message, contains('Use --overwrite'));
-      }
+        ),
+        throwsA(
+          isA<ToolExit>()
+            .having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))
+            .having((ToolExit error) => error.message, 'message', contains('Use --overwrite')),
+        ),
+      );
       expect(globals.fs.isFileSync(outputFile), isTrue);
       expect(globals.fs.file(outputFile).readAsStringSync(), isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      Stdio: () => mockStdio,
+      Stdio: () => fakeStdio,
     });
 
     testUsingContext('will overwrite existing output file if given --overwrite', () async {
@@ -90,7 +91,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      Stdio: () => mockStdio,
+      Stdio: () => fakeStdio,
     });
   });
 }

@@ -4,13 +4,12 @@
 
 import 'dart:io';
 
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
 import 'package:snippets/configuration.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('Configuration', () {
-    Configuration config;
+    late Configuration config;
 
     setUp(() {
       config = Configuration(flutterRoot: Directory('/flutter sdk'));

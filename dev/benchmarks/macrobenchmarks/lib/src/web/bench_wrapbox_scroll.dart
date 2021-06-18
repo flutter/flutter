@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -35,7 +34,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -85,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class ProductPreview extends StatelessWidget {
-  const ProductPreview(this.previewIndex);
+  const ProductPreview(this.previewIndex, {Key key}) : super(key: key);
 
   final int previewIndex;
 

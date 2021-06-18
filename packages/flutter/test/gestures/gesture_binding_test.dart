@@ -7,33 +7,18 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
-
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
 
 class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
   HandleEventCallback? callback;
-  FrameCallback? frameCallback;
-  Duration? frameTime;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
     if (callback != null)
       callback?.call(event);
-  }
-
-  @override
-  Duration get currentSystemFrameTimeStamp {
-    assert(frameTime != null);
-    return frameTime!;
-  }
-
-  @override
-  int scheduleFrameCallback(FrameCallback callback, {bool rescheduling = false}) {
-    frameCallback = callback;
-    return 0;
   }
 }
 
@@ -107,8 +92,7 @@ void main() {
     expect(events[0], isA<PointerHoverEvent>());
     expect(events[1], isA<PointerHoverEvent>());
     expect(events[2], isA<PointerHoverEvent>());
-    expect(pointerRouterEvents.length, 6,
-        reason: 'pointerRouterEvents contains: $pointerRouterEvents');
+    expect(pointerRouterEvents.length, 6, reason: 'pointerRouterEvents contains: $pointerRouterEvents');
     expect(pointerRouterEvents[0], isA<PointerAddedEvent>());
     expect(pointerRouterEvents[1], isA<PointerHoverEvent>());
     expect(pointerRouterEvents[2], isA<PointerHoverEvent>());
@@ -166,8 +150,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -185,8 +168,7 @@ void main() {
         ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 2);
     expect(events[0], isA<PointerAddedEvent>());
@@ -206,8 +188,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -239,8 +220,7 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(
-        packet.data, ui.window.devicePixelRatio).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
@@ -269,8 +249,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -300,8 +279,7 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(
-        packet.data, ui.window.devicePixelRatio).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());

@@ -29,8 +29,8 @@ class AppBarTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.appBarTheme].
   const AppBarTheme({
     this.brightness,
-    this.color,
-    this.backgroundColor,
+    Color? color,
+    Color? backgroundColor,
     this.foregroundColor,
     this.elevation,
     this.shadowColor,
@@ -39,11 +39,16 @@ class AppBarTheme with Diagnosticable {
     this.textTheme,
     this.centerTitle,
     this.titleSpacing,
+    this.toolbarHeight,
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.backwardsCompatibility,
-  });
+  }) : assert(
+         color == null || backgroundColor == null,
+         'The color and backgroundColor parameters mean the same thing. Only specify one.',
+       ),
+       backgroundColor = backgroundColor ?? color;
 
   /// This property is obsolete, please use [systemOverlayStyle] instead.
   ///
@@ -65,10 +70,11 @@ class AppBarTheme with Diagnosticable {
   /// See also:
   ///
   ///  * [backgroundColor], which serves this same purpose
-  ///    as this property, but has a consistent name.
+  ///    as this property, but has a name that's consistent with
+  ///    [AppBar.backgroundColor].
   ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
   ///    on this obsolete property.
-  final Color? color;
+  Color? get color => backgroundColor;
 
   /// Overrides the default value of [AppBar.backgroundColor] in all
   /// descendant [AppBar] widgets.
@@ -78,7 +84,6 @@ class AppBarTheme with Diagnosticable {
   ///  * [foregroundColor], which overrides the default value for
   ///    [AppBar.foregroundColor] in all descendant widgets.
   final Color? backgroundColor;
-
 
   /// Overrides the default value of [AppBar.foregroundColor] in all
   /// descendant widgets.
@@ -140,8 +145,19 @@ class AppBarTheme with Diagnosticable {
   /// If null, [AppBar] uses default value of [NavigationToolbar.kMiddleSpacing].
   final double? titleSpacing;
 
+  /// Overrides the default value for the [AppBar.toolbarHeight]
+  /// property in all descendant [AppBar] widgets.
+  ///
+  /// See also:
+  ///
+  ///  * [AppBar.preferredHeightFor], which computes the overall
+  ///    height of an AppBar widget, taking this value into account.
+  final double? toolbarHeight;
+
   /// Overrides the default value for the obsolete [AppBar.toolbarTextStyle]
   /// property in all descendant [AppBar] widgets.
+  ///
+  /// If this property is specified, then [backwardsCompatibility] should be true.
   ///
   /// See also:
   ///
@@ -151,6 +167,8 @@ class AppBarTheme with Diagnosticable {
 
   /// Overrides the default value of [AppBar.titleTextStyle]
   /// property in all descendant [AppBar] widgets.
+  ///
+  /// If this property is specified, then [backwardsCompatibility] should be true.
   ///
   /// See also:
   ///
@@ -180,15 +198,19 @@ class AppBarTheme with Diagnosticable {
     TextTheme? textTheme,
     bool? centerTitle,
     double? titleSpacing,
+    double? toolbarHeight,
     TextStyle? toolbarTextStyle,
     TextStyle? titleTextStyle,
     SystemUiOverlayStyle? systemOverlayStyle,
     bool? backwardsCompatibility,
   }) {
+    assert(
+      color == null || backgroundColor == null,
+      'The color and backgroundColor parameters mean the same thing. Only specify one.',
+    );
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
-      color: color ?? this.color,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
+      backgroundColor: backgroundColor ?? color ?? this.backgroundColor,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       elevation: elevation ?? this.elevation,
       shadowColor: shadowColor ?? this.shadowColor,
@@ -197,6 +219,7 @@ class AppBarTheme with Diagnosticable {
       textTheme: textTheme ?? this.textTheme,
       centerTitle: centerTitle ?? this.centerTitle,
       titleSpacing: titleSpacing ?? this.titleSpacing,
+      toolbarHeight: toolbarHeight ?? this.toolbarHeight,
       toolbarTextStyle: toolbarTextStyle ?? this.toolbarTextStyle,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       systemOverlayStyle: systemOverlayStyle ?? this.systemOverlayStyle,
@@ -218,7 +241,6 @@ class AppBarTheme with Diagnosticable {
     assert(t != null);
     return AppBarTheme(
       brightness: t < 0.5 ? a?.brightness : b?.brightness,
-      color: Color.lerp(a?.color, b?.color, t),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
@@ -228,6 +250,7 @@ class AppBarTheme with Diagnosticable {
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
       centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
       titleSpacing: lerpDouble(a?.titleSpacing, b?.titleSpacing, t),
+      toolbarHeight: lerpDouble(a?.toolbarHeight, b?.toolbarHeight, t),
       toolbarTextStyle: TextStyle.lerp(a?.toolbarTextStyle, b?.toolbarTextStyle, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       systemOverlayStyle: t < 0.5 ? a?.systemOverlayStyle : b?.systemOverlayStyle,
@@ -239,7 +262,6 @@ class AppBarTheme with Diagnosticable {
   int get hashCode {
     return hashValues(
       brightness,
-      color,
       backgroundColor,
       foregroundColor,
       elevation,
@@ -249,6 +271,7 @@ class AppBarTheme with Diagnosticable {
       textTheme,
       centerTitle,
       titleSpacing,
+      toolbarHeight,
       toolbarTextStyle,
       titleTextStyle,
       systemOverlayStyle,
@@ -264,7 +287,6 @@ class AppBarTheme with Diagnosticable {
       return false;
     return other is AppBarTheme
         && other.brightness == brightness
-        && other.color == color
         && other.backgroundColor == backgroundColor
         && other.foregroundColor == foregroundColor
         && other.elevation == elevation
@@ -274,6 +296,7 @@ class AppBarTheme with Diagnosticable {
         && other.textTheme == textTheme
         && other.centerTitle == centerTitle
         && other.titleSpacing == titleSpacing
+        && other.toolbarHeight == toolbarHeight
         && other.toolbarTextStyle == toolbarTextStyle
         && other.titleTextStyle == titleTextStyle
         && other.systemOverlayStyle == systemOverlayStyle
@@ -284,7 +307,6 @@ class AppBarTheme with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
-    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
@@ -294,6 +316,7 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('toolbarHeight', toolbarHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('toolbarTextStyle', toolbarTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('backwardsCompatibility', backwardsCompatibility, defaultValue: null));

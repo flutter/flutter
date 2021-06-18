@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -266,7 +268,7 @@ abstract class Emulator {
         && other.id == id;
   }
 
-  Future<void> launch();
+  Future<void> launch({bool coldBoot});
 
   @override
   String toString() => name;
@@ -299,9 +301,9 @@ abstract class Emulator {
     return table
         .map<String>((List<String> row) {
           return indices
-                  .map<String>((int i) => row[i].padRight(widths[i]))
-                  .join(' • ') +
-              ' • ${row.last}';
+            .map<String>((int i) => row[i].padRight(widths[i]))
+            .followedBy(<String>[row.last])
+            .join(' • ');
         })
         .map<String>((String line) => line.replaceAll(whiteSpaceAndDots, ''))
         .toList();

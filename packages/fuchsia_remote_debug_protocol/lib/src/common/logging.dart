@@ -50,12 +50,12 @@ typedef LoggingFunction = void Function(LogMessage log);
 ///   '[${log.levelName}]::${log.tag}--${log.time}: ${log.message}'
 ///
 /// Exits with status code 1 if the `log` is [LoggingLevel.severe].
-LoggingFunction defaultLoggingFunction = (LogMessage log) {
+void defaultLoggingFunction(LogMessage log) {
   print('[${log.levelName}]::${log.tag}--${log.time}: ${log.message}');
   if (log.level == LoggingLevel.severe) {
     exit(1);
   }
-};
+}
 
 /// Represents a logging message created by the logger.
 ///

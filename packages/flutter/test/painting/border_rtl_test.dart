@@ -7,7 +7,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import '../rendering/rendering_tester.dart';
 
 class SillyBorder extends BoxBorder {
   @override
@@ -146,7 +145,7 @@ void main() {
       '   However, only Border and BorderDirectional classes are supported\n'
       '   by this method.\n'
       '   For a more general interpolation method, consider using\n'
-      '   ShapeBorder.lerp instead.\n'
+      '   ShapeBorder.lerp instead.\n',
     ));
   });
 
@@ -172,7 +171,7 @@ void main() {
           const Offset(111.0, 190.0),
           const Offset(110.0, 191.0),
           const Offset(111.0, 191.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -202,7 +201,7 @@ void main() {
           const Offset(50.0, 50.0),
           const Offset(50.0, 60.0),
           const Offset(60.0, 60.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -236,7 +235,7 @@ void main() {
           const Offset(111.0, 190.0),
           const Offset(110.0, 191.0),
           const Offset(111.0, 191.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -271,7 +270,7 @@ void main() {
           const Offset(50.0, 75.0),
           const Offset(55.0, 70.0),
           const Offset(60.0, 60.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -303,7 +302,7 @@ void main() {
           const Offset(111.0, 190.0),
           const Offset(110.0, 191.0),
           const Offset(111.0, 191.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -333,7 +332,7 @@ void main() {
           const Offset(40.0, 60.0),
           const Offset(50.0, 60.0),
           const Offset(60.0, 60.0),
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(-10.0, -10.0),
           const Offset(0.0, -10.0),
           const Offset(-10.0, 0.0),
@@ -459,9 +458,9 @@ void main() {
     );
     expect(
       const BorderDirectional(
-        top: BorderSide(style: BorderStyle.none, width: 0.0),
-        start: BorderSide(style: BorderStyle.none, width: 0.0),
-        end: BorderSide(style: BorderStyle.none, width: 0.0),
+        top: BorderSide.none,
+        start: BorderSide.none,
+        end: BorderSide.none,
         bottom: BorderSide.none,
       ).isUniform,
       true,

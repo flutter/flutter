@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'bottom_tab_bar.dart';
 import 'colors.dart';
@@ -21,8 +20,10 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class MyCupertinoTabScaffoldPage extends StatefulWidget {
+///   const MyCupertinoTabScaffoldPage({Key? key}) : super(key: key);
+///
 ///   @override
-///   _CupertinoTabScaffoldPageState createState() => _CupertinoTabScaffoldPageState();
+///   State<MyCupertinoTabScaffoldPage> createState() => _CupertinoTabScaffoldPageState();
 /// }
 ///
 /// class _CupertinoTabScaffoldPageState extends State<MyCupertinoTabScaffoldPage> {
@@ -32,7 +33,7 @@ import 'theme.dart';
 ///   Widget build(BuildContext context) {
 ///     return CupertinoTabScaffold(
 ///       tabBar: CupertinoTabBar(
-///         items: <BottomNavigationBarItem> [
+///         items: const <BottomNavigationBarItem> [
 ///           // ...
 ///         ],
 ///       ),
@@ -144,7 +145,7 @@ class CupertinoTabController extends ChangeNotifier {
 /// ```dart
 /// CupertinoTabScaffold(
 ///   tabBar: CupertinoTabBar(
-///     items: <BottomNavigationBarItem> [
+///     items: const <BottomNavigationBarItem> [
 ///       // ...
 ///     ],
 ///   ),
@@ -219,7 +220,7 @@ class CupertinoTabScaffold extends StatefulWidget {
        assert(
          controller == null || controller.index < tabBar.items.length,
          "The CupertinoTabController's current index ${controller.index} is "
-         'out of bounds for the tab bar with ${tabBar.items.length} tabs'
+         'out of bounds for the tab bar with ${tabBar.items.length} tabs',
        ),
        super(key: key);
 
@@ -311,7 +312,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _CupertinoTabScaffoldState createState() => _CupertinoTabScaffoldState();
+  State<CupertinoTabScaffold> createState() => _CupertinoTabScaffoldState();
 }
 
 class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with RestorationMixin {
@@ -366,7 +367,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
     assert(
       _controller.index >= 0 && _controller.index < widget.tabBar.items.length,
       "The $runtimeType's current index ${_controller.index} is "
-      'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs'
+      'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs',
     );
 
     // The value of `_controller.index` has already been updated at this point.

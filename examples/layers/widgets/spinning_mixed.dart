@@ -33,15 +33,15 @@ class Rectangle extends StatelessWidget {
 
 double? value;
 RenderObjectToWidgetElement<RenderBox>? element;
-BuildOwner owner = BuildOwner();
 void attachWidgetTreeToRenderTree(RenderProxyBox container) {
   element = RenderObjectToWidgetAdapter<RenderBox>(
     container: container,
     child: Directionality(
       textDirection: TextDirection.ltr,
-      child: Container(
+      child: SizedBox(
         height: 300.0,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             const Rectangle(Color(0xFF00FFFF)),
             Material(
@@ -49,6 +49,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                 padding: const EdgeInsets.all(10.0),
                 margin: const EdgeInsets.all(10.0),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
                     ElevatedButton(
                       child: Row(
@@ -64,17 +65,15 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                     ),
                     CircularProgressIndicator(value: value),
                   ],
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                 ),
               ),
             ),
             const Rectangle(Color(0xFFFFFF00)),
           ],
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
         ),
       ),
     ),
-  ).attachToRenderTree(owner, element);
+  ).attachToRenderTree(WidgetsBinding.instance!.buildOwner!, element);
 }
 
 Duration? timeBase;
@@ -87,7 +86,7 @@ void rotate(Duration timeStamp) {
   transformBox.setIdentity();
   transformBox.rotateZ(delta);
 
-  owner.buildScope(element!);
+  WidgetsBinding.instance!.buildOwner!.buildScope(element!);
 }
 
 void main() {

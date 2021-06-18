@@ -7,11 +7,13 @@ import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 /// The main app entrance of the test
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,11 +30,11 @@ class MyApp extends StatelessWidget {
 ///
 /// On press the button, a page with platform view should be pushed into the scene.
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  const MyHomePage({Key? key, this.title}) : super(key: key);
+  final String? title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -40,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title ?? ''),
       ),
       body: Column(children: <Widget>[
         TextButton(
@@ -50,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute<PlatformViewPage>(
-                  builder: (BuildContext context) => PlatformViewPage()),
+                  builder: (BuildContext context) => const PlatformViewPage()),
             );
           },
         ),
@@ -67,7 +69,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
 /// A page contains the platform view to be tested.
 class PlatformViewPage extends StatelessWidget {
-  final Key button = const ValueKey<String>('plus_button');
+  const PlatformViewPage({Key? key}) : super(key: key);
+
+  static Key button = const ValueKey<String>('plus_button');
 
   @override
   Widget build(BuildContext context) {
@@ -77,10 +81,11 @@ class PlatformViewPage extends StatelessWidget {
       ),
       body: Column(
         children: <Widget>[
-          Container(
-            child: const UiKitView(viewType: 'platform_view'),
-            width: 300,
-            height: 300,
+          const Expanded(
+            child: SizedBox(
+              width: 300,
+              child: UiKitView(viewType: 'platform_view'),
+            ),
           ),
           ElevatedButton(
             key: button,

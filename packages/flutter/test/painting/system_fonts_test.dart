@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -76,7 +74,7 @@ void main() {
         ),
       ),
     );
-    final dynamic state = tester.state(find.byType(CupertinoDatePicker)); // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic state = tester.state(find.byType(CupertinoDatePicker));
     final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
     expect(cache.isNotEmpty, isTrue);
     const Map<String, dynamic> data = <String, dynamic>{
@@ -102,7 +100,7 @@ void main() {
         ),
       ),
     );
-    final dynamic state = tester.state(find.byType(CupertinoDatePicker)); // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic state = tester.state(find.byType(CupertinoDatePicker));
     final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
     // Simulates font missing.
     cache.clear();
@@ -128,7 +126,7 @@ void main() {
         ),
       ),
     );
-    final dynamic state = tester.state(find.byType(CupertinoTimerPicker)); // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic state = tester.state(find.byType(CupertinoTimerPicker));
     // Simulates wrong metrics due to font missing.
     state.numberLabelWidth = 0.0;
     state.numberLabelHeight = 0.0;

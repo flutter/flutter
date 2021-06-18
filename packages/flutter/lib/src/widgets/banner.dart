@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'debug.dart';
@@ -346,10 +345,10 @@ class CheckedModeBanner extends StatelessWidget {
     Widget result = child;
     assert(() {
       result = Banner(
-        child: result,
         message: 'DEBUG',
         textDirection: TextDirection.ltr,
         location: BannerLocation.topEnd,
+        child: result,
       );
       return true;
     }());

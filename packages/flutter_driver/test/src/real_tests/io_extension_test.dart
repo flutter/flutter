@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_driver/src/extension/_extension_io.dart';
 
 import '../../common.dart';
 
 void main() {
   group('test io_extension',() {
-    Future<Map<String, dynamic>> Function(Map<String, String>) call;
+    late Future<Map<String, dynamic>> Function(Map<String, String>) call;
 
     setUp(() {
       call = (Map<String, String> args) async {
@@ -19,8 +17,7 @@ void main() {
     });
 
     test('io_extension should throw exception', () {
-      expect(() => registerWebServiceExtension(call),
-          throwsA(isA<UnsupportedError>()));
+      expect(() => registerWebServiceExtension(call), throwsUnsupportedError);
     });
   });
 }

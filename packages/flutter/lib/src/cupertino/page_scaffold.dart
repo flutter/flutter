@@ -18,6 +18,38 @@ import 'theme.dart';
 /// encloses the [ScrollView]. The [ScrollView.primary] flag is used to connect
 /// a [ScrollView] to the enclosing [PrimaryScrollController].
 ///
+/// {@tool dartpad --template=stateful_widget_cupertino}
+/// This example shows a [CupertinoPageScaffold] with a [ListView] as a [child].
+/// The [CupertinoButton] is connected to a callback that increments a counter.
+/// The [backgroundColor] can be changed.
+///
+/// ```dart
+/// int _count = 0;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return CupertinoPageScaffold(
+///     // Uncomment to change the background color
+///     // backgroundColor: CupertinoColors.systemPink,
+///     navigationBar: const CupertinoNavigationBar(
+///       middle: const Text('Sample Code'),
+///     ),
+///     child: ListView(
+///       children: <Widget>[
+///         CupertinoButton(
+///           onPressed: () => setState(() => _count++),
+///           child: const Icon(CupertinoIcons.add),
+///         ),
+///         Center(
+///           child: Text('You have pressed the button $_count times.'),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoTabScaffold], a similar widget for tabbed applications.
@@ -77,7 +109,7 @@ class CupertinoPageScaffold extends StatefulWidget {
   final bool resizeToAvoidBottomInset;
 
   @override
-  _CupertinoPageScaffoldState createState() => _CupertinoPageScaffoldState();
+  State<CupertinoPageScaffold> createState() => _CupertinoPageScaffoldState();
 }
 
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {

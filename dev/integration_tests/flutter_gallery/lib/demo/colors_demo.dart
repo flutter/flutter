@@ -120,6 +120,8 @@ class PaletteTabView extends StatelessWidget {
 }
 
 class ColorsDemo extends StatelessWidget {
+  const ColorsDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/colors';
 
   @override
