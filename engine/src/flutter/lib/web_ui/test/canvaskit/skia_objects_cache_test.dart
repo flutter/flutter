@@ -140,8 +140,10 @@ void _tests() {
         spy.fakeAsync.elapse(const Duration(seconds: 2));
         expect(
           spy.printLog,
-          ['Engine counters:\n'
-           '  TestSkDeletable created: 1\n'],
+          [
+            'Engine counters:\n'
+                '  TestSkDeletable created: 1\n'
+          ],
         );
 
         expect(clone.box.debugGetStackTraces().length, 1);
@@ -165,9 +167,11 @@ void _tests() {
         spy.fakeAsync.elapse(const Duration(seconds: 2));
         expect(
           spy.printLog,
-          ['Engine counters:\n'
-           '  TestSkDeletable created: 1\n'
-           '  TestSkDeletable deleted: 1\n'],
+          [
+            'Engine counters:\n'
+                '  TestSkDeletable created: 1\n'
+                '  TestSkDeletable deleted: 1\n'
+          ],
         );
         Instrumentation.enabled = false;
       });
@@ -423,6 +427,11 @@ class FakeRasterizer implements Rasterizer {
 
   @override
   void setSkiaResourceCacheMaxBytes(int bytes) {
+    throw UnimplementedError();
+  }
+
+  @override
+  void debugRunPostFrameCallbacks() {
     throw UnimplementedError();
   }
 }
