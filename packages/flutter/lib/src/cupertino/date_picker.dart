@@ -188,9 +188,7 @@ enum _PickerColumnType {
 /// There are several modes of the date picker listed in [CupertinoDatePickerMode].
 ///
 /// The class will display its children as consecutive columns. Its children
-/// order is based on internationalization.
-///
-/// The default order can be overridden by using the [dateOrder] property.
+/// order is based on internationalization, or the [dateOrder] property if specified.
 ///
 /// Example of the picker in date mode:
 ///
@@ -248,7 +246,8 @@ class CupertinoDatePicker extends StatefulWidget {
   ///
   /// [use24hFormat] decides whether 24 hour format is used. Defaults to false.
   ///
-  /// [dateOrder] is the date-picker date order. Defaults to localizations.datePickerDateOrder.
+  /// [dateOrder] determines the order of the columns inside [CupertinoDatePicker] in date mode.
+  /// Defaults to the locale's default date format/order.
   CupertinoDatePicker({
     Key? key,
     this.mode = CupertinoDatePickerMode.dateAndTime,
@@ -360,7 +359,8 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Whether to use 24 hour format. Defaults to false.
   final bool use24hFormat;
 
-  /// Date-picker date order. Defaults to localizations.datePickerDateOrder.
+  /// Determines the order of the columns inside [CupertinoDatePicker] in date mode.
+  /// Defaults to the locale's default date format/order.
   final DatePickerDateOrder? dateOrder;
 
   /// Callback called when the selected date and/or time changes. If the new

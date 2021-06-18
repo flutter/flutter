@@ -1239,12 +1239,15 @@ void main() {
         ),
       );
 
-      Offset lastOffset = tester.getTopLeft(find.text('2018'));
+      expect(
+        tester.getTopLeft(find.text('2018')).dx,
+        lessThan(tester.getTopLeft(find.text('14')).dx),
+      );
 
-      expect(tester.getTopLeft(find.text('14')).dx > lastOffset.dx, true);
-      lastOffset = tester.getTopLeft(find.text('14'));
-
-      expect(tester.getTopLeft(find.text('January')).dx > lastOffset.dx, true);
+      expect(
+        tester.getTopLeft(find.text('14')).dx,
+        lessThan(tester.getTopLeft(find.text('January')).dx),
+      );
     });
 
     testWidgets('DatePicker displays hours and minutes correctly in RTL', (WidgetTester tester) async {
