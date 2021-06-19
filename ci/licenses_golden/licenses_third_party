@@ -1,4 +1,4 @@
-Signature: 26ee15f04dcae3b2a86e966a55ce62d8
+Signature: 5ec448ad9778206b74a6b2942d5afec0
 
 UNUSED LICENSES:
 
@@ -9811,7 +9811,6 @@ FILE: ../../../third_party/dart/runtime/vm/thread_state.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_state.h
 FILE: ../../../third_party/dart/samples/ffi/coordinate.dart
 FILE: ../../../third_party/dart/samples/ffi/dylib_utils.dart
-FILE: ../../../third_party/dart/samples/ffi/resource_management/arena.dart
 FILE: ../../../third_party/dart/samples/ffi/resource_management/arena_isolate_shutdown_sample.dart
 FILE: ../../../third_party/dart/samples/ffi/resource_management/arena_sample.dart
 FILE: ../../../third_party/dart/samples/ffi/resource_management/arena_zoned_sample.dart
@@ -9833,11 +9832,9 @@ FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/signatures.d
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/types.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/collections/closable_iterator.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/database.dart
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/arena.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/dylib_utils.dart
 FILE: ../../../third_party/dart/samples_2/ffi/coordinate.dart
 FILE: ../../../third_party/dart/samples_2/ffi/dylib_utils.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena.dart
 FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena_isolate_shutdown_sample.dart
 FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena_sample.dart
 FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena_zoned_sample.dart
@@ -9859,7 +9856,6 @@ FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/bindings/signatures
 FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/bindings/types.dart
 FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/collections/closable_iterator.dart
 FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/database.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/ffi/arena.dart
 FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/ffi/dylib_utils.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/rti.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/shared/recipe_syntax.dart
@@ -9936,9 +9932,7 @@ FILE: ../../../third_party/dart/runtime/vm/pending_deopts.cc
 FILE: ../../../third_party/dart/runtime/vm/pending_deopts.h
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.h
-FILE: ../../../third_party/dart/samples/ffi/resource_management/arena_test.dart
 FILE: ../../../third_party/dart/samples/ffi/resource_management/utf8_helpers.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena_test.dart
 FILE: ../../../third_party/dart/samples_2/ffi/resource_management/utf8_helpers.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/late_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart
