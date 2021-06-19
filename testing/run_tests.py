@@ -283,89 +283,34 @@ def RunDartTest(build_dir, test_packages, dart_file, verbose_dart_snapshot, mult
 
 def EnsureDebugUnoptSkyPackagesAreBuilt():
   variant_out_dir = os.path.join(out_dir, 'host_debug_unopt')
-
-  ninja_command = [
-    'ninja',
-    '-C',
-    variant_out_dir,
-    'flutter/sky/packages'
-  ]
-
-  # Attempt running Ninja if the out directory exists.
-  # We don't want to blow away any custom GN args the caller may have already set.
-  if os.path.exists(variant_out_dir):
-    RunCmd(ninja_command, cwd=buildroot_dir)
-    return
-
-  gn_command = [
-    os.path.join(buildroot_dir, 'flutter', 'tools', 'gn'),
-    '--runtime-mode',
-    'debug',
-    '--unopt',
-    '--no-lto',
-  ]
-
-  RunCmd(gn_command, cwd=buildroot_dir)
-  RunCmd(ninja_command, cwd=buildroot_dir)
+  message = []
+  message.append('gn --runtime-mode debug --unopt --no-lto')
+  message.append('ninja -C %s flutter/sky/packages' % variant_out_dir)
+  final_message = '%s doesn\'t exist. Please run the following commands: \n%s' % (
+      variant_out_dir, '\n'.join(message))
+  assert os.path.exists(variant_out_dir), final_message
 
 
 def EnsureJavaTestsAreBuilt(android_out_dir):
   """Builds the engine variant and the test jar containing the JUnit tests"""
-  ninja_command = [
-    'autoninja',
-    '-C',
-    android_out_dir,
-    'flutter/shell/platform/android:robolectric_tests'
-  ]
-
-  # Attempt running Ninja if the out directory exists.
-  # We don't want to blow away any custom GN args the caller may have already set.
-  if os.path.exists(android_out_dir):
-    RunCmd(ninja_command, cwd=buildroot_dir)
-    return
-
-  assert android_out_dir != "out/android_debug_unopt", "%s doesn't exist. Run GN to generate the directory first" % android_out_dir
-
-  # Otherwise prepare the directory first, then build the test.
-  gn_command = [
-    os.path.join(buildroot_dir, 'flutter', 'tools', 'gn'),
-    '--android',
-    '--unoptimized',
-    '--runtime-mode=debug',
-    '--no-lto',
-  ]
-  RunCmd(gn_command, cwd=buildroot_dir)
-  RunCmd(ninja_command, cwd=buildroot_dir)
+  tmp_out_dir = os.path.join(out_dir, android_out_dir)
+  message = []
+  message.append('gn --android --unoptimized --runtime-mode=debug --no-lto')
+  message.append('ninja -C %s flutter/shell/platform/android:robolectric_tests' % android_out_dir)
+  final_message = '%s doesn\'t exist. Please run the following commands: \n%s' % (
+      android_out_dir, '\n'.join(message))
+  assert os.path.exists(tmp_out_dir), final_message
 
 
 def EnsureIosTestsAreBuilt(ios_out_dir):
   """Builds the engine variant and the test dylib containing the XCTests"""
-  ninja_command = [
-    'autoninja',
-    '-C',
-    ios_out_dir,
-    'ios_test_flutter'
-  ]
-
-  # Attempt running Ninja if the out directory exists.
-  # We don't want to blow away any custom GN args the caller may have already set.
-  if os.path.exists(ios_out_dir):
-    RunCmd(ninja_command, cwd=buildroot_dir)
-    return
-
-  assert ios_out_dir != "out/ios_debug_sim_unopt", "%s doesn't exist. Run GN to generate the directory first" % ios_out_dir
-
-  # Otherwise prepare the directory first, then build the test.
-  gn_command = [
-    os.path.join(buildroot_dir, 'flutter', 'tools', 'gn'),
-    '--ios',
-    '--unoptimized',
-    '--runtime-mode=debug',
-    '--no-lto',
-    '--simulator'
-  ]
-  RunCmd(gn_command, cwd=buildroot_dir)
-  RunCmd(ninja_command, cwd=buildroot_dir)
+  tmp_out_dir = os.path.join(out_dir, ios_out_dir)
+  message = []
+  message.append('gn --ios --unoptimized --runtime-mode=debug --no-lto --simulator')
+  message.append('autoninja -C %s ios_test_flutter' % ios_out_dir)
+  final_message = '%s doesn\'t exist. Please run the following commands: \n%s' % (
+      ios_out_dir, '\n'.join(message))
+  assert os.path.exists(tmp_out_dir), final_message
 
 
 def AssertExpectedJavaVersion():
