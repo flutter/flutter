@@ -189,12 +189,11 @@ Open `ios/Runner.xcworkspace` in Xcode. Create a test target if you
 do not already have one via `File > New > Target...` and select `Unit Testing Bundle`.
 Change the `Product Name` to `RunnerTests`. Make sure `Target to be Tested` is set to `Runner` and language is set to `Objective-C`.
 Select `Finish`.
-Under **Runner** > **Info** > **Configurations** section, make sure, that `Runner` and `RunnerTests` have the same value under each configuration.
 Make sure that the **iOS Deployment Target** of `RunnerTests` within the **Build Settings** section is the same as `Runner`.
 
 Add the new test target to `ios/Podfile` by embedding in the existing `Runner` target.
 
-```
+```ruby
 target 'Runner' do
   # Do not change existing lines.
   ...
@@ -204,7 +203,11 @@ target 'Runner' do
   end
 end
 ```
-Run `flutter build ios` from your project file to hook up the new settings.
+
+To build `integration_test/foo_test.dart` from the command line, run:
+```sh
+flutter build ios --config-only integration_test/foo_test.dart
+```
 
 In Xcode, add a test file called `RunnerTests.m` (or any name of your choice) to the new target and
 replace the file:
@@ -216,14 +219,7 @@ replace the file:
 INTEGRATION_TEST_IOS_RUNNER(RunnerTests)
 ```
 
-Run `Product > Tests` to run the integration tests on your selected device.
-
-To build `integration_test/foo_test.dart` from the command line, run:
-
-```sh
-# Pass --simulator if building for the simulator.
-flutter build ios integration_test/foo_test.dart
-```
+Run `Product > Test` to run the integration tests on your selected device.
 
 To deploy it to Firebase Test Lab you can follow these steps:
 
