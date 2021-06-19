@@ -304,10 +304,11 @@ class SnackBar extends StatefulWidget {
   /// The amount of padding to apply to the snack bar's content and optional
   /// action.
   ///
-  /// If this property is null, then the default depends on the [behavior] and
-  /// the presence of an [action]. The start padding is 24 if [behavior] is
-  /// [SnackBarBehavior.fixed] and 16 if it is [SnackBarBehavior.floating]. If
-  /// there is no [action], the same padding is added to the end.
+  /// If this property is null, the vertical padding's default value will be 14,
+  /// and the horizontal padding's default depends on the [behavior] and the
+  /// presence of an [action]. The start padding is 24 if [behavior] is
+  /// [SnackBarBehavior.fixed] and 16 if it is [SnackBarBehavior.floating].
+  /// If there is no [action], the same padding is added to the end.
   final EdgeInsetsGeometry? padding;
 
   /// The width of the snack bar.
