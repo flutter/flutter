@@ -3,11 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show timeDilation, SchedulerBinding;
 import 'package:flutter_test/flutter_test.dart';
+
+import '../image_data.dart';
+import 'fake_codec.dart';
 
 class FakeFrameInfo implements FrameInfo {
   const FakeFrameInfo(this._duration, this._image);
@@ -779,6 +783,32 @@ void main() {
 
     handle.dispose();
   });
+
+  test('MultiFrameImageStreamCompleter - one frame image should only be decoded once', () async {
+    final FakeCodec oneFrameCodec = await FakeCodec.fromData(Uint8List.fromList(kTransparentImage));
+    final Completer<Codec> codecCompleter = Completer<Codec>();
+    final Completer<void> decodeCompleter = Completer<void>();
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+    );
+    final ImageStreamListener imageListener = ImageStreamListener((ImageInfo info, bool syncCall) {
+      decodeCompleter.complete();
+    });
+
+    imageStream.keepAlive();  // do not dispose
+    imageStream.addListener(imageListener);
+    codecCompleter.complete(oneFrameCodec);
+    await decodeCompleter.future;
+
+    imageStream.removeListener(imageListener);
+    expect(oneFrameCodec.numFramesAsked, 1);
+
+    // Adding a new listener for decoded imageSteam, the one frame image should
+    // not be decoded again.
+    imageStream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+    expect(oneFrameCodec.numFramesAsked, 1);
+  });  // https://github.com/flutter/flutter/issues/82532
 
   // TODO(amirh): enable this once WidgetTester supports flushTimers.
   // https://github.com/flutter/flutter/issues/30344

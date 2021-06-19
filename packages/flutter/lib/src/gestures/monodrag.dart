@@ -262,8 +262,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void addAllowedPointer(PointerEvent event) {
-    startTrackingPointer(event.pointer, event.transform);
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
     _velocityTrackers[event.pointer] = velocityTrackerBuilder(event);
     if (_state == _DragState.ready) {
       _state = _DragState.possible;
@@ -365,6 +365,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           localPosition: correctedPosition.local,
         );
       }
+      // This acceptGesture might have been called only for one pointer, instead
+      // of all pointers. Resolve all pointers to `accepted`. This won't cause
+      // infinite recursion because an accepted pointer won't be accepted again.
+      resolve(GestureDisposition.accepted);
     }
   }
 

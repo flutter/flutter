@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
-import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -72,16 +71,16 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
-      expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'module'));
+      expect((await command.usageValues).commandCreateProjectType, 'module');
 
       await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
-      expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'app'));
+      expect((await command.usageValues).commandCreateProjectType, 'app');
 
       await runner.run(<String>['create', '--no-pub', '--template=package', 'testy']);
-      expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'package'));
+      expect((await command.usageValues).commandCreateProjectType, 'package');
 
       await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
-      expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'plugin'));
+      expect((await command.usageValues).commandCreateProjectType, 'plugin');
     }));
 
     testUsingContext('set iOS host language type as usage value', () => testbed.run(() async {
@@ -90,8 +89,7 @@ void main() {
 
       await runner.run(<String>[
         'create', '--no-pub', '--template=app', 'testy']);
-      expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateIosLanguage, 'swift'));
+      expect((await command.usageValues).commandCreateIosLanguage, 'swift');
 
       await runner.run(<String>[
         'create',
@@ -100,8 +98,7 @@ void main() {
         '--ios-language=objc',
         'testy',
       ]);
-      expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateIosLanguage, 'objc'));
+      expect((await command.usageValues).commandCreateIosLanguage, 'objc');
 
     }));
 
@@ -110,8 +107,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
-      expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateAndroidLanguage, 'kotlin'));
+      expect((await command.usageValues).commandCreateAndroidLanguage, 'kotlin');
 
       await runner.run(<String>[
         'create',
@@ -120,8 +116,7 @@ void main() {
         '--android-language=java',
         'testy',
       ]);
-      expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateAndroidLanguage, 'java'));
+      expect((await command.usageValues).commandCreateAndroidLanguage, 'java');
     }));
   });
 }

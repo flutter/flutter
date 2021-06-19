@@ -79,12 +79,12 @@ class CreateCommand extends CreateBase {
   String get invocation => '${runner.executableName} $name <output directory>';
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
-    return <CustomDimensions, String>{
-      CustomDimensions.commandCreateProjectType: stringArg('template'),
-      CustomDimensions.commandCreateAndroidLanguage: stringArg('android-language'),
-      CustomDimensions.commandCreateIosLanguage: stringArg('ios-language'),
-    };
+  Future<CustomDimensions> get usageValues async {
+    return CustomDimensions(
+      commandCreateProjectType: stringArg('template'),
+      commandCreateAndroidLanguage: stringArg('android-language'),
+      commandCreateIosLanguage: stringArg('ios-language'),
+    );
   }
 
   // Lazy-initialize the net utilities with values from the context.
@@ -421,7 +421,7 @@ Your $application code is in $relativeAppMain.
     final String projectName = templateContext['projectName'] as String;
     final String organization = templateContext['organization'] as String;
     final String androidPluginIdentifier = templateContext['androidIdentifier'] as String;
-    final String exampleProjectName = projectName + '_example';
+    final String exampleProjectName = '${projectName}_example';
     templateContext['projectName'] = exampleProjectName;
     templateContext['androidIdentifier'] = CreateBase.createAndroidIdentifier(organization, exampleProjectName);
     templateContext['iosIdentifier'] = CreateBase.createUTIIdentifier(organization, exampleProjectName);
@@ -483,7 +483,7 @@ void _printPluginDirectoryLocationMessage(String pluginPath, String projectName,
 
 Your plugin code is in $relativePluginMain.
 
-You example app code is in $relativeExampleMain.
+Your example app code is in $relativeExampleMain.
 
 ''');
   if (platformsString != null && platformsString.isNotEmpty) {

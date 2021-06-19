@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// Used in internal testing.
 class FakePlatformViewController extends PlatformViewController {
@@ -122,7 +123,7 @@ class FakeAndroidViewController implements AndroidViewController {
 
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {
-    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeAndroidPlatformView> get views => _views.values;
@@ -208,7 +209,9 @@ class FakeAndroidPlatformViewsController {
   Future<dynamic> _dispose(MethodCall call) {
     assert(call.arguments is Map);
 
+    // ignore: avoid_dynamic_calls
     final int id = call.arguments['id'] as int;
+    // ignore: avoid_dynamic_calls
     final bool hybrid = call.arguments['hybrid'] as bool;
 
     if (hybrid && !_views[id]!.hybrid!) {
@@ -301,7 +304,7 @@ class FakeAndroidPlatformViewsController {
 
 class FakeIosPlatformViewsController {
   FakeIosPlatformViewsController() {
-    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeUiKitView> get views => _views.values;
@@ -396,7 +399,7 @@ class FakeIosPlatformViewsController {
 
 class FakeHtmlPlatformViewsController {
   FakeHtmlPlatformViewsController() {
-    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeHtmlPlatformView> get views => _views.values;

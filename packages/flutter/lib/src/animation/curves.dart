@@ -745,11 +745,11 @@ class CatmullRomSpline extends Curve2D {
 
 
   static List<List<Offset>> _computeSegments(
-      List<Offset> controlPoints,
-      double tension, {
-      Offset? startHandle,
-      Offset? endHandle,
-    }) {
+    List<Offset> controlPoints,
+    double tension, {
+    Offset? startHandle,
+    Offset? endHandle,
+  }) {
     // If not specified, select the first and last control points (which are
     // handles: they are not intersected by the resulting curve) so that they
     // extend the first and last segments, respectively.
@@ -989,10 +989,10 @@ class CatmullRomCurve extends Curve {
   /// In release mode, this function can be used to decide if a proposed
   /// modification to the curve will result in a valid curve.
   static bool validateControlPoints(
-      List<Offset>? controlPoints, {
-      double tension = 0.0,
-      List<String>? reasons,
-    }) {
+    List<Offset>? controlPoints, {
+    double tension = 0.0,
+    List<String>? reasons,
+  }) {
     assert(tension != null);
     if (controlPoints == null) {
       assert(() {
@@ -1401,7 +1401,7 @@ class ElasticInOutCurve extends Curve {
 ///  * [Curve], the interface implemented by the constants available from the
 ///    [Curves] class.
 class Curves {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   Curves._();
 
@@ -1442,7 +1442,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
   static const Cubic easeIn = Cubic(0.42, 0.0, 1.0, 1.0);
 
-  /// A cubic animation curve that starts starts slowly and ends linearly.
+  /// A cubic animation curve that starts slowly and ends linearly.
   ///
   /// The symmetric animation to [linearToEaseOut].
   ///

@@ -17,12 +17,12 @@ final Map<int, Color> m2SwatchColors = <int, Color>{
   800: const Color(0xff270096),
   900: const Color(0xff270096),
 };
-final MaterialColor m2Swatch = MaterialColor(m2SwatchColors[500].value, m2SwatchColors);
+final MaterialColor m2Swatch = MaterialColor(m2SwatchColors[500]!.value, m2SwatchColors);
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   static const String _title = 'Density Test';
 
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -112,11 +112,11 @@ class OptionModel extends ChangeNotifier {
 }
 
 class LabeledCheckbox extends StatelessWidget {
-  const LabeledCheckbox({Key key, this.label, this.onChanged, this.value}) : super(key: key);
+  const LabeledCheckbox({Key? key, required this.label, this.onChanged, this.value}) : super(key: key);
 
   final String label;
-  final ValueChanged<bool> onChanged;
-  final bool value;
+  final ValueChanged<bool?>? onChanged;
+  final bool? value;
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +134,7 @@ class LabeledCheckbox extends StatelessWidget {
 }
 
 class Options extends StatefulWidget {
-  const Options(this.model, {Key key}) : super(key: key);
+  const Options(this.model, {Key? key}) : super(key: key);
 
   final OptionModel model;
 
@@ -181,7 +181,7 @@ class _OptionsState extends State<Options> {
     return 'custom';
   }
 
-  VisualDensity _profileToDensity(String profile) {
+  VisualDensity _profileToDensity(String? profile) {
     switch (profile) {
       case 'standard':
         return VisualDensity.standard;
@@ -304,7 +304,7 @@ class _OptionsState extends State<Options> {
                     child: DropdownButton<String>(
                       style: TextStyle(color: Colors.grey[50]),
                       isDense: true,
-                      onChanged: (String value) {
+                      onChanged: (String? value) {
                         widget.model.density = _profileToDensity(value);
                       },
                       items: const <DropdownMenuItem<String>>[
@@ -321,15 +321,15 @@ class _OptionsState extends State<Options> {
                   ),
                   LabeledCheckbox(
                     label: 'Enabled',
-                    onChanged: (bool checked) {
-                      widget.model.enable = checked;
+                    onChanged: (bool? checked) {
+                      widget.model.enable = checked == true;
                     },
                     value: widget.model.enable,
                   ),
                   LabeledCheckbox(
                     label: 'Slow',
-                    onChanged: (bool checked) {
-                      widget.model.slowAnimations = checked;
+                    onChanged: (bool? checked) {
+                      widget.model.slowAnimations = checked == true;
                       Future<void>.delayed(const Duration(milliseconds: 150)).then((_) {
                         if (widget.model.slowAnimations) {
                           timeDilation = 20.0;
@@ -342,8 +342,8 @@ class _OptionsState extends State<Options> {
                   ),
                   LabeledCheckbox(
                     label: 'RTL',
-                    onChanged: (bool checked) {
-                      widget.model.rtl = checked;
+                    onChanged: (bool? checked) {
+                      widget.model.rtl = checked == true;
                     },
                     value: widget.model.rtl,
                   ),
@@ -365,7 +365,7 @@ class _OptionsState extends State<Options> {
 }
 
 class _ControlTile extends StatelessWidget {
-  const _ControlTile({Key key, @required this.label, @required this.child})
+  const _ControlTile({Key? key, required this.label, required this.child})
       : assert(label != null),
         assert(child != null),
         super(key: key);
@@ -398,13 +398,12 @@ class _ControlTile extends StatelessWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final OptionModel _model = OptionModel();
-  TextEditingController textController;
+  final TextEditingController textController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _model.addListener(_modelChanged);
-    textController = TextEditingController();
   }
 
   @override
@@ -565,9 +564,9 @@ class _MyHomePageState extends State<MyHomePage> {
           children: List<Widget>.generate(checkboxValues.length, (int index) {
             return Checkbox(
               onChanged: _model.enable
-                  ? (bool value) {
+                  ? (bool? value) {
                       setState(() {
-                        checkboxValues[index] = value;
+                        checkboxValues[index] = value == true;
                       });
                     }
                   : null,
@@ -583,9 +582,9 @@ class _MyHomePageState extends State<MyHomePage> {
           children: List<Widget>.generate(4, (int index) {
             return Radio<int>(
               onChanged: _model.enable
-                  ? (int value) {
+                  ? (int? value) {
                       setState(() {
-                        radioValue = value;
+                        radioValue = value!;
                       });
                     }
                   : null,

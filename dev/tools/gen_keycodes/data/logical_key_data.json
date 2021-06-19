@@ -1338,7 +1338,7 @@
       "web": [
         "Backspace"
       ],
-      "macOs": [
+      "macos": [
         "Backspace"
       ],
       "ios": [
@@ -1355,7 +1355,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         51
       ],
       "ios": [
@@ -1383,7 +1383,7 @@
       "web": [
         "Tab"
       ],
-      "macOs": [
+      "macos": [
         "Tab"
       ],
       "ios": [
@@ -1402,7 +1402,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         48
       ],
       "ios": [
@@ -1432,7 +1432,7 @@
       "web": [
         "Enter"
       ],
-      "macOs": [
+      "macos": [
         "Enter"
       ],
       "ios": [
@@ -1451,7 +1451,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         36
       ],
       "ios": [
@@ -1481,7 +1481,7 @@
       "web": [
         "Escape"
       ],
-      "macOs": [
+      "macos": [
         "Escape"
       ],
       "ios": [
@@ -1498,7 +1498,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         53
       ],
       "ios": [
@@ -1526,7 +1526,7 @@
       "web": [
         "Delete"
       ],
-      "macOs": [
+      "macos": [
         "Delete"
       ],
       "ios": [
@@ -1543,7 +1543,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         117
       ],
       "ios": [
@@ -1588,7 +1588,7 @@
       "web": [
         "CapsLock"
       ],
-      "macOs": [
+      "macos": [
         "CapsLock"
       ],
       "ios": [
@@ -1605,7 +1605,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         57
       ],
       "ios": [
@@ -1632,7 +1632,7 @@
       "web": [
         "Fn"
       ],
-      "macOs": [
+      "macos": [
         "Fn"
       ],
       "android": [
@@ -1640,7 +1640,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         63
       ],
       "android": [
@@ -1694,7 +1694,7 @@
       "web": [
         "NumLock"
       ],
-      "macOs": [
+      "macos": [
         "NumLock"
       ],
       "ios": [
@@ -1711,7 +1711,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         71
       ],
       "ios": [
@@ -1827,7 +1827,7 @@
       "web": [
         "ArrowDown"
       ],
-      "macOs": [
+      "macos": [
         "ArrowDown"
       ],
       "ios": [
@@ -1844,7 +1844,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         125
       ],
       "ios": [
@@ -1871,7 +1871,7 @@
       "web": [
         "ArrowLeft"
       ],
-      "macOs": [
+      "macos": [
         "ArrowLeft"
       ],
       "ios": [
@@ -1888,7 +1888,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         123
       ],
       "ios": [
@@ -1915,7 +1915,7 @@
       "web": [
         "ArrowRight"
       ],
-      "macOs": [
+      "macos": [
         "ArrowRight"
       ],
       "ios": [
@@ -1932,7 +1932,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         124
       ],
       "ios": [
@@ -1959,7 +1959,7 @@
       "web": [
         "ArrowUp"
       ],
-      "macOs": [
+      "macos": [
         "ArrowUp"
       ],
       "ios": [
@@ -1976,7 +1976,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         126
       ],
       "ios": [
@@ -2003,7 +2003,7 @@
       "web": [
         "End"
       ],
-      "macOs": [
+      "macos": [
         "End"
       ],
       "ios": [
@@ -2020,7 +2020,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         119
       ],
       "ios": [
@@ -2047,7 +2047,7 @@
       "web": [
         "Home"
       ],
-      "macOs": [
+      "macos": [
         "Home"
       ],
       "ios": [
@@ -2064,7 +2064,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         115
       ],
       "ios": [
@@ -2091,7 +2091,7 @@
       "web": [
         "PageDown"
       ],
-      "macOs": [
+      "macos": [
         "PageDown"
       ],
       "ios": [
@@ -2108,7 +2108,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         121
       ],
       "ios": [
@@ -2135,7 +2135,7 @@
       "web": [
         "PageUp"
       ],
-      "macOs": [
+      "macos": [
         "PageUp"
       ],
       "ios": [
@@ -2152,7 +2152,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         116
       ],
       "ios": [
@@ -2305,7 +2305,7 @@
       "web": [
         "Insert"
       ],
-      "macOs": [
+      "macos": [
         "Insert"
       ],
       "ios": [
@@ -2322,7 +2322,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         114
       ],
       "ios": [
@@ -2492,7 +2492,7 @@
       "web": [
         "ContextMenu"
       ],
-      "macOs": [
+      "macos": [
         "ContextMenu"
       ],
       "ios": [
@@ -2509,7 +2509,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         110
       ],
       "ios": [
@@ -3504,7 +3504,7 @@
       "web": [
         "F1"
       ],
-      "macOs": [
+      "macos": [
         "F1"
       ],
       "ios": [
@@ -3522,7 +3522,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         122
       ],
       "ios": [
@@ -3550,7 +3550,7 @@
       "web": [
         "F2"
       ],
-      "macOs": [
+      "macos": [
         "F2"
       ],
       "ios": [
@@ -3568,7 +3568,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         120
       ],
       "ios": [
@@ -3596,7 +3596,7 @@
       "web": [
         "F3"
       ],
-      "macOs": [
+      "macos": [
         "F3"
       ],
       "ios": [
@@ -3614,7 +3614,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         99
       ],
       "ios": [
@@ -3642,7 +3642,7 @@
       "web": [
         "F4"
       ],
-      "macOs": [
+      "macos": [
         "F4"
       ],
       "ios": [
@@ -3660,7 +3660,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         118
       ],
       "ios": [
@@ -3688,7 +3688,7 @@
       "web": [
         "F5"
       ],
-      "macOs": [
+      "macos": [
         "F5"
       ],
       "ios": [
@@ -3705,7 +3705,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         96
       ],
       "ios": [
@@ -3732,7 +3732,7 @@
       "web": [
         "F6"
       ],
-      "macOs": [
+      "macos": [
         "F6"
       ],
       "ios": [
@@ -3749,7 +3749,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         97
       ],
       "ios": [
@@ -3776,7 +3776,7 @@
       "web": [
         "F7"
       ],
-      "macOs": [
+      "macos": [
         "F7"
       ],
       "ios": [
@@ -3793,7 +3793,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         98
       ],
       "ios": [
@@ -3820,7 +3820,7 @@
       "web": [
         "F8"
       ],
-      "macOs": [
+      "macos": [
         "F8"
       ],
       "ios": [
@@ -3837,7 +3837,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         100
       ],
       "ios": [
@@ -3864,7 +3864,7 @@
       "web": [
         "F9"
       ],
-      "macOs": [
+      "macos": [
         "F9"
       ],
       "ios": [
@@ -3881,7 +3881,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         101
       ],
       "ios": [
@@ -3908,7 +3908,7 @@
       "web": [
         "F10"
       ],
-      "macOs": [
+      "macos": [
         "F10"
       ],
       "ios": [
@@ -3925,7 +3925,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         109
       ],
       "ios": [
@@ -3952,7 +3952,7 @@
       "web": [
         "F11"
       ],
-      "macOs": [
+      "macos": [
         "F11"
       ],
       "ios": [
@@ -3969,7 +3969,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         103
       ],
       "ios": [
@@ -3996,7 +3996,7 @@
       "web": [
         "F12"
       ],
-      "macOs": [
+      "macos": [
         "F12"
       ],
       "ios": [
@@ -4013,7 +4013,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         111
       ],
       "ios": [
@@ -4040,7 +4040,7 @@
       "web": [
         "F13"
       ],
-      "macOs": [
+      "macos": [
         "F13"
       ],
       "ios": [
@@ -4054,7 +4054,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         105
       ],
       "ios": [
@@ -4078,7 +4078,7 @@
       "web": [
         "F14"
       ],
-      "macOs": [
+      "macos": [
         "F14"
       ],
       "ios": [
@@ -4092,7 +4092,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         107
       ],
       "ios": [
@@ -4116,7 +4116,7 @@
       "web": [
         "F15"
       ],
-      "macOs": [
+      "macos": [
         "F15"
       ],
       "ios": [
@@ -4130,7 +4130,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         113
       ],
       "ios": [
@@ -4154,7 +4154,7 @@
       "web": [
         "F16"
       ],
-      "macOs": [
+      "macos": [
         "F16"
       ],
       "ios": [
@@ -4168,7 +4168,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         106
       ],
       "ios": [
@@ -4192,7 +4192,7 @@
       "web": [
         "F17"
       ],
-      "macOs": [
+      "macos": [
         "F17"
       ],
       "ios": [
@@ -4206,7 +4206,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         64
       ],
       "ios": [
@@ -4230,7 +4230,7 @@
       "web": [
         "F18"
       ],
-      "macOs": [
+      "macos": [
         "F18"
       ],
       "ios": [
@@ -4244,7 +4244,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         79
       ],
       "ios": [
@@ -4268,7 +4268,7 @@
       "web": [
         "F19"
       ],
-      "macOs": [
+      "macos": [
         "F19"
       ],
       "ios": [
@@ -4282,7 +4282,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         80
       ],
       "ios": [
@@ -4306,7 +4306,7 @@
       "web": [
         "F20"
       ],
-      "macOs": [
+      "macos": [
         "F20"
       ],
       "ios": [
@@ -4320,7 +4320,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         90
       ],
       "ios": [
@@ -4822,7 +4822,7 @@
       "web": [
         "AudioVolumeDown"
       ],
-      "macOs": [
+      "macos": [
         "AudioVolumeDown"
       ],
       "ios": [
@@ -4839,7 +4839,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         73
       ],
       "ios": [
@@ -4866,7 +4866,7 @@
       "web": [
         "AudioVolumeUp"
       ],
-      "macOs": [
+      "macos": [
         "AudioVolumeUp"
       ],
       "ios": [
@@ -4883,7 +4883,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         72
       ],
       "ios": [
@@ -4910,7 +4910,7 @@
       "web": [
         "AudioVolumeMute"
       ],
-      "macOs": [
+      "macos": [
         "AudioVolumeMute"
       ],
       "ios": [
@@ -4927,7 +4927,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         74
       ],
       "ios": [
@@ -8077,7 +8077,7 @@
       "web": [
         "IntlRo"
       ],
-      "macOs": [
+      "macos": [
         "IntlRo"
       ],
       "ios": [
@@ -8088,7 +8088,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         94
       ],
       "ios": [
@@ -8109,7 +8109,7 @@
       "web": [
         "IntlYen"
       ],
-      "macOs": [
+      "macos": [
         "IntlYen"
       ],
       "ios": [
@@ -8123,7 +8123,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         93
       ],
       "ios": [
@@ -8147,7 +8147,7 @@
       "web": [
         "Lang1"
       ],
-      "macOs": [
+      "macos": [
         "Lang1"
       ],
       "ios": [
@@ -8158,7 +8158,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         104
       ],
       "ios": [
@@ -8179,7 +8179,7 @@
       "web": [
         "Lang2"
       ],
-      "macOs": [
+      "macos": [
         "Lang2"
       ],
       "ios": [
@@ -8187,7 +8187,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         102
       ],
       "ios": [
@@ -8279,7 +8279,7 @@
       "web": [
         "AltLeft"
       ],
-      "macOs": [
+      "macos": [
         "AltLeft"
       ],
       "ios": [
@@ -8296,7 +8296,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         58
       ],
       "ios": [
@@ -8323,7 +8323,7 @@
       "web": [
         "ControlLeft"
       ],
-      "macOs": [
+      "macos": [
         "ControlLeft"
       ],
       "ios": [
@@ -8341,7 +8341,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         59
       ],
       "ios": [
@@ -8369,7 +8369,7 @@
       "web": [
         "MetaLeft"
       ],
-      "macOs": [
+      "macos": [
         "MetaLeft"
       ],
       "ios": [
@@ -8386,7 +8386,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         55
       ],
       "ios": [
@@ -8413,7 +8413,7 @@
       "web": [
         "ShiftLeft"
       ],
-      "macOs": [
+      "macos": [
         "ShiftLeft"
       ],
       "ios": [
@@ -8431,7 +8431,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         56
       ],
       "ios": [
@@ -8459,7 +8459,7 @@
       "web": [
         "AltRight"
       ],
-      "macOs": [
+      "macos": [
         "AltRight"
       ],
       "ios": [
@@ -8477,7 +8477,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         61
       ],
       "ios": [
@@ -8505,7 +8505,7 @@
       "web": [
         "ControlRight"
       ],
-      "macOs": [
+      "macos": [
         "ControlRight"
       ],
       "ios": [
@@ -8522,7 +8522,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         62
       ],
       "ios": [
@@ -8549,7 +8549,7 @@
       "web": [
         "MetaRight"
       ],
-      "macOs": [
+      "macos": [
         "MetaRight"
       ],
       "ios": [
@@ -8566,7 +8566,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         54
       ],
       "ios": [
@@ -8593,7 +8593,7 @@
       "web": [
         "ShiftRight"
       ],
-      "macOs": [
+      "macos": [
         "ShiftRight"
       ],
       "ios": [
@@ -8610,7 +8610,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         60
       ],
       "ios": [
@@ -8637,7 +8637,7 @@
       "web": [
         "NumpadEnter"
       ],
-      "macOs": [
+      "macos": [
         "NumpadEnter"
       ],
       "ios": [
@@ -8651,7 +8651,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         76
       ],
       "ios": [
@@ -8715,7 +8715,7 @@
       "web": [
         "NumpadMultiply"
       ],
-      "macOs": [
+      "macos": [
         "NumpadMultiply"
       ],
       "ios": [
@@ -8732,7 +8732,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         67
       ],
       "ios": [
@@ -8759,7 +8759,7 @@
       "web": [
         "NumpadAdd"
       ],
-      "macOs": [
+      "macos": [
         "NumpadAdd"
       ],
       "ios": [
@@ -8776,7 +8776,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         69
       ],
       "ios": [
@@ -8803,7 +8803,7 @@
       "web": [
         "NumpadComma"
       ],
-      "macOs": [
+      "macos": [
         "NumpadComma"
       ],
       "ios": [
@@ -8814,7 +8814,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         95
       ],
       "ios": [
@@ -8835,7 +8835,7 @@
       "web": [
         "NumpadSubtract"
       ],
-      "macOs": [
+      "macos": [
         "NumpadSubtract"
       ],
       "ios": [
@@ -8852,7 +8852,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         78
       ],
       "ios": [
@@ -8879,7 +8879,7 @@
       "web": [
         "NumpadDecimal"
       ],
-      "macOs": [
+      "macos": [
         "NumpadDecimal"
       ],
       "ios": [
@@ -8896,7 +8896,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         65
       ],
       "ios": [
@@ -8923,7 +8923,7 @@
       "web": [
         "NumpadDivide"
       ],
-      "macOs": [
+      "macos": [
         "NumpadDivide"
       ],
       "ios": [
@@ -8940,7 +8940,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         75
       ],
       "ios": [
@@ -8967,7 +8967,7 @@
       "web": [
         "Numpad0"
       ],
-      "macOs": [
+      "macos": [
         "Numpad0"
       ],
       "ios": [
@@ -8985,7 +8985,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         82
       ],
       "ios": [
@@ -9013,7 +9013,7 @@
       "web": [
         "Numpad1"
       ],
-      "macOs": [
+      "macos": [
         "Numpad1"
       ],
       "ios": [
@@ -9031,7 +9031,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         83
       ],
       "ios": [
@@ -9059,7 +9059,7 @@
       "web": [
         "Numpad2"
       ],
-      "macOs": [
+      "macos": [
         "Numpad2"
       ],
       "ios": [
@@ -9077,7 +9077,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         84
       ],
       "ios": [
@@ -9105,7 +9105,7 @@
       "web": [
         "Numpad3"
       ],
-      "macOs": [
+      "macos": [
         "Numpad3"
       ],
       "ios": [
@@ -9123,7 +9123,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         85
       ],
       "ios": [
@@ -9151,7 +9151,7 @@
       "web": [
         "Numpad4"
       ],
-      "macOs": [
+      "macos": [
         "Numpad4"
       ],
       "ios": [
@@ -9169,7 +9169,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         86
       ],
       "ios": [
@@ -9197,7 +9197,7 @@
       "web": [
         "Numpad5"
       ],
-      "macOs": [
+      "macos": [
         "Numpad5"
       ],
       "ios": [
@@ -9214,7 +9214,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         87
       ],
       "ios": [
@@ -9241,7 +9241,7 @@
       "web": [
         "Numpad6"
       ],
-      "macOs": [
+      "macos": [
         "Numpad6"
       ],
       "ios": [
@@ -9259,7 +9259,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         88
       ],
       "ios": [
@@ -9287,7 +9287,7 @@
       "web": [
         "Numpad7"
       ],
-      "macOs": [
+      "macos": [
         "Numpad7"
       ],
       "ios": [
@@ -9305,7 +9305,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         89
       ],
       "ios": [
@@ -9333,7 +9333,7 @@
       "web": [
         "Numpad8"
       ],
-      "macOs": [
+      "macos": [
         "Numpad8"
       ],
       "ios": [
@@ -9351,7 +9351,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         91
       ],
       "ios": [
@@ -9379,7 +9379,7 @@
       "web": [
         "Numpad9"
       ],
-      "macOs": [
+      "macos": [
         "Numpad9"
       ],
       "ios": [
@@ -9397,7 +9397,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         92
       ],
       "ios": [
@@ -9425,7 +9425,7 @@
       "web": [
         "NumpadEqual"
       ],
-      "macOs": [
+      "macos": [
         "NumpadEqual"
       ],
       "ios": [
@@ -9442,7 +9442,7 @@
       ]
     },
     "values": {
-      "macOs": [
+      "macos": [
         81
       ],
       "ios": [

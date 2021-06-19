@@ -55,6 +55,6 @@ void main() {
     });
 
     expect(result.exitCode, 1);
-    expect(result.stderr, contains('ERROR: Requested build with Flutter local engine at \'release_foo_bar\''));
+    expect(result.stderr, contains("ERROR: Requested build with Flutter local engine at 'release_foo_bar'"));
   });
 }

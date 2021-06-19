@@ -139,6 +139,8 @@ void main() {
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
       packagesPath: 'foo/.packages',
       codeSizeDirectory: 'foo/code-size',
+      // These values are ignored by toEnvironmentConfig
+      androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
     );
 
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
@@ -167,6 +169,7 @@ void main() {
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
       packagesPath: 'foo/.packages',
       codeSizeDirectory: 'foo/code-size',
+      androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
     );
 
     expect(buildInfo.toGradleConfig(), <String>[
@@ -178,7 +181,9 @@ void main() {
       '-Ptrack-widget-creation=true',
       '-Ptree-shake-icons=true',
       '-Pbundle-sksl-path=foo/bar/baz.sksl.json',
-      '-Pcode-size-directory=foo/code-size'
+      '-Pcode-size-directory=foo/code-size',
+      '-Pfoo=bar',
+      '-Pfizz=bazz'
     ]);
   });
 

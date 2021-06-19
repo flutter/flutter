@@ -176,6 +176,99 @@ void main() {
     expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.release), 'release/executable');
   });
 
+  testWithoutContext('WinUWPDevice installs cert if not installed', () async {
+    Cache.flutterRoot = '';
+    final FakeUwpTool uwptool = FakeUwpTool();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
+      fileSystem: fileSystem,
+      uwptool: uwptool,
+    );
+    final FakeBuildableUwpApp package = FakeBuildableUwpApp();
+
+    uwptool.hasValidSignature = false;
+    final String packagePath = fileSystem.path.join(
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
+    );
+    fileSystem.file(packagePath).createSync(recursive:true);
+    final bool result = await windowsDevice.installApp(package);
+
+    expect(result, isTrue);
+    expect(uwptool.installCertRequests, hasLength(1));
+    expect(uwptool.installAppRequests, hasLength(1));
+  });
+
+  testWithoutContext('WinUWPDevice does not install cert if not installed', () async {
+    Cache.flutterRoot = '';
+    final FakeUwpTool uwptool = FakeUwpTool();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
+      fileSystem: fileSystem,
+      uwptool: uwptool,
+    );
+    final FakeBuildableUwpApp package = FakeBuildableUwpApp();
+
+    uwptool.hasValidSignature = true;
+    final String packagePath = fileSystem.path.join(
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
+    );
+    fileSystem.file(packagePath).createSync(recursive:true);
+    final bool result = await windowsDevice.installApp(package);
+
+    expect(result, isTrue);
+    expect(uwptool.installCertRequests, isEmpty);
+    expect(uwptool.installAppRequests, hasLength(1));
+  });
+
+  testWithoutContext('WinUWPDevice prefers installing multi-arch binaries', () async {
+    Cache.flutterRoot = '';
+    final FakeUwpTool uwptool = FakeUwpTool();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
+      fileSystem: fileSystem,
+      uwptool: uwptool,
+    );
+    final FakeBuildableUwpApp package = FakeBuildableUwpApp();
+
+    final String singleArchPath = fileSystem.path.absolute(fileSystem.path.join(
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
+    ));
+    fileSystem.file(singleArchPath).createSync(recursive:true);
+    final String multiArchPath = fileSystem.path.absolute(fileSystem.path.join(
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_Debug_Test', 'testapp_1.2.3.4_Debug.msix',
+    ));
+    fileSystem.file(multiArchPath).createSync(recursive:true);
+    final bool result = await windowsDevice.installApp(package);
+
+    expect(result, isTrue);
+    expect(uwptool.installAppRequests.single.packageUri, Uri.file(multiArchPath).toString());
+  });
+
+  testWithoutContext('WinUWPDevice falls back to installing single-arch binaries', () async {
+    Cache.flutterRoot = '';
+    final FakeUwpTool uwptool = FakeUwpTool();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
+      fileSystem: fileSystem,
+      uwptool: uwptool,
+    );
+    final FakeBuildableUwpApp package = FakeBuildableUwpApp();
+
+    final String singleArchPath = fileSystem.path.absolute(fileSystem.path.join(
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
+    ));
+    fileSystem.file(singleArchPath).createSync(recursive:true);
+    final bool result = await windowsDevice.installApp(package);
+
+    expect(result, isTrue);
+    expect(uwptool.installAppRequests.single.packageUri, Uri.file(singleArchPath).toString());
+  });
+
   testWithoutContext('WinUWPDevice can launch application if cert is installed', () async {
     Cache.flutterRoot = '';
     final FakeUwpTool uwptool = FakeUwpTool();

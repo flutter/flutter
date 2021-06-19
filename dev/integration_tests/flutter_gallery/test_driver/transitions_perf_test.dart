@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'dart:convert' show JsonEncoder, json;
 
 import 'package:file/file.dart';
@@ -27,8 +25,8 @@ List<String> _allDemos = <String>[];
 /// it into a histogram, and saves to a JSON file.
 Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
   final Map<String, List<int>> durations = <String, List<int>>{};
-  Map<String, dynamic> startEvent;
-  int frameStart;
+  Map<String, dynamic>? startEvent;
+  int? frameStart;
 
   // Save the duration of the first frame after each 'Start Transition' event.
   for (final Map<String, dynamic> event in events) {
@@ -44,9 +42,9 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
         frameStart = timestamp;
       } else {
         assert(phase == 'E');
-        final String routeName = startEvent['args']['to'] as String;
+        final String routeName = (startEvent['args'] as Map<String, dynamic>)['to'] as String;
         durations[routeName] ??= <int>[];
-        durations[routeName].add(timestamp - frameStart);
+        durations[routeName]!.add(timestamp - frameStart!);
         startEvent = null;
         frameStart = null;
       }
@@ -81,7 +79,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
         continue;
 
       final String routeName = eventName == 'Start Transition'
-        ? eventIter.current['args']['to'] as String
+        ? (eventIter.current['args'] as Map<String, dynamic>)['to'] as String
         : '';
 
       if (eventName == lastEventName && routeName == lastRouteName) {
@@ -105,7 +103,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 /// home screen twice.
 Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
-  String currentDemoCategory;
+  String? currentDemoCategory;
 
   for (final String demo in demos) {
     if (kSkippedDemos.contains(demo))
@@ -158,14 +156,14 @@ void main([List<String> args = const <String>[]]) {
   final bool withSemantics = args.contains('--with_semantics');
   final bool hybrid = args.contains('--hybrid');
   group('flutter gallery transitions', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
     setUpAll(() async {
       driver = await FlutterDriver.connect();
 
       // Wait for the first frame to be rasterized.
       await driver.waitUntilFirstFrameRasterized();
       if (withSemantics) {
-        print('Enabeling semantics...');
+        print('Enabling semantics...');
         await driver.setSemantics(true);
       }
 
@@ -176,7 +174,6 @@ void main([List<String> args = const <String>[]]) {
     });
 
     tearDownAll(() async {
-      if (driver != null)
         await driver.close();
     });
 

@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/common.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'host_agent.dart';
 import 'task_result.dart';
 
 /// Virtual current working directory, which affect functions, such as [exec].
@@ -291,10 +295,10 @@ Future<Process> startProcess(
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
-  process.exitCode.then<void>((int exitCode) {
+  unawaited(process.exitCode.then<void>((int exitCode) {
     print('"$executable" exit code: $exitCode');
     _runningProcesses.remove(processInfo);
-  });
+  }));
 
   return process;
 }
@@ -450,6 +454,11 @@ List<String> flutterCommandArgs(String command, List<String> options) {
         '--device-timeout',
         '5',
       ],
+
+    if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
+      '--screenshot',
+      hostAgent.dumpDirectory.path,
+    ],
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     ...options,
@@ -466,6 +475,18 @@ Future<int> flutter(String command, {
   final List<String> args = flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
     canFail: canFail, environment: environment);
+}
+
+Future<Process> startFlutter(String command, {
+  List<String> options = const <String>[],
+  Map<String, String> environment = const <String, String>{},
+}) {
+  final List<String> args = flutterCommandArgs(command, options);
+  return startProcess(
+    path.join(flutterDirectory.path, 'bin', 'flutter'),
+    args,
+    environment: environment,
+  );
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.
@@ -563,7 +584,8 @@ T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
 }
 
 String jsonEncode(dynamic data) {
-  return const JsonEncoder.withIndent('  ').convert(data) + '\n';
+  final String jsonValue = const JsonEncoder.withIndent('  ').convert(data);
+  return '$jsonValue\n';
 }
 
 Future<void> getNewGallery(String revision, Directory galleryDir) async {

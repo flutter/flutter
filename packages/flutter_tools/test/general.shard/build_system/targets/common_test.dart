@@ -78,17 +78,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
@@ -113,17 +114,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
@@ -149,17 +151,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
@@ -186,17 +189,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
@@ -225,17 +229,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.debug,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.debug,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.debug, <String>[]),
@@ -262,17 +267,18 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.debug,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.debug,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.debug, <String>[]),
@@ -311,17 +317,18 @@ void main() {
       logger: logger,
     );
     final String build = testEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.debug,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.debug,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.debug, <String>[]),
@@ -468,6 +475,7 @@ void main() {
         'cc',
         '-arch',
         'armv7',
+        '-miphoneos-version-min=8.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-c',
@@ -480,6 +488,7 @@ void main() {
         'cc',
         '-arch',
         'arm64',
+        '-miphoneos-version-min=8.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-c',
@@ -493,6 +502,8 @@ void main() {
         '-arch',
         'armv7',
         '-miphoneos-version-min=8.0',
+        '-isysroot',
+        'path/to/iPhoneOS.sdk',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -504,8 +515,6 @@ void main() {
         '@loader_path/Frameworks',
         '-install_name',
         '@rpath/App.framework/App',
-        '-isysroot',
-        'path/to/iPhoneOS.sdk',
         '-o',
         '$build/armv7/App.framework/App',
         '$build/armv7/snapshot_assembly.o',
@@ -516,6 +525,8 @@ void main() {
         '-arch',
         'arm64',
         '-miphoneos-version-min=8.0',
+        '-isysroot',
+        'path/to/iPhoneOS.sdk',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -527,8 +538,6 @@ void main() {
         '@loader_path/Frameworks',
         '-install_name',
         '@rpath/App.framework/App',
-        '-isysroot',
-        'path/to/iPhoneOS.sdk',
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',
@@ -574,6 +583,7 @@ void main() {
         'cc',
         '-arch',
         'arm64',
+        '-miphoneos-version-min=8.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         // Contains bitcode flag.
@@ -589,6 +599,8 @@ void main() {
         '-arch',
         'arm64',
         '-miphoneos-version-min=8.0',
+        '-isysroot',
+        'path/to/iPhoneOS.sdk',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -602,8 +614,6 @@ void main() {
         '@rpath/App.framework/App',
         // Contains bitcode flag.
         '-fembed-bitcode',
-        '-isysroot',
-        'path/to/iPhoneOS.sdk',
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',
@@ -649,6 +659,7 @@ void main() {
         'cc',
         '-arch',
         'arm64',
+        '-miphoneos-version-min=8.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         // Contains bitcode flag.
@@ -664,6 +675,8 @@ void main() {
         '-arch',
         'arm64',
         '-miphoneos-version-min=8.0',
+        '-isysroot',
+        'path/to/iPhoneOS.sdk',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -677,8 +690,6 @@ void main() {
         '@rpath/App.framework/App',
         // Contains bitcode flag.
         '-fembed-bitcode',
-        '-isysroot',
-        'path/to/iPhoneOS.sdk',
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',

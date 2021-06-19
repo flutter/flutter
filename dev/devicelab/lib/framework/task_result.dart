@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 
 /// A result of running a single task.
 class TaskResult {
-   TaskResult.buildOnly()
-       : succeeded = true,
+  TaskResult.buildOnly()
+      : succeeded = true,
         data = null,
         detailFiles = null,
         benchmarkScoreKeys = null,
@@ -29,7 +31,7 @@ class TaskResult {
               'result data ${prettyJson.convert(data)}';
         } else if (data[key] is! num) {
           throw 'Invalid benchmark score for key "$key". It is expected to be a num '
-              'but was ${data[key].runtimeType}: ${prettyJson.convert(data[key])}';
+              'but was ${(data[key] as Object).runtimeType}: ${prettyJson.convert(data[key])}';
         }
       }
     }
