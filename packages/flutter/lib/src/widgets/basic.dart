@@ -7305,10 +7305,15 @@ class Semantics extends SingleChildRenderObjectWidget {
     int? maxValueLength,
     int? currentValueLength,
     String? label,
+    AttributedString? attributedLabel,
     String? value,
+    AttributedString? attributedValue,
     String? increasedValue,
+    AttributedString? attributedIncreasedValue,
     String? decreasedValue,
+    AttributedString? attributedDecreasedValue,
     String? hint,
+    AttributedString? attributedHint,
     String? onTapHint,
     String? onLongPressHint,
     TextDirection? textDirection,
@@ -7364,10 +7369,15 @@ class Semantics extends SingleChildRenderObjectWidget {
       maxValueLength: maxValueLength,
       currentValueLength: currentValueLength,
       label: label,
+      attributedLabel: attributedLabel,
       value: value,
+      attributedValue: attributedValue,
       increasedValue: increasedValue,
+      attributedIncreasedValue: attributedIncreasedValue,
       decreasedValue: decreasedValue,
+      attributedDecreasedValue: attributedDecreasedValue,
       hint: hint,
+      attributedHint: attributedHint,
       textDirection: textDirection,
       sortKey: sortKey,
       tagForChildren: tagForChildren,
@@ -7452,6 +7462,31 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// an [ExcludeSemantics] widget and then another [Semantics] widget.
   final bool excludeSemantics;
 
+  AttributedString? get _effectiveAttributedLabel {
+    return properties.attributedLabel ??
+          (properties.label == null ? null : AttributedString(properties.label!));
+  }
+
+  AttributedString? get _effectiveAttributedValue {
+    return properties.attributedValue ??
+        (properties.value == null ? null : AttributedString(properties.value!));
+  }
+
+  AttributedString? get _effectiveAttributedIncreasedValue {
+    return properties.attributedIncreasedValue ??
+        (properties.increasedValue == null ? null : AttributedString(properties.increasedValue!));
+  }
+
+  AttributedString? get _effectiveAttributedDecreasedValue {
+    return properties.attributedDecreasedValue ??
+        (properties.decreasedValue == null ? null : AttributedString(properties.decreasedValue!));
+  }
+
+  AttributedString? get _effectiveAttributedHint {
+    return properties.attributedHint ??
+        (properties.hint == null ? null : AttributedString(properties.hint!));
+  }
+
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return RenderSemanticsAnnotations(
@@ -7481,11 +7516,11 @@ class Semantics extends SingleChildRenderObjectWidget {
       namesRoute: properties.namesRoute,
       hidden: properties.hidden,
       image: properties.image,
-      label: properties.label,
-      value: properties.value,
-      increasedValue: properties.increasedValue,
-      decreasedValue: properties.decreasedValue,
-      hint: properties.hint,
+      attributedLabel: _effectiveAttributedLabel,
+      attributedValue: _effectiveAttributedValue,
+      attributedIncreasedValue: _effectiveAttributedIncreasedValue,
+      attributedDecreasedValue: _effectiveAttributedDecreasedValue,
+      attributedHint: _effectiveAttributedHint,
       hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
@@ -7518,7 +7553,10 @@ class Semantics extends SingleChildRenderObjectWidget {
     if (properties.textDirection != null)
       return properties.textDirection;
 
-    final bool containsText = properties.label != null || properties.value != null || properties.hint != null;
+    final bool containsText = properties.attributedLabel != null ||
+                              properties.label != null ||
+                              properties.value != null ||
+                              properties.hint != null;
 
     if (!containsText)
       return null;
@@ -7554,11 +7592,11 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..liveRegion = properties.liveRegion
       ..maxValueLength = properties.maxValueLength
       ..currentValueLength = properties.currentValueLength
-      ..label = properties.label
-      ..value = properties.value
-      ..increasedValue = properties.increasedValue
-      ..decreasedValue = properties.decreasedValue
-      ..hint = properties.hint
+      ..attributedLabel = _effectiveAttributedLabel
+      ..attributedValue = _effectiveAttributedValue
+      ..attributedIncreasedValue = _effectiveAttributedIncreasedValue
+      ..attributedDecreasedValue = _effectiveAttributedDecreasedValue
+      ..attributedHint = _effectiveAttributedHint
       ..hintOverrides = properties.hintOverrides
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
