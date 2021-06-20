@@ -6,6 +6,7 @@
 
 #include <map>
 #include <memory>
+#include <string>
 
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/buffer_view.h"
@@ -28,6 +29,7 @@ struct Command {
   Bindings fragment_bindings;
   BufferView index_buffer;
   size_t index_count = 0u;
+  std::string label;
 
   constexpr operator bool() const { return pipeline && pipeline->IsValid(); }
 };

@@ -216,7 +216,15 @@ bool RenderPass::EncodeCommands(Allocator& allocator,
     }
     return true;
   };
+  fml::closure pop_debug_marker = [pass]() { [pass popDebugGroup]; };
   for (const auto& command : commands_) {
+    fml::ScopedCleanupClosure auto_pop_debug_marker(pop_debug_marker);
+    if (!command.label.empty()) {
+      [pass pushDebugGroup:@(command.label.c_str())];
+    } else {
+      auto_pop_debug_marker.Release();
+    }
+
     [pass setRenderPipelineState:command.pipeline->GetMTLRenderPipelineState()];
     [pass setDepthStencilState:command.pipeline->GetMTLDepthStencilState()];
     [pass setFrontFacingWinding:MTLWindingClockwise];
