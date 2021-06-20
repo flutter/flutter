@@ -379,7 +379,7 @@ class IconButton extends StatelessWidget {
         autofocus: autofocus,
         canRequestFocus: onPressed != null,
         onTap: onPressed,
-        mouseCursor: mouseCursor,
+        mouseCursor: onPressed == null ? SystemMouseCursors.forbidden : mouseCursor,
         enableFeedback: enableFeedback,
         focusColor: focusColor ?? theme.focusColor,
         hoverColor: hoverColor ?? theme.hoverColor,
