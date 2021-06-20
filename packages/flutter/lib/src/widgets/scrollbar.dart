@@ -1048,8 +1048,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
     final bool tryPrimary = widget.controller == null;
     final String controllerForError = tryPrimary
-      ? 'provided ScrollController'
-      : 'PrimaryScrollController';
+      ? 'PrimaryScrollController'
+      : 'provided ScrollController';
 
     String when = '';
     if (showScrollbar) {

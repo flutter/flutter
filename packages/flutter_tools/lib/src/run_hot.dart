@@ -1118,8 +1118,9 @@ Future<OperationResult> _defaultReloadSourcesHelper(
   // refactored, we'll probably need to send one hot reload/restart event
   // per device to analytics.
   firstReloadDetails.addAll(castStringKeyedMap(reloadReport.json['details']));
-  final int loadedLibraryCount = reloadReport.json['details']['loadedLibraryCount'] as int;
-  final int finalLibraryCount = reloadReport.json['details']['finalLibraryCount'] as int;
+  final Map<String, dynamic> details = reloadReport.json['details'] as Map<String, dynamic>;
+  final int loadedLibraryCount = details['loadedLibraryCount'] as int;
+  final int finalLibraryCount = details['finalLibraryCount'] as int;
   globals.printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
   // reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
   // Record time it took for the VM to reload the sources.

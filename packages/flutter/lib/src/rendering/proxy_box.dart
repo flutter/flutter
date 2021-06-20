@@ -3757,7 +3757,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// The [container] argument must not be null.
   ///
-  /// If the [label] is not null, the [textDirection] must also not be null.
+  /// If the [attributedLabel] is not null, the [textDirection] must also not be null.
   RenderSemanticsAnnotations({
     RenderBox? child,
     bool container = false,
@@ -3786,11 +3786,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool? liveRegion,
     int? maxValueLength,
     int? currentValueLength,
-    String? label,
-    String? value,
-    String? increasedValue,
-    String? decreasedValue,
-    String? hint,
+    AttributedString? attributedLabel,
+    AttributedString? attributedValue,
+    AttributedString? attributedIncreasedValue,
+    AttributedString? attributedDecreasedValue,
+    AttributedString? attributedHint,
     SemanticsHintOverrides? hintOverrides,
     TextDirection? textDirection,
     SemanticsSortKey? sortKey,
@@ -3844,11 +3844,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _hidden = hidden,
        _image = image,
        _onDismiss = onDismiss,
-       _label = label,
-       _value = value,
-       _increasedValue = increasedValue,
-       _decreasedValue = decreasedValue,
-       _hint = hint,
+       _attributedLabel = attributedLabel,
+       _attributedValue = attributedValue,
+       _attributedIncreasedValue = attributedIncreasedValue,
+       _attributedDecreasedValue = attributedDecreasedValue,
+       _attributedHint = attributedHint,
        _hintOverrides = hintOverrides,
        _textDirection = textDirection,
        _sortKey = sortKey,
@@ -4183,65 +4183,63 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
+  /// If non-null, sets the [SemanticsNode.attributedLabel] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
-  String? get label => _label;
-  String? _label;
-  set label(String? value) {
-    if (_label == value)
+  AttributedString? get attributedLabel => _attributedLabel;
+  AttributedString? _attributedLabel;
+  set attributedLabel(AttributedString? value) {
+    if (_attributedLabel == value)
       return;
-    _label = value;
+    _attributedLabel = value;
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.value] semantic to the given value.
+  /// If non-null, sets the [SemanticsNode.attributedValue] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
-  String? get value => _value;
-  String? _value;
-  set value(String? value) {
-    if (_value == value)
+  AttributedString? get attributedValue => _attributedValue;
+  AttributedString? _attributedValue;
+  set attributedValue(AttributedString? value) {
+    if (_attributedValue == value)
       return;
-    _value = value;
+    _attributedValue = value;
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.increasedValue] semantic to the given
-  /// value.
+  /// If non-null, sets the [SemanticsNode.attributedIncreasedValue] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
-  String? get increasedValue => _increasedValue;
-  String? _increasedValue;
-  set increasedValue(String? value) {
-    if (_increasedValue == value)
+  AttributedString? get attributedIncreasedValue => _attributedIncreasedValue;
+  AttributedString? _attributedIncreasedValue;
+  set attributedIncreasedValue(AttributedString? value) {
+    if (_attributedIncreasedValue == value)
       return;
-    _increasedValue = value;
+    _attributedIncreasedValue = value;
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.decreasedValue] semantic to the given
-  /// value.
+  /// If non-null, sets the [SemanticsNode.attributedDecreasedValue] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
-  String? get decreasedValue => _decreasedValue;
-  String? _decreasedValue;
-  set decreasedValue(String? value) {
-    if (_decreasedValue == value)
+  AttributedString? get attributedDecreasedValue => _attributedDecreasedValue;
+  AttributedString? _attributedDecreasedValue;
+  set attributedDecreasedValue(AttributedString? value) {
+    if (_attributedDecreasedValue == value)
       return;
-    _decreasedValue = value;
+    _attributedDecreasedValue = value;
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
+  /// If non-null, sets the [SemanticsNode.attributedHint] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
-  String? get hint => _hint;
-  String? _hint;
-  set hint(String? value) {
-    if (_hint == value)
+  AttributedString? get attributedHint => _attributedHint;
+  AttributedString? _attributedHint;
+  set attributedHint(AttributedString? value) {
+    if (_attributedHint == value)
       return;
-    _hint = value;
+    _attributedHint = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4255,10 +4253,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
+  /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given
+  /// value.
   ///
-  /// This must not be null if [label], [hint], [value], [increasedValue], or
-  /// [decreasedValue] are not null.
+  /// This must not be null if [attributedLabel], [attributedHint],
+  /// [attributedValue], [attributedIncreasedValue], or
+  /// [attributedDecreasedValue] are not null.
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
   set textDirection(TextDirection? value) {
@@ -4765,16 +4765,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isHidden = hidden!;
     if (image != null)
       config.isImage = image!;
-    if (label != null)
-      config.label = label!;
-    if (value != null)
-      config.value = value!;
-    if (increasedValue != null)
-      config.increasedValue = increasedValue!;
-    if (decreasedValue != null)
-      config.decreasedValue = decreasedValue!;
-    if (hint != null)
-      config.hint = hint!;
+    if (attributedLabel != null)
+      config.attributedLabel = attributedLabel!;
+    if (attributedValue != null)
+      config.attributedValue = attributedValue!;
+    if (attributedIncreasedValue != null)
+      config.attributedIncreasedValue = attributedIncreasedValue!;
+    if (attributedDecreasedValue != null)
+      config.attributedDecreasedValue = attributedDecreasedValue!;
+    if (attributedHint != null)
+      config.attributedHint = attributedHint!;
     if (hintOverrides != null && hintOverrides!.isNotEmpty)
       config.hintOverrides = hintOverrides;
     if (scopesRoute != null)

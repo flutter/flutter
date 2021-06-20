@@ -350,6 +350,59 @@ void main() {
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
+
+  testWidgets('Ensure CurvedAnimations are disposed on widget change',
+      (WidgetTester tester) async {
+    final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key =
+        GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
+    final ValueNotifier<Curve> curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
+    await tester.pumpWidget(wrap(
+      child: ValueListenableBuilder<Curve>(
+        valueListenable: curve,
+        builder: (_, Curve c, __) => AnimatedOpacity(
+            key: key,
+            opacity: 1.0,
+            duration: const Duration(seconds: 1),
+            curve: c,
+            child: Container(color: Colors.green)),
+      ),
+    ));
+
+    final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? firstState = key.currentState;
+    final Animation<double>? firstAnimation = firstState?.animation;
+    if (firstAnimation == null)
+      fail('animation was null!');
+
+    final CurvedAnimation firstCurvedAnimation =
+        firstAnimation as CurvedAnimation;
+
+    expect(firstCurvedAnimation.isDisposed, isFalse);
+
+    curve.value = const Interval(0.0, 0.6);
+    await tester.pumpAndSettle();
+
+    final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? secondState = key.currentState;
+    final Animation<double>? secondAnimation = secondState?.animation;
+    if (secondAnimation == null)
+      fail('animation was null!');
+
+    final CurvedAnimation secondCurvedAnimation = secondAnimation as CurvedAnimation;
+
+    expect(firstState, equals(secondState));
+    expect(firstAnimation, isNot(equals(secondAnimation)));
+
+    expect(firstCurvedAnimation.isDisposed, isTrue);
+    expect(secondCurvedAnimation.isDisposed, isFalse);
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Offstage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(secondCurvedAnimation.isDisposed, isTrue);
+  });
 }
 
 Widget wrap({required Widget child}) {

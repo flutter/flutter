@@ -1448,8 +1448,12 @@ void main() {
       );
     }
 
-    Widget _buildApp({ ScrollController? scrollController }) {
+    Widget _buildApp({
+      required String id,
+      ScrollController? scrollController,
+    }) {
       return MaterialApp(
+        key: ValueKey<String>(id),
         home: DefaultTabController(
           length: 2,
           child: Scaffold(
@@ -1465,33 +1469,37 @@ void main() {
     }
 
     // Asserts when using the PrimaryScrollController.
-    await tester.pumpWidget(_buildApp());
+    await tester.pumpWidget(_buildApp(id: 'PrimaryScrollController'));
 
     // Swipe to the second tab, resulting in two attached ScrollPositions during
     // the transition.
-    try {
-      await tester.drag(find.text('Test').first, const Offset(10.0, 0.0));
-    } on FlutterError catch (error) {
-      expect(
-        error.message,
-        contains('The Scrollbar attempted to paint using the position attached to the PrimaryScrollController.'),
-      );
-    }
+    await tester.drag(find.text('Test').first, const Offset(-100.0, 0.0));
+    await tester.pump();
+
+    FlutterError error = tester.takeException() as FlutterError;
+    expect(
+      error.message,
+      contains('The PrimaryScrollController is currently attached to more than one ScrollPosition.'),
+    );
 
     // Asserts when using the ScrollController provided by the user.
     final ScrollController scrollController = ScrollController();
-    await tester.pumpWidget(_buildApp(scrollController: scrollController));
+    await tester.pumpWidget(
+      _buildApp(
+        id: 'Provided ScrollController',
+        scrollController: scrollController,
+      ),
+    );
 
     // Swipe to the second tab, resulting in two attached ScrollPositions during
     // the transition.
-    try {
-      await tester.drag(find.text('Test').first, const Offset(10.0, 0.0));
-    } on AssertionError catch (error) {
-      expect(
-        error.message,
-        contains('The Scrollbar attempted to paint using the position attached to the provided ScrollController.'),
-      );
-    }
+    await tester.drag(find.text('Test').first, const Offset(-100.0, 0.0));
+    await tester.pump();
+    error = tester.takeException() as FlutterError;
+    expect(
+      error.message,
+      contains('The provided ScrollController is currently attached to more than one ScrollPosition.'),
+    );
   });
 
   testWidgets('Scrollbar scrollOrientation works correctly', (WidgetTester tester) async {

@@ -31,7 +31,7 @@ Future<void> main() async {
     final Map<String, dynamic> data = <String, dynamic>{};
     for (final String key in withSemantics.benchmarkScoreKeys) {
       final String deltaKey = 'delta_$key';
-      data[deltaKey] = withSemantics.data[key] - withoutSemantics.data[key];
+      data[deltaKey] = (withSemantics.data[key] as num) - (withoutSemantics.data[key] as num);
       data['semantics_$key'] = withSemantics.data[key];
       data[key] = withoutSemantics.data[key];
       benchmarkScoreKeys.add(deltaKey);
