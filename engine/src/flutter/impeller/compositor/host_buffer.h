@@ -30,6 +30,10 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
     return Emplace(reinterpret_cast<const void*>(&t), sizeof(T), alignof(T));
   }
 
+  [[nodiscard]] BufferView Emplace(const void* buffer,
+                                   size_t length,
+                                   size_t align);
+
   [[nodiscard]] bool Truncate(size_t length);
 
  private:
@@ -43,10 +47,6 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
   // |Buffer|
   std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
       Allocator& allocator) const override;
-
-  [[nodiscard]] BufferView Emplace(const void* buffer,
-                                   size_t length,
-                                   size_t align);
 
   [[nodiscard]] BufferView Emplace(const void* buffer, size_t length);
 

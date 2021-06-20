@@ -4,6 +4,7 @@
 
 #include "impeller/entity/entity_renderer.h"
 #include "impeller/compositor/command.h"
+#include "impeller/compositor/vertex_buffer.h"
 #include "impeller/primitives/box.frag.h"
 #include "impeller/primitives/box.vert.h"
 
@@ -37,12 +38,24 @@ bool EntityRenderer::OnIsValid() const {
 bool EntityRenderer::OnRender(RenderPass& pass) {
   shader::BoxVertexInfo::UniformBuffer uniforms;
   uniforms.mvp = Matrix::MakeOrthographic({800, 600});
+  VertexBufferBuilder vertices;
+  vertices.AddVertices({
+      {-0.5, 0.5},  //
+      {0.5, 0.5},   //
+      {0.5, -0.5},  //
+      {-0.5, 0.5},  //
+  });
 
   Command cmd;
   cmd.pipeline = box_primitive_->GetPipeline();
   cmd.vertex_bindings
       .buffers[shader::BoxVertexInfo::kUniformUniformBuffer.location] =
       pass.GetTransientsBuffer().Emplace(uniforms);
+  cmd.vertex_bindings
+      .buffers[shader::BoxVertexInfo::kInputVertexPosition.location] =
+      vertices.CreateVertexBuffer(pass.GetTransientsBuffer());
+  cmd.index_buffer = vertices.CreateIndexBuffer(pass.GetTransientsBuffer());
+  cmd.index_count = vertices.GetIndexCount();
   if (!pass.RecordCommand(std::move(cmd))) {
     return false;
   }

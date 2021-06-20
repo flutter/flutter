@@ -228,14 +228,26 @@ bool RenderPass::EncodeCommands(Allocator& allocator,
                               ShaderStage::kFragment)) {
       return false;
     }
-    // [pass drawIndexedPrimitives:MTLPrimitiveTypeTriangleStrip
-    //                  indexCount:command.index_count
-    //                   indexType:MTLIndexTypeUInt32
-    //                 indexBuffer:command.index_buffer
-    //           indexBufferOffset:(NSUInteger)indexBufferOffset
-    //               instanceCount:1u
-    //                  baseVertex:0u
-    //                baseInstance:0u];
+    auto index_buffer = command.index_buffer.buffer;
+    if (!index_buffer) {
+      return false;
+    }
+    auto device_buffer = index_buffer->GetDeviceBuffer(allocator);
+    if (!device_buffer) {
+      return false;
+    }
+    auto mtl_index_buffer = device_buffer->GetMTLBuffer();
+    if (!mtl_index_buffer) {
+      return false;
+    }
+    [pass drawIndexedPrimitives:MTLPrimitiveTypeTriangleStrip
+                     indexCount:command.index_count
+                      indexType:MTLIndexTypeUInt32
+                    indexBuffer:mtl_index_buffer
+              indexBufferOffset:command.index_buffer.range.offset
+                  instanceCount:1u
+                     baseVertex:0u
+                   baseInstance:0u];
   }
   return true;
 }
