@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <type_traits>
 
 #include "flutter/fml/macros.h"
@@ -21,6 +22,8 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
   virtual ~HostBuffer();
 
   static std::shared_ptr<HostBuffer> Create();
+
+  void SetLabel(std::string label);
 
   size_t GetLength() const;
 
@@ -44,6 +47,7 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
   size_t length_ = 0;
   size_t reserved_ = 0;
   size_t generation_ = 1u;
+  std::string label_;
 
   // |Buffer|
   std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(

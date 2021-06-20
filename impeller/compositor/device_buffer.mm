@@ -45,4 +45,21 @@ std::shared_ptr<const DeviceBuffer> DeviceBuffer::GetDeviceBuffer(
   return shared_from_this();
 }
 
+bool DeviceBuffer::SetLabel(const std::string& label) {
+  if (label.empty()) {
+    return false;
+  }
+  [buffer_ setLabel:@(label.c_str())];
+  return true;
+}
+
+bool DeviceBuffer::SetLabel(const std::string& label, Range range) {
+  if (label.empty()) {
+    return false;
+  }
+  [buffer_ addDebugMarker:@(label.c_str())
+                    range:NSMakeRange(range.offset, range.length)];
+  return true;
+}
+
 }  // namespace impeller
