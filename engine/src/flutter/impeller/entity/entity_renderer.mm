@@ -47,6 +47,7 @@ bool EntityRenderer::OnRender(RenderPass& pass) {
   });
 
   Command cmd;
+  cmd.label = "Simple Box";
   cmd.pipeline = box_primitive_->GetPipeline();
   cmd.vertex_bindings
       .buffers[shader::BoxVertexInfo::kUniformUniformBuffer.location] =

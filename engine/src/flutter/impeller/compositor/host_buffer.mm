@@ -102,7 +102,7 @@ bool HostBuffer::Reserve(size_t reserved) {
     // If new length is zero, a minimum non-zero sized allocation is returned.
     // So this check will not trip and this routine will indicate success as
     // expected.
-    FML_LOG(ERROR) << "Allocation failed. Out of memory.";
+    FML_LOG(ERROR) << "Allocation failed. Out of host memory.";
     return false;
   }
 
