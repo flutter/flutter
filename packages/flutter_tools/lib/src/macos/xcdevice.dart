@@ -224,7 +224,8 @@ class XCDevice {
 
   /// [timeout] defaults to 2 seconds.
   Future<List<IOSDevice>> getAvailableIOSDevices({ Duration timeout }) async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
+    final List<dynamic> allAvailableDevices = await _getAllDevices(
+        timeout: timeout ?? const Duration(seconds: 2));
 
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
@@ -279,7 +280,8 @@ class XCDevice {
         if (errorProperties != null) {
           final String errorMessage = _parseErrorMessage(errorProperties);
           if (errorMessage.contains('not paired')) {
-            UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
+            UsageEvent('device', 'ios-trust-failure',
+                flutterUsage: globals.flutterUsage).send();
           }
           _logger.printTrace(errorMessage);
 
@@ -300,31 +302,33 @@ class XCDevice {
         if (interface != IOSDeviceInterface.usb) {
           continue;
         }
-        
-      String sdkVersion = _sdkVersion(deviceProperties);
-        
-      if (sdkVersion != null) {
-        final String buildVersion = _buildVersion(deviceProperties);
-        if (buildVersion != null) {
-          sdkVersion = '$sdkVersion $buildVersion';
+
+        String sdkVersion = _sdkVersion(device);
+
+        if (sdkVersion != null) {
+          final String buildVersion = _buildVersion(device);
+          if (buildVersion != null) {
+            sdkVersion = '$sdkVersion $buildVersion';
+          }
         }
+
+        devices.add(IOSDevice(
+          device['identifier'] as String,
+          name: device['name'] as String,
+          cpuArchitecture: _cpuArchitecture(device),
+          interfaceType: interface,
+          sdkVersion: sdkVersion,
+          iProxy: _iProxy,
+          fileSystem: globals.fs,
+          logger: _logger,
+          iosDeploy: _iosDeploy,
+          iMobileDevice: _iMobileDevice,
+          platform: globals.platform,
+        ));
       }
-        
-      devices.add(IOSDevice(
-        device['identifier'] as String,
-        name: device['name'] as String,
-        cpuArchitecture: _cpuArchitecture(deviceProperties),
-        interfaceType: interface,
-        sdkVersion: sdkVersion,
-        iProxy: _iProxy,
-        fileSystem: globals.fs,
-        logger: _logger,
-        iosDeploy: _iosDeploy,
-        iMobileDevice: _iMobileDevice,
-        platform: globals.platform,
-      ));
     }
     return devices;
+
   }
 
   /// Despite the name, com.apple.platform.iphoneos includes iPhone, iPads, and all iOS devices.
