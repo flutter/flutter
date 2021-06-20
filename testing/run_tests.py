@@ -485,6 +485,21 @@ def RunBenchmarkTests(build_dir):
       cwd=test_dir)
 
 
+def RunGithooksTests(build_dir):
+  test_dir = os.path.join(buildroot_dir, 'flutter', 'tools', 'githooks')
+  dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
+  for dart_test_file in dart_tests:
+    opts = [
+      '--disable-dart-dev',
+      dart_test_file]
+    RunEngineExecutable(
+      build_dir,
+      os.path.join('dart-sdk', 'bin', 'dart'),
+      None,
+      flags=opts,
+      cwd=test_dir)
+
+
 def main():
   parser = argparse.ArgumentParser()
 
@@ -526,6 +541,7 @@ def main():
     dart_filter = args.dart_filter.split(',') if args.dart_filter else None
     RunDartSmokeTest(build_dir, args.verbose_dart_snapshot)
     RunLitetestTests(build_dir)
+    RunGithooksTests(build_dir)
     RunDartTests(build_dir, dart_filter, args.verbose_dart_snapshot)
     RunConstFinderTests(build_dir)
     RunFrontEndServerTests(build_dir)

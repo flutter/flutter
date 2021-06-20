@@ -32,6 +32,7 @@ SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
 FLUTTER_DIR="$SRC_DIR/flutter"
 DART_BIN="$SRC_DIR/third_party/dart/tools/sdks/dart-sdk/bin"
 PUB="$DART_BIN/pub"
+DART="$DART_BIN/dart"
 DART_ANALYZER="$DART_BIN/dartanalyzer"
 
 echo "Using analyzer from $DART_ANALYZER"
@@ -125,7 +126,13 @@ analyze \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
   "$FLUTTER_DIR/testing/symbols"
 
+echo "Analyzing githooks..."
+analyze \
+  --packages="$FLUTTER_DIR/tools/githooks/.dart_tool/package_config.json" \
+  --options "$FLUTTER_DIR/analysis_options.yaml" \
+  "$FLUTTER_DIR/tools/githooks"
+
 # Check that dart libraries conform.
 echo "Checking web_ui api conformance..."
-(cd "$FLUTTER_DIR/web_sdk"; pub get)
-(cd "$FLUTTER_DIR"; dart "web_sdk/test/api_conform_test.dart")
+(cd "$FLUTTER_DIR/web_sdk"; "$PUB" get)
+(cd "$FLUTTER_DIR"; "$DART" "web_sdk/test/api_conform_test.dart")
