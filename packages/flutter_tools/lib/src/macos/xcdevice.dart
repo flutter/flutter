@@ -304,13 +304,19 @@ class XCDevice {
       if (interface != IOSDeviceInterface.usb) {
         continue;
       }
-
+      String sdkVersion = _sdkVersion(deviceProperties);
+      if (sdkVersion != null) {
+        final String buildVersion = _buildVersion(deviceProperties);
+        if (buildVersion != null) {
+          sdkVersion = '$sdkVersion $buildVersion';
+        }
+      }
       devices.add(IOSDevice(
         device['identifier'] as String,
         name: device['name'] as String,
         cpuArchitecture: _cpuArchitecture(deviceProperties),
         interfaceType: interface,
-        sdkVersion: _sdkVersion(deviceProperties),
+        sdkVersion: sdkVersion,
         iProxy: _iProxy,
         fileSystem: globals.fs,
         logger: _logger,
@@ -362,8 +368,20 @@ class XCDevice {
 
   static String _sdkVersion(Map<String, dynamic> deviceProperties) {
     if (deviceProperties.containsKey('operatingSystemVersion')) {
+      // Parse out the OS version, ignore the build number in parentheses.
+      // "13.3 (17C54)"
+      final RegExp operatingSystemRegex = RegExp(r'(.*) \(.*\)$');
       final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
-      return operatingSystemVersion.replaceAll(RegExp('[()]'), '');
+      return operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
+    }
+    return null ;
+  }
+  static String _buildVersion(Map<String, dynamic> deviceProperties) {
+    if (deviceProperties.containsKey('operatingSystemVersion')) {
+      //Parse out the build version
+      final RegExp buildVersionRegex = RegExp(r'\(.*\)$');
+      final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
+      return buildVersionRegex.firstMatch(operatingSystemVersion)?.group(1)?.replaceAll(RegExp('[()]'), '');
     }
     return null;
   }
