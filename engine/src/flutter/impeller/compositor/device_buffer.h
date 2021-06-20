@@ -27,6 +27,10 @@ class DeviceBuffer final : public Buffer,
 
   id<MTLBuffer> GetMTLBuffer() const;
 
+  bool SetLabel(const std::string& label);
+
+  bool SetLabel(const std::string& label, Range range);
+
  private:
   friend class Allocator;
 
