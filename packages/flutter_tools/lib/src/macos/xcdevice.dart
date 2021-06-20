@@ -224,8 +224,7 @@ class XCDevice {
 
   /// [timeout] defaults to 2 seconds.
   Future<List<IOSDevice>> getAvailableIOSDevices({ Duration timeout }) async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices(
-        timeout: timeout ?? const Duration(seconds: 2));
+    final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
 
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
@@ -280,8 +279,7 @@ class XCDevice {
         if (errorProperties != null) {
           final String errorMessage = _parseErrorMessage(errorProperties);
           if (errorMessage.contains('not paired')) {
-            UsageEvent('device', 'ios-trust-failure',
-                flutterUsage: globals.flutterUsage).send();
+            UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
           }
           _logger.printTrace(errorMessage);
 
@@ -377,8 +375,9 @@ class XCDevice {
       final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
       return operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
     }
-    return null ;
+    return null;
   }
+
   static String _buildVersion(Map<String, dynamic> deviceProperties) {
     if (deviceProperties.containsKey('operatingSystemVersion')) {
       //Parse out the build version
