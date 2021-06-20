@@ -10,6 +10,7 @@
 
 #include "impeller/compositor/allocator.h"
 #include "impeller/compositor/buffer_view.h"
+#include "impeller/compositor/device_buffer.h"
 
 namespace impeller {
 
@@ -21,6 +22,10 @@ HostBuffer::HostBuffer() = default;
 
 HostBuffer::~HostBuffer() {
   ::free(buffer_);
+}
+
+void HostBuffer::SetLabel(std::string label) {
+  label_ = std::move(label);
 }
 
 size_t HostBuffer::GetLength() const {
@@ -121,6 +126,7 @@ std::shared_ptr<const DeviceBuffer> HostBuffer::GetDeviceBuffer(
   if (!new_buffer) {
     return nullptr;
   }
+  new_buffer->SetLabel(label_);
   device_buffer_generation_ = generation_;
   device_buffer_ = std::move(new_buffer);
   return device_buffer_;
