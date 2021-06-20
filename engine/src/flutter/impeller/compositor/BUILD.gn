@@ -50,6 +50,8 @@ impeller_component("compositor") {
     "surface.mm",
     "texture.h",
     "texture.mm",
+    "vertex_buffer.h",
+    "vertex_buffer.mm",
     "vertex_descriptor.h",
     "vertex_descriptor.mm",
   ]
