@@ -383,7 +383,7 @@ class XCDevice {
       //Parse out the build version
       final RegExp buildVersionRegex = RegExp(r'\(.*\)$');
       final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
-      return buildVersionRegex.firstMatch(operatingSystemVersion)?.group(1)?.replaceAll(RegExp('[()]'), '');
+      return buildVersionRegex.firstMatch(operatingSystemVersion)?.group(0)?.replaceAll(RegExp('[()]'), '');
     }
     return null;
   }
