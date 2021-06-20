@@ -37,6 +37,8 @@ def Main():
   command = [
     "xcrun",
     "metal",
+    "-MO",
+    "-gline-tables-only",
     # Both user and system header will be tracked.
     "-MMD",
     "-MF",
