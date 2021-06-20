@@ -37,6 +37,8 @@ def Main():
   command = [
     "xcrun",
     "metal",
+    # TODO: Embeds both sources and driver options in the output. This aids in
+    # debugging but should be removed from release builds.
     "-MO",
     "-gline-tables-only",
     # Both user and system header will be tracked.
