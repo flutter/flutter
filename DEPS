@@ -712,5 +712,13 @@ hooks = [
       'python3',
       'src/build/win/generate_winrt_headers.py',
     ]
+  },
+  {
+    'name': 'Setup githooks',
+    'pattern': '.',
+    'action': [
+      'python3',
+      'src/flutter/tools/githooks/setup.py',
+    ]
   }
 ]
