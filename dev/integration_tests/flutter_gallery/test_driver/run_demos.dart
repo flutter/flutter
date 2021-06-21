@@ -61,7 +61,16 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
       final Finder demoItem = find.text(demoName);
       await controller.scrollUntilVisible(demoItem, 48.0);
       await controller.pumpAndSettle();
-      await controller.tap(demoItem); // Launch the demo
+      try {
+        await controller.tap(demoItem); // Launch the demo
+      } catch (e) {
+        print('Failed to find $demoItem');
+        print('All available elements:');
+        print(controller.allElements.toList());
+        print('App structure:');
+        debugDumpApp();
+        rethrow;
+      }
 
       if (kUnsynchronizedDemos.contains(demo)) {
         // These tests have animation, pumpAndSettle cannot be used.
