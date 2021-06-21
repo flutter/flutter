@@ -62,13 +62,13 @@ void main() {
     // By default, clipBehavior should be Clip.none
     final RenderFlex defaultFlex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200]);
     layout(defaultFlex, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    defaultFlex.paint(context, Offset.zero);
+    context.paintChild(defaultFlex, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
 
     for (final Clip clip in Clip.values) {
       final RenderFlex flex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200], clipBehavior: clip);
       layout(flex, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      flex.paint(context, Offset.zero);
+      context.paintChild(flex, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
   });

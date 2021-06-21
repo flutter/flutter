@@ -88,11 +88,131 @@ class AnnotationResult<T> {
 /// [SceneBuilder.build] to obtain a [Scene]. A [Scene] can then be painted
 /// using [dart:ui.FlutterView.render].
 ///
+/// ## Memory
+///
+/// Layers retain resources between frames to speed up rendering. A layer will
+/// retain these resources until all [LayerHandle]s created by [createHandle]
+/// have been disposed, at which point it calls [releaseRetainedResources]. Such
+/// a layer could still be used after that if something else comes along
+///
 /// See also:
 ///
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
+
+  bool _debugReleasedRetainedResources = false;
+  /// If asserts are enabled, returns whether [releaseRetainedResources] has
+  /// been called since the last time any retained resources were created.
+  ///
+  /// Throws an exception if asserts are disabled.
+  bool get debugReleasedRetainedResources {
+    late bool released;
+    assert(() {
+      released = _debugReleasedRetainedResources;
+      return true;
+    }());
+    return released;
+  }
+
+  /// Set when this layer is appended to a [ContainerLayer], and
+  /// unset when it is removed.
+  ///
+  /// This cannot be set from [attach] or [detach] which is called when an
+  /// entire subtree is attached to or detached from an owner. Layers may be
+  /// appended to or removed from a [ContainerLayer] regardless of whether they
+  /// are attached or detached, and detaching a layer from an owner does not
+  /// imply that it has been removed from its parent.
+  LayerHandle? _parentHandle;
+
+  /// Creates a handle that keeps the native resources of this layer from being
+  /// prematurely disposed.
+  ///
+  /// [RenderObject]s automatically store handles to [PictureLayer](s) they draw
+  /// into and dispose of those handles when the [RenderObject.dispose] method
+  /// is called or they otherwise no longer need the reference to that
+  /// [PictureLayer] (such as when they paint a new picture).
+  ///
+  /// A handle is also automatically managed for [RenderObject.layer].
+  ///
+  /// If a [RenderObject] creates layers in addition to its [RenderObject.layer],
+  /// it must create a handle to that layer and dispose of it when the layer is
+  /// no longer needed. For example, if it re-creates or nulls out an existing
+  /// layer in [RenderObject.paint], it should dispose of the handle to the
+  /// old layer. It should also dispose of any layer handles it holds in
+  /// [RenderObject.dispose].
+  LayerHandle createHandle() {
+    _refCount += 1;
+    return LayerHandle._(this);
+  }
+
+  int _refCount = 0;
+
+  void _unref() {
+    assert(_refCount > 0);
+    _refCount -= 1;
+    if (_refCount == 0) {
+      releaseRetainedResources();
+    }
+  }
+
+  /// Returns the number of objects holding a [LayerHandle] to this layer.
+  ///
+  /// This method throws if asserts are disabled.
+  int get debugHandleCount {
+    late int count;
+    assert(() {
+      count = _refCount;
+      return true;
+    }());
+    return count;
+  }
+
+  /// Subclasses that override [releaseRetainedResources] must call this when
+  /// they acquire resources that would be released by this call.
+  ///
+  /// For example, [PictureLayer] calls this when it gets a new
+  /// [PictureLayer.picture].
+  ///
+  /// Intended to be called as `assert(debugMarkSetRetainedResources())`.
+  @protected
+  bool debugMarkSetRetainedResources() {
+    _debugReleasedRetainedResources = false;
+    return true;
+  }
+
+  /// Clears any retained resources that this layer holds.
+  ///
+  /// This method must dispose resources such as [EngineLayer] and [Picture]
+  /// objects. The layer is still usable after this call, but any graphics
+  /// related resources it holds will need to be recreated.
+  ///
+  /// This method _only_ releases resources for this layer. For example, if it
+  /// is a [ContainerLayer], it does not release resources of any children.
+  /// However, [ContainerLayer]s do remove any children they have when
+  /// this is method is called.
+  ///
+  /// This method automatically gets called when all outstanding [LayerHandle]s
+  /// are disposed. [LayerHandle] objects are typically held by the [parent]
+  /// layer of this layer and any [RenderObject]s that participated in creating
+  /// it.
+  @mustCallSuper
+  @protected
+  @visibleForTesting
+  void releaseRetainedResources() {
+    assert(() {
+      assert(
+        _refCount == 0,
+        'Do not directly call releaseRetainedResources on a $runtimeType. Instead, '
+        'use createHandle and LayerHandle.dispose.',
+      );
+      _debugReleasedRetainedResources = true;
+      return true;
+    }());
+    _engineLayer?.dispose();
+    _engineLayer = null;
+  }
+
   /// This layer's parent in the layer tree.
   ///
   /// The [parent] of the root node in the layer tree is null.
@@ -187,6 +307,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// layer. The web engine could, for example, update the properties of
   /// previously rendered HTML DOM nodes rather than creating new nodes.
   @protected
+  @visibleForTesting
   ui.EngineLayer? get engineLayer => _engineLayer;
 
   /// Sets the engine layer used to render this layer.
@@ -195,7 +316,10 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// in turn returns the engine layer produced by one of [ui.SceneBuilder]'s
   /// "push" methods, such as [ui.SceneBuilder.pushOpacity].
   @protected
+  @visibleForTesting
   set engineLayer(ui.EngineLayer? value) {
+    assert(debugMarkSetRetainedResources());
+    _engineLayer?.dispose();
     _engineLayer = value;
     if (!alwaysNeedsAddToScene) {
       // The parent must construct a new engine layer to add this layer to, and
@@ -415,7 +539,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Defaults to the value of [RenderObject.debugCreator] for the render object
   /// that created this layer. Used in debug messages.
-  dynamic debugCreator;
+  Object? debugCreator;
 
   @override
   String toStringShort() => '${super.toStringShort()}${ owner == null ? " DETACHED" : ""}';
@@ -424,9 +548,60 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
-    properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<String>('engine layer', describeIdentity(_engineLayer)));
+    properties.add(DiagnosticsProperty<Object?>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    if (_engineLayer != null) {
+      properties.add(DiagnosticsProperty<String>('engine layer', describeIdentity(_engineLayer)));
+    }
+    properties.add(DiagnosticsProperty<int>('handles', debugHandleCount));
   }
+}
+
+/// A handle to prevent a [Layer]'s platform graphics resources from being
+/// released.
+///
+/// [Layer] objects retain native resourses such as [EngineLayer]s and [Picture]
+/// objects. These objects may in turn retain large chunks of texture memory,
+/// either directly or indirectly.
+///
+/// The layer's native resources must be retained as long as there is some
+/// object that can add it to a scene. Typically, this is either its
+/// [Layer.parent] or an undisposed [RenderObject] that will append it to a
+/// [ContainerLayer]. Layers automatically hold a handle to their children, and
+/// RenderObjects automatically hold a handle to their [RenderObject.layer] as
+/// well as any [PictureLayer]s that they paint into using the
+/// [PaintingContext.canvas]. A layer automatically releases its resources once
+/// at least one handle has been acquired and all handles have been disposed.
+/// [RenderObject]s that create additional layer objects must manually manage
+/// the handles for that layer similarly to the implementation of
+/// [RenderObject.layer].
+///
+/// Layers can be reused even after their native resources has been released,
+/// since they are mutable objects and the native resources can be reset on
+/// subsequent frames.
+class LayerHandle {
+  LayerHandle._(Layer this._layer);
+
+  Layer? _layer;
+
+  /// Whether the layer this object refers to is identical to `layer`.
+  ///
+  /// In debug mode, this will throw after [dispose] has been called.
+  bool isHandleForLayer(Layer layer) {
+    assert(_layer != null, 'Cannot check a disposed handle.');
+    return identical(layer, _layer);
+  }
+
+  /// Releases the reference to the [Layer] that created this handle.
+  ///
+  /// This object is unusable after this call.
+  void dispose() {
+    assert(_layer != null, 'Handle already disposed.');
+    _layer!._unref();
+    _layer = null;
+  }
+
+  @override
+  String toString() => 'LayerHandle(${_layer != null ? _layer.toString() : 'DISPOSED'})';
 }
 
 /// A composited layer containing a [Picture].
@@ -453,7 +628,9 @@ class PictureLayer extends Layer {
   ui.Picture? get picture => _picture;
   ui.Picture? _picture;
   set picture(ui.Picture? picture) {
+    assert(debugMarkSetRetainedResources());
     markNeedsAddToScene();
+    _picture?.dispose();
     _picture = picture;
   }
 
@@ -493,8 +670,14 @@ class PictureLayer extends Layer {
   }
 
   @override
+  void releaseRetainedResources() {
+    picture = null; // Will dispose _picture.
+    super.releaseRetainedResources();
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    assert(picture != null);
+    assert(picture != null, describeIdentity(this));
     builder.addPicture(layerOffset, picture!, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
   }
 
@@ -866,6 +1049,12 @@ class ContainerLayer extends Layer {
   }
 
   @override
+  void releaseRetainedResources() {
+    removeAllChildren();
+    super.releaseRetainedResources();
+  }
+
+  @override
   void updateSubtreeNeedsAddToScene() {
     super.updateSubtreeNeedsAddToScene();
     Layer? child = firstChild;
@@ -917,6 +1106,7 @@ class ContainerLayer extends Layer {
     assert(!child.attached);
     assert(child.nextSibling == null);
     assert(child.previousSibling == null);
+    assert(child._parentHandle == null);
     assert(() {
       Layer node = this;
       while (node.parent != null)
@@ -930,6 +1120,7 @@ class ContainerLayer extends Layer {
       lastChild!._nextSibling = child;
     _lastChild = child;
     _firstChild ??= child;
+    child._parentHandle = child.createHandle();
     assert(child.attached == attached);
   }
 
@@ -939,6 +1130,7 @@ class ContainerLayer extends Layer {
     assert(child.attached == attached);
     assert(_debugUltimatePreviousSiblingOf(child, equals: firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: lastChild));
+    assert(child._parentHandle != null);
     if (child._previousSibling == null) {
       assert(_firstChild == child);
       _firstChild = child._nextSibling;
@@ -959,6 +1151,8 @@ class ContainerLayer extends Layer {
     child._previousSibling = null;
     child._nextSibling = null;
     dropChild(child);
+    child._parentHandle!.dispose();
+    child._parentHandle = null;
     assert(!child.attached);
   }
 
@@ -971,6 +1165,9 @@ class ContainerLayer extends Layer {
       child._nextSibling = null;
       assert(child.attached == attached);
       dropChild(child);
+      assert(child._parentHandle != null);
+      child._parentHandle!.dispose();
+      child._parentHandle = null;
       child = next;
     }
     _firstChild = null;
