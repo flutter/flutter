@@ -257,6 +257,19 @@ void main() {
     expect(output, isEmpty);
   });
 
+  testWidgets('ListTile.divideTiles only run generator once', (WidgetTester tester) async {
+    int callCount = 0;
+    Iterable<Widget> generator() sync* {
+      ++callCount;
+      yield const Text('');
+      yield const Text('');
+    }
+
+    final List<Widget> output = ListTile.divideTiles(tiles: generator(), color: Colors.grey).toList();
+    expect(output, hasLength(2));
+    expect(callCount, 1);
+  });
+
   testWidgets('ListTileTheme', (WidgetTester tester) async {
     final Key titleKey = UniqueKey();
     final Key subtitleKey = UniqueKey();
