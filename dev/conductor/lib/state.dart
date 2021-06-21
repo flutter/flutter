@@ -176,7 +176,8 @@ ReleasePhase getNextPhase(ReleasePhase previousPhase) {
   return ReleasePhase.valueOf(previousPhase.value + 1);
 }
 
-void writeStateToFile(File file, pb.ConductorState state) {
+void writeStateToFile(File file, pb.ConductorState state, List<String> logs) {
+  state.logs.addAll(logs);
   file.writeAsStringSync(
     jsonEncode(state.toProto3Json()),
     flush: true,

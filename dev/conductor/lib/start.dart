@@ -334,9 +334,7 @@ class StartCommand extends Command<void> {
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
 
-    state.logs.addAll(stdio.logs);
-
-    writeStateToFile(stateFile, state);
+    writeStateToFile(stateFile, state, stdio.logs);
 
     stdio.printStatus(presentState(state));
   }

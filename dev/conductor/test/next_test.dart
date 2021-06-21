@@ -89,6 +89,7 @@ void main() {
       writeStateToFile(
         fileSystem.file(stateFile),
         state,
+        <String>[],
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
@@ -141,6 +142,7 @@ void main() {
       writeStateToFile(
         fileSystem.file(stateFile),
         state,
+        <String>[],
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
@@ -192,6 +194,7 @@ void main() {
       writeStateToFile(
         fileSystem.file(stateFile),
         state,
+        <String>[],
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
@@ -234,6 +237,7 @@ void main() {
       writeStateToFile(
         fileSystem.file(stateFile),
         state,
+        <String>[],
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
@@ -274,6 +278,7 @@ void main() {
       writeStateToFile(
         fileSystem.file(stateFile),
         state,
+        <String>[],
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
@@ -326,6 +331,7 @@ void main() {
       writeStateToFile(
         fileSystem.file(stateFile),
         state,
+        <String>[],
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
@@ -378,6 +384,7 @@ void main() {
       writeStateToFile(
         fileSystem.file(stateFile),
         state,
+        <String>[],
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
@@ -433,6 +440,7 @@ void main() {
       writeStateToFile(
         fileSystem.file(stateFile),
         state,
+        <String>[],
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
@@ -455,6 +463,7 @@ void main() {
       expect(stdio.stdout, contains('Has CI passed for the framework PR?'));
       expect(stdio.error, contains('Aborting command.'));
       expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
+      expect(finalState.logs, stdio.logs);
       expect(processManager.hasRemainingExpectations, false);
     });
 
@@ -495,6 +504,7 @@ void main() {
       writeStateToFile(
         fileSystem.file(stateFile),
         state,
+        <String>[],
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
@@ -516,6 +526,8 @@ void main() {
 
       expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
       expect(stdio.stdout, contains('Has CI passed for the framework PR?'));
+      expect(finalState.logs, stdio.logs);
+      expect(processManager.hasRemainingExpectations, false);
     });
 
     test('throws exception if state.currentPhase is RELEASE_COMPLETED', () async {
@@ -535,6 +547,7 @@ void main() {
       writeStateToFile(
         fileSystem.file(stateFile),
         state,
+        <String>[],
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,

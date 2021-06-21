@@ -118,6 +118,7 @@ void runNext({
           );
           if (!response) {
             stdio.printError('Aborting command.');
+            writeStateToFile(stateFile, state, stdio.logs);
             return;
           }
         }
@@ -134,6 +135,7 @@ void runNext({
           );
           if (!response) {
             stdio.printError('Aborting command.');
+            writeStateToFile(stateFile, state, stdio.logs);
             return;
           }
         }
@@ -148,6 +150,7 @@ void runNext({
         );
         if (!response) {
           stdio.printError('Aborting command.');
+          writeStateToFile(stateFile, state, stdio.logs);
           return;
         }
       }
@@ -174,6 +177,7 @@ void runNext({
           );
           if (!response) {
             stdio.printError('Aborting command.');
+            writeStateToFile(stateFile, state, stdio.logs);
             return;
           }
         }
@@ -190,6 +194,7 @@ void runNext({
           );
           if (!response) {
             stdio.printError('Aborting command.');
+            writeStateToFile(stateFile, state, stdio.logs);
             return;
           }
         }
@@ -216,6 +221,7 @@ void runNext({
         );
         if (!response) {
           stdio.printError('Aborting command.');
+          writeStateToFile(stateFile, state, stdio.logs);
           return;
         }
       }
@@ -241,6 +247,7 @@ void runNext({
         );
         if (!response) {
           stdio.printError('Aborting command.');
+          writeStateToFile(stateFile, state, stdio.logs);
           return;
         }
       }
@@ -263,6 +270,7 @@ void runNext({
         );
         if (!response) {
           stdio.printError('Aborting command.');
+          writeStateToFile(stateFile, state, stdio.logs);
           return;
         }
       }
@@ -276,5 +284,5 @@ void runNext({
   state.currentPhase = nextPhase;
   stdio.printStatus(phaseInstructions(state));
 
-  writeStateToFile(stateFile, state);
+  writeStateToFile(stateFile, state, stdio.logs);
 }
