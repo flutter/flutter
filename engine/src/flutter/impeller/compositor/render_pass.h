@@ -71,6 +71,8 @@ class RenderPass {
 
   bool IsValid() const;
 
+  void SetLabel(std::string label);
+
   HostBuffer& GetTransientsBuffer();
 
   [[nodiscard]] bool RecordCommand(Command command);
@@ -84,6 +86,7 @@ class RenderPass {
   MTLRenderPassDescriptor* desc_ = nil;
   std::vector<Command> commands_;
   std::shared_ptr<HostBuffer> transients_buffer_;
+  std::string label_;
   bool is_valid_ = false;
 
   RenderPass(id<MTLCommandBuffer> buffer, const RenderPassDescriptor& desc);

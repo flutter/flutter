@@ -12,6 +12,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/buffer.h"
 #include "impeller/compositor/buffer_view.h"
+#include "impeller/compositor/platform.h"
 
 namespace impeller {
 
@@ -28,6 +29,12 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
   size_t GetLength() const;
 
   size_t GetReservedLength() const;
+
+  template <class T, class = std::enable_if_t<std::is_standard_layout_v<T>>>
+  [[nodiscard]] BufferView EmplaceUniform(const T& t) {
+    return Emplace(reinterpret_cast<const void*>(&t), sizeof(T),
+                   std::max(alignof(T), DefaultUniformAlignment()));
+  }
 
   template <class T, class = std::enable_if_t<std::is_standard_layout_v<T>>>
   [[nodiscard]] BufferView Emplace(const T& t) {
