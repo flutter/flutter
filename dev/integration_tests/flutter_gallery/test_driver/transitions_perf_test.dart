@@ -196,6 +196,7 @@ void main([List<String> args = const <String>[]]) {
         streams: const <TimelineStream>[
           TimelineStream.dart,
           TimelineStream.embedder,
+          TimelineStream.gc,
         ],
       );
 
