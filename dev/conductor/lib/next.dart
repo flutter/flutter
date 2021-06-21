@@ -66,13 +66,13 @@ bool prompt(String message, Stdio stdio) {
   final String firstChar = response[0].toUpperCase();
   if (firstChar == 'Y') {
     return true;
-  } else if (firstChar == 'N') {
-    return false;
-  } else {
-    throw ConductorException(
-      'Unknown user input (expected "y" or "n"): $response',
-    );
   }
+  if (firstChar == 'N') {
+    return false;
+  }
+  throw ConductorException(
+    'Unknown user input (expected "y" or "n"): $response',
+  );
 }
 
 @visibleForTesting
