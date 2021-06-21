@@ -9,5 +9,5 @@ uniform UniformBuffer {
 in vec3 vertexPosition;
 
 void main() {
-  gl_Position = uniforms.mvp * vec4(vertexPosition, 1.0);
+  gl_Position = vec4(vertexPosition, 1.0);
 }

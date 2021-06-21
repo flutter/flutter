@@ -378,7 +378,6 @@ Compiler::SourceType Compiler::SourceTypeFromFileName(
 std::string Compiler::EntryPointFromSourceName(const std::string& file_name,
                                                SourceType type) {
   std::stringstream stream;
-  stream << "__impeller_";
   std::filesystem::path file_path(file_name);
   stream << file_path.stem().native() << "_";
   switch (type) {
@@ -392,7 +391,7 @@ std::string Compiler::EntryPointFromSourceName(const std::string& file_name,
       stream << "fragment";
       break;
   }
-  stream << "_main__";
+  stream << "_main";
   return stream.str();
 }
 

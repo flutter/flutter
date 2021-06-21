@@ -42,20 +42,18 @@ bool EntityRenderer::OnRender(RenderPass& pass) {
   uniforms.mvp = Matrix::MakeOrthographic({800, 600});
   VertexBufferBuilder vertices;
   vertices.AddVertices({
-      {-0.5, 0.5},  //
-      {0.5, 0.5},   //
-      {0.5, -0.5},  //
-      {-0.5, 0.5},  //
+      {-0.5, 0.5, 1.0},   //
+      {0.5, 0.5, 1.0},    //
+      {0.5, -0.5, 1.0},   //
+      {-0.5, -0.5, 1.0},  //
   });
 
   Command cmd;
   cmd.label = "Box";
   cmd.pipeline = box_primitive_->GetPipeline();
-  cmd.vertex_bindings
-      .buffers[shader::BoxVertexInfo::kInputVertexPosition.location] =
+  cmd.vertex_bindings.buffers[0u] =
       vertices.CreateVertexBuffer(pass.GetTransientsBuffer());
-  cmd.vertex_bindings
-      .buffers[shader::BoxVertexInfo::kUniformUniformBuffer.location] =
+  cmd.vertex_bindings.buffers[1u] =
       pass.GetTransientsBuffer().EmplaceUniform(uniforms);
   cmd.index_buffer = vertices.CreateIndexBuffer(pass.GetTransientsBuffer());
   cmd.index_count = vertices.GetIndexCount();

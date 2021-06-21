@@ -181,7 +181,8 @@ bool VertexDescriptor::SetStageInputs(
       return false;
     }
     stage_inputs_.emplace_back(
-        StageInput{input->location, vertex_format, input->bit_width / 8});
+        StageInput{input->location, vertex_format,
+                   (input->bit_width * input->vec_size) / 8});
   }
 
   return true;
@@ -198,7 +199,7 @@ MTLVertexDescriptor* VertexDescriptor::GetMTLVertexDescriptor() const {
     // All vertex inputs are interleaved and tightly packed in one buffer at
     // zero index.
     attrib.bufferIndex = 0u;
-    stride += input.stride;
+    stride += input.length;
   }
 
   descriptor.layouts[0].stride = stride;

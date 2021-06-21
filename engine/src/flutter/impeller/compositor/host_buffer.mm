@@ -61,7 +61,7 @@ BufferView HostBuffer::Emplace(const void* buffer, size_t length) {
   FML_DCHECK(buffer_);
   generation_++;
   if (buffer) {
-    ::memmove(buffer_, buffer, length);
+    ::memmove(buffer_ + old_length, buffer, length);
   }
   return BufferView{shared_from_this(), Range{old_length, length}};
 }
