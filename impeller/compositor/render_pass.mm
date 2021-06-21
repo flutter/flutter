@@ -137,14 +137,24 @@ bool RenderPass::IsValid() const {
   return is_valid_;
 }
 
+void RenderPass::SetLabel(std::string label) {
+  label_ = std::move(label);
+}
+
 bool RenderPass::FinishEncoding(Allocator& transients_allocator) const {
   if (!IsValid()) {
     return false;
   }
   auto pass = [buffer_ renderCommandEncoderWithDescriptor:desc_];
+
   if (!pass) {
     return false;
   }
+
+  if (!label_.empty()) {
+    [pass setLabel:@(label_.c_str())];
+  }
+
   // Success or failure, the pass must end. The buffer can only process one pass
   // at a time.
   fml::ScopedCleanupClosure auto_end([pass]() { [pass endEncoding]; });

@@ -36,6 +36,8 @@ bool EntityRenderer::OnIsValid() const {
 }
 
 bool EntityRenderer::OnRender(RenderPass& pass) {
+  pass.SetLabel("EntityRenderer");
+
   shader::BoxVertexInfo::UniformBuffer uniforms;
   uniforms.mvp = Matrix::MakeOrthographic({800, 600});
   VertexBufferBuilder vertices;
@@ -47,14 +49,14 @@ bool EntityRenderer::OnRender(RenderPass& pass) {
   });
 
   Command cmd;
-  cmd.label = "Simple Box";
+  cmd.label = "Box";
   cmd.pipeline = box_primitive_->GetPipeline();
-  cmd.vertex_bindings
-      .buffers[shader::BoxVertexInfo::kUniformUniformBuffer.location] =
-      pass.GetTransientsBuffer().Emplace(uniforms);
   cmd.vertex_bindings
       .buffers[shader::BoxVertexInfo::kInputVertexPosition.location] =
       vertices.CreateVertexBuffer(pass.GetTransientsBuffer());
+  cmd.vertex_bindings
+      .buffers[shader::BoxVertexInfo::kUniformUniformBuffer.location] =
+      pass.GetTransientsBuffer().EmplaceUniform(uniforms);
   cmd.index_buffer = vertices.CreateIndexBuffer(pass.GetTransientsBuffer());
   cmd.index_count = vertices.GetIndexCount();
   if (!pass.RecordCommand(std::move(cmd))) {
