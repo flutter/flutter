@@ -1853,10 +1853,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   }
 }''';
 
-      l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-        ..createSync(recursive: true);
       l10nDirectory.childFile(defaultTemplateArbFileName)
-        .writeAsStringSync(pluralMessageWithDuplicateZeroRepresentation);
+        .writeAsStringSync(pluralMessageWithDuplicateOneRepresentation);
 
       try {
         LocalizationsGenerator(
@@ -1884,10 +1882,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   }
 }''';
 
-      l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-        ..createSync(recursive: true);
       l10nDirectory.childFile(defaultTemplateArbFileName)
-        .writeAsStringSync(pluralMessageWithDuplicateZeroRepresentation);
+        .writeAsStringSync(pluralMessageWithDuplicateTwoRepresentation);
 
       try {
         LocalizationsGenerator(
