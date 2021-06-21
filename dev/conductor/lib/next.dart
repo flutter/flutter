@@ -92,8 +92,6 @@ void runNext({
 
   final pb.ConductorState state = readStateFromFile(stateFile);
 
-  stdio.printStatus(phaseInstructions(state));
-
   switch (state.currentPhase) {
     case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
       final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
@@ -102,14 +100,38 @@ void runNext({
           unappliedCherrypicks.add(cherrypick);
         }
       }
-      // At this time, the conductor tool only knows about cherrypicks that it
-      // has auto-applied. To proceed to the next phase when some cherrypicks
-      // were applied manually, the user will have to confirm.
-      if (unappliedCherrypicks.isNotEmpty && autoAccept == false) {
-        final bool response = prompt('Did you apply all engine cherrypicks?', stdio);
-        if (!response) {
-          stdio.printError('Aborting command.');
-          return;
+
+      if (state.engine.cherrypicks.isEmpty) {
+        stdio.printStatus('This release has no engine cherrypicks.');
+        break;
+      } else if (unappliedCherrypicks.isEmpty) {
+        stdio.printStatus('All engine cherrypicks have been auto-applied by '
+            'the conductor.\n');
+        if (autoAccept == false) {
+          final bool response = prompt(
+            'Are you ready to push your changes to the repository '
+            '${state.framework.mirror.url}?',
+            stdio,
+          );
+          if (!response) {
+            stdio.printError('Aborting command.');
+            return;
+          }
+        }
+      } else {
+        stdio.printStatus(
+          'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
+        stdio.printStatus('These must be applied manually in the directory '
+          '${state.engine.checkoutPath}.\n');
+        if (autoAccept == false) {
+          final bool response = prompt(
+            'Are you ready to push your engine branch to the remote ${state.engine.mirror.url}?',
+            stdio,
+          );
+          if (!response) {
+            stdio.printError('Aborting command.');
+            return;
+          }
         }
       }
       break;
@@ -144,6 +166,8 @@ void runNext({
       }
       break;
     case pb.ReleasePhase.PUBLISH_VERSION:
+      stdio.printStatus('Please ensure that you have merged your framework PR and that');
+      stdio.printStatus('post-submit CI has finished successfully.\n');
       final Remote upstream = Remote(
         name: RemoteName.upstream,
         url: state.framework.upstream.url,
@@ -168,6 +192,33 @@ void runNext({
       framework.tag(headRevision, state.releaseVersion, upstream.name);
       break;
     case pb.ReleasePhase.PUBLISH_CHANNEL:
+      final Remote upstream = Remote(
+        name: RemoteName.upstream,
+        url: state.framework.upstream.url,
+      );
+      final FrameworkRepository framework = FrameworkRepository(
+        checkouts,
+        initialRef: state.framework.candidateBranch,
+        upstreamRemote: upstream,
+        previousCheckoutLocation: state.framework.checkoutPath,
+      );
+      final String headRevision = framework.reverseParse('HEAD');
+      if (autoAccept == false) {
+        final bool response = prompt(
+            'Are you ready to publish release ${state.releaseVersion} to '
+            'channel ${state.releaseChannel} at ${state.framework.upstream.url}?',
+          stdio,
+        );
+        if (!response) {
+          stdio.printError('Aborting command.');
+          return;
+        }
+      }
+      framework.updateChannel(
+        headRevision,
+        state.framework.upstream.url,
+        state.releaseChannel,
+      );
       break;
     case pb.ReleasePhase.VERIFY_RELEASE:
       if (autoAccept == false) {
@@ -186,7 +237,7 @@ void runNext({
       break;
   }
   final ReleasePhase nextPhase = getNextPhase(state.currentPhase);
-  stdio.printStatus('Updating phase from ${state.currentPhase} to $nextPhase');
+  stdio.printStatus('\nUpdating phase from ${state.currentPhase} to $nextPhase...\n');
   state.currentPhase = nextPhase;
   stdio.printStatus(phaseInstructions(state));
 

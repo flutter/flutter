@@ -114,6 +114,7 @@ void main() {
 
 
     test('updates state.lastPhase from APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES if user responds yes', () async {
+      const String remoteUrl = 'https://githost.com/org/repo.git';
       stdio.stdin.add('y');
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
@@ -133,6 +134,7 @@ void main() {
               state: pb.CherrypickState.PENDING,
             ),
           ],
+          mirror: pb.Remote(url: remoteUrl),
         ),
         currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
       );
@@ -158,7 +160,7 @@ void main() {
         fileSystem.file(stateFile),
       );
 
-      expect(stdio.stdout, contains('Did you apply all engine cherrypicks? (y/n) '));
+      expect(stdio.stdout, contains('Are you ready to push your engine branch to the remote $remoteUrl? (y/n) '));
       expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
       expect(stdio.error, isEmpty);
     });

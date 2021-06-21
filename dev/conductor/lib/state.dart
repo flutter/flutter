@@ -137,10 +137,15 @@ String phaseInstructions(pb.ConductorState state) {
         'binaries at revision ${state.engine.currentGitHead}.',
       ].join('\n');
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
+      final List<pb.Cherrypick> outstandingCherrypicks = state.framework.cherrypicks.where(
+        (pb.Cherrypick cp) {
+          return cp.state == pb.CherrypickState.PENDING || cp.state == pb.CherrypickState.PENDING_WITH_CONFLICT;
+        },
+      ).toList();
       return <String>[
         'You must now manually apply the following framework cherrypicks to the checkout',
         'at ${state.framework.checkoutPath} in order:',
-        for (final pb.Cherrypick cherrypick in state.framework.cherrypicks)
+        for (final pb.Cherrypick cherrypick in outstandingCherrypicks)
           '\t${cherrypick.trunkRevision}',
       ].join('\n');
     case ReleasePhase.PUBLISH_VERSION:
