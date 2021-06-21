@@ -28,28 +28,29 @@ Future<void> runTasks(
   List<String>? taskArgs,
 }) async {
   for (final String taskName in taskNames) {
-    section('Running task "$taskName"');
-    final TaskResult result = await runTask(
-      taskName,
-      deviceId: deviceId,
-      localEngine: localEngine,
-      localEngineSrcPath: localEngineSrcPath,
-      silent: silent,
-      taskArgs: taskArgs,
-    );
-
-    print('Task result:');
-    print(const JsonEncoder.withIndent('  ').convert(result));
-    section('Finished task "$taskName"');
-
-    if (resultsPath != null) {
-      final Cocoon cocoon = Cocoon();
-      await cocoon.writeTaskResultToFile(
-        builderName: luciBuilder,
-        gitBranch: gitBranch,
-        result: result,
+    TaskResult result;
+    int retry = 0;
+    while (retry <= Cocoon.retry) {
+      result = await rerunTask(
+        taskName,
+        deviceId: deviceId,
+        localEngine: localEngine,
+        localEngineSrcPath: localEngineSrcPath,
+        silent: silent,
+        taskArgs: taskArgs,
         resultsPath: resultsPath,
+        gitBranch: gitBranch,
+        luciBuilder: luciBuilder,
       );
+
+      if (!result.succeeded) {
+        retry++;
+      } else {
+        if (retry > 0) {
+          print('Flaky: true');
+        }
+        break;
+      }
     }
 
     if (!result.succeeded) {
@@ -59,6 +60,43 @@ Future<void> runTasks(
       }
     }
   }
+}
+
+Future<TaskResult> rerunTask(
+  String taskName, {
+  String deviceId,
+  String localEngine,
+  String localEngineSrcPath,
+  bool silent = false,
+  List<String> taskArgs,
+  String resultsPath,
+  String gitBranch,
+  String luciBuilder,
+}) async {
+  section('Running task "$taskName"');
+  final TaskResult result = await runTask(
+    taskName,
+    deviceId: deviceId,
+    localEngine: localEngine,
+    localEngineSrcPath: localEngineSrcPath,
+    silent: silent,
+    taskArgs: taskArgs,
+  );
+
+  print('Task result:');
+  print(const JsonEncoder.withIndent('  ').convert(result));
+  section('Finished task "$taskName"');
+
+  if (resultsPath != null) {
+    final Cocoon cocoon = Cocoon();
+    await cocoon.writeTaskResultToFile(
+      builderName: luciBuilder,
+      gitBranch: gitBranch,
+      result: result,
+      resultsPath: resultsPath,
+    );
+  }
+  return result;
 }
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
