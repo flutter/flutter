@@ -236,7 +236,7 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 /// It is used by both [MaterialApp] and [CupertinoApp] to implement base
 /// functionality for an app.
 ///
-/// If a [MediaQuery] is not available above [WidgetsApp] a [MediaQuery] is
+/// If a [MediaQuery] is not available above [WidgetsApp], a [MediaQuery] is
 /// built using [MediaQuery.fromWindow].
 ///
 /// Find references to many of the widgets that [WidgetsApp] wraps in the "See
