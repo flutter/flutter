@@ -682,13 +682,84 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// along the track exclusive of the thumb will trigger a
 /// [ScrollIncrementType.page] based on the relative position to the thumb.
 ///
-/// When using the [PrimaryScrollController], it should not be attached to more
+/// When using the [PrimaryScrollController], it must not be attached to more
 /// than one [ScrollPosition]. [ScrollView]s that have not been provided a
 /// [ScrollController] and have a [ScrollView.scrollDirection] of
 /// [Axis.vertical] will automatically attach their ScrollPosition to the
 /// PrimaryScrollController. Provide a unique ScrollController to each
 /// [Scrollable] in this case to prevent having multiple ScrollPositions
 /// attached to the PrimaryScrollController.
+///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// This sample shows an app with two scrollables in the same route. Since by
+/// default, there is one [PrimaryScrollController] per route, and they both have a
+/// scroll direction of [Axis.vertical], they would both try to attach to that
+/// controller. The [Scrollbar] cannot support multiple positions attached to
+/// the same controller, so one [ListView], and its [Scrollbar] have been
+/// provided a unique [ScrollController].
+///
+/// Alternatively, a new PrimaryScrollController could be created above one of
+/// the [ListViews].
+///
+/// ```dart
+/// final ScrollController _firstController = ScrollController();
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return LayoutBuilder(
+///       builder: (BuildContext context, BoxConstraints constraints) {
+///         return Row(
+///           children: <Widget>[
+///             Container(
+///                 width: constraints.maxWidth / 2,
+///                 // Only one scroll position can be attached to the
+///                 // PrimaryScrollController if using Scrollbars. Providing a
+///                 // unique scroll controller to this scroll view prevents it
+///                 // from attaching to the PrimaryScrollController.
+///                 child: Scrollbar(
+///                   isAlwaysShown: true,
+///                   controller: _firstController,
+///                   child: ListView.builder(
+///                       controller: _firstController,
+///                       itemCount: 100,
+///                       itemBuilder: (BuildContext context, int index) {
+///                         return Padding(
+///                           padding: EdgeInsets.all(8.0),
+///                           child: Text('Scrollable 1 : Index $index'),
+///                         );
+///                       }
+///                   ),
+///                 )
+///             ),
+///             Container(
+///                 width: constraints.maxWidth / 2,
+///                 // This vertical scroll view has not been provided a
+///                 // ScrollController, so it is using the
+///                 // PrimaryScrollController.
+///                 child: Scrollbar(
+///                   isAlwaysShown: true,
+///                   child: ListView.builder(
+///                       itemCount: 100,
+///                       itemBuilder: (BuildContext context, int index) {
+///                         return Container(
+///                             height: 50,
+///                             color: index.isEven ? Colors.amberAccent : Colors.blueAccent,
+///                             child: Padding(
+///                               padding: EdgeInsets.all(8.0),
+///                               child: Text('Scrollable 2 : Index $index'),
+///                             )
+///                         );
+///                       }
+///                   ),
+///                 )
+///             ),
+///           ],
+///         );
+///       }
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// ### Automatic Scrollbars on Desktop Platforms
 ///
@@ -1099,7 +1170,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         // Wait one frame and cause an empty scroll event.  This allows the
         // thumb to show immediately when isAlwaysShown is true. A scroll
         // event is required in order to paint the thumb.
-        _debugCheckHasValidScrollPosition();
+        assert(_debugCheckHasValidScrollPosition());
         scrollController!.position.didUpdateScrollPositionBy(0);
       }
     });
@@ -1114,11 +1185,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     } else if (scrollController != null && enableGestures) {
       // Interactive scrollbars need to be properly configured. If it is visible
       // for interaction, ensure we are set up properly.
-      _debugCheckHasValidScrollPosition();
+      assert(_debugCheckHasValidScrollPosition());
     }
   }
 
-  void _debugCheckHasValidScrollPosition() {
+  bool _debugCheckHasValidScrollPosition() {
     final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
     final bool tryPrimary = widget.controller == null;
     final String controllerForError = tryPrimary
@@ -1197,6 +1268,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       }
       return true;
     }());
+    return true;
   }
 
   /// This method is responsible for configuring the [scrollbarPainter]
@@ -1286,7 +1358,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPress() {
-    _debugCheckHasValidScrollPosition();
+    assert(_debugCheckHasValidScrollPosition());
     if (getScrollbarDirection() == null) {
       return;
     }
@@ -1299,7 +1371,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPressStart(Offset localPosition) {
-    _debugCheckHasValidScrollPosition();
+    assert(_debugCheckHasValidScrollPosition());
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
@@ -1316,7 +1388,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPressUpdate(Offset localPosition) {
-    _debugCheckHasValidScrollPosition();
+    assert(_debugCheckHasValidScrollPosition());
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
@@ -1329,7 +1401,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
-    _debugCheckHasValidScrollPosition();
+    assert(_debugCheckHasValidScrollPosition());
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
@@ -1341,7 +1413,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   void _handleTrackTapDown(TapDownDetails details) {
     // The Scrollbar should page towards the position of the tap on the track.
-    _debugCheckHasValidScrollPosition();
+    assert(_debugCheckHasValidScrollPosition());
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
 
     double scrollIncrement;
