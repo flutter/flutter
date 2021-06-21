@@ -7,8 +7,6 @@
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
 import 'package:meta/meta.dart' show required, visibleForTesting;
-import 'package:platform/platform.dart';
-
 import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart';
@@ -22,8 +20,8 @@ const String kYesFlag = 'yes';
 class NextCommand extends Command<void> {
   NextCommand({
     @required this.checkouts,
-  })  : platform = checkouts.platform {
-    final String defaultPath = defaultStateFilePath(platform);
+  }) {
+    final String defaultPath = defaultStateFilePath(checkouts.platform);
     argParser.addOption(
       kStateOption,
       defaultsTo: defaultPath,
@@ -37,7 +35,6 @@ class NextCommand extends Command<void> {
   }
 
   final Checkouts checkouts;
-  final Platform platform;
 
   @override
   String get name => 'next';
@@ -50,7 +47,6 @@ class NextCommand extends Command<void> {
     runNext(
       autoAccept: argResults[kYesFlag] as bool,
       checkouts: checkouts,
-      platform: platform,
       stateFile: checkouts.fileSystem.file(argResults[kStateOption]),
     );
   }
@@ -76,7 +72,6 @@ bool prompt(String message, Stdio stdio) {
 void runNext({
   @required bool autoAccept,
   @required Checkouts checkouts,
-  @required Platform platform,
   @required File stateFile,
 }) {
   final Stdio stdio = checkouts.stdio;
