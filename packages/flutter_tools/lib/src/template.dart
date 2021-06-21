@@ -322,6 +322,18 @@ class Template {
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
+        final String? androidIdentifier = context['androidIdentifier'] as String?;
+        if (finalDestinationFile.path.endsWith('.kt') && androidIdentifier != null) {
+          final List<String> segments = androidIdentifier
+              .split('.')
+              .toList();
+          final List<String> reserved = <String>['when', 'in'];
+          final List<String> correctedSegments = segments.map(
+              (String segment) => reserved.contains(segment) ? '`$segment`' : segment
+          ).toList();
+          context['androidIdentifier'] = correctedSegments.join('.');
+        }
+
         final String renderedContents = _templateRenderer.renderString(templateContents, context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
