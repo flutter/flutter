@@ -788,7 +788,7 @@ class MediaQuery extends InheritedWidget {
     );
   }
 
-  /// Creates a [_MediaQueryFromWindow] which is builds and updates a
+  /// Creates a [_MediaQueryFromWindow] which builds and updates a
   /// [MediaQuery] using the latest [WidgetsBinding.window] values.
   ///
   /// The [MediaQuery] is wrapped in a separate widget to ensure that only it
