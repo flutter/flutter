@@ -792,8 +792,8 @@ class MediaQuery extends InheritedWidget {
   /// [MediaQuery] using the latest [WidgetsBinding.window] values.
   ///
   /// The [MediaQuery] is wrapped in a separate widget to ensure that only it
-  /// and its dependents are updated when `window` changes instead of rebuilding
-  /// the whole widget tree.
+  /// and its dependents are updated when `window` changes, instead of
+  /// rebuilding the whole widget tree.
   ///
   /// This should be inserted into the widget tree when the [MediaQuery] view
   /// padding is consumed by a widget in such a way that the view padding is no
