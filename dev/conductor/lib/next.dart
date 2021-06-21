@@ -16,7 +16,9 @@ import './stdio.dart';
 
 const String kStateOption = 'state-file';
 const String kYesFlag = 'yes';
+const String kForceFlag = 'force';
 
+/// Command to proceed from one [pb.ReleasePhase] to the next.
 class NextCommand extends Command<void> {
   NextCommand({
     @required this.checkouts,
@@ -31,6 +33,10 @@ class NextCommand extends Command<void> {
       kYesFlag,
       help: 'Auto-accept any confirmation prompts.',
       hide: true, // primarily for integration testing
+    );
+    argParser.addFlag(
+      kForceFlag,
+      help: 'Force push when updating remote git branches.',
     );
   }
 
@@ -47,6 +53,7 @@ class NextCommand extends Command<void> {
     runNext(
       autoAccept: argResults[kYesFlag] as bool,
       checkouts: checkouts,
+      force: argResults[kForceFlag] as bool,
       stateFile: checkouts.fileSystem.file(argResults[kStateOption]),
     );
   }
@@ -71,6 +78,7 @@ bool prompt(String message, Stdio stdio) {
 @visibleForTesting
 void runNext({
   @required bool autoAccept,
+  @required bool force,
   @required Checkouts checkouts,
   @required File stateFile,
 }) {
@@ -240,6 +248,7 @@ void runNext({
         headRevision,
         state.framework.upstream.url,
         state.releaseChannel,
+        force: force,
       );
       break;
     case pb.ReleasePhase.VERIFY_RELEASE:
