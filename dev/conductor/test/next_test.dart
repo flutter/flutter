@@ -160,7 +160,8 @@ void main() {
         fileSystem.file(stateFile),
       );
 
-      expect(stdio.stdout, contains('Are you ready to push your engine branch to the remote $remoteUrl? (y/n) '));
+      expect(stdio.stdout, contains(
+              'Are you ready to push your engine branch to the repository $remoteUrl? (y/n) '));
       expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
       expect(stdio.error, isEmpty);
     });
@@ -298,6 +299,7 @@ void main() {
     });
 
     test('does not update state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS if user responds no', () async {
+      const String remoteUrl = 'https://githost.com/org/repo.git';
       stdio.stdin.add('n');
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
@@ -317,6 +319,7 @@ void main() {
               state: pb.CherrypickState.PENDING,
             ),
           ],
+          mirror: pb.Remote(url: remoteUrl),
         ),
         currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
       );
@@ -342,12 +345,13 @@ void main() {
         fileSystem.file(stateFile),
       );
 
-      expect(stdio.stdout, contains('Did you apply all framework cherrypicks? (y/n) '));
+      expect(stdio.stdout, contains('Are you ready to push your framework branch to the repository $remoteUrl? (y/n) '));
       expect(stdio.error, contains('Aborting command.'));
       expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
     });
 
     test('updates state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION if user responds yes', () async {
+      const String remoteUrl = 'https://githost.com/org/repo.git';
       stdio.stdin.add('y');
       final FakeProcessManager processManager = FakeProcessManager.list(
         <FakeCommand>[],
@@ -367,6 +371,7 @@ void main() {
               state: pb.CherrypickState.PENDING,
             ),
           ],
+          mirror: pb.Remote(url: remoteUrl),
         ),
         currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
       );
@@ -393,7 +398,7 @@ void main() {
       );
 
       expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
-      expect(stdio.stdout, contains('Did you apply all framework cherrypicks? (y/n)'));
+      expect(stdio.stdout, contains('Are you ready to push your framework branch to the repository $remoteUrl? (y/n)'));
     });
 
 

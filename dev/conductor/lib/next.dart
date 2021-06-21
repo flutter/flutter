@@ -110,7 +110,7 @@ void runNext({
         if (autoAccept == false) {
           final bool response = prompt(
             'Are you ready to push your changes to the repository '
-            '${state.framework.mirror.url}?',
+            '${state.engine.mirror.url}?',
             stdio,
           );
           if (!response) {
@@ -122,10 +122,11 @@ void runNext({
         stdio.printStatus(
           'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
         stdio.printStatus('These must be applied manually in the directory '
-          '${state.engine.checkoutPath}.\n');
+          '${state.engine.checkoutPath} before proceeding.\n');
         if (autoAccept == false) {
           final bool response = prompt(
-            'Are you ready to push your engine branch to the remote ${state.engine.mirror.url}?',
+              'Are you ready to push your engine branch to the repository '
+              '${state.engine.mirror.url}?',
             stdio,
           );
           if (!response) {
@@ -149,19 +150,45 @@ void runNext({
       }
       break;
     case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-      bool allFrameworkCherrypicksVerified = true;
+      final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
       for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
         if (!finishedStates.contains(cherrypick.state)) {
-          allFrameworkCherrypicksVerified = false;
-          break;
+          unappliedCherrypicks.add(cherrypick);
         }
       }
-      // No need to prompt user if all cherrypicks were auto-applied
-      if (allFrameworkCherrypicksVerified == false && autoAccept == false) {
-        final bool response = prompt('Did you apply all framework cherrypicks?', stdio);
-        if (!response) {
-          stdio.printError('Aborting command.');
-          return;
+
+      if (state.framework.cherrypicks.isEmpty) {
+        stdio.printStatus('This release has no framework cherrypicks.');
+        break;
+      } else if (unappliedCherrypicks.isEmpty) {
+        stdio.printStatus('All framework cherrypicks have been auto-applied by '
+            'the conductor.\n');
+        if (autoAccept == false) {
+          final bool response = prompt(
+            'Are you ready to push your changes to the repository '
+            '${state.framework.mirror.url}?',
+            stdio,
+          );
+          if (!response) {
+            stdio.printError('Aborting command.');
+            return;
+          }
+        }
+      } else {
+        stdio.printStatus(
+          'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
+        stdio.printStatus('These must be applied manually in the directory '
+          '${state.framework.checkoutPath} before proceeding.\n');
+        if (autoAccept == false) {
+          final bool response = prompt(
+              'Are you ready to push your framework branch to the repository '
+              '${state.framework.mirror.url}?',
+            stdio,
+          );
+          if (!response) {
+            stdio.printError('Aborting command.');
+            return;
+          }
         }
       }
       break;
@@ -221,6 +248,10 @@ void runNext({
       );
       break;
     case pb.ReleasePhase.VERIFY_RELEASE:
+      stdio.printStatus(
+        'The current status of packaging builds can be seen at:\n'
+        '\t$kLuciPackagingConsoleLink',
+      );
       if (autoAccept == false) {
         final bool response = prompt(
           'Have all packaging builds finished successfully?',
