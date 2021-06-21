@@ -1,6 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -968,7 +969,7 @@ void main() {
 
     final Widget widget = buildFrame();
     await tester.pumpWidget(widget);
-    
+
     // We are on step 1
     expect(find.text('Step 2 Content'), findsNothing);
 
@@ -985,7 +986,7 @@ void main() {
 
     await tester.tap(find.text('Step 1'));
     await tester.pumpAndSettle();
-    
+
     // Confirm that we flipped back to step 1
     expect(find.text('Step 2 Content'), findsNothing);
     final Color color2 = findBox().color;
@@ -1002,7 +1003,7 @@ class StatefulStepper extends StatefulWidget {
 
 class StatefulStepperState extends State<StatefulStepper> {
   int index = 0;
-  
+
   @override
   Widget build(BuildContext context) {
     return Stepper(
