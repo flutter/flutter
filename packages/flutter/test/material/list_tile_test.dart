@@ -257,10 +257,11 @@ void main() {
     expect(output, isEmpty);
   });
 
-  testWidgets('ListTile.divideTiles only run generator once', (WidgetTester tester) async {
+  testWidgets('ListTile.divideTiles only runs the generator once', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/78879
     int callCount = 0;
     Iterable<Widget> generator() sync* {
-      ++callCount;
+      callCount += 1;
       yield const Text('');
       yield const Text('');
     }
