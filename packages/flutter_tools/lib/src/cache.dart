@@ -302,8 +302,15 @@ class Cache {
       return;
     }
     assert(_lock == null);
-    final File lockFile =
-      _fileSystem.file(_fileSystem.path.join(flutterRoot!, 'bin', 'cache', 'lockfile'));
+    final Directory cacheDir =
+        _fileSystem.directory(_fileSystem.path.join(flutterRoot!, 'bin', 'cache'));
+    try {
+      cacheDir.createSync();
+    } on FileSystemException catch (e) {
+      _logger.printError('Failed to create cache directory: "$e"');
+      throwToolExit('Failed to create cache directory');
+    }
+    final File lockFile = cacheDir.childFile('lockfile');
     try {
       _lock = lockFile.openSync(mode: FileMode.write);
     } on FileSystemException catch (e) {

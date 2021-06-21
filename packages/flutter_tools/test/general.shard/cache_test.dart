@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
@@ -852,6 +853,26 @@ void main() {
     await pubDependencies.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
     expect(pub.calledGet, 1);
+  });
+
+  testWithoutContext('Ensure cache folder is created', () {
+    final String originalRoot = Cache.flutterRoot;
+
+    final Directory tempDir =
+        globals.localFileSystem.systemTempDirectory.createTempSync('flutter_cache_test.');
+    tempDir.childDirectory('bin').createSync();
+
+    Cache.flutterRoot = tempDir.path;
+    final Cache cache = Cache.test(
+        fileSystem: globals.localFileSystem,
+        processManager: FakeProcessManager.any()
+    );
+
+    cache.lock();
+    cache.releaseLock();
+
+    Cache.flutterRoot = originalRoot;
+    tempDir.deleteSync(recursive: true);
   });
 
   group('AndroidMavenArtifacts', () {
