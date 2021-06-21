@@ -161,9 +161,8 @@ class _TaskRunner {
         result = await futureResult;
       } finally {
         if (device != null && device.canStreamLogs) {
-          assert(sink != null);
           await device.stopLoggingToSink();
-          await sink.close();
+          await sink?.close();
         }
       }
 
