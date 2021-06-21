@@ -801,17 +801,17 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
     }
 
     if (clipBehavior == Clip.none) {
-      _clipRectLayer = null;
+      _clipRectLayer.layer = null;
       super.paint(context, offset);
     } else {
       // We have overflow and the clipBehavior isn't none. Clip it.
-      _clipRectLayer = context.pushClipRect(
+      _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
         Offset.zero & size,
         super.paint,
         clipBehavior: clipBehavior,
-        oldLayer:_clipRectLayer,
+        oldLayer: _clipRectLayer.layer,
       );
     }
 
@@ -822,7 +822,13 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
     }());
   }
 
-  ClipRectLayer? _clipRectLayer;
+  final LayerHolder<ClipRectLayer?> _clipRectLayer = LayerHolder<ClipRectLayer?>();
+
+  @override
+  void dispose() {
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) {

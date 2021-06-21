@@ -27,13 +27,13 @@ void main() {
     expect(renderObject.debugPictureLayerCount, 2);
 
     for (final Layer layer in layers) {
-      expect(layer.debugReleasedRetainedResources, false);
+      expect(layer.debugDisposed, false);
     }
 
     await tester.pumpWidget(const SizedBox());
 
     for (final Layer layer in layers) {
-      expect(layer.debugReleasedRetainedResources, true);
+      expect(layer.debugDisposed, true);
     }
     expect(renderObject.debugDisposed, true);
     expect(renderObject.debugPictureLayerCount, 0);

@@ -602,39 +602,43 @@ void main() {
     parent.buildScene(SceneBuilder());
   }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/42767
 
-  test('PictureLayer does not let you call releaseRetainedResources unless refcount is 0', () {
-    final PictureLayer layer = PictureLayer(Rect.zero);
+  test('PictureLayer does not let you call dispose unless refcount is 0', () {
+    PictureLayer layer = PictureLayer(Rect.zero);
     expect(layer.debugHandleCount, 0);
+    layer.dispose();
+    expect(layer.debugDisposed, true);
+
+    layer = PictureLayer(Rect.zero);
     final LayerHandle handle = layer.createHandle();
     expect(layer.debugHandleCount, 1);
-    expect(() => layer.releaseRetainedResources(), throwsAssertionError);
+    expect(() => layer.dispose(), throwsAssertionError);
     handle.dispose();
     expect(layer.debugHandleCount, 0);
-    layer.releaseRetainedResources();
-    expect(layer.debugHandleCount, 0);
+    expect(layer.debugDisposed, true);
+    expect(() => layer.dispose(), throwsAssertionError); // already disposed.
   });
 
   test('Layer append/remove increases/decreases handle count', () {
     final PictureLayer layer = PictureLayer(Rect.zero);
     final ContainerLayer parent = ContainerLayer();
     expect(layer.debugHandleCount, 0);
-    expect(layer.debugReleasedRetainedResources, false);
+    expect(layer.debugDisposed, false);
 
     parent.append(layer);
     expect(layer.debugHandleCount, 1);
-    expect(layer.debugReleasedRetainedResources, false);
+    expect(layer.debugDisposed, false);
 
     layer.remove();
     expect(layer.debugHandleCount, 0);
-    expect(layer.debugReleasedRetainedResources, true);
+    expect(layer.debugDisposed, true);
   });
 
-  test('Layer.releaseRetainedResources disposes the engineLayer', () {
+  test('Layer.dispose disposes the engineLayer', () {
     final Layer layer = ConcreteLayer();
     final FakeEngineLayer engineLayer = FakeEngineLayer();
     layer.engineLayer = engineLayer;
     expect(engineLayer.disposed, false);
-    layer.releaseRetainedResources();
+    layer.dispose();
     expect(engineLayer.disposed, true);
     expect(layer.engineLayer, null);
   });
@@ -657,13 +661,25 @@ void main() {
     expect(picture.disposed, true);
   });
 
-  test('PictureLayer releaseRetainedResources disposes the picture', () {
+  test('PictureLayer disposes the picture', () {
     final PictureLayer layer = PictureLayer(Rect.zero);
     final FakePicture picture = FakePicture();
     layer.picture = picture;
     expect(picture.disposed, false);
-    layer.releaseRetainedResources();
+    layer.dispose();
     expect(picture.disposed, true);
+  });
+
+  test('LayerHolder disposes the layer', () {
+    final ConcreteLayer layer = ConcreteLayer();
+    final LayerHolder<ConcreteLayer?> holder = LayerHolder<ConcreteLayer?>();
+    expect(layer.debugHandleCount, 0);
+    expect(layer.debugDisposed, false);
+    holder.layer = layer;
+    expect(layer.debugHandleCount, 1);
+    holder.layer = null;
+    expect(layer.debugHandleCount, 0);
+    expect(layer.debugDisposed, true);
   });
 }
 
