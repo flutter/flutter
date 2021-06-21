@@ -8,6 +8,8 @@ import 'package:flutter/painting.dart';
 
 import 'framework.dart';
 
+typedef WidgetSpanPlainTextGenerator = String Function(Widget);
+
 /// An immutable widget that is embedded inline within text.
 ///
 /// The [child] property is the widget that will be embedded. Children are
@@ -74,6 +76,7 @@ class WidgetSpan extends PlaceholderSpan {
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline? baseline,
     TextStyle? style,
+    this.plainTextGenerator,
   }) : assert(child != null),
        assert(
          baseline != null || !(
@@ -90,6 +93,9 @@ class WidgetSpan extends PlaceholderSpan {
 
   /// The widget to embed inline within text.
   final Widget child;
+
+  ///
+  final WidgetSpanPlainTextGenerator? plainTextGenerator;
 
   /// Adds a placeholder box to the paragraph builder if a size has been
   /// calculated for the widget.
@@ -119,6 +125,17 @@ class WidgetSpan extends PlaceholderSpan {
     );
     if (hasStyle) {
       builder.pop();
+    }
+  }
+
+  @override
+  void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
+    if (includePlaceholders) {
+      if (plainTextGenerator != null) {
+        buffer.write(plainTextGenerator!(child));
+      } else {
+        buffer.write('\uFFFC');
+      }
     }
   }
 
