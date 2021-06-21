@@ -41,13 +41,14 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   struct StageInput {
     size_t location;
     MTLVertexFormat format;
-    size_t stride;
+    size_t length;
 
-    StageInput(size_t p_location, MTLVertexFormat p_format, size_t p_stride)
-        : location(p_location), format(p_format), stride(p_stride) {}
+    StageInput(size_t p_location, MTLVertexFormat p_format, size_t p_length)
+        : location(p_location), format(p_format), length(p_length) {}
 
     constexpr bool operator==(const StageInput& other) const {
-      return location == other.location && format == other.format;
+      return location == other.location && format == other.format &&
+             length == other.length;
     }
   };
   std::vector<StageInput> stage_inputs_;

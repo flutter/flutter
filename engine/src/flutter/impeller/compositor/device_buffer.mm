@@ -32,7 +32,7 @@ id<MTLBuffer> DeviceBuffer::GetMTLBuffer() const {
     return false;
   }
 
-  ::memcpy(dest + offset, source + source_range.offset, source_range.length);
+  ::memmove(dest + offset, source + source_range.offset, source_range.length);
 
   [buffer_ didModifyRange:NSMakeRange(offset, source_range.length)];
 
