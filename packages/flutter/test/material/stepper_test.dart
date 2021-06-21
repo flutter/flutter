@@ -953,7 +953,7 @@ void main() {
 
      expect(material.elevation, 2.0);
    });
-   
+
   testWidgets('Stepper horizontal preserves state', (WidgetTester tester) async {
     Widget buildFrame() {
       return const MaterialApp(
@@ -1038,7 +1038,6 @@ class RandomColorWidgetState extends State<RandomColorWidget> {
   @override
   void initState() {
     color = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
-    print('color: $color');
     super.initState();
   }
 
