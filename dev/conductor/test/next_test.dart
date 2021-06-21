@@ -14,8 +14,8 @@ import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
-import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import './common.dart';
+import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 
 void main() {
   group('next command', () {
