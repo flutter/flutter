@@ -111,13 +111,15 @@ class TestAsyncUtils {
         return Future<T>.error(error! as Object, stack);
       return Future<T>.value(resultValue);
     }
-    return result.then<T>(
-      (T value) {
-        resultValue = value;
+
+    return () async {
+      try {
+        resultValue = await result;
         return completionHandler(null, null);
-      },
-      onError: completionHandler,
-    );
+      } catch (error, stackTrace) {
+        return completionHandler(error, stackTrace);
+      }
+    }();
   }
 
   static Zone? get _currentScopeZone {
