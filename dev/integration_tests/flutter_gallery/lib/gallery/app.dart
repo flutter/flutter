@@ -138,6 +138,11 @@ class _GalleryAppState extends State<GalleryApp> {
     return ScopedModel<AppStateModel>(
       model: model,
       child: MaterialApp(
+        // The automatically applied scrollbars on desktop can cause a crash for
+        // demos where many scrollables are all attached to the same
+        // PrimaryScrollController. The gallery needs to be migrated before
+        // enabling this. https://github.com/flutter/gallery/issues/523
+        scrollBehavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
         theme: kLightGalleryTheme.copyWith(platform: _options!.platform, visualDensity: _options!.visualDensity!.visualDensity),
         darkTheme: kDarkGalleryTheme.copyWith(platform: _options!.platform, visualDensity: _options!.visualDensity!.visualDensity),
         themeMode: _options!.themeMode,
