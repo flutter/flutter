@@ -1,7 +1,7 @@
 # Code of conduct
 
-We expect Flutter's contributors to act professionally and respectfully, and
-we expect our social spaces to be safe and dignified environments.
+We expect Flutter's contributors to act professionally and respectfully.
+And we expect our social spaces to be safe and dignified environments.
 
 Specifically:
 
