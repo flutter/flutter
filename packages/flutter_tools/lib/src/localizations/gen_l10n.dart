@@ -186,10 +186,40 @@ String _generatePluralMethod(Message message, String translationForMessage) {
   }
 
   final Placeholder countPlaceholder = message.getCountPlaceholder();
-  const Map<String, String> pluralIds = <String, String>{
+
+  // Only either the numerical representation ('=0') or the English word ('zero')
+  // should be present. Both cannot simultaneously be defined. Prefer
+  // the use of the English representation.
+  const Map<String, String> pluralChecks = <String, String>{
     '=0': 'zero',
     '=1': 'one',
     '=2': 'two',
+  };
+
+  for (final String numericalVersion in pluralChecks.keys) {
+    final String englishVersion = pluralChecks[numericalVersion]!;
+
+    final RegExp numericalExpRE = RegExp('($numericalVersion)\\s*{([^}]+)}');
+    final RegExpMatch? numericalMatch = numericalExpRE.firstMatch(easyMessage);
+    final RegExp wordExpRE = RegExp('($englishVersion)\\s*{([^}]+)}');
+    final RegExpMatch? wordMatch = wordExpRE.firstMatch(easyMessage);
+
+    if (numericalMatch != null && numericalMatch.groupCount == 2 && wordMatch != null && wordMatch.groupCount == 2) {
+      throw L10nException('''
+Both the numerical representation '$numericalVersion' or the English
+word '$englishVersion' are defined, but both cannot simultaneously be defined.
+Prefer the use of the English representation '$englishVersion'.
+''');
+    }
+  }
+
+  const Map<String, String> pluralIds = <String, String>{
+    '=0': 'zero',
+    'zero': 'zero',
+    '=1': 'one',
+    'one': 'one',
+    '=2': 'two',
+    'two': 'two',
     'few': 'few',
     'many': 'many',
     'other': 'other',

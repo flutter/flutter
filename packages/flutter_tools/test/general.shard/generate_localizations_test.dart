@@ -1812,6 +1812,101 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       });
     });
 
+    testWithoutContext('should throw attempting to generate a plural message with both number and english representations defined for zero, one, or two', () {
+      const String pluralMessageWithDuplicateZeroRepresentation = '''
+{
+  "helloWorlds": "{count,plural, =0{zero}zero{other zero}other{Hello other {count} worlds}}",
+  "@helloWorlds": {
+    "description": "Cannot have both =0 and zero.",
+    "placeholders": {}
+  }
+}''';
+
+      Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithDuplicateZeroRepresentation);
+
+      try {
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+      } on L10nException catch (e) {
+        e.message.contains('both cannot simultaneously be defined.');
+        e.message.contains('=0');
+        e.message.contains('zero');
+      }
+
+      const String pluralMessageWithDuplicateOneRepresentation = '''
+{
+  "helloWorlds": "{count,plural, =1{one}one{other one}other{Hello other {count} worlds}}",
+  "@helloWorlds": {
+    "description": "Cannot have both =1 and one.",
+    "placeholders": {}
+  }
+}''';
+
+      l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithDuplicateZeroRepresentation);
+
+      try {
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+      } on L10nException catch (e) {
+        e.message.contains('both cannot simultaneously be defined.');
+        e.message.contains('=1');
+        e.message.contains('one');
+      }
+
+      const String pluralMessageWithDuplicateTwoRepresentation = '''
+{
+  "helloWorlds": "{count,plural, =2{zero}two{other zero}other{Hello other {count} worlds}}",
+  "@helloWorlds": {
+    "description": "Cannot have both =2 and two.",
+    "placeholders": {}
+  }
+}''';
+
+      l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithDuplicateZeroRepresentation);
+
+      try {
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+      } on L10nException catch (e) {
+        e.message.contains('both cannot simultaneously be defined.');
+        e.message.contains('=2');
+        e.message.contains('two');
+      }
+    });
+
     testWithoutContext('intl package import should be omitted in subclass files when no plurals are included', () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
