@@ -258,6 +258,8 @@ bool RenderPass::EncodeCommands(Allocator& allocator,
     if (!mtl_index_buffer) {
       return false;
     }
+    FML_DCHECK(command.index_count * sizeof(uint32_t) ==
+               command.index_buffer.range.length);
     [pass drawIndexedPrimitives:MTLPrimitiveTypeTriangleStrip
                      indexCount:command.index_count
                       indexType:MTLIndexTypeUInt32
