@@ -1,7 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -953,4 +953,101 @@ void main() {
 
      expect(material.elevation, 2.0);
    });
+   
+  testWidgets('Stepper horizontal preserves state', (WidgetTester tester) async {
+    Widget buildFrame() {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            // Must break this out into its own widget purely to be able to call `setState()`
+            child: StatefulStepper(),
+          ),
+        ),
+      );
+    }
+
+    final Widget widget = buildFrame();
+    await tester.pumpWidget(widget);
+    
+    // We are on step 1
+    expect(find.text('Step 2 Content'), findsNothing);
+
+    ColoredBox findBox() => tester.widget<ColoredBox>(
+      find.descendant(of: find.byKey(const Key('randomized-color')), matching: find.byType(ColoredBox)),
+    );
+    final Color color = findBox().color;
+
+    await tester.tap(find.text('Step 2'));
+    await tester.pumpAndSettle();
+
+    // Confirm that we flipped over to step 2
+    expect(find.text('Step 2 Content'), findsOneWidget);
+
+    await tester.tap(find.text('Step 1'));
+    await tester.pumpAndSettle();
+    
+    // Confirm that we flipped back to step 1
+    expect(find.text('Step 2 Content'), findsNothing);
+    final Color color2 = findBox().color;
+    expect(color, equals(color2));
+  });
+}
+
+class StatefulStepper extends StatefulWidget {
+  const StatefulStepper({ Key? key }) : super(key: key);
+
+  @override
+  StatefulStepperState createState() => StatefulStepperState();
+}
+
+class StatefulStepperState extends State<StatefulStepper> {
+  int index = 0;
+  
+  @override
+  Widget build(BuildContext context) {
+    return Stepper(
+      onStepTapped: (int i) => setState(() => index = i),
+      currentStep: index,
+      type: StepperType.horizontal,
+      steps: const <Step>[
+        Step(
+          title: Text('Step 1'),
+          content: RandomColorWidget(
+            key: Key('randomized-color'),
+          ),
+        ),
+        Step(
+          title: Text('Step 2'),
+          content: Text('Step 2 Content'),
+        ),
+      ],
+    );
+  }
+}
+
+class RandomColorWidget extends StatefulWidget {
+  const RandomColorWidget({Key? key}) : super(key: key);
+  @override
+  State<StatefulWidget> createState() => RandomColorWidgetState();
+}
+
+class RandomColorWidgetState extends State<RandomColorWidget> {
+
+  Color? color;
+
+  @override
+  void initState() {
+    color = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+    print('color: $color');
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 50,
+      width: 50,
+      color: color,
+    );
+  }
 }
