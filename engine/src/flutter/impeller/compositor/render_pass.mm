@@ -6,6 +6,7 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
+#include "impeller/base/base.h"
 #include "impeller/compositor/device_buffer.h"
 #include "impeller/compositor/formats_metal.h"
 #include "impeller/shader_glue/shader_types.h"
@@ -139,6 +140,7 @@ bool RenderPass::IsValid() const {
 
 void RenderPass::SetLabel(std::string label) {
   label_ = std::move(label);
+  transients_buffer_->SetLabel(SPrintF("%s Transients", label_.c_str()));
 }
 
 bool RenderPass::FinishEncoding(Allocator& transients_allocator) const {
