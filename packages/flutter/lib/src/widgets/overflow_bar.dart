@@ -543,15 +543,15 @@ class _RenderOverflowBar extends RenderBox
       }
       size = constraints.constrain(Size(constraints.maxWidth, y - overflowSpacing));
     } else {
-      // Default horizontal alignment
+      // Default horizontal layout
 
       child = firstChild;
       final double firstChildWidth = child!.size.width;
       final double overallWidth = alignment == null ? actualWidth : constraints.maxWidth;
       size = constraints.constrain(Size(overallWidth, maxChildHeight));
 
-      late double x;
-      double layoutSpacing = spacing;
+      late double x; // initial value: origin of the first child
+      double layoutSpacing = spacing; // space between children
       switch (alignment) {
         case null:
           x = rtl ? size.width - firstChildWidth : 0;
