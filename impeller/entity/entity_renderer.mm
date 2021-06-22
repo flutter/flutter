@@ -37,7 +37,7 @@ bool EntityRenderer::OnIsValid() const {
 }
 
 bool EntityRenderer::OnRender(RenderPass& pass) {
-  pass.SetLabel("EntityRenderer");
+  pass.SetLabel("EntityRenderer Render Pass");
 
   shader::BoxVertexInfo::UniformBuffer uniforms;
   uniforms.mvp = Matrix::MakeOrthographic({800, 600});
