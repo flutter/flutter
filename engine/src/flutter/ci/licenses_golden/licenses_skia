@@ -1,4 +1,4 @@
-Signature: eb6adcf0e329eee37cf5e6fe2a2525ab
+Signature: e763e88119fefb8e1d60b1f6c55b0dd8
 
 UNUSED LICENSES:
 
@@ -3678,11 +3678,8 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureResource.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTypesPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrDeviceSpaceEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrMatrixEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrMatrixEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDeviceSpaceEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDeviceSpaceEffect.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrShape.cpp
 FILE: ../../../third_party/skia/src/gpu/geometry/GrShape.h
 FILE: ../../../third_party/skia/src/gpu/gl/webgl/GrGLMakeNativeInterface_webgl.cpp
