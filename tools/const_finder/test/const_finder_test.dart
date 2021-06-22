@@ -155,7 +155,7 @@ void _checkNonConsts() {
         },
         <String, dynamic>{
           'file': 'file://$fixtures/pkg/package.dart',
-          'line': 13,
+          'line': 14,
           'column': 25,
         }
       ]
