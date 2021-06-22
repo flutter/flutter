@@ -54,9 +54,11 @@ bool EntityRenderer::OnRender(RenderPass& pass) {
   Command cmd;
   cmd.label = "Box";
   cmd.pipeline = box_primitive_->GetPipeline();
-  cmd.vertex_bindings.buffers[0u] =
+  // Vertex buffer.
+  cmd.vertex_bindings.buffers[box_primitive_->GetVertexBufferIndex()] =
       vertex_builder.CreateVertexBuffer(pass.GetTransientsBuffer());
-  cmd.vertex_bindings.buffers[1u] =
+  // Uniform buffer.
+  cmd.vertex_bindings.buffers[0u] =
       pass.GetTransientsBuffer().EmplaceUniform(uniforms);
   cmd.index_buffer =
       vertex_builder.CreateIndexBuffer(pass.GetTransientsBuffer());

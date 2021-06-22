@@ -27,8 +27,11 @@ class BoxPrimitive final : public Primitive {
   // |Primitive|
   virtual bool Encode(RenderPass& pass) const override;
 
+  size_t GetVertexBufferIndex() const;
+
  private:
   std::shared_ptr<Pipeline> pipeline_ = 0;
+  size_t vertex_buffer_index_ = 0;
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(BoxPrimitive);
