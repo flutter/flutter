@@ -31,6 +31,7 @@ BoxPrimitive::BoxPrimitive(std::shared_ptr<Context> context)
 
   {
     auto vertex_descriptor = std::make_shared<VertexDescriptor>();
+    vertex_buffer_index_ = vertex_descriptor->GetVertexBufferIndex();
     if (!vertex_descriptor->SetStageInputs(
             shader::BoxVertexInfo::kAllShaderStageInputs)) {
       FML_LOG(ERROR) << "Could not configure vertex descriptor.";
@@ -65,6 +66,10 @@ BoxPrimitive::BoxPrimitive(std::shared_ptr<Context> context)
   }
 
   is_valid_ = true;
+}
+
+size_t BoxPrimitive::GetVertexBufferIndex() const {
+  return vertex_buffer_index_;
 }
 
 BoxPrimitive::~BoxPrimitive() = default;

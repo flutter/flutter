@@ -31,6 +31,8 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
 
   MTLVertexDescriptor* GetMTLVertexDescriptor() const;
 
+  size_t GetVertexBufferIndex() const;
+
   //| Comparable<VertexDescriptor>|
   std::size_t GetHash() const override;
 

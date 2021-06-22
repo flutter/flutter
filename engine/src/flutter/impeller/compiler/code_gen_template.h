@@ -32,7 +32,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   // ===========================================================================
 {% for def in struct_definitions %}
 
-  struct alignas(16) {{def.name}} {
+  struct {{def.name}} {
 {% for member in def.members %}
     {{member.type}} {{member.name}};
 {% endfor %}
