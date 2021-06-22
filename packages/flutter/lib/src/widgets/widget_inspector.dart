@@ -1527,10 +1527,10 @@ mixin WidgetInspectorService {
   }
 
   bool _isLocalCreationLocation(_Location? location) {
-    if (location == null || location.file == null) {
+    if (location == null) {
       return false;
     }
-    final String file = Uri.parse(location.file!).path;
+    final String file = Uri.parse(location.file).path;
 
     // By default check whether the creation location was within package:flutter.
     if (_pubRootDirectories == null) {
@@ -2127,13 +2127,11 @@ class _ElementLocationStatsTracker {
       final Map<String, List<int>> locationsJson = <String, List<int>>{};
       for (final _LocationCount entry in newLocations) {
         final _Location location = entry.location;
-        if (location.file != null) {
-          final List<int> jsonForFile = locationsJson.putIfAbsent(
-            location.file!,
-            () => <int>[],
-          );
-          jsonForFile..add(entry.id)..add(location.line)..add(location.column);
-        }
+        final List<int> jsonForFile = locationsJson.putIfAbsent(
+          location.file,
+          () => <int>[],
+        );
+        jsonForFile..add(entry.id)..add(location.line)..add(location.column);
       }
       json['newLocations'] = locationsJson;
     }
@@ -2143,14 +2141,13 @@ class _ElementLocationStatsTracker {
       final Map<String, Map<int, String>> namesJson = <String, Map<int, String>>{};
       for (final _LocationCount entry in newLocations) {
         final _Location location = entry.location;
-        if (location.file != null) {
-          final Map<int, String> jsonForFile = namesJson.putIfAbsent(
-            location.file!,
-                () => <int, String>{},
-          );
-          if (location.name != null) {
-            jsonForFile[entry.id] = location.name!;
-          }
+        final Map<int, String> jsonForFile = namesJson.putIfAbsent(
+          location.file,
+              () => <int, String>{},
+        );
+        final String? name = location.name;
+        if (name != null) {
+          jsonForFile[entry.id] = name;
         }
       }
       json['newLocationsNames'] = namesJson;
@@ -2874,7 +2871,7 @@ class _Location {
   });
 
   /// File path of the location.
-  final String? file;
+  final String file;
 
   /// 1-based line number.
   final int line;
@@ -2903,9 +2900,7 @@ class _Location {
     if (name != null) {
       parts.add(name!);
     }
-    if (file != null) {
-      parts.add(file!);
-    }
+    parts.add(file);
     parts..add('$line')..add('$column');
     return parts.join(':');
   }

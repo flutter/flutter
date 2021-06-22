@@ -945,7 +945,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final String fileA = creationLocationA['file']! as String;
       final int lineA = creationLocationA['line']! as int;
       final int columnA = creationLocationA['column']! as int;
-      final String? nameA = creationLocationA['name'] as String?;
+      final String nameA = creationLocationA['name']! as String;
       expect(nameA, equals('Text'));
 
       service.setSelection(elementB, 'my-group');
