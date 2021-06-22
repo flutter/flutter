@@ -233,7 +233,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
         'Do not directly call dispose on a $runtimeType. Instead, '
         'use createHandle and LayerHandle.dispose.',
       );
-      _debugDisposed = true;
+      // TODO(dnfield): enable this. https://github.com/flutter/flutter/issues/85066
+      // _debugDisposed = true;
       return true;
     }());
     _engineLayer?.dispose();
