@@ -22,7 +22,7 @@ environment:
   CIRRUS_COMMIT_MESSAGE: ""
 
 
-gcp_credentials: ENCRYPTED[1917385f09764ac58515f6fee14ed58688afc808849b244969d41d0b082061eecd0a4c8ba801f00833877a12b51f8bb5]
+gcp_credentials: ENCRYPTED[!0e63b52bd7e4fda1cd7b7bf2b4fe515a27fadbeaced01f5ad8b699b81d3611ed64c5d3271bcd8426dd914ef41cba48a0!]
 
 # LINUX SHARDS
 task:
