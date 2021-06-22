@@ -323,6 +323,7 @@ void main() {
   });
 
   testWidgets('ReorderableList supports items with nested list views without throwing layout exception.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83224.
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
@@ -364,11 +365,11 @@ void main() {
       ),
     );
 
-    // Start gesture on first item
+    // Start gesture on first item.
     final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const ValueKey<int>(0))));
     await tester.pump(kPressTimeout);
 
-    // Drag enough for move to start
+    // Drag enough for move to start.
     await drag.moveBy(const Offset(0, 50));
     await tester.pumpAndSettle();
 
