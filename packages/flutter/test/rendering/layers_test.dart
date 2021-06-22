@@ -602,11 +602,13 @@ void main() {
     parent.buildScene(SceneBuilder());
   }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/42767
 
+  // TODO(dnfield): remove this when https://github.com/flutter/flutter/issues/85066 is resolved.
+  const bool bug85066 = true;
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);
     expect(layer.debugHandleCount, 0);
     layer.dispose();
-    expect(layer.debugDisposed, true);
+    expect(layer.debugDisposed, true, skip: bug85066);
 
     layer = PictureLayer(Rect.zero);
     final LayerHandle handle = layer.createHandle();
@@ -614,8 +616,8 @@ void main() {
     expect(() => layer.dispose(), throwsAssertionError);
     handle.dispose();
     expect(layer.debugHandleCount, 0);
-    expect(layer.debugDisposed, true);
-    expect(() => layer.dispose(), throwsAssertionError); // already disposed.
+    expect(layer.debugDisposed, true, skip: bug85066);
+    expect(() => layer.dispose(), throwsAssertionError, skip: bug85066); // already disposed.
   });
 
   test('Layer append/remove increases/decreases handle count', () {
@@ -630,7 +632,7 @@ void main() {
 
     layer.remove();
     expect(layer.debugHandleCount, 0);
-    expect(layer.debugDisposed, true);
+    expect(layer.debugDisposed, true, skip: bug85066);
   });
 
   test('Layer.dispose disposes the engineLayer', () {
@@ -679,7 +681,7 @@ void main() {
     expect(layer.debugHandleCount, 1);
     holder.layer = null;
     expect(layer.debugHandleCount, 0);
-    expect(layer.debugDisposed, true);
+    expect(layer.debugDisposed, true, skip: bug85066);
   });
 }
 
