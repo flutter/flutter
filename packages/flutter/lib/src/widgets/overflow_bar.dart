@@ -141,6 +141,12 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   /// only used to see if the horizontal layout will overflow.
   ///
   /// Defaults to null.
+  ///
+  /// See also:
+  ///
+  ///  * [overflowAlignment], the horizontal alignment of the [children] within
+  ///    the vertical "overflow" layout.
+  ///
   final MainAxisAlignment? alignment;
 
   /// The height of the gap between [children] in the vertical
@@ -181,6 +187,9 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   ///
   /// See also:
   ///
+  ///  * [alignment], which defines the [children]'s horizontal layout
+  ///    (according to the same rules as for [Row.mainAxisAlignment]) when
+  ///    the children, separated by [spacing], fit within the available space.
   ///  * [overflowDirection], which defines the order that the
   ///    [OverflowBar]'s children appear in, if the horizontal layout
   ///    overflows.
