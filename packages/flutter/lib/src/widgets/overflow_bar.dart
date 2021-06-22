@@ -129,11 +129,15 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   /// Defines the [children]'s horizontal layout according to the same
   /// rules as for [Row.mainAxisAlignment].
   ///
-  /// If this property is non-null, and the [children] - separated by
-  /// [spacing] - fit within the available width, then the overflow
-  /// bar's will be as wide as possible. Otherwise it will be no
-  /// wider than needed to layout the [children] separated by
-  /// [spacing], modulo the incoming constraints.
+  /// If this property is non-null, and the [children], separated by
+  /// [spacing], fit within the available width, then the overflow
+  /// bar will be as wide as possible. If the children do not fit
+  /// within the available width, then this property is ignored and
+  /// [overflowAlignment] applies instead.
+  ///
+  /// If this property is null (the default) then the overflow bar
+  /// will be no wider than needed to layout the [children] separated
+  /// by [spacing], modulo the incoming constraints.
   ///
   /// If [alignment] is one of [MainAxisAlignment.spaceAround],
   /// [MainAxisAlignment.spaceBetween], or
