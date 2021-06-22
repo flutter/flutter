@@ -1057,12 +1057,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       Widget child,
   ///   ) {
   ///     return SlideTransition(
-  ///       position: AlignmentTween(
+  ///       position: Tween<Offset>(
   ///         begin: const Offset(0.0, 1.0),
   ///         end: Offset.zero,
   ///       ).animate(animation),
   ///       child: SlideTransition(
-  ///         position: TweenOffset(
+  ///         position: Tween<Offset>(
   ///           begin: Offset.zero,
   ///           end: const Offset(0.0, 1.0),
   ///         ).animate(secondaryAnimation),
