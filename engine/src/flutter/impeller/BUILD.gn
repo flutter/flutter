@@ -8,6 +8,7 @@ config("impeller_public_config") {
 
 group("impeller") {
   deps = [
+    "base",
     "compiler",
     "compositor",
     "entity",

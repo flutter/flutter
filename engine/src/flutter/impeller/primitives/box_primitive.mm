@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "flutter/fml/logging.h"
+#include "impeller/base/base.h"
 #include "impeller/compositor/pipeline_descriptor.h"
 #include "impeller/compositor/shader_library.h"
 #include "impeller/compositor/vertex_descriptor.h"
@@ -16,7 +17,7 @@ namespace impeller {
 BoxPrimitive::BoxPrimitive(std::shared_ptr<Context> context)
     : Primitive(context) {
   PipelineDescriptor desc;
-  desc.SetLabel(shader::BoxVertexInfo::kLabel);
+  desc.SetLabel(SPrintF("%s Pipeline", shader::BoxVertexInfo::kLabel.data()));
 
   {
     auto fragment_function = context->GetShaderLibrary()->GetFunction(
