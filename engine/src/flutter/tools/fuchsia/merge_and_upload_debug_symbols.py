@@ -83,7 +83,7 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
   if upload and IsLinux() and not already_exists:
     command = [
         'cipd', 'create', '-pkg-def', cipd_yaml, '-ref', 'latest', '-tag',
-        tag,
+        tag, '-verification-timeout', '10m0s',
     ]
   else:
     command = [
