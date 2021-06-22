@@ -6,6 +6,7 @@
 
 #include <Metal/Metal.h>
 
+#include <functional>
 #include <memory>
 
 #include "flutter/fml/macros.h"
@@ -16,9 +17,12 @@ namespace impeller {
 
 class Surface {
  public:
-  Surface(RenderPassDescriptor desc);
+  Surface(RenderPassDescriptor desc,
+          std::function<bool(void)> present_callback);
 
   ~Surface();
+
+  bool Present() const;
 
   bool IsValid() const;
 
@@ -26,6 +30,8 @@ class Surface {
 
  private:
   RenderPassDescriptor desc_;
+  std::function<bool(void)> present_callback_;
+
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Surface);

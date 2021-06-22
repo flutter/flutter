@@ -53,6 +53,10 @@ bool Renderer::Render(const Surface& surface) {
     return false;
   }
 
+  if (!surface.Present()) {
+    return false;
+  }
+
   if (!render_pass->FinishEncoding(*GetContext()->GetTransientsAllocator())) {
     return false;
   }

@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/entity_renderer.h"
+
 #include "impeller/compositor/command.h"
-#include "impeller/compositor/vertex_buffer.h"
+#include "impeller/compositor/vertex_buffer_builder.h"
 #include "impeller/primitives/box.frag.h"
 #include "impeller/primitives/box.vert.h"
 
@@ -40,23 +41,27 @@ bool EntityRenderer::OnRender(RenderPass& pass) {
 
   shader::BoxVertexInfo::UniformBuffer uniforms;
   uniforms.mvp = Matrix::MakeOrthographic({800, 600});
-  VertexBufferBuilder vertices;
-  vertices.AddVertices({
+  VertexBufferBuilder vertex_builder;
+  vertex_builder.AddVertices({
       {-0.5, 0.5, 1.0},   //
       {0.5, 0.5, 1.0},    //
       {0.5, -0.5, 1.0},   //
+      {0.5, -0.5, 1.0},   //
       {-0.5, -0.5, 1.0},  //
+      {-0.5, 0.5, 1.0},   //
   });
 
   Command cmd;
   cmd.label = "Box";
   cmd.pipeline = box_primitive_->GetPipeline();
   cmd.vertex_bindings.buffers[0u] =
-      vertices.CreateVertexBuffer(pass.GetTransientsBuffer());
+      vertex_builder.CreateVertexBuffer(pass.GetTransientsBuffer());
   cmd.vertex_bindings.buffers[1u] =
       pass.GetTransientsBuffer().EmplaceUniform(uniforms);
-  cmd.index_buffer = vertices.CreateIndexBuffer(pass.GetTransientsBuffer());
-  cmd.index_count = vertices.GetIndexCount();
+  cmd.index_buffer =
+      vertex_builder.CreateIndexBuffer(pass.GetTransientsBuffer());
+  cmd.index_count = vertex_builder.GetIndexCount();
+  cmd.primitive_type = PrimitiveType::kTriange;
   if (!pass.RecordCommand(std::move(cmd))) {
     return false;
   }
