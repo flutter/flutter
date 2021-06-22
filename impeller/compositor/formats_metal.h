@@ -64,6 +64,22 @@ constexpr MTLBlendFactor ToMTLBlendFactor(BlendFactor type) {
   return MTLBlendFactorZero;
 };
 
+constexpr MTLPrimitiveType ToMTLPrimitiveType(PrimitiveType type) {
+  switch (type) {
+    case PrimitiveType::kTriange:
+      return MTLPrimitiveTypeTriangle;
+    case PrimitiveType::kTriangeStrip:
+      return MTLPrimitiveTypeTriangleStrip;
+    case PrimitiveType::kLine:
+      return MTLPrimitiveTypeLine;
+    case PrimitiveType::kLineStrip:
+      return MTLPrimitiveTypeLineStrip;
+    case PrimitiveType::kPoint:
+      return MTLPrimitiveTypePoint;
+  }
+  return MTLPrimitiveTypePoint;
+}
+
 constexpr MTLBlendOperation ToMTLBlendOperation(BlendOperation type) {
   switch (type) {
     case BlendOperation::kAdd:
