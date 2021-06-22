@@ -542,9 +542,10 @@ void main() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       fakeProcessManager.excludedExecutables.add('rsync');
 
+      final BufferLogger logger = BufferLogger.test();
       final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
-        logger: BufferLogger.test(),
+        logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
         processManager: fakeProcessManager,
       );
@@ -556,6 +557,7 @@ void main() {
 
       macOSUtils.unzip(fileSystem.file('foo.zip'), targetDirectory);
       expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(logger.traceText, contains('Unable to find rsync'));
     });
 
     testWithoutContext('unzip and rsyncs', () {

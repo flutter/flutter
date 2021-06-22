@@ -457,7 +457,8 @@ class _MacOSUtils extends _PosixUtils {
         tempDirectory.deleteSync(recursive: true);
       }
     } else {
-      // Fall back to unzipping directly.
+      // Fall back to just unzipping.
+      _logger.printTrace('Unable to find rsync, falling back to direct unzipping.');
       _processUtils.runSync(
         <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
         throwOnError: true,
