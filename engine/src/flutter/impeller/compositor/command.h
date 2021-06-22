@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/buffer_view.h"
+#include "impeller/compositor/formats.h"
 #include "impeller/compositor/pipeline.h"
 
 namespace impeller {
@@ -30,6 +31,7 @@ struct Command {
   BufferView index_buffer;
   size_t index_count = 0u;
   std::string label;
+  PrimitiveType primitive_type;
 
   constexpr operator bool() const { return pipeline && pipeline->IsValid(); }
 };

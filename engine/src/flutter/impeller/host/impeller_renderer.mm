@@ -226,11 +226,15 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 
 - (void)drawInMTKView:(nonnull MTKView*)view {
   impeller::Surface surface(
-      impeller::FromMTLRenderPassDescriptor(view.currentRenderPassDescriptor));
+      impeller::FromMTLRenderPassDescriptor(view.currentRenderPassDescriptor),
+      [drawable = view.currentDrawable]() {
+        [drawable present];
+        return true;
+      });
   if (!renderer_->Render(surface)) {
     FML_LOG(ERROR) << "Could not render.";
   }
-
+  return;
   /// Per frame updates here
   dispatch_semaphore_wait(_inFlightSemaphore, DISPATCH_TIME_FOREVER);
 

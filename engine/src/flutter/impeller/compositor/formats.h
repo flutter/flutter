@@ -56,6 +56,16 @@ enum class StoreAction {
   kStore,
 };
 
+enum class PrimitiveType {
+  kTriange,
+  kTriangeStrip,
+  kLine,
+  kLineStrip,
+  kPoint,
+  // Triangle fans are implementation dependent and need extra extensions
+  // checks. Hence, they are not supported here.
+};
+
 enum class ColorWriteMask : uint64_t {
   kNone = 0,
   kRed = 1 << 0,
