@@ -148,7 +148,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     }());
     return disposed;
   }
-  bool _debugDisposed = false;
+  // TODO(dnfield): https://github.com/flutter/flutter/issues/85066
+  final bool _debugDisposed = false;
 
   /// Set when this layer is appended to a [ContainerLayer], and
   /// unset when it is removed.
