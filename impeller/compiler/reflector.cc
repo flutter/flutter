@@ -351,6 +351,54 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
       continue;
     }
 
+    // Tightly packed Point
+    if (member.basetype == SPIRType::BaseType::Float &&  //
+        member.width == sizeof(float) * 8 &&             //
+        member.columns == 1 &&                           //
+        member.vecsize == 2                              //
+    ) {
+      result.emplace_back(StructMember{
+          .type = "Point",
+          .name = GetMemberNameAtIndex(struct_type, i),
+          .offset = total_byte_length,
+          .byte_length = sizeof(Point),
+      });
+      total_byte_length += sizeof(Point);
+      continue;
+    }
+
+    // Tightly packed Vector3
+    if (member.basetype == SPIRType::BaseType::Float &&  //
+        member.width == sizeof(float) * 8 &&             //
+        member.columns == 1 &&                           //
+        member.vecsize == 3                              //
+    ) {
+      result.emplace_back(StructMember{
+          .type = "Vector3",
+          .name = GetMemberNameAtIndex(struct_type, i),
+          .offset = total_byte_length,
+          .byte_length = sizeof(Vector3),
+      });
+      total_byte_length += sizeof(Vector3);
+      continue;
+    }
+
+    // Tightly packed Vector4
+    if (member.basetype == SPIRType::BaseType::Float &&  //
+        member.width == sizeof(float) * 8 &&             //
+        member.columns == 1 &&                           //
+        member.vecsize == 4                              //
+    ) {
+      result.emplace_back(StructMember{
+          .type = "Vector4",
+          .name = GetMemberNameAtIndex(struct_type, i),
+          .offset = total_byte_length,
+          .byte_length = sizeof(Vector4),
+      });
+      total_byte_length += sizeof(Vector4);
+      continue;
+    }
+
     // Other single isolated scalars.
     {
       auto maybe_known_type = ReadKnownScalarType(member.basetype);

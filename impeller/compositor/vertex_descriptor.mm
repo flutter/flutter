@@ -188,23 +188,33 @@ bool VertexDescriptor::SetStageInputs(
   return true;
 }
 
+size_t VertexDescriptor::GetVertexBufferIndex() const {
+  static constexpr size_t kReservedVertexBufferIndex =
+      30u;  // The final slot available.
+  return kReservedVertexBufferIndex;
+}
+
 MTLVertexDescriptor* VertexDescriptor::GetMTLVertexDescriptor() const {
   auto descriptor = [MTLVertexDescriptor vertexDescriptor];
+
+  const size_t vertex_buffer_index = GetVertexBufferIndex();
 
   size_t stride = 0u;
   for (const auto& input : stage_inputs_) {
     auto attrib = descriptor.attributes[input.location];
     attrib.format = input.format;
     attrib.offset = stride;
-    // All vertex inputs are interleaved and tightly packed in one buffer at
-    // zero index.
-    attrib.bufferIndex = 0u;
+    // All vertex inputs are interleaved and tightly packed in one buffer at a
+    // reserved index.
+    attrib.bufferIndex = vertex_buffer_index;
     stride += input.length;
   }
 
-  descriptor.layouts[0].stride = stride;
-  descriptor.layouts[0].stepRate = 1u;
-  descriptor.layouts[0].stepFunction = MTLVertexStepFunctionPerVertex;
+  // Since it's all in one buffer, indicate its layout.
+  auto vertex_layout = descriptor.layouts[vertex_buffer_index];
+  vertex_layout.stride = stride;
+  vertex_layout.stepRate = 1u;
+  vertex_layout.stepFunction = MTLVertexStepFunctionPerVertex;
 
   return descriptor;
 }

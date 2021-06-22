@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-layout(location = 0) out vec4 fragColor;
+in vec3 color;
+
+out vec4 fragColor;
 
 void main() {
-  fragColor = vec4(1.0, 1.0, 1.0, 1.0);
+  fragColor = vec4(0.0, 1.0, 0.0, 1.0);
 }

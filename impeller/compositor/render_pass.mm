@@ -236,7 +236,6 @@ bool RenderPass::EncodeCommands(Allocator& allocator,
     } else {
       auto_pop_debug_marker.Release();
     }
-
     [pass setRenderPipelineState:command.pipeline->GetMTLRenderPipelineState()];
     [pass setDepthStencilState:command.pipeline->GetMTLDepthStencilState()];
     [pass setFrontFacingWinding:MTLWindingClockwise];
