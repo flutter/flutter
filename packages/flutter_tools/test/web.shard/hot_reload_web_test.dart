@@ -70,5 +70,5 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  });
+  }, skip: Platform.isWindows); // Skipping for https://github.com/flutter/flutter/issues/85043
 }
