@@ -1145,6 +1145,7 @@ void main() {
   testWidgets(
     'kept-alive EditableText does not crash when layout is skipped',
     (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/84896.
       EditableText.debugDeterministicCursor = true;
       const Key key = ValueKey<String>('EditableText');
       await tester.pumpWidget(
@@ -1176,11 +1177,10 @@ void main() {
       // Wait for autofocus.
       await tester.pump();
       expect(focusNode.hasFocus, isTrue);
-      // Prepend additional items to make EditableText invisible. It's still
-      // kept in the tree via the keepalive mechanism.
 
-      // Change the text alignment and showCursor. The RenderEditable would need
-      // relayout and repaint.
+      // Prepend additional items to make EditableText invisible. It's still
+      // kept in the tree via the keepalive mechanism. Change the text alignment
+      // and showCursor. The RenderEditable now needs to relayout and repaint.
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(),
