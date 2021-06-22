@@ -172,6 +172,15 @@ class PaintingContext extends ClipContext {
 
   /// Used for tests that directly invoke [RenderObject.paint] or
   /// [RenderObject.debugPaint].
+  ///
+  /// When accessing the [canvas], the context expects that it has started the
+  /// painted operation on the render object via [paintChild] or
+  /// [repaintCompositedChild]. However, a unit test for
+  /// [RenderObject.debugPaint] may wish to avoid that. In that case, it can use
+  /// this method so that [RenderObject.debugPaint] will be able to safely
+  /// access the canvas.
+  ///
+  /// If asserts are disabled, this method is a no-op.
   @visibleForTesting
   void debugAllowPainting(RenderObject? object) {
     assert(
@@ -282,6 +291,12 @@ class PaintingContext extends ClipContext {
   /// The current canvas can change whenever you paint a child using this
   /// context, which means it's fragile to hold a reference to the canvas
   /// returned by this getter.
+  ///
+  /// This getter requires that the current [RenderObject] being registered for
+  /// painting via [paintChild] or [repaintCompositedChild]. If a test needs
+  /// to invoke a different path, such as [RenderObject.paint] or
+  /// [RenderObject.debugPaint] directly, it can use [debugAllowPainting] to
+  /// register that child manually.
   @override
   Canvas get canvas {
     if (_canvas == null)
