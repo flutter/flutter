@@ -1785,7 +1785,7 @@ class TimePickerDialog extends StatefulWidget {
     this.confirmText,
     this.helpText,
     this.restorationId,
-    this.initialEntryMode = TimePickerEntryMode.dial,
+    this.initialEntryMode,
   }) : assert(initialTime != null),
        super(key: key);
 
@@ -1793,7 +1793,7 @@ class TimePickerDialog extends StatefulWidget {
   final TimeOfDay initialTime;
 
   /// The entry mode for the picker. Whether it's text input or a dial.
-  final TimePickerEntryMode initialEntryMode;
+  final TimePickerEntryMode? initialEntryMode;
 
   /// Optionally provide your own text for the cancel button.
   ///
@@ -1909,7 +1909,7 @@ class _RestorableTimePickerModeN extends RestorableValue<_TimePickerMode?> {
 class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMixin {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  late final _RestorableTimePickerEntryMode _entryMode = _RestorableTimePickerEntryMode(widget.initialEntryMode);
+  late final _RestorableTimePickerEntryMode _entryMode = _RestorableTimePickerEntryMode(widget.initialEntryMode??TimePickerEntryMode.dial);
   final _RestorableTimePickerMode _mode = _RestorableTimePickerMode(_TimePickerMode.hour);
   final _RestorableTimePickerModeN _lastModeAnnounced = _RestorableTimePickerModeN(null);
   final RestorableBool _autoValidate = RestorableBool(false);
@@ -2103,7 +2103,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     final ShapeBorder shape = TimePickerTheme.of(context).shape ?? _kDefaultShape;
     final Orientation orientation = media.orientation;
 
-    final Widget actions = Row(
+    final Widget actions =widget.initialEntryMode == null ? Row(
       children: <Widget>[
         const SizedBox(width: 10.0),
         IconButton(
@@ -2138,6 +2138,24 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
           ),
         ),
       ],
+    ):Container(
+            alignment: AlignmentDirectional.centerEnd,
+            constraints: const BoxConstraints(minHeight: 52.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: OverflowBar(
+              spacing: 8,
+              overflowAlignment: OverflowBarAlignment.end,
+              children: <Widget>[
+                TextButton(
+                  onPressed: _handleCancel,
+                  child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
+                ),
+                TextButton(
+                  onPressed: _handleOk,
+                  child: Text(widget.confirmText ?? localizations.okButtonLabel),
+                ),
+              ],
+            ),
     );
 
     final Widget picker;
@@ -2338,7 +2356,7 @@ Future<TimeOfDay?> showTimePicker({
   required TimeOfDay initialTime,
   TransitionBuilder? builder,
   bool useRootNavigator = true,
-  TimePickerEntryMode initialEntryMode = TimePickerEntryMode.dial,
+  TimePickerEntryMode? initialEntryMode,
   String? cancelText,
   String? confirmText,
   String? helpText,
@@ -2347,7 +2365,6 @@ Future<TimeOfDay?> showTimePicker({
   assert(context != null);
   assert(initialTime != null);
   assert(useRootNavigator != null);
-  assert(initialEntryMode != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   final Widget dialog = TimePickerDialog(
