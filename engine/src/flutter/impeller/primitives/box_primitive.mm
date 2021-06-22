@@ -43,6 +43,7 @@ BoxPrimitive::BoxPrimitive(std::shared_ptr<Context> context)
     // Configure the sole color attachments pixel format.
     ColorAttachmentDescriptor color0;
     color0.format = PixelFormat::kPixelFormat_B8G8R8A8_UNormInt_SRGB;
+
     desc.SetColorAttachmentDescriptor(0u, std::move(color0));
   }
 
