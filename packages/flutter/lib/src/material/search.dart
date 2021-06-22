@@ -37,8 +37,8 @@ import 'theme.dart';
 ///
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// search page to the [Navigator] furthest from or nearest to the given
-/// `context`. By default, `useRootNavigator` is `true` and the search page
-/// route created by this method is pushed to the furthest navigator to the
+/// `context`. By default, `useRootNavigator` is `false` and the search page
+/// route created by this method is pushed to the nearest navigator to the
 /// given `context`. It can not be `null`.
 ///
 /// The transition to the search page triggered by this method looks best if the
@@ -60,7 +60,7 @@ Future<T?> showSearch<T>({
   required BuildContext context,
   required SearchDelegate<T> delegate,
   String? query = '',
-  bool useRootNavigator = true,
+  bool useRootNavigator = false,
 }) {
   assert(delegate != null);
   assert(context != null);

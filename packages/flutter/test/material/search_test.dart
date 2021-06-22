@@ -843,8 +843,8 @@ void main() {
   });
 
   testWidgets('showSearch with useRootNavigator', (WidgetTester tester) async {
-    final MyNavigatorObserver rootObserver = MyNavigatorObserver();
-    final MyNavigatorObserver localObserver = MyNavigatorObserver();
+    final _MyNavigatorObserver rootObserver = _MyNavigatorObserver();
+    final _MyNavigatorObserver localObserver = _MyNavigatorObserver();
 
     final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
       result: 'Result',
@@ -863,12 +863,12 @@ void main() {
                 children: <Widget>[
                   TextButton(
                       onPressed: () async {
-                        await showSearch(context: context, delegate: delegate);
+                        await showSearch(context: context, delegate: delegate, useRootNavigator: true);
                       },
                       child: const Text('showSearchRootNavigator')),
                   TextButton(
                       onPressed: () async {
-                        await showSearch(context: context, delegate: delegate, useRootNavigator: false);
+                        await showSearch(context: context, delegate: delegate);
                       },
                       child: const Text('showSearchLocalNavigator')),
                 ],
@@ -1087,7 +1087,7 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
   }
 }
 
-class MyNavigatorObserver extends NavigatorObserver {
+class _MyNavigatorObserver extends NavigatorObserver {
   int pushCount = 0;
 
   @override

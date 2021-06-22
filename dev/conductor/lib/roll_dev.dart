@@ -13,7 +13,7 @@ import './stdio.dart';
 import './version.dart';
 
 const String kIncrement = 'increment';
-const String kCommit = 'commit';
+const String kCandidateBranch = 'candidate-branch';
 const String kRemoteName = 'remote';
 const String kJustPrint = 'just-print';
 const String kYes = 'yes';
@@ -40,9 +40,9 @@ class RollDevCommand extends Command<void> {
       },
     );
     argParser.addOption(
-      kCommit,
-      help: 'Specifies which git commit to roll to the dev branch. Required.',
-      valueHelp: 'hash',
+      kCandidateBranch,
+      help: 'Specifies which git branch to roll to the dev branch. Required.',
+      valueHelp: 'branch',
       defaultsTo: null, // This option is required
     );
     argParser.addFlag(
@@ -112,17 +112,16 @@ bool rollDev({
 }) {
   final String remoteName = argResults[kRemoteName] as String;
   final String level = argResults[kIncrement] as String;
-  final String commit = argResults[kCommit] as String;
+  final String candidateBranch = argResults[kCandidateBranch] as String;
   final bool justPrint = argResults[kJustPrint] as bool;
   final bool autoApprove = argResults[kYes] as bool;
   final bool force = argResults[kForce] as bool;
   final bool skipTagging = argResults[kSkipTagging] as bool;
 
-  if (level == null || commit == null) {
-    stdio.printStatus(
-        'roll_dev.dart --increment=level --commit=hash • update the version tags '
+  if (level == null || candidateBranch == null) {
+    throw Exception(
+        'roll_dev.dart --$kIncrement=level --$kCandidateBranch=branch • update the version tags '
         'and roll a new dev build.\n$usage');
-    return false;
   }
 
   final String remoteUrl = repository.remoteUrl(remoteName);
@@ -136,14 +135,16 @@ bool rollDev({
   repository.fetch(remoteName);
 
   // Verify [commit] is valid
-  repository.reverseParse(commit);
+  final String commit = repository.reverseParse(candidateBranch);
 
   stdio.printStatus('remoteName is $remoteName');
-  final Version lastVersion =
-      Version.fromString(repository.getFullTag(remoteName));
+  // Get the name of the last dev release
+  final Version lastVersion = Version.fromString(
+    repository.getFullTag(remoteName, 'dev'),
+  );
 
   final Version version =
-      skipTagging ? lastVersion : Version.increment(lastVersion, level);
+      skipTagging ? lastVersion : Version.fromCandidateBranch(candidateBranch);
   final String tagName = version.toString();
 
   if (repository.reverseParse(lastVersion.toString()).contains(commit.trim())) {

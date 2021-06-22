@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:convert' show jsonEncode;
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
@@ -20,6 +18,7 @@ import './proto/conductor_state.pbenum.dart' show ReleasePhase;
 import './repository.dart';
 import './state.dart';
 import './stdio.dart';
+import './version.dart';
 
 const String kCandidateOption = 'candidate-branch';
 const String kDartRevisionOption = 'dart-revision';
@@ -28,6 +27,7 @@ const String kEngineUpstreamOption = 'engine-upstream';
 const String kFrameworkCherrypicksOption = 'framework-cherrypicks';
 const String kFrameworkMirrorOption = 'framework-mirror';
 const String kFrameworkUpstreamOption = 'framework-upstream';
+const String kIncrementOption = 'increment';
 const String kEngineMirrorOption = 'engine-mirror';
 const String kReleaseOption = 'release-channel';
 const String kStateOption = 'state-file';
@@ -90,6 +90,18 @@ class StartCommand extends Command<void> {
     argParser.addOption(
       kDartRevisionOption,
       help: 'New Dart revision to cherrypick.',
+    );
+    argParser.addOption(
+      kIncrementOption,
+      help: 'Specifies which part of the x.y.z version number to increment. Required.',
+      valueHelp: 'level',
+      allowed: <String>['y', 'z', 'm', 'n'],
+      allowedHelp: <String, String>{
+        'y': 'Indicates the first dev release after a beta release.',
+        'z': 'Indicates a hotfix to a stable release.',
+        'm': 'Indicates a standard dev release.',
+        'n': 'Indicates a hotfix to a dev release.',
+      },
     );
     final Git git = Git(processManager);
     conductorVersion = git.getOutput(
@@ -183,6 +195,12 @@ class StartCommand extends Command<void> {
       platform.environment,
       allowNull: true,
     );
+    final String incrementLetter = getValueFromEnvOrArgs(
+      kIncrementOption,
+      argResults,
+      platform.environment,
+    );
+
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
       throw ConductorException(
         'Invalid release candidate branch "$candidateBranch". Text should '
@@ -200,11 +218,11 @@ class StartCommand extends Command<void> {
     final EngineRepository engine = EngineRepository(
       checkouts,
       initialRef: candidateBranch,
-      fetchRemote: Remote(
+      upstreamRemote: Remote(
         name: RemoteName.upstream,
         url: engineUpstream,
       ),
-      pushRemote: Remote(
+      mirrorRemote: Remote(
         name: RemoteName.mirror,
         url: engineMirror,
       ),
@@ -249,15 +267,17 @@ class StartCommand extends Command<void> {
       checkoutPath: engine.checkoutDirectory.path,
       cherrypicks: engineCherrypicks,
       dartRevision: dartRevision,
+      upstream: pb.Remote(name: 'upstream', url: engine.upstreamRemote.url),
+      mirror: pb.Remote(name: 'mirror', url: engine.mirrorRemote.url),
     );
     final FrameworkRepository framework = FrameworkRepository(
       checkouts,
       initialRef: candidateBranch,
-      fetchRemote: Remote(
+      upstreamRemote: Remote(
         name: RemoteName.upstream,
         url: frameworkUpstream,
       ),
-      pushRemote: Remote(
+      mirrorRemote: Remote(
         name: RemoteName.mirror,
         url: frameworkMirror,
       ),
@@ -287,6 +307,16 @@ class StartCommand extends Command<void> {
       }
     }
 
+    // Get framework version
+    final Version lastVersion = Version.fromString(framework.getFullTag(framework.upstreamRemote.name, candidateBranch, exact: false));
+    Version nextVersion;
+    if (incrementLetter == 'm') {
+      nextVersion = Version.fromCandidateBranch(candidateBranch);
+    } else {
+      nextVersion = Version.increment(lastVersion, incrementLetter);
+    }
+    state.releaseVersion = nextVersion.toString();
+
     final String frameworkHead = framework.reverseParse('HEAD');
     state.framework = pb.Repository(
       candidateBranch: candidateBranch,
@@ -294,20 +324,17 @@ class StartCommand extends Command<void> {
       currentGitHead: frameworkHead,
       checkoutPath: framework.checkoutDirectory.path,
       cherrypicks: frameworkCherrypicks,
+      upstream: pb.Remote(name: 'upstream', url: framework.upstreamRemote.url),
+      mirror: pb.Remote(name: 'mirror', url: framework.mirrorRemote.url),
     );
 
-    state.lastPhase = ReleasePhase.INITIALIZE;
+    state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
 
     state.conductorVersion = conductorVersion;
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
 
-    state.logs.addAll(stdio.logs);
-
-    stateFile.writeAsStringSync(
-      jsonEncode(state.toProto3Json()),
-      flush: true,
-    );
+    writeStateToFile(stateFile, state, stdio.logs);
 
     stdio.printStatus(presentState(state));
   }
@@ -340,8 +367,8 @@ class StartCommand extends Command<void> {
     }
 
     final String branchPoint = repository.branchPoint(
-      '${repository.fetchRemote.name}/$upstreamRef',
-      '${repository.fetchRemote.name}/$releaseRef',
+      '${repository.upstreamRemote.name}/$upstreamRef',
+      '${repository.upstreamRemote.name}/$releaseRef',
     );
 
     // `git rev-list` returns newest first, so reverse this list

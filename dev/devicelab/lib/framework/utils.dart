@@ -16,6 +16,7 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'host_agent.dart';
 import 'task_result.dart';
 
 /// Virtual current working directory, which affect functions, such as [exec].
@@ -453,6 +454,11 @@ List<String> flutterCommandArgs(String command, List<String> options) {
         '--device-timeout',
         '5',
       ],
+
+    if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
+      '--screenshot',
+      hostAgent.dumpDirectory.path,
+    ],
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     ...options,
