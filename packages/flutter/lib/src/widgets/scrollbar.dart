@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -690,7 +691,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// [Scrollable] in this case to prevent having multiple ScrollPositions
 /// attached to the PrimaryScrollController.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This sample shows an app with two scrollables in the same route. Since by
 /// default, there is one [PrimaryScrollController] per route, and they both have a
 /// scroll direction of [Axis.vertical], they would both try to attach to that
@@ -699,7 +700,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// provided a unique [ScrollController].
 ///
 /// Alternatively, a new PrimaryScrollController could be created above one of
-/// the [ListViews].
+/// the [ListView]s.
 ///
 /// ```dart
 /// final ScrollController _firstController = ScrollController();
@@ -710,7 +711,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///       builder: (BuildContext context, BoxConstraints constraints) {
 ///         return Row(
 ///           children: <Widget>[
-///             Container(
+///             SizedBox(
 ///                 width: constraints.maxWidth / 2,
 ///                 // Only one scroll position can be attached to the
 ///                 // PrimaryScrollController if using Scrollbars. Providing a
@@ -724,14 +725,14 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///                       itemCount: 100,
 ///                       itemBuilder: (BuildContext context, int index) {
 ///                         return Padding(
-///                           padding: EdgeInsets.all(8.0),
+///                           padding: const EdgeInsets.all(8.0),
 ///                           child: Text('Scrollable 1 : Index $index'),
 ///                         );
 ///                       }
 ///                   ),
 ///                 )
 ///             ),
-///             Container(
+///             SizedBox(
 ///                 width: constraints.maxWidth / 2,
 ///                 // This vertical scroll view has not been provided a
 ///                 // ScrollController, so it is using the
@@ -745,7 +746,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///                             height: 50,
 ///                             color: index.isEven ? Colors.amberAccent : Colors.blueAccent,
 ///                             child: Padding(
-///                               padding: EdgeInsets.all(8.0),
+///                               padding: const EdgeInsets.all(8.0),
 ///                               child: Text('Scrollable 2 : Index $index'),
 ///                             )
 ///                         );
@@ -1720,4 +1721,94 @@ class _TrackTapGestureRecognizer extends TapGestureRecognizer {
 Offset _getLocalOffset(GlobalKey scrollbarPainterKey, Offset position) {
   final RenderBox renderBox = scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
   return renderBox.globalToLocal(position);
+}
+
+/// Flutter code sample for {{element}}
+
+/// This is the main application widget.
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  static const String _title = 'Flutter Code Sample';
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: _title,
+      home: Scaffold(
+        appBar: AppBar(title: const Text(_title)),
+        body: const Center(
+          child: MyStatefulWidget(),
+        ),
+      ),
+    );
+  }
+}
+
+/// This is the stateful widget that the main application instantiates.
+class MyStatefulWidget extends StatefulWidget {
+  const MyStatefulWidget({Key? key}) : super(key: key);
+
+  @override
+  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+}
+
+/// This is the private State class that goes with MyStatefulWidget.
+class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+  final ScrollController _firstController = ScrollController();
+  
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Row(
+            children: <Widget>[
+              SizedBox(
+                  width: constraints.maxWidth / 2,
+                  // Only one scroll position can be attached to the
+                  // PrimaryScrollController if using Scrollbars. Providing a
+                  // unique scroll controller to this scroll view prevents it
+                  // from attaching to the PrimaryScrollController.
+                  child: Scrollbar(
+                    isAlwaysShown: true,
+                    controller: _firstController,
+                    child: ListView.builder(
+                        controller: _firstController,
+                        itemCount: 100,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('Scrollable 1 : Index $index'),
+                          );
+                        }
+                    ),
+                  )
+              ),
+              SizedBox(
+                  width: constraints.maxWidth / 2,
+                  // This vertical scroll view has not been provided a
+                  // ScrollController, so it is using the
+                  // PrimaryScrollController.
+                  child: Scrollbar(
+                    isAlwaysShown: true,
+                    child: ListView.builder(
+                        itemCount: 100,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Container(
+                              height: 50,
+                              color: index.isEven ? Colors.amberAccent : Colors.blueAccent,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text('Scrollable 2 : Index $index'),
+                              )
+                          );
+                        }
+                    ),
+                  )
+              ),
+            ],
+          );
+        }
+    );
+  }
 }
