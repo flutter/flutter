@@ -95,15 +95,16 @@ struct ColorAttachmentDescriptor {
   /// final_color = final_color & write_mask;
   /// ```
 
-  BlendFactor src_color_blend_factor;
-  BlendOperation color_blend_op;
-  BlendFactor dst_color_blend_factor;
+  BlendFactor src_color_blend_factor = BlendFactor::kOne;
+  BlendOperation color_blend_op = BlendOperation::kAdd;
+  BlendFactor dst_color_blend_factor = BlendFactor::kZero;
 
-  BlendFactor src_alpha_blend_factor;
-  BlendOperation alpha_blend_op;
-  BlendFactor dst_alpha_blend_factor;
+  BlendFactor src_alpha_blend_factor = BlendFactor::kOne;
+  BlendOperation alpha_blend_op = BlendOperation::kAdd;
+  BlendFactor dst_alpha_blend_factor = BlendFactor::kZero;
 
-  std::underlying_type_t<ColorWriteMask> write_mask;
+  std::underlying_type_t<ColorWriteMask> write_mask =
+      static_cast<uint64_t>(ColorWriteMask::kAll);
 
   constexpr bool operator==(const ColorAttachmentDescriptor& o) const {
     return format == o.format &&                                  //
