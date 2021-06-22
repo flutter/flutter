@@ -434,7 +434,7 @@ mixin SchedulerBinding on BindingBase {
   }
 
   // Scheduled by _ensureEventLoopCallback.
-  void _runTasks()  {
+  void _runTasks() {
     _hasRequestedAnEventLoopCallback = false;
     if (handleEventLoopCallback() || _taskQueue.isNotEmpty) {
       _ensureEventLoopCallback(); // runs next task when there's time.
