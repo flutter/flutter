@@ -127,24 +127,40 @@ struct ColorAttachmentDescriptor {
 };
 
 enum class CompareFunction {
+  /// Comparison test never passes.
   kNever,
-  kLess,
-  kEqual,
-  kLessEqual,
-  kGreater,
-  kNotEqual,
-  kGreaterEqual,
+  /// Comparison test passes always passes.
   kAlways,
+  /// Comparison test passes if new_value < current_value.
+  kLess,
+  /// Comparison test passes if new_value == current_value.
+  kEqual,
+  /// Comparison test passes if new_value <= current_value.
+  kLessEqual,
+  /// Comparison test passes if new_value > current_value.
+  kGreater,
+  /// Comparison test passes if new_value != current_value.
+  kNotEqual,
+  /// Comparison test passes if new_value >= current_value.
+  kGreaterEqual,
 };
 
 enum class StencilOperation {
+  /// Don't modify the current stencil value.
   kKeep,
+  /// Reset the stencil value to zero.
   kZero,
-  kReplace,
+  /// Reset the stencil value to the reference value.
+  kSetToReferneceValue,
+  /// Increment the current stencil value by 1. Clamp it to the maximum.
   kIncrementClamp,
+  /// Decrement the current stencil value by 1. Clamp it to zero.
   kDecrementClamp,
+  /// Perform a logical bitwise invert on the current stencil value.
   kInvert,
+  /// Increment the current stencil value by 1. If at maxium, set to zero.
   kIncrementWrap,
+  /// Decrement the current stencil value by 1. If at zero, set to maximum.
   kDecrementWrap,
 };
 
@@ -152,11 +168,11 @@ struct DepthAttachmentDescriptor {
   //----------------------------------------------------------------------------
   /// Indicates how to compare the value with that in the depth buffer.
   ///
-  CompareFunction depth_compare;
+  CompareFunction depth_compare = CompareFunction::kAlways;
   //----------------------------------------------------------------------------
   /// Indicates when writes must be performed to the depth buffer.
   ///
-  bool depth_write_enabled;
+  bool depth_write_enabled = false;
 
   constexpr bool operator==(const DepthAttachmentDescriptor& o) const {
     return depth_compare == o.depth_compare &&
@@ -174,30 +190,30 @@ struct StencilAttachmentDescriptor {
   /// value in the stencil buffer. Both values have the read_mask applied to
   /// them before performing this operation.
   ///
-  CompareFunction stencil_compare;
+  CompareFunction stencil_compare = CompareFunction::kAlways;
   //----------------------------------------------------------------------------
   /// Indicates what to do when the stencil test has failed.
   ///
-  StencilOperation stencil_failure;
+  StencilOperation stencil_failure = StencilOperation::kKeep;
   //----------------------------------------------------------------------------
   /// Indicates what to do when the stencil test passes but the depth test
   /// fails.
   ///
-  StencilOperation depth_failure;
+  StencilOperation depth_failure = StencilOperation::kKeep;
   //----------------------------------------------------------------------------
   /// Indicates what to do when both the stencil and depth tests pass.
   ///
-  StencilOperation depth_stencil_pass;
+  StencilOperation depth_stencil_pass = StencilOperation::kKeep;
   //----------------------------------------------------------------------------
   /// The mask applied to the reference and stencil buffer values before
   /// performing the stencil_compare operation.
   ///
-  uint32_t read_mask;
+  uint32_t read_mask = ~0;
   //----------------------------------------------------------------------------
   /// The mask applied to the new stencil value before it is written into the
   /// stencil buffer.
   ///
-  uint32_t write_mask;
+  uint32_t write_mask = ~0;
 
   constexpr bool operator==(const StencilAttachmentDescriptor& o) const {
     return stencil_compare == o.stencil_compare &&

@@ -149,7 +149,7 @@ constexpr MTLStencilOperation ToMTLStencilOperation(StencilOperation op) {
       return MTLStencilOperationKeep;
     case StencilOperation::kZero:
       return MTLStencilOperationZero;
-    case StencilOperation::kReplace:
+    case StencilOperation::kSetToReferneceValue:
       return MTLStencilOperationReplace;
     case StencilOperation::kIncrementClamp:
       return MTLStencilOperationIncrementClamp;
