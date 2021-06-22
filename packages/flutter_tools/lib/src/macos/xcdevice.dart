@@ -373,7 +373,10 @@ class XCDevice {
       // "13.3 (17C54)"
       final RegExp operatingSystemRegex = RegExp(r'(.*) \(.*\)$');
       final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
-      return operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
+      if(operatingSystemRegex.hasMatch(operatingSystemVersion.trim())) {
+        return operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
+      }
+      return operatingSystemVersion;
     }
     return null;
   }
