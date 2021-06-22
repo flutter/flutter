@@ -1142,6 +1142,75 @@ void main() {
     expect(state.wantKeepAlive, true);
   });
 
+  testWidgets(
+    'kept-alive EditableText does not crash when layout is skipped',
+    (WidgetTester tester) async {
+      EditableText.debugDeterministicCursor = true;
+      const Key key = ValueKey<String>('EditableText');
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListView(
+              children: <Widget>[
+                EditableText(
+                  key: key,
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  focusNode: focusNode,
+                  autofocus: true,
+                  maxLines: null,
+                  keyboardType: TextInputType.text,
+                  style: textStyle,
+                  textAlign: TextAlign.left,
+                  cursorColor: cursorColor,
+                  showCursor: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Wait for autofocus.
+      await tester.pump();
+      expect(focusNode.hasFocus, isTrue);
+      // Prepend additional items to make EditableText invisible. It's still
+      // kept in the tree via the keepalive mechanism.
+
+      // Change the text alignment and showCursor. The RenderEditable would need
+      // relayout and repaint.
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListView(
+              children: <Widget>[
+                const SizedBox(height: 6000),
+                EditableText(
+                  key: key,
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  focusNode: focusNode,
+                  autofocus: true,
+                  maxLines: null,
+                  keyboardType: TextInputType.text,
+                  style: textStyle,
+                  textAlign: TextAlign.right,
+                  cursorColor: cursorColor,
+                  showCursor: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      EditableText.debugDeterministicCursor = false;
+  });
+
   /// Toolbar is not used in Flutter Web. Skip this check.
   ///
   /// Web is using native DOM elements (it is also used as platform input)

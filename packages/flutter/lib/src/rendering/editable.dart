@@ -3164,8 +3164,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///  * [getLocalRectForCaret], which is the equivalent but for
   ///    a [TextPosition] rather than a [TextSelection].
   List<TextSelectionPoint> getEndpointsForSelection(TextSelection selection) {
-    assert(constraints != null);
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _computeTextMetricsIfNeeded();
 
     final Offset paintOffset = _paintOffset;
 
@@ -3195,10 +3194,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Returns null if [TextRange.isValid] is false for the given `range`, or the
   /// given `range` is collapsed.
   Rect? getRectForComposingRange(TextRange range) {
-    assert(constraints != null);
     if (!range.isValid || range.isCollapsed)
       return null;
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _computeTextMetricsIfNeeded();
 
     final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(
       TextSelection(baseOffset: range.start, extentOffset: range.end),
@@ -3219,7 +3217,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///  * [TextPainter.getPositionForOffset], which is the equivalent method
   ///    for a [TextPainter] object.
   TextPosition getPositionForPoint(Offset globalPosition) {
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _computeTextMetricsIfNeeded();
     globalPosition += -_paintOffset;
     return _textPainter.getPositionForOffset(globalToLocal(globalPosition));
   }
@@ -3236,7 +3234,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///  * [TextPainter.getOffsetForCaret], the equivalent method for a
   ///    [TextPainter] object.
   Rect getLocalRectForCaret(TextPosition caretPosition) {
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _computeTextMetricsIfNeeded();
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
     final Rect rect = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight).shift(caretOffset + _paintOffset + cursorOffset);
@@ -3308,7 +3306,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _computeTextMetricsIfNeeded();
     return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
@@ -3502,7 +3500,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     assert(cause != null);
     assert(from != null);
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _computeTextMetricsIfNeeded();
     final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
     final TextSelection firstWord = _getWordAtOffset(firstPosition);
     final TextSelection lastWord = to == null ?
@@ -3523,7 +3521,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordEdge({ required SelectionChangedCause cause }) {
     assert(cause != null);
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _computeTextMetricsIfNeeded();
     assert(_lastTapDownPosition != null);
     final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
     final TextRange word = _textPainter.getWordBoundary(position);
@@ -3693,11 +3691,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
-  // This method must be called in `RenderEditable`'s public methods that
-  // expose `_textPainter`'s metrics. For instance, `systemFontsDidChange`
-  // sets _textPainter._paragraph to null, accessing _textPainter's metrics
-  // immediately after `systemFontsDidChange` without first calling this method
-  // may crash.
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     assert(maxWidth != null && minWidth != null);
     final double availableMaxWidth = math.max(0.0, maxWidth - _caretMargin);
@@ -3710,6 +3703,25 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     );
     _textLayoutLastMinWidth = minWidth;
     _textLayoutLastMaxWidth = maxWidth;
+  }
+
+  // Computes the text metrics if `_textPainter`'s layout information was marked
+  // as dirty.
+  //
+  // This method must be called in [RenderEditable]'s public methods that
+  // expose `_textPainter`'s metrics. For instance, `systemFontsDidChange` sets
+  // _textPainter._paragraph to null, accessing _textPainter's metrics
+  // immediately after `systemFontsDidChange` without first calling this method
+  // may crash.
+  //
+  // This method is also called in various paint methods (`RenderEditable.paint`
+  // as well as its foreground/background painters' `paint`). It's needed
+  // because invisible render objects kept in the tree by `KeepAlive` may not
+  // get a chance to do layout but can still paint.
+  // See https://github.com/flutter/flutter/issues/84896.
+  void _computeTextMetricsIfNeeded() {
+    assert(constraints != null);
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
   }
 
   late Rect _caretPrototype;
@@ -3795,7 +3807,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final BoxConstraints constraints = this.constraints;
     _placeholderDimensions = _layoutChildren(constraints);
     _textPainter.setPlaceholderDimensions(_placeholderDimensions);
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _computeTextMetricsIfNeeded();
     _setParentData();
     _computeCaretPrototype();
     // We grab _textPainter.size here because assigning to `size` on the next
@@ -3988,7 +4000,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _computeTextMetricsIfNeeded();
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
       _clipRectLayer = context.pushClipRect(
         needsCompositing,
@@ -4076,6 +4088,7 @@ class _RenderEditableCustomPaint extends RenderBox {
     assert(parent != null);
     final RenderEditablePainter? painter = this.painter;
     if (painter != null && parent != null) {
+      parent._computeTextMetricsIfNeeded();
       painter.paint(context.canvas, size, parent);
     }
   }
