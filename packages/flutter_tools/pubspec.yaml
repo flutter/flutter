@@ -1,7 +1,6 @@
 name: flutter_tools
 description: Tools for building Flutter applications
 homepage: https://flutter.dev
-author: Flutter Authors <flutter-dev@googlegroups.com>
 
 environment:
   sdk: ">=2.12.0-0 <3.0.0"

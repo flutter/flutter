@@ -1,7 +1,6 @@
 name: flutter_driver
 description: Integration and performance test API for Flutter applications
 homepage: http://flutter.dev
-author: Flutter Authors <flutter-dev@googlegroups.com>
 
 environment:
   sdk: ">=2.12.0-0 <3.0.0"

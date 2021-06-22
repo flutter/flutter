@@ -1,6 +1,5 @@
 name: snippets
 version: 0.1.0
-author: Flutter Team <flutter-dev@googlegroups.com>
 description: A code snippet dartdoc extension for Flutter API docs.
 homepage: https://github.com/flutter/flutter
 

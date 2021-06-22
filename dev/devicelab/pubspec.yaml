@@ -1,5 +1,4 @@
 name: flutter_devicelab
-author: Flutter Authors <flutter-dev@googlegroups.com>
 description: Flutter continuous integration performance and correctness tests.
 homepage: https://github.com/flutter/flutter
 
