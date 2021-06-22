@@ -380,7 +380,7 @@ class XCDevice {
 
   static String _buildVersion(Map<String, dynamic> deviceProperties) {
     if (deviceProperties.containsKey('operatingSystemVersion')) {
-      //Parse out the build version
+      // Parse out the build version, for example 17C54 from "13.3 (17C54)".
       final RegExp buildVersionRegex = RegExp(r'\(.*\)$');
       final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
       return buildVersionRegex.firstMatch(operatingSystemVersion)?.group(0)?.replaceAll(RegExp('[()]'), '');
