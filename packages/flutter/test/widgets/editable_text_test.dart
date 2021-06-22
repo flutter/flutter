@@ -1178,7 +1178,7 @@ void main() {
       await tester.pump();
       expect(focusNode.hasFocus, isTrue);
 
-      // Prepend additional items to make EditableText invisible. It's still
+      // Prepend an additional item to make EditableText invisible. It's still
       // kept in the tree via the keepalive mechanism. Change the text alignment
       // and showCursor. The RenderEditable now needs to relayout and repaint.
       await tester.pumpWidget(
@@ -1209,6 +1209,7 @@ void main() {
       );
 
       EditableText.debugDeterministicCursor = false;
+      expect(tester.takeException(), isNull);
   });
 
   /// Toolbar is not used in Flutter Web. Skip this check.

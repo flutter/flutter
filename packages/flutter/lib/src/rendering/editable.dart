@@ -3708,9 +3708,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // Computes the text metrics if `_textPainter`'s layout information was marked
   // as dirty.
   //
-  // This method must be called in [RenderEditable]'s public methods that
-  // expose `_textPainter`'s metrics. For instance, `systemFontsDidChange` sets
-  // _textPainter._paragraph to null, accessing _textPainter's metrics
+  // This method must be called in `RenderEditable`'s public methods that expose
+  // `_textPainter`'s metrics. For instance, `systemFontsDidChange` sets
+  // _textPainter._paragraph to null, so accessing _textPainter's metrics
   // immediately after `systemFontsDidChange` without first calling this method
   // may crash.
   //
@@ -3719,6 +3719,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // because invisible render objects kept in the tree by `KeepAlive` may not
   // get a chance to do layout but can still paint.
   // See https://github.com/flutter/flutter/issues/84896.
+  //
+  // This method only re-computes layout if the underlying `_textPainter`'s
+  // layout cache is invalidated (by calling `TextPainter.markNeedsLayout`), or
+  // the constraints used to layout the `_textPainter` is different. See
+  // `TextPainter.layout`.
   void _computeTextMetricsIfNeeded() {
     assert(constraints != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
