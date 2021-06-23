@@ -59,7 +59,6 @@ Future<void> main() async {
       await driver.tap(tapWindow);
       final String windowClickCount = await driver.getText(
         find.byValueKey('WindowClickCount'),
-        timeout: const Duration(seconds: 5),
       );
       expect(windowClickCount, 'Click count: 1');
     });
