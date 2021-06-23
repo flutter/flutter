@@ -43,7 +43,6 @@ struct SwitchDesc {
 static const std::string gAllowedDartFlags[] = {
     "--enable-isolate-groups",
     "--no-enable-isolate-groups",
-    "--no-causal_async_stacks",
     "--lazy_async_stacks",
 };
 // clang-format on
@@ -58,7 +57,6 @@ static const std::string gAllowedDartFlags[] = {
     "--enable-service-port-fallback",
     "--lazy_async_stacks",
     "--max_profile_depth",
-    "--no-causal_async_stacks",
     "--profile_period",
     "--random_seed",
     "--sample-buffer-duration",

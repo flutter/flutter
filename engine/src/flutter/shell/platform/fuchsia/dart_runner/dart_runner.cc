@@ -36,7 +36,6 @@ namespace {
 
 const char* kDartVMArgs[] = {
     // clang-format off
-    "--no_causal_async_stacks",
     "--lazy_async_stacks",
 
     "--systrace_timeline",
