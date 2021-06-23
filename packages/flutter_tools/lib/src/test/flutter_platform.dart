@@ -63,6 +63,7 @@ FlutterPlatform installHook({
   PlatformPluginRegistration platformPluginRegistration,
   Device integrationTestDevice,
   String integrationTestUserIdentifier,
+  File integrationTestWriteSkslOnExit,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
@@ -92,6 +93,7 @@ FlutterPlatform installHook({
     icudtlPath: icudtlPath,
     integrationTestDevice: integrationTestDevice,
     integrationTestUserIdentifier: integrationTestUserIdentifier,
+    integrationTestWriteSkslOnExit: integrationTestWriteSkslOnExit,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -286,6 +288,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.icudtlPath,
     this.integrationTestDevice,
     this.integrationTestUserIdentifier,
+    this.integrationTestWriteSkslOnExit
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -310,6 +313,7 @@ class FlutterPlatform extends PlatformPlugin {
   bool get _isIntegrationTest => integrationTestDevice != null;
 
   final String integrationTestUserIdentifier;
+  final File integrationTestWriteSkslOnExit;
 
   final FontConfigManager _fontConfigManager = FontConfigManager();
 
@@ -407,6 +411,7 @@ class FlutterPlatform extends PlatformPlugin {
         debuggingOptions: debuggingOptions,
         device: integrationTestDevice,
         userIdentifier: integrationTestUserIdentifier,
+        writeSkslOnExit: integrationTestWriteSkslOnExit,
       );
     }
     return FlutterTesterTestDevice(

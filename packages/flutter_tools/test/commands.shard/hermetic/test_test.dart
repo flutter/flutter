@@ -604,6 +604,32 @@ dev_dependencies:
     ]),
   });
 
+  testUsingContext('Integration tests set the correct sksl', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    const String skslOutputPath = 'sksl.json';
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--write-sksl-on-exit=$skslOutputPath',
+      'integration_test',
+    ]);
+
+    expect(testRunner.lastDebuggingOptionsValue.cacheSkSL, true);
+    expect(testRunner.lastDebuggingOptionsValue.purgePersistentCache, true);
+    expect(testRunner.lastIntegrationTestWriteSkslOnExitValue.path, skslOutputPath);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.android),
+    ]),
+  });
+
   testUsingContext('Builds the asset manifest by default', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
@@ -652,6 +678,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   int exitCode;
   bool lastEnableObservatoryValue;
   DebuggingOptions lastDebuggingOptionsValue;
+  File lastIntegrationTestWriteSkslOnExitValue;
 
   @override
   Future<int> runTests(
@@ -687,9 +714,11 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     int totalShards,
     Device integrationTestDevice,
     String integrationTestUserIdentifier,
+    File integrationTestWriteSkslOnExit,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     lastDebuggingOptionsValue = debuggingOptions;
+    lastIntegrationTestWriteSkslOnExitValue = integrationTestWriteSkslOnExit;
     return exitCode;
   }
 }

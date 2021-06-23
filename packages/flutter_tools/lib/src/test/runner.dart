@@ -55,6 +55,7 @@ abstract class FlutterTestRunner {
     int totalShards,
     Device integrationTestDevice,
     String integrationTestUserIdentifier,
+    File integrationTestWriteSkslOnExit,
   });
 }
 
@@ -91,6 +92,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     int totalShards,
     Device integrationTestDevice,
     String integrationTestUserIdentifier,
+    File integrationTestWriteSkslOnExit,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
@@ -209,6 +211,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       icudtlPath: icudtlPath,
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: integrationTestUserIdentifier,
+      integrationTestWriteSkslOnExit: integrationTestWriteSkslOnExit,
     );
 
     try {

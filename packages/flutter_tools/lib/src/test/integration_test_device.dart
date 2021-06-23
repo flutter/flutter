@@ -6,6 +6,7 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -15,6 +16,7 @@ import '../base/common.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals_null_migrated.dart' as globals;
+import '../sksl_writer.dart';
 import '../vmservice.dart';
 import 'test_device.dart';
 
@@ -28,6 +30,7 @@ class IntegrationTestTestDevice implements TestDevice {
     @required this.device,
     @required this.debuggingOptions,
     @required this.userIdentifier,
+    @required this.writeSkslOnExit,
   });
 
   final int id;
@@ -35,9 +38,14 @@ class IntegrationTestTestDevice implements TestDevice {
   final DebuggingOptions debuggingOptions;
   final String userIdentifier;
 
+  /// File to write the SkSL shaders.
+  ///
+  /// The SkSL shaders will only be written to this file if it is not null.
+  final File writeSkslOnExit;
+
   ApplicationPackage _applicationPackage;
   final Completer<void> _finished = Completer<void>();
-  final Completer<Uri> _gotProcessObservatoryUri = Completer<Uri>();
+  final Completer<FlutterVmService> _connectedToFlutterVmService = Completer<FlutterVmService>();
 
   /// Starts the device.
   ///
@@ -66,8 +74,6 @@ class IntegrationTestTestDevice implements TestDevice {
 
     // No need to set up the log reader because the logs are captured and
     // streamed to the package:test_core runner.
-
-    _gotProcessObservatoryUri.complete(launchResult.observatoryUri);
 
     globals.printTrace('test $id: Connecting to vm service');
     final FlutterVmService vmService = await connectToVmService(launchResult.observatoryUri, logger: globals.logger).timeout(
@@ -98,14 +104,20 @@ class IntegrationTestTestDevice implements TestDevice {
     });
 
     unawaited(remoteMessages.pipe(controller.local.sink));
+    _connectedToFlutterVmService.complete(vmService);
+
     return controller.foreign;
   }
 
   @override
-  Future<Uri> get observatoryUri => _gotProcessObservatoryUri.future;
+  Future<Uri> get observatoryUri async => (await _connectedToFlutterVmService.future).httpAddress;
 
   @override
   Future<void> kill() async {
+    if (writeSkslOnExit != null) {
+      await _writeSksl();
+    }
+
     if (!await device.stopApp(_applicationPackage, userIdentifier: userIdentifier)) {
       globals.printTrace('Could not stop the Integration Test app.');
     }
@@ -119,4 +131,18 @@ class IntegrationTestTestDevice implements TestDevice {
 
   @override
   Future<void> get finished => _finished.future;
+
+  Future<void> _writeSksl() async {
+    if (!_connectedToFlutterVmService.isCompleted) {
+      globals.printStatus('Skipped writing of SkSL data because the Flutter Tool could not connect to the device.');
+      return;
+    }
+    final FlutterVmService vmService = await _connectedToFlutterVmService.future;
+
+    final FlutterView flutterView = (await vmService.getFlutterViews()).first;
+    final Map<String, Object> result = await vmService.getSkSLs(
+      viewId: flutterView.id
+    );
+    await sharedSkSlWriter(device, result, outputFile: writeSkslOnExit, logger: globals.logger);
+  }
 }
