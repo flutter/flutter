@@ -40,6 +40,13 @@ enum class ShaderType {
   kSampler,
 };
 
+template <class T>
+struct ShaderUniformSlot {
+  using Type = T;
+  const char* name;
+  size_t binding;
+};
+
 struct ShaderStageIOSlot {
   const char* name;
   size_t location;

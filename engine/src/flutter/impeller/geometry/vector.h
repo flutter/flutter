@@ -7,6 +7,7 @@
 #include <cmath>
 #include <string>
 
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/size.h"
@@ -24,6 +25,8 @@ struct Vector3 {
   };
 
   constexpr Vector3(){};
+
+  constexpr Vector3(const Color& c) : x(c.red), y(c.green), z(c.blue) {}
 
   constexpr Vector3(const Point& p) : x(p.x), y(p.y) {}
 
@@ -111,6 +114,9 @@ struct Vector4 {
   };
 
   constexpr Vector4() {}
+
+  constexpr Vector4(const Color& c)
+      : x(c.red), y(c.green), z(c.blue), w(c.alpha) {}
 
   constexpr Vector4(Scalar x, Scalar y, Scalar z, Scalar w)
       : x(x), y(y), z(z), w(w) {}
