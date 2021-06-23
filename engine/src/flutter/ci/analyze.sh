@@ -132,6 +132,12 @@ analyze \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
   "$FLUTTER_DIR/tools/githooks"
 
+echo "Analyzing tools/clang_tidy"
+analyze \
+  --packages="$FLUTTER_DIR/tools/clang_tidy/.dart_tool/package_config.json" \
+  --options "$FLUTTER_DIR/analysis_options.yaml" \
+  "$FLUTTER_DIR/tools/clang_tidy"
+
 # Check that dart libraries conform.
 echo "Checking web_ui api conformance..."
 (cd "$FLUTTER_DIR/web_sdk"; "$PUB" get)
