@@ -20,14 +20,14 @@ namespace impeller {
 /// @brief      A 4x4 matrix using column-major storage.
 ///
 ///             Utility methods that need to make assumptions about normalized
-///             device coordinates use the following convention:
+///             device coordinates must use the following convention:
 ///               * Left-handed coordinate system. Positive rotation is
 ///                 clockwise about axis of rotation.
 ///               * Lower left corner is -1.0, -1.0.
 ///               * Upper left corner is  1.0,  1.0.
 ///               * Visible z-space is from 0.0 to 1.0.
-///                 * NOTE: This is not the same as OpenGL conventions!
-///               * Center is at (0.0, 0.0, 0.5).
+///                 * This is NOT the same as OpenGL! Be careful.
+///               * NDC origin is at (0.0, 0.0, 0.5).
 struct Matrix {
   union {
     Scalar m[16];
@@ -167,34 +167,6 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix MakeOrthographic(Scalar left,
-                                 Scalar right,
-                                 Scalar bottom,
-                                 Scalar top,
-                                 Scalar nearZ,
-                                 Scalar farZ);
-
-  static Matrix MakeOrthographic(const Size& size);
-
-  /**
-   *  Specify a viewing frustum in the worlds coordinate system.
-   *
-   *  @param fov    angle of the field of view (in radians).
-   *  @param aspect aspect ratio.
-   *  @param nearZ  near clipping plane.
-   *  @param farZ   far clipping plane.
-   *
-   *  @return the perspective projection matrix.
-   */
-  static Matrix MakePerspective(Scalar fov,
-                                Scalar aspect,
-                                Scalar nearZ,
-                                Scalar farZ);
-
-  static Matrix MakeLookAt(const Vector3& eye,
-                           const Vector3& center,
-                           const Vector3& up);
-
   constexpr Matrix Translate(const Vector3& t) const {
     // clang-format off
     return Matrix(m[0], m[1], m[2], m[3],
@@ -296,6 +268,13 @@ struct Matrix {
   Matrix operator*(const Matrix& m) const { return Multiply(m); }
 
   Matrix operator+(const Matrix& m) const;
+
+  static constexpr Matrix MakeOrthographic(const Size& size) {
+    // Per assumptions about NDC documented above.
+    const auto scale = MakeScale({1.0f / size.width, -1.0f / size.height, 1.0});
+    const auto translate = MakeTranslation({-1.0, 1.0, 0.5});
+    return translate * scale;
+  }
 };
 
 static_assert(sizeof(struct Matrix) == sizeof(Scalar) * 16,

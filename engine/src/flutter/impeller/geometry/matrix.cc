@@ -85,56 +85,6 @@ Matrix::Matrix(const Decomposition& d) : Matrix() {
   }
 }
 
-Matrix Matrix::MakeOrthographic(Scalar left,
-                                Scalar right,
-                                Scalar bottom,
-                                Scalar top,
-                                Scalar nearZ,
-                                Scalar farZ) {
-  Scalar ral = right + left;
-  Scalar rsl = right - left;
-  Scalar tab = top + bottom;
-  Scalar tsb = top - bottom;
-  // Scalar fan = farZ + nearZ;
-  Scalar fsn = farZ - nearZ;
-
-  // clang-format off
-  return Matrix(2.0 / rsl,   0.0,          0.0,          0.0,
-                0.0,         2.0 / tsb,    0.0,          0.0,
-                0.0,         0.0,         -1.0 / fsn,    0.0,
-                -ral / rsl, -tab / tsb,   -nearZ / fsn,  1.0);
-  // clang-format on
-}
-
-Matrix Matrix::MakeOrthographic(const Size& size) {
-  return Matrix::MakeOrthographic(0, size.width, size.height, 0, 0.0, 1.0);
-}
-
-Matrix Matrix::MakePerspective(Scalar fov,
-                               Scalar aspect,
-                               Scalar nearZ,
-                               Scalar farZ) {
-  Scalar cotan = 1.0 / tan(fov / 2.0);
-
-  return Matrix(cotan / aspect, 0.0, 0.0, 0.0,                        //
-                0.0, cotan, 0.0, 0.0,                                 //
-                0.0, 0.0, (farZ + nearZ) / (nearZ - farZ), -1.0,      //
-                0.0, 0.0, (2.0 * farZ * nearZ) / (nearZ - farZ), 0.0  //
-  );
-}
-
-Matrix Matrix::MakeLookAt(const Vector3& eye,
-                          const Vector3& center,
-                          const Vector3& up) {
-  auto n = (eye - center).Normalize();
-  auto u = (up.Cross(n)).Normalize();
-  auto v = n.Cross(u);
-  return {u.x,           v.x,           n.x,           0.0,  //
-          u.y,           v.y,           n.y,           0.0,  //
-          u.z,           v.z,           n.z,           0.0,  //
-          (-u).Dot(eye), (-v).Dot(eye), (-n).Dot(eye), 1.0};
-}
-
 Matrix Matrix::operator+(const Matrix& o) const {
   return Matrix(
       m[0] + o.m[0], m[1] + o.m[1], m[2] + o.m[2], m[3] + o.m[3],         //
