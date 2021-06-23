@@ -62,5 +62,5 @@ void macroPerfTestE2E(
       }
       await durationFuture;
     });
-  }, semanticsEnabled: false);
+  }, semanticsEnabled: false, timeout: Timeout.none);
 }

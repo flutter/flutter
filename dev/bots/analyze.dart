@@ -401,7 +401,7 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   final List<String> errors = <String>[];
   final String dev = path.join(workingDirectory, 'dev');
   final List<File> files = await _allFiles(dev, 'dart', minimumMatches: 1)
-      .where((File file) => file.path.contains('test_driver') && file.path.endsWith('_test.dart'))
+      .where((File file) => file.path.contains('test_driver') && (file.path.endsWith('_test.dart') || file.path.endsWith('util.dart')))
       .toList();
   for (final File file in files) {
     final String contents = file.readAsStringSync();
