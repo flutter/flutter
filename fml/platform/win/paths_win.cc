@@ -53,7 +53,7 @@ size_t LastSeparator(const std::string& path) {
 
 }  // namespace
 
-std::pair<bool, std::string> GetExecutableDirectoryPath() {
+std::pair<bool, std::string> GetExecutablePath() {
   HMODULE module = GetModuleHandle(NULL);
   if (module == NULL) {
     return {false, ""};
@@ -63,7 +63,7 @@ std::pair<bool, std::string> GetExecutableDirectoryPath() {
   if (read_size == 0 || read_size == MAX_PATH) {
     return {false, ""};
   }
-  return {true, GetDirectoryName(std::string{path, read_size})};
+  return {true, std::string{path, read_size}};
 }
 
 std::string AbsolutePath(const std::string& path) {

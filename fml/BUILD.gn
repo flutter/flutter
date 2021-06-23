@@ -97,6 +97,7 @@ source_set("fml") {
   public_deps = [ ":command_line" ]
 
   deps = [
+    "//third_party/abseil-cpp/absl/debugging:symbolize",
     "//third_party/dart/runtime:dart_api",
 
     # These need to be in sync with the Fuchsia buildroot.

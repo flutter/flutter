@@ -52,5 +52,13 @@ std::string SanitizeURIEscapedCharacters(const std::string& str) {
   return result;
 }
 
+std::pair<bool, std::string> GetExecutableDirectoryPath() {
+  auto path = GetExecutablePath();
+  if (!path.first) {
+    return {false, ""};
+  }
+  return {true, fml::paths::GetDirectoryName(path.second)};
+}
+
 }  // namespace paths
 }  // namespace fml

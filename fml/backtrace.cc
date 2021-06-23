@@ -17,6 +17,8 @@
 #endif
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/paths.h"
+#include "third_party/abseil-cpp/absl/debugging/symbolize.h"
 
 namespace fml {
 
@@ -45,16 +47,12 @@ static std::string DemangleSymbolName(const std::string& mangled) {
 }
 
 static std::string GetSymbolName(void* symbol) {
-  Dl_info info = {};
-
-  if (::dladdr(symbol, &info) == 0) {
-    return kKUnknownFrameName;
-  }
-  if (info.dli_sname == nullptr) {
+  char name[1024];
+  if (!absl::Symbolize(symbol, name, sizeof(name))) {
     return kKUnknownFrameName;
   }
 
-  return DemangleSymbolName({info.dli_sname});
+  return DemangleSymbolName({name});
 }
 
 std::string BacktraceHere(size_t offset) {
@@ -140,6 +138,10 @@ void InstallCrashHandler() {
     _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
   }
 #endif
+  auto exe_path = fml::paths::GetExecutablePath();
+  if (exe_path.first) {
+    absl::InitializeSymbolizer(exe_path.second.c_str());
+  }
   ToggleSignalHandlers(true);
 }
 

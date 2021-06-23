@@ -11,9 +11,9 @@
 namespace fml {
 namespace paths {
 
-std::pair<bool, std::string> GetExecutableDirectoryPath() {
+std::pair<bool, std::string> GetExecutablePath() {
   @autoreleasepool {
-    return {true, GetDirectoryName([NSBundle mainBundle].executablePath.UTF8String)};
+    return {true, [NSBundle mainBundle].executablePath.UTF8String};
   }
 }
 
