@@ -91,6 +91,8 @@ public class FlutterView extends SurfaceView
   public interface Provider {
     /**
      * Returns a reference to the Flutter view maintained by this object. This may be {@code null}.
+     *
+     * @return a reference to the Flutter view maintained by this object.
      */
     FlutterView getFlutterView();
   }

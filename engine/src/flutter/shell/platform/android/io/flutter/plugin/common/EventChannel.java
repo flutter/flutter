@@ -91,10 +91,10 @@ public final class EventChannel {
    * Handler of stream setup and teardown requests.
    *
    * <p>Implementations must be prepared to accept sequences of alternating calls to {@link
-   * #onListen(Object, EventSink)} and {@link #onCancel(Object)}. Implementations should ideally
-   * consume no resources when the last such call is not {@code onListen}. In typical situations,
-   * this means that the implementation should register itself with platform-specific event sources
-   * {@code onListen} and deregister again {@code onCancel}.
+   * #onListen(Object, EventChannel.EventSink)} and {@link #onCancel(Object)}. Implementations
+   * should ideally consume no resources when the last such call is not {@code onListen}. In typical
+   * situations, this means that the implementation should register itself with platform-specific
+   * event sources {@code onListen} and deregister again {@code onCancel}.
    */
   public interface StreamHandler {
     /**

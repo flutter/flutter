@@ -109,7 +109,8 @@ public class TestActivity extends TestableFlutterActivity {
   }
 
   /**
-   * This method verifies that {@link FlutterLoader#ensureInitializationCompleteAsync(Context,
+   * This method verifies that {@link
+   * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationCompleteAsync(Context,
    * String[], Handler, Runnable)} invokes its callback when called after initialization.
    */
   private void testFlutterLoaderCallbackWhenInitializedTwice() {

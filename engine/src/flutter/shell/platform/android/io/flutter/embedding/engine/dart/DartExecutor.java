@@ -246,7 +246,7 @@ public class DartExecutor implements BinaryMessenger {
    * is an appropriate time to free resources, such as going to the background.
    *
    * <p>This does not notify a Flutter application about memory pressure. For that, use the {@link
-   * SystemChannel#sendMemoryPressureWarning}.
+   * io.flutter.embedding.engine.systemchannels.SystemChannel#sendMemoryPressureWarning}.
    */
   public void notifyLowMemoryWarning() {
     if (flutterJNI.isAttached()) {

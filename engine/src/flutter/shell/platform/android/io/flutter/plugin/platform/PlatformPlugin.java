@@ -244,7 +244,8 @@ public class PlatformPlugin {
    * PlatformChannel.SystemChromeStyle}.
    *
    * <p>Updating the system UI Overlays is accomplished by altering the decor view of the {@link
-   * Window} associated with the {@link Activity} that was provided to this {@code PlatformPlugin}.
+   * Window} associated with the {@link android.app.Activity} that was provided to this {@code
+   * PlatformPlugin}.
    */
   public void updateSystemUiOverlays() {
     activity.getWindow().getDecorView().setSystemUiVisibility(mEnabledOverlays);

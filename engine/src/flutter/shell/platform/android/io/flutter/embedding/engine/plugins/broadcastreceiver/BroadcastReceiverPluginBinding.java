@@ -14,8 +14,9 @@ import androidx.annotation.NonNull;
 public interface BroadcastReceiverPluginBinding {
 
   /**
-   * Returns the {@link BroadcastReceiver} that is currently attached to the {@link FlutterEngine}
-   * that owns this {@code BroadcastReceiverAwarePluginBinding}.
+   * Returns the {@link BroadcastReceiver} that is currently attached to the {@link
+   * io.flutter.embedding.engine.FlutterEngine} that owns this {@code
+   * BroadcastReceiverAwarePluginBinding}.
    */
   @NonNull
   BroadcastReceiver getBroadcastReceiver();

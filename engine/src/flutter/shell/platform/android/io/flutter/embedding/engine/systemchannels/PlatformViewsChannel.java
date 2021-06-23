@@ -301,8 +301,8 @@ public class PlatformViewsChannel {
     /**
      * The layout direction of the new platform view.
      *
-     * <p>See {@link android.view.View.LAYOUT_DIRECTION_LTR} and {@link
-     * android.view.View.LAYOUT_DIRECTION_RTL}
+     * <p>See {@link android.view.View#LAYOUT_DIRECTION_LTR} and {@link
+     * android.view.View#LAYOUT_DIRECTION_RTL}
      */
     public final int direction;
 

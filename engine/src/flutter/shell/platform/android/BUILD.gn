@@ -568,6 +568,7 @@ zip_bundle("android") {
 
   deps = [
     ":android_jar",
+    ":android_javadoc",
     ":android_symbols",
   ]
 
@@ -582,8 +583,6 @@ zip_bundle("android") {
   }
 }
 
-# TODO(dnfield): make these targets pass.
-# https://github.com/flutter/flutter/issues/42400
 action("gen_android_javadoc") {
   script = "//flutter/tools/gen_javadoc.py"
   sources = android_java_sources + embedding_dependencies_jars
@@ -598,7 +597,10 @@ action("gen_android_javadoc") {
     rebase_path(target_gen_dir),
     "--third-party",
     rebase_path("//third_party"),
+    "--quiet",
   ]
+
+  deps = [ ":gen_android_build_config_java" ]
 }
 
 zip_bundle("android_javadoc") {

@@ -18,8 +18,8 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 
 /**
- * A view that applies the {@link io.flutter.embedding.engine.mutatorsstack.MutatorsStack} to its
- * children.
+ * A view that applies the {@link io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack} to
+ * its children.
  */
 public class FlutterMutatorView extends FrameLayout {
   private FlutterMutatorsStack mutatorsStack;

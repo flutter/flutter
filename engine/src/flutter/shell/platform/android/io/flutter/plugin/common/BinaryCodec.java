@@ -22,7 +22,7 @@ public final class BinaryCodec implements MessageCodec<ByteBuffer> {
   /**
    * A BinaryCodec that returns direct ByteBuffers from `decodeMessage` for better performance.
    *
-   * @see BinaryCodec.BinaryCodec(boolean)
+   * @see BinaryCodec#BinaryCodec(boolean)
    */
   public static final BinaryCodec INSTANCE_DIRECT = new BinaryCodec(true);
 

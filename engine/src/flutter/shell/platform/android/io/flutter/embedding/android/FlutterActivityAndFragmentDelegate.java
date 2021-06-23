@@ -102,8 +102,9 @@ import java.util.Arrays;
    * <p>No further method invocations may occur on this {@code FlutterActivityAndFragmentDelegate}
    * after invoking this method. If a method is invoked, an exception will occur.
    *
-   * <p>This method only clears out references. It does not destroy its {@link FlutterEngine}. The
-   * behavior that destroys a {@link FlutterEngine} can be found in {@link #onDetach()}.
+   * <p>This method only clears out references. It does not destroy its {@link
+   * io.flutter.embedding.engine.FlutterEngine}. The behavior that destroys a {@link
+   * io.flutter.embedding.engine.FlutterEngine} can be found in {@link #onDetach()}.
    */
   void release() {
     this.host = null;
@@ -113,8 +114,8 @@ import java.util.Arrays;
   }
 
   /**
-   * Returns the {@link FlutterEngine} that is owned by this delegate and its host {@code Activity}
-   * or {@code Fragment}.
+   * Returns the {@link io.flutter.embedding.engine.FlutterEngine} that is owned by this delegate
+   * and its host {@code Activity} or {@code Fragment}.
    */
   @Nullable
   /* package */ FlutterEngine getFlutterEngine() {
@@ -139,10 +140,11 @@ import java.util.Arrays;
    *
    * <ol>
    *   <li>Initializes the Flutter system.
-   *   <li>Obtains or creates a {@link FlutterEngine}.
+   *   <li>Obtains or creates a {@link io.flutter.embedding.engine.FlutterEngine}.
    *   <li>Creates and configures a {@link PlatformPlugin}.
-   *   <li>Attaches the {@link FlutterEngine} to the surrounding {@code Activity}, if desired.
-   *   <li>Configures the {@link FlutterEngine} via {@link
+   *   <li>Attaches the {@link io.flutter.embedding.engine.FlutterEngine} to the surrounding {@code
+   *       Activity}, if desired.
+   *   <li>Configures the {@link io.flutter.embedding.engine.FlutterEngine} via {@link
    *       Host#configureFlutterEngine(FlutterEngine)}.
    * </ol>
    */
@@ -196,14 +198,15 @@ import java.util.Arrays;
    *
    * <p>
    *
-   * <p>First, the {@code host} is asked if it would like to use a cached {@link FlutterEngine}, and
-   * if so, the cached {@link FlutterEngine} is retrieved.
+   * <p>First, the {@code host} is asked if it would like to use a cached {@link
+   * io.flutter.embedding.engine.FlutterEngine}, and if so, the cached {@link
+   * io.flutter.embedding.engine.FlutterEngine} is retrieved.
    *
-   * <p>Second, the {@code host} is given an opportunity to provide a {@link FlutterEngine} via
-   * {@link Host#provideFlutterEngine(Context)}.
+   * <p>Second, the {@code host} is given an opportunity to provide a {@link
+   * io.flutter.embedding.engine.FlutterEngine} via {@link Host#provideFlutterEngine(Context)}.
    *
-   * <p>If the {@code host} does not provide a {@link FlutterEngine}, then a new {@link
-   * FlutterEngine} is instantiated.
+   * <p>If the {@code host} does not provide a {@link io.flutter.embedding.engine.FlutterEngine},
+   * then a new {@link FlutterEngine} is instantiated.
    */
   @VisibleForTesting
   /* package */ void setupFlutterEngine() {
@@ -256,7 +259,8 @@ import java.util.Arrays;
    * <ol>
    *   <li>creates a new {@link FlutterView} in a {@code View} hierarchy
    *   <li>adds a {@link FlutterUiDisplayListener} to it
-   *   <li>attaches a {@link FlutterEngine} to the new {@link FlutterView}
+   *   <li>attaches a {@link io.flutter.embedding.engine.FlutterEngine} to the new {@link
+   *       FlutterView}
    *   <li>returns the new {@code View} hierarchy
    * </ol>
    */
@@ -473,7 +477,8 @@ import java.util.Arrays;
    * <ol>
    *   <li>This method notifies the running Flutter app that it is "paused" as per the Flutter app
    *       lifecycle.
-   *   <li>Detaches this delegate's {@link FlutterEngine} from this delegate's {@link FlutterView}.
+   *   <li>Detaches this delegate's {@link io.flutter.embedding.engine.FlutterEngine} from this
+   *       delegate's {@link FlutterView}.
    * </ol>
    */
   void onStop() {
@@ -538,10 +543,10 @@ import java.util.Arrays;
    * <p>
    *
    * <ol>
-   *   <li>Detaches this delegate's {@link FlutterEngine} from its surrounding {@code Activity}, if
-   *       it was previously attached.
+   *   <li>Detaches this delegate's {@link io.flutter.embedding.engine.FlutterEngine} from its
+   *       surrounding {@code Activity}, if it was previously attached.
    *   <li>Destroys this delegate's {@link PlatformPlugin}.
-   *   <li>Destroys this delegate's {@link FlutterEngine} if {@link
+   *   <li>Destroys this delegate's {@link io.flutter.embedding.engine.FlutterEngine} if {@link
    *       Host#shouldDestroyEngineWithHost()} ()} returns true.
    * </ol>
    */
@@ -586,7 +591,7 @@ import java.util.Arrays;
   }
 
   /**
-   * Invoke this from {@link Activity#onBackPressed()}.
+   * Invoke this from {@link android.app.Activity#onBackPressed()}.
    *
    * <p>A {@code Fragment} host must have its containing {@code Activity} forward this call so that
    * the {@code Fragment} can then invoke this method.
@@ -604,8 +609,8 @@ import java.util.Arrays;
   }
 
   /**
-   * Invoke this from {@link Activity#onRequestPermissionsResult(int, String[], int[])} or {@code
-   * Fragment#onRequestPermissionsResult(int, String[], int[])}.
+   * Invoke this from {@link android.app.Activity#onRequestPermissionsResult(int, String[], int[])}
+   * or {@code Fragment#onRequestPermissionsResult(int, String[], int[])}.
    *
    * <p>This method forwards to interested Flutter plugins.
    */
@@ -701,7 +706,7 @@ import java.util.Arrays;
   }
 
   /**
-   * Invoke this from {@link Activity#onTrimMemory(int)}.
+   * Invoke this from {@link android.app.Activity#onTrimMemory(int)}.
    *
    * <p>A {@code Fragment} host must have its containing {@code Activity} forward this call so that
    * the {@code Fragment} can then invoke this method.
@@ -726,7 +731,7 @@ import java.util.Arrays;
   }
 
   /**
-   * Invoke this from {@link Activity#onLowMemory()}.
+   * Invoke this from {@link android.app.Activity#onLowMemory()}.
    *
    * <p>A {@code Fragment} host must have its containing {@code Activity} forward this call so that
    * the {@code Fragment} can then invoke this method.
@@ -761,7 +766,10 @@ import java.util.Arrays;
           FlutterEngineProvider,
           FlutterEngineConfigurator,
           PlatformPlugin.PlatformPluginDelegate {
-    /** Returns the {@link Context} that backs the host {@link Activity} or {@code Fragment}. */
+    /**
+     * Returns the {@link Context} that backs the host {@link android.app.Activity} or {@code
+     * Fragment}.
+     */
     @NonNull
     Context getContext();
 
@@ -770,13 +778,16 @@ import java.util.Arrays;
     boolean shouldHandleDeeplinking();
 
     /**
-     * Returns the host {@link Activity} or the {@code Activity} that is currently attached to the
-     * host {@code Fragment}.
+     * Returns the host {@link android.app.Activity} or the {@code Activity} that is currently
+     * attached to the host {@code Fragment}.
      */
     @Nullable
     Activity getActivity();
 
-    /** Returns the {@link Lifecycle} that backs the host {@link Activity} or {@code Fragment}. */
+    /**
+     * Returns the {@link Lifecycle} that backs the host {@link android.app.Activity} or {@code
+     * Fragment}.
+     */
     @NonNull
     Lifecycle getLifecycle();
 
@@ -785,33 +796,36 @@ import java.util.Arrays;
     FlutterShellArgs getFlutterShellArgs();
 
     /**
-     * Returns the ID of a statically cached {@link FlutterEngine} to use within this delegate's
-     * host, or {@code null} if this delegate's host does not want to use a cached {@link
-     * FlutterEngine}.
+     * Returns the ID of a statically cached {@link io.flutter.embedding.engine.FlutterEngine} to
+     * use within this delegate's host, or {@code null} if this delegate's host does not want to use
+     * a cached {@link FlutterEngine}.
      */
     @Nullable
     String getCachedEngineId();
 
     /**
-     * Returns true if the {@link FlutterEngine} used in this delegate should be destroyed when the
-     * host/delegate are destroyed.
+     * Returns true if the {@link io.flutter.embedding.engine.FlutterEngine} used in this delegate
+     * should be destroyed when the host/delegate are destroyed.
      *
      * <p>The default value is {@code true} in cases where {@code FlutterFragment} created its own
-     * {@link FlutterEngine}, and {@code false} in cases where a cached {@link FlutterEngine} was
-     * provided.
+     * {@link io.flutter.embedding.engine.FlutterEngine}, and {@code false} in cases where a cached
+     * {@link io.flutter.embedding.engine.FlutterEngine} was provided.
      */
     boolean shouldDestroyEngineWithHost();
 
     /**
-     * Callback called when the {@link FlutterEngine} has been attached to by another activity
-     * before this activity was destroyed.
+     * Callback called when the {@link io.flutter.embedding.engine.FlutterEngine} has been attached
+     * to by another activity before this activity was destroyed.
      *
      * <p>The expected behavior is for this activity to synchronously stop using the {@link
      * FlutterEngine} to avoid lifecycle crosstalk with the new activity.
      */
     void detachFromFlutterEngine();
 
-    /** Returns the Dart entrypoint that should run when a new {@link FlutterEngine} is created. */
+    /**
+     * Returns the Dart entrypoint that should run when a new {@link
+     * io.flutter.embedding.engine.FlutterEngine} is created.
+     */
     @NonNull
     String getDartEntrypointFunctionName();
 
@@ -841,9 +855,11 @@ import java.util.Arrays;
     SplashScreen provideSplashScreen();
 
     /**
-     * Returns the {@link FlutterEngine} that should be rendered to a {@link FlutterView}.
+     * Returns the {@link io.flutter.embedding.engine.FlutterEngine} that should be rendered to a
+     * {@link FlutterView}.
      *
-     * <p>If {@code null} is returned, a new {@link FlutterEngine} will be created automatically.
+     * <p>If {@code null} is returned, a new {@link io.flutter.embedding.engine.FlutterEngine} will
+     * be created automatically.
      */
     @Nullable
     FlutterEngine provideFlutterEngine(@NonNull Context context);
@@ -856,7 +872,10 @@ import java.util.Arrays;
     PlatformPlugin providePlatformPlugin(
         @Nullable Activity activity, @NonNull FlutterEngine flutterEngine);
 
-    /** Hook for the host to configure the {@link FlutterEngine} as desired. */
+    /**
+     * Hook for the host to configure the {@link io.flutter.embedding.engine.FlutterEngine} as
+     * desired.
+     */
     void configureFlutterEngine(@NonNull FlutterEngine flutterEngine);
 
     /**
@@ -866,8 +885,8 @@ import java.util.Arrays;
     void cleanUpFlutterEngine(@NonNull FlutterEngine flutterEngine);
 
     /**
-     * Returns true if the {@link FlutterEngine}'s plugin system should be connected to the host
-     * {@link Activity}, allowing plugins to interact with it.
+     * Returns true if the {@link io.flutter.embedding.engine.FlutterEngine}'s plugin system should
+     * be connected to the host {@link android.app.Activity}, allowing plugins to interact with it.
      */
     boolean shouldAttachEngineToActivity();
 

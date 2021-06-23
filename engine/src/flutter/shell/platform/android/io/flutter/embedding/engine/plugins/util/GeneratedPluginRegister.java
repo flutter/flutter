@@ -29,14 +29,16 @@ public class GeneratedPluginRegister {
    * <p>In a normal full-Flutter application, the {@link
    * io.flutter.embedding.android.FlutterActivity} will automatically call the {@code
    * GeneratedPluginRegistrant} to register all plugins. In a typical full-Flutter application, the
-   * {@link io.flutter.embedding.android.FlutterActivity} creates a {@link FlutterEngine}. When a
-   * {@link FlutterEngine} is explicitly created, it automatically registers plugins during its
-   * construction.
+   * {@link io.flutter.embedding.android.FlutterActivity} creates a {@link
+   * io.flutter.embedding.engine.FlutterEngine}. When a {@link
+   * io.flutter.embedding.engine.FlutterEngine} is explicitly created, it automatically registers
+   * plugins during its construction.
    *
-   * <p>Since the {@link FlutterEngine} belongs to the Flutter engine and the
-   * GeneratedPluginRegistrant class belongs to the app project, the {@link FlutterEngine} cannot
-   * place a compile-time dependency on GeneratedPluginRegistrant to invoke it. Instead, this class
-   * uses reflection to attempt to locate the generated file and then uses it at runtime.
+   * <p>Since the {@link io.flutter.embedding.engine.FlutterEngine} belongs to the Flutter engine
+   * and the GeneratedPluginRegistrant class belongs to the app project, the {@link
+   * io.flutter.embedding.engine.FlutterEngine} cannot place a compile-time dependency on
+   * GeneratedPluginRegistrant to invoke it. Instead, this class uses reflection to attempt to
+   * locate the generated file and then uses it at runtime.
    *
    * <p>This method fizzles if the GeneratedPluginRegistrant cannot be found or invoked. This
    * situation should never occur, but if any eventuality comes up that prevents an app from using
@@ -45,12 +47,14 @@ public class GeneratedPluginRegister {
    * <p>To disable this automatic plugin registration behavior:
    *
    * <ul>
-   *   <li>If you manually construct {@link FlutterEngine}s, construct the {@link FlutterEngine}
-   *       with the {@code automaticallyRegisterPlugins} construction parameter set to false.
+   *   <li>If you manually construct {@link io.flutter.embedding.engine.FlutterEngine}s, construct
+   *       the {@link io.flutter.embedding.engine.FlutterEngine} with the {@code
+   *       automaticallyRegisterPlugins} construction parameter set to false.
    *   <li>If you let the {@link io.flutter.embedding.android.FlutterActivity} or {@link
-   *       io.flutter.embedding.android.FlutterFragmentActivity} construct a {@link FlutterEngine}
-   *       implicitly, override the {@code configureFlutterEngine} implementation and don't call
-   *       through to the superclass implementation.
+   *       io.flutter.embedding.android.FlutterFragmentActivity} construct a {@link
+   *       io.flutter.embedding.engine.FlutterEngine} implicitly, override the {@code
+   *       configureFlutterEngine} implementation and don't call through to the superclass
+   *       implementation.
    * </ul>
    *
    * <p>Disabling the automatic plugin registration or deferring it by calling this method

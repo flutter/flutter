@@ -14,8 +14,9 @@ import androidx.annotation.NonNull;
 public interface ContentProviderPluginBinding {
 
   /**
-   * Returns the {@link ContentProvider} that is currently attached to the {@link FlutterEngine}
-   * that owns this {@code ContentProviderAwarePluginBinding}.
+   * Returns the {@link ContentProvider} that is currently attached to the {@link
+   * io.flutter.embedding.engine.FlutterEngine} that owns this {@code
+   * ContentProviderAwarePluginBinding}.
    */
   @NonNull
   ContentProvider getContentProvider();

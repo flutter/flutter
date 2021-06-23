@@ -9,17 +9,18 @@ import androidx.lifecycle.Lifecycle;
 import io.flutter.embedding.engine.FlutterEngine;
 
 /**
- * Configures a {@link FlutterEngine} after it is created, e.g., adds plugins.
+ * Configures a {@link io.flutter.embedding.engine.FlutterEngine} after it is created, e.g., adds
+ * plugins.
  *
  * <p>This interface may be applied to a {@link androidx.fragment.app.FragmentActivity} that owns a
  * {@code FlutterFragment}.
  */
 public interface FlutterEngineConfigurator {
   /**
-   * Configures the given {@link FlutterEngine}.
+   * Configures the given {@link io.flutter.embedding.engine.FlutterEngine}.
    *
-   * <p>This method is called after the given {@link FlutterEngine} has been attached to the owning
-   * {@code FragmentActivity}. See {@link
+   * <p>This method is called after the given {@link io.flutter.embedding.engine.FlutterEngine} has
+   * been attached to the owning {@code FragmentActivity}. See {@link
    * io.flutter.embedding.engine.plugins.activity.ActivityControlSurface#attachToActivity(
    * ExclusiveAppComponent, Lifecycle)}.
    *
