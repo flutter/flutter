@@ -443,6 +443,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       registerServiceExtension(
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
+          // This mirrors the implementation of the 'reassemble' callback registration
+          // in lib/src/foundation/binding.dart, but with the extra binding config used
+          // to skip some reassemble work.
           final String? className = params['className'] as String?;
           BindingBase.debugReassembleConfig = DebugReassembleConfig(widgetName: className);
           try {
