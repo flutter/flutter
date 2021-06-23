@@ -1,4 +1,4 @@
-Signature: 575dbd1a49e74e130682e46b435d8ac4
+Signature: 9d857188dc87746267f12db34480fc46
 
 UNUSED LICENSES:
 
@@ -4005,7 +4005,6 @@ FILE: ../../../third_party/skia/src/gpu/GrThreadSafePipelineBuilder.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockSurfaceProxy.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlRenderCommandEncoder.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlRenderCommandEncoder.mm
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrCullTest.h
 FILE: ../../../third_party/skia/src/utils/SkOrderedFontMgr.cpp
 ----------------------------------------------------------------------------------------------------
