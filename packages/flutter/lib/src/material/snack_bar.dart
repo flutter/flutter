@@ -256,14 +256,6 @@ class SnackBar extends StatefulWidget {
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(
-         margin == null || behavior == SnackBarBehavior.floating,
-         'Margin can only be used with floating behavior',
-       ),
-       assert(
-         width == null || behavior == SnackBarBehavior.floating,
-         'Width can only be used with floating behavior',
-       ),
-       assert(
          width == null || margin == null,
          'Width and margin can not be used together',
        ),
@@ -489,6 +481,29 @@ class _SnackBarState extends State<SnackBar> {
 
     final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? ThemeData(brightness: brightness).textTheme.subtitle1;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
+    assert((){
+      // Whether the behavior is set through the constructor or the theme,
+      // assert that our other properties are configured properly.
+      if (snackBarBehavior != SnackBarBehavior.floating) {
+        final String setter = widget.behavior != null
+            ? 'in the SnackBar constructor'
+            : snackBarTheme.behavior != null
+              ? 'by the inherited SnackBarThemeData'
+              : 'by default';
+        final String messageStub = 'can only be used with floating behavior. '
+          'SnackBarBehavior.fixed was set $setter.';
+        assert(
+          widget.margin == null,
+          'Margin $messageStub',
+        );
+        assert(
+          widget.width == null,
+          'Width $messageStub',
+        );
+      }
+      return true;
+    }());
+
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
     final EdgeInsetsGeometry padding = widget.padding
