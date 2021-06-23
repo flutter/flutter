@@ -40,7 +40,7 @@ fi
 cd "$SCRIPT_DIR"
 "$DART" \
   --disable-dart-dev \
-  bin/lint.dart \
+  "$SRC_DIR/flutter/tools/clang_tidy/bin/main.dart" \
   --compile-commands="$COMPILE_COMMANDS" \
   --repo="$SRC_DIR/flutter" \
   "$@"
