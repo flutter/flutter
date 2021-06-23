@@ -92,6 +92,8 @@ struct ColorAttachmentDescriptor {
   /// } else {
   ///   final_color = new_color;
   /// }
+  /// // IMPORTANT: The write mask is applied irrespective of whether
+  /// //            blending_enabled is set.
   /// final_color = final_color & write_mask;
   /// ```
 
