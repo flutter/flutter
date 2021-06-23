@@ -611,8 +611,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       ]);
     }
 
-    // If the DismissDirection is none, we do not add drag gestures as it cannot
-    // be dragged.
+    // If the DismissDirection is none, we do not add drag gestures because the content
+    // cannot be dragged.
     if (widget.direction == DismissDirection.none)
       return content;
 
