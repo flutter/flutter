@@ -93,7 +93,7 @@ void main() {
     expect(androidWorkflow.canListEmulators, false);
   });
 
-  testWithoutContext('AndroidWorkflow cannot list emulators', () {
+  testWithoutContext('AndroidWorkflow cannot list emulators if emulatorPath is null', () {
     final FakeAndroidSdk androidSdk = FakeAndroidSdk();
     androidSdk.adbPath = 'path/to/adb';
     final AndroidWorkflow androidWorkflow = AndroidWorkflow(
