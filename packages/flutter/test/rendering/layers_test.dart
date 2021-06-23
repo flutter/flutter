@@ -611,10 +611,10 @@ void main() {
     expect(layer.debugDisposed, true, skip: bug85066);
 
     layer = PictureLayer(Rect.zero);
-    final LayerHandle handle = layer.createHandle();
+    final LayerHandle<PictureLayer> handle = LayerHandle<PictureLayer>(layer);
     expect(layer.debugHandleCount, 1);
     expect(() => layer.dispose(), throwsAssertionError);
-    handle.dispose();
+    handle.layer = null;
     expect(layer.debugHandleCount, 0);
     expect(layer.debugDisposed, true, skip: bug85066);
     expect(() => layer.dispose(), throwsAssertionError, skip: bug85066); // already disposed.
@@ -672,16 +672,38 @@ void main() {
     expect(picture.disposed, true);
   });
 
-  test('LayerHolder disposes the layer', () {
+  test('LayerHandle disposes the layer', () {
     final ConcreteLayer layer = ConcreteLayer();
-    final LayerHolder<ConcreteLayer?> holder = LayerHolder<ConcreteLayer?>();
+    final ConcreteLayer layer2 = ConcreteLayer();
+
     expect(layer.debugHandleCount, 0);
+    expect(layer2.debugHandleCount, 0);
+
+    final LayerHandle<ConcreteLayer?> holder = LayerHandle<ConcreteLayer?>(layer);
+    expect(layer.debugHandleCount, 1);
     expect(layer.debugDisposed, false);
+    expect(layer2.debugHandleCount, 0);
+    expect(layer2.debugDisposed, false);
+
     holder.layer = layer;
     expect(layer.debugHandleCount, 1);
+    expect(layer.debugDisposed, false);
+    expect(layer2.debugHandleCount, 0);
+    expect(layer2.debugDisposed, false);
+
+    holder.layer = layer2;
+    expect(layer.debugHandleCount, 0);
+    expect(layer.debugDisposed, true, skip: bug85066);
+    expect(layer2.debugHandleCount, 1);
+    expect(layer2.debugDisposed, false);
+
     holder.layer = null;
     expect(layer.debugHandleCount, 0);
     expect(layer.debugDisposed, true, skip: bug85066);
+    expect(layer2.debugHandleCount, 0);
+    expect(layer2.debugDisposed, true, skip: bug85066);
+
+    expect(() => holder.layer = layer, throwsAssertionError, skip: bug85066);
   });
 }
 

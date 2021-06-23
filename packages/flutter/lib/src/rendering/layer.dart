@@ -97,7 +97,7 @@ class AnnotationResult<T> {
 /// Layers must not be used after disposal. If a RenderObject needs to maintain
 /// a layer for later usage, it must create a handle to that layer. This is
 /// handled automatically for the [RenderObject.layer] property, but additional
-/// layers should be handled with a [LayerHolder] class.
+/// layers should be handled with a [LayerHandle] class.
 ///
 /// {@tool snippet}
 ///
@@ -106,7 +106,7 @@ class AnnotationResult<T> {
 ///
 /// ```dart
 /// class ClippingRenderObject extends RenderBox {
-///   final LayerHolder<ClipRectLayer?> _clipRectLayer = LayerHolder<ClipRectLayer?>();
+///   final LayerHandle<ClipRectLayer?> _clipRectLayer = LayerHandle<ClipRectLayer?>();
 ///
 ///   @override
 ///   bool get isRepaintBoundary => true; // The [layer] property will be used.
@@ -159,33 +159,12 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// appended to or removed from a [ContainerLayer] regardless of whether they
   /// are attached or detached, and detaching a layer from an owner does not
   /// imply that it has been removed from its parent.
-  LayerHandle? _parentHandle;
+  final LayerHandle<Layer> _parentHandle = LayerHandle<Layer>();
 
-  /// Creates a handle that keeps the native resources of this layer from being
-  /// prematurely disposed.
-  ///
-  /// [RenderObject]s automatically store handles to [PictureLayer](s) they draw
-  /// into and dispose of those handles when the [RenderObject.dispose] method
-  /// is called or they otherwise no longer need the reference to that
-  /// [PictureLayer] (such as when they paint a new picture).
-  ///
-  /// A handle is also automatically managed for [RenderObject.layer].
-  ///
-  /// If a [RenderObject] creates layers in addition to its [RenderObject.layer],
-  /// it must create a handle to that layer and dispose of it when the layer is
-  /// no longer needed. For example, if it re-creates or nulls out an existing
-  /// layer in [RenderObject.paint], it should dispose of the handle to the
-  /// old layer. It should also dispose of any layer handles it holds in
-  /// [RenderObject.dispose].
-  LayerHandle createHandle() {
-    assert(!_debugDisposed, 'Attempted to create a handle to a disposed layer.');
-
-    _refCount += 1;
-    return LayerHandle._(this);
-  }
-
+  /// Incremenetd by [LayerHandle].
   int _refCount = 0;
 
+  /// Called by [LayerHandle].
   void _unref() {
     assert(_refCount > 0);
     _refCount -= 1;
@@ -227,7 +206,13 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   @visibleForTesting
   void dispose() {
-    assert(!_debugDisposed);
+    assert(
+      !_debugDisposed,
+      'Layers must only be disposed once. This is typically handled by '
+      'LayerHandle and createHandle. Subclasses should not directly call '
+      'dispose, except to call super.dispose() in an overridden dispose  '
+      'method. Tests must only call dispose once.',
+    );
     assert(() {
       assert(
         _refCount == 0,
@@ -590,9 +575,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 /// A handle to prevent a [Layer]'s platform graphics resources from being
 /// disposed.
 ///
-/// [RenderObject]s that need to hold more than one [Layer] may use the
-/// [LayerHolder] class to help manage the lifetime of additional layers.
-///
 /// [Layer] objects retain native resourses such as [EngineLayer]s and [Picture]
 /// objects. These objects may in turn retain large chunks of texture memory,
 /// either directly or indirectly.
@@ -609,29 +591,58 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 /// the handles for that layer similarly to the implementation of
 /// [RenderObject.layer].
 ///
-/// Layers can be reused even after their native resources has been released,
-/// since they are mutable objects and the native resources can be reset on
-/// subsequent frames.
-class LayerHandle {
-  LayerHandle._(Layer this._layer);
+/// [RenderObject]s automatically store handles to [PictureLayer](s) they draw
+/// into and dispose of those handles when the [RenderObject.dispose] method
+/// is called or they otherwise no longer need the reference to that
+/// [PictureLayer] (such as when they paint a new picture).
+///
+/// A handle is also automatically managed for [RenderObject.layer].
+///
+/// If a [RenderObject] creates layers in addition to its [RenderObject.layer],
+/// it must create a handle to that layer and dispose of it when the layer is
+/// no longer needed. For example, if it re-creates or nulls out an existing
+/// layer in [RenderObject.paint], it should dispose of the handle to the
+/// old layer. It should also dispose of any layer handles it holds in
+/// [RenderObject.dispose].
+class LayerHandle<T extends Layer?> {
+  /// Creates a new LayerHandle, optionally referencing a [Layer].
+  LayerHandle([this._layer]) {
+    if (_layer != null) {
+      _layer!._refCount += 1;
+    }
+  }
 
-  Layer? _layer;
+  T? _layer;
+
+  /// The [Layer] this class holds.
+  ///
+  /// Setting a new value will dispose the previously held layer if there are
+  /// no other open handles to that layer.
+  ///
+  /// To dispose of this handle, set this value to `null`.
+  T? get layer => _layer;
+
+  set layer(T? layer) {
+    assert(
+      layer?.debugDisposed != true,
+      'Attempted to create a handle to an already disposed layer: $layer.',
+    );
+    if (identical(layer, _layer)) {
+      return;
+    }
+    _layer?._unref();
+    _layer = layer;
+    if (_layer != null) {
+      _layer!._refCount += 1;
+    }
+  }
+
 
   /// Whether the layer this object refers to is identical to `layer`.
   ///
   /// In debug mode, this will throw after [dispose] has been called.
   bool isHandleForLayer(Layer layer) {
-    assert(_layer != null, 'Cannot check a disposed handle.');
     return identical(layer, _layer);
-  }
-
-  /// Releases the reference to the [Layer] that created this handle.
-  ///
-  /// This object is unusable after this call.
-  void dispose() {
-    assert(_layer != null, 'Handle already disposed.');
-    _layer!._unref();
-    _layer = null;
   }
 
   @override
@@ -640,7 +651,10 @@ class LayerHandle {
 
 /// A composited layer containing a [Picture].
 ///
-/// Picture layers are always leaves in the layer tree.
+/// Picture layers are always leaves in the layer tree. They are also
+/// responsible for disposing of the [Picture] object they hold. This is done
+/// when their parent and all [RenderObject]s that participated in painting the
+/// picture have been disposed.
 class PictureLayer extends Layer {
   /// Creates a leaf layer for the layer tree.
   PictureLayer(this.canvasBounds);
@@ -1140,7 +1154,7 @@ class ContainerLayer extends Layer {
     assert(!child.attached);
     assert(child.nextSibling == null);
     assert(child.previousSibling == null);
-    assert(child._parentHandle == null);
+    assert(child._parentHandle.layer == null);
     assert(() {
       Layer node = this;
       while (node.parent != null)
@@ -1154,7 +1168,7 @@ class ContainerLayer extends Layer {
       lastChild!._nextSibling = child;
     _lastChild = child;
     _firstChild ??= child;
-    child._parentHandle = child.createHandle();
+    child._parentHandle.layer = child;
     assert(child.attached == attached);
   }
 
@@ -1164,7 +1178,7 @@ class ContainerLayer extends Layer {
     assert(child.attached == attached);
     assert(_debugUltimatePreviousSiblingOf(child, equals: firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: lastChild));
-    assert(child._parentHandle != null);
+    assert(child._parentHandle.layer != null);
     if (child._previousSibling == null) {
       assert(_firstChild == child);
       _firstChild = child._nextSibling;
@@ -1185,8 +1199,7 @@ class ContainerLayer extends Layer {
     child._previousSibling = null;
     child._nextSibling = null;
     dropChild(child);
-    child._parentHandle!.dispose();
-    child._parentHandle = null;
+    child._parentHandle.layer = null;
     assert(!child.attached);
   }
 
@@ -1200,8 +1213,7 @@ class ContainerLayer extends Layer {
       assert(child.attached == attached);
       dropChild(child);
       assert(child._parentHandle != null);
-      child._parentHandle!.dispose();
-      child._parentHandle = null;
+      child._parentHandle.layer = null;
       child = next;
     }
     _firstChild = null;
@@ -2780,27 +2792,5 @@ class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
     properties.add(DiagnosticsProperty<Size>('size', size, defaultValue: null));
     properties.add(DiagnosticsProperty<Offset>('offset', offset, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: false));
-  }
-}
-
-/// A utility for managing a layer maintaining a handle to it.
-///
-/// This class manages automatically creation and diposing of layer handles for
-/// its associated [layer].
-class LayerHolder<T extends Layer?> {
-  LayerHandle? _handle;
-  T? _layer;
-
-
-  /// The [Layer] this class holds.
-  ///
-  /// Setting a new value will dispose of the associated [LayerHandle] for the
-  /// previously held layer, if any.
-  T? get layer => _layer;
-
-  set layer(T? layer) {
-    _handle?.dispose();
-    _handle = layer?.createHandle();
-    _layer = layer;
   }
 }

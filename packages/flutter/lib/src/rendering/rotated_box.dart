@@ -129,7 +129,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     }
   }
 
-  final LayerHolder<TransformLayer?> _transformLayer = LayerHolder<TransformLayer?>();
+  final LayerHandle<TransformLayer?> _transformLayer = LayerHandle<TransformLayer?>();
 
   @override
   void dispose() {

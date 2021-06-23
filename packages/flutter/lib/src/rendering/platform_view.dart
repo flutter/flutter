@@ -223,7 +223,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     _paintTexture(context, offset);
   }
 
-  final LayerHolder<ClipRectLayer?> _clipRectLayer = LayerHolder<ClipRectLayer?>();
+  final LayerHandle<ClipRectLayer?> _clipRectLayer = LayerHandle<ClipRectLayer?>();
 
   @override
   void dispose() {

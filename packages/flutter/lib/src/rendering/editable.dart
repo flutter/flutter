@@ -4001,7 +4001,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _paintHandleLayers(context, getEndpointsForSelection(selection!));
   }
 
-  final LayerHolder<ClipRectLayer?> _clipRectLayer = LayerHolder<ClipRectLayer?>();
+  final LayerHandle<ClipRectLayer?> _clipRectLayer = LayerHandle<ClipRectLayer?>();
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;

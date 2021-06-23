@@ -646,7 +646,7 @@ class RenderStack extends RenderBox
     }
   }
 
-  final LayerHolder<ClipRectLayer?> _clipRectLayer = LayerHolder<ClipRectLayer?>();
+  final LayerHandle<ClipRectLayer?> _clipRectLayer = LayerHandle<ClipRectLayer?>();
 
   @override
   void dispose() {

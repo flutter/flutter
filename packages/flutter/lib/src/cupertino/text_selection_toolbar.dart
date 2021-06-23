@@ -299,7 +299,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     );
   }
 
-  final LayerHolder<ClipPathLayer?> _clipPathLayer = LayerHolder<ClipPathLayer?>();
+  final LayerHandle<ClipPathLayer?> _clipPathLayer = LayerHandle<ClipPathLayer?>();
   Paint? _debugPaint;
 
   @override

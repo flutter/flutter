@@ -529,7 +529,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     }, oldLayer: _clipRRectLayer.layer);
   }
 
-  final LayerHolder<ClipRRectLayer?> _clipRRectLayer = LayerHolder<ClipRRectLayer?>();
+  final LayerHandle<ClipRRectLayer?> _clipRRectLayer = LayerHandle<ClipRRectLayer?>();
 
   @override
   void dispose() {
