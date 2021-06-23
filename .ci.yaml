@@ -937,6 +937,7 @@ targets:
 
   - name: linux_large_image_changer_perf_android
     builder: Linux large_image_changer_perf_android
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/85078
     presubmit: false
     scheduler: luci
 
