@@ -71,7 +71,7 @@ def Main():
     help='Print what would be done, but do nothing.')
   args = parser.parse_args()
 
-  if args.help:
+  if 'help' in vars(args) and args.help:
     parser.print_help()
     return 0
 
@@ -96,7 +96,7 @@ def Main():
   if auth_result.returncode != 0:
     print('Auth failed:\nstdout:\n%s\nstderr:\n%s' % (auth_result.stdout, auth_result.stderr))
     return 1
-  auth_token = auth_result.stdout
+  auth_token = auth_result.stdout.rstrip()
 
   for builder in builders:
     if args.force_upload:
@@ -107,8 +107,7 @@ def Main():
     curl_command = [
       'curl',
       'http://flutter-dashboard.appspot.com/api/reset-prod-task',
-      '-d',
-      params,
+      "-d %s" % params,
       '-H',
       'X-Flutter-IdToken: %s' % auth_token,
     ]
