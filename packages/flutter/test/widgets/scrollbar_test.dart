@@ -381,13 +381,13 @@ void main() {
       axisDirection: AxisDirection.down,
     );
 
-    final ScrollbarPainter p = _buildPainter(
+    final ScrollbarPainter painter = _buildPainter(
       padding: padding,
       scrollMetrics: metrics,
     );
 
     testWidgets('down', (WidgetTester tester) async {
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.height,
           pixels: double.negativeInfinity,
@@ -396,13 +396,13 @@ void main() {
       );
 
       // Top overscroll.
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect0 = captureRect();
       expect(rect0.top, padding.top);
       expect(size.width - rect0.right, padding.right);
 
       // Bottom overscroll.
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.height,
           pixels: double.infinity,
@@ -410,14 +410,14 @@ void main() {
         AxisDirection.down,
       );
 
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect1 = captureRect();
       expect(size.height - rect1.bottom, padding.bottom);
       expect(size.width - rect1.right, padding.right);
     });
 
     testWidgets('up', (WidgetTester tester) async {
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.height,
           pixels: double.infinity,
@@ -427,13 +427,13 @@ void main() {
       );
 
       // Top overscroll.
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect0 = captureRect();
       expect(rect0.top, padding.top);
       expect(size.width - rect0.right, padding.right);
 
       // Bottom overscroll.
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.height,
           pixels: double.negativeInfinity,
@@ -442,14 +442,14 @@ void main() {
         AxisDirection.up,
       );
 
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect1 = captureRect();
       expect(size.height - rect1.bottom, padding.bottom);
       expect(size.width - rect1.right, padding.right);
     });
 
     testWidgets('left', (WidgetTester tester) async {
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.negativeInfinity,
@@ -459,13 +459,13 @@ void main() {
       );
 
       // Right overscroll.
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect0 = captureRect();
       expect(size.height - rect0.bottom, padding.bottom);
       expect(size.width - rect0.right, padding.right);
 
       // Left overscroll.
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.infinity,
@@ -474,14 +474,14 @@ void main() {
         AxisDirection.left,
       );
 
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect1 = captureRect();
       expect(size.height - rect1.bottom, padding.bottom);
       expect(rect1.left, padding.left);
     });
 
     testWidgets('right', (WidgetTester tester) async {
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.infinity,
@@ -491,13 +491,13 @@ void main() {
       );
 
       // Right overscroll.
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect0 = captureRect();
       expect(size.height - rect0.bottom, padding.bottom);
       expect(size.width - rect0.right, padding.right);
 
       // Left overscroll.
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.negativeInfinity,
@@ -506,7 +506,7 @@ void main() {
         AxisDirection.right,
       );
 
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect1 = captureRect();
       expect(size.height - rect1.bottom, padding.bottom);
       expect(rect1.left, padding.left);
@@ -525,7 +525,7 @@ void main() {
     );
 
     const double minOverscrollLength = 8.0;
-    final ScrollbarPainter p = _buildPainter(
+    final ScrollbarPainter painter = _buildPainter(
       padding: padding,
       scrollMetrics: metrics,
       minLength: 36.0,
@@ -533,54 +533,54 @@ void main() {
     );
 
     // No overscroll gives a full sized thumb.
-    p.update(
+    painter.update(
       metrics.copyWith(
         pixels: 0.0,
       ),
       AxisDirection.down,
     );
-    p.paint(testCanvas, size);
+    painter.paint(testCanvas, size);
     final double fullThumbExtent = captureRect().height;
     expect(fullThumbExtent, greaterThan(_kMinThumbExtent));
 
     // Scrolling to the middle also gives a full sized thumb.
-    p.update(
+    painter.update(
       metrics.copyWith(
         pixels: scrollExtent / 2,
       ),
       AxisDirection.down,
     );
-    p.paint(testCanvas, size);
+    painter.paint(testCanvas, size);
     expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 1e-6));
 
     // Scrolling just to the very end also gives a full sized thumb.
-    p.update(
+    painter.update(
       metrics.copyWith(
         pixels: scrollExtent,
       ),
       AxisDirection.down,
     );
-    p.paint(testCanvas, size);
+    painter.paint(testCanvas, size);
     expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 1e-6));
 
     // Scrolling just past the end shrinks the thumb slightly.
-    p.update(
+    painter.update(
       metrics.copyWith(
         pixels: scrollExtent * 1.001,
       ),
       AxisDirection.down,
     );
-    p.paint(testCanvas, size);
+    painter.paint(testCanvas, size);
     expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 2.0));
 
     // Scrolling way past the end shrinks the thumb to minimum.
-    p.update(
+    painter.update(
       metrics.copyWith(
         pixels: double.infinity,
       ),
       AxisDirection.down,
     );
-    p.paint(testCanvas, size);
+    painter.paint(testCanvas, size);
     expect(captureRect().height, minOverscrollLength);
   });
 
@@ -1163,10 +1163,10 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final dynamic exception = tester.takeException();
+    final AssertionError exception = tester.takeException() as AssertionError;
     expect(exception, isAssertionError);
     expect(
-      (exception as AssertionError).message,
+      exception.message,
       contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
   });
@@ -1198,10 +1198,16 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    final dynamic exception = tester.takeException();
+    AssertionError? exception = tester.takeException() as AssertionError?;
+    // The scrollbar is not visible and cannot be interacted with, so no assertion.
+    expect(exception, isNull);
+    // Scroll to trigger the scrollbar to come into view.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    exception = tester.takeException() as AssertionError;
     expect(exception, isAssertionError);
     expect(
-      (exception as AssertionError).message,
+      exception.message,
       contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
   });
