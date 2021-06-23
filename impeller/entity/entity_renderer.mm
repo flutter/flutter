@@ -41,15 +41,13 @@ bool EntityRenderer::OnRender(RenderPass& pass) {
 
   shader::BoxVertexInfo::UniformBuffer uniforms;
   uniforms.color = Color::Blue();
-  uniforms.mvp = Matrix::MakeOrthographic({800, 600});
+  uniforms.mvp =
+      Matrix::MakeOrthographic({800, 600}).Scale({200.0, 200.0, 1.0});
   VertexBufferBuilder vertex_builder;
   vertex_builder.AddVertices({
-      {-0.5, 0.5, 1.0},   //
-      {0.5, 0.5, 1.0},    //
-      {0.5, -0.5, 1.0},   //
-      {0.5, -0.5, 1.0},   //
-      {-0.5, -0.5, 1.0},  //
-      {-0.5, 0.5, 1.0},   //
+      {0, 0.5, 0.0},      //
+      {0.5, -0.5, 0.0},   //
+      {-0.5, -0.5, 0.0},  //
   });
 
   Command cmd;
