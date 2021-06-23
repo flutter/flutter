@@ -15,6 +15,7 @@ void macroPerfTestE2E(
   String routeName, {
   Duration pageDelay,
   Duration duration = const Duration(seconds: 3),
+  Duration timeout = const Duration(seconds: 30),
   ControlCallback body,
   ControlCallback setup,
 }) {
@@ -62,5 +63,5 @@ void macroPerfTestE2E(
       }
       await durationFuture;
     });
-  }, semanticsEnabled: false);
+  }, semanticsEnabled: false, timeout: Timeout(timeout));
 }
