@@ -376,7 +376,7 @@ abstract class Widget extends DiagnosticableTree {
     return widget is StatefulWidget ? 1 :
            widget is StatelessWidget ? 2 :
            0;
-    }
+  }
 }
 
 /// A widget that does not require mutable state.
@@ -6404,7 +6404,7 @@ FlutterErrorDetails _debugReportException(
 ///  * [RenderObjectElement.updateChildren], which discusses why this class is
 ///    used as slot values for the children of a [MultiChildRenderObjectElement].
 @immutable
-class IndexedSlot<T> {
+class IndexedSlot<T extends Element?> {
   /// Creates an [IndexedSlot] with the provided [index] and slot [value].
   const IndexedSlot(this.index, this.value);
 

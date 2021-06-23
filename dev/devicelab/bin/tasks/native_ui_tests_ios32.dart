@@ -74,20 +74,23 @@ Future<void> main() async {
     );
 
     if (testResultExit != 0) {
-      // Zip the test results to the artifacts directory for upload.
-      final String zipPath = path.join(hostAgent.dumpDirectory.path,
-          'native_ui_tests_ios32-${DateTime.now().toLocal().toIso8601String()}.zip');
-      await exec(
-        'zip',
-        <String>[
-          '-r',
-          '-9',
-          zipPath,
-          'result.xcresult',
-        ],
-        workingDirectory: resultBundleTemp,
-        canFail: true, // Best effort to get the logs.
-      );
+      final Directory dumpDirectory = hostAgent.dumpDirectory;
+      if (dumpDirectory != null) {
+        // Zip the test results to the artifacts directory for upload.
+        final String zipPath = path.join(dumpDirectory.path,
+            'native_ui_tests_ios32-${DateTime.now().toLocal().toIso8601String()}.zip');
+        await exec(
+          'zip',
+          <String>[
+            '-r',
+            '-9',
+            zipPath,
+            'result.xcresult',
+          ],
+          workingDirectory: resultBundleTemp,
+          canFail: true, // Best effort to get the logs.
+        );
+      }
 
       return TaskResult.failure('Platform unit tests failed');
     }

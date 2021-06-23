@@ -381,6 +381,17 @@ void main() {
 
       expect(iosApp, null);
     }, overrides: overrides);
+
+    testUsingContext('returns null when there with no product identifier', () async {
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
+      final Directory project = globals.fs.directory('ios/Runner.xcodeproj')..createSync(recursive: true);
+      project.childFile('project.pbxproj').createSync();
+      final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
+          FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
+
+      expect(iosApp, null);
+    }, overrides: overrides);
   });
 
   group('FuchsiaApp', () {

@@ -194,6 +194,9 @@ void main() {
   InputDecorationTheme(hasFloatingPlaceholder: false);
   InputDecorationTheme();
   inputDecorationTheme.hasFloatingPlaceholder;
+  inputDecorationTheme.copyWith(hasFloatingPlaceholder: false);
+  inputDecorationTheme.copyWith(hasFloatingPlaceholder: true);
+  inputDecorationTheme.copyWith();
 
   // Changes made in https://github.com/flutter/flutter/pull/66482
   ThemeData(textSelectionColor: Colors.red);

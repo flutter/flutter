@@ -28,6 +28,7 @@ import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -482,8 +483,9 @@ void main() {
     // Expect the dependency on flutter_web_plugins exists
     expect(pubspec.dependencies, contains('flutter_web_plugins'));
     // The platform is correctly registered
-    expect(pubspec.flutter['plugin']['platforms']['web']['pluginClass'], 'FlutterProjectWeb');
-    expect(pubspec.flutter['plugin']['platforms']['web']['fileName'], 'flutter_project_web.dart');
+    final YamlMap web = ((pubspec.flutter['plugin'] as YamlMap)['platforms'] as YamlMap)['web'] as YamlMap;
+    expect(web['pluginClass'], 'FlutterProjectWeb');
+    expect(web['fileName'], 'flutter_project_web.dart');
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
@@ -1060,6 +1062,25 @@ void main() {
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     Logger: () => logger,
+  });
+
+  testUsingContext('app creates maskable icons for web', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=web',
+      projectDir.path,
+    ]);
+
+    final Directory iconsDir = projectDir.childDirectory('web').childDirectory('icons');
+
+    expect(iconsDir.childFile('Icon-maskable-192.png'), exists);
+    expect(iconsDir.childFile('Icon-maskable-512.png'), exists);
   });
 
   testUsingContext('plugin uses new platform schema', () async {
@@ -1904,7 +1925,7 @@ void main() {
     Logger: () => logger,
   });
 
-  testUsingContext('plugin doe not support web if feature is not enabled', () async {
+  testUsingContext('plugin does not support web if feature is not enabled', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
