@@ -4,7 +4,9 @@
 
 #include "impeller/entity/entity_renderer.h"
 
+#include "flutter/fml/time/time_point.h"
 #include "impeller/compositor/command.h"
+#include "impeller/compositor/surface.h"
 #include "impeller/compositor/vertex_buffer_builder.h"
 #include "impeller/primitives/box.frag.h"
 #include "impeller/primitives/box.vert.h"
@@ -36,18 +38,20 @@ bool EntityRenderer::OnIsValid() const {
   return is_valid_;
 }
 
-bool EntityRenderer::OnRender(RenderPass& pass) {
+bool EntityRenderer::OnRender(const Surface& surface, RenderPass& pass) {
   pass.SetLabel("EntityRenderer Render Pass");
 
   shader::BoxVertexInfo::UniformBuffer uniforms;
   uniforms.color = Color::Blue();
-  uniforms.mvp =
-      Matrix::MakeOrthographic({800, 600}).Scale({200.0, 200.0, 1.0});
+
+  uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
+
   VertexBufferBuilder vertex_builder;
+
   vertex_builder.AddVertices({
-      {0, 0.5, 0.0},      //
-      {0.5, -0.5, 0.0},   //
-      {-0.5, -0.5, 0.0},  //
+      {0, 0, 0.0},      //
+      {800, 0.0, 0.0},  //
+      {0.0, 600, 0.0},  //
   });
 
   Command cmd;

@@ -15,6 +15,7 @@
 #include "impeller/compositor/host_buffer.h"
 #include "impeller/compositor/texture.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/size.h"
 
 namespace impeller {
 
@@ -47,6 +48,8 @@ class RenderPassDescriptor {
   ~RenderPassDescriptor();
 
   bool HasColorAttachment(size_t index) const;
+
+  std::optional<Size> GetColorAttachmentSize(size_t index) const;
 
   RenderPassDescriptor& SetColorAttachment(ColorRenderPassAttachment attachment,
                                            size_t index);

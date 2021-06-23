@@ -26,7 +26,7 @@ class EntityRenderer final : public Renderer {
   bool OnIsValid() const override;
 
   // |Renderer|
-  bool OnRender(RenderPass& pass) override;
+  bool OnRender(const Surface& surface, RenderPass& pass) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EntityRenderer);
 };
