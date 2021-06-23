@@ -1785,8 +1785,9 @@ class TimePickerDialog extends StatefulWidget {
     this.confirmText,
     this.helpText,
     this.restorationId,
-    this.initialEntryMode = TimePickerEntryMode.dial,
+    required this.initialEntryMode,
   }) : assert(initialTime != null),
+       assert(initialEntryMode!=null),
        super(key: key);
 
   /// The time initially selected when the dialog is shown.
@@ -2103,21 +2104,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     final ShapeBorder shape = TimePickerTheme.of(context).shape ?? _kDefaultShape;
     final Orientation orientation = media.orientation;
 
-    final Widget actions = Row(
-      children: <Widget>[
-        const SizedBox(width: 10.0),
-        IconButton(
-          color: TimePickerTheme.of(context).entryModeIconColor ?? theme.colorScheme.onSurface.withOpacity(
-            theme.colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
-          ),
-          onPressed: _handleEntryModeToggle,
-          icon: Icon(_entryMode.value == TimePickerEntryMode.dial ? Icons.keyboard : Icons.access_time),
-          tooltip: _entryMode.value == TimePickerEntryMode.dial
-              ? MaterialLocalizations.of(context).inputTimeModeButtonLabel
-              : MaterialLocalizations.of(context).dialModeButtonLabel,
-        ),
-        Expanded(
-          child: Container(
+    final Widget actions = Container(
             alignment: AlignmentDirectional.centerEnd,
             constraints: const BoxConstraints(minHeight: 52.0),
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -2135,9 +2122,6 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                 ),
               ],
             ),
-          ),
-        ),
-      ],
     );
 
     final Widget picker;
@@ -2338,7 +2322,7 @@ Future<TimeOfDay?> showTimePicker({
   required TimeOfDay initialTime,
   TransitionBuilder? builder,
   bool useRootNavigator = true,
-  TimePickerEntryMode initialEntryMode = TimePickerEntryMode.dial,
+  required TimePickerEntryMode initialEntryMode,
   String? cancelText,
   String? confirmText,
   String? helpText,
