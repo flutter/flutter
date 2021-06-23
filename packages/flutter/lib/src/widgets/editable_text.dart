@@ -814,9 +814,9 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///  * [minLines], which sets the minimum number of lines visible.
+  /// {@endtemplate}
   ///  * [expands], which determines whether the field should fill the height of
   ///    its parent.
-  /// {@endtemplate}
   final int? maxLines;
 
   /// {@template flutter.widgets.editableText.minLines}
@@ -862,9 +862,9 @@ class EditableText extends StatefulWidget {
   ///  * [maxLines], which sets the maximum number of lines visible, and has
   ///    several examples of how minLines and maxLines interact to produce
   ///    various behaviors.
+  /// {@endtemplate}
   ///  * [expands], which determines whether the field should fill the height of
   ///    its parent.
-  /// {@endtemplate}
   final int? minLines;
 
   /// {@template flutter.widgets.editableText.expands}
