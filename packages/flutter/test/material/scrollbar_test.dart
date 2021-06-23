@@ -128,7 +128,7 @@ void main() {
       of: find.byType(Scrollbar),
       matching: find.byType(CustomPaint),
     ).first);
-    final dynamic scrollPainter = custom.foregroundPainter;
+    final ScrollbarPainter? scrollPainter = custom.foregroundPainter as ScrollbarPainter?;
     // Dragging makes the scrollbar first appear.
     await tester.drag(find.text('0'), const Offset(0.0, -10.0));
     await tester.pump(const Duration(milliseconds: 200));
@@ -141,7 +141,7 @@ void main() {
       viewportDimension: 100.0,
       axisDirection: AxisDirection.down,
     );
-    scrollPainter.update(metrics, AxisDirection.down);
+    scrollPainter!.update(metrics, AxisDirection.down);
 
     final TestCanvas canvas = TestCanvas();
     scrollPainter.paint(canvas, const Size(10.0, 100.0));
@@ -171,7 +171,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final dynamic exception = tester.takeException();
+      final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     },
   );
@@ -199,7 +199,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final dynamic exception = tester.takeException();
+      final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     },
   );

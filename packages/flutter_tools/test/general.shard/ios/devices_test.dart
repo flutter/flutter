@@ -148,6 +148,24 @@ void main() {
       ).majorSdkVersion, 0);
     });
 
+    testWithoutContext('has build number in sdkNameAndVersion', () async {
+      final IOSDevice device = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: nullFileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        sdkVersion: '13.3 17C54',
+        cpuArchitecture: DarwinArch.arm64,
+        interfaceType: IOSDeviceInterface.usb,
+      );
+
+      expect(await device.sdkNameAndVersion,'iOS 13.3 17C54');
+    });
+
     testWithoutContext('Supports debug, profile, and release modes', () {
       final IOSDevice device = IOSDevice(
         'device-123',

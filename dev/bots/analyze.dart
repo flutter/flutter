@@ -72,6 +72,9 @@ Future<void> run(List<String> arguments) async {
   print('$clock Internationalization...');
   await verifyInternationalizations();
 
+  print('$clock Integration test timeouts...');
+  await verifyIntegrationTestTimeouts(flutterRoot);
+
   // Ensure that all package dependencies are in sync.
   print('$clock Package dependencies...');
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
@@ -383,6 +386,31 @@ Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
     }
   }
   // Fail if any errors
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      if (errors.length == 1)
+        '${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset'
+      else
+        '${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset',
+      ...errors.map((String paragraph) => '$paragraph\n'),
+    ]);
+  }
+}
+
+Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  final String dev = path.join(workingDirectory, 'dev');
+  final List<File> files = await _allFiles(dev, 'dart', minimumMatches: 1)
+      .where((File file) => file.path.contains('test_driver') && (file.path.endsWith('_test.dart') || file.path.endsWith('util.dart')))
+      .toList();
+  for (final File file in files) {
+    final String contents = file.readAsStringSync();
+    final int testCount = ' test('.allMatches(contents).length;
+    final int timeoutNoneCount = 'timeout: Timeout.none'.allMatches(contents).length;
+    if (testCount != timeoutNoneCount) {
+      errors.add('$yellow${file.path}$reset has at least $testCount test(s) but only $timeoutNoneCount `Timeout.none`(s).');
+    }
+  }
   if (errors.isNotEmpty) {
     exitWithError(<String>[
       if (errors.length == 1)
@@ -1006,7 +1034,7 @@ Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true})
   );
   if (evalResult.exitCode != 0) {
     exitWithError(<String>[
-      'git ls-filese failed with exit code ${evalResult.exitCode}',
+      'git ls-files failed with exit code ${evalResult.exitCode}',
       '${bold}stdout:$reset',
       evalResult.stdout,
       '${bold}stderr:$reset',
