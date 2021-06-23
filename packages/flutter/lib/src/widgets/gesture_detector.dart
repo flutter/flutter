@@ -179,9 +179,9 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// This example uses a [Container] that wraps a [GestureDetector] widget which
 /// detects a tap.
 ///
-/// Since the [GestureDetector] does not have a child it takes on the size of its
-/// parent making the entire area of the surrounding [Container] clickable. When
-/// tapped the [Container] turns yellow by setting the `_color` field. When
+/// Since the [GestureDetector] does not have a child, it takes on the size of its
+/// parent, making the entire area of the surrounding [Container] clickable. When
+/// tapped, the [Container] turns yellow by setting the `_color` field. When
 /// tapped again, it goes back to white.
 ///
 /// ```dart
