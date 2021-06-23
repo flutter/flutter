@@ -36,8 +36,7 @@ void main() {
 
       final SerializableFinder stockOption =
           find.byValueKey('AAPL_symbol_name');
-      final String symbol = await driver.getText(stockOption,
-          timeout: const Duration(milliseconds: 500));
+      final String symbol = await driver.getText(stockOption);
 
       expect(symbol, 'AAPL');
     }, skip: 'Needs to be fixed on Fuchsia.');
