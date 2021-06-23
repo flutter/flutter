@@ -16,6 +16,18 @@
 
 namespace impeller {
 
+//------------------------------------------------------------------------------
+/// @brief      A 4x4 matrix using column-major storage.
+///
+///             Utility methods that need to make assumptions about normalized
+///             device coordinates use the following convention:
+///               * Left-handed coordinate system. Positive rotation is
+///                 clockwise about axis of rotation.
+///               * Lower left corner is -1.0, -1.0.
+///               * Upper left corner is  1.0,  1.0.
+///               * Visible z-space is from 0.0 to 1.0.
+///                 * NOTE: This is not the same as OpenGL conventions!
+///               * Center is at (0.0, 0.0, 0.5).
 struct Matrix {
   union {
     Scalar m[16];
@@ -226,7 +238,14 @@ struct Matrix {
     // clang-format on
   }
 
-  Matrix Transpose() const;
+  constexpr Matrix Transpose() const {
+    return {
+        m[0], m[4], m[8],  m[12],  //
+        m[1], m[5], m[9],  m[13],  //
+        m[2], m[6], m[10], m[14],  //
+        m[3], m[7], m[11], m[15],  //
+    };
+  }
 
   Matrix Invert() const;
 

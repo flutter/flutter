@@ -95,20 +95,19 @@ Matrix Matrix::MakeOrthographic(Scalar left,
   Scalar rsl = right - left;
   Scalar tab = top + bottom;
   Scalar tsb = top - bottom;
-  Scalar fan = farZ + nearZ;
+  // Scalar fan = farZ + nearZ;
   Scalar fsn = farZ - nearZ;
 
   // clang-format off
-  return Matrix(2.0 / rsl,   0.0,          0.0,        0.0,
-                0.0,         2.0 / tsb,    0.0,        0.0,
-                0.0,         0.0,         -2.0 / fsn,  0.0,
-                -ral / rsl, -tab / tsb,   -fan / fsn,  1.0);
+  return Matrix(2.0 / rsl,   0.0,          0.0,          0.0,
+                0.0,         2.0 / tsb,    0.0,          0.0,
+                0.0,         0.0,         -1.0 / fsn,    0.0,
+                -ral / rsl, -tab / tsb,   -nearZ / fsn,  1.0);
   // clang-format on
 }
 
 Matrix Matrix::MakeOrthographic(const Size& size) {
-  return Matrix::MakeOrthographic(0, size.width, size.height, 0, -INT_MAX,
-                                  INT_MAX);
+  return Matrix::MakeOrthographic(0, size.width, size.height, 0, 0.0, 1.0);
 }
 
 Matrix Matrix::MakePerspective(Scalar fov,
@@ -208,15 +207,6 @@ Matrix Matrix::Invert() const {
           tmp.m[4] * det,  tmp.m[5] * det,  tmp.m[6] * det,  tmp.m[7] * det,
           tmp.m[8] * det,  tmp.m[9] * det,  tmp.m[10] * det, tmp.m[11] * det,
           tmp.m[12] * det, tmp.m[13] * det, tmp.m[14] * det, tmp.m[15] * det};
-}
-
-Matrix Matrix::Transpose() const {
-  return {
-      m[0], m[4], m[8],  m[12],  //
-      m[1], m[5], m[9],  m[13],  //
-      m[2], m[6], m[10], m[14],  //
-      m[3], m[7], m[11], m[15],  //
-  };
 }
 
 Scalar Matrix::GetDeterminant() const {
