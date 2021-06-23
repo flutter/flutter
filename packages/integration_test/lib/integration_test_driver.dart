@@ -64,7 +64,7 @@ Future<void> writeResponseData(
 ///
 /// ```
 Future<void> integrationDriver({
-  Duration timeout = const Duration(minutes: 20),
+  Duration timeout = const Duration(minutes: 1),
   ResponseDataCallback? responseDataCallback = writeResponseData,
 }) async {
   final FlutterDriver driver = await FlutterDriver.connect();

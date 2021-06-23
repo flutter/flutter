@@ -30,7 +30,7 @@ void main() {
     await file.writeAsString(_encodeJson(<String, dynamic>{
       'stack_size': stackSizeInBytes,
     }));
-  });
+  }, timeout: const Timeout(kTimeout));
 }
 
 String _encodeJson(Map<String, dynamic> jsonObject) {
