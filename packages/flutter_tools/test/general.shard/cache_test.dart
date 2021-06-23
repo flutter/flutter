@@ -429,10 +429,9 @@ void main() {
 
   testWithoutContext('FlutterRunnerDebugSymbols downloads Flutter runner debug symbols', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Cache cache = Cache.test(
-      fileSystem: fileSystem,
-      processManager: FakeProcessManager.any(),
-    );
+    final Cache cache = FakeSecondaryCache()
+      ..version = '123456';
+
     final FakeVersionedPackageResolver packageResolver = FakeVersionedPackageResolver();
     final FlutterRunnerDebugSymbols flutterRunnerDebugSymbols = FlutterRunnerDebugSymbols(
       cache,
@@ -443,8 +442,8 @@ void main() {
     await flutterRunnerDebugSymbols.updateInner(FakeArtifactUpdater(), fileSystem, FakeOperatingSystemUtils());
 
     expect(packageResolver.resolved, <List<String>>[
-      <String>['fuchsia-debug-symbols-x64', null],
-      <String>['fuchsia-debug-symbols-arm64', null],
+      <String>['fuchsia-debug-symbols-x64', '123456'],
+      <String>['fuchsia-debug-symbols-arm64', '123456'],
     ]);
   });
 
