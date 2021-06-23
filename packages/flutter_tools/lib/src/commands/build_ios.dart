@@ -225,11 +225,14 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   Directory _outputAppDirectory(String xcodeResultOutput);
 
   @override
+  bool get supported => globals.platform.isMacOS;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
     final BuildInfo buildInfo = await getBuildInfo();
 
-    if (!globals.platform.isMacOS) {
+    if (!supported) {
       throwToolExit('Building for iOS is only supported on macOS.');
     }
     if (forSimulator && !buildInfo.supportsSimulator) {
