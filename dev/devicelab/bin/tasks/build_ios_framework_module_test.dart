@@ -270,24 +270,36 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
     await _checkBitcode(engineFrameworkPath, mode);
 
-    checkFileExists(path.join(
+    // TODO(jmagman): Remove ios-x86_64-simulator checks when the ARM simulator engine artifacts rolls.
+    final String x86SimulatorFramework = path.join(
       outputPath,
       mode,
       'Flutter.xcframework',
       'ios-x86_64-simulator',
       'Flutter.framework',
-      'Flutter',
-    ));
+    );
 
-    checkFileExists(path.join(
+    final String x86ArmSimulatorFramework = path.join(
       outputPath,
       mode,
       'Flutter.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'Flutter.framework',
-      'Headers',
-      'Flutter.h',
-    ));
+    );
+
+    final bool x86SimulatorBinaryExists = exists(File(path.join(x86SimulatorFramework, 'Flutter')));
+    final bool x86ArmSimulatorBinaryExists = exists(File(path.join(x86ArmSimulatorFramework, 'Flutter')));
+
+    if (!x86SimulatorBinaryExists && !x86ArmSimulatorBinaryExists) {
+      throw TaskResult.failure('Expected Flutter engine artifact binary to exist');
+    }
+
+    final bool x86SimulatorHeaderExists = exists(File(path.join(x86SimulatorFramework, 'Headers', 'Flutter.h')));
+    final bool x86ArmSimulatorHeaderExists = exists(File(path.join(x86ArmSimulatorFramework, 'Headers', 'Flutter.h')));
+
+    if (!x86SimulatorHeaderExists && !x86ArmSimulatorHeaderExists) {
+      throw TaskResult.failure('Expected Flutter.h engine artifact to exist');
+    }
   }
 
   section('Check all modes have plugins');
