@@ -24,6 +24,17 @@ bool RenderPassDescriptor::HasColorAttachment(size_t index) const {
   return false;
 }
 
+std::optional<Size> RenderPassDescriptor::GetColorAttachmentSize(
+    size_t index) const {
+  auto found = colors_.find(index);
+
+  if (found == colors_.end()) {
+    return std::nullopt;
+  }
+
+  return found->second.texture->GetSize();
+}
+
 RenderPassDescriptor& RenderPassDescriptor::SetColorAttachment(
     ColorRenderPassAttachment attachment,
     size_t index) {

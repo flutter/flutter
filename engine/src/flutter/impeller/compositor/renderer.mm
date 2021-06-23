@@ -49,7 +49,7 @@ bool Renderer::Render(const Surface& surface) {
     return false;
   }
 
-  if (!OnRender(*render_pass)) {
+  if (!OnRender(surface, *render_pass)) {
     return false;
   }
 

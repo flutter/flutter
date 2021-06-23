@@ -32,7 +32,7 @@ class Renderer {
 
   virtual bool OnIsValid() const = 0;
 
-  virtual bool OnRender(RenderPass& pass) = 0;
+  virtual bool OnRender(const Surface& surface, RenderPass& pass) = 0;
 
  private:
   dispatch_semaphore_t frames_in_flight_sema_ = nullptr;

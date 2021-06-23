@@ -22,6 +22,8 @@ class Surface {
 
   ~Surface();
 
+  const Size& GetSize() const;
+
   bool Present() const;
 
   bool IsValid() const;
@@ -31,6 +33,7 @@ class Surface {
  private:
   RenderPassDescriptor desc_;
   std::function<bool(void)> present_callback_;
+  Size size_;
 
   bool is_valid_ = false;
 
