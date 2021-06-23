@@ -485,25 +485,18 @@ class _SnackBarState extends State<SnackBar> {
       // Whether the behavior is set through the constructor or the theme,
       // assert that our other properties are configured properly.
       if (snackBarBehavior != SnackBarBehavior.floating) {
-        late final String messageStub;
-        if (widget.behavior != null) {
-          messageStub = 'can only be used with floating behavior. '
-            'SnackBarBehavior.fixed was set in the SnackBar constructor.';
-        } else if (snackBarTheme.behavior != null) {
-          messageStub = 'can only be used with floating behavior. '
-            'SnackBarBehavior.fixed was set by the inherited SnackBarThemeData.';
-        } else {
-          messageStub = 'can only be used with floating behavior. '
-            'SnackBarBehavior.fixed was set by default.';
+        String message(String parameter) {
+          final String prefix = '$parameter can only be used with floating behavior. ';
+          if (widget.behavior != null) {
+            return '$prefix SnackBarBehavior.fixed was set in the SnackBar constructor.';
+          } else if (snackBarTheme.behavior != null) {
+            return '$prefix SnackBarBehavior.fixed was set by the inherited SnackBarThemeData.';
+          } else {
+            return '$prefix SnackBarBehavior.fixed was set by default.';
+          }
         }
-        assert(
-          widget.margin == null,
-          'Margin $messageStub',
-        );
-        assert(
-          widget.width == null,
-          'Width $messageStub',
-        );
+        assert(widget.margin == null, message('Margin'));
+        assert(widget.width == null, message('Width'));
       }
       return true;
     }());
