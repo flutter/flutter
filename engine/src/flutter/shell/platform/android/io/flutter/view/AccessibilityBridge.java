@@ -56,7 +56,7 @@ import java.util.regex.Pattern;
  *       View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)}. The {@link
  *       #rootAccessibilityView} is expected to notify the {@code AccessibilityBridge} of relevant
  *       interactions: {@link #onAccessibilityHoverEvent(MotionEvent)}, {@link #reset()}, {@link
- *       #updateSemantics(ByteBuffer, String[])}, and {@link
+ *       #updateSemantics(ByteBuffer, String[], ByteBuffer[])}, and {@link
  *       #updateCustomAccessibilityActions(ByteBuffer, String[])}
  *   <li>An {@link AccessibilityChannel} that is connected to the running Flutter app.
  *   <li>Android's {@link AccessibilityManager} to query and listen for accessibility settings.

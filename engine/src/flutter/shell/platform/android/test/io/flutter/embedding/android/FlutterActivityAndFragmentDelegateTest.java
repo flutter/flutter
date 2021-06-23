@@ -747,12 +747,13 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   /**
-   * Creates a mock {@link FlutterEngine}.
+   * Creates a mock {@link io.flutter.embedding.engine.FlutterEngine}.
    *
-   * <p>The heuristic for deciding what to mock in the given {@link FlutterEngine} is that we should
-   * mock the minimum number of necessary methods and associated objects. Maintaining developers
-   * should add more mock behavior as required for tests, but should avoid mocking things that are
-   * not required for the correct execution of tests.
+   * <p>The heuristic for deciding what to mock in the given {@link
+   * io.flutter.embedding.engine.FlutterEngine} is that we should mock the minimum number of
+   * necessary methods and associated objects. Maintaining developers should add more mock behavior
+   * as required for tests, but should avoid mocking things that are not required for the correct
+   * execution of tests.
    */
   @NonNull
   private FlutterEngine mockFlutterEngine() {

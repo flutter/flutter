@@ -21,18 +21,21 @@ import io.flutter.view.TextureRegistry;
  * communicate between platform code and Dart code.
  *
  * <p>A Flutter plugin has a lifecycle. First, a developer must add a {@code FlutterPlugin} to an
- * instance of {@link FlutterEngine}. To do this, obtain a {@link PluginRegistry} with {@link
- * FlutterEngine#getPlugins()}, then call {@link PluginRegistry#add(FlutterPlugin)}, passing the
- * instance of the Flutter plugin. During the call to {@link PluginRegistry#add(FlutterPlugin)}, the
- * {@link FlutterEngine} will invoke {@link #onAttachedToEngine(FlutterPluginBinding)} on the given
- * {@code FlutterPlugin}. If the {@code FlutterPlugin} is removed from the {@link FlutterEngine} via
- * {@link PluginRegistry#remove(Class)}, or if the {@link FlutterEngine} is destroyed, the {@link
- * FlutterEngine} will invoke {@link FlutterPlugin#onDetachedFromEngine(FlutterPluginBinding)} on
- * the given {@code FlutterPlugin}.
+ * instance of {@link io.flutter.embedding.engine.FlutterEngine}. To do this, obtain a {@link
+ * PluginRegistry} with {@link FlutterEngine#getPlugins()}, then call {@link
+ * PluginRegistry#add(FlutterPlugin)}, passing the instance of the Flutter plugin. During the call
+ * to {@link PluginRegistry#add(FlutterPlugin)}, the {@link
+ * io.flutter.embedding.engine.FlutterEngine} will invoke {@link
+ * #onAttachedToEngine(FlutterPluginBinding)} on the given {@code FlutterPlugin}. If the {@code
+ * FlutterPlugin} is removed from the {@link io.flutter.embedding.engine.FlutterEngine} via {@link
+ * PluginRegistry#remove(Class)}, or if the {@link io.flutter.embedding.engine.FlutterEngine} is
+ * destroyed, the {@link FlutterEngine} will invoke {@link
+ * FlutterPlugin#onDetachedFromEngine(FlutterPluginBinding)} on the given {@code FlutterPlugin}.
  *
- * <p>Once a {@code FlutterPlugin} is attached to a {@link FlutterEngine}, the plugin's code is
- * permitted to access and invoke methods on resources within the {@link FlutterPluginBinding} that
- * the {@link FlutterEngine} gave to the {@code FlutterPlugin} in {@link
+ * <p>Once a {@code FlutterPlugin} is attached to a {@link
+ * io.flutter.embedding.engine.FlutterEngine}, the plugin's code is permitted to access and invoke
+ * methods on resources within the {@link FlutterPluginBinding} that the {@link
+ * io.flutter.embedding.engine.FlutterEngine} gave to the {@code FlutterPlugin} in {@link
  * #onAttachedToEngine(FlutterPluginBinding)}. This includes, for example, the application {@link
  * Context} for the running app.
  *
@@ -63,7 +66,8 @@ import io.flutter.view.TextureRegistry;
 public interface FlutterPlugin {
 
   /**
-   * This {@code FlutterPlugin} has been associated with a {@link FlutterEngine} instance.
+   * This {@code FlutterPlugin} has been associated with a {@link
+   * io.flutter.embedding.engine.FlutterEngine} instance.
    *
    * <p>Relevant resources that this {@code FlutterPlugin} may need are provided via the {@code
    * binding}. The {@code binding} may be cached and referenced until {@link
@@ -72,7 +76,8 @@ public interface FlutterPlugin {
   void onAttachedToEngine(@NonNull FlutterPluginBinding binding);
 
   /**
-   * This {@code FlutterPlugin} has been removed from a {@link FlutterEngine} instance.
+   * This {@code FlutterPlugin} has been removed from a {@link
+   * io.flutter.embedding.engine.FlutterEngine} instance.
    *
    * <p>The {@code binding} passed to this method is the same instance that was passed in {@link
    * #onAttachedToEngine(FlutterPluginBinding)}. It is provided again in this method as a
@@ -84,13 +89,15 @@ public interface FlutterPlugin {
   void onDetachedFromEngine(@NonNull FlutterPluginBinding binding);
 
   /**
-   * Resources made available to all plugins registered with a given {@link FlutterEngine}.
+   * Resources made available to all plugins registered with a given {@link
+   * io.flutter.embedding.engine.FlutterEngine}.
    *
    * <p>The provided {@link BinaryMessenger} can be used to communicate with Dart code running in
    * the Flutter context associated with this plugin binding.
    *
    * <p>Plugins that need to respond to {@code Lifecycle} events should implement the additional
-   * {@link ActivityAware} and/or {@link ServiceAware} interfaces, where a {@link Lifecycle}
+   * {@link io.flutter.embedding.engine.plugins.activity.ActivityAware} and/or {@link
+   * io.flutter.embedding.engine.plugins.service.ServiceAware} interfaces, where a {@link Lifecycle}
    * reference can be obtained.
    */
   class FlutterPluginBinding {
