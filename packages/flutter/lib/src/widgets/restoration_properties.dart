@@ -75,8 +75,9 @@ import 'restoration.dart';
 ///
 ///   @override
 ///   void didUpdateValue(Duration? oldValue) {
-///     if (oldValue == null || oldValue.inMicroseconds != value.inMicroseconds)
+///     if (oldValue == null || oldValue.inMicroseconds != value.inMicroseconds) {
 ///       notifyListeners();
+///     }
 ///   }
 ///
 ///   @override

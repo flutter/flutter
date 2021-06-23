@@ -23,7 +23,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  testUsingContext('Exits with code 2 when when HttpException is thrown '
+  testUsingContext('Exits with code 2 when HttpException is thrown '
     'during VM service connection', () async {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     final FakeDevice device = FakeDevice()

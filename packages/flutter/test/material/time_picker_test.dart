@@ -861,6 +861,31 @@ void _testsInput() {
     expect(find.text(helpText), findsOneWidget);
   });
 
+  testWidgets('Hour label text is used - Input', (WidgetTester tester) async {
+    const String hourLabelText = 'Custom hour label';
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, hourLabelText: hourLabelText);
+    expect(find.text(hourLabelText), findsOneWidget);
+  });
+
+
+  testWidgets('Minute label text is used - Input', (WidgetTester tester) async {
+    const String minuteLabelText = 'Custom minute label';
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, minuteLabelText: minuteLabelText);
+    expect(find.text(minuteLabelText), findsOneWidget);
+  });
+
+  testWidgets('Invalid error text is used - Input', (WidgetTester tester) async {
+    const String errorInvalidText = 'Custom validation error';
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, errorInvalidText: errorInvalidText);
+    // Input invalid time (hour) to force validation error
+    await tester.enterText(find.byType(TextField).first, '88');
+    final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(TextButton).first));
+    // Tap the ok button to trigger the validation error with custom translation
+    await tester.tap(find.text(materialLocalizations.okButtonLabel));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text(errorInvalidText), findsOneWidget);
+  });
+
   testWidgets('Can toggle to dial entry mode', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input);
     await tester.tap(find.byIcon(Icons.access_time));
@@ -1124,6 +1149,9 @@ Future<void> mediaQueryBoilerplate(
   double textScaleFactor = 1.0,
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
   String? helpText,
+  String? hourLabelText,
+  String? minuteLabelText,
+  String? errorInvalidText,
   bool accessibleNavigation = false,
 }) async {
   await tester.pumpWidget(
@@ -1152,6 +1180,9 @@ Future<void> mediaQueryBoilerplate(
                         initialTime: initialTime,
                         initialEntryMode: entryMode,
                         helpText: helpText,
+                        hourLabelText: hourLabelText,
+                        minuteLabelText: minuteLabelText,
+                        errorInvalidText: errorInvalidText
                       );
                     },
                     child: const Text('X'),

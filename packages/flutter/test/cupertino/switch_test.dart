@@ -47,7 +47,7 @@ void main() {
 
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -87,7 +87,7 @@ void main() {
     bool value2 = false;
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -154,7 +154,7 @@ void main() {
     bool value = false;
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -192,7 +192,7 @@ void main() {
     bool value = false;
 
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 

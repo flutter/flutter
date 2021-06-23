@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:io' as io;
@@ -56,7 +58,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
           if (benchmarkName != benchmarkIterator.current) {
             profileData.completeError(Exception(
               'Browser returned benchmark results from a wrong benchmark.\n'
-              'Requested to run bechmark ${benchmarkIterator.current}, but '
+              'Requested to run benchmark ${benchmarkIterator.current}, but '
               'got results for $benchmarkName.',
             ));
             unawaited(server.close());
@@ -67,7 +69,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
             final BlinkTraceSummary traceSummary = BlinkTraceSummary.fromJson(latestPerformanceTrace);
             profile['totalUiFrame.average'] = traceSummary.averageTotalUIFrameTime.inMicroseconds;
             profile['scoreKeys'] ??= <dynamic>[]; // using dynamic for consistency with JSON
-            profile['scoreKeys'].add('totalUiFrame.average');
+            (profile['scoreKeys'] as List<dynamic>).add('totalUiFrame.average');
             latestPerformanceTrace = null;
           }
           collectedProfiles.add(profile);

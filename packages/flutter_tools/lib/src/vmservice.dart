@@ -185,7 +185,7 @@ Future<vm_service.VmService> setUpVmService(
   vm_service.VmService vmService
 ) async {
   // Each service registration requires a request to the attached VM service. Since the
-  // order of these requests does not mattter, store each future in a list and await
+  // order of these requests does not matter, store each future in a list and await
   // all at the end of this method.
   final List<Future<vm_service.Success>> registrationRequests = <Future<vm_service.Success>>[];
   if (reloadSources != null) {

@@ -1394,16 +1394,16 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String? get timerPickerHourLabelZero => null;
 
   @override
-  String? get timerPickerMinuteLabelFew => 'min.';
+  String? get timerPickerMinuteLabelFew => 'min';
 
   @override
   String? get timerPickerMinuteLabelMany => null;
 
   @override
-  String? get timerPickerMinuteLabelOne => 'min.';
+  String? get timerPickerMinuteLabelOne => 'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => 'min';
 
   @override
   String? get timerPickerMinuteLabelTwo => null;
@@ -1832,7 +1832,7 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Afvis';
 
   @override
-  String get pasteButtonLabel => 'Sæt ind';
+  String get pasteButtonLabel => 'Indsæt';
 
   @override
   String get postMeridiemAbbreviation => 'PM';

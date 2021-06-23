@@ -121,7 +121,7 @@ class StackFrame {
       packageScheme = 'package';
       final Uri packageUri = Uri.parse(match.group(1)!);
       package = packageUri.pathSegments[0];
-      packagePath = packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', '');
+      packagePath = packageUri.path.replaceFirst('${packageUri.pathSegments[0]}/', '');
     }
 
     return StackFrame(
@@ -232,7 +232,7 @@ class StackFrame {
     String packagePath = packageUri.path;
     if (packageUri.scheme == 'dart' || packageUri.scheme == 'package') {
       package = packageUri.pathSegments[0];
-      packagePath = packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', '');
+      packagePath = packageUri.path.replaceFirst('${packageUri.pathSegments[0]}/', '');
     }
 
     return StackFrame(

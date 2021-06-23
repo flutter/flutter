@@ -1020,7 +1020,7 @@ class LocalizationsGenerator {
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
       .replaceAll('@(methods)', methods.join('\n\n'))
-      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '');
+      .replaceAll('@(requiresIntlImport)', _requiresIntlImport() ? "import 'package:intl/intl.dart' as intl;" : '');
   }
 
   String _generateSubclass(
@@ -1159,7 +1159,7 @@ class LocalizationsGenerator {
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
       .replaceAll('@(delegateClass)', delegateClass)
       .replaceAll('@(requiresFoundationImport)', useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
-      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '')
+      .replaceAll('@(requiresIntlImport)', _requiresIntlImport() ? "import 'package:intl/intl.dart' as intl;" : '')
       .replaceAll('@(canBeNullable)', usesNullableGetter ? '?' : '')
       .replaceAll('@(needsNullCheck)', usesNullableGetter ? '' : '!')
       // Removes all trailing whitespace from the generated file.
@@ -1168,7 +1168,7 @@ class LocalizationsGenerator {
       .replaceAll('\n\n\n', '\n\n');
   }
 
-  bool _containsPluralMessage() => _allMessages.any((Message message) => message.isPlural);
+  bool _requiresIntlImport() => _allMessages.any((Message message) => message.isPlural || message.placeholdersRequireFormatting);
 
   void writeOutputFiles(Logger logger, { bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.

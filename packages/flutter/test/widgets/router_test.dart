@@ -263,7 +263,7 @@ void main() {
           },
           onPopRoute: () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           },
@@ -332,7 +332,7 @@ void main() {
           },
           onPopRoute: () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           },
@@ -347,7 +347,7 @@ void main() {
     result = await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
     expect(result, isTrue);
     await tester.pump();
-    expect(find.text('popped outter'), findsOneWidget);
+    expect(find.text('popped outer'), findsOneWidget);
 
     innerDispatcher1.takePriority();
     result = false;
@@ -466,7 +466,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
         ),
       ),
     ));
-    // This should work without calling the takePrioirty on the innerDispatcher2
+    // This should work without calling the takePriority on the innerDispatcher2
     // and the innerDispatcher1.
     innerDispatcher3.takePriority();
     bool result = false;
@@ -757,7 +757,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
           },
           onPopRoute: () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           },
@@ -799,7 +799,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
           }
         ..onPopRoute = () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           };
@@ -833,7 +833,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       }
       ..onPopRoute = () {
         provider.value = const RouteInformation(
-          location: 'popped outter',
+          location: 'popped outer',
         );
         return SynchronousFuture<bool>(true);
       };
@@ -878,7 +878,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
           }
         ..onPopRoute = () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           };
@@ -903,7 +903,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       }
       ..onPopRoute = () {
         provider.value = const RouteInformation(
-          location: 'popped outter',
+          location: 'popped outer',
         );
         return SynchronousFuture<bool>(true);
       };
@@ -919,7 +919,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await tester.pump();
     await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
     await tester.pump();
-    expect(find.text('popped outter'), findsOneWidget);
+    expect(find.text('popped outer'), findsOneWidget);
   });
 
   testWidgets('Nested backButtonListener should take priority', (WidgetTester tester) async {
@@ -961,7 +961,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
           },
           onPopRoute: () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           },
@@ -1016,7 +1016,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
           },
           onPopRoute: () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           },
@@ -1065,7 +1065,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       }
       ..onPopRoute = () {
         provider.value = const RouteInformation(
-          location: 'popped outter',
+          location: 'popped outer',
         );
         return SynchronousFuture<bool>(true);
       };

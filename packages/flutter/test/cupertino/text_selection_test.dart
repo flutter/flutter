@@ -66,7 +66,7 @@ const _LongCupertinoLocalizations _longLocalizations = _LongCupertinoLocalizatio
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   // Returns true iff the button is visually enabled.
   bool appearsEnabled(WidgetTester tester, String text) {
@@ -156,6 +156,7 @@ void main() {
                       context,
                       TextSelectionHandleType.right,
                       10.0,
+                      null,
                     ),
                   ),
                 ),

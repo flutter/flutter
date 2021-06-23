@@ -9,10 +9,13 @@ import 'package:flutter_driver/flutter_driver.dart';
 
 import 'common.dart';
 
+/// A callback to use with [integrationDriver].
+typedef ScreenshotCallback = Future<bool> Function(String name, List<int> image);
+
 /// Example Integration Test which can also run WebDriver command depending on
 /// the requests coming from the test methods.
 Future<void> integrationDriver(
-    {FlutterDriver? driver, Function? onScreenshot}) async {
+    {FlutterDriver? driver, ScreenshotCallback? onScreenshot}) async {
   driver ??= await FlutterDriver.connect();
   // Test states that it's waiting on web driver commands.
   // [DriverTestMessage] is converted to string since json format causes an
@@ -28,11 +31,12 @@ Future<void> integrationDriver(
       response.data!['web_driver_command'] != '${WebDriverCommandType.noop}') {
     final String? webDriverCommand = response.data!['web_driver_command'] as String?;
     if (webDriverCommand == '${WebDriverCommandType.screenshot}') {
+      assert(onScreenshot != null, 'screenshot command requires an onScreenshot callback');
       // Use `driver.screenshot()` method to get a screenshot of the web page.
       final List<int> screenshotImage = await driver.screenshot();
-      final String? screenshotName = response.data!['screenshot_name'] as String?;
+      final String screenshotName = response.data!['screenshot_name']! as String;
 
-      final bool screenshotSuccess = await onScreenshot!(screenshotName, screenshotImage) as bool;
+      final bool screenshotSuccess = await onScreenshot!(screenshotName, screenshotImage);
       if (screenshotSuccess) {
         jsonResponse = await driver.requestData(DriverTestMessage.complete().toString());
       } else {

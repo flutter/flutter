@@ -227,7 +227,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
     final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
-    // paints above above material
+    // paints above material
     expect(box, paints..circle(x: 44.0, y: 0.0, color: splashColor));
     await gesture.up();
   });

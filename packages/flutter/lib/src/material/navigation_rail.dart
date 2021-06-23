@@ -112,7 +112,7 @@ class NavigationRail extends StatefulWidget {
   /// [minWidth].
   ///
   /// The argument [extended] must not be null. [extended] can only be set to
-  /// true when when the [labelType] is null or [NavigationRailLabelType.none].
+  /// true when the [labelType] is null or [NavigationRailLabelType.none].
   ///
   /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
   /// [unselectedLabelTextStyle], [selectedLabelTextStyle],
@@ -498,7 +498,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                           padding: widget.destinations[i].padding,
                           onTap: () {
-                            widget.onDestinationSelected!(i);
+                            if (widget.onDestinationSelected != null)
+                              widget.onDestinationSelected!(i);
                           },
                           indexLabel: localizations.tabLabel(
                             tabIndex: i + 1,

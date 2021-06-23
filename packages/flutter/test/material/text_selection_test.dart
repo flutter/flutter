@@ -28,7 +28,7 @@ class MockClipboard {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   setUp(() async {
     await Clipboard.setData(const ClipboardData(text: 'clipboard data'));
@@ -566,7 +566,7 @@ void main() {
                   padding: const EdgeInsets.symmetric(horizontal: 250),
                   child: FittedBox(
                     child: materialTextSelectionControls.buildHandle(
-                      context, TextSelectionHandleType.right, 10.0,
+                      context, TextSelectionHandleType.right, 10.0, null,
                     ),
                   ),
                 ),
@@ -580,6 +580,38 @@ void main() {
         find.byType(RepaintBoundary),
         matchesGoldenFile('transparent_handle.png'),
       );
+    });
+
+    testWidgets('works with 3 positional parameters', (WidgetTester tester) async {
+      await tester.pumpWidget(Theme(
+        data: ThemeData(
+          textSelectionTheme: const TextSelectionThemeData(
+            selectionHandleColor: Color(0x550000AA),
+          ),
+        ),
+        child: Builder(
+          builder: (BuildContext context) {
+            return Container(
+              color: Colors.white,
+              height: 800,
+              width: 800,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 250),
+                child: FittedBox(
+                  child: materialTextSelectionControls.buildHandle(
+                    context, TextSelectionHandleType.right, 10.0,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ));
+
+      // No expect here as this should simply compile / not throw any
+      // exceptions while building. The test will fail if this either does
+      // not compile or if the tester catches an exception, which we do
+      // not take here.
     });
   });
 

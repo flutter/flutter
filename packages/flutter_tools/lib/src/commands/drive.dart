@@ -20,7 +20,7 @@ import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
