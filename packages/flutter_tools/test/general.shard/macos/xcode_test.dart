@@ -676,7 +676,7 @@ void main() {
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
           expect(await devices[0].sdkNameAndVersion,'iOS 13.3 17C54');
           expect(await devices[1].sdkNameAndVersion,'iOS 10.1');
-          expect(await devices[2].sdkNameAndVersion,'iOS null');
+          expect(await devices[2].sdkNameAndVersion,'iOS unknown version');
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
         });
