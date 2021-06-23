@@ -1527,10 +1527,10 @@ mixin WidgetInspectorService {
   }
 
   bool _isLocalCreationLocation(_Location? location) {
-    if (location == null || location.file == null) {
+    if (location == null) {
       return false;
     }
-    final String file = Uri.parse(location.file!).path;
+    final String file = Uri.parse(location.file).path;
 
     // By default check whether the creation location was within package:flutter.
     if (_pubRootDirectories == null) {
@@ -2127,16 +2127,32 @@ class _ElementLocationStatsTracker {
       final Map<String, List<int>> locationsJson = <String, List<int>>{};
       for (final _LocationCount entry in newLocations) {
         final _Location location = entry.location;
-        if (location.file != null) {
-          final List<int> jsonForFile = locationsJson.putIfAbsent(
-            location.file!,
-            () => <int>[],
-          );
-          jsonForFile..add(entry.id)..add(location.line)..add(location.column);
-        }
+        final List<int> jsonForFile = locationsJson.putIfAbsent(
+          location.file,
+          () => <int>[],
+        );
+        jsonForFile..add(entry.id)..add(location.line)..add(location.column);
       }
       json['newLocations'] = locationsJson;
     }
+
+    // Add in a data structure for the location names.
+    if (newLocations.isNotEmpty) {
+      final Map<String, Map<int, String>> namesJson = <String, Map<int, String>>{};
+      for (final _LocationCount entry in newLocations) {
+        final _Location location = entry.location;
+        final Map<int, String> jsonForFile = namesJson.putIfAbsent(
+          location.file,
+              () => <int, String>{},
+        );
+        final String? name = location.name;
+        if (name != null) {
+          jsonForFile[entry.id] = name;
+        }
+      }
+      json['newLocationsNames'] = namesJson;
+    }
+
     resetCounts();
     newLocations.clear();
     return json;
@@ -2852,22 +2868,19 @@ class _Location {
     required this.line,
     required this.column,
     this.name,
-    this.parameterLocations,
   });
 
   /// File path of the location.
-  final String? file;
+  final String file;
 
   /// 1-based line number.
   final int line;
+
   /// 1-based column number.
   final int column;
 
   /// Optional name of the parameter or function at this location.
   final String? name;
-
-  /// Optional locations of the parameters of the member at this location.
-  final List<_Location>? parameterLocations;
 
   Map<String, Object?> toJsonMap() {
     final Map<String, Object?> json = <String, Object?>{
@@ -2878,11 +2891,6 @@ class _Location {
     if (name != null) {
       json['name'] = name;
     }
-    if (parameterLocations != null) {
-      json['parameterLocations'] = parameterLocations!.map<Map<String, Object?>>(
-        (_Location location) => location.toJsonMap(),
-      ).toList();
-    }
     return json;
   }
 
@@ -2892,9 +2900,7 @@ class _Location {
     if (name != null) {
       parts.add(name!);
     }
-    if (file != null) {
-      parts.add(file!);
-    }
+    parts.add(file);
     parts..add('$line')..add('$column');
     return parts.join(':');
   }

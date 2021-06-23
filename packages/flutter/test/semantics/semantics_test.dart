@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -61,6 +62,75 @@ void main() {
       );
 
       expect(node.getSemanticsData().tags, tags);
+    });
+
+    test('SemanticsConfiguration can set both string label/value/hint and attributed version', () {
+      final SemanticsConfiguration config = SemanticsConfiguration();
+      config.label = 'label1';
+      expect(config.label, 'label1');
+      expect(config.attributedLabel.string, 'label1');
+      expect(config.attributedLabel.attributes.isEmpty, isTrue);
+
+      config.attributedLabel = AttributedString(
+        'label2',
+        attributes: <StringAttribute>[
+          SpellOutStringAttribute(range: const TextRange(start: 0, end:1)),
+        ]
+      );
+      expect(config.label, 'label2');
+      expect(config.attributedLabel.string, 'label2');
+      expect(config.attributedLabel.attributes.length, 1);
+      expect(config.attributedLabel.attributes[0] is SpellOutStringAttribute, isTrue);
+      expect(config.attributedLabel.attributes[0].range, const TextRange(start: 0, end: 1));
+
+      config.label = 'label3';
+      expect(config.label, 'label3');
+      expect(config.attributedLabel.string, 'label3');
+      expect(config.attributedLabel.attributes.isEmpty, isTrue);
+
+      config.value = 'value1';
+      expect(config.value, 'value1');
+      expect(config.attributedValue.string, 'value1');
+      expect(config.attributedValue.attributes.isEmpty, isTrue);
+
+      config.attributedValue = AttributedString(
+          'value2',
+          attributes: <StringAttribute>[
+            SpellOutStringAttribute(range: const TextRange(start: 0, end:1)),
+          ]
+      );
+      expect(config.value, 'value2');
+      expect(config.attributedValue.string, 'value2');
+      expect(config.attributedValue.attributes.length, 1);
+      expect(config.attributedValue.attributes[0] is SpellOutStringAttribute, isTrue);
+      expect(config.attributedValue.attributes[0].range, const TextRange(start: 0, end: 1));
+
+      config.value = 'value3';
+      expect(config.value, 'value3');
+      expect(config.attributedValue.string, 'value3');
+      expect(config.attributedValue.attributes.isEmpty, isTrue);
+
+      config.hint = 'hint1';
+      expect(config.hint, 'hint1');
+      expect(config.attributedHint.string, 'hint1');
+      expect(config.attributedHint.attributes.isEmpty, isTrue);
+
+      config.attributedHint = AttributedString(
+          'hint2',
+          attributes: <StringAttribute>[
+            SpellOutStringAttribute(range: const TextRange(start: 0, end:1)),
+          ]
+      );
+      expect(config.hint, 'hint2');
+      expect(config.attributedHint.string, 'hint2');
+      expect(config.attributedHint.attributes.length, 1);
+      expect(config.attributedHint.attributes[0] is SpellOutStringAttribute, isTrue);
+      expect(config.attributedHint.attributes[0].range, const TextRange(start: 0, end: 1));
+
+      config.hint = 'hint3';
+      expect(config.hint, 'hint3');
+      expect(config.attributedHint.string, 'hint3');
+      expect(config.attributedHint.attributes.isEmpty, isTrue);
     });
 
     test('mutate existing semantic node list errors', () {
@@ -568,6 +638,26 @@ void main() {
       '   elevation: 0.0\n'
       '   thickness: 0.0\n',
     );
+  });
+
+  test('Attributed String can concate', () {
+    final AttributedString string1 = AttributedString(
+      'string1',
+      attributes: <StringAttribute>[
+        SpellOutStringAttribute(range: const TextRange(start:0, end:4)),
+      ]
+    );
+    final AttributedString string2 = AttributedString(
+        'string2',
+        attributes: <StringAttribute>[
+          LocaleStringAttribute(locale: const Locale('es', 'MX'), range: const TextRange(start:0, end:4)),
+        ]
+    );
+    final AttributedString result = string1 + string2;
+    expect(result.string, 'string1string2');
+    expect(result.attributes.length, 2);
+    expect(result.attributes[0].range, const TextRange(start:0, end:4));
+    expect(result.attributes[0] is SpellOutStringAttribute, isTrue);
   });
 
   test('Semantics id does not repeat', () {
