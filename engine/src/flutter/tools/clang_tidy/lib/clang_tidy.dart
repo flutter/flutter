@@ -107,8 +107,11 @@ class ClangTidy {
       }
     }
 
+    final List<dynamic> buildCommandsData = jsonDecode(
+      options.buildCommandsPath.readAsStringSync(),
+    ) as List<dynamic>;
     final List<Command> changedFileBuildCommands = getLintCommandsForChangedFiles(
-      options.buildCommandsPath,
+      buildCommandsData,
       changedFiles,
     );
 
@@ -163,14 +166,11 @@ class ClangTidy {
   /// compute the lint commands to run.
   @visibleForTesting
   List<Command> getLintCommandsForChangedFiles(
-    io.File buildCommandsPath,
+    List<dynamic> buildCommandsData,
     List<io.File> changedFiles,
   ) {
-    final List<dynamic> buildCommandMaps = jsonDecode(
-      buildCommandsPath.readAsStringSync(),
-    ) as List<dynamic>;
     final List<Command> buildCommands = <Command>[
-      for (final dynamic c in buildCommandMaps)
+      for (final dynamic c in buildCommandsData)
         Command.fromMap(c as Map<String, dynamic>),
     ];
 
