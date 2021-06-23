@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/project_migrator.dart';
+import 'package:flutter_tools/src/ios/migrations/deployment_target_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
@@ -485,6 +486,78 @@ keep this 3
 /* End XCConfigurationList section */
 ''');
         expect(testLogger.statusText, contains('Project base configurations detected, removing.'));
+      });
+    });
+
+    group('update deployment target version', () {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectInfoFile;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem();
+        xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
+        testLogger = BufferLogger.test();
+        project = FakeIosProject();
+        project.xcodeProjectInfoFile = xcodeProjectInfoFile;
+      });
+
+      testWithoutContext('skipped if files are missing', () {
+        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+          project,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+        expect(xcodeProjectInfoFile.existsSync(), isFalse);
+
+        expect(testLogger.traceText, contains('Xcode project not found, skipping iOS deployment target version migration'));
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('skipped if nothing to upgrade', () {
+        const String contents = 'IPHONEOS_DEPLOYMENT_TARGET = 9.0;';
+        xcodeProjectInfoFile.writeAsStringSync(contents);
+        final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
+
+        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+          project,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+
+        expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
+        expect(xcodeProjectInfoFile.readAsStringSync(), contents);
+
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('Xcode project is migrated to minimum version 8.0', () {
+        xcodeProjectInfoFile.writeAsStringSync('''
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+''');
+
+        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+          project,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+
+        expect(xcodeProjectInfoFile.readAsStringSync(), '''
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+''');
+        // Only print once even though 2 lines were changed.
+        expect('Updating minimum iOS deployment target from 8.0 to 9.0'.allMatches(testLogger.statusText).length, 1);
       });
     });
   });
