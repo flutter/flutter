@@ -465,7 +465,7 @@ class IOSDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
-  Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion';
+  Future<String> get sdkNameAndVersion async => 'iOS ${_sdkVersion ?? 'unknown version'}';
 
   @override
   DeviceLogReader getLogReader({
