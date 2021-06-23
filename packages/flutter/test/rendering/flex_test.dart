@@ -664,6 +664,7 @@ void main() {
     // try to paint(), which also checks _hasOverflow, and it should be able to
     // do so without an ancillary error.
     expect(exceptions, hasLength(1));
+    // ignore: avoid_dynamic_calls
     expect(exceptions.first.message, isNot(contains('Null check operator')));
   });
 }

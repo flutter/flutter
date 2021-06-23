@@ -355,10 +355,14 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
 
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(secondaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
   });
 
@@ -367,10 +371,14 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
 
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(secondaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
   });
 
@@ -491,6 +499,7 @@ void _tests() {
 
     // Ensure we preserve day period as we roll over.
     final dynamic pickerState = tester.state(_timePickerDialog);
+    // ignore: avoid_dynamic_calls
     expect(pickerState.selectedTime.value, const TimeOfDay(hour: 1, minute: 0));
 
     await actAndExpect(
@@ -556,6 +565,7 @@ void _tests() {
 
     // Ensure we preserve hour period as we roll over.
     final dynamic pickerState = tester.state(_timePickerDialog);
+    // ignore: avoid_dynamic_calls
     expect(pickerState.selectedTime.value, const TimeOfDay(hour: 11, minute: 0));
 
     await actAndExpect(
