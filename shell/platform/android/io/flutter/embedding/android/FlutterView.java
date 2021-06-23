@@ -53,7 +53,8 @@ import java.util.Set;
 /**
  * Displays a Flutter UI on an Android device.
  *
- * <p>A {@code FlutterView}'s UI is painted by a corresponding {@link FlutterEngine}.
+ * <p>A {@code FlutterView}'s UI is painted by a corresponding {@link
+ * io.flutter.embedding.engine.FlutterEngine}.
  *
  * <p>A {@code FlutterView} can operate in 2 different {@link
  * io.flutter.embedding.android.RenderMode}s:
@@ -336,13 +337,13 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   }
 
   /**
-   * Returns true if an attached {@link FlutterEngine} has rendered at least 1 frame to this {@code
-   * FlutterView}.
+   * Returns true if an attached {@link io.flutter.embedding.engine.FlutterEngine} has rendered at
+   * least 1 frame to this {@code FlutterView}.
    *
-   * <p>Returns false if no {@link FlutterEngine} is attached.
+   * <p>Returns false if no {@link io.flutter.embedding.engine.FlutterEngine} is attached.
    *
-   * <p>This flag is specific to a given {@link FlutterEngine}. The following hypothetical timeline
-   * demonstrates how this flag changes over time.
+   * <p>This flag is specific to a given {@link io.flutter.embedding.engine.FlutterEngine}. The
+   * following hypothetical timeline demonstrates how this flag changes over time.
    *
    * <ol>
    *   <li>{@code flutterEngineA} is attached to this {@code FlutterView}: returns false
@@ -498,8 +499,8 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
    * these insets. Therefore, this method calculates the viewport metrics that Flutter should use
    * and then sends those metrics to Flutter.
    *
-   * <p>This callback is not present in API < 20, which means lower API devices will see the wider
-   * than expected padding when the status and navigation bars are hidden.
+   * <p>This callback is not present in API &lt; 20, which means lower API devices will see the
+   * wider than expected padding when the status and navigation bars are hidden.
    */
   @Override
   @TargetApi(20)
@@ -833,7 +834,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
    * Prior to Android Q, it's impossible to add real views as descendants of virtual nodes. This
    * breaks accessibility when an Android view is embedded in a Flutter app.
    *
-   * <p>This method overrides a @hide method in {@code ViewGroup} to workaround this limitation.
+   * <p>This method overrides a hidden method in {@code ViewGroup} to workaround this limitation.
    * This solution is derivated from Jetpack Compose, and can be found in the Android source code as
    * well.
    *
@@ -851,7 +852,8 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     // Android Q or later doesn't call this method.
     //
     // However, since this is implementation detail, a future version of Android might call
-    // this method again, fallback to calling the @hide method as expected by ViewGroup.
+    // this method again, fallback to calling the This member is not intended for public use, and is
+    // only visible for testing. method as expected by ViewGroup.
     Method findViewByAccessibilityIdTraversalMethod;
     try {
       findViewByAccessibilityIdTraversalMethod =
@@ -929,12 +931,13 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   // -------- End: Mouse ---------
 
   /**
-   * Connects this {@code FlutterView} to the given {@link FlutterEngine}.
+   * Connects this {@code FlutterView} to the given {@link
+   * io.flutter.embedding.engine.FlutterEngine}.
    *
    * <p>This {@code FlutterView} will begin rendering the UI painted by the given {@link
    * FlutterEngine}. This {@code FlutterView} will also begin forwarding interaction events from
-   * this {@code FlutterView} to the given {@link FlutterEngine}, e.g., user touch events,
-   * accessibility events, keyboard events, and others.
+   * this {@code FlutterView} to the given {@link io.flutter.embedding.engine.FlutterEngine}, e.g.,
+   * user touch events, accessibility events, keyboard events, and others.
    *
    * <p>See {@link #detachFromFlutterEngine()} for information on how to detach from a {@link
    * FlutterEngine}.
@@ -1030,11 +1033,12 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   }
 
   /**
-   * Disconnects this {@code FlutterView} from a previously attached {@link FlutterEngine}.
+   * Disconnects this {@code FlutterView} from a previously attached {@link
+   * io.flutter.embedding.engine.FlutterEngine}.
    *
    * <p>This {@code FlutterView} will clear its UI and stop forwarding all events to the
-   * previously-attached {@link FlutterEngine}. This includes touch events, accessibility events,
-   * keyboard events, and others.
+   * previously-attached {@link io.flutter.embedding.engine.FlutterEngine}. This includes touch
+   * events, accessibility events, keyboard events, and others.
    *
    * <p>See {@link #attachToFlutterEngine(FlutterEngine)} for information on how to attach a {@link
    * FlutterEngine}.
@@ -1179,7 +1183,10 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     return false;
   }
 
-  /** Returns true if this {@code FlutterView} is currently attached to a {@link FlutterEngine}. */
+  /**
+   * Returns true if this {@code FlutterView} is currently attached to a {@link
+   * io.flutter.embedding.engine.FlutterEngine}.
+   */
   @VisibleForTesting
   public boolean isAttachedToFlutterEngine() {
     return flutterEngine != null
@@ -1187,8 +1194,9 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   }
 
   /**
-   * Returns the {@link FlutterEngine} to which this {@code FlutterView} is currently attached, or
-   * null if this {@code FlutterView} is not currently attached to a {@link FlutterEngine}.
+   * Returns the {@link io.flutter.embedding.engine.FlutterEngine} to which this {@code FlutterView}
+   * is currently attached, or null if this {@code FlutterView} is not currently attached to a
+   * {@link io.flutter.embedding.engine.FlutterEngine}.
    */
   @VisibleForTesting
   @Nullable
@@ -1198,7 +1206,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
 
   /**
    * Adds a {@link FlutterEngineAttachmentListener}, which is notified whenever this {@code
-   * FlutterView} attached to/detaches from a {@link FlutterEngine}.
+   * FlutterView} attached to/detaches from a {@link io.flutter.embedding.engine.FlutterEngine}.
    */
   @VisibleForTesting
   public void addFlutterEngineAttachmentListener(
@@ -1344,8 +1352,8 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   }
 
   /**
-   * Listener that is notified when a {@link FlutterEngine} is attached to/detached from a given
-   * {@code FlutterView}.
+   * Listener that is notified when a {@link io.flutter.embedding.engine.FlutterEngine} is attached
+   * to/detached from a given {@code FlutterView}.
    */
   @VisibleForTesting
   public interface FlutterEngineAttachmentListener {
@@ -1353,8 +1361,8 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     void onFlutterEngineAttachedToFlutterView(@NonNull FlutterEngine engine);
 
     /**
-     * A previously attached {@link FlutterEngine} has been detached from the associated {@code
-     * FlutterView}.
+     * A previously attached {@link io.flutter.embedding.engine.FlutterEngine} has been detached
+     * from the associated {@code FlutterView}.
      */
     void onFlutterEngineDetachedFromFlutterView();
   }

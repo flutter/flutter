@@ -166,7 +166,8 @@ public class TextInputChannel {
    * Instructs Flutter to reattach the last active text input client, if any.
    *
    * <p>This is necessary when the view hierarchy has been detached and reattached to a {@link
-   * FlutterEngine}, as the engine may have kept alive a text editing client on the Dart side.
+   * io.flutter.embedding.engine.FlutterEngine}, as the engine may have kept alive a text editing
+   * client on the Dart side.
    */
   public void requestExistingInputState() {
     channel.invokeMethod("TextInputClient.requestExistingInputState", null);
@@ -347,7 +348,8 @@ public class TextInputChannel {
     void requestAutofill();
 
     /**
-     * Requests that the {@link AutofillManager} cancel or commit the current autofill context.
+     * Requests that the {@link android.view.autofill.AutofillManager} cancel or commit the current
+     * autofill context.
      *
      * <p>The method calls {@link android.view.autofill.AutofillManager#commit()} when {@code
      * shouldSave} is true, and calls {@link android.view.autofill.AutofillManager#cancel()}

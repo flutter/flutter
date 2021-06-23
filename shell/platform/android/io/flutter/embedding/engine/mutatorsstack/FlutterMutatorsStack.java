@@ -18,14 +18,13 @@ import java.util.List;
  * The mutator stack containing a list of mutators
  *
  * <p>The mutators can be applied to a {@link io.flutter.plugin.platform.PlatformView} to perform a
- * series mutations. See {@link io.flutter.embedding.engine.mutatorsstack.Mutator} for informations
- * on Mutators.
+ * series mutations. See {@link FlutterMutatorsStack.FlutterMutator} for informations on Mutators.
  */
 @Keep
 public class FlutterMutatorsStack {
   /**
-   * The type of a Mutator See {@link io.flutter.embedding.engine.mutatorsstack.Mutator} for
-   * informations on Mutators.
+   * The type of a Mutator See {@link FlutterMutatorsStack.FlutterMutator} for informations on
+   * Mutators.
    */
   public enum FlutterMutatorType {
     CLIP_RECT,
@@ -40,7 +39,7 @@ public class FlutterMutatorsStack {
    *
    * <p>A mutator contains information of a single mutation operation that can be applied to a
    * {@link io.flutter.plugin.platform.PlatformView}. See {@link
-   * io.flutter.embedding.engine.mutatorsstack.Mutator} for informations on Mutators.
+   * FlutterMutatorsStack.FlutterMutator} for informations on Mutators.
    */
   public class FlutterMutator {
 
@@ -77,7 +76,7 @@ public class FlutterMutatorsStack {
     /**
      * Initialize a clip path mutator.
      *
-     * @param rect the path to be clipped.
+     * @param path the path to be clipped.
      */
     public FlutterMutator(Path path) {
       this.type = FlutterMutatorType.CLIP_PATH;
@@ -144,7 +143,7 @@ public class FlutterMutatorsStack {
   }
 
   /**
-   * Push a transform {@link io.flutter.embedding.engine.mutatorsstack.Mutator} to the stack.
+   * Push a transform {@link FlutterMutatorsStack.FlutterMutator} to the stack.
    *
    * @param values the transform matrix to be pushed to the stack. The array matches how a {@link
    *     android.graphics.Matrix} is constructed.
@@ -157,7 +156,7 @@ public class FlutterMutatorsStack {
     finalMatrix.preConcat(mutator.getMatrix());
   }
 
-  /** Push a clipRect {@link io.flutter.embedding.engine.mutatorsstack.Mutator} to the stack. */
+  /** Push a clipRect {@link FlutterMutatorsStack.FlutterMutator} to the stack. */
   public void pushClipRect(int left, int top, int right, int bottom) {
     Rect rect = new Rect(left, top, right, bottom);
     FlutterMutator mutator = new FlutterMutator(rect);
@@ -169,7 +168,7 @@ public class FlutterMutatorsStack {
   }
 
   /**
-   * Push a clipRRect {@link io.flutter.embedding.engine.mutatorsstack.Mutator} to the stack.
+   * Push a clipRRect {@link FlutterMutatorsStack.FlutterMutator} to the stack.
    *
    * @param left left offset of the rrect.
    * @param top top offset of the rrect.
@@ -199,8 +198,8 @@ public class FlutterMutatorsStack {
    * Get a list of all the clipping operations. All the clipping operations -- whether it is clip
    * rect, clip rrect, or clip path -- are converted into Paths. The paths are also transformed with
    * the matrix that up to their stack positions. For example: If the stack looks like (from top to
-   * bottom): TransA -> ClipA -> TransB -> ClipB, the final paths will look like [TransA*ClipA,
-   * TransA*TransB*ClipB].
+   * bottom): TransA -&gt; ClipA -&gt; TransB -&gt; ClipB, the final paths will look like
+   * [TransA*ClipA, TransA*TransB*ClipB].
    *
    * <p>Clipping this list to the parent canvas of a view results the final clipping path.
    */

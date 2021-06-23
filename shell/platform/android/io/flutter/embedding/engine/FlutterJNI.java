@@ -23,7 +23,6 @@ import io.flutter.embedding.engine.dart.PlatformMessageHandler;
 import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
-import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.embedding.engine.renderer.SurfaceTextureWrapper;
 import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.localization.LocalizationPlugin;
@@ -77,13 +76,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * flutterJNI.detachFromNativeAndReleaseResources();
  * }</pre>
  *
- * <p>To provide a visual, interactive surface for Flutter rendering and touch events, register a
- * {@link RenderSurface} with {@link #setRenderSurface(RenderSurface)}
- *
  * <p>To receive callbacks for certain events that occur on the native side, register listeners:
  *
  * <ol>
- *   <li>{@link #addEngineLifecycleListener(EngineLifecycleListener)}
+ *   <li>{@link #addEngineLifecycleListener(FlutterEngine.EngineLifecycleListener)}
  *   <li>{@link #addIsDisplayingFlutterUiListener(FlutterUiDisplayListener)}
  * </ol>
  *
@@ -722,7 +718,7 @@ public class FlutterJNI {
 
   /**
    * Call this method to inform Flutter that a texture previously registered with {@link
-   * #registerTexture(long, SurfaceTexture)} has a new frame available.
+   * #registerTexture(long, SurfaceTextureWrapper)} has a new frame available.
    *
    * <p>Invoking this method instructs Flutter to update its presentation of the given texture so
    * that the new frame is displayed.
@@ -737,7 +733,8 @@ public class FlutterJNI {
   private native void nativeMarkTextureFrameAvailable(long nativeShellHolderId, long textureId);
 
   /**
-   * Unregisters a texture that was registered with {@link #registerTexture(long, SurfaceTexture)}.
+   * Unregisters a texture that was registered with {@link #registerTexture(long,
+   * SurfaceTextureWrapper)}.
    */
   @UiThread
   public void unregisterTexture(long textureId) {
@@ -803,8 +800,8 @@ public class FlutterJNI {
    * will be dropped (ignored). Therefore, when using {@code FlutterJNI} to integrate a Flutter
    * context in an app, a {@link PlatformMessageHandler} must be registered for 2-way Java/Dart
    * communication to operate correctly. Moreover, the handler must be implemented such that
-   * fundamental platform messages are handled as expected. See {@link FlutterNativeView} for an
-   * example implementation.
+   * fundamental platform messages are handled as expected. See {@link
+   * io.flutter.view.FlutterNativeView} for an example implementation.
    */
   @UiThread
   public void setPlatformMessageHandler(@Nullable PlatformMessageHandler platformMessageHandler) {

@@ -14,11 +14,12 @@ public interface PlatformView {
   View getView();
 
   /**
-   * Called by the {@link FlutterEngine} that owns this {@code PlatformView} when the Android {@link
-   * View} responsible for rendering a Flutter UI is associated with the {@link FlutterEngine}.
+   * Called by the {@link io.flutter.embedding.engine.FlutterEngine} that owns this {@code
+   * PlatformView} when the Android {@link View} responsible for rendering a Flutter UI is
+   * associated with the {@link io.flutter.embedding.engine.FlutterEngine}.
    *
-   * <p>This means that our associated {@link FlutterEngine} can now render a UI and interact with
-   * the user.
+   * <p>This means that our associated {@link io.flutter.embedding.engine.FlutterEngine} can now
+   * render a UI and interact with the user.
    *
    * <p>Some platform views may have unusual dependencies on the {@link View} that renders Flutter
    * UIs, such as unique keyboard interactions. That {@link View} is provided here for those
@@ -31,12 +32,12 @@ public interface PlatformView {
   default void onFlutterViewAttached(@NonNull View flutterView) {}
 
   /**
-   * Called by the {@link FlutterEngine} that owns this {@code PlatformView} when the Android {@link
-   * View} responsible for rendering a Flutter UI is detached and disassociated from the {@link
-   * FlutterEngine}.
+   * Called by the {@link io.flutter.embedding.engine.FlutterEngine} that owns this {@code
+   * PlatformView} when the Android {@link View} responsible for rendering a Flutter UI is detached
+   * and disassociated from the {@link io.flutter.embedding.engine.FlutterEngine}.
    *
-   * <p>This means that our associated {@link FlutterEngine} no longer has a rendering surface, or a
-   * user interaction surface of any kind.
+   * <p>This means that our associated {@link io.flutter.embedding.engine.FlutterEngine} no longer
+   * has a rendering surface, or a user interaction surface of any kind.
    *
    * <p>This platform view must release any references related to the Android {@link View} that was
    * provided in {@link #onFlutterViewAttached(View)}.
@@ -60,7 +61,7 @@ public interface PlatformView {
 
   /**
    * Callback fired when the platform's input connection is locked, or should be used. See also
-   * {@link TextInputPlugin#lockPlatformViewInputConnection}.
+   * {@link io.flutter.plugin.editing.TextInputPlugin#lockPlatformViewInputConnection}.
    *
    * <p>This hook only exists for rare cases where the plugin relies on the state of the input
    * connection. This probably doesn't need to be implemented.
@@ -71,7 +72,7 @@ public interface PlatformView {
 
   /**
    * Callback fired when the platform input connection has been unlocked. See also {@link
-   * TextInputPlugin#lockPlatformViewInputConnection}.
+   * io.flutter.plugin.editing.TextInputPlugin#lockPlatformViewInputConnection}.
    *
    * <p>This hook only exists for rare cases where the plugin relies on the state of the input
    * connection. This probably doesn't need to be implemented.

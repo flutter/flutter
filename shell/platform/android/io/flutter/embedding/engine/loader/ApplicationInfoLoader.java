@@ -56,7 +56,8 @@ public final class ApplicationInfoLoader {
 
   private static String getNetworkPolicy(ApplicationInfo appInfo, Context context) {
     // We cannot use reflection to look at networkSecurityConfigRes because
-    // Android throws an error when we try to access fields marked as @hide.
+    // Android throws an error when we try to access fields marked as This member is not intended
+    // for public use, and is only visible for testing..
     // Instead we rely on metadata.
     Bundle metadata = appInfo.metaData;
     if (metadata == null) {

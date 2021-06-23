@@ -76,7 +76,8 @@ public class FlutterFragmentActivity extends FragmentActivity
   /**
    * Creates an {@link FlutterFragmentActivity.NewEngineIntentBuilder}, which can be used to
    * configure an {@link Intent} to launch a {@code FlutterFragmentActivity} that internally creates
-   * a new {@link FlutterEngine} using the desired Dart entrypoint, initial route, etc.
+   * a new {@link io.flutter.embedding.engine.FlutterEngine} using the desired Dart entrypoint,
+   * initial route, etc.
    */
   @NonNull
   public static NewEngineIntentBuilder withNewEngine() {
@@ -85,7 +86,7 @@ public class FlutterFragmentActivity extends FragmentActivity
 
   /**
    * Builder to create an {@code Intent} that launches a {@code FlutterFragmentActivity} with a new
-   * {@link FlutterEngine} and the desired configuration.
+   * {@link io.flutter.embedding.engine.FlutterEngine} and the desired configuration.
    */
   public static class NewEngineIntentBuilder {
     private final Class<? extends FlutterFragmentActivity> activityClass;
@@ -164,7 +165,7 @@ public class FlutterFragmentActivity extends FragmentActivity
 
   /**
    * Builder to create an {@code Intent} that launches a {@code FlutterFragmentActivity} with an
-   * existing {@link FlutterEngine} that is cached in {@link
+   * existing {@link io.flutter.embedding.engine.FlutterEngine} that is cached in {@link
    * io.flutter.embedding.engine.FlutterEngineCache}.
    */
   public static class CachedEngineIntentBuilder {
@@ -178,9 +179,9 @@ public class FlutterFragmentActivity extends FragmentActivity
      * {@code FlutterFragmentActivity}.
      *
      * <p>Subclasses of {@code FlutterFragmentActivity} should provide their own static version of
-     * {@link #withCachedEngine()}, which returns an instance of {@code CachedEngineIntentBuilder}
-     * constructed with a {@code Class} reference to the {@code FlutterFragmentActivity} subclass,
-     * e.g.:
+     * {@link #withCachedEngine(String)}, which returns an instance of {@code
+     * CachedEngineIntentBuilder} constructed with a {@code Class} reference to the {@code
+     * FlutterFragmentActivity} subclass, e.g.:
      *
      * <p>{@code return new CachedEngineIntentBuilder(MyFlutterActivity.class, engineId); }
      */
@@ -191,8 +192,8 @@ public class FlutterFragmentActivity extends FragmentActivity
     }
 
     /**
-     * Returns true if the cached {@link FlutterEngine} should be destroyed and removed from the
-     * cache when this {@code FlutterFragmentActivity} is destroyed.
+     * Returns true if the cached {@link io.flutter.embedding.engine.FlutterEngine} should be
+     * destroyed and removed from the cache when this {@code FlutterFragmentActivity} is destroyed.
      *
      * <p>The default value is {@code false}.
      */
@@ -536,13 +537,13 @@ public class FlutterFragmentActivity extends FragmentActivity
   }
 
   /**
-   * Returns false if the {@link FlutterEngine} backing this {@code FlutterFragmentActivity} should
-   * outlive this {@code FlutterFragmentActivity}, or true to be destroyed when the {@code
-   * FlutterFragmentActivity} is destroyed.
+   * Returns false if the {@link io.flutter.embedding.engine.FlutterEngine} backing this {@code
+   * FlutterFragmentActivity} should outlive this {@code FlutterFragmentActivity}, or true to be
+   * destroyed when the {@code FlutterFragmentActivity} is destroyed.
    *
    * <p>The default value is {@code true} in cases where {@code FlutterFragmentActivity} created its
-   * own {@link FlutterEngine}, and {@code false} in cases where a cached {@link FlutterEngine} was
-   * provided.
+   * own {@link io.flutter.embedding.engine.FlutterEngine}, and {@code false} in cases where a
+   * cached {@link io.flutter.embedding.engine.FlutterEngine} was provided.
    */
   public boolean shouldDestroyEngineWithHost() {
     return getIntent().getBooleanExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, false);
@@ -550,7 +551,8 @@ public class FlutterFragmentActivity extends FragmentActivity
 
   /**
    * Hook for subclasses to control whether or not the {@link FlutterFragment} within this {@code
-   * Activity} automatically attaches its {@link FlutterEngine} to this {@code Activity}.
+   * Activity} automatically attaches its {@link io.flutter.embedding.engine.FlutterEngine} to this
+   * {@code Activity}.
    *
    * <p>For an explanation of why this control exists, see {@link
    * FlutterFragment.NewEngineFragmentBuilder#shouldAttachEngineToActivity()}.
@@ -638,7 +640,7 @@ public class FlutterFragmentActivity extends FragmentActivity
    * path.
    *
    * <p>When otherwise unspecified, the value is null, which defaults to the app bundle path defined
-   * in {@link FlutterLoader#findAppBundlePath()}.
+   * in {@link io.flutter.embedding.engine.loader.FlutterLoader#findAppBundlePath()}.
    *
    * <p>Subclasses may override this method to return a custom app bundle path.
    */
@@ -727,9 +729,10 @@ public class FlutterFragmentActivity extends FragmentActivity
   }
 
   /**
-   * Returns the ID of a statically cached {@link FlutterEngine} to use within this {@code
-   * FlutterFragmentActivity}, or {@code null} if this {@code FlutterFragmentActivity} does not want
-   * to use a cached {@link FlutterEngine}.
+   * Returns the ID of a statically cached {@link io.flutter.embedding.engine.FlutterEngine} to use
+   * within this {@code FlutterFragmentActivity}, or {@code null} if this {@code
+   * FlutterFragmentActivity} does not want to use a cached {@link
+   * io.flutter.embedding.engine.FlutterEngine}.
    */
   @Nullable
   protected String getCachedEngineId() {
@@ -754,7 +757,7 @@ public class FlutterFragmentActivity extends FragmentActivity
    * FlutterFragmentActivity}.
    *
    * <p>That is, {@link RenderMode#surface} if {@link FlutterFragmentActivity#getBackgroundMode()}
-   * is {@link BackgroundMode.opaque} or {@link RenderMode#texture} otherwise.
+   * is {@link BackgroundMode#opaque} or {@link RenderMode#texture} otherwise.
    */
   @NonNull
   protected RenderMode getRenderMode() {
