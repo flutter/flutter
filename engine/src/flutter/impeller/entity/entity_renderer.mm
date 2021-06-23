@@ -40,6 +40,7 @@ bool EntityRenderer::OnRender(RenderPass& pass) {
   pass.SetLabel("EntityRenderer Render Pass");
 
   shader::BoxVertexInfo::UniformBuffer uniforms;
+  uniforms.color = Color::Blue();
   uniforms.mvp = Matrix::MakeOrthographic({800, 600});
   VertexBufferBuilder vertex_builder;
   vertex_builder.AddVertices({
@@ -54,11 +55,10 @@ bool EntityRenderer::OnRender(RenderPass& pass) {
   Command cmd;
   cmd.label = "Box";
   cmd.pipeline = box_primitive_->GetPipeline();
-  // Vertex buffer.
   cmd.vertex_bindings.buffers[box_primitive_->GetVertexBufferIndex()] =
       vertex_builder.CreateVertexBuffer(pass.GetTransientsBuffer());
-  // Uniform buffer.
-  cmd.vertex_bindings.buffers[0u] =
+  cmd.vertex_bindings
+      .buffers[shader::BoxVertexInfo::kUniformUniformBuffer.binding] =
       pass.GetTransientsBuffer().EmplaceUniform(uniforms);
   cmd.index_buffer =
       vertex_builder.CreateIndexBuffer(pass.GetTransientsBuffer());
