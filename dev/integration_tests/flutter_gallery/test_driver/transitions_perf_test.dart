@@ -130,7 +130,6 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
     await driver.scrollUntilVisible(demoList, demoItem,
       dyScroll: -48.0,
       alignment: 0.5,
-      timeout: const Duration(seconds: 30),
     );
 
     for (int i = 0; i < 2; i += 1) {
@@ -218,6 +217,6 @@ void main([List<String> args = const <String>[]]) {
         await runDemos(unprofiledDemos.toList(), driver);
       }
 
-    }, timeout: const Timeout(Duration(minutes: 5)));
+    });
   });
 }
