@@ -273,17 +273,21 @@ class Message {
       value = _value(bundle, resourceId),
       description = _description(bundle, resourceId, isResourceAttributeRequired),
       placeholders = _placeholders(bundle, resourceId, isResourceAttributeRequired),
-      _pluralMatch = _pluralRE.firstMatch(_value(bundle, resourceId));
+      _pluralMatch = _pluralRE.firstMatch(_value(bundle, resourceId)),
+      _selectMatch = _selectRE.firstMatch(_value(bundle, resourceId));
 
   static final RegExp _pluralRE = RegExp(r'\s*\{([\w\s,]*),\s*plural\s*,');
+  static final RegExp _selectRE = RegExp(r'\s*\{([\w\s,]*),\s*select\s*,');
 
   final String resourceId;
   final String value;
   final String? description;
   final List<Placeholder> placeholders;
   final RegExpMatch? _pluralMatch;
+  final RegExpMatch? _selectMatch;
 
   bool get isPlural => _pluralMatch != null && _pluralMatch!.groupCount == 1;
+  bool get isSelect => _selectMatch != null && _selectMatch!.groupCount == 1;
 
   bool get placeholdersRequireFormatting => placeholders.any((Placeholder p) => p.requiresFormatting);
 

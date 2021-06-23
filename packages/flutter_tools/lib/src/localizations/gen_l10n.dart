@@ -240,6 +240,48 @@ String _generatePluralMethod(Message message, String translationForMessage) {
     .replaceAll('@(none)\n', '');
 }
 
+String _generateSelectMethod(Message message, String translationForMessage) {
+  if (message.placeholders.isEmpty) {
+    throw L10nException(
+      'Unable to find placeholders for the select message: ${message.resourceId}.\n'
+      'Check to see if the select message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+  }
+
+  final List<String> cases = <String>[];
+
+  final RegExp re = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\{.*\})+\}');
+
+  final RegExpMatch? match = re.firstMatch(translationForMessage);
+  String? choice;
+  if (match != null && match.groupCount == 2) {
+    choice = match.group(1);
+    final String pattern = match.group(2)!;
+    final RegExp patternRE = RegExp(r'\s*([\w\d]+)\{(.*?)\}');
+    for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
+      if (patternMatch.groupCount == 2) {
+        cases.add(
+            "        '${patternMatch.group(1)}': '${patternMatch.group(2)}'");
+      }
+    }
+  }
+
+  final List<String> parameters = message.placeholders.map((Placeholder placeholder) {
+    final String placeholderType = placeholder.type ?? 'object';
+    return '$placeholderType ${placeholder.name}';
+  }).toList();
+
+  final String description = message.description ?? 'No description provided in @${message.resourceId}';
+
+  return selectMethodTemplate
+    .replaceAll('@(name)', message.resourceId)
+    .replaceAll('@(parameters)', parameters.join(', '))
+    .replaceAll('@(choice)', choice!)
+    .replaceAll('@(cases)', cases.join(',\n').trim())
+    .replaceAll('@(description)', description);
+}
+
 bool _needsCurlyBracketStringInterpolation(String messageString, String placeholder) {
   final int placeholderIndex = messageString.indexOf(placeholder);
   // This means that this message does not contain placeholders/parameters,
@@ -303,6 +345,10 @@ String _generateMethod(Message message, String translationForMessage) {
 
   if (message.isPlural) {
     return _generatePluralMethod(message, translationForMessage);
+  }
+
+  if (message.isSelect) {
+    return _generateSelectMethod(message, translationForMessage);
   }
 
   if (message.placeholdersRequireFormatting) {
@@ -1168,7 +1214,8 @@ class LocalizationsGenerator {
       .replaceAll('\n\n\n', '\n\n');
   }
 
-  bool _requiresIntlImport() => _allMessages.any((Message message) => message.isPlural || message.placeholdersRequireFormatting);
+  bool _requiresIntlImport() => _allMessages.any(
+          (Message message) => message.isPlural || message.isSelect || message.placeholdersRequireFormatting);
 
   void writeOutputFiles(Logger logger, { bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
