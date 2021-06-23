@@ -204,7 +204,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('Ensure Visual Density effective constraints are clamped', (WidgetTester tester) async {
-    const BoxConstraints square = BoxConstraints.tightFor(width: 35.0, height: 35.0);
+    const BoxConstraints square = BoxConstraints.tightFor(width: 35, height: 35);
     BoxConstraints expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(square);
     expect(expanded.minWidth, equals(35));
     expect(expanded.minHeight, equals(35));
