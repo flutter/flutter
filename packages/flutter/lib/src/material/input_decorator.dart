@@ -2135,7 +2135,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   InputBorder _getDefaultBorder(ThemeData themeData) {
-    if (decoration!.border?.borderSide == BorderSide.none) {
+    if (decoration!.border != null) {
       return decoration!.border!;
     }
 
