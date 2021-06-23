@@ -27,7 +27,7 @@ Future<void> main() async {
     expect(errorMessage, '');
     final SerializableFinder backButton = find.byValueKey('back');
     await driver.tap(backButton);
-  });
+  }, timeout: Timeout.none);
 
   group('WindowManager', ()
   {
@@ -49,7 +49,7 @@ Future<void> main() async {
       await driver.tap(showAlertDialog);
       final String status = await driver.getText(find.byValueKey('Status'));
       expect(status, 'Success');
-    });
+    }, timeout: Timeout.none);
 
     test('Child windows can handle touches', () async {
       final SerializableFinder addWindow = find.byValueKey('AddWindow');
@@ -61,6 +61,6 @@ Future<void> main() async {
         find.byValueKey('WindowClickCount'),
       );
       expect(windowClickCount, 'Click count: 1');
-    });
+    }, timeout: Timeout.none);
   });
 }

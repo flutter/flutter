@@ -48,6 +48,6 @@ void main() {
 
         imageBefore = imageAfter;
       }
-    });
+    }, timeout: Timeout.none);
   });
 }

@@ -180,7 +180,7 @@ void main([List<String> args = const <String>[]]) {
       // Assert that we can use semantics related finders in profile mode.
       final int id = await driver.getSemanticsId(find.bySemanticsLabel('Material'));
       expect(id, greaterThan(-1));
-    }, skip: !withSemantics);
+    }, skip: !withSemantics, timeout: Timeout.none);
 
     test('all demos', () async {
       // Collect timeline data for just a limited set of demos to avoid OOMs.
@@ -217,6 +217,6 @@ void main([List<String> args = const <String>[]]) {
         await runDemos(unprofiledDemos.toList(), driver);
       }
 
-    });
+    }, timeout: Timeout.none);
   });
 }

@@ -18,6 +18,6 @@ void main() {
       await driver.close();
     });
 
-    test('empty', () async {});
+    test('empty', () async {}, timeout: Timeout.none);
   });
 }

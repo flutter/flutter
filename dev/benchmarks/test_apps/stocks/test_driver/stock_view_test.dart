@@ -22,7 +22,7 @@ void main() {
     test('Stock list is shown', () async {
       final SerializableFinder stockList = find.byValueKey('stock-list');
       expect(stockList, isNotNull);
-    });
+    }, timeout: Timeout.none);
 
     test('open AAPL stock', () async {
       final SerializableFinder stockList = find.byValueKey('stock-list');
@@ -39,6 +39,6 @@ void main() {
       final String symbol = await driver.getText(stockOption);
 
       expect(symbol, 'AAPL');
-    }, skip: 'Needs to be fixed on Fuchsia.');
+    }, skip: 'Needs to be fixed on Fuchsia.', timeout: Timeout.none);
   });
 }
