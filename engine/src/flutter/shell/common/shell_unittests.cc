@@ -457,7 +457,6 @@ TEST_F(ShellTest, AllowedDartVMFlag) {
       "--enable-isolate-groups",
       "--no-enable-isolate-groups",
       "--lazy_async_stacks",
-      "--no-causal_async_stacks",
   };
 #if !FLUTTER_RELEASE
   flags.push_back("--max_profile_depth 1");

@@ -74,7 +74,6 @@ echo "Compiling JIT Snapshot..."
 
 "$DEVICE_TOOLS/gen_snapshot" --deterministic \
   --enable-asserts \
-  --no-causal_async_stacks \
   --lazy_async_stacks \
   --isolate_snapshot_instructions="$OUTDIR/isolate_snapshot_instr" \
   --snapshot_kind=app-jit \
