@@ -226,11 +226,15 @@ class ThemeData with Diagnosticable {
     Color? primaryColorDark,
     @Deprecated(
       'Use colorScheme.secondary instead. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     Color? accentColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     Brightness? accentColorBrightness,
@@ -282,12 +286,20 @@ class ThemeData with Diagnosticable {
     TextTheme? primaryTextTheme,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     TextTheme? accentTextTheme,
     InputDecorationTheme? inputDecorationTheme,
     IconThemeData? iconTheme,
     IconThemeData? primaryIconTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     IconThemeData? accentIconTheme,
     SliderThemeData? sliderTheme,
     TabBarTheme? tabBarTheme,
@@ -568,11 +580,15 @@ class ThemeData with Diagnosticable {
     required this.shadowColor,
     @Deprecated(
       'Use colorScheme.secondary instead. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     required this.accentColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     required this.accentColorBrightness,
@@ -621,6 +637,8 @@ class ThemeData with Diagnosticable {
     required this.primaryTextTheme,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     required this.accentTextTheme,
@@ -629,6 +647,8 @@ class ThemeData with Diagnosticable {
     required this.primaryIconTheme,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     required this.accentIconTheme,
@@ -918,6 +938,8 @@ class ThemeData with Diagnosticable {
   /// can be used.
   @Deprecated(
     'Use colorScheme.secondary instead. '
+    'For more information, consult the migration guide at '
+    'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
   final Color accentColor;
@@ -932,6 +954,8 @@ class ThemeData with Diagnosticable {
   /// of any color can be found with [ThemeData.estimateBrightnessForColor].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
+    'For more information, consult the migration guide at '
+    'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
   final Brightness accentColorBrightness;
@@ -1076,6 +1100,8 @@ class ThemeData with Diagnosticable {
   /// ```
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
+    'For more information, consult the migration guide at '
+    'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
   final TextTheme accentTextTheme;
@@ -1100,6 +1126,8 @@ class ThemeData with Diagnosticable {
   /// the theme's [colorScheme] [ColorScheme.secondary].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
+    'For more information, consult the migration guide at '
+    'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
   final IconThemeData accentIconTheme;
@@ -1330,7 +1358,19 @@ class ThemeData with Diagnosticable {
     Brightness? primaryColorBrightness,
     Color? primaryColorLight,
     Color? primaryColorDark,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     Color? accentColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     Brightness? accentColorBrightness,
     Color? canvasColor,
     Color? shadowColor,
@@ -1377,10 +1417,22 @@ class ThemeData with Diagnosticable {
     Color? toggleableActiveColor,
     TextTheme? textTheme,
     TextTheme? primaryTextTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     TextTheme? accentTextTheme,
     InputDecorationTheme? inputDecorationTheme,
     IconThemeData? iconTheme,
     IconThemeData? primaryIconTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     IconThemeData? accentIconTheme,
     SliderThemeData? sliderTheme,
     TabBarTheme? tabBarTheme,
