@@ -486,7 +486,7 @@ class _SnackBarState extends State<SnackBar> {
       // assert that our other properties are configured properly.
       if (snackBarBehavior != SnackBarBehavior.floating) {
         String message(String parameter) {
-          final String prefix = '$parameter can only be used with floating behavior. ';
+          final String prefix = '$parameter can only be used with floating behavior.';
           if (widget.behavior != null) {
             return '$prefix SnackBarBehavior.fixed was set in the SnackBar constructor.';
           } else if (snackBarTheme.behavior != null) {
