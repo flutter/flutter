@@ -9,15 +9,14 @@
 namespace fml {
 namespace paths {
 
-std::pair<bool, std::string> GetExecutableDirectoryPath() {
+std::pair<bool, std::string> GetExecutablePath() {
   const int path_size = 255;
   char path[path_size] = {0};
   auto read_size = ::readlink("/proc/self/exe", path, path_size);
   if (read_size == -1) {
     return {false, ""};
   }
-  return {true, fml::paths::GetDirectoryName(
-                    std::string{path, static_cast<size_t>(read_size)})};
+  return {true, std::string{path, static_cast<size_t>(read_size)}};
 }
 
 fml::UniqueFD GetCachesDirectory() {

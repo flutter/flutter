@@ -13,6 +13,7 @@
 namespace fml {
 namespace paths {
 
+std::pair<bool, std::string> GetExecutablePath();
 std::pair<bool, std::string> GetExecutableDirectoryPath();
 
 // Get the directory to the application's caches directory.

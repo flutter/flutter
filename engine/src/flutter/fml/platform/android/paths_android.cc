@@ -9,7 +9,7 @@
 namespace fml {
 namespace paths {
 
-std::pair<bool, std::string> GetExecutableDirectoryPath() {
+std::pair<bool, std::string> GetExecutablePath() {
   return {false, ""};
 }
 
