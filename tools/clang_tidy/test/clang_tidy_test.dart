@@ -159,8 +159,16 @@ Future<int> main(List<String> args) async {
       outSink: outBuffer,
       errSink: errBuffer,
     );
+    const String filePath = '/path/to/a/source_file.cc';
+    final List<dynamic> buildCommandsData = <Map<String, dynamic>>[
+      <String, dynamic>{
+        'directory': '/unused',
+        'command': '../../buildtools/mac-x64/clang/bin/clang $filePath',
+        'file': filePath,
+      },
+    ];
     final List<Command> commands = clangTidy.getLintCommandsForChangedFiles(
-      clangTidy.options.buildCommandsPath,
+      buildCommandsData,
       <io.File>[],
     );
 
@@ -177,13 +185,17 @@ Future<int> main(List<String> args) async {
       outSink: outBuffer,
       errSink: errBuffer,
     );
-    final List<io.File> fileList = await clangTidy.computeChangedFiles();
-    final io.File file = fileList.firstWhere((io.File f) {
-      return f.path.endsWith('.cc');
-    });
+    const String filePath = '/path/to/a/source_file.cc';
+    final List<dynamic> buildCommandsData = <Map<String, dynamic>>[
+      <String, dynamic>{
+        'directory': '/unused',
+        'command': '../../buildtools/mac-x64/clang/bin/clang $filePath',
+        'file': filePath,
+      },
+    ];
     final List<Command> commands = clangTidy.getLintCommandsForChangedFiles(
-      clangTidy.options.buildCommandsPath,
-      <io.File>[file],
+      buildCommandsData,
+      <io.File>[io.File(filePath)],
     );
 
     expect(commands, isNotEmpty);
