@@ -466,4 +466,40 @@ void testMain() async {
     testFontFeatures(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_font_features_dom');
   });
+
+  void testBackgroundStyle(EngineCanvas canvas) {
+    final CanvasParagraph paragraph = rich(
+      EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 40.0),
+      (CanvasParagraphBuilder builder) {
+        builder.pushStyle(EngineTextStyle.only(color: black));
+        builder.pushStyle(EngineTextStyle.only(background: Paint()..color = blue));
+        builder.addText('Lor');
+        builder.pushStyle(EngineTextStyle.only(background: Paint()..color = black, color: white));
+        builder.addText('em ');
+        builder.pop();
+        builder.pushStyle(EngineTextStyle.only(background: Paint()..color = green));
+        builder.addText('ipsu');
+        builder.pushStyle(EngineTextStyle.only(background: Paint()..color = yellow));
+        builder.addText('m\ndo');
+        builder.pushStyle(EngineTextStyle.only(background: Paint()..color = red));
+        builder.addText('lor sit');
+      },
+    );
+    paragraph.layout(constrain(double.infinity));
+    canvas.drawParagraph(paragraph, Offset.zero);
+  }
+
+  test('background style', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 300, 200);
+    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    testBackgroundStyle(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_background_style');
+  });
+
+  test('background style (DOM)', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 300, 200);
+    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    testBackgroundStyle(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_background_style_dom');
+  });
 }

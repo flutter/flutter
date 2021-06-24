@@ -1745,6 +1745,10 @@ void _applyTextStyleToElement({
   if (color != null) {
     cssStyle.color = colorToCssString(color);
   }
+  final ui.Color? background = style._background?.color;
+  if (background != null) {
+    cssStyle.backgroundColor = colorToCssString(background);
+  }
   if (style._height != null) {
     cssStyle.lineHeight = '${style._height}';
   }
