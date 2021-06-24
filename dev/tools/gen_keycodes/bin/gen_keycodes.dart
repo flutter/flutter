@@ -15,6 +15,7 @@ import 'package:gen_keycodes/keyboard_maps_code_gen.dart';
 import 'package:gen_keycodes/logical_key_data.dart';
 import 'package:gen_keycodes/macos_code_gen.dart';
 import 'package:gen_keycodes/physical_key_data.dart';
+import 'package:gen_keycodes/testing_key_codes_gen.dart';
 import 'package:gen_keycodes/utils.dart';
 import 'package:gen_keycodes/web_code_gen.dart';
 import 'package:gen_keycodes/windows_code_gen.dart';
@@ -220,6 +221,14 @@ Future<void> main(List<String> rawArguments) async {
   }
   print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
   await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
+
+  final File keyCodesFile = File(path.join(PlatformCodeGenerator.engineRoot,
+      'shell', 'platform', 'common', 'testing', 'key_codes.h'));
+  if (!mapsFile.existsSync()) {
+    mapsFile.createSync(recursive: true);
+  }
+  print('Writing ${'engine key codes'.padRight(15)}${mapsFile.absolute}');
+  await keyCodesFile.writeAsString(KeyCodesCcGenerator(physicalData, logicalData).generate());
 
   final Map<String, PlatformCodeGenerator> platforms = <String, PlatformCodeGenerator>{
     'android': AndroidCodeGenerator(

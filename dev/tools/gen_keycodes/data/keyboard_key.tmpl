@@ -361,7 +361,9 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// This is used by platform-specific code to generate Flutter key codes using
   /// HID Usage codes.
   static const int hidPlane = 0x00100000000;
+
 @@@LOGICAL_KEY_DEFINITIONS@@@
+
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
@@ -373,7 +375,8 @@ class LogicalKeyboardKey extends KeyboardKey {
 @@@LOGICAL_KEY_SYNONYMS@@@  };
 
   static const Map<int, String> _keyLabels = <int, String>{
-@@@LOGICAL_KEY_KEY_LABELS@@@    };
+@@@LOGICAL_KEY_KEY_LABELS@@@
+  };
 }
 
 /// A class with static values that describe the keys that are returned from
@@ -520,7 +523,9 @@ class PhysicalKeyboardKey extends KeyboardKey {
 
   // Key constants for all keyboard keys in the USB HID specification at the
   // time Flutter was built.
+
 @@@PHYSICAL_KEY_DEFINITIONS@@@
+
   // A list of all the predefined constant PhysicalKeyboardKeys so that they
   // can be searched.
   static const Map<int, PhysicalKeyboardKey> _knownPhysicalKeys = <int, PhysicalKeyboardKey>{
@@ -530,5 +535,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
   static const Map<int, String> _debugNames = kReleaseMode ?
     <int, String>{} :
     <int, String>{
-@@@PHYSICAL_KEY_DEBUG_NAMES@@@    };
+@@@PHYSICAL_KEY_DEBUG_NAMES@@@
+    };
 }

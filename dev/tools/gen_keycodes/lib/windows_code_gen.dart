@@ -5,6 +5,7 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
+import 'constants.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -64,6 +65,20 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   }
   final Map<String, String> _scancodeToLogical;
 
+  /// This generates the mask values for the part of a key code that defines its plane.
+  String get _maskConstants {
+    final StringBuffer buffer = StringBuffer();
+    const List<MaskConstant> maskConstants = <MaskConstant>[
+      kValueMask,
+      kUnicodePlane,
+      kWindowsPlane,
+    ];
+    for (final MaskConstant constant in maskConstants) {
+      buffer.writeln('const uint64_t KeyboardKeyEmbedderHandler::${constant.lowerCamelName} = ${toHex(constant.value, digits: 11)};');
+    }
+    return buffer.toString().trimRight();
+  }
+
   @override
   String get templatePath => path.join(dataRoot, 'windows_flutter_key_map_cc.tmpl');
 
@@ -77,6 +92,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
       'WINDOWS_SCAN_CODE_MAP': _windowsScanCodeMap,
       'WINDOWS_SCAN_CODE_TO_LOGICAL_MAP': _scanCodeToLogicalMap,
       'WINDOWS_KEY_CODE_MAP': _windowsLogicalKeyCodeMap,
+      'MASK_CONSTANTS': _maskConstants,
     };
   }
 }

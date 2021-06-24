@@ -35,39 +35,36 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {
-    final StringBuffer definitions = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Physical Key Definition');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       final String firstComment = _wrapString('Represents the location of the '
         '"${entry.commentName}" key on a generalized keyboard.');
       final String otherComments = _wrapString('See the function '
         '[RawKeyEvent.physicalKey] for more information.');
-      definitions.write('''
-
+      lines.add(entry.usbHidCode, '''
 $firstComment  ///
 $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode, digits: 8)});
 ''');
     }
-    return definitions.toString();
+    return lines.sortedJoin().trimRight();
   }
 
   String get _physicalDebugNames {
-    final StringBuffer result = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Physical debug names');
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      result.write('''
-      ${toHex(entry.usbHidCode, digits: 8)}: '${entry.commentName}',
-''');
+      lines.add(entry.usbHidCode, '''
+      ${toHex(entry.usbHidCode, digits: 8)}: '${entry.commentName}',''');
     }
-    return result.toString();
+    return lines.sortedJoin().trimRight();
   }
 
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
-    final StringBuffer definitions = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Logical debug names');
     void printKey(int flutterId, String constantName, String commentName, {String? otherComments}) {
       final String firstComment = _wrapString('Represents the logical "$commentName" key on the keyboard.');
       otherComments ??= _wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
-      definitions.write('''
-
+      lines.add(flutterId, '''
 $firstComment  ///
 $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey(${toHex(flutterId, digits: 11)});
 ''');
@@ -78,19 +75,19 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
         entry.value,
         entry.constantName,
         entry.commentName,
-        otherComments: _otherComments(entry.constantName),
+        otherComments: _otherComments(entry.name),
       );
     }
-    return definitions.toString();
+    return lines.sortedJoin().trimRight();
   }
 
-  String? _otherComments(String constantName) {
-    if (synonyms.containsKey(constantName)) {
-      final Set<String> unionNames = synonyms[constantName]!.keys.map(
+  String? _otherComments(String name) {
+    if (synonyms.containsKey(name)) {
+      final Set<String> unionNames = synonyms[name]!.keys.map(
         (LogicalKeyEntry entry) => entry.constantName).toSet();
-      return 'This key represents the union of the keys '
+      return _wrapString('This key represents the union of the keys '
               '$unionNames when comparing keys. This key will never be generated '
-              'directly, its main use is in defining key maps.';
+              'directly, its main use is in defining key maps.');
     }
     return null;
   }
@@ -107,31 +104,30 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _logicalKeyLabels {
-    final StringBuffer result = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Logical key labels');
     for (final LogicalKeyEntry entry in logicalData.entries) {
-      result.write('''
-    ${toHex(entry.value, digits: 11)}: '${entry.commentName}',
-''');
+      lines.add(entry.value, '''
+    ${toHex(entry.value, digits: 11)}: '${entry.commentName}',''');
     }
-    return result.toString();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of USB HID codes to physical keys.
   String get _predefinedHidCodeMap {
-    final StringBuffer scanCodeMap = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Physical key map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      scanCodeMap.writeln('    ${toHex(entry.usbHidCode)}: ${entry.constantName},');
+      lines.add(entry.usbHidCode, '    ${toHex(entry.usbHidCode)}: ${entry.constantName},');
     }
-    return scanCodeMap.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of Flutter key codes to logical keys.
   String get _predefinedKeyCodeMap {
-    final StringBuffer keyCodeMap = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Logical key map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
-      keyCodeMap.writeln('    ${toHex(entry.value, digits: 11)}: ${entry.constantName},');
+      lines.add(entry.value, '    ${toHex(entry.value, digits: 11)}: ${entry.constantName},');
     }
-    return keyCodeMap.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   @override

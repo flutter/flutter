@@ -5,6 +5,7 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
+import 'constants.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -91,6 +92,20 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   }
   final Map<String, List<String>> _lockBitMapping;
 
+  /// This generates the mask values for the part of a key code that defines its plane.
+  String get _maskConstants {
+    final StringBuffer buffer = StringBuffer();
+    const List<MaskConstant> maskConstants = <MaskConstant>[
+      kValueMask,
+      kUnicodePlane,
+      kGtkPlane,
+    ];
+    for (final MaskConstant constant in maskConstants) {
+      buffer.writeln('const uint64_t k${constant.upperCamelName} = ${toHex(constant.value, digits: 11)};');
+    }
+    return buffer.toString().trimRight();
+  }
+
   @override
   String get templatePath => path.join(dataRoot, 'gtk_key_mapping_cc.tmpl');
 
@@ -105,6 +120,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
       'GTK_KEYVAL_CODE_MAP': _gtkKeyvalCodeMap,
       'GTK_MODIFIER_BIT_MAP': _gtkModifierBitMap,
       'GTK_MODE_BIT_MAP': _gtkModeBitMap,
+      'MASK_CONSTANTS': _maskConstants,
     };
   }
 }
