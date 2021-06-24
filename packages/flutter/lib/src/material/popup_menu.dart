@@ -993,6 +993,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.shape,
     this.color,
     this.enableFeedback,
+    this.splashRadius,
   }) : assert(itemBuilder != null),
        assert(offset != null),
        assert(enabled != null),
@@ -1094,6 +1095,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If this property is null, the default size is 24.0 pixels.
   final double? iconSize;
 
+  /// The splash radius.
+  ///
+  /// If null, default splash radius of [Material.defaultSplashRadius] is used.
+  final double? splashRadius;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1182,6 +1188,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
       enableFeedback: enableFeedback,
+      splashRadius: widget.splashRadius,
     );
   }
 }
