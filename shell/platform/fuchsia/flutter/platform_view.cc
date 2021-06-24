@@ -64,6 +64,7 @@ PlatformView::PlatformView(
         parent_environment_service_provider_handle,
     fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
         session_listener_request,
+    fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
     fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
     fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
         keyboard_listener_request,
@@ -83,7 +84,8 @@ PlatformView::PlatformView(
     : flutter::PlatformView(delegate, std::move(task_runners)),
       debug_label_(std::move(debug_label)),
       view_ref_(std::move(view_ref)),
-      focuser_(focuser.Bind()),
+      focus_delegate_(
+          std::make_shared<FocusDelegate>(std::move(vrf), std::move(focuser))),
       session_listener_binding_(this, std::move(session_listener_request)),
       session_listener_error_callback_(
           std::move(session_listener_error_callback)),
@@ -118,6 +120,16 @@ PlatformView::PlatformView(
   parent_environment_service_provider_.get()->ConnectToService(
       fuchsia::ui::input::ImeService::Name_,
       text_sync_service_.NewRequest().TakeChannel());
+
+  focus_delegate_->WatchLoop([&](bool focused) {
+    // Ensure last_text_state_ is set to make sure Flutter actually wants
+    // an IME.
+    if (focused && last_text_state_ != nullptr) {
+      ActivateIme();
+    } else if (!focused) {
+      DeactivateIme();
+    }
+  });
 
   // Finally! Register the native platform message handlers.
   RegisterPlatformMessageHandlers();
@@ -341,10 +353,8 @@ void PlatformView::OnScenicEvent(
         break;
       case fuchsia::ui::scenic::Event::Tag::kInput:
         switch (event.input().Which()) {
-          case fuchsia::ui::input::InputEvent::Tag::kFocus: {
-            OnHandleFocusEvent(event.input().focus());
+          case fuchsia::ui::input::InputEvent::Tag::kFocus:
             break;
-          }
           case fuchsia::ui::input::InputEvent::Tag::kPointer: {
             OnHandlePointerEvent(event.input().pointer());
             break;
@@ -660,19 +670,6 @@ void PlatformView::OnKeyEvent(
       nullptr)                                           // response
   );
   callback(fuchsia::ui::input3::KeyEventStatus::HANDLED);
-}
-
-bool PlatformView::OnHandleFocusEvent(
-    const fuchsia::ui::input::FocusEvent& focus) {
-  // Ensure last_text_state_ is set to make sure Flutter actually wants an IME.
-  if (focus.focused && last_text_state_ != nullptr) {
-    ActivateIme();
-    return true;
-  } else if (!focus.focused) {
-    DeactivateIme();
-    return true;
-  }
-  return false;
 }
 
 void PlatformView::ActivateIme() {
@@ -1089,50 +1086,12 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
           });
         };
     on_destroy_view_callback_(view_id_raw, std::move(on_view_unbound));
+  } else if (method->value == "HostView.getCurrentFocusState") {
+    focus_delegate_->CompleteCurrentFocusState(message->response());
+  } else if (method->value == "HostView.getNextFocusState") {
+    focus_delegate_->CompleteNextFocusState(message->response());
   } else if (method->value == "View.requestFocus") {
-    auto args_it = root.FindMember("args");
-    if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
-      FML_LOG(ERROR) << "No arguments found.";
-      return;
-    }
-    const auto& args = args_it->value;
-
-    auto view_ref = args.FindMember("viewRef");
-    if (!view_ref->value.IsUint64()) {
-      FML_LOG(ERROR) << "Argument 'viewRef' is not a int64";
-      return;
-    }
-
-    zx_handle_t handle = view_ref->value.GetUint64();
-    zx_handle_t out_handle;
-    zx_status_t status =
-        zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &out_handle);
-    if (status != ZX_OK) {
-      FML_LOG(ERROR) << "Argument 'viewRef' is not valid";
-      return;
-    }
-    auto ref = fuchsia::ui::views::ViewRef({
-        .reference = zx::eventpair(out_handle),
-    });
-    focuser_->RequestFocus(
-        std::move(ref),
-        [view_ref = view_ref->value.GetUint64(), message = std::move(message)](
-            fuchsia::ui::views::Focuser_RequestFocus_Result result) {
-          if (message->response().get()) {
-            int result_code =
-                result.is_err()
-                    ? static_cast<
-                          std::underlying_type_t<fuchsia::ui::views::Error>>(
-                          result.err())
-                    : 0;
-
-            std::ostringstream out;
-            out << "[" << result_code << "]";
-            message->response()->Complete(
-                std::make_unique<fml::NonOwnedMapping>(
-                    (const uint8_t*)out.str().c_str(), out.str().length()));
-          }
-        });
+    focus_delegate_->RequestFocus(root, message->response());
   } else {
     FML_DLOG(ERROR) << "Unknown " << message->channel() << " method "
                     << method->value.GetString();

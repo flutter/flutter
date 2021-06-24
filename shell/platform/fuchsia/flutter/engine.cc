@@ -21,6 +21,7 @@
 #include "third_party/skia/include/ports/SkFontMgr_fuchsia.h"
 
 #include "../runtime/dart/utils/files.h"
+#include "focus_delegate.h"
 #include "fuchsia_intl.h"
 #include "platform_view.h"
 #include "surface.h"
@@ -99,6 +100,8 @@ Engine::Engine(Delegate& delegate,
   endpoints.set_session_listener(session_listener.Bind());
   fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser;
   endpoints.set_view_focuser(focuser.NewRequest());
+  fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> view_ref_focused;
+  endpoints.set_view_ref_focused(view_ref_focused.NewRequest());
   scenic->CreateSessionT(std::move(endpoints), [] {});
 
   // Make clones of the `ViewRef` before sending it down to Scenic, since the
@@ -275,6 +278,7 @@ Engine::Engine(Delegate& delegate,
                std::move(parent_environment_service_provider),
            session_listener_request = std::move(session_listener_request),
            focuser = std::move(focuser),
+           view_ref_focused = std::move(view_ref_focused),
            on_session_listener_error_callback =
                std::move(on_session_listener_error_callback),
            on_enable_wireframe_callback =
@@ -339,7 +343,7 @@ Engine::Engine(Delegate& delegate,
                 std::move(runner_services),
                 std::move(parent_environment_service_provider),  // services
                 std::move(session_listener_request),  // session listener
-                std::move(focuser),
+                std::move(view_ref_focused), std::move(focuser),
                 // Server-side part of the fuchsia.ui.input3.KeyboardListener
                 // connection.
                 std::move(keyboard_listener_request),

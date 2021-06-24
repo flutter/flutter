@@ -26,6 +26,7 @@
 #include "flutter/shell/platform/fuchsia/flutter/fuchsia_external_view_embedder.h"
 #include "flutter/shell/platform/fuchsia/flutter/keyboard.h"
 #include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
+#include "focus_delegate.h"
 
 namespace flutter_runner {
 
@@ -72,6 +73,7 @@ class PlatformView final : public flutter::PlatformView,
                    parent_environment_service_provider,
                fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
                    session_listener_request,
+               fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
                fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
                fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
                    keyboard_listener,
@@ -183,7 +185,7 @@ class PlatformView final : public flutter::PlatformView,
   // TODO(MI4-2490): remove once ViewRefControl is passed to Scenic and kept
   // alive there
   const fuchsia::ui::views::ViewRef view_ref_;
-  fuchsia::ui::views::FocuserPtr focuser_;
+  std::shared_ptr<FocusDelegate> focus_delegate_;
 
   // Logical size and logical->physical ratio.  These are optional to provide
   // an "unset" state during program startup, before Scenic has sent any

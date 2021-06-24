@@ -1349,6 +1349,9 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_fakes.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/focus_delegate.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/focus_delegate.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/focus_delegate_unittests.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_external_view_embedder.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_external_view_embedder.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.cc
