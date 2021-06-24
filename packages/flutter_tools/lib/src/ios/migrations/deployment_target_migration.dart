@@ -13,20 +13,41 @@ class DeploymentTargetMigration extends ProjectMigrator {
     IosProject project,
     Logger logger,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
+        _appFrameworkInfoPlist = project.appFrameworkInfoPlist,
         super(logger);
 
   final File _xcodeProjectInfoFile;
+  final File _appFrameworkInfoPlist;
 
   @override
   bool migrate() {
-    if (!_xcodeProjectInfoFile.existsSync()) {
+    if (_xcodeProjectInfoFile.existsSync()) {
+      processFileLines(_xcodeProjectInfoFile);
+    } else {
       logger.printTrace('Xcode project not found, skipping iOS deployment target version migration.');
-      return true;
     }
 
-    processFileLines(_xcodeProjectInfoFile);
+    if (_appFrameworkInfoPlist.existsSync()) {
+      processFileLines(_appFrameworkInfoPlist);
+    } else {
+      logger.printTrace('AppFrameworkInfo.plist not found, skipping minimum OS version migration.');
+    }
 
     return true;
+  }
+
+  @override
+  String migrateFileContents(String fileContents) {
+    const String minimumOSVersionOriginal = '''
+  <key>MinimumOSVersion</key>
+  <string>8.0</string>
+''';
+    const String minimumOSVersionReplacement = '''
+  <key>MinimumOSVersion</key>
+  <string>9.0</string>
+''';
+
+    return fileContents.replaceAll(minimumOSVersionOriginal, minimumOSVersionReplacement);
   }
 
   @override

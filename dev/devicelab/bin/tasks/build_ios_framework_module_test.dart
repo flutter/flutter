@@ -132,6 +132,15 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   );
   checkFileExists(debugAppFrameworkPath);
 
+  checkFileExists(path.join(
+    outputPath,
+    'Debug',
+    'App.xcframework',
+    'ios-arm64_armv7',
+    'App.framework',
+    'Info.plist',
+  ));
+
   section('Check debug build has Dart snapshot as asset');
 
   checkFileExists(path.join(
@@ -204,6 +213,15 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'ios-x86_64-simulator',
       'App.framework',
       'App',
+    ));
+
+    checkFileExists(path.join(
+      outputPath,
+      mode,
+      'App.xcframework',
+      'ios-x86_64-simulator',
+      'App.framework',
+      'Info.plist',
     ));
   }
 
