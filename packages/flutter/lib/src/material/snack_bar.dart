@@ -297,7 +297,7 @@ class SnackBar extends StatefulWidget {
   /// action.
   ///
   /// If this property is null, the default padding values for:
-  /// 
+  ///
   /// * [content]
   ///     * Top and bottom paddings are 14.
   ///     * Left padding is 24 if [behavior] is [SnackBarBehavior.fixed],
@@ -306,9 +306,9 @@ class SnackBar extends StatefulWidget {
   /// * [action]
   ///     * Top and bottom paddings are 14
   ///     * Left and right paddings are half of [content]'s left padding.
-  /// 
+  ///
   /// If this property is not null, the padding assignment for:
-  /// 
+  ///
   /// * [content]
   ///     * Left, top and bottom paddings are assigned normally.
   ///     * Right padding is assigned normally if there is no [action], otherwise 0.
