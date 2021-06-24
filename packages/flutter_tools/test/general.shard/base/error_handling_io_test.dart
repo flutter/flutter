@@ -14,15 +14,12 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:mockito/mockito.dart';
+import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
-
-class MockFile extends Mock implements File {}
-class MockFileSystem extends Mock implements FileSystem {}
-class MockDirectory extends Mock implements Directory {}
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -38,27 +35,6 @@ final Platform macOSPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{}
 );
-
-void setupDirectoryMocks({
-  FileSystem mockFileSystem,
-  ErrorHandlingFileSystem fs,
-  int errorCode,
-}) {
-  final MockDirectory mockDirectory = MockDirectory();
-  final MockDirectory mockParentDirectory = MockDirectory();
-  when(mockDirectory.parent).thenReturn(mockParentDirectory);
-  when(mockFileSystem.directory(any)).thenReturn(mockDirectory);
-  when(mockDirectory.path).thenReturn('parent/directory');
-  when(mockDirectory.parent).thenReturn(mockParentDirectory);
-  when(mockParentDirectory.path).thenReturn('parent');
-  when(mockDirectory.createTemp(any)).thenAnswer((_) async {
-    throw FileSystemException('', '', OSError('', errorCode));
-  });
-  when(mockDirectory.createTempSync(any))
-    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockDirectory.existsSync())
-    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
-}
 
 void main() {
   testWithoutContext('deleteIfExists does not delete if file does not exist', () {
@@ -76,16 +52,8 @@ void main() {
   });
 
   testWithoutContext('deleteIfExists handles separate program deleting file', () {
-    final File file = MockFile();
-    bool exists = true;
-    // Return true for the first call, false for any subsequent calls.
-    when(file.existsSync()).thenAnswer((Invocation _) {
-      final bool result = exists;
-      exists = false;
-      return result;
-    });
-    when(file.deleteSync(recursive: false))
-      .thenThrow(const FileSystemException('', '', OSError('', 2)));
+    final File file = FakeExistsFile()
+      ..error = const FileSystemException('', '', OSError('', 2));
 
     expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
@@ -134,18 +102,10 @@ void main() {
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
     const int kFatalDeviceHardwareError =  483;
-    MockFileSystem mockFileSystem;
-    ErrorHandlingFileSystem fs;
+
     FileExceptionHandler exceptionHandler;
 
     setUp(() {
-      mockFileSystem = MockFileSystem();
-      fs = ErrorHandlingFileSystem(
-        delegate: mockFileSystem,
-        platform: windowsPlatform,
-      );
-      // For fs.path.absolute usage.
-      when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
       exceptionHandler = FileExceptionHandler();
     });
 
@@ -303,13 +263,17 @@ void main() {
     });
 
     testWithoutContext('when creating a temporary dir on a full device', () async {
-      setupDirectoryMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: kDeviceFull,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
       );
+      final Directory directory = fileSystem.directory('directory')
+        ..createSync();
 
-      final Directory directory = fs.directory('directory');
+      exceptionHandler.addTempError(
+        FileSystemOp.create,
+        FileSystemException('', directory.path, const OSError('', kDeviceFull)),
+      );
 
       const String expectedMessage = 'The target device is full';
       expect(() async => directory.createTemp('prefix'),
@@ -337,13 +301,19 @@ void main() {
     });
 
     testWithoutContext('when checking for directory existence with permission issues', () async {
-      setupDirectoryMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: kUserPermissionDenied,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
       );
 
-      final Directory directory = fs.directory('directory');
+      final Directory directory = fileSystem.directory('directory')
+        ..createSync();
+
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.exists,
+        FileSystemException('', directory.path, const OSError('', kDeviceFull)),
+      );
 
       const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
@@ -384,18 +354,9 @@ void main() {
     const int enospc = 28;
     const int eacces = 13;
 
-    MockFileSystem mockFileSystem;
-    ErrorHandlingFileSystem fs;
     FileExceptionHandler exceptionHandler;
 
     setUp(() {
-      mockFileSystem = MockFileSystem();
-      fs = ErrorHandlingFileSystem(
-        delegate: mockFileSystem,
-        platform: linuxPlatform,
-      );
-      // For fs.path.absolute usage.
-      when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
       exceptionHandler = FileExceptionHandler();
     });
 
@@ -528,13 +489,18 @@ void main() {
     });
 
     testWithoutContext('when creating a temporary dir on a full device', () async {
-      setupDirectoryMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: enospc,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
       );
 
-      final Directory directory = fs.directory('directory');
+      final Directory directory = fileSystem.directory('directory')
+        ..createSync();
+
+      exceptionHandler.addTempError(
+        FileSystemOp.create,
+        FileSystemException('', directory.path, const OSError('', enospc)),
+      );
 
       const String expectedMessage = 'The target device is full';
       expect(() async => directory.createTemp('prefix'),
@@ -544,13 +510,19 @@ void main() {
     });
 
     testWithoutContext('when checking for directory existence with permission issues', () async {
-      setupDirectoryMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: eacces,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
       );
 
-      final Directory directory = fs.directory('directory');
+      final Directory directory = fileSystem.directory('directory')
+        ..createSync();
+
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.exists,
+        FileSystemException('', directory.path, const OSError('', eacces)),
+      );
 
       const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
@@ -588,18 +560,9 @@ void main() {
     const int eperm = 1;
     const int enospc = 28;
     const int eacces = 13;
-    MockFileSystem mockFileSystem;
-    ErrorHandlingFileSystem fs;
     FileExceptionHandler exceptionHandler;
 
     setUp(() {
-      mockFileSystem = MockFileSystem();
-      fs = ErrorHandlingFileSystem(
-        delegate: mockFileSystem,
-        platform: macOSPlatform,
-      );
-      // For fs.path.absolute usage.
-      when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
       exceptionHandler = FileExceptionHandler();
     });
 
@@ -732,13 +695,18 @@ void main() {
     });
 
     testWithoutContext('when creating a temporary dir on a full device', () async {
-      setupDirectoryMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: enospc,
+       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
       );
 
-      final Directory directory = fs.directory('directory');
+      final Directory directory = fileSystem.directory('directory')
+        ..createSync();
+
+      exceptionHandler.addTempError(
+        FileSystemOp.create,
+        FileSystemException('', directory.path, const OSError('', enospc)),
+      );
 
       const String expectedMessage = 'The target device is full';
       expect(() async => directory.createTemp('prefix'),
@@ -748,13 +716,18 @@ void main() {
     });
 
     testWithoutContext('when checking for directory existence with permission issues', () async {
-      setupDirectoryMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: eacces,
+       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
       );
 
-      final Directory directory = fs.directory('directory');
+      final Directory directory = fileSystem.directory('directory');
+
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.exists,
+        FileSystemException('', directory.path, const OSError('', eacces)),
+      );
 
       const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
@@ -764,7 +737,7 @@ void main() {
     testWithoutContext('When reading from a file without permission', () {
        final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
-        platform: linuxPlatform,
+        platform: macOSPlatform,
       );
       final File file = fileSystem.file('file');
 
@@ -791,9 +764,9 @@ void main() {
   });
 
   testWithoutContext('Caches path context correctly', () {
-    final MockFileSystem mockFileSystem = MockFileSystem();
+    final FakeFileSystem fileSystem = FakeFileSystem();
     final FileSystem fs = ErrorHandlingFileSystem(
-      delegate: mockFileSystem,
+      delegate: fileSystem,
       platform: const LocalPlatform(),
     );
 
@@ -801,9 +774,9 @@ void main() {
   });
 
   testWithoutContext('Clears cache when CWD changes', () {
-    final MockFileSystem mockFileSystem = MockFileSystem();
+    final FakeFileSystem fileSystem = FakeFileSystem();
     final FileSystem fs = ErrorHandlingFileSystem(
-      delegate: mockFileSystem,
+      delegate: fileSystem,
       platform: const LocalPlatform(),
     );
 
@@ -811,7 +784,7 @@ void main() {
 
     fs.currentDirectory = null;
     // For fs.path.absolute usage.
-    when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
+    fileSystem.path = MemoryFileSystem.test().path;
 
     expect(identical(firstPath, fs.path), false);
   });
@@ -1199,54 +1172,6 @@ void main() {
       fileSystem.file('source').copySync('dest');
       expect(dest.readAsBytesSync(), expectedBytes);
     });
-
-    testWithoutContext('copySync deletes the result file if the fallback fails', () {
-      final MockFileSystem mockFileSystem = MockFileSystem();
-      // For fs.path.absolute usage.
-      when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
-
-      final FileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: mockFileSystem,
-        platform: linuxPlatform,
-      );
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
-      final MockFile source = MockFile();
-      when(source.path).thenReturn('source');
-      final MockDirectory parent = MockDirectory();
-      when(parent.path).thenReturn('destParent');
-      final MockFile dest = MockFile();
-      when(dest.parent).thenReturn(parent);
-      final File memorySource = memoryFileSystem.file('source')
-        ..createSync();
-      final File memoryDest = memoryFileSystem.file('dest')
-        ..createSync();
-      int calledCount = 0;
-
-      when(dest.existsSync()).thenReturn(true);
-      when(source.copySync(any))
-        .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
-      when(source.openSync(mode: anyNamed('mode')))
-        .thenAnswer((Invocation invocation) {
-          if (calledCount == 1) {
-            throw const FileSystemException('', '', OSError('', eaccess));
-          }
-          calledCount +=  1;
-          return memorySource.openSync(mode: invocation.namedArguments[#mode] as FileMode);
-        });
-      when(dest.openSync(mode: anyNamed('mode')))
-        .thenAnswer((Invocation invocation) => memoryDest.openSync(mode: invocation.namedArguments[#mode] as FileMode));
-      when(mockFileSystem.file('source')).thenReturn(source);
-      when(mockFileSystem.file('dest')).thenReturn(dest);
-
-      const String expectedMessage =
-          'Flutter failed to copy source to dest due to unknown error.\n'
-          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
-          'Try running:\n'
-          r'  sudo chown -R $(whoami) /source /destParent';
-      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit(message: expectedMessage));
-
-      verify(dest.deleteSync(recursive: true)).called(1);
-    });
   });
 }
 
@@ -1276,4 +1201,35 @@ class ThrowsOnCurrentDirectoryFileSystem extends Fake implements FileSystem {
 
   @override
   Directory get currentDirectory => throw FileSystemException('', '', OSError('', errorCode));
+}
+
+class FakeExistsFile extends Fake implements File {
+  Object error;
+  int existsCount = 0;
+
+
+  @override
+  bool existsSync() {
+    if (existsCount == 0) {
+      existsCount += 1;
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  void deleteSync({bool recursive = false}) {
+    throw error;
+  }
+}
+
+class FakeFileSystem extends Fake implements FileSystem {
+  @override
+  p.Context path;
+
+  @override
+  Directory get currentDirectory => null;
+
+  @override
+  set currentDirectory(dynamic path) { }
 }

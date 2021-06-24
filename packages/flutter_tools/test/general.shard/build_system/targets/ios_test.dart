@@ -64,12 +64,12 @@ void main() {
     );
   });
 
-  testWithoutContext('iOS AOT targets has analyicsName', () {
+  testWithoutContext('iOS AOT targets has analyticsName', () {
     expect(const AotAssemblyRelease().analyticsName, 'ios_aot');
     expect(const AotAssemblyProfile().analyticsName, 'ios_aot');
   });
 
-  testUsingContext('DebugUniveralFramework creates simulator binary', () async {
+  testUsingContext('DebugUniversalFramework creates simulator binary', () async {
     environment.defines[kIosArchs] = 'x86_64';
     environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
     processManager.addCommand(
@@ -113,7 +113,7 @@ void main() {
     Platform: () => macPlatform,
   });
 
-  testUsingContext('DebugUniveralFramework creates expected binary with arm64 only arch', () async {
+  testUsingContext('DebugUniversalFramework creates expected binary with arm64 only arch', () async {
     environment.defines[kIosArchs] = 'arm64';
     environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
     processManager.addCommand(

@@ -9,6 +9,16 @@ import 'package:test/test.dart';
 
 export 'package:test/test.dart' hide isInstanceOf;
 
+Matcher throwsAssertionWith(String messageSubString) {
+  return throwsA(
+      isA<AssertionError>().having(
+          (AssertionError e) => e.toString(),
+          'description',
+          contains(messageSubString),
+      ),
+  );
+}
+
 Matcher throwsExceptionWith(String messageSubString) {
   return throwsA(
       isA<Exception>().having(
@@ -28,11 +38,12 @@ class TestStdio extends Stdio {
   String get error => logs.where((String log) => log.startsWith(r'[error] ')).join('\n');
 
   String get stdout => logs.where((String log) {
-    return log.startsWith(r'[status] ') || log.startsWith(r'[trace] ');
+    return log.startsWith(r'[status] ') || log.startsWith(r'[trace] ') || log.startsWith(r'[write] ');
   }).join('\n');
 
   final bool verbose;
   late final List<String> _stdin;
+  List<String> get stdin => _stdin;
 
   @override
   String readLineSync() {
@@ -46,7 +57,7 @@ class TestStdio extends Stdio {
 class FakeArgResults implements ArgResults {
   FakeArgResults({
     required String level,
-    required String commit,
+    required String candidateBranch,
     String remote = 'upstream',
     bool justPrint = false,
     bool autoApprove = true, // so we don't have to mock stdin
@@ -55,7 +66,7 @@ class FakeArgResults implements ArgResults {
     bool skipTagging = false,
   }) : _parsedArgs = <String, dynamic>{
     'increment': level,
-    'commit': commit,
+    'candidate-branch': candidateBranch,
     'remote': remote,
     'just-print': justPrint,
     'yes': autoApprove,
