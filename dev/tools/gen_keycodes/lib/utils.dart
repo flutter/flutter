@@ -245,6 +245,10 @@ class OutputLines<T extends Comparable<Object>> {
     lines[code] = line;
   }
 
+  String join() {
+    return lines.values.join('\n');
+  }
+
   String sortedJoin() {
     return (lines.entries.toList()
       ..sort((MapEntry<T, String> a, MapEntry<T, String> b) => a.key.compareTo(b.key)))

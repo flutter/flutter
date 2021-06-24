@@ -5,6 +5,7 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
+import 'constants.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -14,6 +15,22 @@ import 'utils.dart';
 String _wrapString(String input) {
   return wrapString(input, prefix: '  /// ');
 }
+
+final List<MaskConstant> _maskConstants = <MaskConstant>[
+  kValueMask,
+  kPlaneMask,
+  kUnicodePlane,
+  kUnprintablePlane,
+  kFlutterPlane,
+  kAndroidPlane,
+  kFuchsiaPlane,
+  kIosPlane,
+  kMacosPlane,
+  kGtkPlane,
+  kWindowsPlane,
+  kWebPlane,
+  kGlfwPlane,
+];
 
 class SynonymKeyInfo {
   SynonymKeyInfo(this.keys, this.name);
@@ -130,6 +147,18 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     return lines.sortedJoin().trimRight();
   }
 
+  String get _maskConstantVariables {
+    final OutputLines<int> lines = OutputLines<int>('Mask constants');
+    for (final MaskConstant constant in _maskConstants) {
+      lines.add(constant.value, '''
+${_wrapString(constant.description)}  ///
+  /// This is used by platform-specific code to generate Flutter key codes.
+  static const int ${constant.lowerCamelName} = ${toHex(constant.value, digits: 11)};
+''');
+    }
+    return lines.join().trimRight();
+  }
+
   @override
   String get templatePath => path.join(dataRoot, 'keyboard_key.tmpl');
 
@@ -143,6 +172,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       'PHYSICAL_KEY_MAP': _predefinedHidCodeMap,
       'PHYSICAL_KEY_DEFINITIONS': _physicalDefinitions,
       'PHYSICAL_KEY_DEBUG_NAMES': _physicalDebugNames,
+      'MASK_CONSTANTS': _maskConstantVariables,
     };
   }
 

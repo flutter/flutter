@@ -91,6 +91,11 @@ const MaskConstant kWindowsPlane = MaskConstant.platform(
   value: 0x1600000000,
 );
 
+const MaskConstant kWebPlane = MaskConstant.platform(
+  platform: 'Web',
+  value: 0x1700000000,
+);
+
 const MaskConstant kGlfwPlane = MaskConstant.platform(
   platform: 'GLFW',
   value: 0x1800000000,
