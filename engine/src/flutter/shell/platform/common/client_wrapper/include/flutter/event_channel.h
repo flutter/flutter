@@ -165,7 +165,7 @@ class EventChannel {
   BinaryMessenger* messenger_;
   const std::string name_;
   const MethodCodec<T>* codec_;
-  bool is_listening_;
+  bool is_listening_ = false;
 };
 
 }  // namespace flutter

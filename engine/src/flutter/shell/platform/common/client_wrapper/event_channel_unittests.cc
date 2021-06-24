@@ -140,6 +140,43 @@ TEST(EventChannelTest, Cancel) {
   EXPECT_EQ(on_cancel_called, true);
 }
 
+// Tests that OnCancel in not called on registration.
+TEST(EventChannelTest, ListenNotCancel) {
+  TestBinaryMessenger messenger;
+  const std::string channel_name("some_channel");
+  const StandardMethodCodec& codec = StandardMethodCodec::GetInstance();
+  EventChannel channel(&messenger, channel_name, &codec);
+
+  bool on_listen_called = false;
+  bool on_cancel_called = false;
+  auto handler = std::make_unique<StreamHandlerFunctions<>>(
+      [&on_listen_called](const EncodableValue* arguments,
+                          std::unique_ptr<EventSink<>>&& events)
+          -> std::unique_ptr<StreamHandlerError<>> {
+        on_listen_called = true;
+        return nullptr;
+      },
+      [&on_cancel_called](const EncodableValue* arguments)
+          -> std::unique_ptr<StreamHandlerError<>> {
+        on_cancel_called = true;
+        return nullptr;
+      });
+  channel.SetStreamHandler(std::move(handler));
+  EXPECT_EQ(messenger.last_message_handler_channel(), channel_name);
+  EXPECT_NE(messenger.last_message_handler(), nullptr);
+
+  // Send dummy listen message.
+  MethodCall<> call_listen("listen", nullptr);
+  auto message = codec.EncodeMethodCall(call_listen);
+  messenger.last_message_handler()(
+      message->data(), message->size(),
+      [](const uint8_t* reply, const size_t reply_size) {});
+
+  // Check results.
+  EXPECT_EQ(on_listen_called, true);
+  EXPECT_EQ(on_cancel_called, false);
+}
+
 // Pseudo test when user re-registers or call OnListen to the same channel.
 // Confirm that OnCancel is called and OnListen is called again
 // when user re-registers the same channel that has already started
