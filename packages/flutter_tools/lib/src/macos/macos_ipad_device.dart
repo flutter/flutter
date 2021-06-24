@@ -146,5 +146,5 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async => const <String>[];
 
   @override
-  List<String> get wellKnownIds => const <String>[];
+  List<String> get wellKnownIds => const <String>['designed-for-ipad'];
 }
