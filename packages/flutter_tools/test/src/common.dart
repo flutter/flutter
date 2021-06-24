@@ -244,6 +244,8 @@ class _NoContext implements AppContext {
 /// ```
 class FileExceptionHandler {
   final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors = <String, Map<FileSystemOp, FileSystemException>>{};
+  final Map<FileSystemOp, FileSystemException> _tempErrors = <FileSystemOp, FileSystemException>{};
+  static final RegExp _tempDirectoryEnd = RegExp('rand[0-9]+');
 
   /// Add an exception that will be thrown whenever the file system attached to this
   /// handler performs the [operation] on the [entity].
@@ -253,8 +255,18 @@ class FileExceptionHandler {
     _contextErrors[path]![operation] = exception;
   }
 
-  // Tear-off this method and pass it to the memory filesystem `opHandle` parameter.
+  void addTempError(FileSystemOp operation, FileSystemException exception) {
+    _tempErrors[operation] = exception;
+  }
+
+  /// Tear-off this method and pass it to the memory filesystem `opHandle` parameter.
   void opHandle(String path, FileSystemOp operation) {
+    if (path.startsWith('.tmp_') || _tempDirectoryEnd.firstMatch(path) != null) {
+      final FileSystemException? exception = _tempErrors[operation];
+      if (exception != null) {
+        throw exception;
+      }
+    }
     final Map<FileSystemOp, FileSystemException>? exceptions = _contextErrors[path];
     if (exceptions == null) {
       return;

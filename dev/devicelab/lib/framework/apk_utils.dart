@@ -222,7 +222,7 @@ Future<String> getAndroidManifest(String apk) async {
   );
 }
 
- /// Checks that the classes are contained in the APK, throws otherwise.
+/// Checks that the classes are contained in the APK, throws otherwise.
 Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
   final ApkExtractor extractor = ApkExtractor(apk);
   for (final String className in classes) {

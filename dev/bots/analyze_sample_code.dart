@@ -611,13 +611,22 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^1.0.3
 ''');
 
 
     // Import the analysis options from the Flutter root.
-    final File rootAnalysisOptions = File(path.join(_flutterRoot,'analysis_options.yaml'));
     final File analysisOptions = File(path.join(directory.path, 'analysis_options.yaml'));
-    analysisOptions.writeAsStringSync('include: ${rootAnalysisOptions.absolute.path}');
+    analysisOptions.writeAsStringSync('''
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Samples want to print things pretty often.
+    avoid_print: false
+''');
   }
 
   /// Writes out a sample section to the disk and returns the file.

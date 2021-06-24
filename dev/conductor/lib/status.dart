@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:convert' show jsonDecode;
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -59,8 +57,8 @@ class StatusCommand extends Command<void> {
           'No persistent state file found at ${argResults[kStateOption]}.');
       return;
     }
-    final pb.ConductorState state = pb.ConductorState();
-    state.mergeFromProto3Json(jsonDecode(stateFile.readAsStringSync()));
+    final pb.ConductorState state = readStateFromFile(stateFile);
+
     stdio.printStatus(presentState(state));
     if (argResults[kVerboseFlag] as bool) {
       stdio.printStatus('\nLogs:');

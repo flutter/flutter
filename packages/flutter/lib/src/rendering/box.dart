@@ -2208,7 +2208,7 @@ abstract class RenderBox extends RenderObject {
           DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint('See https://flutter.dev/docs/development/ui/layout/box-constraints for more information.'),
         ]);
-     }
+      }
       // verify that the size is within the constraints
       if (!constraints.isSatisfiedBy(_size!)) {
         throw FlutterError.fromParts(<DiagnosticsNode>[

@@ -6,8 +6,11 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -811,42 +814,45 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     controller: primaryScrollController,
                     child: FocusScope(
                       node: focusScopeNode, // immutable
-                      child: RepaintBoundary(
-                        child: AnimatedBuilder(
-                          animation: _listenable, // immutable
-                          builder: (BuildContext context, Widget? child) {
-                            return widget.route.buildTransitions(
-                              context,
-                              widget.route.animation!,
-                              widget.route.secondaryAnimation!,
-                              // This additional AnimatedBuilder is include because if the
-                              // value of the userGestureInProgressNotifier changes, it's
-                              // only necessary to rebuild the IgnorePointer widget and set
-                              // the focus node's ability to focus.
-                              AnimatedBuilder(
-                                animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
-                                builder: (BuildContext context, Widget? child) {
-                                  final bool ignoreEvents = _shouldIgnoreFocusRequest;
-                                  focusScopeNode.canRequestFocus = !ignoreEvents;
-                                  return IgnorePointer(
-                                    ignoring: ignoreEvents,
-                                    child: child,
+                      child: _FocusTrap(
+                        focusScopeNode: focusScopeNode,
+                        child: RepaintBoundary(
+                          child: AnimatedBuilder(
+                            animation: _listenable, // immutable
+                            builder: (BuildContext context, Widget? child) {
+                              return widget.route.buildTransitions(
+                                context,
+                                widget.route.animation!,
+                                widget.route.secondaryAnimation!,
+                                // This additional AnimatedBuilder is include because if the
+                                // value of the userGestureInProgressNotifier changes, it's
+                                // only necessary to rebuild the IgnorePointer widget and set
+                                // the focus node's ability to focus.
+                                AnimatedBuilder(
+                                  animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                                  builder: (BuildContext context, Widget? child) {
+                                    final bool ignoreEvents = _shouldIgnoreFocusRequest;
+                                    focusScopeNode.canRequestFocus = !ignoreEvents;
+                                    return IgnorePointer(
+                                      ignoring: ignoreEvents,
+                                      child: child,
+                                    );
+                                  },
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: _page ??= RepaintBoundary(
+                              key: widget.route._subtreeKey, // immutable
+                              child: Builder(
+                                builder: (BuildContext context) {
+                                  return widget.route.buildPage(
+                                    context,
+                                    widget.route.animation!,
+                                    widget.route.secondaryAnimation!,
                                   );
                                 },
-                                child: child,
                               ),
-                            );
-                          },
-                          child: _page ??= RepaintBoundary(
-                            key: widget.route._subtreeKey, // immutable
-                            child: Builder(
-                              builder: (BuildContext context) {
-                                return widget.route.buildPage(
-                                  context,
-                                  widget.route.animation!,
-                                  widget.route.secondaryAnimation!,
-                                );
-                              },
                             ),
                           ),
                         ),
@@ -1980,3 +1986,110 @@ typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<doubl
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
 typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
+
+/// When a primary pointer makes contact with the screen, this widget determines if that pointer
+/// contacted an existing focused widget. If not, this asks the [FocusScopeNode] to reset the
+/// focus state. This allows [TextField]s and other focusable widgets to give up their focus
+/// state, without creating a gesture detector that competes with others on screen.
+class _FocusTrap extends SingleChildRenderObjectWidget {
+  const _FocusTrap({
+    required this.focusScopeNode,
+    required Widget child,
+  }) : super(child: child);
+
+  final FocusScopeNode focusScopeNode;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderFocusTrap(focusScopeNode);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderFocusTrap renderObject) {
+    renderObject.focusScopeNode = focusScopeNode;
+  }
+}
+
+class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
+  _RenderFocusTrap(this._focusScopeNode) {
+    focusScopeNode.addListener(_currentFocusListener);
+  }
+
+  FocusNode? currentFocus;
+  Rect? currentFocusRect;
+  Expando<BoxHitTestResult> cachedResults = Expando<BoxHitTestResult>();
+
+  FocusScopeNode _focusScopeNode;
+  FocusScopeNode get focusScopeNode => _focusScopeNode;
+  set focusScopeNode(FocusScopeNode value) {
+    if (focusScopeNode == value)
+      return;
+    focusScopeNode.removeListener(_currentFocusListener);
+    _focusScopeNode = value;
+    focusScopeNode.addListener(_currentFocusListener);
+  }
+
+  void _currentFocusListener() {
+    currentFocus = focusScopeNode.focusedChild;
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+    bool hitTarget = false;
+    if (size.contains(position)) {
+      hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
+      if (hitTarget) {
+        final BoxHitTestEntry entry = BoxHitTestEntry(this, position);
+        cachedResults[entry] = result;
+        result.add(entry);
+      }
+    }
+    return hitTarget;
+  }
+
+  /// The focus dropping behavior is only present on desktop platforms
+  /// and mobile browsers.
+  bool get _shouldIgnoreEvents {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return !kIsWeb;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+        return false;
+    }
+  }
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
+    if (event is! PointerDownEvent
+      || event.buttons != kPrimaryButton
+      || event.kind != PointerDeviceKind.mouse
+      || _shouldIgnoreEvents
+      || currentFocus == null) {
+      return;
+    }
+    final BoxHitTestResult? result = cachedResults[entry];
+    final FocusNode? focusNode = currentFocus;
+    if (focusNode == null || result == null)
+      return;
+
+    final RenderObject? renderObject = focusNode.context?.findRenderObject();
+    if (renderObject == null)
+      return;
+
+    bool hitCurrentFocus = false;
+    for (final HitTestEntry entry in result.path) {
+      final HitTestTarget target = entry.target;
+      if (target == renderObject) {
+        hitCurrentFocus = true;
+        break;
+      }
+    }
+    if (!hitCurrentFocus)
+      focusNode.unfocus(disposition: UnfocusDisposition.scope);
+  }
+}

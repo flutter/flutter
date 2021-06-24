@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <IntegrationTest/IntegrationTestIosTest.h>
-#import <XCTest/XCTest.h>
+@import XCTest;
+@import integration_test;
 
 INTEGRATION_TEST_IOS_RUNNER(RunnerTests)

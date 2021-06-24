@@ -144,7 +144,7 @@ Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, 
 ///       // This test is especially slow on Windows.
 ///       'windows': Timeout.factor(2),
 ///       'browser': [
-///         Skip('TODO: add browser support'),
+///         Skip('add browser support'),
 ///         // This will be slow on browsers once it works on them.
 ///         Timeout.factor(2)
 ///       ]

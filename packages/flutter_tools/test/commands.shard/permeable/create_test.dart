@@ -28,6 +28,7 @@ import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -482,8 +483,9 @@ void main() {
     // Expect the dependency on flutter_web_plugins exists
     expect(pubspec.dependencies, contains('flutter_web_plugins'));
     // The platform is correctly registered
-    expect(pubspec.flutter['plugin']['platforms']['web']['pluginClass'], 'FlutterProjectWeb');
-    expect(pubspec.flutter['plugin']['platforms']['web']['fileName'], 'flutter_project_web.dart');
+    final YamlMap web = ((pubspec.flutter['plugin'] as YamlMap)['platforms'] as YamlMap)['web'] as YamlMap;
+    expect(web['pluginClass'], 'FlutterProjectWeb');
+    expect(web['fileName'], 'flutter_project_web.dart');
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
@@ -1062,6 +1064,25 @@ void main() {
     Logger: () => logger,
   });
 
+  testUsingContext('app creates maskable icons for web', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=web',
+      projectDir.path,
+    ]);
+
+    final Directory iconsDir = projectDir.childDirectory('web').childDirectory('icons');
+
+    expect(iconsDir.childFile('Icon-maskable-192.png'), exists);
+    expect(iconsDir.childFile('Icon-maskable-512.png'), exists);
+  });
+
   testUsingContext('plugin uses new platform schema', () async {
     Cache.flutterRoot = '../..';
 
@@ -1099,17 +1120,13 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.fs.path.join(
-            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
-          ),
-          <String>[file.path],
+          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
 
-        expect(original, formatted, reason: file.path);
+        expect(formatted, contains(original), reason: file.path);
       }
     }
 
@@ -1205,17 +1222,13 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.fs.path.join(
-            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
-          ),
-          <String>[file.path],
+          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
 
-        expect(original, formatted, reason: file.path);
+        expect(formatted, contains(original), reason: file.path);
       }
     }
 
@@ -1912,7 +1925,7 @@ void main() {
     Logger: () => logger,
   });
 
-  testUsingContext('plugin doe not support web if feature is not enabled', () async {
+  testUsingContext('plugin does not support web if feature is not enabled', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -2201,6 +2214,25 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('flutter create . on and existing plugin should show "Your example app code in"', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
+    final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
+    final String relativeExamplePath = globals.fs.path.normalize(globals.fs.path.join(relativePluginPath, 'example/lib/main.dart'));
+
+    await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platforms=android', projectDir.path]);
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+    await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platforms=ios', projectDir.path]);
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+  }, overrides: <Type, Generator> {
+    Logger: () => logger,
   });
 
   testUsingContext('flutter create -t plugin in an empty folder should not show pubspec.yaml updating suggestion', () async {

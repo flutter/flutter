@@ -496,10 +496,10 @@ class _DefaultPub implements Pub {
 
     // Because [loadPackageConfigWithLogging] succeeded [packageConfigFile]
     // we can rely on the file to exist and be correctly formatted.
-    final dynamic jsonContents =
-        json.decode(packageConfigFile.readAsStringSync());
+    final Map<String, dynamic> jsonContents =
+        json.decode(packageConfigFile.readAsStringSync()) as Map<String, dynamic>;
 
-    jsonContents['packages'].add(<String, dynamic>{
+    (jsonContents['packages'] as List<dynamic>).add(<String, dynamic>{
       'name': 'flutter_gen',
       'rootUri': 'flutter_gen',
       'languageVersion': '2.12',

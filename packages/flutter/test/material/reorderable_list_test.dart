@@ -1366,6 +1366,20 @@ void main() {
     });
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
 
+    testWidgets('ReorderableListView on desktop platforms should have drag handles', (WidgetTester tester) async {
+      await tester.pumpWidget(build());
+      // All four items should have drag handles and not delayed listeners.
+      expect(find.byIcon(Icons.drag_handle), findsNWidgets(4));
+      expect(find.byType(ReorderableDelayedDragStartListener), findsNothing);
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets('ReorderableListView on mobile platforms should not have drag handles', (WidgetTester tester) async {
+      await tester.pumpWidget(build());
+      // All four items should have delayed listeners and not drag handles.
+      expect(find.byType(ReorderableDelayedDragStartListener), findsNWidgets(4));
+      expect(find.byIcon(Icons.drag_handle), findsNothing);
+    }, variant: TargetPlatformVariant.mobile());
+
     testWidgets('Vertical list renders drag handle in correct position', (WidgetTester tester) async {
       await tester.pumpWidget(build(platform: TargetPlatform.macOS));
       final Finder listView = find.byType(ReorderableListView);
