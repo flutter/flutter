@@ -59,6 +59,8 @@ template("runner_sources") {
       "engine.h",
       "flutter_runner_product_configuration.cc",
       "flutter_runner_product_configuration.h",
+      "focus_delegate.cc",
+      "focus_delegate.h",
       "fuchsia_external_view_embedder.cc",
       "fuchsia_external_view_embedder.h",
       "fuchsia_intl.cc",
@@ -447,6 +449,7 @@ executable("flutter_runner_unittests") {
     "accessibility_bridge_unittest.cc",
     "component_unittest.cc",
     "flutter_runner_fakes.h",
+    "focus_delegate_unittests.cc",
     "fuchsia_intl_unittest.cc",
     "keyboard_unittest.cc",
     "platform_view_unittest.cc",
@@ -471,6 +474,7 @@ executable("flutter_runner_unittests") {
   ]
 
   deps = [
+           "tests/fakes",
            ":flutter_runner_fixtures",
            ":flutter_runner_sources",
            "//build/fuchsia/pkg:sys_cpp_testing",
