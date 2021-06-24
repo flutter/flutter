@@ -64,13 +64,13 @@ def main():
             i.read()
             .replace(
                 '{{DART_SDK_GIT_REVISION}}',
-                GetDartSdkGitRevision(args.buildroot))
+                GetDartSdkGitRevision(args.buildroot).decode('utf-8'))
             .replace(
                 '{{DART_SDK_SEMANTIC_VERSION}}',
-                GetDartSdkSemanticVersion(args.buildroot))
+                GetDartSdkSemanticVersion(args.buildroot).decode('utf-8'))
             .replace(
                 '{{FLUTTER_ENGINE_GIT_REVISION}}',
-                GetFlutterEngineGitRevision(args.buildroot))
+                GetFlutterEngineGitRevision(args.buildroot).decode('utf-8'))
             .replace(
                 '{{FUCHSIA_SDK_VERSION}}',
                 GetFuchsiaSdkVersion(args.buildroot)))
