@@ -138,11 +138,8 @@ class MaterialFonts extends CachedArtifact {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
-    final String? cacheVersion = version;
-    if (cacheVersion != null) {
-      final Uri archiveUri = _toStorageUri(cacheVersion);
-      return artifactUpdater.downloadZipArchive('Downloading Material fonts...', archiveUri, location);
-    }
+    final Uri archiveUri = _toStorageUri(version!);
+    return artifactUpdater.downloadZipArchive('Downloading Material fonts...', archiveUri, location);
   }
 
   Uri _toStorageUri(String path) => Uri.parse('${cache.storageBaseUrl}/$path');
@@ -538,15 +535,11 @@ class GradleWrapper extends CachedArtifact {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
-    final String? cacheVersion = version;
-    if (cacheVersion != null) {
-      final Uri archiveUri = _toStorageUri(cacheVersion);
-      await artifactUpdater.downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location);
-    }
+    final Uri archiveUri = _toStorageUri(version!);
+    await artifactUpdater.downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location);
     // Delete property file, allowing templates to provide it.
     // Remove NOTICE file. Should not be part of the template.
-    final File propertiesFile = fileSystem.file(
-        fileSystem.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'));
+    final File propertiesFile = fileSystem.file(fileSystem.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'));
     final File noticeFile = fileSystem.file(fileSystem.path.join(location.path, 'NOTICE'));
     ErrorHandlingFileSystem.deleteIfExists(propertiesFile);
     ErrorHandlingFileSystem.deleteIfExists(noticeFile);
@@ -670,16 +663,13 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
   String? get version => cache.getVersionFor('engine');
 
   Future<void> _downloadDebugSymbols(String targetArch, ArtifactUpdater artifactUpdater) async {
-    final String? cacheVersion = version;
-    if (cacheVersion != null) {
-      final String packageName = 'fuchsia-debug-symbols-$targetArch';
-      final String url = packageResolver.resolveUrl(packageName, cacheVersion);
-      await artifactUpdater.downloadZipArchive(
-        'Downloading debug symbols for flutter runner - arch:$targetArch...',
-        Uri.parse(url),
-        location,
-      );
-    }
+    final String packageName = 'fuchsia-debug-symbols-$targetArch';
+    final String url = packageResolver.resolveUrl(packageName, version!);
+    await artifactUpdater.downloadZipArchive(
+      'Downloading debug symbols for flutter runner - arch:$targetArch...',
+      Uri.parse(url),
+      location,
+    );
   }
 
   @override
