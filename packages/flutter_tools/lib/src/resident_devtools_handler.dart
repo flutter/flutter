@@ -291,7 +291,6 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
 
 /// Convert a [URI] with query parameters into a display format instead
 /// of the default URI encoding.
-@visibleForTesting
 String urlToDisplayString(Uri uri) {
   final StringBuffer base = StringBuffer(uri.replace(
     queryParameters: <String, String>{},
