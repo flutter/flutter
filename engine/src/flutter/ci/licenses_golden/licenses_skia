@@ -1,4 +1,4 @@
-Signature: bbc173f4e3f87c61ca44313e8148ed8f
+Signature: 7a6b84a39f30aab8a3aae4e8a0060fb6
 
 UNUSED LICENSES:
 
@@ -4005,6 +4005,8 @@ FILE: ../../../third_party/skia/src/gpu/GrThreadSafePipelineBuilder.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockSurfaceProxy.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlRenderCommandEncoder.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasRenderTask.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrCullTest.h
 FILE: ../../../third_party/skia/src/utils/SkOrderedFontMgr.cpp
 ----------------------------------------------------------------------------------------------------
@@ -5143,6 +5145,7 @@ FILE: ../../../third_party/skia/gm/fp_sample_chaining.cpp
 FILE: ../../../third_party/skia/gm/fpcoordinateoverride.cpp
 FILE: ../../../third_party/skia/gm/inverseclip.cpp
 FILE: ../../../third_party/skia/gm/labyrinth.cpp
+FILE: ../../../third_party/skia/gm/manypathatlases.cpp
 FILE: ../../../third_party/skia/gm/preservefillrule.cpp
 FILE: ../../../third_party/skia/gm/swizzle.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
