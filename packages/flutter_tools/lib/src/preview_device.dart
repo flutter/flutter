@@ -24,22 +24,31 @@ import 'device_port_forwarder.dart';
 import 'project.dart';
 import 'protocol_discovery.dart';
 
+typedef BundleBuilderFactory = BundleBuilder Function();
+
+BundleBuilder _defaultBundleBuilder() {
+  return BundleBuilder();
+}
+
 class PreviewDevice extends Device {
   PreviewDevice({
     @required Platform platform,
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
+    @visibleForTesting BundleBuilderFactory builderFactory = _defaultBundleBuilder,
   }) : _platform = platform,
        _processManager = processManager,
        _logger = logger,
        _fileSystem = fileSystem,
+       _bundleBuilderFactory = builderFactory,
        super('preview', ephemeral: false, category: Category.desktop, platformType: PlatformType.custom);
 
   final Platform _platform;
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fileSystem;
+  final BundleBuilderFactory _bundleBuilderFactory;
 
   @override
   void clearLogs() { }
@@ -89,7 +98,7 @@ class PreviewDevice extends Device {
   Future<LaunchResult> startApp(covariant ApplicationPackage package, {
     String mainPath,
     String route,
-    DebuggingOptions debuggingOptions,
+    @required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
@@ -102,7 +111,7 @@ class PreviewDevice extends Device {
     Status status;
     try {
       status = _logger.startProgress('Compiling application for preview...');
-      await BundleBuilder().build(
+      await _bundleBuilderFactory().build(
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
         platform: TargetPlatform.tester,
