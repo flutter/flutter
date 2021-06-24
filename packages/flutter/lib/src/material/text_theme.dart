@@ -49,31 +49,6 @@ import 'typography.dart';
 /// ...where "light" is `FontWeight.w300`, "regular" is `FontWeight.w400` and
 /// "medium" is `FontWeight.w500`.
 ///
-///
-/// Each of the [TextTheme] text styles corresponds to one of the
-/// styles from the 2018 spec.
-///
-/// ```
-/// NAME               SIZE   WEIGHT   SPACING
-/// headline1          112.0  thin     0.0
-/// headline2          56.0   normal   0.0
-/// headline3          45.0   normal   0.0
-/// headline4          34.0   normal   0.0
-/// headline5          24.0   normal   0.0
-/// headline6          20.0   medium   0.0
-/// subtitle1          16.0   normal   0.0
-/// body1 (bodyText1)  14.0   medium   0.0
-/// body2 (bodyText2)  14.0   normal   0.0
-/// caption            12.0   normal   0.0
-/// button             14.0   medium   0.0
-/// subtitle2          14.0   medium   0.0
-/// overline           10.0   normal   0.0
-/// ```
-///
-/// Where "thin" is `FontWeight.w100`, "normal" is `FontWeight.w400` and
-/// "medium" is `FontWeight.w500`. Letter spacing for all of the original
-/// text styles was 0.0.
-///
 /// By default, text styles are initialized to match the 2018 Material Design
 /// specification as listed above. To provide backwards compatibility, the 2104
 /// specification is also available.
