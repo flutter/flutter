@@ -148,6 +148,28 @@ void main() {
       expect(find.text('B FOCUSED'), findsOneWidget);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/84845
+    testWidgets('autofocus test - previously focused child is about to unmount.', (WidgetTester tester) async {
+      final FocusNode focusNodeA = FocusNode(debugLabel: 'Test Node A');
+      final FocusNode focusNodeB = FocusNode(debugLabel: 'Test Node B');
+      final Widget autofocusA = Focus(
+        focusNode: focusNodeA,
+        autofocus: true,
+        child: const Placeholder(),
+      );
+
+      final Widget autofocusB = Focus(
+        focusNode: focusNodeB,
+        autofocus: true,
+        child: const Placeholder(),
+      );
+
+      await tester.pumpWidget(FocusScope(child: autofocusA));
+      expect(focusNodeA.hasFocus, true);
+      await tester.pumpWidget(FocusScope(child: SizedBox(child: autofocusB)));
+      expect(focusNodeB.hasFocus, true);
+    });
+
     testWidgets('Can have multiple focused children and they update accordingly', (WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();

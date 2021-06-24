@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
@@ -614,8 +615,13 @@ class _FocusState extends State<Focus> {
 
   void _handleAutofocus() {
     if (!_didAutofocus && widget.autofocus) {
-      FocusScope.of(context).autofocus(focusNode);
       _didAutofocus = true;
+      // Waiting for inactive nodes to be disposed.
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        if (mounted) {
+          FocusScope.of(context).autofocus(focusNode);
+        }
+      });
     }
   }
 
