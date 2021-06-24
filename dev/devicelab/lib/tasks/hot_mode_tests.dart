@@ -33,7 +33,9 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
       deviceIdOverride = device.deviceId;
     }
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
-    rm(benchmarkFile);
+    if (benchmarkFile.existsSync()) {
+      rm(benchmarkFile);
+    }
     final List<String> options = <String>[
       '--hot', '-d', deviceIdOverride, '--benchmark', '--resident',  '--no-android-gradle-daemon', '--no-publish-port', '--verbose',
     ];
