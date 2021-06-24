@@ -49,45 +49,41 @@ import 'typography.dart';
 /// ...where "light" is `FontWeight.w300`, "regular" is `FontWeight.w400` and
 /// "medium" is `FontWeight.w500`.
 ///
-/// The [TextTheme] API was originally based on the original material (2014)
-/// design spec, which used different text style names. The table
-/// below should help with understanding the mapping of the 2014 names and
-/// the 2018 names in terms of the 2018 material specification.
 ///
 /// Each of the [TextTheme] text styles corresponds to one of the
-/// styles from 2018 spec. By default, the font sizes, font weights
-/// and letter spacings have not changed from their original,
-/// 2014, values.
+/// styles from the 2018 spec.
 ///
 /// ```
-/// NAME       SIZE   WEIGHT   SPACING  2018 NAME
-/// display4   112.0  thin     0.0      headline1
-/// display3   56.0   normal   0.0      headline2
-/// display2   45.0   normal   0.0      headline3
-/// display1   34.0   normal   0.0      headline4
-/// headline   24.0   normal   0.0      headline5
-/// title      20.0   medium   0.0      headline6
-/// subhead    16.0   normal   0.0      subtitle1
-/// body2      14.0   medium   0.0      body1 (bodyText1)
-/// body1      14.0   normal   0.0      body2 (bodyText2)
-/// caption    12.0   normal   0.0      caption
-/// button     14.0   medium   0.0      button
-/// subtitle   14.0   medium   0.0      subtitle2
-/// overline   10.0   normal   0.0      overline
+/// NAME               SIZE   WEIGHT   SPACING
+/// headline1          112.0  thin     0.0
+/// headline2          56.0   normal   0.0
+/// headline3          45.0   normal   0.0
+/// headline4          34.0   normal   0.0
+/// headline5          24.0   normal   0.0
+/// headline6          20.0   medium   0.0
+/// subtitle1          16.0   normal   0.0
+/// body1 (bodyText1)  14.0   medium   0.0
+/// body2 (bodyText2)  14.0   normal   0.0
+/// caption            12.0   normal   0.0
+/// button             14.0   medium   0.0
+/// subtitle2          14.0   medium   0.0
+/// overline           10.0   normal   0.0
 /// ```
 ///
 /// Where "thin" is `FontWeight.w100`, "normal" is `FontWeight.w400` and
 /// "medium" is `FontWeight.w500`. Letter spacing for all of the original
 /// text styles was 0.0.
 ///
-/// Since the names `body1` and `body2` are used in both specifications but with
-/// different meanings, the API uses the terms `bodyText1` and `bodyText2` for
-/// the newer API.
+/// By default, text styles are initialized to match the 2018 Material Design
+/// specification as listed above. To provide backwards compatibility, the 2104
+/// specification is also available.
 ///
-/// To configure a [Theme] for the 2018 sizes, weights, and letter spacings,
-/// initialize its [ThemeData.typography] value using [Typography.material2018].
-/// To configure a [Theme] for the 2014 sizes, weights, and letter spacings,
-/// initialize its [ThemeData.typography] value using [Typography.material2014].
+/// To explicitly configure a [Theme] for the 2018 sizes, weights, and letter
+/// spacings, you can initialize its [ThemeData.typography] value using
+/// [Typography.material2018]. The [Typography] constructor defaults to this
+/// configuration. To configure a [Theme] for the 2014 sizes, weights, and letter
+/// spacings, initialize its [ThemeData.typography] value using
+/// [Typography.material2014].
 ///
 /// See also:
 ///
