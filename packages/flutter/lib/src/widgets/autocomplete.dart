@@ -3,16 +3,20 @@
 // found in the LICENSE file.
 
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
+import 'actions.dart';
 import 'basic.dart';
 import 'container.dart';
 import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
+import 'inherited_notifier.dart';
 import 'overlay.dart';
+import 'shortcuts.dart';
 
 /// The type of the [RawAutocomplete] callback which computes the list of
-/// optional completions for the widget's field based on the text the user has
+/// optional completions for the widget's field, based on the text the user has
 /// entered so far.
 ///
 /// See also:
@@ -31,6 +35,11 @@ typedef AutocompleteOnSelected<T extends Object> = void Function(T option);
 /// The type of the [RawAutocomplete] callback which returns a [Widget] that
 /// displays the specified [options] and calls [onSelected] if the user
 /// selects an option.
+///
+/// The returned widget from this callback will be wrapped in an
+/// [AutocompleteHighlightedOption] inherited widget. This will allow
+/// this callback to determine which option is currently highlighted for
+/// keyboard navigation.
 ///
 /// See also:
 ///
@@ -631,6 +640,15 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// The options are displayed floating below the field using a
   /// [CompositedTransformFollower] inside of an [Overlay], not at the same
   /// place in the widget tree as [RawAutocomplete].
+  ///
+  /// In order to track which item is highlighted by keyboard navigation, the
+  /// resulting options will be wrapped in an inherited
+  /// [AutocompleteHighlightedOption] widget.
+  /// Inside this callback, the index of the highlighted option can be obtained
+  /// from [AutocompleteHighlightedOption.of] to display the highlighted option
+  /// with a visual highlight to indicate it will be the option selected from
+  /// the keyboard.
+  ///
   /// {@endtemplate}
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
 
@@ -711,8 +729,17 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   final LayerLink _optionsLayerLink = LayerLink();
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
+  late final Map<Type, Action<Intent>> _actionMap;
+  late final _AutocompleteCallbackAction<AutocompletePreviousOptionIntent> _previousOptionAction;
+  late final _AutocompleteCallbackAction<AutocompleteNextOptionIntent> _nextOptionAction;
   Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
+  final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
+
+  static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowUp): AutocompletePreviousOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
+  };
 
   // The OverlayEntry containing the options.
   OverlayEntry? _floatingOptions;
@@ -728,6 +755,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _textEditingController.value,
     );
     _options = options;
+    _updateHighlight(_highlightedOptionIndex.value);
     if (_selection != null
         && _textEditingController.text != widget.displayStringForOption(_selection!)) {
       _selection = null;
@@ -745,7 +773,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     if (_options.isEmpty) {
       return;
     }
-    _select(_options.first);
+    _select(_options.elementAt(_highlightedOptionIndex.value));
   }
 
   // Select the given option and update the widget.
@@ -762,8 +790,30 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     widget.onSelected?.call(_selection!);
   }
 
+  void _updateHighlight(int newIndex) {
+    _highlightedOptionIndex.value = _options.isEmpty ? 0 : newIndex % _options.length;
+  }
+
+  void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {
+    _updateHighlight(_highlightedOptionIndex.value - 1);
+  }
+
+  void _highlightNextOption(AutocompleteNextOptionIntent intent) {
+    _updateHighlight(_highlightedOptionIndex.value + 1);
+  }
+
+  void _setActionsEnabled(bool enabled) {
+    // The enabled state determines whether the action will consume the
+    // key shortcut or let it continue on to the underlying text field.
+    // They should only be enabled when the options are showing so shortcuts
+    // can be used to navigate them.
+    _previousOptionAction.enabled = enabled;
+    _nextOptionAction.enabled = enabled;
+  }
+
   // Hide or show the options overlay, if needed.
   void _updateOverlay() {
+    _setActionsEnabled(_shouldShowOptions);
     if (_shouldShowOptions) {
       _floatingOptions?.remove();
       _floatingOptions = OverlayEntry(
@@ -772,7 +822,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             link: _optionsLayerLink,
             showWhenUnlinked: false,
             targetAnchor: Alignment.bottomLeft,
-            child: widget.optionsViewBuilder(context, _select, _options),
+            child: AutocompleteHighlightedOption(
+              highlightIndexNotifier: _highlightedOptionIndex,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return widget.optionsViewBuilder(context, _select, _options);
+                }
+              )
+            ),
           );
         },
       );
@@ -830,6 +887,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _textEditingController.addListener(_onChangedField);
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onChangedFocus);
+    _previousOptionAction = _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(onInvoke: _highlightPreviousOption);
+    _nextOptionAction = _AutocompleteCallbackAction<AutocompleteNextOptionIntent>(onInvoke: _highlightNextOption);
+    _actionMap = <Type, Action<Intent>> {
+      AutocompletePreviousOptionIntent: _previousOptionAction,
+      AutocompleteNextOptionIntent: _nextOptionAction,
+    };
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _updateOverlay();
     });
@@ -867,17 +930,93 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   Widget build(BuildContext context) {
     return Container(
       key: _fieldKey,
-      child: CompositedTransformTarget(
-        link: _optionsLayerLink,
-        child: widget.fieldViewBuilder == null
-            ? const SizedBox.shrink()
-            : widget.fieldViewBuilder!(
-                context,
-                _textEditingController,
-                _focusNode,
-                _onFieldSubmitted,
-              ),
+      child: Shortcuts(
+        shortcuts: _shortcuts,
+        child: Actions(
+          actions: _actionMap,
+          child: CompositedTransformTarget(
+            link: _optionsLayerLink,
+            child: widget.fieldViewBuilder == null
+              ? const SizedBox.shrink()
+              : widget.fieldViewBuilder!(
+                  context,
+                  _textEditingController,
+                  _focusNode,
+                  _onFieldSubmitted,
+                ),
+          ),
+        ),
       ),
     );
+  }
+}
+
+class _AutocompleteCallbackAction<T extends Intent> extends CallbackAction<T> {
+  _AutocompleteCallbackAction({
+    required OnInvokeCallback<T> onInvoke,
+    this.enabled = true,
+  }) : super(onInvoke: onInvoke);
+
+  bool enabled;
+
+  @override
+  bool isEnabled(covariant T intent) => enabled;
+
+  @override
+  bool consumesKey(covariant T intent) => enabled;
+}
+
+/// An [Intent] to highlight the previous option in the autocomplete list.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class AutocompletePreviousOptionIntent extends Intent {
+  /// Creates an instance of AutocompletePreviousOptionIntent.
+  const AutocompletePreviousOptionIntent();
+}
+
+/// An [Intent] to highlight the next option in the autocomplete list.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class AutocompleteNextOptionIntent extends Intent {
+  /// Creates an instance of AutocompleteNextOptionIntent.
+  const AutocompleteNextOptionIntent();
+}
+
+/// An inherited widget used to indicate which autocomplete option should be
+/// highlighted for keyboard navigation.
+///
+/// The `RawAutoComplete` widget will wrap the options view generated by the
+/// `optionsViewBuilder` with this widget to provide the highlighted option's
+/// index to the builder.
+///
+/// In the builder callback the index of the highlighted option can be obtained
+/// by using the static [of] method:
+///
+/// ```dart
+/// final highlightedIndex = AutocompleteHighlightedOption.of(context);
+/// ```
+///
+/// which can then be used to tell which option should be given a visual
+/// indication that will be the option selected with the keyboard.
+class AutocompleteHighlightedOption extends InheritedNotifier<ValueNotifier<int>> {
+  /// Create an instance of AutocompleteHighlightedOption inherited widget.
+  const AutocompleteHighlightedOption({
+    Key? key,
+    required ValueNotifier<int> highlightIndexNotifier,
+    required Widget child,
+  }) : super(key: key, notifier: highlightIndexNotifier, child: child);
+
+  /// Returns the index of the highlighted option from the closest
+  /// [AutocompleteHighlightedOption] ancestor.
+  ///
+  /// If there is no ancestor, it returns 0.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// final highlightedIndex = AutocompleteHighlightedOption.of(context);
+  /// ```
+  static int of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<AutocompleteHighlightedOption>()?.notifier?.value ?? 0;
   }
 }

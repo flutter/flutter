@@ -168,7 +168,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// test.
   Uri _addPrefix(Uri golden) {
     final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
-    return Uri.parse(prefix + '.' + golden.toString());
+    return Uri.parse('$prefix.$golden');
   }
 }
 

@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';
 import 'material.dart';
 import 'text_form_field.dart';
+import 'theme.dart';
 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
 ///
@@ -295,9 +297,20 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
                 onTap: () {
                   onSelected(option);
                 },
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(displayStringForOption(option)),
+                child: Builder(
+                  builder: (BuildContext context) {
+                    final bool highlight = AutocompleteHighlightedOption.of(context) == index;
+                    if (highlight) {
+                      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+                        Scrollable.ensureVisible(context, alignment: 0.5);
+                      });
+                    }
+                    return Container(
+                      color: highlight ? Theme.of(context).focusColor : null,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(displayStringForOption(option)),
+                    );
+                  }
                 ),
               );
             },

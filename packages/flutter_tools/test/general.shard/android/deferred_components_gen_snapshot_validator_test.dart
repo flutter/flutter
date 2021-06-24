@@ -2,25 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/deferred_components_gen_snapshot_validator.dart';
 import 'package:flutter_tools/src/android/deferred_components_validator.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger logger;
-  Environment env;
+  late FileSystem fileSystem;
+  late BufferLogger logger;
+  late Environment env;
 
   Environment createEnvironment() {
     final Map<String, String> defines = <String, String>{ kDeferredComponents: 'true' };
@@ -32,10 +31,10 @@ void main() {
       inputs: <String, String>{},
       cacheDir: fileSystem.directory('/cache'),
       flutterRootDir: fileSystem.directory('/flutter_root'),
-      artifacts: globals.artifacts,
+      artifacts: Artifacts.test(),
       fileSystem: fileSystem,
       logger: logger,
-      processManager: globals.processManager,
+      processManager: FakeProcessManager.any(),
       platform: FakePlatform(),
       engineVersion: 'invalidEngineVersion',
       generateDartPluginRegistry: false,

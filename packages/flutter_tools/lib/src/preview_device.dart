@@ -15,7 +15,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
-import 'bundle.dart';
+import 'bundle_builder.dart';
 import 'cache.dart';
 import 'desktop_device.dart';
 import 'devfs.dart';

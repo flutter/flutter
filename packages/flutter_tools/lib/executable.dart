@@ -39,7 +39,6 @@ import 'src/commands/logs.dart';
 import 'src/commands/make_host_app_editable.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
-import 'src/commands/preview.dart';
 import 'src/commands/run.dart';
 import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
@@ -49,7 +48,7 @@ import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/devtools_launcher.dart';
 import 'src/features.dart';
-import 'src/globals.dart' as globals;
+import 'src/globals_null_migrated.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
@@ -161,7 +160,7 @@ List<FlutterCommand> generateCommands({
     platform: globals.platform,
   ),
   EmulatorsCommand(),
-  FormatCommand(),
+  FormatCommand(verboseHelp: verboseHelp),
   GenerateCommand(),
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,
@@ -178,7 +177,6 @@ List<FlutterCommand> generateCommands({
     platform: globals.platform,
     featureFlags: featureFlags,
   ),
-  PreviewCommand(),
   RunCommand(verboseHelp: verboseHelp),
   ScreenshotCommand(),
   ShellCompletionCommand(),

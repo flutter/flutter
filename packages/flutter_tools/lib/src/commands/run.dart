@@ -127,6 +127,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
               'this comma separated list of allowed prefixes.',
         valueHelp: 'foo,bar',
       )
+      ..addOption('trace-skia-allowlist',
+        hide: !verboseHelp,
+        help: 'Filters out all Skia trace events except those that are specified in '
+              'this comma separated list of allowed prefixes.',
+        valueHelp: 'skia.gpu,skia.shaders',
+      )
       ..addMultiOption('dart-entrypoint-args',
         abbr: 'a',
         help: 'Pass a list of arguments to the Dart entrypoint at application '
@@ -199,6 +205,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         skiaDeterministicRendering: argParser.options.containsKey('skia-deterministic-rendering') && boolArg('skia-deterministic-rendering'),
         traceSkia: boolArg('trace-skia'),
         traceAllowlist: traceAllowlist,
+        traceSkiaAllowlist: stringArg('trace-skia-allowlist'),
         traceSystrace: boolArg('trace-systrace'),
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
@@ -236,6 +243,7 @@ class RunCommand extends RunCommandBase {
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    usesInitializeFromDillOption(hide: !verboseHelp);
 
     // By default, the app should to publish the VM service port over mDNS.
     // This will allow subsequent "flutter attach" commands to connect to the VM
@@ -608,8 +616,8 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices)
         await FlutterDevice.create(
           device,
-          fileSystemRoots: stringsArg(FlutterOptions.kFileSystemRoot),
-          fileSystemScheme: stringArg(FlutterOptions.kFileSystemScheme),
+          fileSystemRoots: fileSystemRoots,
+          fileSystemScheme: fileSystemScheme,
           experimentalFlags: expFlags,
           target: targetFile,
           buildInfo: buildInfo,

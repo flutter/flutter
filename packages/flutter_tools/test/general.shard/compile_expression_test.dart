@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -24,12 +22,12 @@ import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
-  FakeProcessManager processManager;
-  ResidentCompiler generator;
-  MemoryIOSink frontendServerStdIn;
-  StreamController<String> stdErrStreamController;
-  BufferLogger testLogger;
-  MemoryFileSystem fileSystem;
+  late FakeProcessManager processManager;
+  late ResidentCompiler generator;
+  late MemoryIOSink frontendServerStdIn;
+  late StreamController<String> stdErrStreamController;
+  late BufferLogger testLogger;
+  late MemoryFileSystem fileSystem;
 
   setUp(() {
     testLogger = BufferLogger.test();
@@ -52,7 +50,7 @@ void main() {
   });
 
   testWithoutContext('compile expression fails if not previously compiled', () async {
-    final CompilerOutput result = await generator.compileExpression(
+    final CompilerOutput? result = await generator.compileExpression(
         '2+2', null, null, null, null, false);
 
     expect(result, isNull);
@@ -82,12 +80,12 @@ void main() {
       packageConfig: PackageConfig.empty,
       projectRootPath: '',
       fs: fileSystem,
-    ).then((CompilerOutput output) {
+    ).then((CompilerOutput? output) {
       expect(frontendServerStdIn.getAndClear(),
           'compile file:///path/to/main.dart\n');
       expect(testLogger.errorText,
           equals('line1\nline2\n'));
-      expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+      expect(output!.outputFilename, equals('/path/to/main.dart.dill'));
 
       compileExpressionResponseCompleter.complete(
           Future<List<int>>.value(utf8.encode(
@@ -95,9 +93,9 @@ void main() {
           )));
       generator.compileExpression(
           '2+2', null, null, null, null, false).then(
-              (CompilerOutput outputExpression) {
+              (CompilerOutput? outputExpression) {
                 expect(outputExpression, isNotNull);
-                expect(outputExpression.expressionData, <int>[1, 2, 3, 4]);
+                expect(outputExpression!.expressionData, <int>[1, 2, 3, 4]);
               }
       );
     });
@@ -126,10 +124,10 @@ void main() {
         packageConfig: PackageConfig.empty,
         projectRootPath: '',
         fs: MemoryFileSystem(),
-      ).then((CompilerOutput outputCompile) {
+      ).then((CompilerOutput? outputCompile) {
         expect(testLogger.errorText,
             equals('line1\nline2\n'));
-        expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
+        expect(outputCompile!.outputFilename, equals('/path/to/main.dart.dill'));
 
         fileSystem.file('/path/to/main.dart.dill.incremental')
           ..createSync(recursive: true)
@@ -144,9 +142,9 @@ void main() {
     final Completer<bool> lastExpressionCompleted = Completer<bool>();
     unawaited(
       generator.compileExpression('0+1', null, null, null, null, false).then(
-        (CompilerOutput outputExpression) {
+        (CompilerOutput? outputExpression) {
           expect(outputExpression, isNotNull);
-          expect(outputExpression.expressionData, <int>[0, 1, 2, 3]);
+          expect(outputExpression!.expressionData, <int>[0, 1, 2, 3]);
 
           fileSystem.file('/path/to/main.dart.dill.incremental')
             ..createSync(recursive: true)
@@ -161,9 +159,9 @@ void main() {
     // The test manages timing via completers.
     unawaited(
       generator.compileExpression('1+1', null, null, null, null, false).then(
-        (CompilerOutput outputExpression) {
+        (CompilerOutput? outputExpression) {
           expect(outputExpression, isNotNull);
-          expect(outputExpression.expressionData, <int>[4, 5, 6, 7]);
+          expect(outputExpression!.expressionData, <int>[4, 5, 6, 7]);
           lastExpressionCompleted.complete(true);
         },
       ),
@@ -179,13 +177,13 @@ void main() {
 
 class FakeProcess extends Fake implements Process {
   @override
-  Stream<List<int>> stdout;
+  Stream<List<int>> stdout = const Stream<List<int>>.empty();
 
   @override
-  Stream<List<int>> stderr;
+  Stream<List<int>> stderr = const Stream<List<int>>.empty();
 
   @override
-  IOSink stdin;
+  IOSink stdin = IOSink(StreamController<List<int>>().sink);
 
   @override
   Future<int> get exitCode => Completer<int>().future;
@@ -195,12 +193,12 @@ class FakeProcessManager extends Fake implements ProcessManager {
   final FakeProcess process = FakeProcess();
 
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) {
+  bool canRun(dynamic executable, {String? workingDirectory}) {
     return true;
   }
 
   @override
-  Future<Process> start(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, ProcessStartMode mode = ProcessStartMode.normal}) async {
+  Future<Process> start(List<Object> command, {String? workingDirectory, Map<String, String>? environment, bool includeParentEnvironment = true, bool runInShell = false, ProcessStartMode mode = ProcessStartMode.normal}) async {
     return process;
   }
 }

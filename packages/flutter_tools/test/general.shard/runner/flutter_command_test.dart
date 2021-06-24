@@ -509,6 +509,26 @@ void main() {
       expect(buildInfo.packagesPath, 'foo');
     });
 
+    testUsingContext('use fileSystemScheme to generate BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(fileSystemScheme: 'foo');
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.fileSystemScheme, 'foo');
+    });
+
+    testUsingContext('use fileSystemRoots to generate BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(fileSystemRoots: <String>['foo', 'bar']);
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.fileSystemRoots, <String>['foo', 'bar']);
+    });
+
+    testUsingContext('includes initializeFromDill in BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+      final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+      await runner.run(<String>['dummy', '--initialize-from-dill=/foo/bar.dill']);
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.initializeFromDill, '/foo/bar.dill');
+    });
+
     testUsingContext('dds options', () async {
       final FakeDdsCommand ddsCommand = FakeDdsCommand();
       final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);

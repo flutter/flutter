@@ -8,10 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'binding.dart' show TestDefaultBinaryMessengerBinding;
-import 'deprecated.dart';
-import 'test_async_utils.dart';
-
 export 'package:flutter/services.dart' show TextEditingValue, TextInputAction;
 
 /// A testing stub for the system's onscreen keyboard.
@@ -123,8 +119,9 @@ class TestTextInput {
     log.add(methodCall);
     switch (methodCall.method) {
       case 'TextInput.setClient':
-        _client = methodCall.arguments[0] as int;
-        setClientArgs = methodCall.arguments[1] as Map<String, dynamic>;
+        final List<dynamic> arguments = methodCall.arguments as List<dynamic>;
+        _client = arguments[0] as int;
+        setClientArgs = arguments[1] as Map<String, dynamic>;
         break;
       case 'TextInput.updateConfig':
         setClientArgs = methodCall.arguments as Map<String, dynamic>;

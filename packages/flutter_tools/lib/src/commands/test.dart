@@ -12,7 +12,7 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../bundle.dart';
+import '../bundle_builder.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../globals_null_migrated.dart' as globals;

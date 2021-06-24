@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -111,73 +113,33 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
   final String outputPath = path.join(projectDir.path, outputDirectoryName);
 
-  // Xcode changed the name of this generated directory in Xcode 12.
-  const String xcode11ArmDirectoryName = 'ios-armv7_arm64';
-  const String xcode12ArmDirectoryName = 'ios-arm64_armv7';
-
-  final String xcode11AppFrameworkDirectory = path.join(
-    outputPath,
-    'Debug',
-    'App.xcframework',
-    xcode11ArmDirectoryName,
-    'App.framework',
-    'App',
-  );
-  final String xcode12AppFrameworkDirectory = path.join(
-    outputPath,
-    'Debug',
-    'App.xcframework',
-    xcode12ArmDirectoryName,
-    'App.framework',
-    'App',
-  );
-
-  // Based on the locally installed version of Xcode.
-  String localXcodeArmDirectoryName;
-  if (exists(File(xcode11AppFrameworkDirectory))) {
-    localXcodeArmDirectoryName = xcode11ArmDirectoryName;
-  } else if (exists(File(xcode12AppFrameworkDirectory))) {
-    localXcodeArmDirectoryName = xcode12ArmDirectoryName;
-  } else {
-    throw const FileSystemException('Expected App.framework binary to exist.');
-  }
-
-  final String xcode11FlutterFrameworkDirectory = path.join(
+  checkFileExists(path.join(
     outputPath,
     'Debug',
     'Flutter.xcframework',
-    xcode11ArmDirectoryName,
+    'ios-arm64_armv7',
     'Flutter.framework',
     'Flutter',
-  );
-  final String xcode12FlutterFrameworkDirectory = path.join(
-    outputPath,
-    'Debug',
-    'Flutter.xcframework',
-    xcode12ArmDirectoryName,
-    'Flutter.framework',
-    'Flutter',
-  );
-
-  // Based on the version of Xcode installed on the engine builder.
-  String builderXcodeArmDirectoryName;
-  if (exists(File(xcode11FlutterFrameworkDirectory))) {
-    builderXcodeArmDirectoryName = xcode11ArmDirectoryName;
-  } else if (exists(File(xcode12FlutterFrameworkDirectory))) {
-    builderXcodeArmDirectoryName = xcode12ArmDirectoryName;
-  } else {
-    throw const FileSystemException('Expected Flutter.framework binary to exist.');
-  }
+  ));
 
   final String debugAppFrameworkPath = path.join(
     outputPath,
     'Debug',
     'App.xcframework',
-    localXcodeArmDirectoryName,
+    'ios-arm64_armv7',
     'App.framework',
     'App',
   );
   checkFileExists(debugAppFrameworkPath);
+
+  checkFileExists(path.join(
+    outputPath,
+    'Debug',
+    'App.xcframework',
+    'ios-arm64_armv7',
+    'App.framework',
+    'Info.plist',
+  ));
 
   section('Check debug build has Dart snapshot as asset');
 
@@ -221,7 +183,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'App.xcframework',
-      localXcodeArmDirectoryName,
+      'ios-arm64_armv7',
       'App.framework',
       'App',
     );
@@ -238,7 +200,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'App.xcframework',
-      localXcodeArmDirectoryName,
+      'ios-arm64_armv7',
       'App.framework',
       'flutter_assets',
       'vm_snapshot_data',
@@ -252,6 +214,15 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'App.framework',
       'App',
     ));
+
+    checkFileExists(path.join(
+      outputPath,
+      mode,
+      'App.xcframework',
+      'ios-x86_64-simulator',
+      'App.framework',
+      'Info.plist',
+    ));
   }
 
   section("Check all modes' engine dylib");
@@ -261,31 +232,43 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'Flutter.xcframework',
-      builderXcodeArmDirectoryName,
+      'ios-arm64_armv7',
       'Flutter.framework',
       'Flutter',
     );
 
     await _checkBitcode(engineFrameworkPath, mode);
 
-    checkFileExists(path.join(
+    // TODO(jmagman): Remove ios-x86_64-simulator checks when the ARM simulator engine artifacts rolls.
+    final String x86SimulatorFramework = path.join(
       outputPath,
       mode,
       'Flutter.xcframework',
       'ios-x86_64-simulator',
       'Flutter.framework',
-      'Flutter',
-    ));
+    );
 
-    checkFileExists(path.join(
+    final String x86ArmSimulatorFramework = path.join(
       outputPath,
       mode,
       'Flutter.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'Flutter.framework',
-      'Headers',
-      'Flutter.h',
-    ));
+    );
+
+    final bool x86SimulatorBinaryExists = exists(File(path.join(x86SimulatorFramework, 'Flutter')));
+    final bool x86ArmSimulatorBinaryExists = exists(File(path.join(x86ArmSimulatorFramework, 'Flutter')));
+
+    if (!x86SimulatorBinaryExists && !x86ArmSimulatorBinaryExists) {
+      throw TaskResult.failure('Expected Flutter engine artifact binary to exist');
+    }
+
+    final bool x86SimulatorHeaderExists = exists(File(path.join(x86SimulatorFramework, 'Headers', 'Flutter.h')));
+    final bool x86ArmSimulatorHeaderExists = exists(File(path.join(x86ArmSimulatorFramework, 'Headers', 'Flutter.h')));
+
+    if (!x86SimulatorHeaderExists && !x86ArmSimulatorHeaderExists) {
+      throw TaskResult.failure('Expected Flutter.h engine artifact to exist');
+    }
   }
 
   section('Check all modes have plugins');
@@ -295,7 +278,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'device_info.xcframework',
-      localXcodeArmDirectoryName,
+      'ios-arm64_armv7',
       'device_info.framework',
       'device_info',
     );
@@ -308,7 +291,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'Reachability.xcframework',
-      localXcodeArmDirectoryName,
+      'ios-arm64_armv7',
       'Reachability.framework',
       'Reachability',
     );
@@ -320,7 +303,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'device_info.xcframework',
-      localXcodeArmDirectoryName,
+      'ios-arm64_armv7',
       'device_info.framework',
       'Headers',
       'DeviceInfoPlugin.h',
@@ -331,7 +314,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
         outputPath,
         mode,
         'device_info.xcframework',
-        localXcodeArmDirectoryName,
+        'ios-arm64_armv7',
         'dSYMs',
         'device_info.framework.dSYM',
       ));
@@ -364,7 +347,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     outputPath,
     'Release',
     'device_info.xcframework',
-    localXcodeArmDirectoryName,
+    'ios-arm64_armv7',
     'BCSymbolMaps',
   ));
 
@@ -378,7 +361,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'FlutterPluginRegistrant.xcframework',
-      localXcodeArmDirectoryName,
+      'ios-arm64_armv7',
       'FlutterPluginRegistrant.framework',
       'FlutterPluginRegistrant',
     );
@@ -388,7 +371,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'FlutterPluginRegistrant.xcframework',
-      localXcodeArmDirectoryName,
+      'ios-arm64_armv7',
       'FlutterPluginRegistrant.framework',
       'Headers',
       'GeneratedPluginRegistrant.h',

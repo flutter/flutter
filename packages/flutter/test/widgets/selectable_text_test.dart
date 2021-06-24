@@ -131,8 +131,8 @@ void main() {
       'Second line goes until\n'
       'Third line of stuff';
   const String kMoreThanFourLines =
-      kThreeLines +
-          "\nFourth line won't display and ends at";
+      '$kThreeLines\n'
+      "Fourth line won't display and ends at";
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
@@ -1303,24 +1303,27 @@ void main() {
   });
 
   testWidgets('minLines cannot be greater than maxLines', (WidgetTester tester) async {
-    try {
-      await tester.pumpWidget(
-        overlay(
-          child: SizedBox(
-            width: 300.0,
-            child: SelectableText(
-              'abcd',
-              minLines: 4,
-              maxLines: 3,
+    expect(
+      () async {
+        await tester.pumpWidget(
+          overlay(
+            child: SizedBox(
+              width: 300.0,
+              child: SelectableText(
+                'abcd',
+                minLines: 4,
+                maxLines: 3,
+              ),
             ),
           ),
-        ),
-      );
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains("minLines can't be greater than maxLines"));
-      return;
-    }
-    fail('An assert should be triggered when minLines is greater than maxLines');
+        );
+      },
+      throwsA(isA<AssertionError>().having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains("minLines can't be greater than maxLines"),
+      )),
+    );
   });
 
   testWidgets('Selectable height with minLine', (WidgetTester tester) async {
@@ -1667,7 +1670,7 @@ void main() {
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
-        clipboardContent = methodCall.arguments['text'] as String;
+        clipboardContent = (methodCall.arguments as Map<String, dynamic>)['text'] as String;
       else if (methodCall.method == 'Clipboard.getData')
         return <String, dynamic>{'text': clipboardContent};
       return null;

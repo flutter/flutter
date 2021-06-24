@@ -332,7 +332,7 @@ abstract class CreateBase extends FlutterCommand {
     final String pluginDartClass = _createPluginClassName(projectName);
     final String pluginClass = pluginDartClass.endsWith('Plugin')
         ? pluginDartClass
-        : pluginDartClass + 'Plugin';
+        : '${pluginDartClass}Plugin';
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase =
         pluginClassSnakeCase.toUpperCase();
@@ -465,7 +465,7 @@ abstract class CreateBase extends FlutterCommand {
     final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
     final List<String> prefixedSegments = segments.map((String segment) {
       if (!segmentPatternRegex.hasMatch(segment)) {
-        return 'u' + segment;
+        return 'u$segment';
       }
       return segment;
     }).toList();

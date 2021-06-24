@@ -131,7 +131,7 @@ class MethodChannel {
   /// If the result is null and `missingOk` is true, this returns null. (This is
   /// the behaviour of [OptionalMethodChannel.invokeMethod].)
   ///
-  /// If the result is null and `missingOk` is false, this throwsa
+  /// If the result is null and `missingOk` is false, this throws a
   /// [MissingPluginException]. (This is the behaviour of
   /// [MethodChannel.invokeMethod].)
   ///

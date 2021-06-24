@@ -51,7 +51,7 @@ class SystemNavigator {
 
   /// Selects the multiple-entry history mode.
   ///
-  /// On web, this switches the browser history model to one that tracks alll
+  /// On web, this switches the browser history model to one that tracks all
   /// updates to [routeInformationUpdated] to form a history stack. This is the
   /// default.
   ///

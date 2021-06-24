@@ -160,7 +160,7 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
 
   # Generate a fake podspec to represent the Flutter framework.
   # This is only necessary because plugin podspecs contain `s.dependency 'Flutter'`, and if this Podfile
-  # does not add a `pod 'Flutter'` CocoaPods will try to download it from the CoocaPods trunk.
+  # does not add a `pod 'Flutter'` CocoaPods will try to download it from the CocoaPods trunk.
   File.open(copied_podspec_path, 'w') { |podspec|
     podspec.write <<~EOF
       #
@@ -198,7 +198,7 @@ def flutter_install_macos_engine_pod(mac_application_path = nil)
 
   # Generate a fake podspec to represent the FlutterMacOS framework.
   # This is only necessary because plugin podspecs contain `s.dependency 'FlutterMacOS'`, and if this Podfile
-  # does not add a `pod 'FlutterMacOS'` CocoaPods will try to download it from the CoocaPods trunk.
+  # does not add a `pod 'FlutterMacOS'` CocoaPods will try to download it from the CocoaPods trunk.
   File.open(copied_podspec_path, 'w') { |podspec|
     podspec.write <<~EOF
       #
