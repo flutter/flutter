@@ -14,7 +14,7 @@ namespace testing {
 using MockLayerTest = LayerTest;
 
 #ifndef NDEBUG
-TEST_F(MockLayerTest, PaintBeforePreollDies) {
+TEST_F(MockLayerTest, PaintBeforePrerollDies) {
   SkPath path = SkPath().addRect(5.0f, 6.0f, 20.5f, 21.5f);
   auto layer = std::make_shared<MockLayer>(path, SkPaint());
 

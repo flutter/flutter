@@ -36,7 +36,7 @@ TEST_F(ClipRRectLayerTest, PaintingEmptyLayerDies) {
                             "needs_painting\\(context\\)");
 }
 
-TEST_F(ClipRRectLayerTest, PaintBeforePreollDies) {
+TEST_F(ClipRRectLayerTest, PaintBeforePrerollDies) {
   const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
   const SkRRect layer_rrect = SkRRect::MakeRect(layer_bounds);
   auto layer = std::make_shared<ClipRRectLayer>(layer_rrect, Clip::hardEdge);

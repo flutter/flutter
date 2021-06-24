@@ -51,7 +51,7 @@ TEST_F(TextureLayerTest, PaintingEmptyLayerDies) {
                             "needs_painting\\(context\\)");
 }
 
-TEST_F(TextureLayerTest, PaintBeforePreollDies) {
+TEST_F(TextureLayerTest, PaintBeforePrerollDies) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
   const SkSize layer_size = SkSize::Make(8.0f, 8.0f);
   const int64_t texture_id = 0;
