@@ -31,7 +31,7 @@ TEST_F(PictureLayerTest, PaintBeforePrerollInvalidPictureDies) {
                             "picture_\\.get\\(\\)");
 }
 
-TEST_F(PictureLayerTest, PaintBeforePreollDies) {
+TEST_F(PictureLayerTest, PaintBeforePrerollDies) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
   const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   auto mock_picture = SkPicture::MakePlaceholder(picture_bounds);

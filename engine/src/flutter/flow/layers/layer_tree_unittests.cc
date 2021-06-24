@@ -51,7 +51,7 @@ TEST_F(LayerTreeTest, PaintingEmptyLayerDies) {
   layer_tree().Paint(frame());
 }
 
-TEST_F(LayerTreeTest, PaintBeforePreollDies) {
+TEST_F(LayerTreeTest, PaintBeforePrerollDies) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   SkPath child_path;
   child_path.addRect(child_bounds);

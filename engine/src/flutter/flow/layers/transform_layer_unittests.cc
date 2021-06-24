@@ -27,7 +27,7 @@ TEST_F(TransformLayerTest, PaintingEmptyLayerDies) {
                             "needs_painting\\(context\\)");
 }
 
-TEST_F(TransformLayerTest, PaintBeforePreollDies) {
+TEST_F(TransformLayerTest, PaintBeforePrerollDies) {
   SkPath child_path;
   child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   auto mock_layer = std::make_shared<MockLayer>(child_path, SkPaint());
