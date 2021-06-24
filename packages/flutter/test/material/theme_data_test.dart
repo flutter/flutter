@@ -202,6 +202,49 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('Ensure Visual Density effective constraints are clamped', (WidgetTester tester) async {
+    const BoxConstraints square = BoxConstraints.tightFor(width: 35, height: 35);
+    BoxConstraints expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(square);
+    expect(expanded.minWidth, equals(35));
+    expect(expanded.minHeight, equals(35));
+    expect(expanded.maxWidth, equals(35));
+    expect(expanded.maxHeight, equals(35));
+
+    BoxConstraints contracted = const VisualDensity(horizontal: -4.0, vertical: -4.0).effectiveConstraints(square);
+    expect(contracted.minWidth, equals(19));
+    expect(contracted.minHeight, equals(19));
+    expect(expanded.maxWidth, equals(35));
+    expect(expanded.maxHeight, equals(35));
+
+    const BoxConstraints small = BoxConstraints.tightFor(width: 4, height: 4);
+    expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(small);
+    expect(expanded.minWidth, equals(4));
+    expect(expanded.minHeight, equals(4));
+    expect(expanded.maxWidth, equals(4));
+    expect(expanded.maxHeight, equals(4));
+
+    contracted = const VisualDensity(horizontal: -4.0, vertical: -4.0).effectiveConstraints(small);
+    expect(contracted.minWidth, equals(0));
+    expect(contracted.minHeight, equals(0));
+    expect(expanded.maxWidth, equals(4));
+    expect(expanded.maxHeight, equals(4));
+  });
+
+  testWidgets('Ensure Visual Density effective constraints expand and contract', (WidgetTester tester) async {
+    const BoxConstraints square = BoxConstraints();
+    final BoxConstraints expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(square);
+    expect(expanded.minWidth, equals(16));
+    expect(expanded.minHeight, equals(16));
+    expect(expanded.maxWidth, equals(double.infinity));
+    expect(expanded.maxHeight, equals(double.infinity));
+
+    final BoxConstraints contracted = const VisualDensity(horizontal: -4.0, vertical: -4.0).effectiveConstraints(square);
+    expect(contracted.minWidth, equals(0));
+    expect(contracted.minHeight, equals(0));
+    expect(expanded.maxWidth, equals(double.infinity));
+    expect(expanded.maxHeight, equals(double.infinity));
+  });
+
   testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
 
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
