@@ -160,7 +160,6 @@ void main() {
     testWithoutContext('Gradle wrapper will delete .properties/NOTICES if they exist', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
-      final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
       final FakeSecondaryCache cache = FakeSecondaryCache()
         ..artifactDirectory = artifactDir
         ..version = '123456';
