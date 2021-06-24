@@ -311,7 +311,7 @@ class SnackBar extends StatefulWidget {
   /// 
   /// * [content]
   ///     * Left, top and bottom paddings are assigned normally.
-  ///     * Right padding is ignored, therefore 0.
+  ///     * Right padding is assigned normally if there is no [action], otherwise 0.
   /// * [action]
   ///     * Left padding is replaced with half value of right padding.
   ///     * Top and bottom paddings are assigned normally.
