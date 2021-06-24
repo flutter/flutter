@@ -61,7 +61,13 @@ def main():
     args.json
   ]
 
-  for _, fidl_files in fidl_files_by_name.iteritems():
+  # Create an iterator that works on both python3 and python2
+  try:
+    fidl_files_by_name_iter = fidl_files_by_name.items()
+  except AttributeError:
+    fidl_files_by_name_iter = fidl_files_by_name.iteritems()
+
+  for _, fidl_files in fidl_files_by_name_iter:
     fidlc_command.append('--files')
     for fidl_file in fidl_files:
       fidl_abspath = os.path.abspath('%s/%s' % (args.sdk_base, fidl_file))
