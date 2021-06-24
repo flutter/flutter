@@ -62,7 +62,7 @@ def GatherArtifacts(src_root, dst_root, create_meta_package=True):
     src_full = os.path.join(src_root, src_rel)
     dst_full = os.path.join(dst_root, dst_rel)
     if not os.path.exists(src_full):
-      print 'Unable to find artifact: ', str(src_full)
+      print('Unable to find artifact: ', str(src_full))
       sys.exit(1)
     CopyPath(src_full, dst_full)
 

@@ -43,17 +43,17 @@ def GetBuildIdParts(exec_path, read_elf):
   sha1_pattern = re.compile(r'[0-9a-fA-F\-]+')
   file_out = subprocess.check_output([read_elf, '-n', exec_path])
   build_id_line = file_out.splitlines()[-1].split()
-  if (build_id_line[0] != 'Build' or
-      build_id_line[1] != 'ID:' or not
-      sha1_pattern.match(build_id_line[-1]) or not
+  if (build_id_line[0] != b'Build' or
+      build_id_line[1] != b'ID:' or not
+      sha1_pattern.match(str(build_id_line[-1])) or not
       len(build_id_line[-1]) > 2):
     raise Exception('Expected the last line of llvm-readelf to match "Build ID <Hex String>" Got: %s' % file_out)
 
   build_id = build_id_line[-1]
   return {
-      'build_id': build_id,
-      'prefix_dir': build_id[:2],
-      'exec_name': build_id[2:]
+      'build_id': build_id.decode('utf-8'),
+      'prefix_dir': build_id[:2].decode('utf-8'),
+      'exec_name': build_id[2:].decode('utf-8')
   }
 
 
@@ -115,7 +115,7 @@ def main():
       raise
 
   if not os.path.exists(dbg_prefix_base):
-    print 'Unable to create directory: %s.' % dbg_prefix_base
+    print('Unable to create directory: %s.' % dbg_prefix_base)
     return 1
 
   dbg_suffix = ''
