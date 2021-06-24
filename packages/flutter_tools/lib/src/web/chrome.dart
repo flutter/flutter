@@ -250,6 +250,7 @@ class ChromiumLauncher {
     // Keep attempting to launch the browser until one of:
     // - Chrome launched successfully, in which case we just return from the loop.
     // - The tool reached the maximum retry count, in which case we throw ToolExit.
+    const int kMaxRetries = 3;
     int retry = 0;
     while (true) {
       final Process process = await _processManager.start(args);
@@ -285,8 +286,8 @@ class ChromiumLauncher {
             // Return value unused.
             return '';
           }
-          if (retry >= 3) {
-            _logger.printTrace('Failed to launch browser after 3 tries. Command used to launch it: ${args.join(' ')}');
+          if (retry >= kMaxRetries) {
+            _logger.printTrace('Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}');
             throw ToolExit(
               'Failed to launch browser. Make sure you are using an up-to-date '
               'Chrome or Edge. Otherwise, consider using -d web-server instead '
