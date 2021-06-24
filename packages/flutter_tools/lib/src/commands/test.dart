@@ -307,7 +307,18 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final List<String> plainNames = stringsArg('plain-name');
     final String tags = stringArg('tags');
     final String excludeTags = stringArg('exclude-tags');
-    final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
+
+    final File writeSkslOnExit = stringArg('write-sksl-on-exit') != null
+        ? globals.fs.file(stringArg('write-sksl-on-exit'))
+        : null;
+    if (!_isIntegrationTest && argResults.wasParsed('write-sksl-on-exit')) {
+      globals.logger.printStatus(
+          '--write-sksl-on-exit was parsed but will be ignored, this is only '
+              'supported for Integration Tests.'
+      );
+    }
+
+    final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: writeSkslOnExit == null ? BuildMode.debug : BuildMode.profile);
 
     if (buildInfo.packageConfig['test_api'] == null) {
       throwToolExit(
@@ -391,16 +402,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       watcher = collector;
     }
 
-    final File writeSkslOnExit = stringArg('write-sksl-on-exit') != null
-        ? globals.fs.file(stringArg('write-sksl-on-exit'))
-        : null;
-    if (!_isIntegrationTest && argResults.wasParsed('write-sksl-on-exit')) {
-      globals.logger.printStatus(
-        '--write-sksl-on-exit was parsed but will be ignored, this is only '
-        'supported for Integration Tests.'
-      );
-    }
-
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
@@ -440,6 +441,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           'dev_dependencies:\n'
           '  integration_test:\n'
           '    sdk: flutter\n',
+        );
+      }
+
+      if (writeSkslOnExit != null && _testFiles.length != 1) {
+        throwToolExit(
+          'Error: Cannot collect SkSL when running more than one Integration '
+          'test (${_testFiles.length} files were requested). '
+          '\n\n'
+          'Ensure that you pass a specific file to `flutter test`, e.g: '
+          '  flutter test integration_test/foo_test.dart'
         );
       }
     }
