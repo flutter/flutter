@@ -223,7 +223,7 @@ Future<void> main(List<String> rawArguments) async {
   await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
 
   final File keyCodesFile = File(path.join(PlatformCodeGenerator.engineRoot,
-      'shell', 'platform', 'common', 'testing', 'key_codes.h'));
+      'shell', 'platform', 'embedder', 'test_utils', 'key_codes.h'));
   if (!mapsFile.existsSync()) {
     mapsFile.createSync(recursive: true);
   }

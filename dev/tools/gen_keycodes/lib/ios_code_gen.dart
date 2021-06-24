@@ -37,7 +37,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.iOSScanCode != null) {
         lines.add(entry.iOSScanCode!,
-            '  {${toHex(entry.iOSScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
+            '    {${toHex(entry.iOSScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -47,7 +47,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('iOS keycode map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.iOSKeyCodeValues, entry.iOSKeyCodeNames, (int iOSValue, String iOSName) {
-        lines.add(iOSValue, '  {${toHex(iOSValue)}, ${toHex(entry.value, digits: 11)}},  // $iOSName');
+        lines.add(iOSValue, '    {${toHex(iOSValue)}, ${toHex(entry.value, digits: 11)}},  // $iOSName');
       });
     }
     return lines.sortedJoin().trimRight();
@@ -75,7 +75,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   String get _keyToModifierFlagMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      modifierKeyMap.writeln('  {${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}, kModifierFlag${lowerCamelToUpperCamel(name)}},');
+      modifierKeyMap.writeln('    {${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}, kModifierFlag${lowerCamelToUpperCamel(name)}}, // $name');
     }
     return modifierKeyMap.toString().trimRight();
   }
@@ -84,7 +84,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   String get _modifierFlagToKeyMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      modifierKeyMap.writeln('  {kModifierFlag${lowerCamelToUpperCamel(name)}, ${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}},');
+      modifierKeyMap.writeln('    {kModifierFlag${lowerCamelToUpperCamel(name)}, ${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}}, // $name');
     }
     return modifierKeyMap.toString().trimRight();
   }
