@@ -323,6 +323,12 @@ sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
                                               SkBudgeted::kNo,  // budgeted
                                               image_info        // image info
                   );
+              if (!surface) {
+                FML_LOG(ERROR)
+                    << "DoMakeRasterSnapshot can not create GPU render target";
+                return;
+              }
+
               surface->getCanvas()->scale(scale_factor, scale_factor);
               result = DrawSnapshot(surface, draw_callback);
             }));
