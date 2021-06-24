@@ -7334,6 +7334,90 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
+  testWidgets('expanding selection to start/end', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'word word word');
+    // word wo|rd| word
+    controller.selection = const TextSelection(
+      baseOffset: 7,
+      extentOffset: 9,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 9);
+
+    final String targetPlatform = defaultTargetPlatform.toString();
+    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
+
+    // Select to the start.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shift: true,
+      platform: platform,
+    );
+
+    // |word word| word
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 9,
+          extentOffset: 0,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select to the end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shift: true,
+      platform: platform,
+    );
+
+    // |word word word|
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 9,
+          extentOffset: 0,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
+
   testWidgets('can change behavior by overriding text editing actions', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
