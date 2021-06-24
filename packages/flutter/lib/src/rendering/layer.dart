@@ -91,13 +91,13 @@ class AnnotationResult<T> {
 /// ## Memory
 ///
 /// Layers retain resources between frames to speed up rendering. A layer will
-/// retain these resources until all [LayerHandle]s created by [createHandle]
-/// have been disposed, at which point it calls [dispose].
+/// retain these resources until all [LayerHandle]s referring to the layer have
+/// nulled out their references.
 ///
 /// Layers must not be used after disposal. If a RenderObject needs to maintain
 /// a layer for later usage, it must create a handle to that layer. This is
 /// handled automatically for the [RenderObject.layer] property, but additional
-/// layers should be handled with a [LayerHandle] class.
+/// layers must user their own [LayerHandle].
 ///
 /// {@tool snippet}
 ///
@@ -635,14 +635,6 @@ class LayerHandle<T extends Layer?> {
     if (_layer != null) {
       _layer!._refCount += 1;
     }
-  }
-
-
-  /// Whether the layer this object refers to is identical to `layer`.
-  ///
-  /// In debug mode, this will throw after [dispose] has been called.
-  bool isHandleForLayer(Layer layer) {
-    return identical(layer, _layer);
   }
 
   @override
