@@ -2,7 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-executable("font-subset") {
+import("//flutter/build/zip_bundle.gni")
+import("//flutter/shell/version/version.gni")
+
+executable("_font-subset") {
+  output_name = "font-subset"
+
   sources = [
     "hb_wrappers.h",
     "main.cc",
@@ -10,7 +15,6 @@ executable("font-subset") {
 
   deps = [ "//third_party/harfbuzz" ]
 
-  libs = []
   if (is_mac) {
     frameworks = [
       "Foundation.framework",
@@ -18,4 +22,50 @@ executable("font-subset") {
       "CoreText.framework",
     ]
   }
+}
+
+generated_file("_font-subset-license") {
+  source_path = rebase_path(".", "//flutter")
+  license_path =
+      rebase_path("//flutter/sky/packages/sky_engine/LICENSE", "//flutter")
+  git_url = "https://github.com/flutter/engine/tree/$engine_version"
+  outputs = [ "$target_gen_dir/README.md" ]
+  contents = [
+    "# font-subset",
+    "",
+    "This tool is used by the Flutter SDK to tree shake icon fonts.",
+    "",
+    "Source code for this tool: [flutter/engine/$source_path]($git_url/$source_path).",
+    "License for this tool: [flutter/engine/sky/packages/sky_engine/LICENSE]($git_url/$license_path).",
+  ]
+}
+
+zip_bundle("font-subset") {
+  output = "font-subset.zip"
+
+  font_subset_bin = "font-subset"
+  if (is_win) {
+    font_subset_bin = "${font_subset_bin}.exe"
+  }
+
+  files = [
+    {
+      source = "$root_build_dir/$font_subset_bin"
+      destination = font_subset_bin
+    },
+    {
+      source = "$root_gen_dir/const_finder.dart.snapshot"
+      destination = "const_finder.dart.snapshot"
+    },
+    {
+      source = "$target_gen_dir/README.md"
+      destination = "README.md"
+    },
+  ]
+
+  deps = [
+    ":_font-subset",
+    ":_font-subset-license",
+    "//flutter/tools/const_finder",
+  ]
 }

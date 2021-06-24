@@ -38,7 +38,7 @@ template("zip_bundle") {
   action(target_name) {
     script = "//flutter/build/zip.py"
     outputs = [ "$root_build_dir/zip_archives/${invoker.output}" ]
-    inputs = []
+    sources = []
     deps = invoker.deps
 
     args = [
@@ -51,7 +51,7 @@ template("zip_bundle") {
         rebase_path(input.source),
         rebase_path(input.destination),
       ]
-      inputs += [ input.source ]
+      sources += [ input.source ]
     }
   }
 }
