@@ -14,6 +14,7 @@ import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -101,6 +102,22 @@ public class PlatformChannel {
                   // NoSuchFieldException: One or more of the overlay names are invalid.
                   result.error("error", exception.getMessage(), null);
                 }
+                break;
+              case "SystemChrome.setEnabledSystemUIMode":
+                try {
+                  SystemUiMode mode = decodeSystemUiMode((String) arguments);
+                  platformMessageHandler.showSystemUiMode(mode);
+                  result.success(null);
+                } catch (JSONException | NoSuchFieldException exception) {
+                  // JSONException: One or more expected fields were either omitted or referenced an
+                  // invalid type.
+                  // NoSuchFieldException: One or more of the overlay names are invalid.
+                  result.error("error", exception.getMessage(), null);
+                }
+                break;
+              case "SystemChrome.setSystemUIChangeListener":
+                platformMessageHandler.setSystemUiChangeListener();
+                result.success(null);
                 break;
               case "SystemChrome.restoreSystemUIOverlays":
                 platformMessageHandler.restoreSystemUiOverlays();
@@ -192,6 +209,12 @@ public class PlatformChannel {
    */
   public void setPlatformMessageHandler(@Nullable PlatformMessageHandler platformMessageHandler) {
     this.platformMessageHandler = platformMessageHandler;
+  }
+
+  /** Informs Flutter of a change in the SystemUI overlays. */
+  public void systemChromeChanged(boolean overlaysAreVisible) {
+    Log.v(TAG, "Sending 'systemUIChange' message.");
+    channel.invokeMethod("SystemChrome.systemUIChange", Arrays.asList(overlaysAreVisible));
   }
 
   // TODO(mattcarroll): add support for IntDef annotations, then add @ScreenOrientation
@@ -314,6 +337,32 @@ public class PlatformChannel {
   }
 
   /**
+   * Decodes an object of JSON-encoded mode to a {@link SystemUiMode}.
+   *
+   * @throws JSONException if {@code encodedSystemUiMode} does not contain expected keys and value
+   *     types.
+   * @throws NoSuchFieldException if any of the given encoded mode name is invalid.
+   */
+  @NonNull
+  private SystemUiMode decodeSystemUiMode(@NonNull String encodedSystemUiMode)
+      throws JSONException, NoSuchFieldException {
+    SystemUiMode mode = SystemUiMode.fromValue(encodedSystemUiMode);
+    switch (mode) {
+      case LEAN_BACK:
+        return SystemUiMode.LEAN_BACK;
+      case IMMERSIVE:
+        return SystemUiMode.IMMERSIVE;
+      case IMMERSIVE_STICKY:
+        return SystemUiMode.IMMERSIVE_STICKY;
+      case EDGE_TO_EDGE:
+        return SystemUiMode.EDGE_TO_EDGE;
+    }
+
+    // Execution should never ever get this far, but if it does, we default to edge to edge.
+    return SystemUiMode.EDGE_TO_EDGE;
+  }
+
+  /**
    * Decodes a JSON-encoded {@code encodedStyle} to a {@link SystemChromeStyle}.
    *
    * @throws JSONException if {@code encodedStyle} does not contain expected keys and value types.
@@ -322,22 +371,19 @@ public class PlatformChannel {
   @NonNull
   private SystemChromeStyle decodeSystemChromeStyle(@NonNull JSONObject encodedStyle)
       throws JSONException, NoSuchFieldException {
-    Brightness systemNavigationBarIconBrightness = null;
-    // TODO(mattcarroll): add color annotation
-    Integer systemNavigationBarColor = null;
-    // TODO(mattcarroll): add color annotation
-    Integer systemNavigationBarDividerColor = null;
-    Brightness statusBarIconBrightness = null;
     // TODO(mattcarroll): add color annotation
     Integer statusBarColor = null;
+    Brightness statusBarIconBrightness = null;
+    boolean systemStatusBarContrastEnforced = true;
+    // TODO(mattcarroll): add color annotation
+    Integer systemNavigationBarColor = null;
+    Brightness systemNavigationBarIconBrightness = null;
+    // TODO(mattcarroll): add color annotation
+    Integer systemNavigationBarDividerColor = null;
+    boolean systemNavigationBarContrastEnforced = true;
 
-    if (!encodedStyle.isNull("systemNavigationBarIconBrightness")) {
-      systemNavigationBarIconBrightness =
-          Brightness.fromValue(encodedStyle.getString("systemNavigationBarIconBrightness"));
-    }
-
-    if (!encodedStyle.isNull("systemNavigationBarColor")) {
-      systemNavigationBarColor = encodedStyle.getInt("systemNavigationBarColor");
+    if (!encodedStyle.isNull("statusBarColor")) {
+      statusBarColor = encodedStyle.getInt("statusBarColor");
     }
 
     if (!encodedStyle.isNull("statusBarIconBrightness")) {
@@ -345,20 +391,36 @@ public class PlatformChannel {
           Brightness.fromValue(encodedStyle.getString("statusBarIconBrightness"));
     }
 
-    if (!encodedStyle.isNull("statusBarColor")) {
-      statusBarColor = encodedStyle.getInt("statusBarColor");
+    if (!encodedStyle.isNull("systemStatusBarContrastEnforced")) {
+      systemStatusBarContrastEnforced = encodedStyle.getBoolean("systemStatusBarContrastEnforced");
+    }
+
+    if (!encodedStyle.isNull("systemNavigationBarColor")) {
+      systemNavigationBarColor = encodedStyle.getInt("systemNavigationBarColor");
+    }
+
+    if (!encodedStyle.isNull("systemNavigationBarIconBrightness")) {
+      systemNavigationBarIconBrightness =
+          Brightness.fromValue(encodedStyle.getString("systemNavigationBarIconBrightness"));
     }
 
     if (!encodedStyle.isNull("systemNavigationBarDividerColor")) {
       systemNavigationBarDividerColor = encodedStyle.getInt("systemNavigationBarDividerColor");
     }
 
+    if (!encodedStyle.isNull("systemNavigationBarContrastEnforced")) {
+      systemNavigationBarContrastEnforced =
+          encodedStyle.getBoolean("systemNavigationBarContrastEnforced");
+    }
+
     return new SystemChromeStyle(
         statusBarColor,
         statusBarIconBrightness,
+        systemStatusBarContrastEnforced,
         systemNavigationBarColor,
         systemNavigationBarIconBrightness,
-        systemNavigationBarDividerColor);
+        systemNavigationBarDividerColor,
+        systemNavigationBarContrastEnforced);
   }
 
   /**
@@ -400,11 +462,42 @@ public class PlatformChannel {
     void showSystemOverlays(@NonNull List<SystemUiOverlay> overlays);
 
     /**
-     * The Flutter application would like to restore the visibility of system overlays to the last
-     * set of overlays sent via {@link #showSystemOverlays(List)}.
+     * The Flutter application would like the Android system to display the given {@code mode}.
      *
-     * <p>If {@link #showSystemOverlays(List)} has yet to be called, then a default system overlay
-     * appearance is desired:
+     * <p>{@link SystemUiMode#LEAN_BACK} refers to a fullscreen experience that restores system bars
+     * upon tapping anywhere in the application. This tap gesture is not received by the
+     * application.
+     *
+     * <p>{@link SystemUiMode#IMMERSIVE} refers to a fullscreen experience that restores system bars
+     * upon swiping from the edge of the viewport. This swipe gesture is not recived by the
+     * application.
+     *
+     * <p>{@link SystemUiMode#IMMERSIVE_STICKY} refers to a fullscreen experience that restores
+     * system bars upon swiping from the edge of the viewport. This swipe gesture is received by the
+     * application, in contrast to {@link SystemUiMode#IMMERSIVE}.
+     *
+     * <p>{@link SystemUiMode#EDGE_TO_EDGE} refers to a layout configuration that will consume the
+     * full viewport. This full screen experience does not hide status bars. These status bars can
+     * be set to transparent, making the buttons and icons hover over the fullscreen application.
+     */
+    void showSystemUiMode(@NonNull SystemUiMode mode);
+
+    /**
+     * The Flutter application would like the Android system to notify the framework when the system
+     * ui visibility has changed.
+     *
+     * <p>This is relevant when using {@link SystemUiMode}s for fullscreen applications, from which
+     * the system overlays can appear or disappear based on user input.
+     */
+    void setSystemUiChangeListener();
+
+    /**
+     * The Flutter application would like to restore the visibility of system overlays to the last
+     * set of overlays sent via {@link #showSystemOverlays(List)} or {@link
+     * #showSystemUiMode(SystemUiMode)}.
+     *
+     * <p>If {@link #showSystemOverlays(List)} or {@link #showSystemUiMode(SystemUiMode)} has yet to
+     * be called, then a default system overlay appearance is desired:
      *
      * <p>{@code View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN }
      */
@@ -542,6 +635,35 @@ public class PlatformChannel {
     }
   }
 
+  /** The set of Android system fullscreen modes as perceived by the Flutter application. */
+  public enum SystemUiMode {
+    LEAN_BACK("SystemUiMode.leanBack"),
+    IMMERSIVE("SystemUiMode.immersive"),
+    IMMERSIVE_STICKY("SystemUiMode.immersiveSticky"),
+    EDGE_TO_EDGE("SystemUiMode.edgeToEdge");
+
+    /**
+     * Returns the SystemUiMode for the provied encoded value. @throws NoSuchFieldException if any
+     * of the given encoded overlay names are invalid.
+     */
+    @NonNull
+    static SystemUiMode fromValue(@NonNull String encodedName) throws NoSuchFieldException {
+      for (SystemUiMode mode : SystemUiMode.values()) {
+        if (mode.encodedName.equals(encodedName)) {
+          return mode;
+        }
+      }
+      throw new NoSuchFieldException("No such SystemUiMode: " + encodedName);
+    }
+
+    @NonNull private String encodedName;
+
+    /** Returens the encoded {@link SystemUiMode} */
+    SystemUiMode(@NonNull String encodedName) {
+      this.encodedName = encodedName;
+    }
+  }
+
   /**
    * The color and label of an application that appears in Android's app switcher, AKA recents
    * screen.
@@ -562,23 +684,29 @@ public class PlatformChannel {
     // TODO(mattcarroll): add color annotation
     @Nullable public final Integer statusBarColor;
     @Nullable public final Brightness statusBarIconBrightness;
+    @Nullable public final boolean systemStatusBarContrastEnforced;
     // TODO(mattcarroll): add color annotation
     @Nullable public final Integer systemNavigationBarColor;
     @Nullable public final Brightness systemNavigationBarIconBrightness;
     // TODO(mattcarroll): add color annotation
     @Nullable public final Integer systemNavigationBarDividerColor;
+    @Nullable public final boolean systemNavigationBarContrastEnforced;
 
     public SystemChromeStyle(
         @Nullable Integer statusBarColor,
         @Nullable Brightness statusBarIconBrightness,
+        @Nullable boolean systemStatusBarContrastEnforced,
         @Nullable Integer systemNavigationBarColor,
         @Nullable Brightness systemNavigationBarIconBrightness,
-        @Nullable Integer systemNavigationBarDividerColor) {
+        @Nullable Integer systemNavigationBarDividerColor,
+        @Nullable boolean systemNavigationBarContrastEnforced) {
       this.statusBarColor = statusBarColor;
       this.statusBarIconBrightness = statusBarIconBrightness;
+      this.systemStatusBarContrastEnforced = systemStatusBarContrastEnforced;
       this.systemNavigationBarColor = systemNavigationBarColor;
       this.systemNavigationBarIconBrightness = systemNavigationBarIconBrightness;
       this.systemNavigationBarDividerColor = systemNavigationBarDividerColor;
+      this.systemNavigationBarContrastEnforced = systemNavigationBarContrastEnforced;
     }
   }
 
