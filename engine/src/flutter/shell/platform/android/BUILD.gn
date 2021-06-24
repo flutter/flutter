@@ -468,6 +468,7 @@ action("robolectric_tests") {
     "test/io/flutter/embedding/android/KeyChannelResponderTest.java",
     "test/io/flutter/embedding/android/KeyboardManagerTest.java",
     "test/io/flutter/embedding/android/RobolectricFlutterActivity.java",
+    "test/io/flutter/embedding/android/SplashShadowResources.java",
     "test/io/flutter/embedding/engine/FlutterEngineCacheTest.java",
     "test/io/flutter/embedding/engine/FlutterEngineConnectionRegistryTest.java",
     "test/io/flutter/embedding/engine/FlutterEngineGroupComponentTest.java",
