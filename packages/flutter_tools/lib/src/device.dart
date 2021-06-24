@@ -344,7 +344,7 @@ abstract class DeviceDiscovery {
   /// devices (will be an empty list if there are no issues).
   Future<List<String>> getDiagnostics() => Future<List<String>>.value(<String>[]);
 
-  /// The well-known device IDs that the discoverer can produce.
+  /// Hard-coded device IDs that the discoverer can produce.
   ///
   /// These values are used by the device discovery to determine if it can
   /// short-circuit the other detectors if a specific ID is provided. If a
