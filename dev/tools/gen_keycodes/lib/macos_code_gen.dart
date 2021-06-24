@@ -62,11 +62,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
       kMacosPlane,
     ];
     for (final MaskConstant constant in maskConstants) {
-      buffer.writeln('/**');
-      buffer.write(wrapString(constant.description, prefix: ' * '));
-      buffer.writeln(' */');
       buffer.writeln('const uint64_t k${constant.upperCamelName} = ${toHex(constant.value, digits: 11)};');
-      buffer.writeln('');
     }
     return buffer.toString().trimRight();
   }
