@@ -631,6 +631,13 @@ class DevFS {
           assetPathsToEvict.add(archivePath);
         }
       });
+
+      // When the bundle is first uploaded, include a dummy file to make sure
+      // that the assets directory on DevFS is created.
+      if (bundleFirstUpload) {
+        final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, '.__dummy_flutter_asset'));
+        dirtyEntries[deviceUri] = DevFSByteContent(<int>[]);
+      }
     }
     final CompilerOutput compilerOutput = await pendingCompilerOutput;
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
