@@ -26,7 +26,6 @@ void main() {
     final List<Layer> layers = tester.binding.renderView.debugLayer!.depthFirstIterateChildren();
 
     final RenderObject renderObject = key.currentContext!.findRenderObject()!;
-    expect(renderObject.debugPictureLayerCount, 2);
 
     for (final Layer layer in layers) {
       expect(layer.debugDisposed, false);
@@ -38,7 +37,6 @@ void main() {
       expect(layer.debugDisposed, true, skip: bug85066);
     }
     expect(renderObject.debugDisposed, true);
-    expect(renderObject.debugPictureLayerCount, 0);
   });
 }
 

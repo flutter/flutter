@@ -169,31 +169,6 @@ class PaintingContext extends ClipContext {
     }());
   }
 
-  /// Used for tests that directly invoke [RenderObject.paint] or
-  /// [RenderObject.debugPaint].
-  ///
-  /// When accessing the [canvas], the context expects that it has started the
-  /// painted operation on the render object via [paintChild] or
-  /// [repaintCompositedChild]. However, a unit test for
-  /// [RenderObject.debugPaint] may wish to avoid that. In that case, it can use
-  /// this method so that [RenderObject.debugPaint] will be able to safely
-  /// access the canvas.
-  ///
-  /// If asserts are disabled, this method is a no-op.
-  @visibleForTesting
-  void debugAllowPainting(RenderObject? object) {
-    assert(
-      RenderObject._activePaint == null || object == null,
-      'A test attempted to debugAllowPainting $object without first nulling '
-      'the actively painted render object (${RenderObject._activePaint}). '
-      'The previously run test may have failed to clean up its state.',
-    );
-    assert(() {
-      RenderObject._activePaint = object;
-      return true;
-    }());
-  }
-
   /// Paint a child [RenderObject].
   ///
   /// If the child has its own composited layer, the child will be composited
@@ -289,23 +264,11 @@ class PaintingContext extends ClipContext {
   /// The current canvas can change whenever you paint a child using this
   /// context, which means it's fragile to hold a reference to the canvas
   /// returned by this getter.
-  ///
-  /// This getter requires that the current [RenderObject] being registered for
-  /// painting via [paintChild] or [repaintCompositedChild]. If a test needs
-  /// to invoke a different path, such as [RenderObject.paint] or
-  /// [RenderObject.debugPaint] directly, it can use [debugAllowPainting] to
-  /// register that child manually.
   @override
   Canvas get canvas {
     if (_canvas == null)
       _startRecording();
     assert(_currentLayer != null);
-    assert(RenderObject._activePaint != null);
-    final List<LayerHandle<PictureLayer>> handles = RenderObject._activePaint!._pictureLayerHandles;
-    if (handles.isEmpty || !handles[handles.length - 1].isHandleForLayer(_currentLayer!)) {
-      assert(!handles.any((LayerHandle<PictureLayer> handle) => handle.isHandleForLayer(_currentLayer!)));
-      handles.add(LayerHandle<PictureLayer>(_currentLayer));
-    }
     return _canvas!;
   }
 
@@ -1316,10 +1279,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void dispose() {
     assert(!_debugDisposed);
     _layerHandle.layer = null;
-    for (final LayerHandle<PictureLayer> handle in _pictureLayerHandles) {
-      handle.layer = null;
-    }
-    _pictureLayerHandles.clear();
     assert(() {
       // TODO(dnfield): Enable this assert once clients have had a chance to
       // migrate.
@@ -2043,15 +2002,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// Only valid when asserts are enabled. In release builds, always returns
   /// null.
-  static RenderObject? get debugActivePaint {
-    RenderObject? object;
-    assert(() {
-      object = _activePaint;
-      return true;
-    }());
-    return object;
-  }
-  static RenderObject? _activePaint;
+  static RenderObject? get debugActivePaint => _debugActivePaint;
+  static RenderObject? _debugActivePaint;
 
   /// Whether this render object repaints separately from its parent.
   ///
@@ -2102,13 +2054,21 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// never populating this field, or by setting it to null when the value of
   /// [needsCompositing] changes from true to false.
   ///
+  /// If a new layer is created and stored in some other field on the render
+  /// object, the render object must use a [LayerHandle] to store it. A layer
+  /// handle will prevent the layer from being disposed before the render
+  /// object is finished with it, and it will also make sure that the layer
+  /// gets appropriately disposed when the render object creates a replacement
+  /// or nulls it out. The render object must null out the [LayerHandle.layer]
+  /// in its [dispose] method.
+  ///
   /// If this render object is a repaint boundary, the framework automatically
   /// creates an [OffsetLayer] and populates this field prior to calling the
   /// [paint] method. The [paint] method must not replace the value of this
   /// field.
   @protected
   ContainerLayer? get layer {
-    assert(!isRepaintBoundary || (_layerHandle.layer == null || _layerHandle.layer is OffsetLayer));
+    assert(!isRepaintBoundary || _layerHandle.layer == null || _layerHandle.layer is OffsetLayer);
     return _layerHandle.layer;
   }
 
@@ -2122,6 +2082,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     );
     _layerHandle.layer = newLayer;
   }
+
+  final LayerHandle<ContainerLayer> _layerHandle = LayerHandle<ContainerLayer>();
 
   /// In debug mode, the compositing layer that this render object uses to repaint.
   ///
@@ -2353,21 +2315,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     markNeedsPaint();
   }
 
-  final LayerHandle<ContainerLayer> _layerHandle = LayerHandle<ContainerLayer>();
-  final List<LayerHandle<PictureLayer>> _pictureLayerHandles = <LayerHandle<PictureLayer>>[];
-
-  /// Returns the number of picture layers this render object has painted to.
-  ///
-  /// Throws an exception if asserts are not enabled.
-  int get debugPictureLayerCount {
-    late int count;
-    assert(() {
-      count = _pictureLayerHandles.length;
-      return true;
-    }());
-    return count;
-  }
-
   void _paintWithContext(PaintingContext context, Offset offset) {
     assert(!_debugDisposed);
     assert(() {
@@ -2449,19 +2396,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }
       return true;
     }());
-    final RenderObject? lastActivePaint = _activePaint;
-    _activePaint = this;
+    RenderObject? debugLastActivePaint;
     assert(() {
       _debugDoingThisPaint = true;
+      debugLastActivePaint = _debugActivePaint;
+      _debugActivePaint = this;
       assert(!isRepaintBoundary || _layerHandle.layer != null);
       return true;
     }());
     _needsPaint = false;
     try {
-      for (final LayerHandle<PictureLayer> handle in _pictureLayerHandles) {
-        handle.layer = null;
-      }
-      _pictureLayerHandles.clear();
       paint(context, offset);
       assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
       assert(!_needsPaint); // check that the paint() method didn't mark us dirty again
@@ -2470,10 +2414,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
     assert(() {
       debugPaint(context, offset);
+      _debugActivePaint = debugLastActivePaint;
       _debugDoingThisPaint = false;
       return true;
     }());
-    _activePaint = lastActivePaint;
   }
 
   /// An estimate of the bounds within which this render object will paint.
