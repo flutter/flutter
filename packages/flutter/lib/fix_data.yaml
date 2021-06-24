@@ -15,6 +15,28 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/60320
+  - title: "Migrate to 'viewId'"
+    date: 2020-07-05
+    element:
+      uris: [ 'services.dart' ]
+      getter: id
+      inClass: 'TextureAndroidViewController'
+    changes:
+      - kind: 'rename'
+        newName: 'viewId'
+
+  # Changes made in https://github.com/flutter/flutter/pull/60320
+  - title: "Migrate to 'viewId'"
+    date: 2020-07-05
+    element:
+      uris: [ 'services.dart' ]
+      getter: id
+      inClass: 'SurfaceAndroidViewController'
+    changes:
+      - kind: 'rename'
+        newName: 'viewId'
+
   # Changes made in https://github.com/flutter/flutter/pull/81858
   - title: "Migrate to 'supportedDevices'"
     date: 2021-05-04
