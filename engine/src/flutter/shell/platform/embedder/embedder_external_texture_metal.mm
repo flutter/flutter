@@ -56,8 +56,6 @@ sk_sp<SkImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
       external_texture_callback_(texture_id, size.width(), size.height());
 
   if (!texture) {
-    FML_LOG(ERROR) << "External texture callback for ID " << texture_id
-                   << " did not return a valid texture.";
     return nullptr;
   }
 
