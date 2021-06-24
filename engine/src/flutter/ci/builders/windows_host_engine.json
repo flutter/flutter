@@ -1,0 +1,77 @@
+[
+    {
+        "archives": [],
+        "drone_dimensions": [
+            "device_type=none",
+            "os=Windows-10"
+        ],
+        "gn": [
+            "--runtime-mode",
+            "debug",
+            "--full-dart-sdk",
+            "--no-lto"
+        ],
+        "name": "host_debug",
+        "ninja": {
+            "config": "host_debug",
+            "targets": []
+        },
+        "tests": [
+            {
+                "language": "python",
+                "name": "Host Tests for host_debug",
+                "parameters": [
+                    "--variant",
+                    "host_debug",
+                    "--type",
+                    "engine"
+                ],
+                "script": "flutter/testing/run_tests.py",
+                "type": "local"
+            }
+        ]
+    },
+    {
+        "archives": [],
+        "drone_dimensions": [
+            "device_type=none",
+            "os=Windows-10"
+        ],
+        "gn": [
+            "--runtime-mode",
+            "profile",
+            "--no-lto"
+        ],
+        "name": "host_profile",
+        "ninja": {
+            "config": "host_profile",
+            "targets": [
+                "windows",
+                "gen_snapshot"
+            ]
+        },
+        "tests": []
+    },
+    {
+        "archives": [],
+        "drone_dimensions": [
+            "device_type=none",
+            "os=Windows-10"
+        ],
+        "generators": [],
+        "gn": [
+            "--runtime-mode",
+            "release",
+            "--no-lto"
+        ],
+        "name": "host_release",
+        "ninja": {
+            "config": "host_release",
+            "targets": [
+                "windows",
+                "gen_snapshot"
+            ]
+        },
+        "tests": []
+    }
+]
