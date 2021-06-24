@@ -53,8 +53,6 @@ void testMain() {
         expect(paragraph, isNotNull);
       }
     });
-    // This test fails with "memory access out of bounds"
-    // See https://github.com/flutter/flutter/issues/80140
-    // Unskip this once this fix lands: https://skia-review.googlesource.com/c/skia/+/416687
-  }, skip: true);
+    // TODO: https://github.com/flutter/flutter/issues/60040
+  }, skip: isIosSafari);
 }

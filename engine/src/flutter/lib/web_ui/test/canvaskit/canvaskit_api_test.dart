@@ -836,12 +836,12 @@ void _pathTests() {
     const ui.Rect rect = ui.Rect.fromLTRB(0, 0, 10, 10);
     final SkPath path = SkPath();
     path.addRect(toSkRect(rect));
-    expect(path.toCmds(), <List<num>>[
-      <num>[0, 0, 0], // moveTo
-      <num>[1, 10, 0], // lineTo
-      <num>[1, 10, 10], // lineTo
-      <num>[1, 0, 10], // lineTo
-      <num>[5], // close
+    expect(path.toCmds(), <num>[
+      0, 0, 0, // moveTo
+      1, 10, 0, // lineTo
+      1, 10, 10, // lineTo
+      1, 0, 10, // lineTo
+      5, // close
     ]);
 
     final SkPath copy = canvasKit.Path.MakeFromCmds(path.toCmds());
@@ -1335,7 +1335,8 @@ void _paragraphTests() {
         SkPaint());
     builder.addText('!');
     builder.pop();
-    builder.pushStyle(canvasKit.TextStyle(SkTextStyleProperties()..halfLeading = true));
+    builder.pushStyle(
+        canvasKit.TextStyle(SkTextStyleProperties()..halfLeading = true));
     builder.pop();
     final SkParagraph paragraph = builder.build();
     paragraph.layout(55);
