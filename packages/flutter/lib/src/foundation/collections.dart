@@ -4,15 +4,16 @@
 
 // TODO(ianh): These should be on the Set and List classes themselves.
 
-/// Compares two sets for shallow equality.
+/// Compares two sets for shallow equality (element-by-element).
 ///
 /// Returns true if the sets are both null, or if they are both non-null, have
 /// the same length, and contain the same members. Returns false otherwise.
 /// Order is not compared.
 ///
-/// If the elements in the sets are collections (e.g., maps, lists, sets),
-/// then the result may not be as expected since the function uses the
-/// equality operator ([Object.==]) to compare the elements.
+/// The term shallow above refers to the first level of equality: if the elements
+/// are maps, lists, sets, or other collections/composite objects, then the
+/// contents of those elements are not compared element-by-element unless their
+/// equality operators ([Object.==]) do so.
 /// For checking deep equality, consider using [DeepCollectionEquality] class.
 ///
 /// See also:
@@ -33,15 +34,16 @@ bool setEquals<T>(Set<T>? a, Set<T>? b) {
   return true;
 }
 
-/// Compares two lists for shallow equality.
+/// Compares two lists for shallow equality (element-by-element).
 ///
 /// Returns true if the lists are both null, or if they are both non-null, have
 /// the same length, and contain the same members in the same order. Returns
 /// false otherwise.
 ///
-/// If the elements in the lists are collections (e.g., maps, lists, sets),
-/// then the result may not be as expected since the function uses the
-/// equality operator ([Object.==]) to compare the elements.
+/// The term shallow above refers to the first level of equality: if the elements
+/// are maps, lists, sets, or other collections/composite objects, then the
+/// contents of those elements are not compared element-by-element unless their
+/// equality operators ([Object.==]) do so.
 /// For checking deep equality, consider using [DeepCollectionEquality] class.
 ///
 /// See also:
@@ -62,15 +64,16 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
   return true;
 }
 
-/// Compares two maps for shallow equality.
+/// Compares two maps for shallow equality (element-by-element).
 ///
 /// Returns true if the maps are both null, or if they are both non-null, have
 /// the same length, and contain the same keys associated with the same values.
 /// Returns false otherwise.
 ///
-/// If the elements in the maps are collections (e.g., maps, lists, sets),
-/// then the result may not be as expected since the function uses the
-/// equality operator ([Object.==]) to compare the elements.
+/// The term shallow above refers to the first level of equality: if the elements
+/// are maps, lists, sets, or other collections/composite objects, then the
+/// contents of those elements are not compared element-by-element unless their
+/// equality operators ([Object.==]) do so.
 /// For checking deep equality, consider using [DeepCollectionEquality] class.
 ///
 /// See also:
