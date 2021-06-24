@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -35,6 +36,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import io.flutter.Log;
@@ -321,17 +323,17 @@ public class FlutterFragmentActivity extends FragmentActivity
    * to be used in a manifest file.
    */
   @Nullable
-  @SuppressWarnings("deprecation")
   private Drawable getSplashScreenFromManifest() {
     try {
       Bundle metaData = getMetaData();
       Integer splashScreenId =
           metaData != null ? metaData.getInt(SPLASH_SCREEN_META_DATA_KEY) : null;
       return splashScreenId != null
-          ? Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP
-              ? getResources().getDrawable(splashScreenId, getTheme())
-              : getResources().getDrawable(splashScreenId)
+          ? ResourcesCompat.getDrawable(getResources(), splashScreenId, getTheme())
           : null;
+    } catch (Resources.NotFoundException e) {
+      Log.e(TAG, "Splash screen not found. Ensure the drawable exists and that it's valid.");
+      throw e;
     } catch (PackageManager.NameNotFoundException e) {
       // This is never expected to happen.
       return null;
