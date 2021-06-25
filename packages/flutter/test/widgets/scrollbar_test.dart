@@ -1482,4 +1482,53 @@ void main() {
         ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
     );
   });
+  testWidgets('minThumbLength property of RawScrollbar is respected', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            minThumbLength: 21,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 50000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+    expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0)) // track
+          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0))); // thumb
+  });
+
+  testWidgets('crossAxisMargin property of RawScrollbar is respected', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            crossAxisMargin: 30,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+    expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(734.0, 0.0, 800.0, 600.0))
+          ..rect(rect: const Rect.fromLTRB(764.0, 0.0, 770.0, 360.0)));
+  });
 }
