@@ -155,19 +155,26 @@ void main() {
       const String revision = 'abc123';
       const String version = '1.2.3';
 
-      processManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>[
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
+          'git', 'remote', '-v'
+        ],
+        stdout:
+          'origin\thttps://github.com/flutter/flutter.git (fetch)\n'
+          'origin\thttps://github.com/flutter/flutter.git (push)'
+        ),
+        FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
         ]),
-        const FakeCommand(command: <String>[
+        FakeCommand(command: <String>[
           'git', 'rev-parse', '--verify', '@{u}',
         ],
         stdout: revision),
-        const FakeCommand(command: <String>[
+        FakeCommand(command: <String>[
           'git', 'tag', '--points-at', revision,
         ],
         stdout: ''),
-        const FakeCommand(command: <String>[
+        FakeCommand(command: <String>[
           'git', 'describe', '--match', '*.*.*', '--long', '--tags', revision,
         ],
         stdout: version),
@@ -185,6 +192,13 @@ void main() {
 
     testUsingContext('fetchLatestVersion throws toolExit if HEAD is detached', () async {
       processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
+          'git', 'remote', '-v'
+        ],
+        stdout:
+          'origin\thttps://github.com/flutter/flutter (fetch)\n'
+          'origin\thttps://github.com/flutter/flutter (push)'
+        ),
         FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
         ]),
@@ -211,22 +225,39 @@ void main() {
     testUsingContext('fetchRemoteRevision throws toolExit if no upstream configured', () async {
       processManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>[
-          'git', 'fetch', '--tags'
-        ]),
-        FakeCommand(
-          command: <String>['git', 'rev-parse', '--verify', '@{u}'],
-          exception: ProcessException(
-            'git',
-            <String>['rev-parse', '--verify', '@{u}'],
-            'fatal: no upstream configured for branch',
-          ),
-        ),
+          'git', 'remote', '-v'
+        ],
+        stdout: '')
       ]);
 
       await expectLater(
             () async => realCommandRunner.fetchLatestVersion(),
         throwsToolExit(
           message: 'Unable to upgrade Flutter: no origin repository configured.',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('fetchRemoteRevision throws toolExit if no incorrect origin configured', () async {
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
+          'git', 'remote', '-v'
+        ],
+        stdout:
+          'origin\thttps://github.com/SOMEONE/flutter (fetch)\n'
+          'origin\thttps://github.com/SOMEONE/flutter (push)'
+        ),
+      ]);
+
+      await expectLater(
+            () async => realCommandRunner.fetchLatestVersion(),
+        throwsToolExit(
+          message: 'Unable to upgrade Flutter: origin repository does not point to '
+            'https://github.com/flutter/flutter',
         ),
       );
       expect(processManager, hasNoRemainingExpectations);

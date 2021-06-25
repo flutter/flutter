@@ -228,6 +228,23 @@ class UpgradeCommandRunner {
   Future<FlutterVersion> fetchLatestVersion() async {
     String revision;
     try {
+      // Check origin and its location
+      RunResult result = await globals.processUtils.run(
+        <String>['git', 'remote', '-v'],
+        workingDirectory: workingDirectory,
+      );
+      if (!result.stdout.contains('origin\thttps://github.com/flutter/flutter')) {
+        if (result.stdout.contains('origin\t')) {
+          throwToolExit(
+              'Unable to upgrade Flutter: origin repository does not point to '
+              'https://github.com/flutter/flutter in $workingDirectory');
+        } else {
+          throwToolExit(
+              'Unable to upgrade Flutter: no origin repository configured. '
+              "Run 'git remote add origin "
+              "https://github.com/flutter/flutter' in $workingDirectory");
+        }
+      }
       // Fetch upstream branch's commits and tags
       await globals.processUtils.run(
         <String>['git', 'fetch', '--tags'],
@@ -235,7 +252,7 @@ class UpgradeCommandRunner {
         workingDirectory: workingDirectory,
       );
       // '@{u}' means upstream HEAD
-      final RunResult result = await globals.processUtils.run(
+      result = await globals.processUtils.run(
           <String>[ 'git', 'rev-parse', '--verify', '@{u}'],
           throwOnError: true,
           workingDirectory: workingDirectory,
@@ -250,11 +267,6 @@ class UpgradeCommandRunner {
           'and retry, for example:\n'
           '  git checkout stable'
         );
-      } else if (errorString.contains('fatal: no upstream configured for branch')) {
-        throwToolExit(
-          'Unable to upgrade Flutter: no origin repository configured. '
-          "Run 'git remote add origin "
-          "https://github.com/flutter/flutter' in $workingDirectory");
       } else {
         throwToolExit(errorString);
       }
