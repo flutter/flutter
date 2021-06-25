@@ -533,7 +533,7 @@ void main() {
       expect(report.success, true);
       expect(writer.written, true);
       expect(writer.lastWrittenEntries.keys, <Uri>[
-        Uri.parse('build/flutter_assets/.__dummy_flutter_asset'),
+        Uri.parse('build/flutter_assets/${DevFS.kAssetDirectoryPlaceholderFilename}'),
       ]);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
