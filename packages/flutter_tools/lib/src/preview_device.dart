@@ -119,7 +119,7 @@ class PreviewDevice extends Device {
       );
       copyDirectory(_fileSystem.directory(
         getAssetBuildDirectory()),
-      _assetDirectory.childDirectory('data').childDirectory('flutter_assets'),
+        _assetDirectory.childDirectory('data').childDirectory('flutter_assets'),
       );
     } finally {
       status.stop();
