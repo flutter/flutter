@@ -384,6 +384,13 @@ class AlertDialog extends StatelessWidget {
   /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry actionsPadding;
 
+  /// Defines the horizontal layout of the [actions] according to the same
+  /// rules as for [Row.mainAxisAlignment].
+  ///
+  /// This parameter is passed along to the dialog's [OverflowBar].
+  ///
+  /// If this parameter is null (the default) then [MainAxisAlignment.end]
+  /// is used.
   final MainAxisAlignment? actionsAlignment;
 
   /// The vertical direction of [actions] if the children overflow
