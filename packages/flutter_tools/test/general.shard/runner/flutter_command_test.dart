@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:args/src/option.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
@@ -48,10 +49,69 @@ void main() {
       Cache.enableLocking();
     });
 
-    testUsingContext('help text contains global options', () {
-      final FakeDeprecatedCommand fake = FakeDeprecatedCommand();
-      createTestCommandRunner(fake);
-      expect(fake.usage, contains('Global options:\n'));
+    group('help text', () {
+      testUsingContext('contains global options', () {
+        final FakeDeprecatedCommand fake = FakeDeprecatedCommand();
+        createTestCommandRunner(fake);
+        expect(fake.usage, contains('Global options:\n'));
+      });
+
+      testUsingContext('options do not mention defaults in descriptive texts', () async {
+        /// Helper to check options for any flags added by [addFlags].
+        ///
+        /// All flags can't be added to the same flutterCommand as many of the
+        /// addFoo/useFoo methods overlap and throw if called together.
+        void check(void Function(FlutterCommand) addFlags) {
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+          addFlags(flutterCommand);
+          for (final Option option in flutterCommand.argParser.options.values) {
+            // option.help is not checked as some options legitimately contain
+            // the word default (for example Gradle daemon).
+            expect(option.valueHelp, isNot(contains('default')));
+            if (option.allowedHelp != null) {
+              for (final String allowedValueHelp in option.allowedHelp.values) {
+                expect(allowedValueHelp, isNot(contains('default')));
+              }
+            }
+          }
+        }
+
+        // For convenience, all addFoo and useFoo methods are tested. Those that
+        // do not have help text for options are skipped in the [check] method.
+        check((FlutterCommand command) => command.addAndroidSpecificBuildOptions());
+        check((FlutterCommand command) => command.addBuildModeFlags(verboseHelp: true));
+        check((FlutterCommand command) => command.addBuildPerformanceFile());
+        check((FlutterCommand command) => command.addBundleSkSLPathOption(hide: false));
+        check((FlutterCommand command) => command.addCommonDesktopBuildOptions(verboseHelp: true));
+        check((FlutterCommand command) => command.addDartObfuscationOption());
+        check((FlutterCommand command) => command.addDdsOptions(verboseHelp: true));
+        check((FlutterCommand command) => command.addDevToolsOptions(verboseHelp: true));
+        check((FlutterCommand command) => command.addEnableExperimentation(hide: false));
+        check((FlutterCommand command) => command.addNativeNullAssertions());
+        check((FlutterCommand command) => command.addNullSafetyModeOptions(hide: false));
+        check((FlutterCommand command) => command.addPublishPort());
+        check((FlutterCommand command) => command.addShrinkingFlag(verboseHelp: true));
+        check((FlutterCommand command) => command.addSplitDebugInfoOption());
+        check((FlutterCommand command) => command.addTreeShakeIconsFlag());
+        check((FlutterCommand command) => command.usesAnalyzeSizeFlag());
+        check((FlutterCommand command) => command.usesBuildNameOption());
+        check((FlutterCommand command) => command.usesBuildNumberOption());
+        check((FlutterCommand command) => command.usesDartDefineOption());
+        check((FlutterCommand command) => command.usesDeviceTimeoutOption());
+        check((FlutterCommand command) => command.usesDeviceUserOption());
+        check((FlutterCommand command) => command.usesExtraDartFlagOptions(verboseHelp: true));
+        check((FlutterCommand command) => command.usesFilesystemOptions(hide: false));
+        check((FlutterCommand command) => command.usesFlavorOption());
+        check((FlutterCommand command) => command.usesFuchsiaOptions());
+        check((FlutterCommand command) => command.usesInitializeFromDillOption(hide: false));
+        check((FlutterCommand command) => command.usesIpv6Flag(verboseHelp: true));
+        check((FlutterCommand command) => command.usesPortOptions(verboseHelp: true));
+        check((FlutterCommand command) => command.usesPubOption());
+        check((FlutterCommand command) => command.usesTargetOption());
+        check((FlutterCommand command) => command.usesTrackWidgetCreation(verboseHelp: true));
+        check((FlutterCommand command) => command.usesWebOptions(verboseHelp: true));
+        check((FlutterCommand command) => command.usesWebRendererOption());
+      });
     });
 
     testUsingContext('honors shouldUpdateCache false', () async {
