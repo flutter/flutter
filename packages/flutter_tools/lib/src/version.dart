@@ -753,7 +753,9 @@ Future<void> checkVersionFreshness(FlutterVersion version, {
   Duration pauseTime = Duration.zero,
 }) async {
   // Don't perform update checks if we're not on an official channel.
-  if (!kOfficialChannels.contains(version.channel)) {
+  if (version.repositoryUrl == null
+      || !version.repositoryUrl!.contains('github.com/flutter/flutter')
+      || !kOfficialChannels.contains(version.channel)) {
     return;
   }
 

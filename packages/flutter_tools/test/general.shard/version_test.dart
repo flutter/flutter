@@ -284,6 +284,28 @@ void main() {
         _expectVersionMessage(versionOutOfDateMessage(_testClock.now().difference(getChannelOutOfDateVersion())), logger);
       });
 
+      testWithoutContext('prints nothing remote url is a fork', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel,
+            repositoryUrl: 'https://github.com/MINE/flutter');
+        final BufferLogger logger = BufferLogger.test();
+        final VersionCheckStamp stamp = VersionCheckStamp(
+          lastTimeVersionWasChecked: _stampOutOfDate,
+          lastKnownRemoteVersion: _testClock.ago(const Duration(days: 2)),
+        );
+        cache.versionStamp = json.encode(stamp);
+
+        await checkVersionFreshness(
+          flutterVersion,
+          cache: cache,
+          clock: _testClock,
+          logger: logger,
+          localFrameworkCommitDate: getChannelOutOfDateVersion(),
+          latestFlutterCommitDate: null, // Failed to get remote version
+        );
+
+        _expectVersionMessage('', logger);
+      });
+
       group('$VersionCheckStamp for $channel', () {
         void _expectDefault(VersionCheckStamp stamp) {
           expect(stamp.lastKnownRemoteVersion, isNull);
@@ -628,8 +650,11 @@ class FakeCache extends Fake implements Cache {
 }
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
-  FakeFlutterVersion(this.channel);
+  FakeFlutterVersion(this.channel, {this.repositoryUrl = 'https://github.com/flutter/flutter'});
 
   @override
   final String channel;
+
+  @override
+  final String repositoryUrl;
 }
