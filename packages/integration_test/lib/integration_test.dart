@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 import 'package:vm_service/vm_service_io.dart' as vm_io;
@@ -34,33 +35,7 @@ const bool _shouldReportResultsToNative = bool.fromEnvironment(
 );
 
 // The channel name used to call platform methods.
-const MethodChannel _channel = MethodChannel('plugins.flutter.io/integration_test');
-
-/// Takes a screenshot of the device, and returns the PNG representation of it.
-///
-// {@tool snippet}
-/// Sample invocations of [deviceScreenshot].
-///
-/// ```dart
-/// await expectLater(
-///   deviceScreenshot(),
-///   matchesGoldenFile('device.png'),
-/// );
-/// ```
-/// {@end-tool}
-///
-/// See also:
-///
-///  * [matchesGoldenFile], which asserts that the returned [Future<Uint8List>]
-///    matches the golden image file identified by [key], with an optional
-///    [version] number.
-Future<Uint8List> deviceScreenshot() async {
-  final List<int>? rawBytes = await _channel.invokeMethod<List<int>>('captureScreenshot', null);
-  if (rawBytes == null) {
-    throw 'Expected a list of bytes, but instead captureScreenshot returned null';
-  }
-  return Uint8List.fromList(rawBytes);
-}
+const MethodChannel integrationTestChannel = MethodChannel('plugins.flutter.io/integration_test');
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
@@ -81,7 +56,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
       }
 
       try {
-        await _channel.invokeMethod<void>(
+        await integrationTestChannel.invokeMethod<void>(
           'allTestsFinished',
           <String, dynamic>{
             'results': results.map<String, dynamic>((String name, Object result) {
@@ -198,7 +173,10 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// Called by test methods. Implementation differs for each platform.
   Future<void> takeScreenshot(String screenshotName) async {
-    await callbackManager.takeScreenshot(screenshotName);
+    reportData ??= <String, dynamic>{};
+    reportData!['screenshots'] ??= <dynamic>[];
+    final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName);
+    reportData!['screenshots']!.add(data);
   }
 
   /// The callback function to response the driver side input.

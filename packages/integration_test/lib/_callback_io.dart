@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+import 'dart:ui';
+import 'dart:typed_data';
+
+import 'package:flutter/services.dart';
 import 'common.dart';
+
+const MethodChannel integrationTestChannel = MethodChannel('plugins.flutter.io/integration_test');
 
 /// The dart:io implementation of [CallbackManager].
 ///
@@ -55,8 +62,29 @@ class IOCallbackManager implements CallbackManager {
   }
 
   @override
-  Future<void> takeScreenshot(String screenshot) {
-    throw UnimplementedError(
-        'Screenshots are not implemented on this platform');
+  Future<Map<String, dynamic>> takeScreenshot(String screenshot) async {
+    integrationTestChannel.setMethodCallHandler(_onMethodChannelCall);
+
+    final List<int>? rawBytes = await integrationTestChannel.invokeMethod<List<int>>(
+      'captureScreenshot',
+      null,
+    );
+    if (rawBytes == null) {
+      throw 'Expected a list of bytes, but instead captureScreenshot returned null';
+    }
+    return <String, dynamic>{
+      'screenshotName': screenshot,
+      'bytes': rawBytes,
+    };
+  }
+
+  Future<dynamic> _onMethodChannelCall(MethodCall call) {
+    switch (call.method) {
+      case 'scheduleFrame':
+        window.scheduleFrame();
+        print('scheduled frame');
+        break;
+    }
+    return Future<dynamic>.value(null);
   }
 }

@@ -70,6 +70,13 @@ Future<void> integrationDriver({
   final FlutterDriver driver = await FlutterDriver.connect();
   final String jsonResult = await driver.requestData(null, timeout: timeout);
   final Response response = Response.fromJson(jsonResult);
+
+  final List<dynamic> screenshots = response.data!['screenshots']! as List<dynamic>;
+  final List<dynamic> bytes = screenshots[0]['bytes'];
+
+  await File('/Users/egarciad/p/flutter/packages/integration_test/example/android/test.png')
+        .writeAsBytes(bytes.cast<int>());
+
   await driver.close();
 
   if (response.allTestsPassed) {

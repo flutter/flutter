@@ -271,7 +271,8 @@ abstract class CallbackManager {
       Map<String, String> params, IntegrationTestResults testRunner);
 
   /// Request to take a screenshot of the application.
-  Future<void> takeScreenshot(String screenshot);
+  /// Returns the data that is sent back to the host.
+   Future<Map<String, dynamic>> takeScreenshot(String screenshot);
 
   /// Cleanup and completers or locks used during the communication.
   void cleanup();

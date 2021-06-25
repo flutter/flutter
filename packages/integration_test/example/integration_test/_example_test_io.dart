@@ -24,14 +24,17 @@ void main() {
     // Build our app and trigger a frame.
     app.main();
 
+    // Let app become fully idle.
+    await Future<void>.delayed(const Duration(seconds: 2));
     // Trace the timeline of the following operation. The timeline result will
     // be written to `build/integration_response_data.json` with the key
     // `timeline`.
-    // await binding.traceAction(() async {
       // Trigger a frame.
       await tester.pumpAndSettle();
 
-      print(await deviceScreenshot());
+      await Future<void>.delayed(const Duration(seconds: 3));
+
+      await binding.takeScreenshot('platform_name').timeout(const Duration(seconds: 3));
 
       // Verify that platform version is retrieved.
       expect(
@@ -42,6 +45,5 @@ void main() {
         ),
         findsOneWidget,
       );
-    // });
   });
 }
