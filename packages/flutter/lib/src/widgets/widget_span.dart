@@ -8,7 +8,7 @@ import 'package:flutter/painting.dart';
 
 import 'framework.dart';
 
-typedef WidgetSpanPlainTextGenerator = String Function(Widget);
+typedef WidgetSpanPlainTextGenerator = String Function(Widget, ui.PlaceholderAlignment, TextBaseline?, TextStyle?);
 
 /// An immutable widget that is embedded inline within text.
 ///
@@ -71,12 +71,12 @@ class WidgetSpan extends PlaceholderSpan {
   ///
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
-  const WidgetSpan({
+  WidgetSpan({
     required this.child,
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline? baseline,
     TextStyle? style,
-    this.plainTextGenerator,
+    WidgetSpanPlainTextGenerator? plainTextGenerator,
   }) : assert(child != null),
        assert(
          baseline != null || !(
@@ -89,13 +89,11 @@ class WidgetSpan extends PlaceholderSpan {
          alignment: alignment,
          baseline: baseline,
          style: style,
+         plainText: plainTextGenerator!(child, alignment, baseline, style),
        );
 
   /// The widget to embed inline within text.
   final Widget child;
-
-  ///
-  final WidgetSpanPlainTextGenerator? plainTextGenerator;
 
   /// Adds a placeholder box to the paragraph builder if a size has been
   /// calculated for the widget.
@@ -122,20 +120,10 @@ class WidgetSpan extends PlaceholderSpan {
       scale: textScaleFactor,
       baseline: currentDimensions.baseline,
       baselineOffset: currentDimensions.baselineOffset,
+      codepointLength: plainText.length,
     );
     if (hasStyle) {
       builder.pop();
-    }
-  }
-
-  @override
-  void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
-    if (includePlaceholders) {
-      if (plainTextGenerator != null) {
-        buffer.write(plainTextGenerator!(child));
-      } else {
-        buffer.write('\uFFFC');
-      }
     }
   }
 

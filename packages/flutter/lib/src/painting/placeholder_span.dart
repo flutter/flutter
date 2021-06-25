@@ -39,6 +39,7 @@ abstract class PlaceholderSpan extends InlineSpan {
     this.alignment = ui.PlaceholderAlignment.bottom,
     this.baseline,
     TextStyle? style,
+    this.plainText = '\uFFFC',
   }) : super(style: style);
 
   /// How the placeholder aligns vertically with the text.
@@ -52,12 +53,14 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// This is ignored when using other alignment modes.
   final TextBaseline? baseline;
 
+  final String plainText;
+
   /// [PlaceholderSpan]s are flattened to a `0xFFFC` object replacement character in the
   /// plain text representation when `includePlaceholders` is true.
   @override
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     if (includePlaceholders) {
-      buffer.write('\uFFFC');
+      buffer.write(plainText);
     }
   }
 
