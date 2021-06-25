@@ -98,7 +98,6 @@ Engine::Engine(Delegate& delegate,
       UIDartState::Context{
           task_runners_,                           // task runners
           std::move(snapshot_delegate),            // snapshot delegate
-          GetWeakPtr(),                            // hint freed delegate
           std::move(io_manager),                   // io manager
           std::move(unref_queue),                  // Skia unref queue
           image_decoder_.GetWeakPtr(),             // image decoder
@@ -231,27 +230,11 @@ void Engine::ReportTimings(std::vector<int64_t> timings) {
   runtime_controller_->ReportTimings(std::move(timings));
 }
 
-void Engine::HintFreed(size_t size) {
-  hint_freed_bytes_since_last_call_ += size;
-}
-
 void Engine::NotifyIdle(int64_t deadline) {
   auto trace_event = std::to_string(deadline - Dart_TimelineGetMicros());
   TRACE_EVENT1("flutter", "Engine::NotifyIdle", "deadline_now_delta",
                trace_event.c_str());
-  // Avoid asking the RuntimeController to call Dart_HintFreed more than once
-  // every 5 seconds.
-  // This is to avoid GCs happening too frequently e.g. when an animated GIF is
-  // playing and disposing of an image every frame.
-  fml::TimePoint now = delegate_.GetCurrentTimePoint();
-  fml::TimeDelta delta = now - last_hint_freed_call_time_;
-  size_t hint_freed_bytes = 0;
-  if (delta.ToMilliseconds() > 5000 && hint_freed_bytes_since_last_call_ > 0) {
-    hint_freed_bytes = hint_freed_bytes_since_last_call_;
-    hint_freed_bytes_since_last_call_ = 0;
-    last_hint_freed_call_time_ = now;
-  }
-  runtime_controller_->NotifyIdle(deadline, hint_freed_bytes);
+  runtime_controller_->NotifyIdle(deadline);
 }
 
 std::optional<uint32_t> Engine::GetUIIsolateReturnCode() {

@@ -341,12 +341,10 @@ class RuntimeController : public PlatformConfigurationClient {
   /// @param[in]  deadline  The deadline measures in microseconds against the
   ///             system's monotonic time. The clock can be accessed via
   ///             `Dart_TimelineGetMicros`.
-  /// @param[in] freed_hint  A hint of the number of bytes potentially freed
-  ///                        since the last call to NotifyIdle if a GC were run.
   ///
   /// @return     If the idle notification was forwarded to the running isolate.
   ///
-  virtual bool NotifyIdle(int64_t deadline, size_t freed_hint);
+  virtual bool NotifyIdle(int64_t deadline);
 
   //----------------------------------------------------------------------------
   /// @brief      Returns if the root isolate is running. The isolate must be

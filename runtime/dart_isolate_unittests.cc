@@ -114,7 +114,6 @@ TEST_F(DartIsolateTest, SpawnIsolate) {
       /*settings=*/vm_data->GetSettings(),
       /*platform_configuration=*/nullptr,
       /*snapshot_delegate=*/{},
-      /*hint_freed_delegate=*/{},
       /*advisory_script_uri=*/"main.dart",
       /*advisory_script_entrypoint=*/"main",
       /*flags=*/DartIsolate::Flags{},
