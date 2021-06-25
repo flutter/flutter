@@ -3928,6 +3928,37 @@ void main() {
       expect(result.path, hasLength(0));
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
   });
+
+  test('does not skip TextPainter.layout because of invalid cache', () {
+    // Regression test for https://github.com/flutter/flutter/issues/84896.
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    const BoxConstraints constraints = BoxConstraints(minWidth: 100, maxWidth: 500);
+    final RenderEditable editable = RenderEditable(
+      text: const TextSpan(
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        text: 'A',
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      locale: const Locale('en', 'US'),
+      forceLine: true,
+      offset: ViewportOffset.fixed(10.0),
+      textSelectionDelegate: delegate,
+      selection: const TextSelection.collapsed(offset: 0),
+      cursorColor: const Color(0xFFFFFFFF),
+      showCursor: ValueNotifier<bool>(true),
+    );
+    layout(editable, constraints: constraints);
+
+    final double initialWidth = editable.computeDryLayout(constraints).width;
+    expect(initialWidth, 500);
+
+    // Turn off forceLine. Now the width should be significantly smaller.
+    editable.forceLine = false;
+    expect(editable.computeDryLayout(constraints).width, lessThan(initialWidth));
+  });
 }
 
 class _TestRenderEditable extends RenderEditable {
