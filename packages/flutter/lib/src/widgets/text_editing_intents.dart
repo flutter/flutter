@@ -195,6 +195,15 @@ class MoveSelectionDownTextIntent extends Intent{
   const MoveSelectionDownTextIntent();
 }
 
+/// An [Intent] to not consume the key when composing, but otherwise to move the
+/// selection down by one line.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class MoveSelectionDownWhenNotComposingTextIntent extends Intent{
+  /// Creates an instance of MoveSelectionDownWhenNotComposingTextIntent.
+  const MoveSelectionDownWhenNotComposingTextIntent();
+}
+
 /// An [Intent] to move the selection left by one line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
@@ -217,6 +226,15 @@ class MoveSelectionLeftByWordTextIntent extends Intent{
 class MoveSelectionLeftTextIntent extends Intent{
   /// Creates an instance of MoveSelectionLeftTextIntent.
   const MoveSelectionLeftTextIntent();
+}
+
+/// An [Intent] to not consume the key when composing, but otherwise to move the
+/// selection left by one line.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class MoveSelectionLeftWhenNotComposingTextIntent extends Intent{
+  /// Creates an instance of MoveSelectionLeftWhenNotComposingTextIntent.
+  const MoveSelectionLeftWhenNotComposingTextIntent();
 }
 
 /// An [Intent] to move the selection to the start of the field.
@@ -251,6 +269,15 @@ class MoveSelectionRightTextIntent extends Intent{
   const MoveSelectionRightTextIntent();
 }
 
+/// An [Intent] to not consume the key when composing, but otherwise to move the
+/// selection right by one line.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class MoveSelectionRightWhenNotComposingTextIntent extends Intent{
+  /// Creates an instance of MoveSelectionRightWhenNotComposingTextIntent.
+  const MoveSelectionRightWhenNotComposingTextIntent();
+}
+
 /// An [Intent] to move the selection to the end of the field.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
@@ -265,4 +292,13 @@ class MoveSelectionToEndTextIntent extends Intent{
 class MoveSelectionUpTextIntent extends Intent{
   /// Creates an instance of MoveSelectionUpTextIntent.
   const MoveSelectionUpTextIntent();
+}
+
+/// An [Intent] to not consume the key when composing, but otherwise to move the
+/// selection up by one line.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class MoveSelectionUpWhenNotComposingTextIntent extends Intent{
+  /// Creates an instance of MoveSelectionUpWhenNotComposingTextIntent.
+  const MoveSelectionUpWhenNotComposingTextIntent();
 }

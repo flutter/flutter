@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart' show TextRange;
+
 import 'actions.dart';
 import 'editable_text.dart';
 import 'framework.dart';
@@ -57,16 +59,44 @@ class DefaultTextEditingActions extends Actions{
     ExpandSelectionToEndTextIntent: _ExpandSelectionToEndTextAction(),
     ExpandSelectionToStartTextIntent: _ExpandSelectionToStartTextAction(),
     MoveSelectionDownTextIntent: _MoveSelectionDownTextAction(),
+    MoveSelectionDownWhenNotComposingTextIntent: _MoveSelectionDownWhenNotComposingTextAction(),
     MoveSelectionLeftByLineTextIntent: _MoveSelectionLeftByLineTextAction(),
     MoveSelectionLeftByWordTextIntent: _MoveSelectionLeftByWordTextAction(),
     MoveSelectionLeftTextIntent: _MoveSelectionLeftTextAction(),
+    MoveSelectionLeftWhenNotComposingTextIntent: _MoveSelectionLeftWhenNotComposingTextAction(),
     MoveSelectionRightByLineTextIntent: _MoveSelectionRightByLineTextAction(),
     MoveSelectionRightByWordTextIntent: _MoveSelectionRightByWordTextAction(),
     MoveSelectionRightTextIntent: _MoveSelectionRightTextAction(),
+    MoveSelectionRightWhenNotComposingTextIntent: _MoveSelectionRightWhenNotComposingTextAction(),
     MoveSelectionToEndTextIntent: _MoveSelectionToEndTextAction(),
     MoveSelectionToStartTextIntent: _MoveSelectionToStartTextAction(),
     MoveSelectionUpTextIntent: _MoveSelectionUpTextAction(),
+    MoveSelectionUpWhenNotComposingTextIntent: _MoveSelectionUpWhenNotComposingTextAction(),
   };
+}
+
+// Can be used to not consume the key when composing.
+//
+// This is useful to allow native composing controls to be usable.
+//
+// The invoke method will still be called even when consumesKey is false, so if
+// it should do nothing when composing, that is up to the implementer to
+// enforce.
+abstract class _WhenNotComposingTextAction<T extends Intent> extends TextEditingAction<T> {
+  _WhenNotComposingTextAction();
+
+  bool get _isComposing {
+    final TextRange composing =
+        textEditingActionTarget!.renderEditable.textSelectionDelegate.textEditingValue.composing;
+    // When composing, allow the key to pass through to control the native
+    // composing tooltip.
+    return composing.isValid && !composing.isCollapsed;
+  }
+
+  @override
+  bool consumesKey(T intent) {
+    return !_isComposing;
+  }
 }
 
 // This allows the web engine to handle text editing events natively while using
@@ -229,9 +259,33 @@ class _MoveSelectionDownTextAction extends TextEditingAction<MoveSelectionDownTe
   }
 }
 
+class _MoveSelectionDownWhenNotComposingTextAction extends _WhenNotComposingTextAction<MoveSelectionDownWhenNotComposingTextIntent> {
+  _MoveSelectionDownWhenNotComposingTextAction();
+
+  @override
+  void invoke(MoveSelectionDownWhenNotComposingTextIntent intent, [BuildContext? context]) {
+    if (_isComposing) {
+      return;
+    }
+    textEditingActionTarget!.renderEditable.moveSelectionDown(SelectionChangedCause.keyboard);
+  }
+}
+
 class _MoveSelectionLeftTextAction extends TextEditingAction<MoveSelectionLeftTextIntent> {
   @override
   Object? invoke(MoveSelectionLeftTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
+  }
+}
+
+class _MoveSelectionLeftWhenNotComposingTextAction extends _WhenNotComposingTextAction<MoveSelectionLeftWhenNotComposingTextIntent> {
+  _MoveSelectionLeftWhenNotComposingTextAction();
+
+  @override
+  void invoke(MoveSelectionLeftWhenNotComposingTextIntent intent, [BuildContext? context]) {
+    if (_isComposing) {
+      return;
+    }
     textEditingActionTarget!.renderEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
   }
 }
@@ -243,9 +297,33 @@ class _MoveSelectionRightTextAction extends TextEditingAction<MoveSelectionRight
   }
 }
 
+class _MoveSelectionRightWhenNotComposingTextAction extends _WhenNotComposingTextAction<MoveSelectionRightWhenNotComposingTextIntent> {
+  _MoveSelectionRightWhenNotComposingTextAction();
+
+  @override
+  void invoke(MoveSelectionRightWhenNotComposingTextIntent intent, [BuildContext? context]) {
+    if (_isComposing) {
+      return;
+    }
+    textEditingActionTarget!.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+  }
+}
+
 class _MoveSelectionUpTextAction extends TextEditingAction<MoveSelectionUpTextIntent> {
   @override
   Object? invoke(MoveSelectionUpTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.moveSelectionUp(SelectionChangedCause.keyboard);
+  }
+}
+
+class _MoveSelectionUpWhenNotComposingTextAction extends _WhenNotComposingTextAction<MoveSelectionUpWhenNotComposingTextIntent> {
+  _MoveSelectionUpWhenNotComposingTextAction();
+
+  @override
+  void invoke(MoveSelectionUpWhenNotComposingTextIntent intent, [BuildContext? context]) {
+    if (_isComposing) {
+      return;
+    }
     textEditingActionTarget!.renderEditable.moveSelectionUp(SelectionChangedCause.keyboard);
   }
 }
