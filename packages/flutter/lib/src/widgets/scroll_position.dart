@@ -971,7 +971,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   }
 }
 
-/// A notification that a scrollable widget's [ScrollMetrics] has changed.
+/// A notification that a scrollable widget's [ScrollMetrics] have changed.
 ///
 /// For example, when the content of a scrollable is altered, making it larger
 /// or smaller, this notification will be dispatched. Similarly, if the size
@@ -983,7 +983,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 /// caused by the user scrolling.
 ///
 /// {@tool dartpad --template=freeform}
-/// This sample shows that how a [ScrollMetricsNotification] is dispatched when
+/// This sample shows how a [ScrollMetricsNotification] is dispatched when
 /// the `windowSize` is changed. Press the floating action button to increase
 /// the scrollable window's size.
 ///
