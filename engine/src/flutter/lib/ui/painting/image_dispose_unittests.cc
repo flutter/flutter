@@ -30,23 +30,11 @@ class ImageDisposeTest : public ShellTest {
   // Used to wait on Dart callbacks or Shell task runner flushing
   fml::AutoResetWaitableEvent message_latch_;
 
-  fml::AutoResetWaitableEvent picture_finalizer_latch_;
-  static void picture_finalizer(void* isolate_callback_data, void* peer) {
-    auto latch = reinterpret_cast<fml::AutoResetWaitableEvent*>(peer);
-    latch->Signal();
-  }
-
   sk_sp<SkPicture> current_picture_;
   sk_sp<SkImage> current_image_;
 };
 
-TEST_F(ImageDisposeTest,
-#if defined(OS_FUCHSIA)
-       DISABLED_ImageReleasedAfterFrame
-#else
-       ImageReleasedAfterFrame
-#endif  // defined(OS_FUCHSIA)
-) {
+TEST_F(ImageDisposeTest, ImageReleasedAfterFrameAndDisposePictureAndLayer) {
   auto native_capture_image_and_picture = [&](Dart_NativeArguments args) {
     auto image_handle = Dart_GetNativeArgument(args, 0);
     auto native_image_handle =
@@ -60,12 +48,9 @@ TEST_F(ImageDisposeTest,
     ASSERT_FALSE(picture->picture()->unique());
     current_image_ = image->image();
     current_picture_ = picture->picture();
-
-    Dart_NewFinalizableHandle(Dart_GetNativeArgument(args, 1),
-                              &picture_finalizer_latch_, 0, &picture_finalizer);
   };
 
-  auto native_on_begin_frame_done = [&](Dart_NativeArguments args) {
+  auto native_finish = [&](Dart_NativeArguments args) {
     message_latch_.Signal();
   };
 
@@ -80,8 +65,7 @@ TEST_F(ImageDisposeTest,
 
   AddNativeCallback("CaptureImageAndPicture",
                     CREATE_NATIVE_ENTRY(native_capture_image_and_picture));
-  AddNativeCallback("OnBeginFrameDone",
-                    CREATE_NATIVE_ENTRY(native_on_begin_frame_done));
+  AddNativeCallback("Finish", CREATE_NATIVE_ENTRY(native_finish));
 
   std::unique_ptr<Shell> shell = CreateShell(std::move(settings), task_runners);
 
@@ -103,15 +87,8 @@ TEST_F(ImageDisposeTest,
   ASSERT_TRUE(current_picture_);
   ASSERT_TRUE(current_image_);
 
-  // Simulate a large notify idle, as the animator would do
-  // when it has no frames left.
-  // On slower machines, this is especially important - we capture that
-  // this happens normally in devicelab bnechmarks like large_image_changer.
-  NotifyIdle(shell.get(), Dart_TimelineGetMicros() + 100000);
-
-  picture_finalizer_latch_.Wait();
-
-  // Force a drain the SkiaUnrefQueue.
+  // Force a drain the SkiaUnrefQueue. The engine does this normally as frames
+  // pump, but we force it here to make the test more deterministic.
   message_latch_.Reset();
   task_runner->PostTask([&, io_manager = shell->GetIOManager()]() {
     io_manager->GetSkiaUnrefQueue()->Drain();

@@ -8,6 +8,10 @@ import 'dart:ui';
 
 void main() {}
 
+/// Mutiple tests use this to signal to the C++ side that they are ready for
+/// validation.
+void _finish() native 'Finish';
+
 @pragma('vm:entry-point')
 void validateSceneBuilderAndScene() {
   final SceneBuilder builder = SceneBuilder();
@@ -60,7 +64,6 @@ Future<void> createSingleFrameCodec() async {
   _finish();
 }
 void _validateCodec(Codec codec) native 'ValidateCodec';
-void _finish() native 'Finish';
 
 @pragma('vm:entry-point')
 void createVertices() {
@@ -232,8 +235,8 @@ void _validateExternal(Uint8List result) native 'ValidateExternal';
 
 @pragma('vm:entry-point')
 Future<void> pumpImage() async {
-  const int width = 6000;
-  const int height = 6000;
+  const int width = 60;
+  const int height = 60;
   final Completer<Image> completer = Completer<Image>();
   decodeImageFromPixels(
     Uint8List.fromList(List<int>.filled(width * height * 4, 0xFF)),
@@ -243,34 +246,37 @@ Future<void> pumpImage() async {
     (Image image) => completer.complete(image),
   );
   final Image image = await completer.future;
+  late Picture picture;
+  late OffsetEngineLayer layer;
 
-  final FrameCallback renderBlank = (Duration duration) {
+  void renderBlank(Duration duration) {
     image.dispose();
+    picture.dispose();
+    layer.dispose();
 
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
-    canvas.drawRect(Rect.largest, Paint());
-    final Picture picture = recorder.endRecording();
-
+    canvas.drawPaint(Paint());
+    picture = recorder.endRecording();
     final SceneBuilder builder = SceneBuilder();
+    layer = builder.pushOffset(0, 0);
     builder.addPicture(Offset.zero, picture);
 
     final Scene scene = builder.build();
     window.render(scene);
     scene.dispose();
-    window.onBeginFrame = (Duration duration) {
-      window.onDrawFrame = _onBeginFrameDone;
-    };
-    window.scheduleFrame();
-  };
 
-  final FrameCallback renderImage = (Duration duration) {
+    _finish();
+  }
+
+  void renderImage(Duration duration) {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
     canvas.drawImage(image, Offset.zero, Paint());
-    final Picture picture = recorder.endRecording();
+    picture = recorder.endRecording();
 
     final SceneBuilder builder = SceneBuilder();
+    layer = builder.pushOffset(0, 0);
     builder.addPicture(Offset.zero, picture);
 
     _captureImageAndPicture(image, picture);
@@ -278,15 +284,15 @@ Future<void> pumpImage() async {
     final Scene scene = builder.build();
     window.render(scene);
     scene.dispose();
+
     window.onBeginFrame = renderBlank;
     window.scheduleFrame();
-  };
+  }
 
   window.onBeginFrame = renderImage;
   window.scheduleFrame();
 }
 void _captureImageAndPicture(Image image, Picture picture) native 'CaptureImageAndPicture';
-Future<void> _onBeginFrameDone() native 'OnBeginFrameDone';
 
 @pragma('vm:entry-point')
 void hooksTests() {

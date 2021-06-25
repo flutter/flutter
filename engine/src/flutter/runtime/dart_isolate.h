@@ -15,7 +15,6 @@
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "flutter/lib/ui/hint_freed_delegate.h"
 #include "flutter/lib/ui/io_manager.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -230,7 +229,6 @@ class DartIsolate : public UIDartState {
       const Settings& settings,
       std::unique_ptr<PlatformConfiguration> platform_configuration,
       fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-      fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
       std::string advisory_script_uri,
       std::string advisory_script_entrypoint,
       Flags flags,

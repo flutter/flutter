@@ -25,16 +25,6 @@ EngineLayer::EngineLayer(std::shared_ptr<flutter::ContainerLayer> layer)
 
 EngineLayer::~EngineLayer() = default;
 
-size_t EngineLayer::GetAllocationSize() const {
-  // TODO(dnfield): Remove this when scene disposal changes land in the
-  // framework. https://github.com/flutter/flutter/issues/81514
-
-  // Provide an approximation of the total memory impact of this object to the
-  // Dart GC.  The ContainerLayer may hold references to a tree of other layers,
-  // which in turn may contain Skia objects.
-  return 3000;
-};
-
 void EngineLayer::dispose() {
   layer_.reset();
   ClearDartWrapper();

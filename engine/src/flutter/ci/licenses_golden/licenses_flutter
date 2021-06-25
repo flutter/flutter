@@ -327,7 +327,6 @@ FILE: ../../../flutter/lib/ui/fixtures/hello_loop_2.webp
 FILE: ../../../flutter/lib/ui/fixtures/ui_test.dart
 FILE: ../../../flutter/lib/ui/geometry.dart
 FILE: ../../../flutter/lib/ui/hash_codes.dart
-FILE: ../../../flutter/lib/ui/hint_freed_delegate.h
 FILE: ../../../flutter/lib/ui/hooks.dart
 FILE: ../../../flutter/lib/ui/hooks_unittests.cc
 FILE: ../../../flutter/lib/ui/io_manager.h
