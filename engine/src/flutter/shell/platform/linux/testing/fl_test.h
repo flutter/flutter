@@ -23,6 +23,10 @@ gchar* bytes_to_hex_string(GBytes* bytes);
 // Creates a mock engine that responds to platform messages.
 FlEngine* make_mock_engine();
 
+// Creates a mock engine using a specified FlDartProject that responds to
+// platform messages.
+FlEngine* make_mock_engine_with_project(FlDartProject* project);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_TEST_H_

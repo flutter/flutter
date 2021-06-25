@@ -224,3 +224,38 @@ TEST(FlEngineTest, SettingsPlugin) {
 
   EXPECT_TRUE(called);
 }
+
+TEST(FlEngineTest, DartEntrypointArgs) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+
+  GPtrArray* args_array = g_ptr_array_new();
+  g_ptr_array_add(args_array, (gpointer) "arg_one");
+  g_ptr_array_add(args_array, (gpointer) "arg_two");
+  g_ptr_array_add(args_array, (gpointer) "arg_three");
+  g_ptr_array_add(args_array, nullptr);
+  gchar** args = (gchar**)g_ptr_array_free(args_array, false);
+
+  fl_dart_project_set_dart_entrypoint_arguments(project, args);
+
+  g_autoptr(FlEngine) engine = make_mock_engine_with_project(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called = false;
+  embedder_api->Initialize = MOCK_ENGINE_PROC(
+      Initialize, ([&called, &set_args = args](
+                       size_t version, const FlutterRendererConfig* config,
+                       const FlutterProjectArgs* args, void* user_data,
+                       FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        called = true;
+        EXPECT_NE(set_args, args->dart_entrypoint_argv);
+        EXPECT_EQ(args->dart_entrypoint_argc, 3);
+
+        return kSuccess;
+      }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  EXPECT_TRUE(called);
+}
