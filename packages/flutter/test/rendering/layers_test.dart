@@ -256,7 +256,7 @@ void main() {
     );
   });
 
-  test('PictureLayer prints picture, engine layer, and raster cache hints in debug info', () {
+  test('PictureLayer prints picture, raster cache hints in debug info', () {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
     canvas.drawPaint(Paint());
@@ -267,8 +267,18 @@ void main() {
     layer.willChangeHint = false;
     final List<String> info = _getDebugInfo(layer);
     expect(info, contains('picture: ${describeIdentity(picture)}'));
-    expect(info, contains('engine layer: ${describeIdentity(null)}'));
+    expect(info, isNot(contains('engine layer: ${describeIdentity(null)}')));
     expect(info, contains('raster cache hints: isComplex = true, willChange = false'));
+  });
+
+  test('Layer prints engineLayer if it is not null in debug info', () {
+    final ConcreteLayer layer = ConcreteLayer();
+    List<String> info = _getDebugInfo(layer);
+    expect(info, isNot(contains('engine layer: ${describeIdentity(null)}')));
+
+    layer.engineLayer = FakeEngineLayer();
+    info = _getDebugInfo(layer);
+    expect(info, contains('engine layer: ${describeIdentity(layer.engineLayer)}'));
   });
 
   test('mutating PictureLayer fields triggers needsAddToScene', () {
@@ -591,6 +601,135 @@ void main() {
     // layer.
     parent.buildScene(SceneBuilder());
   }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/42767
+
+  // TODO(dnfield): remove this when https://github.com/flutter/flutter/issues/85066 is resolved.
+  const bool bug85066 = true;
+  test('PictureLayer does not let you call dispose unless refcount is 0', () {
+    PictureLayer layer = PictureLayer(Rect.zero);
+    expect(layer.debugHandleCount, 0);
+    layer.dispose();
+    expect(layer.debugDisposed, true, skip: bug85066);
+
+    layer = PictureLayer(Rect.zero);
+    final LayerHandle<PictureLayer> handle = LayerHandle<PictureLayer>(layer);
+    expect(layer.debugHandleCount, 1);
+    expect(() => layer.dispose(), throwsAssertionError);
+    handle.layer = null;
+    expect(layer.debugHandleCount, 0);
+    expect(layer.debugDisposed, true, skip: bug85066);
+    expect(() => layer.dispose(), throwsAssertionError, skip: bug85066); // already disposed.
+  });
+
+  test('Layer append/remove increases/decreases handle count', () {
+    final PictureLayer layer = PictureLayer(Rect.zero);
+    final ContainerLayer parent = ContainerLayer();
+    expect(layer.debugHandleCount, 0);
+    expect(layer.debugDisposed, false);
+
+    parent.append(layer);
+    expect(layer.debugHandleCount, 1);
+    expect(layer.debugDisposed, false);
+
+    layer.remove();
+    expect(layer.debugHandleCount, 0);
+    expect(layer.debugDisposed, true, skip: bug85066);
+  });
+
+  test('Layer.dispose disposes the engineLayer', () {
+    final Layer layer = ConcreteLayer();
+    final FakeEngineLayer engineLayer = FakeEngineLayer();
+    layer.engineLayer = engineLayer;
+    expect(engineLayer.disposed, false);
+    layer.dispose();
+    expect(engineLayer.disposed, true);
+    expect(layer.engineLayer, null);
+  });
+
+  test('Layer.engineLayer (set) disposes the engineLayer', () {
+    final Layer layer = ConcreteLayer();
+    final FakeEngineLayer engineLayer = FakeEngineLayer();
+    layer.engineLayer = engineLayer;
+    expect(engineLayer.disposed, false);
+    layer.engineLayer = null;
+    expect(engineLayer.disposed, true);
+  });
+
+  test('PictureLayer.picture (set) disposes the picture', () {
+    final PictureLayer layer = PictureLayer(Rect.zero);
+    final FakePicture picture = FakePicture();
+    layer.picture = picture;
+    expect(picture.disposed, false);
+    layer.picture = null;
+    expect(picture.disposed, true);
+  });
+
+  test('PictureLayer disposes the picture', () {
+    final PictureLayer layer = PictureLayer(Rect.zero);
+    final FakePicture picture = FakePicture();
+    layer.picture = picture;
+    expect(picture.disposed, false);
+    layer.dispose();
+    expect(picture.disposed, true);
+  });
+
+  test('LayerHandle disposes the layer', () {
+    final ConcreteLayer layer = ConcreteLayer();
+    final ConcreteLayer layer2 = ConcreteLayer();
+
+    expect(layer.debugHandleCount, 0);
+    expect(layer2.debugHandleCount, 0);
+
+    final LayerHandle<ConcreteLayer> holder = LayerHandle<ConcreteLayer>(layer);
+    expect(layer.debugHandleCount, 1);
+    expect(layer.debugDisposed, false);
+    expect(layer2.debugHandleCount, 0);
+    expect(layer2.debugDisposed, false);
+
+    holder.layer = layer;
+    expect(layer.debugHandleCount, 1);
+    expect(layer.debugDisposed, false);
+    expect(layer2.debugHandleCount, 0);
+    expect(layer2.debugDisposed, false);
+
+    holder.layer = layer2;
+    expect(layer.debugHandleCount, 0);
+    expect(layer.debugDisposed, true, skip: bug85066);
+    expect(layer2.debugHandleCount, 1);
+    expect(layer2.debugDisposed, false);
+
+    holder.layer = null;
+    expect(layer.debugHandleCount, 0);
+    expect(layer.debugDisposed, true, skip: bug85066);
+    expect(layer2.debugHandleCount, 0);
+    expect(layer2.debugDisposed, true, skip: bug85066);
+
+    expect(() => holder.layer = layer, throwsAssertionError, skip: bug85066);
+  });
+}
+
+class FakeEngineLayer extends Fake implements EngineLayer {
+  bool disposed = false;
+
+  @override
+  void dispose() {
+    assert(!disposed);
+    disposed = true;
+  }
+}
+
+class FakePicture extends Fake implements Picture {
+  bool disposed = false;
+
+  @override
+  void dispose() {
+    assert(!disposed);
+    disposed = true;
+  }
+}
+
+class ConcreteLayer extends Layer {
+  @override
+  void addToScene(SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {}
 }
 
 class _TestAlwaysNeedsAddToSceneLayer extends ContainerLayer {

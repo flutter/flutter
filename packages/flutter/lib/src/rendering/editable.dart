@@ -301,6 +301,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _foregroundRenderObject = null;
     _backgroundRenderObject?.dispose();
     _backgroundRenderObject = null;
+    _clipRectLayer.layer = null;
     _cachedBuiltInForegroundPainters?.dispose();
     _cachedBuiltInPainters?.dispose();
     super.dispose();
@@ -4007,22 +4008,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   void paint(PaintingContext context, Offset offset) {
     _computeTextMetricsIfNeeded();
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
-      _clipRectLayer = context.pushClipRect(
+      _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
         Offset.zero & size,
         _paintContents,
         clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer,
+        oldLayer: _clipRectLayer.layer,
       );
     } else {
-      _clipRectLayer = null;
+      _clipRectLayer.layer = null;
       _paintContents(context, offset);
     }
     _paintHandleLayers(context, getEndpointsForSelection(selection!));
   }
 
-  ClipRectLayer? _clipRectLayer;
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
