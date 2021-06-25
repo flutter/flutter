@@ -10,7 +10,6 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -429,6 +428,7 @@ void main() {
 
   testWithoutContext('DevFS correctly records the elapsed time', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
+    // final FakeDevFSWriter writer = FakeDevFSWriter();
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
       httpAddress: Uri.parse('http://localhost'),
@@ -470,115 +470,6 @@ void main() {
     expect(report.compileDuration, const Duration(seconds: 3));
     expect(report.transferDuration, const Duration(seconds: 5));
   });
-
-  group('DevFS with AssetBundle', () {
-    FileSystem fileSystem;
-    FakeDevFSWriter writer;
-    DevFS devFS;
-    FakeResidentCompiler residentCompiler;
-
-    setUp(() {
-      fileSystem = MemoryFileSystem.test();
-      writer = FakeDevFSWriter();
-      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[createDevFSRequest],
-      );
-
-      devFS = DevFS(
-        fakeVmServiceHost.vmService,
-        'test',
-        fileSystem.currentDirectory,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        osUtils: FakeOperatingSystemUtils(),
-        httpClient: FakeHttpClient.any(),
-      );
-
-      residentCompiler = FakeResidentCompiler()
-        ..onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
-          fileSystem.file('example').createSync();
-          return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
-        };
-    });
-
-    testUsingContext('skip uploading assets when bundleFirstUpload', () async {
-      final FakeAssetBundle fakeAssetBundle = FakeAssetBundle(<String, DevFSContent>{
-        'assets/modified.png': FakeDevFSByteContent(
-          bytes: <int>[0],
-          isModified: true,
-        ),
-        'assets/not_modified.png': FakeDevFSByteContent(
-          bytes: <int>[0],
-          isModified: false,
-        ),
-      });
-
-      await devFS.create();
-
-      expect(writer.written, false);
-
-      final UpdateFSReport report = await devFS.update(
-        mainUri: Uri.parse('lib/main.dart'),
-        generator: residentCompiler,
-        dillOutputPath: 'lib/foo.dill',
-        pathToReload: 'lib/foo.txt.dill',
-        trackWidgetCreation: false,
-        invalidatedFiles: <Uri>[],
-        packageConfig: PackageConfig.empty,
-        devFSWriter: writer,
-        bundle: fakeAssetBundle,
-        bundleFirstUpload: true,
-      );
-
-      expect(report.success, true);
-      expect(writer.written, true);
-      expect(writer.lastWrittenEntries.keys, <Uri>[
-        Uri.parse('build/flutter_assets/${DevFS.kAssetDirectoryPlaceholderFilename}'),
-      ]);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext('uploads updated assets when bundleFirstUpload', () async {
-      final FakeAssetBundle fakeAssetBundle = FakeAssetBundle(<String, DevFSContent>{
-        'assets/modified.png': FakeDevFSByteContent(
-          bytes: <int>[0],
-          isModified: true,
-        ),
-        'assets/not_modified.png': FakeDevFSByteContent(
-          bytes: <int>[0],
-          isModified: false,
-        ),
-      });
-      await devFS.create();
-
-      expect(writer.written, false);
-
-      final UpdateFSReport report = await devFS.update(
-        mainUri: Uri.parse('lib/main.dart'),
-        generator: residentCompiler,
-        dillOutputPath: 'lib/foo.dill',
-        pathToReload: 'lib/foo.txt.dill',
-        trackWidgetCreation: false,
-        invalidatedFiles: <Uri>[],
-        packageConfig: PackageConfig.empty,
-        devFSWriter: writer,
-        bundle: fakeAssetBundle,
-        bundleFirstUpload: false,
-      );
-
-      expect(report.success, true);
-      expect(writer.written, true);
-      expect(writer.lastWrittenEntries.keys, <Uri>[
-        Uri.parse('build/flutter_assets/assets/modified.png'),
-        Uri.parse('lib/foo.txt.dill'),
-      ]);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-  });
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
@@ -593,34 +484,9 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 
 class FakeDevFSWriter implements DevFSWriter {
   bool written = false;
-  Map<Uri, DevFSContent> lastWrittenEntries;
 
   @override
   Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, DevFSWriter parent) async {
     written = true;
-    lastWrittenEntries = entries;
   }
-}
-
-class FakeAssetBundle extends Fake implements AssetBundle {
-  FakeAssetBundle(this.entries);
-
-  @override
-  Map<String, DevFSContent> entries;
-}
-
-class FakeDevFSByteContent extends Fake implements DevFSByteContent {
-  FakeDevFSByteContent({
-    this.bytes,
-    this.isModified,
-  });
-
-  @override
-  List<int> bytes;
-
-  @override
-  bool isModified;
-
-  @override
-  int get size => bytes.length;
 }
