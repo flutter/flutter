@@ -635,7 +635,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     }
   }
 
-  final LayerHandle<ClipRectLayer?> _clipRectLayer = LayerHandle<ClipRectLayer?>();
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
   void dispose() {

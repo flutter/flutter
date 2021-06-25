@@ -679,7 +679,7 @@ void main() {
     expect(layer.debugHandleCount, 0);
     expect(layer2.debugHandleCount, 0);
 
-    final LayerHandle<ConcreteLayer?> holder = LayerHandle<ConcreteLayer?>(layer);
+    final LayerHandle<ConcreteLayer> holder = LayerHandle<ConcreteLayer>(layer);
     expect(layer.debugHandleCount, 1);
     expect(layer.debugDisposed, false);
     expect(layer2.debugHandleCount, 0);

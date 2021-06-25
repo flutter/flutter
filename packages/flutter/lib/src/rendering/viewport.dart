@@ -646,7 +646,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
   }
 
-  final LayerHandle<ClipRectLayer?> _clipRectLayer = LayerHandle<ClipRectLayer?>();
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
   void dispose() {

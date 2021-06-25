@@ -341,7 +341,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     }
   }
 
-  final LayerHandle<ClipRectLayer?> _clipRectLayer = LayerHandle<ClipRectLayer?>();
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
   void dispose() {

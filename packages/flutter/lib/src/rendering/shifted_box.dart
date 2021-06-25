@@ -822,7 +822,7 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
     }());
   }
 
-  final LayerHandle<ClipRectLayer?> _clipRectLayer = LayerHandle<ClipRectLayer?>();
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
   void dispose() {

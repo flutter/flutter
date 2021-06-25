@@ -97,7 +97,7 @@ class AnnotationResult<T> {
 /// Layers must not be used after disposal. If a RenderObject needs to maintain
 /// a layer for later usage, it must create a handle to that layer. This is
 /// handled automatically for the [RenderObject.layer] property, but additional
-/// layers must user their own [LayerHandle].
+/// layers must use their own [LayerHandle].
 ///
 /// {@tool snippet}
 ///
@@ -106,7 +106,7 @@ class AnnotationResult<T> {
 ///
 /// ```dart
 /// class ClippingRenderObject extends RenderBox {
-///   final LayerHandle<ClipRectLayer?> _clipRectLayer = LayerHandle<ClipRectLayer?>();
+///   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 ///
 ///   @override
 ///   bool get isRepaintBoundary => true; // The [layer] property will be used.
@@ -161,7 +161,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// imply that it has been removed from its parent.
   final LayerHandle<Layer> _parentHandle = LayerHandle<Layer>();
 
-  /// Incremenetd by [LayerHandle].
+  /// Incremeneted by [LayerHandle].
   int _refCount = 0;
 
   /// Called by [LayerHandle].
@@ -194,7 +194,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// This method _only_ disposes resources for this layer. For example, if it
   /// is a [ContainerLayer], it does not dispose resources of any children.
   /// However, [ContainerLayer]s do remove any children they have when
-  /// this is method is called.
+  /// this method is called, and if this layer was the last holder of a removed
+  /// child handle, the child may recursively clean up its resources.
   ///
   /// This method automatically gets called when all outstanding [LayerHandle]s
   /// are disposed. [LayerHandle] objects are typically held by the [parent]
@@ -591,21 +592,17 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 /// the handles for that layer similarly to the implementation of
 /// [RenderObject.layer].
 ///
-/// [RenderObject]s automatically store handles to [PictureLayer](s) they draw
-/// into and dispose of those handles when the [RenderObject.dispose] method
-/// is called or they otherwise no longer need the reference to that
-/// [PictureLayer] (such as when they paint a new picture).
+/// A handle is automatically managed for [RenderObject.layer].
 ///
-/// A handle is also automatically managed for [RenderObject.layer].
-///
-/// If a [RenderObject] creates layers in addition to its [RenderObject.layer],
+/// If a [RenderObject] creates layers in addition to its [RenderObject.layer]
+/// and it intends to reuse those layers separately from [RenderObject.layer],
 /// it must create a handle to that layer and dispose of it when the layer is
 /// no longer needed. For example, if it re-creates or nulls out an existing
 /// layer in [RenderObject.paint], it should dispose of the handle to the
 /// old layer. It should also dispose of any layer handles it holds in
 /// [RenderObject.dispose].
-class LayerHandle<T extends Layer?> {
-  /// Creates a new LayerHandle, optionally referencing a [Layer].
+class LayerHandle<T extends Layer> {
+  /// Create a new layer handle, optionally referencing a [Layer].
   LayerHandle([this._layer]) {
     if (_layer != null) {
       _layer!._refCount += 1;
@@ -614,12 +611,10 @@ class LayerHandle<T extends Layer?> {
 
   T? _layer;
 
-  /// The [Layer] this class holds.
+  /// The [Layer] whose resources this object keeps alive.
   ///
-  /// Setting a new value will dispose the previously held layer if there are
-  /// no other open handles to that layer.
-  ///
-  /// To dispose of this handle, set this value to `null`.
+  /// Setting a new value will or null dispose the previously held layer if
+  /// there are no other open handles to that layer.
   T? get layer => _layer;
 
   set layer(T? layer) {
@@ -644,9 +639,9 @@ class LayerHandle<T extends Layer?> {
 /// A composited layer containing a [Picture].
 ///
 /// Picture layers are always leaves in the layer tree. They are also
-/// responsible for disposing of the [Picture] object they hold. This is done
-/// when their parent and all [RenderObject]s that participated in painting the
-/// picture have been disposed.
+/// responsible for disposing of the [Picture] object they hold. This is
+/// typically done when their parent and all [RenderObject]s that participated
+/// in painting the picture have been disposed.
 class PictureLayer extends Layer {
   /// Creates a leaf layer for the layer tree.
   PictureLayer(this.canvasBounds);

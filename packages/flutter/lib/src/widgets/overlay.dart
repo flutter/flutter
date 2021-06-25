@@ -801,7 +801,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     }
   }
 
-  final LayerHandle<ClipRectLayer?> _clipRectLayer = LayerHandle<ClipRectLayer?>();
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
   void dispose() {
