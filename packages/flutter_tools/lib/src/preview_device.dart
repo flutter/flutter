@@ -33,7 +33,7 @@ BundleBuilder _defaultBundleBuilder() {
 /// A device type that runs a prebuilt desktop binary alongside a locally compiled kernel file.
 ///
 /// This could be used to support debug local development without plugins on machines that
-/// have not completed the SDK setup. These feautres are not fully implemented and the
+/// have not completed the SDK setup. These features are not fully implemented and the
 /// device is not currently discoverable.
 class PreviewDevice extends Device {
   PreviewDevice({
