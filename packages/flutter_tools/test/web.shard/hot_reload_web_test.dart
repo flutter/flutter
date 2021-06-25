@@ -32,7 +32,7 @@ void main() {
   });
 
   testWithoutContext('hot restart works without error', () async {
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     await flutter.hotRestart();
   });
 
@@ -44,7 +44,7 @@ void main() {
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
