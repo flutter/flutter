@@ -133,6 +133,9 @@ class IOSDevices extends PollingDeviceDiscovery {
 
     return _xcdevice.getDiagnostics();
   }
+
+  @override
+  List<String> get wellKnownIds => const <String>[];
 }
 
 enum IOSDeviceInterface {
