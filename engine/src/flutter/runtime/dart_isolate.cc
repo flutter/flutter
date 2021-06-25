@@ -82,7 +82,6 @@ std::weak_ptr<DartIsolate> DartIsolate::SpawnIsolate(
     const Settings& settings,
     std::unique_ptr<PlatformConfiguration> platform_configuration,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-    fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
     Flags flags,
@@ -103,7 +102,6 @@ std::weak_ptr<DartIsolate> DartIsolate::SpawnIsolate(
       std::move(isolate_configration),                   //
       UIDartState::Context{GetTaskRunners(),             //
                            snapshot_delegate,            //
-                           hint_freed_delegate,          //
                            GetIOManager(),               //
                            GetSkiaUnrefQueue(),          //
                            GetImageDecoder(),            //

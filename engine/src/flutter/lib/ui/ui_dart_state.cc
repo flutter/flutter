@@ -30,7 +30,6 @@ UIDartState::Context::Context(const TaskRunners& task_runners)
 UIDartState::Context::Context(
     const TaskRunners& task_runners,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-    fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> unref_queue,
     fml::WeakPtr<ImageDecoder> image_decoder,
@@ -40,7 +39,6 @@ UIDartState::Context::Context(
     std::shared_ptr<VolatilePathTracker> volatile_path_tracker)
     : task_runners(task_runners),
       snapshot_delegate(snapshot_delegate),
-      hint_freed_delegate(hint_freed_delegate),
       io_manager(io_manager),
       unref_queue(unref_queue),
       image_decoder(image_decoder),
@@ -167,10 +165,6 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
 
 fml::WeakPtr<SnapshotDelegate> UIDartState::GetSnapshotDelegate() const {
   return context_.snapshot_delegate;
-}
-
-fml::WeakPtr<HintFreedDelegate> UIDartState::GetHintFreedDelegate() const {
-  return context_.hint_freed_delegate;
 }
 
 fml::WeakPtr<GrDirectContext> UIDartState::GetResourceContext() const {
