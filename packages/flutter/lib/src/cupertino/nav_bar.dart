@@ -232,10 +232,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
-  }) : assert(automaticallyImplyLeading != null),
-       assert(automaticallyImplyMiddle != null),
-       assert(transitionBetweenRoutes != null),
-       assert(
+  }) : assert(
          heroTag != null,
          'heroTag cannot be null. Use transitionBetweenRoutes = false to '
          'disable Hero transition on this navigation bar.',
@@ -566,9 +563,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
-  }) : assert(automaticallyImplyLeading != null),
-       assert(automaticallyImplyTitle != null),
-       assert(
+  }) : assert(
          automaticallyImplyTitle == true || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
@@ -737,9 +732,7 @@ class _LargeTitleNavigationBarSliverDelegate
     required this.persistentHeight,
     required this.alwaysShowMiddle,
     required this.stretchConfiguration,
-  }) : assert(persistentHeight != null),
-       assert(alwaysShowMiddle != null),
-       assert(transitionBetweenRoutes != null);
+  });
 
   final _NavigationBarStaticComponentsKeys keys;
   final _NavigationBarStaticComponents components;
@@ -1474,9 +1467,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
     required this.hasUserMiddle,
     required this.largeExpanded,
     required this.child,
-  }) : assert(componentsKeys != null),
-       assert(largeExpanded != null),
-       assert(!largeExpanded || largeTitleTextStyle != null),
+  }) : assert(!largeExpanded || largeTitleTextStyle != null),
        super(key: componentsKeys.navBarBoxKey);
 
   final _NavigationBarStaticComponentsKeys componentsKeys;
@@ -2267,10 +2258,6 @@ Widget _navBarHeroFlightShuttleBuilder(
   BuildContext fromHeroContext,
   BuildContext toHeroContext,
 ) {
-  assert(animation != null);
-  assert(flightDirection != null);
-  assert(fromHeroContext != null);
-  assert(toHeroContext != null);
   assert(fromHeroContext.widget is Hero);
   assert(toHeroContext.widget is Hero);
 
@@ -2282,9 +2269,6 @@ Widget _navBarHeroFlightShuttleBuilder(
 
   final _TransitionableNavigationBar fromNavBar = fromHeroWidget.child as _TransitionableNavigationBar;
   final _TransitionableNavigationBar toNavBar = toHeroWidget.child as _TransitionableNavigationBar;
-
-  assert(fromNavBar.componentsKeys != null);
-  assert(toNavBar.componentsKeys != null);
 
   assert(
     fromNavBar.componentsKeys.navBarBoxKey.currentContext!.owner != null,

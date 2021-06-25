@@ -43,8 +43,6 @@ class CupertinoButton extends StatefulWidget {
     this.alignment = Alignment.center,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-       assert(disabledColor != null),
-       assert(alignment != null),
        _filled = false,
        super(key: key);
 
@@ -65,8 +63,6 @@ class CupertinoButton extends StatefulWidget {
     this.alignment = Alignment.center,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-       assert(disabledColor != null),
-       assert(alignment != null),
        color = null,
        _filled = true,
        super(key: key);

@@ -31,8 +31,7 @@ class OrientationBuilder extends StatelessWidget {
   const OrientationBuilder({
     Key? key,
     required this.builder,
-  }) : assert(builder != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// Builds the widgets below this widget given this widget's orientation.
   ///

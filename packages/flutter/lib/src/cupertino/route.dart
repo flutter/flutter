@@ -322,10 +322,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     RouteSettings? settings,
     this.maintainState = true,
     bool fullscreenDialog = false,
-  }) : assert(builder != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null),
-       super(settings: settings, fullscreenDialog: fullscreenDialog) {
+  }) : super(settings: settings, fullscreenDialog: fullscreenDialog) {
     assert(opaque);
   }
 
@@ -352,8 +349,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
 class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
   _PageBasedCupertinoPageRoute({
     required CupertinoPage<T> page,
-  }) : assert(page != null),
-       super(settings: page) {
+  }) : super(settings: page) {
     assert(opaque);
   }
 
@@ -402,10 +398,7 @@ class CupertinoPage<T> extends Page<T> {
     String? name,
     Object? arguments,
     String? restorationId,
-  }) : assert(child != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null),
-       super(key: key, name: name, arguments: arguments, restorationId: restorationId);
+  }) : super(key: key, name: name, arguments: arguments, restorationId: restorationId);
 
   /// The content to be shown in the [Route] created by this page.
   final Widget child;
@@ -444,8 +437,7 @@ class CupertinoPageTransition extends StatelessWidget {
     required Animation<double> secondaryRouteAnimation,
     required this.child,
     required bool linearTransition,
-  }) : assert(linearTransition != null),
-       _primaryPositionAnimation =
+  }) : _primaryPositionAnimation =
            (linearTransition
              ? primaryRouteAnimation
              : CurvedAnimation(
@@ -585,10 +577,7 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.child,
-  }) : assert(enabledCallback != null),
-       assert(onStartPopGesture != null),
-       assert(child != null),
-       super(key: key);
+  }) : super(key: key);
 
   final Widget child;
 
@@ -709,8 +698,7 @@ class _CupertinoBackGestureController<T> {
   _CupertinoBackGestureController({
     required this.navigator,
     required this.controller,
-  }) : assert(navigator != null),
-       assert(controller != null) {
+  }) {
     navigator.didStartUserGesture();
   }
 
@@ -833,7 +821,6 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
     _CupertinoEdgeShadowDecoration? b,
     double t,
   ) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -894,8 +881,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   _CupertinoEdgeShadowPainter(
     this._decoration,
     VoidCallback? onChange,
-  ) : assert(_decoration != null),
-      assert(_decoration._colors == null || _decoration._colors!.length > 1),
+  ) : assert(_decoration._colors == null || _decoration._colors!.length > 1),
       super(onChange);
 
   final _CupertinoEdgeShadowDecoration _decoration;
@@ -1194,7 +1180,6 @@ Future<T?> showCupertinoModalPopup<T>({
   bool? semanticsDismissible,
   RouteSettings? routeSettings,
 }) {
-  assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
     CupertinoModalPopupRoute<T>(
       builder: builder,
@@ -1324,11 +1309,7 @@ Future<T?> showCupertinoDialog<T>({
   bool useRootNavigator = true,
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
-}) {
-  assert(builder != null);
-  assert(useRootNavigator != null);
-
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(CupertinoDialogRoute<T>(
+}) => Navigator.of(context, rootNavigator: useRootNavigator).push<T>(CupertinoDialogRoute<T>(
     builder: builder,
     context: context,
     barrierDismissible: barrierDismissible,
@@ -1336,7 +1317,6 @@ Future<T?> showCupertinoDialog<T>({
     barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
     settings: routeSettings,
   ));
-}
 
 /// A dialog route that shows an iOS-style dialog.
 ///
@@ -1383,8 +1363,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 250),
     RouteTransitionsBuilder? transitionBuilder = _buildCupertinoDialogTransitions,
     RouteSettings? settings,
-  }) : assert(barrierDismissible != null),
-      super(
+  }) : super(
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
           return builder(context);
         },

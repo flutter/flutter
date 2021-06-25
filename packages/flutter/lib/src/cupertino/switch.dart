@@ -62,9 +62,7 @@ class CupertinoSwitch extends StatefulWidget {
     this.activeColor,
     this.trackColor,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(value != null),
-       assert(dragStartBehavior != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// Whether this switch is on or off.
   ///
@@ -382,10 +380,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     ValueChanged<bool>? onChanged,
     required TextDirection textDirection,
     required _CupertinoSwitchState state,
-  }) : assert(value != null),
-       assert(activeColor != null),
-       assert(state != null),
-       _value = value,
+  }) : _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
        _onChanged = onChanged,
@@ -401,7 +396,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool get value => _value;
   bool _value;
   set value(bool value) {
-    assert(value != null);
     if (value == _value)
       return;
     _value = value;
@@ -411,7 +405,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get activeColor => _activeColor;
   Color _activeColor;
   set activeColor(Color value) {
-    assert(value != null);
     if (value == _activeColor)
       return;
     _activeColor = value;
@@ -421,7 +414,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get trackColor => _trackColor;
   Color _trackColor;
   set trackColor(Color value) {
-    assert(value != null);
     if (value == _trackColor)
       return;
     _trackColor = value;
@@ -444,7 +436,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value)
       return;
     _textDirection = value;

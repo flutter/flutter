@@ -20,9 +20,7 @@ class _CupertinoSliverRefresh extends SingleChildRenderObjectWidget {
     this.refreshIndicatorLayoutExtent = 0.0,
     this.hasLayoutExtent = false,
     Widget? child,
-  }) : assert(refreshIndicatorLayoutExtent != null),
-       assert(refreshIndicatorLayoutExtent >= 0.0),
-       assert(hasLayoutExtent != null),
+  }) : assert(refreshIndicatorLayoutExtent >= 0.0),
        super(key: key, child: child);
 
   // The amount of space the indicator should occupy in the sliver in a
@@ -62,9 +60,7 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
     required double refreshIndicatorExtent,
     required bool hasLayoutExtent,
     RenderBox? child,
-  }) : assert(refreshIndicatorExtent != null),
-       assert(refreshIndicatorExtent >= 0.0),
-       assert(hasLayoutExtent != null),
+  }) : assert(refreshIndicatorExtent >= 0.0),
        _refreshIndicatorExtent = refreshIndicatorExtent,
        _hasLayoutExtent = hasLayoutExtent {
     this.child = child;
@@ -75,7 +71,6 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   double get refreshIndicatorLayoutExtent => _refreshIndicatorExtent;
   double _refreshIndicatorExtent;
   set refreshIndicatorLayoutExtent(double value) {
-    assert(value != null);
     assert(value >= 0.0);
     if (value == _refreshIndicatorExtent)
       return;
@@ -89,7 +84,6 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   bool get hasLayoutExtent => _hasLayoutExtent;
   bool _hasLayoutExtent;
   set hasLayoutExtent(bool value) {
-    assert(value != null);
     if (value == _hasLayoutExtent)
       return;
     _hasLayoutExtent = value;
@@ -344,9 +338,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
     this.builder = buildRefreshIndicator,
     this.onRefresh,
-  }) : assert(refreshTriggerPullDistance != null),
-       assert(refreshTriggerPullDistance > 0.0),
-       assert(refreshIndicatorExtent != null),
+  }) : assert(refreshTriggerPullDistance > 0.0),
        assert(refreshIndicatorExtent >= 0.0),
        assert(
          refreshTriggerPullDistance >= refreshIndicatorExtent,

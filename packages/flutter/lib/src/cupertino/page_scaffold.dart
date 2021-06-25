@@ -63,9 +63,7 @@ class CupertinoPageScaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
     required this.child,
-  }) : assert(child != null),
-       assert(resizeToAvoidBottomInset != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
   /// top of the screen.

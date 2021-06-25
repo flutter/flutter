@@ -128,12 +128,8 @@ class CupertinoScrollbar extends RawScrollbar {
     this.radiusWhileDragging = defaultRadiusWhileDragging,
     ScrollNotificationPredicate? notificationPredicate,
     ScrollbarOrientation? scrollbarOrientation,
-  }) : assert(thickness != null),
-       assert(thickness < double.infinity),
-       assert(thicknessWhileDragging != null),
+  }) : assert(thickness < double.infinity),
        assert(thicknessWhileDragging < double.infinity),
-       assert(radius != null),
-       assert(radiusWhileDragging != null),
        super(
          key: key,
          child: child,

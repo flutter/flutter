@@ -63,12 +63,8 @@ class CupertinoSlider extends StatefulWidget {
     this.divisions,
     this.activeColor,
     this.thumbColor = CupertinoColors.white,
-  }) : assert(value != null),
-       assert(min != null),
-       assert(max != null),
-       assert(value >= min && value <= max),
+  }) : assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
-       assert(thumbColor != null),
        super(key: key);
 
   /// The currently selected value for this slider.
@@ -329,8 +325,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     this.onChangeEnd,
     required TickerProvider vsync,
     required TextDirection textDirection,
-  }) : assert(value != null && value >= 0.0 && value <= 1.0),
-       assert(textDirection != null),
+  }) : assert(value >= 0.0 && value <= 1.0),
        _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
@@ -353,7 +348,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   double get value => _value;
   double _value;
   set value(double newValue) {
-    assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
+    assert(newValue >= 0.0 && newValue <= 1.0);
     if (newValue == _value)
       return;
     _value = newValue;
@@ -417,7 +412,6 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value)
       return;
     _textDirection = value;
