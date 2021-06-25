@@ -863,10 +863,12 @@ class RawScrollbar extends StatefulWidget {
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.interactive,
     this.scrollbarOrientation,
+    this.mainAxisMargin = 0.0,
   }) : assert(child != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
        assert(pressDuration != null),
+       assert(mainAxisMargin != null),
        super(key: key);
 
   /// {@template flutter.widgets.Scrollbar.child}
@@ -1077,6 +1079,12 @@ class RawScrollbar extends StatefulWidget {
   /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
   final ScrollbarOrientation? scrollbarOrientation;
 
+  /// Distance from the scrollbar's start and end to the edge of the viewport
+  /// in logical pixels. It affects the amount of available paint area.
+  ///
+  /// Mustn't be null and defaults to 0.
+  final double mainAxisMargin;
+
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
 }
@@ -1149,6 +1157,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       thickness: widget.thickness ?? _kScrollbarThickness,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       scrollbarOrientation: widget.scrollbarOrientation,
+      mainAxisMargin: widget.mainAxisMargin,
     );
   }
 
@@ -1284,7 +1293,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
       ..padding = MediaQuery.of(context).padding
-      ..scrollbarOrientation = widget.scrollbarOrientation;
+      ..scrollbarOrientation = widget.scrollbarOrientation
+      ..mainAxisMargin = widget.mainAxisMargin;
   }
 
   @override

@@ -1452,4 +1452,34 @@ void main() {
 
     expect(() => painter.paint(testCanvas, size), throwsA(isA<AssertionError>()));
   });
+
+  testWidgets('RawScrollbar mainAxisMargin property works properly', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            mainAxisMargin: 10,
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 1000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 580.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
+    );
+  });
 }
