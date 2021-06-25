@@ -38,6 +38,31 @@ TEST(FlDartProjectTest, EnableMirrors) {
   G_GNUC_END_IGNORE_DEPRECATIONS
 }
 
+TEST(FlDartProjectTest, DartEntrypointArgs) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+
+  char** retrieved_args =
+      fl_dart_project_get_dart_entrypoint_arguments(project);
+
+  EXPECT_EQ(g_strv_length(retrieved_args), 0U);
+
+  GPtrArray* args_array = g_ptr_array_new();
+  g_ptr_array_add(args_array, (gpointer) "arg_one");
+  g_ptr_array_add(args_array, (gpointer) "arg_two");
+  g_ptr_array_add(args_array, (gpointer) "arg_three");
+  g_ptr_array_add(args_array, nullptr);
+  gchar** args = (gchar**)g_ptr_array_free(args_array, false);
+
+  fl_dart_project_set_dart_entrypoint_arguments(project, args);
+
+  retrieved_args = fl_dart_project_get_dart_entrypoint_arguments(project);
+
+  // FlDartProject should have done a deep copy of the args
+  EXPECT_NE(retrieved_args, args);
+
+  EXPECT_EQ(g_strv_length(retrieved_args), 3U);
+}
+
 TEST(FlDartProjectTest, SwitchesEmpty) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
 
