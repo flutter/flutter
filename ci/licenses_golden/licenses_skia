@@ -1,4 +1,4 @@
-Signature: 3b85eabd96013d4bb12dce293ab2353f
+Signature: 6db4181185e70731bd8f01579de9c0d4
 
 UNUSED LICENSES:
 
@@ -3103,7 +3103,6 @@ FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.fp
@@ -3113,8 +3112,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAARectEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAARectEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAlphaThresholdFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAlphaThresholdFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleBlurFragmentProcessor.cpp
@@ -3127,34 +3124,16 @@ FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRectBlurEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRectBlurEffect.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuad.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrClampedGradientEffect.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrDualIntervalGradientColorizer.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.h
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.h
-FILE: ../../../third_party/skia/src/gpu/gradients/GrLinearGradientLayout.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrRadialGradientLayout.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrSingleIntervalGradientColorizer.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrSweepGradientLayout.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrTiledGradientEffect.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrTwoPointConicalGradientLayout.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrUnrolledBinaryGradientColorizer.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrClampedGradientEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrClampedGradientEffect.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrDualIntervalGradientColorizer.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrDualIntervalGradientColorizer.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrLinearGradientLayout.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrLinearGradientLayout.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrRadialGradientLayout.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrRadialGradientLayout.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSingleIntervalGradientColorizer.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSingleIntervalGradientColorizer.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSweepGradientLayout.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSweepGradientLayout.h
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTiledGradientEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTiledGradientEffect.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTwoPointConicalGradientLayout.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTwoPointConicalGradientLayout.h
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrUnrolledBinaryGradientColorizer.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrUnrolledBinaryGradientColorizer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlAttachment.h
@@ -3437,14 +3416,8 @@ FILE: ../../../third_party/skia/src/gpu/GrTextureProxyCacheAccess.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureProxyPriv.h
 FILE: ../../../third_party/skia/src/gpu/SkGr.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrAtlasedShaderHelpers.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrCircleEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrEllipseEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrTextureEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrTextureEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrEllipseEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrEllipseEffect.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLOpsRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLSemaphore.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLSemaphore.h
