@@ -899,7 +899,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     );
   }
 
-  void _handlePlatformFocusChanged(bool isFocused){
+  void _handlePlatformFocusChanged(bool isFocused) {
     if (isFocused) {
       _focusNode!.requestFocus();
     }

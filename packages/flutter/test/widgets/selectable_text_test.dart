@@ -4646,7 +4646,7 @@ void main() {
       MaterialApp(
         home: SelectableText(
           ' blah blah',
-          onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+          onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
             selection = newSelection;
           },
         ),
@@ -4692,7 +4692,7 @@ void main() {
           child: Center(
             child: SelectableText(
               ' blah blah',
-              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
                 selection = newSelection;
               },
             ),
@@ -4745,7 +4745,7 @@ void main() {
           child: Center(
             child: SelectableText(
               ' blah blah  \n  blah',
-              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
                 selection = newSelection;
               },
             ),
