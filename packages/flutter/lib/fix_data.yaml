@@ -15,6 +15,204 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
   # Changes made in https://github.com/flutter/flutter/pull/60320
   - title: "Migrate to 'viewId'"
     date: 2020-07-05
