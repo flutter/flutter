@@ -1,4 +1,4 @@
-Signature: 1f9dc0ed632b47eaf9f0288a3a81cea5
+Signature: ce92968d0091e30a29755a67d0ca002c
 
 UNUSED LICENSES:
 
@@ -5214,6 +5214,8 @@ FILE: ../../../third_party/skia/include/gpu/gl/egl/GrGLMakeEGLInterface.h
 FILE: ../../../third_party/skia/include/gpu/gl/glx/GrGLMakeGLXInterface.h
 FILE: ../../../third_party/skia/include/sksl/DSLSymbols.h
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings_gen.cpp
+FILE: ../../../third_party/skia/src/core/SkBlendModeBlender.cpp
+FILE: ../../../third_party/skia/src/core/SkBlendModeBlender.h
 FILE: ../../../third_party/skia/src/core/SkBlenderBase.h
 FILE: ../../../third_party/skia/src/core/SkMatrixInvert.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixInvert.h
