@@ -17,6 +17,7 @@
 #include "paragraph_skia.h"
 
 #include <algorithm>
+#include <numeric>
 
 namespace txt {
 
@@ -106,6 +107,12 @@ std::vector<LineMetrics>& ParagraphSkia::GetLineMetrics() {
     paragraph_->getLineMetrics(metrics);
 
     line_metrics_.emplace();
+    line_metrics_styles_.reserve(
+        std::accumulate(metrics.begin(), metrics.end(), 0,
+                        [](const int a, const skt::LineMetrics& b) {
+                          return a + b.fLineMetrics.size();
+                        }));
+
     for (const skt::LineMetrics& skm : metrics) {
       LineMetrics& txtm = line_metrics_->emplace_back(
           skm.fStartIndex, skm.fEndIndex, skm.fEndExcludingWhitespaces,
