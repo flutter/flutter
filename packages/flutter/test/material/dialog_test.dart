@@ -2087,7 +2087,7 @@ void main() {
     }
 
     // Default configuration
-    await(tester.pumpWidget(buildFrame(null)));
+    await tester.pumpWidget(buildFrame(null));
     expect(tester.getTopLeft(find.byType(AlertDialog)).dx, 0);
     expect(tester.getTopRight(find.byType(AlertDialog)).dx, 800);
     expect(tester.getSize(find.byType(OverflowBar)).width, 800);
@@ -2096,27 +2096,27 @@ void main() {
 
     // All possible alginment values
 
-    await(tester.pumpWidget(buildFrame(MainAxisAlignment.start)));
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.start));
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, 0);
     expect(tester.getTopRight(find.byKey(actionKey)).dx, 20);
 
-    await(tester.pumpWidget(buildFrame(MainAxisAlignment.center)));
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.center));
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, (800 - 20) / 2);
     expect(tester.getTopRight(find.byKey(actionKey)).dx, (800 - 20) / 2 + 20);
 
-    await(tester.pumpWidget(buildFrame(MainAxisAlignment.end)));
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.end));
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, 800 - 20);
     expect(tester.getTopRight(find.byKey(actionKey)).dx, 800);
 
-    await(tester.pumpWidget(buildFrame(MainAxisAlignment.spaceBetween)));
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.spaceBetween));
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, 0);
     expect(tester.getTopRight(find.byKey(actionKey)).dx, 20);
 
-    await(tester.pumpWidget(buildFrame(MainAxisAlignment.spaceAround)));
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.spaceAround));
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, (800 - 20) / 2);
     expect(tester.getTopRight(find.byKey(actionKey)).dx, (800 - 20) / 2 + 20);
 
-    await(tester.pumpWidget(buildFrame(MainAxisAlignment.spaceEvenly)));
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.spaceEvenly));
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, (800 - 20) / 2);
     expect(tester.getTopRight(find.byKey(actionKey)).dx, (800 - 20) / 2 + 20);
   });
