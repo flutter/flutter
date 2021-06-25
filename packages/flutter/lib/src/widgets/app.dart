@@ -236,6 +236,9 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 /// It is used by both [MaterialApp] and [CupertinoApp] to implement base
 /// functionality for an app.
 ///
+/// If a [MediaQuery] is not available above [WidgetsApp], a [MediaQuery] is
+/// built using [MediaQuery.fromWindow].
+///
 /// Find references to many of the widgets that [WidgetsApp] wraps in the "See
 /// also" section.
 ///
@@ -247,6 +250,8 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 ///    without an explicit style.
 ///  * [MediaQuery], which establishes a subtree in which media queries resolve
 ///    to a [MediaQueryData].
+///  * [MediaQuery.fromWindow], which builds a [MediaQuery] with data derived
+///    from [WidgetsBinding.window].
 ///  * [Localizations], which defines the [Locale] for its `child`.
 ///  * [Title], a widget that describes this app in the operating system.
 ///  * [Navigator], a widget that manages a set of child widgets with a stack
@@ -1635,6 +1640,19 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
+    Widget child = Localizations(
+      locale: appLocale,
+      delegates: _localizationsDelegates.toList(),
+      child: title,
+    );
+
+    final MediaQueryData? data = MediaQuery.maybeOf(context);
+    if (data == null) {
+      child = MediaQuery.fromWindow(
+        child: child,
+      );
+    }
+
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: Shortcuts(
@@ -1648,96 +1666,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
             child: DefaultTextEditingActions(
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
-                child: _MediaQueryFromWindow(
-                  child: Localizations(
-                    locale: appLocale,
-                    delegates: _localizationsDelegates.toList(),
-                    child: title,
-                  ),
-                ),
+                child: child,
               ),
             ),
           ),
         ),
       ),
     );
-  }
-}
-
-/// Builds [MediaQuery] from `window` by listening to [WidgetsBinding].
-///
-/// It is performed in a standalone widget to rebuild **only** [MediaQuery] and
-/// its dependents when `window` changes, instead of rebuilding the entire widget tree.
-class _MediaQueryFromWindow extends StatefulWidget {
-  const _MediaQueryFromWindow({Key? key, required this.child}) : super(key: key);
-
-  final Widget child;
-
-  @override
-  _MediaQueryFromWindowsState createState() => _MediaQueryFromWindowsState();
-}
-
-class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance!.addObserver(this);
-  }
-
-  // ACCESSIBILITY
-
-  @override
-  void didChangeAccessibilityFeatures() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-  // METRICS
-
-  @override
-  void didChangeMetrics() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-  @override
-  void didChangeTextScaleFactor() {
-    setState(() {
-      // The textScaleFactor property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
-  // RENDERING
-  @override
-  void didChangePlatformBrightness() {
-    setState(() {
-      // The platformBrightness property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
-    if (!kReleaseMode) {
-      data = data.copyWith(platformBrightness: debugBrightnessOverride);
-    }
-    return MediaQuery(
-      data: data,
-      child: widget.child,
-    );
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
-    super.dispose();
   }
 }
