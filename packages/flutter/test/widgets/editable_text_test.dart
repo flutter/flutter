@@ -4065,8 +4065,10 @@ void main() {
         bool wordModifier = false,
         bool lineModifier = false,
         bool shortcutModifier = false,
-        required String platform,
+        required TargetPlatform targetPlatform,
       }) async {
+    final String targetPlatformString = targetPlatform.toString();
+    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     if (shift) {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
     }
@@ -4118,7 +4120,9 @@ void main() {
     }
   }
 
-  Future<void> testTextEditing(WidgetTester tester, {required String platform}) async {
+  Future<void> testTextEditing(WidgetTester tester, {required TargetPlatform targetPlatform}) async {
+    final String targetPlatformString = targetPlatform.toString();
+    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -4164,7 +4168,7 @@ void main() {
         LogicalKeyboardKey.arrowRight,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(cause, equals(SelectionChangedCause.keyboard), reason: 'on $platform');
@@ -4189,7 +4193,7 @@ void main() {
         LogicalKeyboardKey.arrowLeft,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4211,7 +4215,7 @@ void main() {
         LogicalKeyboardKey.arrowLeft,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4235,7 +4239,7 @@ void main() {
       ],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4258,7 +4262,7 @@ void main() {
       ],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4280,7 +4284,7 @@ void main() {
         LogicalKeyboardKey.arrowDown,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4300,7 +4304,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.arrowRight,
       ],
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4322,7 +4326,7 @@ void main() {
         LogicalKeyboardKey.arrowDown,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4347,7 +4351,7 @@ void main() {
         LogicalKeyboardKey.arrowDown,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4369,7 +4373,7 @@ void main() {
         LogicalKeyboardKey.arrowUp,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4392,7 +4396,7 @@ void main() {
       ],
       lineModifier: true,
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4415,7 +4419,7 @@ void main() {
       ],
       lineModifier: true,
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4437,7 +4441,7 @@ void main() {
         LogicalKeyboardKey.keyA,
       ],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4458,7 +4462,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.arrowLeft,
       ],
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4481,7 +4485,7 @@ void main() {
       ],
       shift: false,
       lineModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4504,7 +4508,7 @@ void main() {
       ],
       shift: false,
       lineModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4529,7 +4533,7 @@ void main() {
       ],
       shift: false,
       lineModifier: false,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4551,7 +4555,7 @@ void main() {
       ],
       shift: true,
       lineModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4574,7 +4578,7 @@ void main() {
       ],
       shift: true,
       lineModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4597,7 +4601,7 @@ void main() {
       ],
       shift: false,
       lineModifier: false,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4620,7 +4624,7 @@ void main() {
         LogicalKeyboardKey.arrowRight,
       ],
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4644,7 +4648,7 @@ void main() {
         LogicalKeyboardKey.arrowLeft,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4667,7 +4671,7 @@ void main() {
       ],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4690,7 +4694,7 @@ void main() {
         LogicalKeyboardKey.keyX,
       ],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4727,7 +4731,7 @@ void main() {
         LogicalKeyboardKey.keyV,
       ],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4751,7 +4755,7 @@ void main() {
         LogicalKeyboardKey.keyC,
       ],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4774,7 +4778,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.delete,
       ],
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     expect(
       selection,
@@ -4791,9 +4795,7 @@ void main() {
   }
 
   testWidgets('keyboard text selection works', (WidgetTester tester) async {
-    final String targetPlatform = defaultTargetPlatform.toString();
-    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
-    await testTextEditing(tester, platform: platform);
+    await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
@@ -4844,7 +4846,7 @@ void main() {
           LogicalKeyboardKey.keyV,
         ],
         shortcutModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
 
       expect(selection, isNull, reason: 'on $platform');
@@ -4857,7 +4859,7 @@ void main() {
           LogicalKeyboardKey.keyA,
         ],
         shortcutModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
 
       expect(
@@ -4880,7 +4882,7 @@ void main() {
           LogicalKeyboardKey.keyX,
         ],
         shortcutModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
 
       expect(
@@ -4908,7 +4910,7 @@ void main() {
           LogicalKeyboardKey.keyC,
         ],
         shortcutModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
 
       expect(
@@ -4935,7 +4937,7 @@ void main() {
         <LogicalKeyboardKey>[
           LogicalKeyboardKey.delete,
         ],
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
       expect(
         selection,
@@ -4956,7 +4958,7 @@ void main() {
         <LogicalKeyboardKey>[
           LogicalKeyboardKey.backspace,
         ],
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
       expect(
         selection,
@@ -7136,7 +7138,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.delete,
       ],
-      platform: 'android',
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(tester.takeException(), null);
@@ -7233,7 +7235,7 @@ void main() {
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     await tester.pump();
     // word wo|rd word|
@@ -7246,7 +7248,7 @@ void main() {
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     // word wo|rd |word
     expect(controller.selection.isCollapsed, false);
@@ -7258,9 +7260,9 @@ void main() {
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
-    if (platform == 'macos') {
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
       // word wo|rd word
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 7);
@@ -7271,7 +7273,7 @@ void main() {
         <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
         shift: true,
         wordModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
     }
 
@@ -7285,7 +7287,7 @@ void main() {
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     // |word wo|rd word
     expect(controller.selection.isCollapsed, false);
@@ -7297,7 +7299,7 @@ void main() {
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     // word| wo|rd word
     expect(controller.selection.isCollapsed, false);
@@ -7309,9 +7311,9 @@ void main() {
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
-    if (platform == 'macos') {
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
       // word wo|rd word
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 7);
@@ -7322,7 +7324,7 @@ void main() {
         <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
         shift: true,
         wordModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
     }
 
@@ -7376,7 +7378,7 @@ void main() {
         LogicalKeyboardKey.home,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     // |word word| word
@@ -7399,7 +7401,7 @@ void main() {
         LogicalKeyboardKey.home,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     // |word word word|
