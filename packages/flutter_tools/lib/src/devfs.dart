@@ -480,8 +480,6 @@ class DevFS {
   final Directory rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
 
-  static const String kAssetDirectoryPlaceholderFilename = '.__dummy_flutter_asset';
-
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
   DateTime _previousCompiled;
@@ -633,13 +631,6 @@ class DevFS {
           assetPathsToEvict.add(archivePath);
         }
       });
-
-      // When the bundle is first uploaded, include a dummy file to make sure
-      // that the assets directory on DevFS is created.
-      if (bundleFirstUpload) {
-        final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, kAssetDirectoryPlaceholderFilename));
-        dirtyEntries[deviceUri] = DevFSByteContent(<int>[]);
-      }
     }
     final CompilerOutput compilerOutput = await pendingCompilerOutput;
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
