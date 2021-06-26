@@ -152,7 +152,7 @@ class StackFrameEquality implements Equality<StackFrame> {
   }
 
   @override
-  int hash(StackFrame e) {
+  int hash(StackFrame e) { // ignore: avoid_renaming_method_parameters
     return hashValues(e.number, e.packageScheme, e.package, e.packagePath, e.line, e.column, e.className, e.method);
   }
 
