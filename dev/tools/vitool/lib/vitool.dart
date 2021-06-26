@@ -274,7 +274,7 @@ class FrameData {
   }
 
   @override
-  int get hashCode => Object.hash(size.x, size.y, Object.hashAll(paths));
+  int get hashCode => Object.hash(size, Object.hashAll(paths));
 
   @override
   String toString() {
