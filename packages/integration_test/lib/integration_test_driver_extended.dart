@@ -20,12 +20,8 @@ Future<void> integrationDriver(
   // Test states that it's waiting on web driver commands.
   // [DriverTestMessage] is converted to string since json format causes an
   // error if it's used as a message for requestData.
-  print('CONNECTED');
   String jsonResponse = await driver.requestData(DriverTestMessage.pending().toString());
 
-  print('response=');
-  print(jsonResponse);
-  print('\n');
   Response response = Response.fromJson(jsonResponse);
 
   // Until `integration_test` returns a [WebDriverCommandType.noop], keep

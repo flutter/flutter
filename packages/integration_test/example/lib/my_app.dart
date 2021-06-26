@@ -4,8 +4,6 @@
 
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
 
 // ignore_for_file: public_member_api_docs
 
@@ -19,13 +17,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static const MethodChannel _channel = MethodChannel('plugins.flutter.io/integration_test');
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -34,15 +25,9 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Column(children: <Widget> [
-            Text('Platform: ${Platform.operatingSystem}\n'),
-            ElevatedButton(child: const Text('Hello'), onPressed: () {
-              _channel.invokeMethod<void>('captureScreenshot', <String, dynamic>{});
-            },),
-          ],
+          child: Text('Platform: ${Platform.operatingSystem}\n'),
         ),
       ),
-    )
     );
   }
 }

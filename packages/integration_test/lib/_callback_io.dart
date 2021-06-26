@@ -82,7 +82,6 @@ class IOCallbackManager implements CallbackManager {
     switch (call.method) {
       case 'scheduleFrame':
         window.scheduleFrame();
-        print('scheduled frame');
         break;
     }
     return Future<dynamic>.value(null);

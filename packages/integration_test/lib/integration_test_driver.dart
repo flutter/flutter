@@ -74,7 +74,7 @@ Future<void> integrationDriver({
   // TODO(egarciad): clean this up.
   final List<dynamic> screenshots = response.data!['screenshots']! as List<dynamic>;
   final List<dynamic> bytes = screenshots[0]['bytes'];
-  await File('/Users/egarciad/p/flutter/packages/integration_test/example/android/test.png').writeAsBytes(bytes.cast<int>());
+  await File('test.png').writeAsBytes(bytes.cast<int>());
 
   await driver.close();
 
