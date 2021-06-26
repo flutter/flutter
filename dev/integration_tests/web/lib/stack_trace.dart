@@ -151,6 +151,7 @@ class StackFrameEquality implements Equality<StackFrame> {
            e1.method == e2.method;
   }
 
+  // TODO(dnfield): This ignore shouldn't be necessary, see https://github.com/dart-lang/sdk/issues/46477
   @override
   int hash(StackFrame e) { // ignore: avoid_renaming_method_parameters
     return hashValues(e.number, e.packageScheme, e.package, e.packagePath, e.line, e.column, e.className, e.method);
