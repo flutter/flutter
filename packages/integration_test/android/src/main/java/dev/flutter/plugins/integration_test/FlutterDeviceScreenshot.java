@@ -8,40 +8,32 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Rect;
 import android.graphics.Canvas;
-import androidx.annotation.NonNull;
-import androidx.test.platform.app.InstrumentationRegistry;
-import java.io.ByteArrayOutputStream;
-import io.flutter.util.PathUtils;
-import java.io.FileOutputStream;
-import java.io.File;
-import android.content.Context;
-import java.io.IOException;
-import java.lang.IllegalStateException;
-import android.view.View;
+import android.graphics.Rect;
+import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.view.Choreographer;
 import android.view.PixelCopy;
 import android.view.ViewGroup;
-import io.flutter.embedding.android.FlutterView;
+import androidx.annotation.NonNull;
+import androidx.test.platform.app.InstrumentationRegistry;
 import io.flutter.embedding.android.FlutterSurfaceView;
-import io.flutter.embedding.android.FlutterTextureView;
-import io.flutter.embedding.android.FlutterImageView;
-
-import android.os.Looper;
-import android.os.Handler;
-import com.google.common.util.concurrent.SettableFuture;
-import java.util.concurrent.Future;
-import android.view.Choreographer;
+import io.flutter.embedding.android.FlutterView;
+import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.common.MethodChannel.Result;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /** FlutterDeviceScreenshot */
 @TargetApi(19)
 class FlutterDeviceScreenshot {
-  static FlutterView getFlutterView(Activity activity) {
-    final ViewGroup root = (ViewGroup)activity.findViewById(android.R.id.content);
-    return (FlutterView)(((ViewGroup)root.getChildAt(0)).getChildAt(0));
-  }
-
+  /**
+   * Whether the app is run with instrumentation.
+   *
+   * @return true if the app is running with instrumentation.
+   */
   static boolean hasInstrumentation() {
     try {
       return InstrumentationRegistry.getInstrumentation() != null;
@@ -53,34 +45,26 @@ class FlutterDeviceScreenshot {
   /**
    * Captures a screenshot by drawing the view to a Canvas.
    *
-   * <p> It also converts {@link FlutterView} to an image view, since {@link FlutterSurfaceView}
+   * <p>It also converts {@link FlutterView} to an image view, since {@link FlutterSurfaceView}
    * pixels are opaque when rendering the view to a canvas.
    *
-   * @param activity activity the flutter activity. Usually {@link FlutterActivity}.
-   * @return byte array containing the screenshot.
+   * @param activity This is {@link FlutterActivity}.
+   * @param methodChannel The method channel to call into Dart.
+   * @param result The result of the method call that came from Dart.
    */
-  static Future<byte[]> captureView(@NonNull Activity activity) {
-    SettableFuture<byte[]> result = SettableFuture.create();
-
+  static void captureView(
+      @NonNull Activity activity, @NonNull MethodChannel methodChannel, @NonNull Result result) {
     final FlutterView flutterView = getFlutterView(activity);
+    flutterView.convertToImageView();
+    methodChannel.invokeMethod("scheduleFrame", null);
 
-    final int[] location = new int[2];
-    flutterView.getLocationInWindow(location);
-    final Bitmap bitmap = Bitmap.createBitmap(flutterView.getWidth(), flutterView.getHeight(), Bitmap.Config.ARGB_8888);
-    PixelCopy.request(
-        activity.getWindow(),
-        new Rect(location[0], location[1], location[0] + flutterView.getWidth(), location[1] + flutterView.getHeight()),
-        bitmap,
-        (int copyResult) -> {
-          if (copyResult == PixelCopy.SUCCESS) {
-            final ByteArrayOutputStream output = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, /* irrelevant for PNG */ 100, output);
-            result.set(output.toByteArray());
-          }
-        },
-        new Handler(Looper.getMainLooper()));
+    final HandlerThread screenshotBackgroundThread = new HandlerThread("screenshot");
+    screenshotBackgroundThread.start();
 
-    return result;
+    final Handler backgroundHandler = new Handler(screenshotBackgroundThread.getLooper());
+    final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    takeScreenshot(backgroundHandler, mainHandler, flutterView, result);
   }
 
   /**
@@ -95,5 +79,92 @@ class FlutterDeviceScreenshot {
 
     originalBitmap.compress(Bitmap.CompressFormat.PNG, /* irrelevant for PNG */ 100, output);
     return output.toByteArray();
+  }
+
+  private static FlutterView getFlutterView(Activity activity) {
+    final ViewGroup root = (ViewGroup) activity.findViewById(android.R.id.content);
+    return (FlutterView) (((ViewGroup) root.getChildAt(0)).getChildAt(0));
+  }
+
+  private static void waitForAndroidFrame(Runnable r) {
+    Choreographer.getInstance()
+        .postFrameCallback(
+            new Choreographer.FrameCallback() {
+              @Override
+              public void doFrame(long frameTimeNanos) {
+                r.run();
+              }
+            });
+  }
+
+  private static void takeScreenshot(
+      @NonNull Handler backgroundHandler,
+      @NonNull Handler mainHandler,
+      @NonNull FlutterView view,
+      @NonNull Result result) {
+    final boolean acquired = view.acquireLatestImageViewFrame();
+    // The next frame may already have already been comitted.
+    // The next frame is guaranteed to have the Flutter image.
+    waitForAndroidFrame(
+        () -> {
+          waitForAndroidFrame(
+              () -> {
+                if (acquired) {
+                  FlutterDeviceScreenshot.convertViewToBitmap(view, result, backgroundHandler);
+                } else {
+                  takeScreenshot(backgroundHandler, mainHandler, view, result);
+                }
+              });
+        });
+  }
+
+  private static void convertViewToBitmap(
+      FlutterView flutterView, @NonNull Result result, @NonNull Handler backgroundHandler) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      final Bitmap bitmap =
+          Bitmap.createBitmap(
+              flutterView.getWidth(), flutterView.getHeight(), Bitmap.Config.RGB_565);
+      final Canvas canvas = new Canvas(bitmap);
+      flutterView.draw(canvas);
+
+      final ByteArrayOutputStream output = new ByteArrayOutputStream();
+      bitmap.compress(Bitmap.CompressFormat.PNG, /*quality=*/ 100, output);
+      result.success(output.toByteArray());
+    }
+
+    final Bitmap bitmap =
+        Bitmap.createBitmap(
+            flutterView.getWidth(), flutterView.getHeight(), Bitmap.Config.ARGB_8888);
+    final int[] flutterViewLocation = new int[2];
+    flutterView.getLocationInWindow(flutterViewLocation);
+    final int flutterViewLeft = flutterViewLocation[0];
+    final int flutterViewTop = flutterViewLocation[1];
+
+    final Activity activity = (Activity) flutterView.getContext();
+    PixelCopy.request(
+        activity.getWindow(),
+        new Rect(
+            flutterViewLeft,
+            flutterViewTop,
+            flutterViewLeft + flutterView.getWidth(),
+            flutterViewTop + flutterView.getHeight()),
+        bitmap,
+        (int copyResult) -> {
+          final Handler mainHandler = new Handler(Looper.getMainLooper());
+          if (copyResult == PixelCopy.SUCCESS) {
+            final ByteArrayOutputStream output = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, /*quality=*/ 100, output);
+            mainHandler.post(
+                () -> {
+                  result.success(output.toByteArray());
+                });
+          } else {
+            mainHandler.post(
+                () -> {
+                  result.error("Could not copy the pixels", "result was " + copyResult, null);
+                });
+          }
+        },
+        backgroundHandler);
   }
 }

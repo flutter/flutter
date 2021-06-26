@@ -7,26 +7,17 @@ package dev.flutter.plugins.integration_test;
 import android.app.Activity;
 import android.content.Context;
 import com.google.common.util.concurrent.SettableFuture;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
-import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.embedding.android.FlutterView;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Future;
-import java.lang.InterruptedException;
-import java.util.concurrent.ExecutionException;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Handler;
-import android.view.Choreographer;
 
 /** IntegrationTestPlugin */
 public class IntegrationTestPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
@@ -83,54 +74,6 @@ public class IntegrationTestPlugin implements MethodCallHandler, FlutterPlugin, 
     flutterActivity = null;
   }
 
-  private static HandlerThread screenshotBackgroundThread;
-
-  private void waitForAndroidFrame(Runnable r) {
-    Choreographer.getInstance()
-      .postFrameCallback(
-        new Choreographer.FrameCallback() {
-          @Override
-          public void doFrame(long frameTimeNanos) {
-            r.run();
-          }
-      });
-  }
-
-  private void takeScreenshot(Handler handler, Handler mainHandler, FlutterView view, Activity activity, Result result) {
-    final boolean acquired = view.acquireLatestImageViewFrame();
-    // The next frame may already have already been comitted.
-    waitForAndroidFrame(() -> {
-      mainHandler.post(() -> {
-        methodChannel.invokeMethod("scheduleFrame", null);
-      });
-
-      // The next frame is guaranteed to have the Flutter image.
-      waitForAndroidFrame(() -> {
-        mainHandler.post(() -> {
-          methodChannel.invokeMethod("scheduleFrame", null);
-        });
-
-        if (acquired) {
-          io.flutter.Log.d("flutter", "got the image");
-            try {
-              byte[] png = FlutterDeviceScreenshot.captureView(activity).get();
-              mainHandler.post(() -> {
-                io.flutter.Log.d("flutter", "responded");
-                result.success(png);
-              });
-            } catch (Exception exception) {
-              mainHandler.post(() -> {
-                io.flutter.Log.d("flutter", "no responded");
-                result.error("Could not capture screenshot", "capture view failed", exception);
-              });
-            }
-        } else {
-          takeScreenshot(handler, mainHandler, view, activity, result);
-        }
-      });
-    });
-  }
-
   @Override
   public void onMethodCall(MethodCall call, Result result) {
     switch (call.method) {
@@ -140,11 +83,6 @@ public class IntegrationTestPlugin implements MethodCallHandler, FlutterPlugin, 
         result.success(null);
         return;
       case "captureScreenshot":
-        if (screenshotBackgroundThread == null) {
-          screenshotBackgroundThread = new HandlerThread("screenshot");
-          screenshotBackgroundThread.start();
-        }
-
         if (FlutterDeviceScreenshot.hasInstrumentation()) {
           byte[] image;
           try {
@@ -160,17 +98,7 @@ public class IntegrationTestPlugin implements MethodCallHandler, FlutterPlugin, 
           result.error("Could not capture screenshot", "Activity not initialized", null);
           return;
         }
-        final FlutterView flutterView = FlutterDeviceScreenshot.getFlutterView(flutterActivity);
-
-        flutterView.convertToImageView();
-        io.flutter.Log.d("flutter", "waiting for copy");
-        Handler handler = new Handler(screenshotBackgroundThread.getLooper());
-        Handler mainHandler = new Handler(Looper.getMainLooper());
-
-        handler.post(() -> {
-          takeScreenshot(handler, mainHandler, flutterView, flutterActivity, result);
-        });
-
+        FlutterDeviceScreenshot.captureView(flutterActivity, methodChannel, result);
         return;
       default:
         result.notImplemented();
