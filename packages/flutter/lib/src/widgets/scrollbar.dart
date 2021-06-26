@@ -1060,8 +1060,8 @@ class RawScrollbar extends StatefulWidget {
   /// [minOverscrollLength] is `double.infinity`, it will not be respected if
   /// the [ScrollMetrics.viewportDimension] and [mainAxisMargin] are finite.
   ///
-  /// The value is less than or equal to [minLength] and greater than or equal to 0.
-  /// If unspecified or set to null, it will default to the value of [minLength].
+  /// The value is less than or equal to [minThumbLength] and greater than or equal to 0.
+  /// If unspecified or set to null, it will default to the value of [minThumbLength].
   double get minOverscrollLength => _minOverscrollLength;
   final double _minOverscrollLength;
 
