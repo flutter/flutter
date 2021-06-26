@@ -1,4 +1,4 @@
-Signature: 6db4181185e70731bd8f01579de9c0d4
+Signature: a0c66c4827edbd4c02120d3e64ab2a31
 
 UNUSED LICENSES:
 
@@ -3103,7 +3103,6 @@ FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrRRectBlurEffect.fp
@@ -3112,8 +3111,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAlphaThresholdFragmentProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAlphaThresholdFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleBlurFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleBlurFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConfigConversionEffect.cpp
