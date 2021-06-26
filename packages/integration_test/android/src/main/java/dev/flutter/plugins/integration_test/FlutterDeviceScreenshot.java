@@ -135,19 +135,23 @@ class FlutterDeviceScreenshot {
     final Bitmap bitmap =
         Bitmap.createBitmap(
             flutterView.getWidth(), flutterView.getHeight(), Bitmap.Config.ARGB_8888);
+
     final int[] flutterViewLocation = new int[2];
     flutterView.getLocationInWindow(flutterViewLocation);
     final int flutterViewLeft = flutterViewLocation[0];
     final int flutterViewTop = flutterViewLocation[1];
 
-    final Activity activity = (Activity) flutterView.getContext();
-    PixelCopy.request(
-        activity.getWindow(),
+    final Rect flutterViewRect =
         new Rect(
             flutterViewLeft,
             flutterViewTop,
             flutterViewLeft + flutterView.getWidth(),
-            flutterViewTop + flutterView.getHeight()),
+            flutterViewTop + flutterView.getHeight());
+
+    final Activity flutterActivity = (Activity) flutterView.getContext();
+    PixelCopy.request(
+        flutterActivity.getWindow(),
+        flutterViewRect,
         bitmap,
         (int copyResult) -> {
           final Handler mainHandler = new Handler(Looper.getMainLooper());
