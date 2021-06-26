@@ -7213,6 +7213,13 @@ void main() {
   });
 
   testWidgets('can change behavior by overriding text editing shortcuts', (WidgetTester tester) async {
+    const  Map<SingleActivator, Intent> testShortcuts = <SingleActivator, Intent>{
+      SingleActivator(LogicalKeyboardKey.arrowLeft): MoveSelectionRightTextIntent(),
+      SingleActivator(LogicalKeyboardKey.keyX, control: true): MoveSelectionRightTextIntent(),
+      SingleActivator(LogicalKeyboardKey.keyC, control: true): MoveSelectionRightTextIntent(),
+      SingleActivator(LogicalKeyboardKey.keyV, control: true): MoveSelectionRightTextIntent(),
+      SingleActivator(LogicalKeyboardKey.keyA, control: true): MoveSelectionRightTextIntent(),
+    };
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -7225,9 +7232,7 @@ void main() {
         child: SizedBox(
           width: 400,
           child: Shortcuts(
-            shortcuts: const <ShortcutActivator, Intent>{
-              SingleActivator(LogicalKeyboardKey.arrowLeft): MoveSelectionRightTextIntent(),
-            },
+            shortcuts: testShortcuts,
             child: EditableText(
               maxLines: 10,
               controller: controller,
@@ -7254,11 +7259,23 @@ void main() {
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 1);
 
-    // And the left arrow also moves to the right due to the Shortcuts override.
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pump();
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 2);
+    final String targetPlatform = defaultTargetPlatform.toString();
+    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
+
+    // And the testShortcuts also moves to the right due to the Shortcuts override.
+    for (final SingleActivator singleActivator in testShortcuts.keys) {
+      controller.selection = const TextSelection.collapsed(offset: 0);
+      await tester.pump();
+
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[singleActivator.trigger],
+        shortcutModifier: singleActivator.control,
+        platform: platform,
+      );
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 1);
+    }
 
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb);
@@ -7411,20 +7428,35 @@ void main() {
       extentOffset: 0,
       affinity: TextAffinity.upstream,
     );
-    late final bool myIntentWasCalled;
+    bool myIntentWasCalled = false;
+    final _MyMoveSelectionRightTextAction myMoveSelectionRightTextAction =
+        _MyMoveSelectionRightTextAction(
+      onInvoke: () {
+        myIntentWasCalled = true;
+      },
+    );
+    const Iterable<SingleActivator> testSingleActivators = <SingleActivator>{
+      SingleActivator(LogicalKeyboardKey.arrowLeft),
+      SingleActivator(LogicalKeyboardKey.keyX, control: true),
+      SingleActivator(LogicalKeyboardKey.keyC, control: true),
+      SingleActivator(LogicalKeyboardKey.keyV, control: true),
+      SingleActivator(LogicalKeyboardKey.keyA, control: true),
+    };
+
+    final Map<Type, Action<Intent>> testActions = <Type, Action<Intent>>{
+      MoveSelectionLeftTextIntent: myMoveSelectionRightTextAction,
+      CutSelectionTextIntent: myMoveSelectionRightTextAction,
+      CopySelectionTextIntent: myMoveSelectionRightTextAction,
+      PasteTextIntent: myMoveSelectionRightTextAction,
+      SelectAllTextIntent: myMoveSelectionRightTextAction,
+    };
     await tester.pumpWidget(MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
           width: 400,
           child: Actions(
-            actions: <Type, Action<Intent>>{
-              MoveSelectionLeftTextIntent: _MyMoveSelectionRightTextAction(
-                onInvoke: () {
-                  myIntentWasCalled = true;
-                },
-              ),
-            },
+            actions: testActions,
             child: EditableText(
               maxLines: 10,
               controller: controller,
@@ -7450,13 +7482,27 @@ void main() {
     await tester.pump();
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 1);
+    expect(myIntentWasCalled, isFalse);
 
-    // And the left arrow also moves to the right due to the Actions override.
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pump();
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 2);
-    expect(myIntentWasCalled, isTrue);
+    final String targetPlatform = defaultTargetPlatform.toString();
+    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
+
+    // And the testSingleActivators also moves to the right due to the Shortcuts override.
+    for (final SingleActivator singleActivator in testSingleActivators) {
+      myIntentWasCalled = false;
+      controller.selection = const TextSelection.collapsed(offset: 0);
+      await tester.pump();
+
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[singleActivator.trigger],
+        shortcutModifier: singleActivator.control,
+        platform: platform,
+      );
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 1);
+      expect(myIntentWasCalled, isTrue);
+    }
 
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb);
