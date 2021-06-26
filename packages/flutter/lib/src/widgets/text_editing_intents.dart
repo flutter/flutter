@@ -267,6 +267,14 @@ class MoveSelectionUpTextIntent extends Intent{
   const MoveSelectionUpTextIntent();
 }
 
+/// An [Intent] to select everything in the field.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class SelectAllTextIntent extends Intent{
+  /// Creates an instance of SelectAllTextIntent.
+  const SelectAllTextIntent();
+}
+
 /// An [Intent] to copy selection in the field.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}

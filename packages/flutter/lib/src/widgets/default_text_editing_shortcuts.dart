@@ -190,6 +190,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * End
@@ -197,6 +198,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + X
     //   * Meta + C
     //   * Meta + V
+    //   * Meta + A
     //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
@@ -241,6 +243,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * Meta + arrow down
@@ -249,6 +252,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + X
     //   * Meta + C
     //   * Meta + V
+    //   * Meta + A
     //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
@@ -293,6 +297,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * Meta + arrow down
@@ -301,6 +306,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + X
     //   * Meta + C
     //   * Meta + V
+    //   * Meta + A
     //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
@@ -345,6 +351,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * Meta + arrow down
@@ -353,6 +360,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + X
     //   * Meta + C
     //   * Meta + V
+    //   * Meta + A
     //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
@@ -401,11 +409,13 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyX, meta: true): CutSelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, meta: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * Control + X
     //   * Control + C
     //   * Control + V
+    //   * Control + A
     //   * Control + arrow left
     //   * Control + arrow right
     //   * Control + shift + arrow left
@@ -452,11 +462,13 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * Meta + X
     //   * Meta + C
     //   * Meta + V
+    //   * Meta + A
     //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
@@ -519,6 +531,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, meta: true): SelectAllTextIntent(),
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {
