@@ -1492,6 +1492,7 @@ void main() {
           child: RawScrollbar(
             controller: scrollController,
             minThumbLength: 21,
+            minOverscrollLength: 8,
             isAlwaysShown: true,
             child: SingleChildScrollView(
               controller: scrollController,

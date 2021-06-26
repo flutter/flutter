@@ -858,6 +858,7 @@ class RawScrollbar extends StatefulWidget {
     this.thickness,
     this.thumbColor,
     this.minThumbLength = _kMinThumbExtent,
+    double? minOverscrollLength,
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
@@ -869,6 +870,9 @@ class RawScrollbar extends StatefulWidget {
   }) : assert(child != null),
        assert(minThumbLength != null),
        assert(minThumbLength >= 0),
+       assert(minOverscrollLength == null || minOverscrollLength <= minThumbLength),
+       assert(minOverscrollLength == null || minOverscrollLength >= 0),
+       _minOverscrollLength = minOverscrollLength ?? minThumbLength,
        assert(fadeDuration != null),
        assert(timeToFade != null),
        assert(pressDuration != null),
@@ -1048,6 +1052,19 @@ class RawScrollbar extends StatefulWidget {
   /// [minOverscrollLength], which in turn is >= 0. Defaults to 18.0.
   final double minThumbLength;
 
+  /// The preferred smallest size the scrollbar can shrink to when viewport is
+  /// overscrolled.
+  ///
+  /// When overscrolling, the size of the scrollbar may shrink to a smaller size
+  /// than [minOverscrollLength] to fit in the available paint area. E.g., when
+  /// [minOverscrollLength] is `double.infinity`, it will not be respected if
+  /// the [ScrollMetrics.viewportDimension] and [mainAxisMargin] are finite.
+  ///
+  /// The value is less than or equal to [minLength] and greater than or equal to 0.
+  /// If unspecified or set to null, it will default to the value of [minLength].
+  double get minOverscrollLength => _minOverscrollLength;
+  final double _minOverscrollLength;
+
   /// The [Duration] of the fade animation.
   ///
   /// Cannot be null, defaults to a [Duration] of 300 milliseconds.
@@ -1178,6 +1195,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     scrollbarPainter = ScrollbarPainter(
       color: widget.thumbColor ?? const Color(0x66BCBCBC),
       minLength: widget.minThumbLength,
+      minOverscrollLength: widget.minOverscrollLength,
       thickness: widget.thickness ?? _kScrollbarThickness,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       scrollbarOrientation: widget.scrollbarOrientation,
@@ -1321,7 +1339,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..mainAxisMargin = widget.mainAxisMargin
       ..crossAxisMargin = widget.crossAxisMargin
-      ..minLength = widget.minThumbLength;
+      ..minLength = widget.minThumbLength
+      ..minOverscrollLength = widget.minOverscrollLength;
   }
 
   @override
