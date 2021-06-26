@@ -55,12 +55,12 @@ void main() {
 
     test('complex_layout_scroll_perf', () async {
       await testScrollPerf('complex-scroll', 'complex_layout_scroll_perf');
-    });
+    }, timeout: Timeout.none);
 
     test('tiles_scroll_perf', () async {
       await driver.tap(find.byTooltip('Open navigation menu'));
       await driver.tap(find.byValueKey('scroll-switcher'));
       await testScrollPerf('tiles-scroll', 'tiles_scroll_perf');
-    });
+    }, timeout: Timeout.none);
   });
 }

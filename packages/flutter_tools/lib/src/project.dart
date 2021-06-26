@@ -503,6 +503,8 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist => hostAppRoot.childDirectory(_hostAppProjectName).childFile('Info.plist');
 
+  File get appFrameworkInfoPlist => _flutterLibRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
+
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   @override
@@ -689,8 +691,23 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       final File infoFile = hostAppRoot.childDirectory(target).childFile('Info.plist');
       // The Info.plist file of a target contains the key WKCompanionAppBundleIdentifier,
       // if it is a watchOS companion app.
-      if (infoFile.existsSync() && globals.plistParser.getValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier') == bundleIdentifier) {
-        return true;
+      if (infoFile.existsSync()) {
+        final String? fromPlist = globals.plistParser.getValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier');
+        if (bundleIdentifier == fromPlist) {
+          return true;
+        }
+
+        // The key WKCompanionAppBundleIdentifier might contain an xcode variable
+        // that needs to be substituted before comparing it with bundle id
+        if (fromPlist != null && fromPlist.contains(r'$')) {
+          final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(buildInfo);
+          if (allBuildSettings != null) {
+            final String substituedVariable = substituteXcodeVariables(fromPlist, allBuildSettings);
+            if (substituedVariable == bundleIdentifier) {
+              return true;
+            }
+          }
+        }
       }
     }
     return false;

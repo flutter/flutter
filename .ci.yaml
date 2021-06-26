@@ -824,6 +824,7 @@ targets:
 
   - name: linux_docs_test
     builder: Linux docs_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/84609
     presubmit: false
     scheduler: luci
 

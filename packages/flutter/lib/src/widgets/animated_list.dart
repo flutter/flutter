@@ -162,7 +162,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   }
 /// }
 ///
-/// typedef RemovedItemBuilder = Widget Function(int item, BuildContext context, Animation<double> animation);
+/// typedef RemovedItemBuilder<T> = Widget Function(T item, BuildContext context, Animation<double> animation);
 ///
 /// /// Keeps a Dart [List] in sync with an [AnimatedList].
 /// ///
@@ -181,7 +181,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   }) : _items = List<E>.from(initialItems ?? <E>[]);
 ///
 ///   final GlobalKey<AnimatedListState> listKey;
-///   final RemovedItemBuilder removedItemBuilder;
+///   final RemovedItemBuilder<E> removedItemBuilder;
 ///   final List<E> _items;
 ///
 ///   AnimatedListState? get _animatedList => listKey.currentState;
@@ -197,7 +197,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///       _animatedList!.removeItem(
 ///         index,
 ///         (BuildContext context, Animation<double> animation) {
-///           return removedItemBuilder(index, context, animation);
+///           return removedItemBuilder(removedItem, context, animation);
 ///         },
 ///       );
 ///     }
