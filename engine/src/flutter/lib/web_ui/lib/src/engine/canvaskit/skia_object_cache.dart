@@ -267,6 +267,13 @@ abstract class ManagedSkiaObject<T extends Object> extends SkiaObject<T> {
   @override
   void didDelete() {
     assert(!browserSupportsFinalizationRegistry);
+
+    // Null indicates that the object has been manually disposed of. This
+    // happens for objects with manual lifecycles, such as Picture.
+    if (rawSkiaObject == null) {
+      return;
+    }
+
     if (Instrumentation.enabled) {
       Instrumentation.instance.incrementCounter(
         '${(rawSkiaObject as SkDeletable).constructor.name} deleted',
