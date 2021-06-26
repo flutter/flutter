@@ -38,9 +38,8 @@ void main() {
 
     await Future<void>.delayed(const Duration(seconds: 3));
 
-    await binding
-        .takeScreenshot('platform_name')
-        .timeout(const Duration(seconds: 3));
+    // Takes a screenshot of the native UI.
+    await binding.takeScreenshot('platform_name');
 
     // Verify that platform version is retrieved.
     expect(
