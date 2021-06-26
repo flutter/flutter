@@ -1,4 +1,4 @@
-Signature: a0c66c4827edbd4c02120d3e64ab2a31
+Signature: 4df0c641bf90f588e4256d7fce8749e5
 
 UNUSED LICENSES:
 
@@ -1210,7 +1210,6 @@ FILE: ../../../third_party/skia/gm/xfermodes.cpp
 FILE: ../../../third_party/skia/include/core/SkData.h
 FILE: ../../../third_party/skia/include/core/SkImageEncoder.h
 FILE: ../../../third_party/skia/include/core/SkImageFilter.h
-FILE: ../../../third_party/skia/include/core/SkMatrix44.h
 FILE: ../../../third_party/skia/include/core/SkSize.h
 FILE: ../../../third_party/skia/include/effects/SkLayerDrawLooper.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLConfig.h
@@ -1273,7 +1272,6 @@ FILE: ../../../third_party/skia/src/core/SkFontStream.cpp
 FILE: ../../../third_party/skia/src/core/SkLineClipper.cpp
 FILE: ../../../third_party/skia/src/core/SkLineClipper.h
 FILE: ../../../third_party/skia/src/core/SkMallocPixelRef.cpp
-FILE: ../../../third_party/skia/src/core/SkMatrix44.cpp
 FILE: ../../../third_party/skia/src/core/SkPictureData.cpp
 FILE: ../../../third_party/skia/src/core/SkPictureData.h
 FILE: ../../../third_party/skia/src/core/SkPictureFlat.cpp
