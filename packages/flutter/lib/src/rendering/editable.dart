@@ -2284,8 +2284,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
-  // Handles shortcut functionality including cut, copy, paste and select all
-  // using control/command + A.
+  // Handles shortcut functionality including select all using control/command + A.
   Future<void> _handleShortcuts(LogicalKeyboardKey key) async {
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
     final String text = textSelectionDelegate.textEditingValue.text;
