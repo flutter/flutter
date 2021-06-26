@@ -187,10 +187,16 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * End
     //   * Home
+    //   * Meta + X
+    //   * Meta + C
+    //   * Meta + V
     //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
@@ -232,11 +238,18 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * Meta + arrow down
     //   * End
     //   * Home
+    //   * Meta + X
+    //   * Meta + C
+    //   * Meta + V
+    //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
     //   * Meta + arrow up
@@ -277,11 +290,18 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * Meta + arrow down
     //   * End
     //   * Home
+    //   * Meta + X
+    //   * Meta + C
+    //   * Meta + V
+    //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
     //   * Meta + arrow up
@@ -322,11 +342,18 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * Meta + arrow down
     //   * End
     //   * Home
+    //   * Meta + X
+    //   * Meta + C
+    //   * Meta + V
+    //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
     //   * Meta + arrow up
@@ -371,8 +398,14 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, meta: true): CutSelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
+    //   * Control + X
+    //   * Control + C
+    //   * Control + V
     //   * Control + arrow left
     //   * Control + arrow right
     //   * Control + shift + arrow left
@@ -416,8 +449,14 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
     SingleActivator(LogicalKeyboardKey.end, shift: true): ExpandSelectionRightByLineTextIntent(),
     SingleActivator(LogicalKeyboardKey.home, shift: true): ExpandSelectionLeftByLineTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
+    //   * Meta + X
+    //   * Meta + C
+    //   * Meta + V
     //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
@@ -474,6 +513,12 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.end, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.home, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.space): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, meta: true): CutSelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteTextIntent(),
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {

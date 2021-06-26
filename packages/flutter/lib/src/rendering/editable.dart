@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -645,11 +644,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   static final Set<LogicalKeyboardKey> _shortcutKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.keyA,
-    LogicalKeyboardKey.keyC,
-    LogicalKeyboardKey.keyV,
-    LogicalKeyboardKey.keyX,
-    LogicalKeyboardKey.delete,
-    LogicalKeyboardKey.backspace,
   };
 
   static final Set<LogicalKeyboardKey> _nonModifierKeys = <LogicalKeyboardKey>{
@@ -2232,41 +2226,73 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(nextSelection, cause);
   }
 
+  /// Copy current [selection] to Clipboard.
+  void copySelection() {
+    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
+    final String text = textSelectionDelegate.textEditingValue.text;
+    assert(selection != null);
+    if (!selection.isCollapsed) {
+      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    }
+  }
+
+  /// Cut current [selection] to Clipboard.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  void cutSelection(SelectionChangedCause cause) {
+    if (_readOnly) {
+      return;
+    }
+    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
+    final String text = textSelectionDelegate.textEditingValue.text;
+    assert(selection != null);
+    if (!selection.isCollapsed) {
+      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+      _setTextEditingValue(
+        TextEditingValue(
+          text: selection.textBefore(text) + selection.textAfter(text),
+          selection: TextSelection.collapsed(offset: math.min(selection.start, selection.end)),
+        ),
+        cause,
+      );
+    }
+  }
+
+  /// Paste text from Clipboard, if selection exists, then selection will be replaced.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  Future<void> pasteText(SelectionChangedCause cause) async {
+    if (_readOnly) {
+      return;
+    }
+    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
+    final String text = textSelectionDelegate.textEditingValue.text;
+    assert(selection != null);
+    // Snapshot the input before using `await`.
+    // See https://github.com/flutter/flutter/issues/11427
+    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (data != null && selection.isValid) {
+      _setTextEditingValue(
+          TextEditingValue(
+            text: selection.textBefore(text) + data.text! + selection.textAfter(text),
+            selection: TextSelection.collapsed(
+                offset: math.min(selection.start, selection.end) + data.text!.length,
+            ),
+          ),
+          cause,
+      );
+    }
+  }
+
   // Handles shortcut functionality including cut, copy, paste and select all
-  // using control/command + (X, C, V, A).
+  // using control/command + A.
   Future<void> _handleShortcuts(LogicalKeyboardKey key) async {
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
     final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
     assert(_shortcutKeys.contains(key), 'shortcut key $key not recognized.');
-    if (key == LogicalKeyboardKey.keyC) {
-      if (!selection.isCollapsed) {
-        Clipboard.setData(ClipboardData(text: selection.textInside(text)));
-      }
-      return;
-    }
     TextEditingValue? value;
-    if (key == LogicalKeyboardKey.keyX && !_readOnly) {
-      if (!selection.isCollapsed) {
-        Clipboard.setData(ClipboardData(text: selection.textInside(text)));
-        value = TextEditingValue(
-          text: selection.textBefore(text) + selection.textAfter(text),
-          selection: TextSelection.collapsed(offset: math.min(selection.start, selection.end)),
-        );
-      }
-    } else if (key == LogicalKeyboardKey.keyV && !_readOnly) {
-      // Snapshot the input before using `await`.
-      // See https://github.com/flutter/flutter/issues/11427
-      final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-      if (data != null && selection.isValid) {
-        value = TextEditingValue(
-          text: selection.textBefore(text) + data.text! + selection.textAfter(text),
-          selection: TextSelection.collapsed(
-            offset: math.min(selection.start, selection.end) + data.text!.length,
-          ),
-        );
-      }
-    } else if (key == LogicalKeyboardKey.keyA) {
+    if (key == LogicalKeyboardKey.keyA) {
       value = TextEditingValue(
         text: text,
         selection: selection.copyWith(
