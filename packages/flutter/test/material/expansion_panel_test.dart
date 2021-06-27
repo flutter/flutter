@@ -692,7 +692,7 @@ void main() {
         );
       }
 
-      ExpansionPanelList buildExpansionPanelList(Function setState) {
+      ExpansionPanelList buildExpansionPanelList(StateSetter setState) {
         return ExpansionPanelList(
           expansionCallback: (int index, _) => setState(() { _panelExpansionState[index] = !_panelExpansionState[index]; }),
           children: <ExpansionPanel>[

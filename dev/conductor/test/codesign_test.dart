@@ -4,7 +4,6 @@
 
 import 'package:args/command_runner.dart';
 import 'package:conductor/codesign.dart';
-import 'package:conductor/globals.dart';
 import 'package:conductor/repository.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -16,7 +15,7 @@ import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 void main() {
   group('codesign command', () {
     const String flutterRoot = '/flutter';
-    const String checkoutsParentDirectory = '$flutterRoot/dev/tools/';
+    const String checkoutsParentDirectory = '$flutterRoot/dev/conductor/';
     const String flutterCache =
         '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/cache';
     const String flutterBin =
@@ -387,18 +386,13 @@ void main() {
             stdout: 'application/x-mach-binary',
           ),
       ]);
-      try {
-        await runner.run(<String>[
-          'codesign',
-          '--$kVerify',
-          '--no-$kSignatures',
-          '--$kRevision',
-          revision,
-        ]);
-      } on ConductorException {
-        //print(stdio.error);
-        rethrow;
-      }
+      await runner.run(<String>[
+        'codesign',
+        '--$kVerify',
+        '--no-$kSignatures',
+        '--$kRevision',
+        revision,
+      ]);
       expect(
         processManager.hasRemainingExpectations,
         false,

@@ -40,5 +40,5 @@ Future<void> main() async {
     }
 
     await driver.close();
-  });
+  }, timeout: Timeout.none);
 }

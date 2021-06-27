@@ -6,7 +6,6 @@
 
 import 'dart:io';
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -56,7 +55,8 @@ Future<void> main() async {
           'Flutter',
         );
         // Exits 0 only if codesigned.
-        unawaited(eval('xcrun', <String>['codesign', '--verify', flutterFramework]));
+        final Future<String> flutterCodesign =
+            eval('xcrun', <String>['codesign', '--verify', flutterFramework]);
 
         final String appFramework = path.join(
           appBundle.path,
@@ -64,7 +64,10 @@ Future<void> main() async {
           'App.framework',
           'App',
         );
-        unawaited(eval('xcrun', <String>['codesign', '--verify', appFramework]));
+        final Future<String> appCodesign =
+            eval('xcrun', <String>['codesign', '--verify', appFramework]);
+        await flutterCodesign;
+        await appCodesign;
       });
 
       return TaskResult.success(null);

@@ -1523,6 +1523,7 @@ void main() {
     await tester.pumpWidget(Container());
     final dynamic exception = tester.takeException();
     expect(
+      // ignore: avoid_dynamic_calls
       exception.message,
       equalsIgnoringHashCodes(
         'Tried to build dirty widget in the wrong build scope.\n'

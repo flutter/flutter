@@ -3246,7 +3246,7 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     final MethodCall setClient = log.first;
     expect(setClient.method, 'TextInput.setClient');
-    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.dark');
+    expect(((setClient.arguments as List<dynamic>).last as Map<String, dynamic>)['keyboardAppearance'], 'Brightness.dark');
   });
 
   testWidgets('text field can override keyboardAppearance from theme', (WidgetTester tester) async {
@@ -3271,7 +3271,7 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     final MethodCall setClient = log.first;
     expect(setClient.method, 'TextInput.setClient');
-    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.light');
+    expect(((setClient.arguments as List<dynamic>).last as Map<String, dynamic>)['keyboardAppearance'], 'Brightness.light');
   });
 
   testWidgets('cursorColor respects theme', (WidgetTester tester) async {

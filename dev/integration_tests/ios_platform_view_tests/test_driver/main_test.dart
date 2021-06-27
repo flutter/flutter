@@ -40,7 +40,7 @@ void main() {
 
       final Health driverHealth = await driver.checkHealth();
       expect(driverHealth.status, HealthStatus.ok);
-    });
+    }, timeout: Timeout.none);
 
     test('Merge thread to create and remove platform views should not crash',
         () async {
@@ -65,6 +65,6 @@ void main() {
 
       final Health driverHealth = await driver.checkHealth();
       expect(driverHealth.status, HealthStatus.ok);
-    });
+    }, timeout: Timeout.none);
   });
 }

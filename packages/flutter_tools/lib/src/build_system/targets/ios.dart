@@ -504,12 +504,7 @@ abstract class IosAssetBundle extends Target {
     // Copy the plist from either the project or module.
     // TODO(jonahwilliams): add plist to inputs
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-    final Directory plistRoot = flutterProject.isModule
-      ? flutterProject.ios.ephemeralModuleDirectory
-      : environment.projectDir.childDirectory('ios');
-    plistRoot
-      .childDirectory('Flutter')
-      .childFile('AppFrameworkInfo.plist')
+    flutterProject.ios.appFrameworkInfoPlist
       .copySync(environment.outputDir
       .childDirectory('App.framework')
       .childFile('Info.plist').path);
@@ -608,9 +603,9 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
       '-fembed-bitcode-marker',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=8.0'
+        '-miphoneos-version-min=9.0'
       else
-        '-miphonesimulator-version-min=8.0',
+        '-miphonesimulator-version-min=9.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',

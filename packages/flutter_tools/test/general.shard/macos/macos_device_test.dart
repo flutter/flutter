@@ -132,6 +132,22 @@ void main() {
     expect(await macOSDevices.devices, hasLength(1));
   });
 
+  testWithoutContext('has a well known device id macos', () async {
+    final MacOSDevices macOSDevices = MacOSDevices(
+      fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
+      logger: BufferLogger.test(),
+      platform: macOS,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      macOSWorkflow: MacOSWorkflow(
+        featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+        platform: macOS,
+      ),
+    );
+
+    expect(macOSDevices.wellKnownIds, <String>['macos']);
+  });
+
   testWithoutContext('can discover devices with a provided timeout', () async {
     final MacOSDevices macOSDevices = MacOSDevices(
       fileSystem: MemoryFileSystem.test(),

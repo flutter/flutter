@@ -378,12 +378,13 @@ class ConductorState extends $pb.GeneratedMessage {
         protoName: 'lastUpdatedDate')
     ..pPS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'logs')
     ..e<ReleasePhase>(
-        9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastPhase', $pb.PbFieldType.OE,
-        protoName: 'lastPhase',
-        defaultOrMaker: ReleasePhase.INITIALIZE,
+        9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'currentPhase', $pb.PbFieldType.OE,
+        protoName: 'currentPhase',
+        defaultOrMaker: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
         valueOf: ReleasePhase.valueOf,
         enumValues: ReleasePhase.values)
-    ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conductorVersion')
+    ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conductorVersion',
+        protoName: 'conductorVersion')
     ..hasRequiredFields = false;
 
   ConductorState._() : super();
@@ -395,7 +396,7 @@ class ConductorState extends $pb.GeneratedMessage {
     $fixnum.Int64 createdDate,
     $fixnum.Int64 lastUpdatedDate,
     $core.Iterable<$core.String> logs,
-    ReleasePhase lastPhase,
+    ReleasePhase currentPhase,
     $core.String conductorVersion,
   }) {
     final _result = create();
@@ -420,8 +421,8 @@ class ConductorState extends $pb.GeneratedMessage {
     if (logs != null) {
       _result.logs.addAll(logs);
     }
-    if (lastPhase != null) {
-      _result.lastPhase = lastPhase;
+    if (currentPhase != null) {
+      _result.currentPhase = currentPhase;
     }
     if (conductorVersion != null) {
       _result.conductorVersion = conductorVersion;
@@ -531,16 +532,16 @@ class ConductorState extends $pb.GeneratedMessage {
   $core.List<$core.String> get logs => $_getList(6);
 
   @$pb.TagNumber(9)
-  ReleasePhase get lastPhase => $_getN(7);
+  ReleasePhase get currentPhase => $_getN(7);
   @$pb.TagNumber(9)
-  set lastPhase(ReleasePhase v) {
+  set currentPhase(ReleasePhase v) {
     setField(9, v);
   }
 
   @$pb.TagNumber(9)
-  $core.bool hasLastPhase() => $_has(7);
+  $core.bool hasCurrentPhase() => $_has(7);
   @$pb.TagNumber(9)
-  void clearLastPhase() => clearField(9);
+  void clearCurrentPhase() => clearField(9);
 
   @$pb.TagNumber(10)
   $core.String get conductorVersion => $_getSZ(8);

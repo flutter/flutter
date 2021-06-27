@@ -1670,7 +1670,7 @@ void main() {
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
-        clipboardContent = methodCall.arguments['text'] as String;
+        clipboardContent = (methodCall.arguments as Map<String, dynamic>)['text'] as String;
       else if (methodCall.method == 'Clipboard.getData')
         return <String, dynamic>{'text': clipboardContent};
       return null;

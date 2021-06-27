@@ -4706,6 +4706,7 @@ void main() {
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
+          // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};
@@ -4779,6 +4780,7 @@ void main() {
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
+          // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};
@@ -4902,6 +4904,7 @@ void main() {
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
+          // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};
@@ -4976,6 +4979,7 @@ void main() {
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
+          // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};

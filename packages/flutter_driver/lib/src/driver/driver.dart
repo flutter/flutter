@@ -814,5 +814,5 @@ class DriverOffset {
   }
 
   @override
-  int get hashCode => dx.hashCode ^ dy.hashCode;
+  int get hashCode => Object.hash(dx, dy);
 }

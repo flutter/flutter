@@ -503,6 +503,8 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist => hostAppRoot.childDirectory(_hostAppProjectName).childFile('Info.plist');
 
+  File get appFrameworkInfoPlist => _flutterLibRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
+
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   @override

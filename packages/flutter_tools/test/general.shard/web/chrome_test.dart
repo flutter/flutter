@@ -461,21 +461,60 @@ void main() {
     );
   });
 
-  testWithoutContext('gives up retrying when a non-glibc error happens', () async {
+  testWithoutContext('can retry launch when chrome fails to start', () async {
+    const List<String> args = <String>[
+      'example_chrome',
+      '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+      '--remote-debugging-port=12345',
+      ...kChromeArgs,
+      '--headless',
+      '--disable-gpu',
+      '--no-sandbox',
+      '--window-size=2400,1800',
+      'example_url',
+    ];
+
+    // Pretend to random error 3 times.
+    for (int i = 0; i < 3; i++) {
+      processManager.addCommand(const FakeCommand(
+        command: args,
+        stderr: 'BLAH BLAH',
+      ));
+    }
+
+    // Succeed on the 4th try.
     processManager.addCommand(const FakeCommand(
-      command: <String>[
-        'example_chrome',
-        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-        '--remote-debugging-port=12345',
-        ...kChromeArgs,
-        '--headless',
-        '--disable-gpu',
-        '--no-sandbox',
-        '--window-size=2400,1800',
-        'example_url',
-      ],
-      stderr: 'nothing in the std error indicating glibc error',
+      command: args,
+      stderr: kDevtoolsStderr,
     ));
+
+    expect(
+      () async => chromeLauncher.launch(
+        'example_url',
+        skipCheck: true,
+        headless: true,
+      ),
+      returnsNormally,
+    );
+  });
+
+  testWithoutContext('gives up retrying when an error happens more than 3 times', () async {
+    for (int i = 0; i < 4; i++) {
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          '--headless',
+          '--disable-gpu',
+          '--no-sandbox',
+          '--window-size=2400,1800',
+          'example_url',
+        ],
+        stderr: 'nothing in the std error indicating glibc error',
+      ));
+    }
 
     expect(
       () async => chromeLauncher.launch(

@@ -18,6 +18,6 @@ void main() {
 
   test('check that we are in normal mode', () async {
     expect(await driver.requestData('status'), 'log: paint');
-    await driver.waitForAbsent(find.byType('PerformanceOverlay'), timeout: Duration.zero);
-  });
+    await driver.waitForAbsent(find.byType('PerformanceOverlay'));
+  }, timeout: Timeout.none);
 }

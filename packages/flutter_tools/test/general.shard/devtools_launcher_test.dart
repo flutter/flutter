@@ -35,7 +35,7 @@ void main() {
     );
   });
 
-   testWithoutContext('DevtoolsLauncher does not launch devtools if unable to reach pub.dev', () async {
+   testWithoutContext('DevtoolsLauncher does not launch devtools if unable to reach pub.dev and there is no activated package', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
       logger: logger,
@@ -48,11 +48,62 @@ void main() {
           response: const FakeResponse(statusCode: HttpStatus.internalServerError),
         ),
       ]),
-      processManager: FakeProcessManager.empty(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'foobar 0.9.6',
+        ),
+      ]),
     );
 
     final DevToolsServerAddress address = await launcher.serve();
     expect(address, isNull);
+  });
+
+  testWithoutContext('DevtoolsLauncher launches devtools if unable to reach pub.dev but there is an activated package', () async {
+    final Completer<void> completer = Completer<void>();
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      pubExecutable: 'pub',
+      logger: logger,
+      platform: platform,
+      persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient.list(<FakeRequest>[
+        FakeRequest(
+          Uri.https('pub.dev', ''),
+          method: HttpMethod.head,
+          response: const FakeResponse(statusCode: HttpStatus.internalServerError),
+        ),
+      ]),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'devtools 0.9.6',
+        ),
+        FakeCommand(
+          command: const <String>[
+            'pub',
+            'global',
+            'run',
+            'devtools',
+            '--no-launch-browser',
+          ],
+          stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
+          completer: completer,
+        ),
+      ]),
+    );
+
+    final DevToolsServerAddress address = await launcher.serve();
+    expect(address.host, '127.0.0.1');
+    expect(address.port, 9100);
   });
 
   testWithoutContext('DevtoolsLauncher pings PUB_HOSTED_URL instead of pub.dev for online check', () async {
@@ -70,7 +121,16 @@ void main() {
           response: const FakeResponse(statusCode: HttpStatus.internalServerError),
         ),
       ]),
-      processManager: FakeProcessManager.empty(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'foobar 0.9.6',
+        ),
+      ]),
     );
 
     final DevToolsServerAddress address = await launcher.serve();
@@ -86,7 +146,16 @@ void main() {
       }),
       persistentToolState: persistentToolState,
       httpClient: FakeHttpClient.list(<FakeRequest>[]),
-      processManager: FakeProcessManager.empty(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'foobar 0.9.6',
+        ),
+      ]),
     );
 
     final DevToolsServerAddress address = await launcher.serve();
@@ -416,7 +485,16 @@ void main() {
           responseError: Exception('Connection failed.'),
         ),
       ]),
-      processManager: FakeProcessManager.empty(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'foobar 0.9.6',
+        ),
+      ]),
     );
 
     await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
@@ -439,7 +517,16 @@ void main() {
           ),
         ),
       ]),
-      processManager: FakeProcessManager.empty(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'foobar 0.9.6',
+        ),
+      ]),
     );
 
     await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));

@@ -1,5 +1,4 @@
 name: flutter_test_private
-author: Flutter Authors <flutter-dev@googlegroups.com>
 description: Tests private interfaces of the flutter
 
 environment:

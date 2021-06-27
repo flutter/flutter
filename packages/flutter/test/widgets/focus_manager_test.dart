@@ -1351,4 +1351,50 @@ void main() {
 
     tester.binding.focusManager.removeListener(handleFocusChange);
   });
+
+  testWidgets('debugFocusChanges causes logging of focus changes', (WidgetTester tester) async {
+    final bool oldDebugFocusChanges = debugFocusChanges;
+    final DebugPrintCallback oldDebugPrint = debugPrint;
+    final StringBuffer messages = StringBuffer();
+    debugPrint = (String? message, {int? wrapWidth}) {
+      messages.writeln(message ?? '');
+    };
+    debugFocusChanges = true;
+    try {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      child1Attachment.reparent(parent: parent1);
+
+      int notifyCount = 0;
+      void handleFocusChange() {
+        notifyCount++;
+      }
+      tester.binding.focusManager.addListener(handleFocusChange);
+
+      parent1.requestFocus();
+      expect(notifyCount, equals(0));
+      await tester.pump();
+      expect(notifyCount, equals(1));
+      notifyCount = 0;
+
+      child1.requestFocus();
+      await tester.pump();
+      expect(notifyCount, equals(1));
+      notifyCount = 0;
+
+      tester.binding.focusManager.removeListener(handleFocusChange);
+    } finally {
+      debugFocusChanges = oldDebugFocusChanges;
+      debugPrint = oldDebugPrint;
+    }
+    final String messagesStr = messages.toString();
+    expect(messagesStr.split('\n').length, equals(58));
+    expect(messagesStr, contains(RegExp(r'   └─Child 1: FocusScopeNode#[a-f0-9]{5}\(parent1 \[PRIMARY FOCUS\]\)')));
+    expect(messagesStr, contains('FOCUS: Notifying 2 dirty nodes'));
+    expect(messagesStr, contains(RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));
+  });
 }

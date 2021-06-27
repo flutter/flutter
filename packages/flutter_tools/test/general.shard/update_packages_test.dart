@@ -15,7 +15,6 @@ import '../src/common.dart';
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
 const String kFlutterPubspecYaml = r'''
 name: flutter
-author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
@@ -50,7 +49,6 @@ dev_dependencies:
 
 const String kExtraPubspecYaml = r'''
 name: nodeps
-author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A dummy pubspec with no dependencies
 homepage: http://flutter.dev
 
@@ -60,7 +58,6 @@ environment:
 
 const String kInvalidGitPubspec = '''
 name: flutter
-author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 

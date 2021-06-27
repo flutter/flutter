@@ -2978,11 +2978,12 @@ class BuildOwner {
   /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
-  void reassemble(Element root) {
+  void reassemble(Element root, DebugReassembleConfig? reassembleConfig) {
     Timeline.startSync('Dirty Element Tree');
     try {
       assert(root._parent == null);
       assert(root.owner == this);
+      root._debugReassembleConfig = reassembleConfig;
       root.reassemble();
     } finally {
       Timeline.finishSync();
@@ -3049,6 +3050,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       _widget = widget;
 
   Element? _parent;
+  DebugReassembleConfig? _debugReassembleConfig;
 
   // Custom implementation of `operator ==` optimized for the ".of" pattern
   // used with `InheritedWidgets`.
@@ -3175,10 +3177,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   @protected
   void reassemble() {
-    markNeedsBuild();
+    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
+      markNeedsBuild();
+      _debugReassembleConfig = null;
+    }
     visitChildren((Element child) {
+      child._debugReassembleConfig = _debugReassembleConfig;
       child.reassemble();
     });
+    _debugReassembleConfig = null;
   }
 
   bool _debugIsInScope(Element target) {
@@ -4784,7 +4791,9 @@ class StatefulElement extends ComponentElement {
 
   @override
   void reassemble() {
-    state.reassemble();
+    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
+      state.reassemble();
+    }
     super.reassemble();
   }
 
@@ -6434,4 +6443,10 @@ class _NullElement extends Element {
 class _NullWidget extends Widget {
   @override
   Element createElement() => throw UnimplementedError();
+}
+
+// Whether a [DebugReassembleConfig] indicates that an element holding [widget] can skip
+// a reassemble.
+bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
+  return config == null || config.widgetName == null || widget?.runtimeType.toString() == config.widgetName;
 }

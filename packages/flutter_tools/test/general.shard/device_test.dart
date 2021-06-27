@@ -71,6 +71,33 @@ void main() {
       expect(logger.traceText, contains('Ignored error discovering 0553790d0a4e726f'));
     });
 
+    testWithoutContext('getDeviceById exact matcher with well known ID', () async {
+      final FakeDevice device1 = FakeDevice('Windows', 'windows');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
+      final List<Device> devices = <Device>[device1, device2, device3];
+      final BufferLogger logger = BufferLogger.test();
+
+      // Because the well known ID will match, no other device discovery will run.
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        deviceDiscoveryOverrides: <DeviceDiscovery>[
+          ThrowingPollingDeviceDiscovery(),
+          LongPollingDeviceDiscovery(),
+        ],
+        logger: logger,
+        terminal: Terminal.test(),
+        wellKnownId: 'windows',
+      );
+
+      Future<void> expectDevice(String id, List<Device> expected) async {
+        deviceManager.specifiedDeviceId = id;
+        expect(await deviceManager.getDevicesById(id), expected);
+      }
+      await expectDevice('windows', <Device>[device1]);
+      expect(logger.traceText, isEmpty);
+    });
+
     testWithoutContext('getDeviceById prefix matcher', () async {
       final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
@@ -467,8 +494,12 @@ class TestDeviceManager extends DeviceManager {
     List<DeviceDiscovery> deviceDiscoveryOverrides,
     @required Logger logger,
     @required Terminal terminal,
+    String wellKnownId,
   }) : super(logger: logger, terminal: terminal, userMessages: UserMessages()) {
     _fakeDeviceDiscoverer = FakePollingDeviceDiscovery();
+    if (wellKnownId != null) {
+      _fakeDeviceDiscoverer.wellKnownIds.add(wellKnownId);
+    }
     _deviceDiscoverers = <DeviceDiscovery>[
       _fakeDeviceDiscoverer,
       if (deviceDiscoveryOverrides != null)
@@ -516,6 +547,9 @@ class MockDeviceDiscovery extends Fake implements DeviceDiscovery {
     discoverDevicesCalled += 1;
     return deviceValues;
   }
+
+  @override
+  List<String> get wellKnownIds => <String>[];
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {}
@@ -545,6 +579,9 @@ class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   bool get canListAnything => true;
+
+  @override
+  final List<String> wellKnownIds = <String>[];
 }
 
 class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
@@ -560,6 +597,9 @@ class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   bool get canListAnything => true;
+
+  @override
+  List<String> get wellKnownIds => <String>[];
 }
 
 class FakeTerminal extends Fake implements Terminal {

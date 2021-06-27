@@ -326,11 +326,13 @@ void main() {
     );
     final dynamic exception = tester.takeException();
     expect(exception, isA<String>());
-    expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
-    expect(find.text('route "/"'), findsOneWidget);
-    expect(find.text('route "/a"'), findsNothing);
-    expect(find.text('route "/a/b"'), findsNothing);
-    expect(find.text('route "/b"'), findsNothing);
+    if (exception is String) {
+      expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
+      expect(find.text('route "/"'), findsOneWidget);
+      expect(find.text('route "/a"'), findsNothing);
+      expect(find.text('route "/a/b"'), findsNothing);
+      expect(find.text('route "/b"'), findsNothing);
+    }
   });
 
   testWidgets('Make sure initialRoute is only used the first time', (WidgetTester tester) async {

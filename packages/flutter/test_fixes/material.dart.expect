@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 void main() {
   // Generic reference variables.
   BuildContext context;
+  RenderObjectWidget renderObjectWidget;
+  RenderObject renderObject;
+  Object object;
 
   // Changes made in https://github.com/flutter/flutter/pull/26259
   const Scaffold scaffold = Scaffold(resizeToAvoidBottomInset: true);
@@ -273,4 +276,30 @@ void main() {
   longPressDraggable = LongPressDraggable(dragAnchorStrategy: childDragAnchorStrategy);
   longPressDraggable = LongPressDraggable(dragAnchorStrategy: pointerDragAnchorStrategy);
   longPressDraggable.dragAnchorStrategy;
+
+  // Changes made in https://github.com/flutter/flutter/pull/64254
+  final LeafRenderObjectElement leafElement = LeafRenderObjectElement();
+  leafElement.insertRenderObjectChild(renderObject, object);
+  leafElement.moveRenderObjectChild(renderObject, object);
+  leafElement.removeRenderObjectChild(renderObject);
+  final ListWheelElement listWheelElement = ListWheelElement();
+  listWheelElement.insertRenderObjectChild(renderObject, object);
+  listWheelElement.moveRenderObjectChild(renderObject, object);
+  listWheelElement.removeRenderObjectChild(renderObject);
+  final MultiChildRenderObjectElement multiChildRenderObjectElement = MultiChildRenderObjectElement();
+  multiChildRenderObjectElement.insertRenderObjectChild(renderObject, object);
+  multiChildRenderObjectElement.moveRenderObjectChild(renderObject, object);
+  multiChildRenderObjectElement.removeRenderObjectChild(renderObject);
+  final SingleChildRenderObjectElement singleChildRenderObjectElement = SingleChildRenderObjectElement();
+  singleChildRenderObjectElement.insertRenderObjectChild(renderObject, object);
+  singleChildRenderObjectElement.moveRenderObjectChild(renderObject, object);
+  singleChildRenderObjectElement.removeRenderObjectChild(renderObject);
+  final SliverMultiBoxAdaptorElement sliverMultiBoxAdaptorElement = SliverMultiBoxAdaptorElement();
+  sliverMultiBoxAdaptorElement.insertRenderObjectChild(renderObject, object);
+  sliverMultiBoxAdaptorElement.moveRenderObjectChild(renderObject, object);
+  sliverMultiBoxAdaptorElement.removeRenderObjectChild(renderObject);
+  final RenderObjectToWidgetElement renderObjectToWidgetElement = RenderObjectToWidgetElement(widget);
+  renderObjectToWidgetElement.insertRenderObjectChild(renderObject, object);
+  renderObjectToWidgetElement.moveRenderObjectChild(renderObject, object);
+  renderObjectToWidgetElement.removeRenderObjectChild(renderObject);
 }

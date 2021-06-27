@@ -20,6 +20,8 @@ const List<String> kReleaseChannels = <String>[
 
 const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
 
+const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/flutter/g/packaging/console';
+
 final RegExp releaseCandidateBranchRegex = RegExp(
   r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
 );

@@ -21,6 +21,8 @@ void main() {
     );
 
     expect(iosWorkflow.appliesToHostPlatform, false);
+    expect(iosWorkflow.canLaunchDevices, false);
+    expect(iosWorkflow.canListDevices, false);
   });
 
   testWithoutContext('iOS workflow is disabled on Linux', () {
@@ -31,6 +33,8 @@ void main() {
     );
 
     expect(iosWorkflow.appliesToHostPlatform, false);
+    expect(iosWorkflow.canLaunchDevices, false);
+    expect(iosWorkflow.canListDevices, false);
   });
 
   testWithoutContext('iOS workflow is disabled on windows', () {
@@ -41,16 +45,25 @@ void main() {
     );
 
     expect(iosWorkflow.appliesToHostPlatform, false);
+    expect(iosWorkflow.canLaunchDevices, false);
+    expect(iosWorkflow.canListDevices, false);
   });
 
-  testWithoutContext('iOS workflow is enabled on macOS', () {
+  testWithoutContext('iOS workflow applies on macOS, no Xcode', () {
     final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macos'),
-      xcode: Xcode.test(processManager: FakeProcessManager.any()),
+      xcode: Xcode.test(processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          processManager: FakeProcessManager.any(),
+          version: null,
+        ),
+      ),
       featureFlags: TestFeatureFlags(isIOSEnabled: true),
     );
 
     expect(iosWorkflow.appliesToHostPlatform, true);
+    expect(iosWorkflow.canLaunchDevices, false);
+    expect(iosWorkflow.canListDevices, false);
     expect(iosWorkflow.canListEmulators, false);
   });
 
@@ -74,5 +87,6 @@ void main() {
     expect(xcode.isSimctlInstalled, true);
     expect(iosWorkflow.canLaunchDevices, true);
     expect(iosWorkflow.canListDevices, true);
+    expect(iosWorkflow.canListEmulators, false);
   });
 }

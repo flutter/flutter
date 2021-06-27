@@ -10,21 +10,23 @@ message Remote {
 
 enum ReleasePhase {
   // Release was started with `conductor start` and repositories cloned.
-  INITIALIZE = 0;
-  APPLY_ENGINE_CHERRYPICKS = 1;
-  CODESIGN_ENGINE_BINARIES = 2;
-  APPLY_FRAMEWORK_CHERRYPICKS = 3;
+  APPLY_ENGINE_CHERRYPICKS = 0;
+  CODESIGN_ENGINE_BINARIES = 1;
+  APPLY_FRAMEWORK_CHERRYPICKS = 2;
 
   // Git tag applied to framework RC branch HEAD and pushed upstream.
-  PUBLISH_VERSION = 4;
+  PUBLISH_VERSION = 3;
 
   // RC branch HEAD pushed to upstream release branch.
   //
   // For example, flutter-1.2-candidate.3 -> upstream/beta
-  PUBLISH_CHANNEL = 5;
+  PUBLISH_CHANNEL = 4;
 
   // Package artifacts verified to exist on cloud storage.
-  VERIFY_RELEASE = 6;
+  VERIFY_RELEASE = 5;
+
+  // There is no further work to be done.
+  RELEASE_COMPLETED = 6;
 }
 
 enum CherrypickState {
@@ -98,9 +100,9 @@ message ConductorState {
 
   repeated string logs = 8;
 
-  // The last [ReleasePhase] that was successfully completed.
-  ReleasePhase lastPhase = 9;
+  // The current [ReleasePhase] that has yet to be completed.
+  ReleasePhase currentPhase = 9;
 
   // Commit hash of the Conductor tool.
-  string conductor_version = 10;
+  string conductorVersion = 10;
 }

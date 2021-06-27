@@ -124,6 +124,21 @@ void main() {
       contains(isA<GoogleChromeDevice>()));
   });
 
+  testWithoutContext('Has well known device ids chrome, edge, and web-server', () async {
+    final WebDevices webDevices = WebDevices(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{}
+      ),
+      processManager:  FakeProcessManager.any(),
+    );
+
+    expect(webDevices.wellKnownIds, <String>['chrome', 'web-server', 'edge']);
+  });
+
   testWithoutContext('Chrome device is not listed when Chrome cannot be run', () async {
     final FakeProcessManager processManager = FakeProcessManager.empty();
     processManager.excludedExecutables = <String>{kLinuxExecutable};

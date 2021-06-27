@@ -360,7 +360,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final dynamic exception = tester.takeException();
+      final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     },
   );
@@ -390,7 +390,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final dynamic exception = tester.takeException();
+      final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     },
   );
@@ -961,10 +961,16 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    final dynamic exception = tester.takeException();
+    AssertionError? exception = tester.takeException() as AssertionError?;
+    // The scrollbar is not visible and cannot be interacted with, so no assertion.
+    expect(exception, isNull);
+    // Scroll to trigger the scrollbar to come into view.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    exception = tester.takeException() as AssertionError;
     expect(exception, isAssertionError);
     expect(
-      (exception as AssertionError).message,
+      exception.message,
       contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
   });

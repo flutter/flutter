@@ -90,8 +90,11 @@ InputBorder? getBorder(WidgetTester tester) {
     return null;
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  // ignore: avoid_dynamic_calls
   final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+  // ignore: avoid_dynamic_calls
   final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+  // ignore: avoid_dynamic_calls
   final InputBorder border = inputBorderTween.evaluate(animation) as InputBorder;
   return border;
 }
@@ -115,6 +118,7 @@ Color getBorderColor(WidgetTester tester) => getBorderSide(tester)!.color;
 Color getContainerColor(WidgetTester tester) {
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  // ignore: avoid_dynamic_calls
   return inputBorderPainter.blendedColor as Color;
 }
 

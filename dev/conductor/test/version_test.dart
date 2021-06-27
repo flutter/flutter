@@ -44,29 +44,26 @@ void main() {
     });
 
     test('successfully increments z', () {
-      const String level = 'm';
+      const String level = 'z';
 
-      Version version = Version.fromString('1.0.0-0.0.pre');
-      expect(Version.increment(version, level).toString(), '1.0.0-1.0.pre');
+      Version version = Version.fromString('1.0.0');
+      expect(Version.increment(version, level).toString(), '1.0.1');
 
-      version = Version.fromString('10.20.0-40.50.pre');
-      expect(Version.increment(version, level).toString(), '10.20.0-41.0.pre');
+      version = Version.fromString('10.20.0');
+      expect(Version.increment(version, level).toString(), '10.20.1');
 
-      version = Version.fromString('1.18.0-3.0.pre');
-      expect(Version.increment(version, level).toString(), '1.18.0-4.0.pre');
+      version = Version.fromString('1.18.3');
+      expect(Version.increment(version, level).toString(), '1.18.4');
     });
 
-    test('successfully increments m', () {
+    test('does not support incrementing m', () {
       const String level = 'm';
 
-      Version version = Version.fromString('1.0.0-0.0.pre');
-      expect(Version.increment(version, level).toString(), '1.0.0-1.0.pre');
-
-      version = Version.fromString('10.20.0-40.50.pre');
-      expect(Version.increment(version, level).toString(), '10.20.0-41.0.pre');
-
-      version = Version.fromString('1.18.0-3.0.pre');
-      expect(Version.increment(version, level).toString(), '1.18.0-4.0.pre');
+      final Version version = Version.fromString('1.0.0-0.0.pre');
+      expect(
+        () => Version.increment(version, level).toString(),
+        throwsAssertionWith("Do not increment 'm' via Version.increment"),
+      );
     });
 
     test('successfully increments n', () {

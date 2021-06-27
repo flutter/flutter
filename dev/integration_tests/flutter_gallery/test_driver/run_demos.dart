@@ -61,6 +61,14 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
       final Finder demoItem = find.text(demoName);
       await controller.scrollUntilVisible(demoItem, 48.0);
       await controller.pumpAndSettle();
+      if (demoItem.evaluate().isEmpty) {
+        print('Failed to find $demoItem');
+        print('All available elements:');
+        print(controller.allElements.toList().join('\n'));
+        print('App structure:');
+        debugDumpApp();
+        throw TestFailure('Failed to find element');
+      }
       await controller.tap(demoItem); // Launch the demo
 
       if (kUnsynchronizedDemos.contains(demo)) {

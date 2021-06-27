@@ -3472,4 +3472,81 @@ void main() {
     expect(find.byType(RawScrollbar), findsNothing);
 
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('borderRadius property works properly', (WidgetTester tester) async {
+    const double radius = 20.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButton<String>(
+              borderRadius: BorderRadius.circular(radius),
+              value: 'One',
+              items: <String>['One', 'Two', 'Three', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.ancestor(
+        of: find.text('One').last,
+        matching: find.byType(CustomPaint),
+      ).at(2),
+      paints
+        ..save()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 144.0, 208.0, radius, radius)),
+    );
+
+    final InkWell firstItem = tester.widget(find.widgetWithText(InkWell, 'One'));
+    final InkWell lastItem = tester.widget(find.widgetWithText(InkWell, 'Four'));
+
+    expect(firstItem.borderRadius, const BorderRadius.vertical(top: Radius.circular(radius)));
+    expect(lastItem.borderRadius, const BorderRadius.vertical(bottom: Radius.circular(radius)));
+  });
+
+  testWidgets('borderRadius is properly applied to InkWell when there is only one item', (WidgetTester tester) async {
+    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(5.0));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButton<String>(
+              borderRadius: borderRadius,
+              value: 'One',
+              items: const <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  child: Text('One'), value: 'One'
+                ),
+              ],
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+
+    final InkWell menuItem = tester.widget(find.widgetWithText(InkWell, 'One'));
+
+    expect(menuItem.borderRadius, borderRadius);
+  });
 }

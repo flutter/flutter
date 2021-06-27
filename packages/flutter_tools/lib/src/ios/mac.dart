@@ -26,6 +26,7 @@ import '../reporting/reporting.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
 import 'devices.dart';
+import 'migrations/deployment_target_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
@@ -111,6 +112,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),
+    DeploymentTargetMigration(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);

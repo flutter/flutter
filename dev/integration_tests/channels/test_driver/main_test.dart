@@ -25,7 +25,7 @@ void main() {
       if (status != 'complete') {
         fail('Failed at step $step with status $status');
       }
-    }, timeout: const Timeout(Duration(minutes: 1)));
+    }, timeout: Timeout.none);
 
     tearDownAll(() async {
       driver.close();

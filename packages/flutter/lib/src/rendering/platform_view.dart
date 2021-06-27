@@ -209,21 +209,27 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     // Clip the texture if it's going to paint out of the bounds of the renter box
     // (see comment in _paintTexture for an explanation of when this happens).
     if ((size.width < _currentAndroidViewSize.width || size.height < _currentAndroidViewSize.height) && clipBehavior != Clip.none) {
-      _clipRectLayer = context.pushClipRect(
+      _clipRectLayer.layer = context.pushClipRect(
         true,
         offset,
         offset & size,
         _paintTexture,
         clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer,
+        oldLayer: _clipRectLayer.layer,
       );
       return;
     }
-    _clipRectLayer = null;
+    _clipRectLayer.layer = null;
     _paintTexture(context, offset);
   }
 
-  ClipRectLayer? _clipRectLayer;
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  @override
+  void dispose() {
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
 
   void _paintTexture(PaintingContext context, Offset offset) {
     // As resizing the Android view happens asynchronously we don't know exactly when is a

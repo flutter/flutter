@@ -796,9 +796,13 @@ void main() {
       // fill color and test them against the expected values.
       void _testInputDecorator(CustomPaint decoratorPaint, InputBorder expectedBorder, Color expectedContainerColor) {
         final dynamic/*_InputBorderPainter*/ inputBorderPainter = decoratorPaint.foregroundPainter;
+        // ignore: avoid_dynamic_calls
         final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+        // ignore: avoid_dynamic_calls
         final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+        // ignore: avoid_dynamic_calls
         final InputBorder actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
+        // ignore: avoid_dynamic_calls
         final Color containerColor = inputBorderPainter.blendedColor as Color;
 
         expect(actualBorder, equals(expectedBorder));

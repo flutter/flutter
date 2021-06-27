@@ -231,6 +231,9 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     }
     return FuchsiaDevice(resolvedHost, name: name);
   }
+
+  @override
+  List<String> get wellKnownIds => const <String>[];
 }
 
 

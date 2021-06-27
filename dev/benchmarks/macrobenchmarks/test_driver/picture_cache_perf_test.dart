@@ -11,7 +11,6 @@ void main() {
   macroPerfTest(
     'picture_cache_perf',
     kPictureCacheRouteName,
-    timeout: const Duration(seconds: 60),
     pageDelay: const Duration(seconds: 1),
     driverOps: (FlutterDriver driver) async {
       final SerializableFinder tabBarView = find.byValueKey('tabbar_view');

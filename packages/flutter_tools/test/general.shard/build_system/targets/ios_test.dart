@@ -23,7 +23,7 @@ final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment:
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
   '-fembed-bitcode-marker',
-  '-miphoneos-version-min=8.0',
+  '-miphoneos-version-min=9.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -64,12 +64,12 @@ void main() {
     );
   });
 
-  testWithoutContext('iOS AOT targets has analyicsName', () {
+  testWithoutContext('iOS AOT targets has analyticsName', () {
     expect(const AotAssemblyRelease().analyticsName, 'ios_aot');
     expect(const AotAssemblyProfile().analyticsName, 'ios_aot');
   });
 
-  testUsingContext('DebugUniveralFramework creates simulator binary', () async {
+  testUsingContext('DebugUniversalFramework creates simulator binary', () async {
     environment.defines[kIosArchs] = 'x86_64';
     environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
     processManager.addCommand(
@@ -84,7 +84,7 @@ void main() {
             '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         '-dynamiclib',
         '-fembed-bitcode-marker',
-        '-miphonesimulator-version-min=8.0',
+        '-miphonesimulator-version-min=9.0',
         '-Xlinker',
         '-rpath',
         '-Xlinker',
@@ -113,7 +113,7 @@ void main() {
     Platform: () => macPlatform,
   });
 
-  testUsingContext('DebugUniveralFramework creates expected binary with arm64 only arch', () async {
+  testUsingContext('DebugUniversalFramework creates expected binary with arm64 only arch', () async {
     environment.defines[kIosArchs] = 'arm64';
     environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
     processManager.addCommand(

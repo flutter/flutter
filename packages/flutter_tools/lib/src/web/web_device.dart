@@ -362,6 +362,9 @@ class WebDevices extends PollingDeviceDiscovery {
 
   @override
   bool get supportsPlatform =>  _featureFlags.isWebEnabled;
+
+  @override
+  List<String> get wellKnownIds => const <String>['chrome', 'web-server', 'edge'];
 }
 
 @visibleForTesting
