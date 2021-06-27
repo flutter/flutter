@@ -4,8 +4,10 @@
 
 // @dart = 2.12
 
+import 'dart:io' as io;
+
 import 'package:githooks/githooks.dart';
 
-Future<int> main(List<String> args) async {
-  return run(args);
+Future<void> main(List<String> args) async {
+  io.exitCode = await run(args);
 }
