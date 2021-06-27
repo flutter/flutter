@@ -1555,7 +1555,7 @@ void main() {
           BuildMode.debug,
           '',
           treeShakeIcons: false,
-          extraFrontEndOptions: <String>['--enable-experiment=non-nullable>']
+          extraFrontEndOptions: <String>['--enable-experiment=non-nullable']
         )
       ),
       target: 'main.dart',
@@ -1566,7 +1566,7 @@ void main() {
     await residentRunner.run(enableDevTools: true);
 
     expect(await globals.fs.file(globals.fs.path.join(
-      'build', '3416d3007730479552122f01c01e326d.cache.dill')).readAsString(), 'ABC');
+      'build', 'cache.dill')).readAsString(), 'ABC');
   }));
 
   testUsingContext('HotRunner does not copy app.dill if a dillOutputPath is given', () => testbed.run(() async {
@@ -1735,7 +1735,7 @@ void main() {
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
-      globals.fs.path.join(getBuildDirectory(), '825b8f791aa86c5057fff6f064542c54.cache.dill'));
+      globals.fs.path.join(getBuildDirectory(), '80b1a4cf4e7b90e1ab5f72022a0bc624.cache.dill'));
     expect(residentCompiler.librariesSpec,
       globals.fs.file(globals.artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
         .uri.toString());
