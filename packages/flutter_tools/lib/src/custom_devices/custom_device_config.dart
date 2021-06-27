@@ -296,11 +296,11 @@ class CustomDeviceConfig {
   static CustomDeviceConfig getExampleForPlatform(Platform platform) {
     if (platform.isWindows) {
       return exampleWindows;
-    } else if (platform.isLinux || platform.isMacOS) {
-      return exampleUnix;
-    } else {
-      throw FallThroughError();
     }
+    if (platform.isLinux || platform.isMacOS) {
+      return exampleUnix;
+    }
+    throw FallThroughError();
   }
 
   final String id;
