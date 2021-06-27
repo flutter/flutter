@@ -664,8 +664,8 @@ void main() {
       )
     );
     await tester.pumpAndSettle();
-    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
-    await gesture.moveBy(Offset(0.0, -20.0));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    await gesture.moveBy(const Offset(0.0, -20.0));
     await tester.pumpAndSettle();
     expect(scrollController.offset, 200.0); // scrollSpeedFactor * 20
   });
