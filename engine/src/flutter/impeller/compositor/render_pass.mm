@@ -241,6 +241,10 @@ bool RenderPass::EncodeCommands(Allocator& allocator,
   };
   fml::closure pop_debug_marker = [pass]() { [pass popDebugGroup]; };
   for (const auto& command : commands_) {
+    if (command.index_count == 0u) {
+      continue;
+    }
+
     fml::ScopedCleanupClosure auto_pop_debug_marker(pop_debug_marker);
     if (!command.label.empty()) {
       [pass pushDebugGroup:@(command.label.c_str())];

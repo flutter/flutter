@@ -190,6 +190,15 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
   {
     auto& struct_definitions = root["struct_definitions"] =
         nlohmann::json::array_t{};
+    if (entrypoints.front().execution_model ==
+        spv::ExecutionModel::ExecutionModelVertex) {
+      if (auto struc =
+              ReflectPerVertexStructDefinition(shader_resources.stage_inputs);
+          struc.has_value()) {
+        struct_definitions.emplace_back(EmitStructDefinition(struc.value()));
+      }
+    }
+
     std::set<spirv_cross::ID> known_structs;
     ir_->for_each_typed_id<SPIRType>([&](uint32_t, const SPIRType& type) {
       if (known_structs.find(type.self) != known_structs.end()) {
@@ -202,15 +211,6 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
         struct_definitions.emplace_back(EmitStructDefinition(struc.value()));
       }
     });
-
-    if (entrypoints.front().execution_model ==
-        spv::ExecutionModel::ExecutionModelVertex) {
-      if (auto struc =
-              ReflectPerVertexStructDefinition(shader_resources.stage_inputs);
-          struc.has_value()) {
-        struct_definitions.emplace_back(EmitStructDefinition(struc.value()));
-      }
-    }
   }
 
   return root;

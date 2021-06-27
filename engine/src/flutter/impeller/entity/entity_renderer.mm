@@ -45,12 +45,12 @@ bool EntityRenderer::OnRender(const Surface& surface, RenderPass& pass) {
 
   uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
 
-  VertexBufferBuilder vertex_builder;
+  VertexBufferBuilder<shader::BoxVertexInfo::PerVertexData> vertex_builder;
 
   vertex_builder.AddVertices({
-      {0, 0, 0.0},      //
-      {800, 0.0, 0.0},  //
-      {0.0, 600, 0.0},  //
+      {{0, 0, 0.0}, {Color::Red()}},        //
+      {{800, 0.0, 0.0}, {Color::Green()}},  //
+      {{0.0, 600, 0.0}, {Color::Blue()}},   //
   });
 
   Command cmd;
