@@ -14,26 +14,48 @@
 
 namespace impeller {
 
+template <class VertexType_, class IndexType_ = uint32_t>
 class VertexBufferBuilder {
  public:
-  VertexBufferBuilder();
+  using VertexType = VertexType_;
+  using IndexType = IndexType_;
 
-  ~VertexBufferBuilder();
+  VertexBufferBuilder() = default;
 
-  VertexBufferBuilder& AddVertices(std::initializer_list<Vector3> vertices);
+  ~VertexBufferBuilder() = default;
 
-  BufferView CreateVertexBuffer(HostBuffer& buffer) const;
+  VertexBufferBuilder& AddVertices(
+      std::initializer_list<VertexType_> vertices) {
+    for (const auto& vertex : vertices) {
+      vertices_.push_back(vertex);
+    }
+    return *this;
+  }
 
-  BufferView CreateIndexBuffer(HostBuffer& buffer) const;
+  BufferView CreateVertexBuffer(HostBuffer& buffer) const {
+    return buffer.Emplace(vertices_.data(),
+                          vertices_.size() * sizeof(VertexType),
+                          alignof(VertexType));
+  }
 
-  size_t GetIndexCount() const;
+  BufferView CreateIndexBuffer(HostBuffer& buffer) const {
+    // So dumb! We don't actually need an index buffer right now. But we will
+    // once de-duplication is done. So assume this is always done.
+    std::vector<IndexType> index_buffer;
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      index_buffer.push_back(i);
+    }
+    return buffer.Emplace(index_buffer.data(),
+                          index_buffer.size() * sizeof(IndexType),
+                          alignof(IndexType));
+  }
+
+  size_t GetIndexCount() const { return vertices_.size(); }
 
  private:
   // This is a placeholder till vertex de-duplication can be implemented. The
   // current implementation is a very dumb placeholder.
-  std::vector<Vector3> vertices_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(VertexBufferBuilder);
+  std::vector<VertexType> vertices_;
 };
 
 }  // namespace impeller

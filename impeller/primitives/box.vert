@@ -6,12 +6,12 @@ uniform UniformBuffer {
   mat4 mvp;
 } uniforms;
 
-in vec3 vertexPosition;
-in vec4 vertexColor;
+in vec3 vertex_position;
+in vec4 vertex_color;
 
 out vec4 color;
 
 void main() {
-  gl_Position = uniforms.mvp * vec4(vertexPosition, 1.0);
-  color = vertexColor;
+  gl_Position = uniforms.mvp * vec4(vertex_position, 1.0);
+  color = vertex_color;
 }
