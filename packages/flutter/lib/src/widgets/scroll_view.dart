@@ -223,9 +223,9 @@ abstract class ScrollView extends StatelessWidget {
   /// [ScrollBehavior].
   final ScrollBehavior? scrollBehavior;
 
-  /// The speed factor at which scrolling is performed. This is useful when the 
-  /// normal speed of scrolling is not enough (or too fast) and needs to be 
-  /// adjusted to a desired speed. The default value is 1.0. 
+  /// The speed factor at which scrolling is performed. This is useful when the
+  /// normal speed of scrolling is not enough (or too fast) and needs to be
+  /// adjusted to a desired speed. The default value is 1.0.
   final double scrollSpeedFactor;
 
   /// {@template flutter.widgets.scroll_view.shrinkWrap}
@@ -717,9 +717,9 @@ abstract class BoxScrollView extends ScrollView {
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry? padding;
 
-  /// The speed factor at which scrolling is performed. This is useful when the 
-  /// normal speed of scrolling is not enough (or too fast) and needs to be 
-  /// adjusted to a desired speed. The default value is 1.0. 
+  /// The speed factor at which scrolling is performed. This is useful when the
+  /// normal speed of scrolling is not enough (or too fast) and needs to be
+  /// adjusted to a desired speed. The default value is 1.0.
   final double scrollSpeedFactor;
   @override
   List<Widget> buildSlivers(BuildContext context) {
@@ -1531,8 +1531,8 @@ class ListView extends BoxScrollView {
   /// {@endtemplate}
   final Widget? prototypeItem;
 
-  /// The speed factor at which scrolling is performed. This is useful when the 
-  /// normal speed of scrolling is not enough (or too fast) and needs to be 
+  /// The speed factor at which scrolling is performed. This is useful when the
+  /// normal speed of scrolling is not enough (or too fast) and needs to be
   /// adjusted to a desired speed. The default value is 1.0.
   final double scrollSpeedFactor;
 

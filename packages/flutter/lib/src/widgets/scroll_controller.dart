@@ -226,8 +226,8 @@ class ScrollController extends ChangeNotifier {
   ///    This is used when the environment has changed and the [Scrollable]
   ///    needs to recreate the [ScrollPosition] object. It is null the first
   ///    time the [ScrollPosition] is created.
-  ///  * `scrollSpeedFactor`: An optional [double] parameter that represents 
-  ///    the speed factor at which scrolling is performed. By default, it has 
+  ///  * `scrollSpeedFactor`: An optional [double] parameter that represents
+  ///    the speed factor at which scrolling is performed. By default, it has
   ///    the value 1.0. If the scrolling is intended to be done at twice the
   ///    normal speed e.g., you can set it to 2.0, etc.
   ScrollPosition createScrollPosition(

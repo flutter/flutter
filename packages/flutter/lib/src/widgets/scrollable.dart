@@ -257,8 +257,8 @@ class Scrollable extends StatefulWidget {
   /// [ScrollBehavior].
   final ScrollBehavior? scrollBehavior;
 
-  /// The speed factor at which scrolling is performed. This is useful when the 
-  /// normal speed of scrolling is not enough (or too fast) and needs to be 
+  /// The speed factor at which scrolling is performed. This is useful when the
+  /// normal speed of scrolling is not enough (or too fast) and needs to be
   /// adjusted to a desired speed. The default value is 1.0.
   final double scrollSpeedFactor;
 

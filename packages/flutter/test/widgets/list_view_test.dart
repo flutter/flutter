@@ -650,7 +650,7 @@ void main() {
   });
 
   testWidgets('ListView scrollSpeedFactor property is respected', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController(); 
+    final ScrollController scrollController = ScrollController();
     // Scroll at normal speed.
     await tester.pumpWidget(
       Directionality(
