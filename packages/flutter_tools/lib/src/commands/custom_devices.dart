@@ -807,7 +807,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     }
     if (boolArg(_kSsh) == true) {
       return runInteractivelySsh();
-    } 
+    }
     throw FallThroughError();
   }
 }
