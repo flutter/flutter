@@ -57,7 +57,7 @@ class LinkedScrollController extends ScrollController {
   }
 
   @override
-  LinkedScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+  LinkedScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition, { double scrollSpeedFactor = 1.0 }) {
     return LinkedScrollPosition(
       this,
       physics: physics,

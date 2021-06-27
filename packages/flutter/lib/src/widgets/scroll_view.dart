@@ -691,13 +691,13 @@ abstract class BoxScrollView extends ScrollView {
     ScrollPhysics? physics,
     bool shrinkWrap = false,
     this.padding,
-    this.scrollSpeedFactor = 1.0,
     double? cacheExtent,
     int? semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    double scrollSpeedFactor = 1.0,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -707,6 +707,7 @@ abstract class BoxScrollView extends ScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
+    scrollSpeedFactor: scrollSpeedFactor,
     semanticChildCount: semanticChildCount,
     dragStartBehavior: dragStartBehavior,
     keyboardDismissBehavior: keyboardDismissBehavior,
@@ -717,10 +718,6 @@ abstract class BoxScrollView extends ScrollView {
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry? padding;
 
-  /// The speed factor at which scrolling is performed. This is useful when the
-  /// normal speed of scrolling is not enough (or too fast) and needs to be
-  /// adjusted to a desired speed. The default value is 1.0.
-  final double scrollSpeedFactor;
   @override
   List<Widget> buildSlivers(BuildContext context) {
     Widget sliver = buildChildLayout(context);
@@ -1127,7 +1124,7 @@ class ListView extends BoxScrollView {
     EdgeInsetsGeometry? padding,
     this.itemExtent,
     this.prototypeItem,
-    this.scrollSpeedFactor = 1.0,
+    double scrollSpeedFactor = 1.0,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -1151,6 +1148,7 @@ class ListView extends BoxScrollView {
        super(
          key: key,
          scrollDirection: scrollDirection,
+         scrollSpeedFactor: scrollSpeedFactor,
          reverse: reverse,
          controller: controller,
          primary: primary,
@@ -1207,12 +1205,12 @@ class ListView extends BoxScrollView {
     EdgeInsetsGeometry? padding,
     this.itemExtent,
     this.prototypeItem,
-    this.scrollSpeedFactor = 1.0,
     required IndexedWidgetBuilder itemBuilder,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
+    double scrollSpeedFactor = 1.0,
     double? cacheExtent,
     int? semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
@@ -1309,7 +1307,7 @@ class ListView extends BoxScrollView {
     required IndexedWidgetBuilder itemBuilder,
     required IndexedWidgetBuilder separatorBuilder,
     required int itemCount,
-    this.scrollSpeedFactor = 1.0,
+    double scrollSpeedFactor = 1.0,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -1356,6 +1354,7 @@ class ListView extends BoxScrollView {
          primary: primary,
          physics: physics,
          shrinkWrap: shrinkWrap,
+         scrollSpeedFactor: scrollSpeedFactor,
          padding: padding,
          cacheExtent: cacheExtent,
          semanticChildCount: itemCount,
@@ -1463,7 +1462,7 @@ class ListView extends BoxScrollView {
     EdgeInsetsGeometry? padding,
     this.itemExtent,
     this.prototypeItem,
-    this.scrollSpeedFactor = 1.0,
+    double scrollSpeedFactor = 1.0,
     required this.childrenDelegate,
     double? cacheExtent,
     int? semanticChildCount,
@@ -1483,6 +1482,7 @@ class ListView extends BoxScrollView {
          controller: controller,
          primary: primary,
          physics: physics,
+         scrollSpeedFactor: scrollSpeedFactor,
          shrinkWrap: shrinkWrap,
          padding: padding,
          cacheExtent: cacheExtent,
@@ -1530,11 +1530,6 @@ class ListView extends BoxScrollView {
   ///    to a given value.
   /// {@endtemplate}
   final Widget? prototypeItem;
-
-  /// The speed factor at which scrolling is performed. This is useful when the
-  /// normal speed of scrolling is not enough (or too fast) and needs to be
-  /// adjusted to a desired speed. The default value is 1.0.
-  final double scrollSpeedFactor;
 
   /// A delegate that provides the children for the [ListView].
   ///
