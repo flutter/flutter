@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-in vec3 color;
+in vec4 color;
 
 out vec4 fragColor;
 
 void main() {
-  fragColor = vec4(color, 1.0);
+  fragColor = color;
 }

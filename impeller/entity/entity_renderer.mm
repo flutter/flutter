@@ -42,7 +42,6 @@ bool EntityRenderer::OnRender(const Surface& surface, RenderPass& pass) {
   pass.SetLabel("EntityRenderer Render Pass");
 
   shader::BoxVertexInfo::UniformBuffer uniforms;
-  uniforms.color = Color::Blue();
 
   uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
 
