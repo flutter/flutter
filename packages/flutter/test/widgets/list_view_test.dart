@@ -648,4 +648,69 @@ void main() {
     final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
+
+  testWidgets('ListView scrollSpeedFactor property is respected', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController(); 
+    // Scroll at normal speed.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            key: Key('1.0'),
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: ListView.builder(
+              controller: scrollController,
+              itemCount: 10,
+              itemBuilder: (BuildContext _, int __) => Container(height: 2000.0),
+            ),
+          ),
+        )
+      )
+    );
+    await tester.pumpAndSettle();
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(Key('1.0'))));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(Key('1.0')),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.6, 800.0, 18.6))
+    );
+
+    // Now, scroll at 3x the normal speed.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            key: Key('3.0'),
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: ListView.builder(
+              scrollSpeedFactor: 3.0,
+              controller: scrollController,
+              itemCount: 10,
+              itemBuilder: (BuildContext _, int __) => Container(height: 2000.0),
+            ),
+          ),
+        )
+      )
+    );
+    await tester.pumpAndSettle();
+    gesture = await tester.startGesture(tester.getCenter(find.byKey(Key('3.0'))));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(Key('3.0')),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 1.8, 800.0, 19.8))
+    );
+  });
+
 }

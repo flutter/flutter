@@ -50,6 +50,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     required ScrollPhysics physics,
     required ScrollContext context,
     double? initialPixels = 0.0,
+    this.scrollSpeedFactor = 1.0,
     bool keepScrollOffset = true,
     ScrollPosition? oldPosition,
     String? debugLabel,
@@ -72,6 +73,9 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// Velocity from a previous activity temporarily held by [hold] to potentially
   /// transfer to a next activity.
   double _heldPreviousVelocity = 0.0;
+
+  /// The speed factor at which scrolling is performed. Defaults to 1.0.
+  final double scrollSpeedFactor;
 
   @override
   AxisDirection get axisDirection => context.axisDirection;
@@ -121,7 +125,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void applyUserOffset(double delta) {
     updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
-    setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
+    setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta * scrollSpeedFactor));
   }
 
   @override

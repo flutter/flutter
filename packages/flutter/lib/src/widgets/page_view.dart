@@ -230,7 +230,7 @@ class PageController extends ScrollController {
   }
 
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition, { double scrollSpeedFactor = 1.0 }) {
     return _PagePosition(
       physics: physics,
       context: context,

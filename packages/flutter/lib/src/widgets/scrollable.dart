@@ -91,6 +91,7 @@ class Scrollable extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.restorationId,
     this.scrollBehavior,
+    this.scrollSpeedFactor = 1.0,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -256,6 +257,11 @@ class Scrollable extends StatefulWidget {
   /// [ScrollBehavior].
   final ScrollBehavior? scrollBehavior;
 
+  /// The speed factor at which scrolling is performed. This is useful when the 
+  /// normal speed of scrolling is not enough (or too fast) and needs to be 
+  /// adjusted to a desired speed. The default value is 1.0.
+  final double scrollSpeedFactor;
+
   /// The axis along which the scroll view scrolls.
   ///
   /// Determined by the [axisDirection].
@@ -420,7 +426,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       scheduleMicrotask(oldPosition.dispose);
     }
 
-    _position = _effectiveScrollController.createScrollPosition(_physics!, this, oldPosition);
+    _position = _effectiveScrollController.createScrollPosition(_physics!, this, oldPosition, scrollSpeedFactor: widget.scrollSpeedFactor);
     assert(_position != null);
     _effectiveScrollController.attach(position);
   }

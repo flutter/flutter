@@ -382,6 +382,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     ScrollPhysics physics,
     ScrollContext context,
     ScrollPosition? oldPosition,
+    { double scrollSpeedFactor = 1.0 }
   ) {
     return _DraggableScrollableSheetScrollPosition(
       physics: physics,

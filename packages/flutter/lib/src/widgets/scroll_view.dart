@@ -40,14 +40,14 @@ enum ScrollViewKeyboardDismissBehavior {
 
 /// A widget that scrolls.
 ///
-/// Scrollable widgets consist of three pieces:
+/// ScrollView widgets consist of three pieces:
 ///
 ///  1. A [Scrollable] widget, which listens for various user gestures and
 ///     implements the interaction design for scrolling.
 ///  2. A viewport widget, such as [Viewport] or [ShrinkWrappingViewport], which
 ///     implements the visual design for scrolling by displaying only a portion
 ///     of the widgets inside the scroll view.
-///  3. One or more slivers, which are widgets that can be composed to created
+///  3. One or more slivers, which are widgets that can be composed to create
 ///     various scrolling effects, such as lists, grids, and expanding headers.
 ///
 /// [ScrollView] helps orchestrate these pieces by creating the [Scrollable] and
@@ -86,6 +86,7 @@ abstract class ScrollView extends StatelessWidget {
     bool? primary,
     ScrollPhysics? physics,
     this.scrollBehavior,
+    this.scrollSpeedFactor = 1.0,
     this.shrinkWrap = false,
     this.center,
     this.anchor = 0.0,
@@ -221,6 +222,11 @@ abstract class ScrollView extends StatelessWidget {
   /// followed by [scrollBehavior], and then the inherited ancestor
   /// [ScrollBehavior].
   final ScrollBehavior? scrollBehavior;
+
+  /// The speed factor at which scrolling is performed. This is useful when the 
+  /// normal speed of scrolling is not enough (or too fast) and needs to be 
+  /// adjusted to a desired speed. The default value is 1.0. 
+  final double scrollSpeedFactor;
 
   /// {@template flutter.widgets.scroll_view.shrinkWrap}
   /// Whether the extent of the scroll view in the [scrollDirection] should be
@@ -396,6 +402,7 @@ abstract class ScrollView extends StatelessWidget {
       controller: scrollController,
       physics: physics,
       scrollBehavior: scrollBehavior,
+      scrollSpeedFactor: scrollSpeedFactor,
       semanticChildCount: semanticChildCount,
       restorationId: restorationId,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
@@ -684,6 +691,7 @@ abstract class BoxScrollView extends ScrollView {
     ScrollPhysics? physics,
     bool shrinkWrap = false,
     this.padding,
+    this.scrollSpeedFactor = 1.0,
     double? cacheExtent,
     int? semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
@@ -709,6 +717,10 @@ abstract class BoxScrollView extends ScrollView {
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry? padding;
 
+  /// The speed factor at which scrolling is performed. This is useful when the 
+  /// normal speed of scrolling is not enough (or too fast) and needs to be 
+  /// adjusted to a desired speed. The default value is 1.0. 
+  final double scrollSpeedFactor;
   @override
   List<Widget> buildSlivers(BuildContext context) {
     Widget sliver = buildChildLayout(context);
@@ -1115,6 +1127,7 @@ class ListView extends BoxScrollView {
     EdgeInsetsGeometry? padding,
     this.itemExtent,
     this.prototypeItem,
+    this.scrollSpeedFactor = 1.0,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -1194,6 +1207,7 @@ class ListView extends BoxScrollView {
     EdgeInsetsGeometry? padding,
     this.itemExtent,
     this.prototypeItem,
+    this.scrollSpeedFactor = 1.0,
     required IndexedWidgetBuilder itemBuilder,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
@@ -1221,6 +1235,7 @@ class ListView extends BoxScrollView {
        super(
          key: key,
          scrollDirection: scrollDirection,
+         scrollSpeedFactor: scrollSpeedFactor,
          reverse: reverse,
          controller: controller,
          primary: primary,
@@ -1294,6 +1309,7 @@ class ListView extends BoxScrollView {
     required IndexedWidgetBuilder itemBuilder,
     required IndexedWidgetBuilder separatorBuilder,
     required int itemCount,
+    this.scrollSpeedFactor = 1.0,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -1447,6 +1463,7 @@ class ListView extends BoxScrollView {
     EdgeInsetsGeometry? padding,
     this.itemExtent,
     this.prototypeItem,
+    this.scrollSpeedFactor = 1.0,
     required this.childrenDelegate,
     double? cacheExtent,
     int? semanticChildCount,
@@ -1513,6 +1530,11 @@ class ListView extends BoxScrollView {
   ///    to a given value.
   /// {@endtemplate}
   final Widget? prototypeItem;
+
+  /// The speed factor at which scrolling is performed. This is useful when the 
+  /// normal speed of scrolling is not enough (or too fast) and needs to be 
+  /// adjusted to a desired speed. The default value is 1.0.
+  final double scrollSpeedFactor;
 
   /// A delegate that provides the children for the [ListView].
   ///

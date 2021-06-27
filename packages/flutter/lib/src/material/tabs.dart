@@ -561,7 +561,7 @@ class _TabBarScrollController extends ScrollController {
   final _TabBarState tabBar;
 
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition, { double scrollSpeedFactor = 1.0 }) {
     return _TabBarScrollPosition(
       physics: physics,
       context: context,

@@ -1296,6 +1296,7 @@ class _NestedScrollController extends ScrollController {
     ScrollPhysics physics,
     ScrollContext context,
     ScrollPosition? oldPosition,
+    { double scrollSpeedFactor = 1.0 }
   ) {
     return _NestedScrollPosition(
       coordinator: coordinator,
