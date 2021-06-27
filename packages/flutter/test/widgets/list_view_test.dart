@@ -651,66 +651,22 @@ void main() {
 
   testWidgets('ListView scrollSpeedFactor property is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    // Scroll at normal speed.
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: RawScrollbar(
-            key: const Key('1.0'),
-            controller: scrollController,
-            isAlwaysShown: true,
-            child: ListView.builder(
-              controller: scrollController,
-              itemCount: 10,
-              itemBuilder: (BuildContext _, int __) => Container(height: 2000.0),
-            ),
+      MaterialApp(
+      home: Scaffold(
+        body: ListView.builder(
+          controller: scrollController,
+          scrollSpeedFactor: 10,
+          itemBuilder: (BuildContext _, int __) => Container(height: 1000),
+          itemCount: 20
           ),
-        )
+        ),
       )
     );
     await tester.pumpAndSettle();
-    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(const Key('1.0'))));
-    await gesture.moveBy(const Offset(0.0, -20.0));
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    await gesture.moveBy(Offset(0.0, -20.0));
     await tester.pumpAndSettle();
-    expect(
-      find.byKey(const Key('1.0')),
-      paints
-        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
-        ..rect(rect: const Rect.fromLTRB(794.0, 0.6, 800.0, 18.6))
-    );
-
-    // Now, scroll at 3x the normal speed.
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: RawScrollbar(
-            key: const Key('3.0'),
-            controller: scrollController,
-            isAlwaysShown: true,
-            child: ListView.builder(
-              scrollSpeedFactor: 3.0,
-              controller: scrollController,
-              itemCount: 10,
-              itemBuilder: (BuildContext _, int __) => Container(height: 2000.0),
-            ),
-          ),
-        )
-      )
-    );
-    await tester.pumpAndSettle();
-    gesture = await tester.startGesture(tester.getCenter(find.byKey(const Key('3.0'))));
-    await gesture.moveBy(const Offset(0.0, -20.0));
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(const Key('3.0')),
-      paints
-        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
-        ..rect(rect: const Rect.fromLTRB(794.0, 1.8, 800.0, 19.8))
-    );
+    expect(scrollController.offset, 200.0); // scrollSpeedFactor * 20
   });
-
 }
