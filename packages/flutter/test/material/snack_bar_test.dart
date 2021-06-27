@@ -421,12 +421,17 @@ void main() {
   });
 
   testWidgets('SnackBar dismiss test', (WidgetTester tester) async {
-    int snackBarCount = 0;
     const Key tapTarget = Key('tap-target');
+    late DismissDirection dismissDirection;
+    late double width;
+    int snackBarCount = 0;
+
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
+            width = MediaQuery.of(context).size.width;
+
             return GestureDetector(
               key: tapTarget,
               onTap: () {
@@ -434,6 +439,7 @@ void main() {
                 Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2),
+                  dismissDirection: dismissDirection,
                 ));
               },
               behavior: HitTestBehavior.opaque,
@@ -446,32 +452,28 @@ void main() {
         ),
       ),
     ));
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsNothing);
-    await tester.tap(find.byKey(tapTarget)); // queue bar1
-    await tester.tap(find.byKey(tapTarget)); // queue bar2
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(); // schedule animation for bar1
-    expect(find.text('bar1'), findsOneWidget);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(); // begin animation
-    expect(find.text('bar1'), findsOneWidget);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-    await tester.drag(find.text('bar1'), const Offset(0.0, 50.0));
-    await tester.pump(); // bar1 dismissed, bar2 begins animating
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsOneWidget);
+
+    await _testSnackBarDismiss(
+      tester: tester,
+      tapTarget: tapTarget,
+      scaffoldWidth: width,
+      onDismissDirectionChange: (DismissDirection dir) => dismissDirection = dir,
+      onDragGestureChange: () => snackBarCount = 0,
+    );
   });
 
   testWidgets('SnackBar dismiss test - ScaffoldMessenger', (WidgetTester tester) async {
-    int snackBarCount = 0;
     const Key tapTarget = Key('tap-target');
+    late DismissDirection dismissDirection;
+    late double width;
+    int snackBarCount = 0;
+
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
+            width = MediaQuery.of(context).size.width;
+
             return GestureDetector(
               key: tapTarget,
               onTap: () {
@@ -479,6 +481,7 @@ void main() {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2),
+                  dismissDirection: dismissDirection,
                 ));
               },
               behavior: HitTestBehavior.opaque,
@@ -491,23 +494,14 @@ void main() {
         ),
       ),
     ));
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsNothing);
-    await tester.tap(find.byKey(tapTarget)); // queue bar1
-    await tester.tap(find.byKey(tapTarget)); // queue bar2
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(); // schedule animation for bar1
-    expect(find.text('bar1'), findsOneWidget);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(); // begin animation
-    expect(find.text('bar1'), findsOneWidget);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-    await tester.drag(find.text('bar1'), const Offset(0.0, 50.0));
-    await tester.pump(); // bar1 dismissed, bar2 begins animating
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsOneWidget);
+
+    await _testSnackBarDismiss(
+      tester: tester,
+      tapTarget: tapTarget,
+      scaffoldWidth: width,
+      onDismissDirectionChange: (DismissDirection dir) => dismissDirection = dir,
+      onDragGestureChange: () => snackBarCount = 0,
+    );
   });
 
   testWidgets('SnackBar cannot be tapped twice', (WidgetTester tester) async {
@@ -712,7 +706,6 @@ void main() {
       disabledColor: Colors.black,
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
-      buttonColor: Colors.black,
       secondaryHeaderColor: Colors.black,
       textSelectionColor: Colors.black,
       cursorColor: Colors.black,
@@ -823,9 +816,9 @@ void main() {
               return GestureDetector(
                 onTap: () {
                   Scaffold.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('I am a snack bar.'),
-                      margin: const EdgeInsets.all(padding),
+                    const SnackBar(
+                      content: Text('I am a snack bar.'),
+                      margin: EdgeInsets.all(padding),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -1001,8 +994,8 @@ void main() {
               return GestureDetector(
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('I am a snack bar.'),
+                    const SnackBar(
+                      content: Text('I am a snack bar.'),
                       width: width,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -2289,6 +2282,63 @@ void main() {
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('snack_bar.goldenTest.workWithBottomSheet.png'));
   });
 
+  testWidgets('ScaffoldMessenger does not duplicate a SnackBar when presenting a MaterialBanner.', (WidgetTester tester) async {
+    const Key materialBannerTapTarget = Key('materialbanner-tap-target');
+    const Key snackBarTapTarget = Key('snackbar-tap-target');
+    const String snackBarText = 'SnackBar';
+    const String materialBannerText = 'MaterialBanner';
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              children: <Widget>[
+                GestureDetector(
+                  key: snackBarTapTarget,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text(snackBarText),
+                    ));
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: const SizedBox(
+                    height: 100.0,
+                    width: 100.0,
+                  ),
+                ),
+                GestureDetector(
+                  key: materialBannerTapTarget,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                      content: const Text(materialBannerText),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('DISMISS'),
+                          onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                        ),
+                      ],
+                    ));
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: const SizedBox(
+                    height: 100.0,
+                    width: 100.0,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ));
+    await tester.tap(find.byKey(snackBarTapTarget));
+    await tester.tap(find.byKey(materialBannerTapTarget));
+    await tester.pumpAndSettle();
+
+    expect(find.text(snackBarText), findsOneWidget);
+    expect(find.text(materialBannerText), findsOneWidget);
+  });
+
   testWidgets('ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2370,4 +2420,183 @@ void main() {
     expect(find.text(snackBars[1]), findsNothing);
     expect(find.text(snackBars[2]), findsNothing);
   });
+
+  Widget _buildApp({
+    required SnackBarBehavior? behavior,
+    EdgeInsetsGeometry? margin,
+    double? width,
+  }) {
+    return MaterialApp(
+      home: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.send),
+          onPressed: () {},
+        ),
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  behavior: behavior,
+                  margin: margin,
+                  width: width,
+                  content: const Text('I am a snack bar.'),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  testWidgets('Setting SnackBarBehavior.fixed will still assert for margin', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/84935
+    await tester.pumpWidget(_buildApp(
+      behavior: SnackBarBehavior.fixed,
+      margin: const EdgeInsets.all(8.0),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'Margin can only be used with floating behavior. SnackBarBehavior.fixed '
+      'was set in the SnackBar constructor.',
+    );
+  });
+
+  testWidgets('Default SnackBarBehavior will still assert for margin', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/84935
+    await tester.pumpWidget(_buildApp(
+      behavior: null,
+      margin: const EdgeInsets.all(8.0),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'Margin can only be used with floating behavior. SnackBarBehavior.fixed '
+      'was set by default.',
+    );
+  });
+
+  testWidgets('Setting SnackBarBehavior.fixed will still assert for width', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/84935
+    await tester.pumpWidget(_buildApp(
+      behavior: SnackBarBehavior.fixed,
+      width: 5.0,
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'Width can only be used with floating behavior. SnackBarBehavior.fixed '
+      'was set in the SnackBar constructor.',
+    );
+  });
+
+  testWidgets('Default SnackBarBehavior will still assert for width', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/84935
+    await tester.pumpWidget(_buildApp(
+      behavior: null,
+      width: 5.0,
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'Width can only be used with floating behavior. SnackBarBehavior.fixed '
+      'was set by default.',
+    );
+  });
+}
+
+/// Start test for "SnackBar dismiss test".
+Future<void> _testSnackBarDismiss({
+  required WidgetTester tester,
+  required Key tapTarget,
+  required double scaffoldWidth,
+  required ValueChanged<DismissDirection> onDismissDirectionChange,
+  required VoidCallback onDragGestureChange,
+}) async {
+  final Map<DismissDirection, List<Offset>> dragGestures = _getDragGesturesOfDismissDirections(scaffoldWidth);
+
+  for (final DismissDirection key in dragGestures.keys) {
+    onDismissDirectionChange(key);
+
+    for (final Offset dragGesture in dragGestures[key]!) {
+      onDragGestureChange();
+
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsNothing);
+      await tester.tap(find.byKey(tapTarget)); // queue bar1
+      await tester.tap(find.byKey(tapTarget)); // queue bar2
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsNothing);
+      await tester.pump(); // schedule animation for bar1
+      expect(find.text('bar1'), findsOneWidget);
+      expect(find.text('bar2'), findsNothing);
+      await tester.pump(); // begin animation
+      expect(find.text('bar1'), findsOneWidget);
+      expect(find.text('bar2'), findsNothing);
+      await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+      await tester.drag(find.text('bar1'), dragGesture);
+      await tester.pump(); // bar1 dismissed, bar2 begins animating
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+      await tester.drag(find.text('bar2'), dragGesture);
+      await tester.pump(); // bar2 dismissed
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsNothing);
+    }
+  }
+}
+
+/// Create drag gestures for DismissDirections.
+Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double scaffoldWidth) {
+  final Map<DismissDirection, List<Offset>> dragGestures = <DismissDirection, List<Offset>>{};
+
+  for (final DismissDirection val in DismissDirection.values) {
+    switch (val) {
+      case DismissDirection.down:
+        dragGestures[val] = <Offset>[const Offset(0.0, 50.0)]; // drag to bottom gesture
+        break;
+      case DismissDirection.up:
+        dragGestures[val] = <Offset>[const Offset(0.0, -50.0)]; // drag to top gesture
+        break;
+      case DismissDirection.vertical:
+        dragGestures[val] = <Offset>[
+          const Offset(0.0, 50.0), // drag to bottom gesture
+          const Offset(0.0, -50.0), // drag to top gesture
+        ];
+        break;
+      case DismissDirection.startToEnd:
+        dragGestures[val] = <Offset>[Offset(scaffoldWidth, 0.0)]; // drag to right gesture
+        break;
+      case DismissDirection.endToStart:
+        dragGestures[val] = <Offset>[Offset(-scaffoldWidth, 0.0)]; // drag to left gesture
+        break;
+      case DismissDirection.horizontal:
+        dragGestures[val] = <Offset>[
+          Offset(scaffoldWidth, 0.0), // drag to right gesture
+          Offset(-scaffoldWidth, 0.0), // drag to left gesture
+        ];
+        break;
+      default:
+    }
+  }
+
+  return dragGestures;
 }

@@ -226,11 +226,15 @@ class ThemeData with Diagnosticable {
     Color? primaryColorDark,
     @Deprecated(
       'Use colorScheme.secondary instead. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     Color? accentColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     Brightness? accentColorBrightness,
@@ -248,6 +252,10 @@ class ThemeData with Diagnosticable {
     Color? selectedRowColor,
     Color? unselectedWidgetColor,
     Color? disabledColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.2.pre.',
+    )
     Color? buttonColor,
     ButtonThemeData? buttonTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
@@ -278,12 +286,20 @@ class ThemeData with Diagnosticable {
     TextTheme? primaryTextTheme,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     TextTheme? accentTextTheme,
     InputDecorationTheme? inputDecorationTheme,
     IconThemeData? iconTheme,
     IconThemeData? primaryIconTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     IconThemeData? accentIconTheme,
     SliderThemeData? sliderTheme,
     TabBarTheme? tabBarTheme,
@@ -564,11 +580,15 @@ class ThemeData with Diagnosticable {
     required this.shadowColor,
     @Deprecated(
       'Use colorScheme.secondary instead. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     required this.accentColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     required this.accentColorBrightness,
@@ -585,6 +605,10 @@ class ThemeData with Diagnosticable {
     required this.unselectedWidgetColor,
     required this.disabledColor,
     required this.buttonTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.2.pre.',
+    )
     required this.buttonColor,
     required this.toggleButtonsTheme,
     required this.secondaryHeaderColor,
@@ -613,6 +637,8 @@ class ThemeData with Diagnosticable {
     required this.primaryTextTheme,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     required this.accentTextTheme,
@@ -621,6 +647,8 @@ class ThemeData with Diagnosticable {
     required this.primaryIconTheme,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     required this.accentIconTheme,
@@ -910,6 +938,8 @@ class ThemeData with Diagnosticable {
   /// can be used.
   @Deprecated(
     'Use colorScheme.secondary instead. '
+    'For more information, consult the migration guide at '
+    'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
   final Color accentColor;
@@ -924,6 +954,8 @@ class ThemeData with Diagnosticable {
   /// of any color can be found with [ThemeData.estimateBrightnessForColor].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
+    'For more information, consult the migration guide at '
+    'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
   final Brightness accentColorBrightness;
@@ -991,6 +1023,10 @@ class ThemeData with Diagnosticable {
   final ToggleButtonsThemeData toggleButtonsTheme;
 
   /// The default fill color of the [Material] used in [RaisedButton]s.
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v2.3.0-0.2.pre.',
+  )
   final Color buttonColor;
 
   /// The color of the header of a [PaginatedDataTable] when there are selected rows.
@@ -1064,6 +1100,8 @@ class ThemeData with Diagnosticable {
   /// ```
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
+    'For more information, consult the migration guide at '
+    'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
   final TextTheme accentTextTheme;
@@ -1088,6 +1126,8 @@ class ThemeData with Diagnosticable {
   /// the theme's [colorScheme] [ColorScheme.secondary].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
+    'For more information, consult the migration guide at '
+    'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
   final IconThemeData accentIconTheme;
@@ -1318,7 +1358,19 @@ class ThemeData with Diagnosticable {
     Brightness? primaryColorBrightness,
     Color? primaryColorLight,
     Color? primaryColorDark,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     Color? accentColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     Brightness? accentColorBrightness,
     Color? canvasColor,
     Color? shadowColor,
@@ -1336,6 +1388,10 @@ class ThemeData with Diagnosticable {
     Color? disabledColor,
     ButtonThemeData? buttonTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.2.pre.',
+    )
     Color? buttonColor,
     Color? secondaryHeaderColor,
     @Deprecated(
@@ -1361,10 +1417,22 @@ class ThemeData with Diagnosticable {
     Color? toggleableActiveColor,
     TextTheme? textTheme,
     TextTheme? primaryTextTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     TextTheme? accentTextTheme,
     InputDecorationTheme? inputDecorationTheme,
     IconThemeData? iconTheme,
     IconThemeData? primaryIconTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     IconThemeData? accentIconTheme,
     SliderThemeData? sliderTheme,
     TabBarTheme? tabBarTheme,
@@ -2095,6 +2163,22 @@ class _FifoCache<K, V> {
 /// the list. For chips, it only affects the vertical size, not the horizontal
 /// size.
 ///
+/// Here are some examples of widgets that respond to density changes:
+///
+///  * [Checkbox]
+///  * [Chip]
+///  * [ElevatedButton]
+///  * [FlatButton]
+///  * [IconButton]
+///  * [InputDecorator] (which gives density support to [TextField], etc.)
+///  * [ListTile]
+///  * [MaterialButton]
+///  * [OutlineButton]
+///  * [OutlinedButton]
+///  * [Radio]
+///  * [RawMaterialButton]
+///  * [TextButton]
+///
 /// See also:
 ///
 ///  * [ThemeData.visualDensity], where this property is used to specify the base
@@ -2238,11 +2322,14 @@ class VisualDensity with Diagnosticable {
 
   /// Return a copy of [constraints] whose minimum width and height have been
   /// updated with the [baseSizeAdjustment].
+  ///
+  /// The resulting minWidth and minHeight values are clamped to not exceed the
+  /// maxWidth and maxHeight values, respectively.
   BoxConstraints effectiveConstraints(BoxConstraints constraints){
     assert(constraints != null && constraints.debugAssertIsValid());
     return constraints.copyWith(
-      minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, double.infinity).toDouble(),
-      minHeight: (constraints.minHeight + baseSizeAdjustment.dy).clamp(0.0, double.infinity).toDouble(),
+      minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, constraints.maxWidth),
+      minHeight: (constraints.minHeight + baseSizeAdjustment.dy).clamp(0.0, constraints.maxHeight),
     );
   }
 

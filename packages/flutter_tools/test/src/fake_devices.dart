@@ -175,6 +175,9 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   Stream<Device> get onRemoved => _onRemovedController.stream;
+
+  @override
+  List<String> wellKnownIds = <String>[];
 }
 
 /// A fake implementation of the [DeviceLogReader].
@@ -183,6 +186,8 @@ class FakeDeviceLogReader extends DeviceLogReader {
   String get name => 'FakeLogReader';
 
   StreamController<String> _cachedLinesController;
+
+  bool disposed = false;
 
   final List<String> _lineQueue = <String>[];
   StreamController<String> get _linesController {
@@ -209,5 +214,6 @@ class FakeDeviceLogReader extends DeviceLogReader {
   Future<void> dispose() async {
     _lineQueue.clear();
     await _linesController.close();
+    disposed = true;
   }
 }

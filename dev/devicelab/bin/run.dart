@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -183,7 +185,7 @@ Future<void> _runABTest() async {
   abTest.finalize();
 
   final File jsonFile = _uniqueFile(args['ab-result-file'] as String ?? 'ABresults#.json');
-  jsonFile.writeAsString(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap));
+  jsonFile.writeAsStringSync(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap));
 
   if (!silent) {
     section('Raw results');

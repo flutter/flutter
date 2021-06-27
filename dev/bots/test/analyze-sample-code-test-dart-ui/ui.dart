@@ -26,7 +26,7 @@ library dart.ui;
 /// }
 /// ```
 /// {@end-tool}
-const _KeepToString keepToString = _KeepToString();
+const Object keepToString = _KeepToString();
 
 class _KeepToString {
   const _KeepToString();

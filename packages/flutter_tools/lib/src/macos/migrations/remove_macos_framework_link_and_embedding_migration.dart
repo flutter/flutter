@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
@@ -38,7 +36,7 @@ class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   }
 
   @override
-  String migrateLine(String line) {
+  String? migrateLine(String line) {
     // App.framework Frameworks reference.
     // isa = PBXFrameworksBuildPhase;
     // files = (

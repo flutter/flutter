@@ -23,7 +23,7 @@ String testOutputsDirectory =
 /// succeeds.
 typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?);
 
-/// Writes a json-serializable json data to to
+/// Writes a json-serializable data to
 /// [testOutputsDirectory]/`testOutputFilename.json`.
 ///
 /// This is the default `responseDataCallback` in [integrationDriver].
@@ -64,7 +64,7 @@ Future<void> writeResponseData(
 ///
 /// ```
 Future<void> integrationDriver({
-  Duration timeout = const Duration(minutes: 1),
+  Duration timeout = const Duration(minutes: 20),
   ResponseDataCallback? responseDataCallback = writeResponseData,
 }) async {
   final FlutterDriver driver = await FlutterDriver.connect();

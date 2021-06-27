@@ -499,8 +499,8 @@ class FloatingActionButton extends StatelessWidget {
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
-      child: child,
       enableFeedback: enableFeedback,
+      child: child,
     );
 
     if (tooltip != null) {

@@ -151,7 +151,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///   const MyPrefilledText({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyPrefilledTextState createState() => _MyPrefilledTextState();
+///   State<MyPrefilledText> createState() => _MyPrefilledTextState();
 /// }
 ///
 /// class _MyPrefilledTextState extends State<MyPrefilledText> {
@@ -636,9 +636,13 @@ class CupertinoTextField extends StatefulWidget {
   final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
+  ///  * [expands], which determines whether the field should fill the height of
+  ///    its parent.
   final int? maxLines;
 
   /// {@macro flutter.widgets.editableText.minLines}
+  ///  * [expands], which determines whether the field should fill the height of
+  ///    its parent.
   final int? minLines;
 
   /// {@macro flutter.widgets.editableText.expands}
@@ -776,7 +780,7 @@ class CupertinoTextField extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _CupertinoTextFieldState createState() => _CupertinoTextFieldState();
+  State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

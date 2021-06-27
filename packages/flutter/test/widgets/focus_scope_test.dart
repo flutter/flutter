@@ -263,7 +263,7 @@ void main() {
       );
 
       // Add the child focus scope to the focus tree.
-      final FocusAttachment childAttachment = childFocusScope.attach(key.currentContext!);
+      final FocusAttachment childAttachment = childFocusScope.attach(key.currentContext);
       parentFocusScope.setFirstFocus(childFocusScope);
       await tester.pumpAndSettle();
       expect(childFocusScope.isFirstFocus, isTrue);

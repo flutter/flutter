@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
-import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/windows.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -146,7 +145,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
 
     final String windowsDesktopPath = artifacts.getArtifactPath(Artifact.windowsUwpDesktopPath, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
-    final String windowsCppClientWrapper = artifacts.getArtifactPath(Artifact.windowsCppClientWrapper, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
+    final String windowsCppClientWrapper = artifacts.getArtifactPath(Artifact.windowsUwpCppClientWrapper, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
     final String icuData = artifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.windows_x64);
     final List<String> requiredFiles = <String>[
       '$windowsDesktopPath\\flutter_export.h',

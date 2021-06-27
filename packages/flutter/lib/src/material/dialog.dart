@@ -230,7 +230,7 @@ class Dialog extends StatelessWidget {
 ///     onPressed: () => showDialog<String>(
 ///       context: context,
 ///       builder: (BuildContext context) => AlertDialog(
-///         title: const Text('AlertDialog Tilte'),
+///         title: const Text('AlertDialog Title'),
 ///         content: const Text('AlertDialog description'),
 ///         actions: <Widget>[
 ///           TextButton(
@@ -276,6 +276,7 @@ class AlertDialog extends StatelessWidget {
     this.contentTextStyle,
     this.actions,
     this.actionsPadding = EdgeInsets.zero,
+    this.actionsAlignment,
     this.actionsOverflowDirection,
     this.actionsOverflowButtonSpacing,
     this.buttonPadding,
@@ -382,6 +383,15 @@ class AlertDialog extends StatelessWidget {
   ///
   /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry actionsPadding;
+
+  /// Defines the horizontal layout of the [actions] according to the same
+  /// rules as for [Row.mainAxisAlignment].
+  ///
+  /// This parameter is passed along to the dialog's [OverflowBar].
+  ///
+  /// If this parameter is null (the default) then [MainAxisAlignment.end]
+  /// is used.
+  final MainAxisAlignment? actionsAlignment;
 
   /// The vertical direction of [actions] if the children overflow
   /// horizontally.
@@ -507,9 +517,9 @@ class AlertDialog extends StatelessWidget {
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6!,
           child: Semantics(
-            child: title,
             namesRoute: label == null,
             container: true,
+            child: title,
           ),
         ),
       );
@@ -528,27 +538,23 @@ class AlertDialog extends StatelessWidget {
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1!,
           child: Semantics(
             container: true,
-            child: content!,
+            child: content,
           ),
         ),
       );
     }
 
-
     if (actions != null) {
       final double spacing = (buttonPadding?.horizontal ?? 16) / 2;
       actionsWidget = Padding(
-        padding: actionsPadding,
-        child: Container(
-          alignment: AlignmentDirectional.centerEnd,
-          padding: EdgeInsets.all(spacing),
-          child: OverflowBar(
-            spacing: spacing,
-            overflowAlignment: OverflowBarAlignment.end,
-            overflowDirection: actionsOverflowDirection ?? VerticalDirection.down,
-            overflowSpacing: actionsOverflowButtonSpacing ?? 0,
-            children: actions!,
-          ),
+        padding: actionsPadding.add(EdgeInsets.all(spacing)),
+        child: OverflowBar(
+          alignment: actionsAlignment ?? MainAxisAlignment.end,
+          spacing: spacing,
+          overflowAlignment: OverflowBarAlignment.end,
+          overflowDirection: actionsOverflowDirection ?? VerticalDirection.down,
+          overflowSpacing: actionsOverflowButtonSpacing ?? 0,
+          children: actions!,
         ),
       );
     }
@@ -1152,7 +1158,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
 }
 
 double _paddingScaleFactor(double textScaleFactor) {
-  final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0).toDouble();
+  final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0);
   // The final padding scale factor is clamped between 1/3 and 1. For example,
   // a non-scaled padding of 24 will produce a padding between 24 and 8.
   return lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0)!;

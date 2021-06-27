@@ -390,8 +390,9 @@ class DataCell {
 ///         (int index) => DataRow(
 ///           color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
 ///             // All rows will have the same selected color.
-///             if (states.contains(MaterialState.selected))
+///             if (states.contains(MaterialState.selected)) {
 ///               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+///             }
 ///             // Even rows will have a grey color.
 ///             if (index.isEven) {
 ///               return Colors.grey.withOpacity(0.3);
@@ -790,8 +791,8 @@ class DataTable extends StatelessWidget {
     if (onRowTap != null) {
       contents = TableRowInkWell(
         onTap: onRowTap,
-        child: contents,
         overlayColor: overlayColor,
+        child: contents,
       );
     }
     return TableCell(
@@ -915,14 +916,14 @@ class DataTable extends StatelessWidget {
         onLongPress: onLongPress,
         onTapCancel: onTapCancel,
         onTapDown: onTapDown,
-        child: label,
         overlayColor: overlayColor,
+        child: label,
       );
     } else if (onSelectChanged != null) {
       label = TableRowInkWell(
         onTap: onSelectChanged,
-        child: label,
         overlayColor: overlayColor,
+        child: label,
       );
     }
     return label;

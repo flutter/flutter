@@ -259,9 +259,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlinedButton(
-              child: const Text('OutlinedButton'),
               onPressed: () {},
               focusNode: focusNode,
+              child: const Text('OutlinedButton'),
             ),
           ),
         ),
@@ -327,9 +327,9 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return OutlinedButton(
-                    child: const Text('OutlinedButton'),
                     onPressed: () {},
                     focusNode: focusNode,
+                    child: const Text('OutlinedButton'),
                   );
                 },
               ),
@@ -578,9 +578,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: OutlinedButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -1318,7 +1318,7 @@ void main() {
     final Key labelKey = UniqueKey();
     final ButtonStyle style = OutlinedButton.styleFrom(
       padding: EdgeInsets.zero,
-      visualDensity: const VisualDensity(), // dx=0, dy=0
+      visualDensity: VisualDensity.standard, // dx=0, dy=0
     );
 
     await tester.pumpWidget(

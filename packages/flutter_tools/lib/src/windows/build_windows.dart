@@ -16,7 +16,7 @@ import '../cache.dart';
 import '../cmake.dart';
 import '../convert.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
 import '../project.dart';
 import 'install_manifest.dart';
@@ -161,7 +161,7 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
 
   final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final Status status = globals.logger.startProgress(
-    'Building Windows application...',
+    'Building Windows UWP application...',
   );
   try {
     // The Cmake re-entrant build does not work for UWP, so the flutter build is

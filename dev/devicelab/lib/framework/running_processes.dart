@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -26,20 +28,7 @@ class RunningProcessInfo {
   }
 
   @override
-  int get hashCode {
-    // TODO(dnfield): Replace this when Object.hashValues lands, https://github.com/dart-lang/sdk/issues/11617
-    int hash = 17;
-    if (pid != null) {
-      hash = hash * 23 + pid.hashCode;
-    }
-    if (commandLine != null) {
-      hash = hash * 23 + commandLine.hashCode;
-    }
-    if (creationDate != null) {
-      hash = hash * 23 + creationDate.hashCode;
-    }
-    return hash;
-  }
+  int get hashCode => Object.hash(pid, commandLine, creationDate);
 
   @override
   String toString() {
@@ -148,7 +137,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
       rawTime = '0$rawTime';
     }
     if (rawTime[4] == '/') {
-      rawTime = rawTime.substring(0, 3) + '0' + rawTime.substring(3);
+      rawTime = '${rawTime.substring(0, 3)}0${rawTime.substring(3)}';
     }
     final String year = rawTime.substring(6, 10);
     final String month = rawTime.substring(3, 5);

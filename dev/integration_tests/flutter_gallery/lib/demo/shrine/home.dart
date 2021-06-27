@@ -40,7 +40,7 @@ class HomePage extends StatelessWidget {
       children: <Widget>[
         if (backdrop != null)
           backdrop!,
-        Align(child: expandingBottomSheet, alignment: Alignment.bottomRight),
+        Align(alignment: Alignment.bottomRight, child: expandingBottomSheet),
       ],
     );
   }

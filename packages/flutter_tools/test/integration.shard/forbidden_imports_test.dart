@@ -66,6 +66,7 @@ void main() {
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'platform.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_io.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'multi_root_file_system.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 

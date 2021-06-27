@@ -2004,7 +2004,7 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
 ///   [SliderThemeData.disabledActiveTrackColor],
 ///   [SliderThemeData.disabledInactiveTrackColor].
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the round slider slider tick mark shape.]
+/// ![A slider widget, consisting of 5 divisions and showing the round slider tick mark shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/rounded_slider_tick_mark_shape.png)
 ///
 /// See also:
@@ -2549,14 +2549,14 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(
-     bool isEnabled,
-     bool isDiscrete, {
-     TextPainter? labelPainter,
-     double? textScaleFactor,
+    bool isEnabled,
+    bool isDiscrete, {
+    TextPainter? labelPainter,
+    double? textScaleFactor,
   }) {
-     assert(labelPainter != null);
-     assert(textScaleFactor != null && textScaleFactor >= 0);
-     return _pathPainter.getPreferredSize(labelPainter!, textScaleFactor!);
+    assert(labelPainter != null);
+    assert(textScaleFactor != null && textScaleFactor >= 0);
+    return _pathPainter.getPreferredSize(labelPainter!, textScaleFactor!);
   }
 
   @override

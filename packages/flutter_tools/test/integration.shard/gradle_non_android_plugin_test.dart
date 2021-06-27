@@ -8,7 +8,6 @@ import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import 'test_utils.dart';
 
 void main() {
@@ -22,7 +21,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testUsingContext('flutter app that depends on a non-Android plugin can still build for Android', () {
+  testWithoutContext('flutter app that depends on a non-Android plugin can still build for Android', () {
     final String flutterRoot = getFlutterRoot();
     final String flutterBin = fileSystem.path.join(
       flutterRoot,

@@ -6,7 +6,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 Future<void> main() async {
-  const String fileName = 'large_image_changer';
+  const String fileName = 'animated_image';
 
   test('Animate for 250 frames', () async {
     final FlutterDriver driver = await FlutterDriver.connect();
@@ -20,5 +20,5 @@ Future<void> main() async {
     await summary.writeTimelineToFile(fileName, pretty: true);
 
     await driver.close();
-  });
+  }, timeout: Timeout.none);
 }

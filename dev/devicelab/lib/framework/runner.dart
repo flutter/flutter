@@ -2,15 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'adb.dart';
 import 'cocoon.dart';
+import 'devices.dart';
 import 'task_result.dart';
 import 'utils.dart';
 
@@ -103,9 +106,9 @@ Future<TaskResult> runTask(
 
   bool runnerFinished = false;
 
-  runner.exitCode.whenComplete(() {
+  unawaited(runner.exitCode.whenComplete(() {
     runnerFinished = true;
-  });
+  }));
 
   final Completer<Uri> uri = Completer<Uri>();
 

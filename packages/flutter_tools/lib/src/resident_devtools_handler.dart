@@ -6,8 +6,10 @@
 
 import 'dart:async';
 
+import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
 
+import 'base/common.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'resident_runner.dart';
@@ -33,7 +35,12 @@ abstract class ResidentDevtoolsHandler {
 
   Future<void> hotRestart(List<FlutterDevice> flutterDevices);
 
-  Future<void> serveAndAnnounceDevTools({Uri devToolsServerAddress, List<FlutterDevice> flutterDevices});
+  Future<void> serveAndAnnounceDevTools({
+    Uri devToolsServerAddress,
+    @required List<FlutterDevice> flutterDevices,
+  });
+
+  bool launchDevToolsInBrowser({@required List<FlutterDevice> flutterDevices});
 
   Future<void> shutdown();
 }
@@ -41,11 +48,16 @@ abstract class ResidentDevtoolsHandler {
 class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   FlutterResidentDevtoolsHandler(this._devToolsLauncher, this._residentRunner, this._logger);
 
+  static const Duration launchInBrowserTimeout = Duration(seconds: 15);
+
   final DevtoolsLauncher _devToolsLauncher;
   final ResidentRunner _residentRunner;
   final Logger _logger;
   bool _shutdown = false;
   bool _served = false;
+
+  @visibleForTesting
+  bool launchedInBrowser = false;
 
   @override
   DevToolsServerAddress get activeDevToolsServer => _devToolsLauncher?.activeDevToolsServer;
@@ -66,10 +78,14 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     if (devToolsServerAddress != null) {
       _devToolsLauncher.devToolsUrl = devToolsServerAddress;
     } else {
-      _served = true;
       await _devToolsLauncher.serve();
+      _served = true;
     }
     await _devToolsLauncher.ready;
+    // Do not attempt to print debugger list if the connection has failed.
+    if (_devToolsLauncher.activeDevToolsServer == null) {
+      return;
+    }
     final List<FlutterDevice> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
     await _maybeCallDevToolsUriServiceExtension(devicesWithExtension);
     await _callConnectedVmServiceUriExtension(devicesWithExtension);
@@ -79,6 +95,35 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       // report their URLs yet. Do so now.
       _residentRunner.printDebuggerList(includeObservatory: false);
     }
+  }
+
+  // This must be guaranteed not to return a Future that fails.
+  @override
+  bool launchDevToolsInBrowser({@required List<FlutterDevice> flutterDevices}) {
+    if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
+      return false;
+    }
+    if (_devToolsLauncher.devToolsUrl == null) {
+      _logger.startProgress('Waiting for Flutter DevTools to be served...');
+      unawaited(_devToolsLauncher.ready.then((_) {
+        _launchDevToolsForDevices(flutterDevices);
+      }));
+    } else {
+      _launchDevToolsForDevices(flutterDevices);
+    }
+    return true;
+  }
+
+  void _launchDevToolsForDevices(List<FlutterDevice> flutterDevices) {
+    assert(activeDevToolsServer != null);
+    for (final FlutterDevice device in flutterDevices) {
+      final String devToolsUrl = activeDevToolsServer.uri?.replace(
+        queryParameters: <String, dynamic>{'uri': '${device.vmService.httpAddress}'},
+      ).toString();
+      _logger.printStatus('Launching Flutter DevTools for ${device.device.name} at $devToolsUrl');
+      unawaited(Chrome.start(<String>[devToolsUrl]));
+    }
+    launchedInBrowser = true;
   }
 
   Future<void> _maybeCallDevToolsUriServiceExtension(
@@ -125,7 +170,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     try {
       await flutterDevice.vmService?.findExtensionIsolate(
         extension,
-        webIsolate: flutterDevice.targetPlatform == TargetPlatform.web_javascript,
       );
       return flutterDevice;
     } on VmServiceDisappearedException {
@@ -234,8 +278,23 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
   }
 
   @override
+  bool launchDevToolsInBrowser({List<FlutterDevice> flutterDevices}) {
+    return false;
+  }
+
+  @override
   Future<void> shutdown() async {
     wasShutdown = true;
     return;
   }
+}
+
+/// Convert a [URI] with query parameters into a display format instead
+/// of the default URI encoding.
+String urlToDisplayString(Uri uri) {
+  final StringBuffer base = StringBuffer(uri.replace(
+    queryParameters: <String, String>{},
+  ).toString());
+  base.write(uri.queryParameters.keys.map((String key) => '$key=${uri.queryParameters[key]}').join('&'));
+  return base.toString();
 }

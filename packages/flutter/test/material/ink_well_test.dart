@@ -624,8 +624,8 @@ void main() {
       child: Material(
         child: InkWell(
           onTap: () { },
-          child: const Text('Button'),
           excludeFromSemantics: true,
+          child: const Text('Button'),
         ),
       ),
     ));

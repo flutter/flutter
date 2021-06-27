@@ -17,11 +17,8 @@ void main() {
   final List<String> targetPlatforms = <String>[
     'apk',
     'web',
-    // TODO(zra): Re-enable after https://github.com/flutter/flutter/issues/81837
-    // is addressed.
-    // https://github.com/flutter/flutter/issues/81950
-    // if (platform.isWindows)
-    //   'windows',
+    if (platform.isWindows)
+      'windows',
     if (platform.isMacOS)
       ...<String>['macos', 'ios'],
   ];

@@ -59,6 +59,6 @@ void main() {
         }
       }
       expect(heightTextDidExpand, isTrue);
-    });
+    }, timeout: Timeout.none);
   });
 }

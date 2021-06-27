@@ -373,7 +373,7 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  _BoxDecorationPainter createBoxPainter([ VoidCallback? onChanged ]) {
+  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
     assert(onChanged != null || image == null);
     return _BoxDecorationPainter(this, onChanged);
   }

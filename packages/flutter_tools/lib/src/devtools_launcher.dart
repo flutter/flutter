@@ -41,6 +41,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   final Platform _platform;
   final PersistentToolState _persistentToolState;
   final io.HttpClient _httpClient;
+  final Completer<void> _processStartCompleter = Completer<void>();
 
   io.Process _devToolsProcess;
 
@@ -49,7 +50,10 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   static const String _pubHostedUrlKey = 'PUB_HOSTED_URL';
 
   @override
-  Future<void> launch(Uri vmServiceUri) async {
+  Future<void> get processStart => _processStartCompleter.future;
+
+  @override
+  Future<void> launch(Uri vmServiceUri, {List<String> additionalArguments}) async {
     // Place this entire method in a try/catch that swallows exceptions because
     // this method is guaranteed not to return a Future that throws.
     try {
@@ -90,23 +94,17 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         );
       }
 
-      if (offline) {
-        // TODO(kenz): we should launch an already activated version of DevTools
-        // here, if available, once DevTools has offline support. DevTools does
-        // not work without internet currently due to the failed request of a
-        // couple scripts. See https://github.com/flutter/devtools/issues/2420.
-        return;
-      } else {
-        bool devToolsActive = await _checkForActiveDevTools();
+      bool devToolsActive = await _checkForActiveDevTools();
+      if (!offline) {
         await _activateDevTools(throttleUpdates: devToolsActive);
-        if (!devToolsActive) {
-          devToolsActive = await _checkForActiveDevTools();
-        }
-        if (!devToolsActive) {
-          // We don't have devtools installed and installing it failed;
-          // _activateDevTools will have reported the error already.
-          return;
-        }
+      }
+      if (!devToolsActive && !offline) {
+        devToolsActive = await _checkForActiveDevTools();
+      }
+      if (!devToolsActive) {
+        // We don't have devtools installed and installing it failed;
+        // _activateDevTools will have reported the error already.
+        return;
       }
 
       _devToolsProcess = await _processManager.start(<String>[
@@ -116,7 +114,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         'devtools',
         '--no-launch-browser',
         if (vmServiceUri != null) '--vm-uri=$vmServiceUri',
+        ...?additionalArguments,
       ]);
+      _processStartCompleter.complete();
       final Completer<Uri> completer = Completer<Uri>();
       _devToolsProcess.stdout
           .transform(utf8.decoder)

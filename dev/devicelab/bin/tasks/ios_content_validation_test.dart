@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/apk_utils.dart';
@@ -53,7 +55,8 @@ Future<void> main() async {
           'Flutter',
         );
         // Exits 0 only if codesigned.
-        eval('xcrun', <String>['codesign', '--verify', flutterFramework]);
+        final Future<String> flutterCodesign =
+            eval('xcrun', <String>['codesign', '--verify', flutterFramework]);
 
         final String appFramework = path.join(
           appBundle.path,
@@ -61,7 +64,10 @@ Future<void> main() async {
           'App.framework',
           'App',
         );
-        eval('xcrun', <String>['codesign', '--verify', appFramework]);
+        final Future<String> appCodesign =
+            eval('xcrun', <String>['codesign', '--verify', appFramework]);
+        await flutterCodesign;
+        await appCodesign;
       });
 
       return TaskResult.success(null);
