@@ -222,9 +222,9 @@ Future<String> getDartVersion() async {
   return version.replaceAll('"', "'");
 }
 
-Future<String> getCurrentFlutterRepoCommit() {
+Future<String?> getCurrentFlutterRepoCommit() {
   if (!dir('${flutterDirectory.path}/.git').existsSync()) {
-    return Future<String>.value(null);
+    return Future<String?>.value(null);
   }
 
   return inDirectory<String>(flutterDirectory, () {
