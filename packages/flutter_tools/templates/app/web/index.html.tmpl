@@ -28,8 +28,48 @@
 
   <title>{{projectName}}</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- This style is for making the loading indicator work -->
+  <style>
+    .loading-indicator-container {
+      height: 98vh;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loading-indicator {
+      width: 48px;
+      height: 48px;
+
+      border-top: 5px solid #0175C2;
+      border-bottom: 5px solid #0175C2;
+      border-right: 5px solid transparent;
+      border-left: 5px solid transparent;
+      border-radius: 50%;
+      animation: loading-indicator-spin 2s linear infinite;
+    }
+
+    @keyframes loading-indicator-spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
 <body>
+
+  <!-- This div, aka container, will show a loading indicator before the
+       Flutter app is loaded. -->
+  <div class="loading-indicator-container">
+    <div class="loading-indicator"></div>
+  </div>
+
   <!-- This script installs service_worker.js to provide PWA functionality to
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
