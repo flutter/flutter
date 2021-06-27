@@ -156,7 +156,7 @@ class CustomDevicesConfig {
   List<CustomDeviceConfig> tryGetDevices() {
     try {
       return devices;
-    } on Exception catch (_) {
+    } on Exception {
       // any Exceptions are logged by [devices] already.
       return <CustomDeviceConfig>[];
     }
