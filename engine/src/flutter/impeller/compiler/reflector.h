@@ -38,8 +38,22 @@ class Reflector {
   std::shared_ptr<fml::Mapping> GetReflectionCC() const;
 
  private:
+  struct StructMember {
+    std::string type;
+    std::string name;
+    size_t offset = 0u;
+    size_t byte_length = 0u;
+  };
+
+  struct StructDefinition {
+    std::string name;
+    size_t byte_length = 0u;
+    std::vector<StructMember> members;
+  };
+
   const Options options_;
   const std::shared_ptr<const spirv_cross::ParsedIR> ir_;
+  // TODO: There is no reason this needs to the MSL subtype.
   const std::shared_ptr<const spirv_cross::CompilerMSL> compiler_;
   std::unique_ptr<const nlohmann::json> template_arguments_;
   std::shared_ptr<fml::Mapping> reflection_header_;
@@ -64,8 +78,15 @@ class Reflector {
   std::optional<nlohmann::json::object_t> ReflectType(
       const spirv_cross::TypeID& type_id) const;
 
-  std::optional<nlohmann::json::object_t> ReflectStructDefinition(
+  nlohmann::json::object_t EmitStructDefinition(
+      std::optional<Reflector::StructDefinition> struc) const;
+
+  std::optional<StructDefinition> ReflectStructDefinition(
       const spirv_cross::TypeID& type_id) const;
+
+  std::optional<StructDefinition> ReflectPerVertexStructDefinition(
+      const spirv_cross::SmallVector<spirv_cross::Resource>& stage_inputs)
+      const;
 
   std::optional<std::string> GetMemberNameAtIndexIfExists(
       const spirv_cross::SPIRType& parent_type,
@@ -75,12 +96,6 @@ class Reflector {
                                    size_t index,
                                    std::string suffix = "") const;
 
-  struct StructMember {
-    std::string type;
-    std::string name;
-    size_t offset;
-    size_t byte_length;
-  };
   std::vector<StructMember> ReadStructMembers(
       const spirv_cross::TypeID& type_id) const;
 
