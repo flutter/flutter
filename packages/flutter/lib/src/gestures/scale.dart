@@ -37,7 +37,7 @@ class ScaleStartDetails {
   ///
   /// The [focalPoint] argument must not be null.
   ScaleStartDetails({ this.focalPoint = Offset.zero, Offset? localFocalPoint, this.pointerCount = 0 })
-    : assert(focalPoint != null), localFocalPoint = localFocalPoint ?? focalPoint;
+    : localFocalPoint = localFocalPoint ?? focalPoint;
 
   /// The initial focal point of the pointers in contact with the screen.
   ///
@@ -86,11 +86,9 @@ class ScaleUpdateDetails {
     this.rotation = 0.0,
     this.pointerCount = 0,
     this.delta = Offset.zero,
-  }) : assert(focalPoint != null),
-       assert(delta != null),
-       assert(scale != null && scale >= 0.0),
-       assert(horizontalScale != null && horizontalScale >= 0.0),
-       assert(verticalScale != null && verticalScale >= 0.0),
+  }) : assert(scale >= 0.0),
+       assert(horizontalScale >= 0.0),
+       assert(verticalScale >= 0.0),
        assert(rotation != null),
        localFocalPoint = localFocalPoint ?? focalPoint;
 
@@ -182,8 +180,7 @@ class ScaleEndDetails {
   /// Creates details for [GestureScaleEndCallback].
   ///
   /// The [velocity] argument must not be null.
-  ScaleEndDetails({ this.velocity = Velocity.zero, this.pointerCount = 0 })
-    : assert(velocity != null);
+  ScaleEndDetails({ this.velocity = Velocity.zero, this.pointerCount = 0 });
 
   /// The velocity of the last pointer to be lifted off of the screen.
   final Velocity velocity;
@@ -210,7 +207,6 @@ typedef GestureScaleUpdateCallback = void Function(ScaleUpdateDetails details);
 typedef GestureScaleEndCallback = void Function(ScaleEndDetails details);
 
 bool _isFlingGesture(Velocity velocity) {
-  assert(velocity != null);
   final double speedSquared = velocity.pixelsPerSecond.distanceSquared;
   return speedSquared > kMinFlingVelocity * kMinFlingVelocity;
 }
@@ -230,9 +226,7 @@ class _LineBetweenPointers{
     this.pointerStartId = 0,
     this.pointerEndLocation = Offset.zero,
     this.pointerEndId = 1,
-  }) : assert(pointerStartLocation != null && pointerEndLocation != null),
-       assert(pointerStartId != null && pointerEndId != null),
-       assert(pointerStartId != pointerEndId);
+  }) : assert(pointerStartId != pointerEndId);
 
   // The location and the id of the pointer that marks the start of the line.
   final Offset pointerStartLocation;
@@ -265,8 +259,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
     this.dragStartBehavior = DragStartBehavior.down,
-  }) : assert(dragStartBehavior != null),
-       super(
+  }) : super(
          debugOwner: debugOwner,
          kind: kind,
          supportedDevices: supportedDevices,

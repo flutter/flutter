@@ -851,8 +851,7 @@ class PointerAddedEvent extends PointerEvent with _PointerEventDescription, _Cop
 }
 
 class _TransformedPointerAddedEvent extends _TransformedPointerEvent with _CopyPointerAddedEvent implements PointerAddedEvent {
-  _TransformedPointerAddedEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerAddedEvent(this.original, this.transform);
 
   @override
   final PointerAddedEvent original;
@@ -955,8 +954,7 @@ class PointerRemovedEvent extends PointerEvent with _PointerEventDescription, _C
 }
 
 class _TransformedPointerRemovedEvent extends _TransformedPointerEvent with _CopyPointerRemovedEvent implements PointerRemovedEvent {
-  _TransformedPointerRemovedEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerRemovedEvent(this.original, this.transform);
 
   @override
   final PointerRemovedEvent original;
@@ -1093,8 +1091,7 @@ class PointerHoverEvent extends PointerEvent with _PointerEventDescription, _Cop
 }
 
 class _TransformedPointerHoverEvent extends _TransformedPointerEvent with _CopyPointerHoverEvent implements PointerHoverEvent {
-  _TransformedPointerHoverEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerHoverEvent(this.original, this.transform);
 
   @override
   final PointerHoverEvent original;
@@ -1259,8 +1256,7 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
 }
 
 class _TransformedPointerEnterEvent extends _TransformedPointerEvent with _CopyPointerEnterEvent implements PointerEnterEvent {
-  _TransformedPointerEnterEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerEnterEvent(this.original, this.transform);
 
   @override
   final PointerEnterEvent original;
@@ -1426,8 +1422,7 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
 }
 
 class _TransformedPointerExitEvent extends _TransformedPointerEvent with _CopyPointerExitEvent implements PointerExitEvent {
-  _TransformedPointerExitEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerExitEvent(this.original, this.transform);
 
   @override
   final PointerExitEvent original;
@@ -1553,8 +1548,7 @@ class PointerDownEvent extends PointerEvent with _PointerEventDescription, _Copy
 }
 
 class _TransformedPointerDownEvent extends _TransformedPointerEvent with _CopyPointerDownEvent implements PointerDownEvent {
-  _TransformedPointerDownEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerDownEvent(this.original, this.transform);
 
   @override
   final PointerDownEvent original;
@@ -1692,8 +1686,7 @@ class PointerMoveEvent extends PointerEvent with _PointerEventDescription, _Copy
 }
 
 class _TransformedPointerMoveEvent extends _TransformedPointerEvent with _CopyPointerMoveEvent implements PointerMoveEvent {
-  _TransformedPointerMoveEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerMoveEvent(this.original, this.transform);
 
   @override
   final PointerMoveEvent original;
@@ -1824,8 +1817,7 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPo
 }
 
 class _TransformedPointerUpEvent extends _TransformedPointerEvent with _CopyPointerUpEvent implements PointerUpEvent {
-  _TransformedPointerUpEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerUpEvent(this.original, this.transform);
 
   @override
   final PointerUpEvent original;
@@ -1931,12 +1923,7 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
     Offset position = Offset.zero,
     this.scrollDelta = Offset.zero,
     int embedderId = 0,
-  }) : assert(timeStamp != null),
-       assert(kind != null),
-       assert(device != null),
-       assert(position != null),
-       assert(scrollDelta != null),
-       super(
+  }) : super(
          timeStamp: timeStamp,
          kind: kind,
          device: device,
@@ -1963,8 +1950,7 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
 }
 
 class _TransformedPointerScrollEvent extends _TransformedPointerEvent with _CopyPointerScrollEvent implements PointerScrollEvent {
-  _TransformedPointerScrollEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerScrollEvent(this.original, this.transform);
 
   @override
   final PointerScrollEvent original;
@@ -2138,8 +2124,7 @@ double computeScaleSlop(PointerDeviceKind kind) {
 }
 
 class _TransformedPointerCancelEvent extends _TransformedPointerEvent with _CopyPointerCancelEvent implements PointerCancelEvent {
-  _TransformedPointerCancelEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerCancelEvent(this.original, this.transform);
 
   @override
   final PointerCancelEvent original;

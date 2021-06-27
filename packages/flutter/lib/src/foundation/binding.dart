@@ -300,7 +300,7 @@ abstract class BindingBase {
   Future<void> lockEvents(Future<void> Function() callback) {
     developer.Timeline.startSync('Lock events');
 
-    assert(callback != null);
+    assert(callback != null); // TODO(werainkhatri): verify redundancy.
     _lockCount += 1;
     final Future<void> future = callback();
     assert(future != null, 'The lockEvents() callback returned null; it should return a Future<void> that completes when the lock is to expire.');
@@ -374,8 +374,6 @@ abstract class BindingBase {
     required String name,
     required AsyncCallback callback,
   }) {
-    assert(name != null);
-    assert(callback != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
@@ -405,9 +403,6 @@ abstract class BindingBase {
     required AsyncValueGetter<bool> getter,
     required AsyncValueSetter<bool> setter,
   }) {
-    assert(name != null);
-    assert(getter != null);
-    assert(setter != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
@@ -439,9 +434,6 @@ abstract class BindingBase {
     required AsyncValueGetter<double> getter,
     required AsyncValueSetter<double> setter,
   }) {
-    assert(name != null);
-    assert(getter != null);
-    assert(setter != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
@@ -501,9 +493,6 @@ abstract class BindingBase {
     required AsyncValueGetter<String> getter,
     required AsyncValueSetter<String> setter,
   }) {
-    assert(name != null);
-    assert(getter != null);
-    assert(setter != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
@@ -572,8 +561,6 @@ abstract class BindingBase {
     required String name,
     required ServiceExtensionCallback callback,
   }) {
-    assert(name != null);
-    assert(callback != null);
     final String methodName = 'ext.flutter.$name';
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);

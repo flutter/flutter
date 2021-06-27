@@ -370,7 +370,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     if (hitTestResult != null ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
-      assert(event.position != null);
       dispatchEvent(event, hitTestResult);
     }
   }

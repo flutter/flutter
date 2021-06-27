@@ -47,9 +47,7 @@ class ForcePressDetails {
     required this.globalPosition,
     Offset? localPosition,
     required this.pressure,
-  }) : assert(globalPosition != null),
-       assert(pressure != null),
-       localPosition = localPosition ?? globalPosition;
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the function was called.
   final Offset globalPosition;
@@ -128,10 +126,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(startPressure != null),
-       assert(peakPressure != null),
-       assert(interpolation != null),
-       assert(peakPressure > startPressure),
+  }) : assert(peakPressure > startPressure),
        super(
          debugOwner: debugOwner,
          kind: kind,
