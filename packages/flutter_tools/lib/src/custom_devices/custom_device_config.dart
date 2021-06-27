@@ -464,7 +464,7 @@ class CustomDeviceConfig {
     );
   }
 
-  dynamic toJson() {
+  Object toJson() {
     return <String, Object?>{
       _kId: id,
       _kLabel: label,
