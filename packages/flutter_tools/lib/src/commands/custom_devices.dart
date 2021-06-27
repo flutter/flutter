@@ -188,12 +188,13 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
   String get configBackupPath => '${customDevicesConfig.configPath}.bak';
 
   /// Copies the current config file to [configBackupPath], overwriting it
-  /// if necessary.
+  /// if necessary. Returns false and does nothing if the current config file
+  /// doesn't exist. (True otherwise)
   @protected
-  Future<bool> backup() async {
+  bool backup() {
     final File configFile = fileSystem.file(customDevicesConfig.configPath);
-    if (await configFile.exists()) {
-      await configFile.copy(configBackupPath);
+    if (configFile.existsSync()) {
+      configFile.copySync(configBackupPath);
       return true;
     }
     return false;
@@ -285,7 +286,7 @@ If a file already exists at the backup location, it will be overwritten.
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    final bool wasBackedUp = await backup();
+    final bool wasBackedUp = backup();
 
     ErrorHandlingFileSystem.deleteIfExists(fileSystem.file(customDevicesConfig.configPath));
     customDevicesConfig.ensureFileExists();
@@ -344,7 +345,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         'other reason.\n'
         "By default, this won't check whether the passed in config actually "
         'works. For more info see the "--check" option.',
-      valueHelp: 'JSON config',
+      valueHelp: '{"id": "pi", ...}',
       aliases: _kJsonAliases
     );
 
@@ -841,7 +842,7 @@ Delete a device from the config file.
       throwToolExit('Couldn\'t find device with id "$id" in config at "${customDevicesConfig.configPath}"');
     }
 
-    await backup();
+    backup();
     customDevicesConfig.remove(id);
     logger.printStatus('Successfully removed device with id "$id" from config at "${customDevicesConfig.configPath}"');
     return FlutterCommandResult.success();
