@@ -149,14 +149,14 @@ std::shared_ptr<fml::Mapping> Reflector::GetReflectionCC() const {
 std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
   nlohmann::json root;
 
-  {
-    const auto& entrypoints = compiler_->get_entry_points_and_stages();
-    if (entrypoints.size() != 1) {
-      FML_LOG(ERROR) << "Incorrect number of entrypoints in the shader. Found "
-                     << entrypoints.size() << " but expected 1.";
-      return std::nullopt;
-    }
+  const auto& entrypoints = compiler_->get_entry_points_and_stages();
+  if (entrypoints.size() != 1) {
+    FML_LOG(ERROR) << "Incorrect number of entrypoints in the shader. Found "
+                   << entrypoints.size() << " but expected 1.";
+    return std::nullopt;
+  }
 
+  {
     root["entrypoint"] = entrypoints.front().name;
     root["shader_name"] = options_.shader_name;
     root["shader_stage"] =
@@ -187,20 +187,31 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     return std::nullopt;
   }
 
-  auto& struct_definitions = root["struct_definitions"] =
-      nlohmann::json::array_t{};
-  std::set<spirv_cross::ID> known_structs;
-  ir_->for_each_typed_id<SPIRType>([&](uint32_t, const SPIRType& type) {
-    if (known_structs.find(type.self) != known_structs.end()) {
-      // Iterating over types this way leads to duplicates which may cause
-      // duplicate struct definitions.
-      return;
+  {
+    auto& struct_definitions = root["struct_definitions"] =
+        nlohmann::json::array_t{};
+    std::set<spirv_cross::ID> known_structs;
+    ir_->for_each_typed_id<SPIRType>([&](uint32_t, const SPIRType& type) {
+      if (known_structs.find(type.self) != known_structs.end()) {
+        // Iterating over types this way leads to duplicates which may cause
+        // duplicate struct definitions.
+        return;
+      }
+      known_structs.insert(type.self);
+      if (auto struc = ReflectStructDefinition(type.self); struc.has_value()) {
+        struct_definitions.emplace_back(EmitStructDefinition(struc.value()));
+      }
+    });
+
+    if (entrypoints.front().execution_model ==
+        spv::ExecutionModel::ExecutionModelVertex) {
+      if (auto struc =
+              ReflectPerVertexStructDefinition(shader_resources.stage_inputs);
+          struc.has_value()) {
+        struct_definitions.emplace_back(EmitStructDefinition(struc.value()));
+      }
     }
-    known_structs.insert(type.self);
-    if (auto struc = ReflectStructDefinition(type.self); struc.has_value()) {
-      struct_definitions.emplace_back(std::move(struc.value()));
-    }
-  });
+  }
 
   return root;
 }
@@ -448,7 +459,7 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
   return result;
 }
 
-std::optional<nlohmann::json::object_t> Reflector::ReflectStructDefinition(
+std::optional<Reflector::StructDefinition> Reflector::ReflectStructDefinition(
     const TypeID& type_id) const {
   const auto& type = compiler_->get_type(type_id);
   if (type.basetype != SPIRType::BaseType::Struct) {
@@ -460,28 +471,125 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectStructDefinition(
     return std::nullopt;
   }
 
-  nlohmann::json::object_t struc;
-  struc["name"] = struct_name;
-
   size_t total_size = 0u;
   for (const auto& member_type_id : type.member_types) {
     const auto& member_type = compiler_->get_type(member_type_id);
     total_size +=
         (member_type.width * member_type.vecsize * member_type.columns) / 8u;
   }
-  struc["byte_length"] = total_size;
 
-  size_t members_size = 0u;
-  struc["members"] = nlohmann::json::array_t{};
-  const auto struct_members = ReadStructMembers(type_id);
-  for (const auto& struct_member : struct_members) {
-    auto& member = struc["members"].emplace_back(nlohmann::json::object_t{});
-    member["name"] = struct_member.name;
-    member["type"] = struct_member.type;
-    member["offset"] = struct_member.offset;
-    member["byte_length"] = struct_member.byte_length;
+  StructDefinition struc;
+  struc.name = struct_name;
+  struc.byte_length = total_size;
+  struc.members = ReadStructMembers(type_id);
+  return struc;
+}
+
+nlohmann::json::object_t Reflector::EmitStructDefinition(
+    std::optional<Reflector::StructDefinition> struc) const {
+  nlohmann::json::object_t result;
+  result["name"] = struc->name;
+  result["byte_length"] = struc->byte_length;
+  auto& members = result["members"] = nlohmann::json::array_t{};
+  for (const auto& struc_member : struc->members) {
+    auto& member = members.emplace_back(nlohmann::json::object_t{});
+    member["name"] = struc_member.name;
+    member["type"] = struc_member.type;
+    member["offset"] = struc_member.offset;
+    member["byte_length"] = struc_member.byte_length;
+  }
+  return result;
+}
+
+struct VertexType {
+  std::string type_name;
+  std::string variable_name;
+  size_t byte_length = 0u;
+};
+
+static VertexType VertexTypeFromInputResource(const CompilerMSL& compiler,
+                                              const Resource* resource) {
+  VertexType result;
+  result.variable_name = resource->name;
+  auto type = compiler.get_type(resource->type_id);
+  const auto total_size = type.columns * type.vecsize * type.width / 8u;
+  result.byte_length = total_size;
+
+  if (type.basetype == SPIRType::BaseType::Float && type.columns == 1u &&
+      type.vecsize == 2u && type.width == sizeof(float) * 8u) {
+    result.type_name = "Point";
+  } else if (type.basetype == SPIRType::BaseType::Float && type.columns == 1u &&
+             type.vecsize == 4u && type.width == sizeof(float) * 8u) {
+    result.type_name = "Vector4";
+  } else if (type.basetype == SPIRType::BaseType::Float && type.columns == 1u &&
+             type.vecsize == 3u && type.width == sizeof(float) * 8u) {
+    result.type_name = "Vector3";
+  } else {
+    // Catch all unknown padding.
+    result.type_name = TypeNameWithPaddingOfSize(total_size);
   }
 
+  return result;
+}
+
+std::optional<Reflector::StructDefinition>
+Reflector::ReflectPerVertexStructDefinition(
+    const SmallVector<spirv_cross::Resource>& stage_inputs) const {
+  // Avoid emitting a zero sized structure. The code gen templates assume a
+  // non-zero size.
+  if (stage_inputs.empty()) {
+    return std::nullopt;
+  }
+
+  // Validate locations are contiguous and there are no duplicates.
+  std::set<uint32_t> locations;
+  for (const auto& input : stage_inputs) {
+    auto location = compiler_->get_decoration(
+        input.id, spv::Decoration::DecorationLocation);
+    if (locations.count(location) != 0) {
+      // Duplicate location. Bail.
+      return std::nullopt;
+    }
+    locations.insert(location);
+  }
+
+  for (size_t i = 0; i < locations.size(); i++) {
+    if (locations.count(i) != 1) {
+      // Locations are not contiguous. Bail.
+      return std::nullopt;
+    }
+  }
+
+  auto input_for_location = [&](uint32_t queried_location) -> const Resource* {
+    for (const auto& input : stage_inputs) {
+      auto location = compiler_->get_decoration(
+          input.id, spv::Decoration::DecorationLocation);
+      if (location == queried_location) {
+        return &input;
+      }
+    }
+    // This really cannot happen with all the validation above.
+    return nullptr;
+  };
+
+  StructDefinition struc;
+  struc.name = "PerVertexData";
+  struc.byte_length = 0u;
+  for (size_t i = 0; i < locations.size(); i++) {
+    auto resource = input_for_location(i);
+    if (resource == nullptr) {
+      return std::nullopt;
+    }
+    const auto vertex_type = VertexTypeFromInputResource(*compiler_, resource);
+
+    StructMember member;
+    member.name = vertex_type.variable_name;
+    member.type = vertex_type.type_name;
+    member.byte_length = vertex_type.byte_length;
+    member.offset = struc.byte_length;
+    struc.byte_length += vertex_type.byte_length;
+    struc.members.emplace_back(std::move(member));
+  }
   return struc;
 }
 
