@@ -803,11 +803,11 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
     if (stringArg(_kJson) != null) {
       return runNonInteractively();
-    } else if (boolArg(_kSsh) == true) {
-      return runInteractivelySsh();
-    } else {
-      throw FallThroughError();
     }
+    if (boolArg(_kSsh) == true) {
+      return runInteractivelySsh();
+    } 
+    throw FallThroughError();
   }
 }
 
