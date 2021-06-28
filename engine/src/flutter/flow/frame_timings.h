@@ -94,6 +94,9 @@ class FrameTimingsRecorder {
   /// Returns the frame number in a fml tracing friendly format.
   const char* GetFrameNumberTraceArg() const;
 
+  /// Returns the recorded time from when `RecordRasterEnd` is called.
+  FrameTiming GetRecordedTime() const;
+
  private:
   static std::atomic<uint64_t> frame_number_gen_;
 
@@ -109,6 +112,9 @@ class FrameTimingsRecorder {
   fml::TimePoint build_end_;
   fml::TimePoint raster_start_;
   fml::TimePoint raster_end_;
+
+  // Set when `RecordRasterEnd` is called. Cannot be reset once set.
+  FrameTiming timing_;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(FrameTimingsRecorder);
 };

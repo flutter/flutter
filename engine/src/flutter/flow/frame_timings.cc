@@ -107,14 +107,19 @@ FrameTiming FrameTimingsRecorder::RecordRasterEnd(fml::TimePoint raster_end) {
   FML_DCHECK(state_ == State::kRasterStart);
   state_ = State::kRasterEnd;
   raster_end_ = raster_end;
-  FrameTiming timing;
-  timing.Set(FrameTiming::kVsyncStart, vsync_start_);
-  timing.Set(FrameTiming::kBuildStart, build_start_);
-  timing.Set(FrameTiming::kBuildFinish, build_end_);
-  timing.Set(FrameTiming::kRasterStart, raster_start_);
-  timing.Set(FrameTiming::kRasterFinish, raster_end_);
-  timing.SetFrameNumber(GetFrameNumber());
-  return timing;
+  timing_.Set(FrameTiming::kVsyncStart, vsync_start_);
+  timing_.Set(FrameTiming::kBuildStart, build_start_);
+  timing_.Set(FrameTiming::kBuildFinish, build_end_);
+  timing_.Set(FrameTiming::kRasterStart, raster_start_);
+  timing_.Set(FrameTiming::kRasterFinish, raster_end_);
+  timing_.SetFrameNumber(GetFrameNumber());
+  return timing_;
+}
+
+FrameTiming FrameTimingsRecorder::GetRecordedTime() const {
+  std::scoped_lock state_lock(state_mutex_);
+  FML_DCHECK(state_ == State::kRasterEnd);
+  return timing_;
 }
 
 std::unique_ptr<FrameTimingsRecorder> FrameTimingsRecorder::CloneUntil(
