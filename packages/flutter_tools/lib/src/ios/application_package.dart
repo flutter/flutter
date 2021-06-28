@@ -6,7 +6,7 @@ import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../globals_null_migrated.dart' as globals;
-import '../project.dart';
+import '../xcode_project.dart';
 import 'plist_parser.dart';
 
 /// Tests whether a [Directory] is an iOS bundle directory.

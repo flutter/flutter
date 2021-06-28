@@ -32,7 +32,7 @@ import 'theme.dart';
 /// Adaptive layouts can build different instances of the [Scaffold] in order to
 /// have a navigation rail for more horizontal layouts and a bottom navigation
 /// bar for more vertical layouts. See
-/// [https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart]
+/// [the adaptive_scaffold.dart sample](https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
 /// for an example.
 ///
 /// {@tool dartpad --template=stateful_widget_material}
@@ -98,7 +98,7 @@ import 'theme.dart';
 ///    destinations in the navigation rail.
 ///  * [BottomNavigationBar], which is a similar navigation widget that's laid
 ///     out horizontally.
-///  * [https://material.io/components/navigation-rail/]
+///  * https://material.io/components/navigation-rail/
 class NavigationRail extends StatefulWidget {
   /// Creates a material design navigation rail.
   ///
