@@ -610,7 +610,7 @@ class Hash256 {
   }
 
   @override
-  int get hashCode => Object.hash(a, b, c, d);
+  int get hashCode => a ^ b ^ c ^ d;
 }
 
 // DO NOT ADD ANY ENTRIES TO THIS LIST.

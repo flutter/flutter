@@ -302,7 +302,7 @@ class XcodeProjectBuildContext {
   final EnvironmentType environmentType;
 
   @override
-  int get hashCode => Object.hash(scheme, configuration, environmentType);
+  int get hashCode => scheme.hashCode ^ configuration.hashCode ^ environmentType.hashCode;
 
   @override
   bool operator ==(Object other) {
