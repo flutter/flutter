@@ -7,6 +7,7 @@
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/shell/common/context_options.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace flutter {
@@ -18,30 +19,7 @@ sk_sp<GrDirectContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
     return nullptr;
   }
 
-  GrContextOptions options = {};
-
-  if (PersistentCache::cache_sksl()) {
-    FML_LOG(INFO) << "Cache SkSL";
-    options.fShaderCacheStrategy = GrContextOptions::ShaderCacheStrategy::kSkSL;
-  }
-  PersistentCache::MarkStrategySet();
-
-  options.fPersistentCache = PersistentCache::GetCacheForProcess();
-
-  // There is currently a bug with doing GPU YUV to RGB conversions on the IO
-  // thread. The necessary work isn't being flushed or synchronized with the
-  // other threads correctly, so the textures end up blank.  For now, suppress
-  // that feature, which will cause texture uploads to do CPU YUV conversion.
-  // A similar work-around is also used in shell/gpu/gpu_surface_gl.cc.
-  options.fDisableGpuYUVConversion = true;
-
-  // To get video playback on the widest range of devices, we limit Skia to
-  // ES2 shading language when the ES3 external image extension is missing.
-  options.fPreferExternalImagesOverES3 = true;
-
-  // Enabling this flag can increase VRAM consumption. Turn it off until
-  // further notice.
-  options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
+  const auto options = MakeDefaultContextOptions(ContextType::kResource);
 
 #if !OS_FUCHSIA
   if (auto context = GrDirectContext::MakeGL(gl_interface, options)) {
