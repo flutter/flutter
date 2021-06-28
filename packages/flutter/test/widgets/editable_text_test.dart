@@ -7304,13 +7304,11 @@ void main() {
     expect(controller.selection.baseOffset, 0);
 
     // meta + A moves the cursor right instead of doing select all.
-    final String targetPlatform = defaultTargetPlatform.toString();
-    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.keyA],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     await tester.pump();
     expect(controller.selection.isCollapsed, isTrue);
@@ -7319,7 +7317,7 @@ void main() {
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.keyA],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     await tester.pump();
     expect(controller.selection.isCollapsed, isTrue);
@@ -7651,13 +7649,11 @@ void main() {
     expect(controller.selection.baseOffset, 0);
 
     // meta + A moves the cursor right instead of doing select all.
-    final String targetPlatform = defaultTargetPlatform.toString();
-    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.keyA],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     await tester.pump();
     expect(controller.selection.isCollapsed, isTrue);
@@ -7667,7 +7663,7 @@ void main() {
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.keyA],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     await tester.pump();
     expect(controller.selection.isCollapsed, isTrue);
