@@ -633,6 +633,15 @@ class SingletonFlutterWindow extends FlutterWindow {
     platformDispatcher.onSemanticsEnabledChanged = callback;
   }
 
+  /// The [FrameData] object for the current frame.
+  FrameData get frameData => platformDispatcher.frameData;
+
+  /// A callback that is invoked when the window updates the [FrameData].
+  VoidCallback? get onFrameDataChanged => platformDispatcher.onFrameDataChanged;
+  set onFrameDataChanged(VoidCallback? callback) {
+    platformDispatcher.onFrameDataChanged = callback;
+  }
+
   /// A callback that is invoked whenever the user requests an action to be
   /// performed.
   ///
@@ -849,3 +858,16 @@ enum Brightness {
 ///   belonging to the application, including top level application windows like
 ///   this one.
 final SingletonFlutterWindow window = SingletonFlutterWindow._(0, PlatformDispatcher.instance);
+
+/// Additional data available on each flutter frame.
+class FrameData {
+  const FrameData._({this.frameNumber = -1});
+
+  /// The number of the current frame.
+  ///
+  /// This number monotonically increases, but doesn't necessarily
+  /// start at a particular value.
+  ///
+  /// If not provided, defaults to -1.
+  final int frameNumber;
+}

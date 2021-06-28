@@ -317,6 +317,11 @@ void hooksTests() {
     }
   }
 
+  void expectNotEquals(Object? value, Object? expected) {
+    if (value == expected) {
+      throw 'Expected $value to not be $expected.';
+    }
+  }
 
   test('onMetricsChanged preserves callback zone', () {
     late Zone originalZone;
@@ -479,7 +484,7 @@ void hooksTests() {
       };
     });
 
-    _callHook('_beginFrame', 1, 1234);
+    _callHook('_beginFrame', 2, 1234, 1);
     expectIdentical(runZone, innerZone);
     expectEquals(start, const Duration(microseconds: 1234));
   });
@@ -623,6 +628,25 @@ void hooksTests() {
     _callHook('_updateUserSettingsData', 1, '{"textScaleFactor": 0.5, "platformBrightness": "dark", "alwaysUse24HourFormat": true}');
     expectIdentical(runZonePlatformBrightness, innerZone);
     expectEquals(platformBrightness, Brightness.dark);
+  });
+
+  test('onFrameDataChanged preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late int frameNumber;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onFrameDataChanged = () {
+        runZone = Zone.current;
+        frameNumber = window.frameData.frameNumber;
+      };
+    });
+
+    _callHook('_beginFrame', 2, 0, 2);
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+    expectEquals(frameNumber, 2);
   });
 
   _finish();

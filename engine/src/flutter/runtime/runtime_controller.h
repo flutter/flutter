@@ -244,7 +244,7 @@ class RuntimeController : public PlatformConfigurationClient {
   /// @return     If notification to begin frame rendering was delivered to the
   ///             running isolate.
   ///
-  bool BeginFrame(fml::TimePoint frame_time);
+  bool BeginFrame(fml::TimePoint frame_time, uint64_t frame_number);
 
   //----------------------------------------------------------------------------
   /// @brief      Dart code cannot fully measure the time it takes for a

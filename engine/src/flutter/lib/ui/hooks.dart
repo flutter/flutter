@@ -110,8 +110,9 @@ void _dispatchSemanticsAction(int id, int action, ByteData? args) {
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _beginFrame(int microseconds) {
+void _beginFrame(int microseconds, int frameNumber) {
   PlatformDispatcher.instance._beginFrame(microseconds);
+  PlatformDispatcher.instance._updateFrameData(frameNumber);
 }
 
 @pragma('vm:entry-point')
