@@ -246,8 +246,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeStartDateSemanticLabelRaw;
 
   @override
-  String dateRangeStartDateSemanticLabel(String fullDate) {
-    return dateRangeStartDateSemanticLabelRaw.replaceFirst(r'$fullDate', fullDate);
+  String dateRangeStartDateSemanticLabel(String formattedDate) {
+    return dateRangeStartDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
   }
 
   /// The raw version of [dateRangeEndDateSemanticLabel], with `$fullDate` verbatim
@@ -256,8 +256,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeEndDateSemanticLabelRaw;
 
   @override
-  String dateRangeEndDateSemanticLabel(String fullDate) {
-    return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', fullDate);
+  String dateRangeEndDateSemanticLabel(String formattedDate) {
+    return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
   }
 
   /// The raw version of [aboutListTileTitle], with `$applicationName` verbatim
@@ -646,9 +646,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get remainingTextFieldCharacterCountOther;
 
   @override
-  String remainingTextFieldCharacterCount(int remainingCount) {
+  String remainingTextFieldCharacterCount(int remaining) {
     return intl.Intl.pluralLogic(
-      remainingCount,
+      remaining,
       zero: remainingTextFieldCharacterCountZero,
       one: remainingTextFieldCharacterCountOne,
       two: remainingTextFieldCharacterCountTwo,
@@ -656,7 +656,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
       few: remainingTextFieldCharacterCountFew,
       other: remainingTextFieldCharacterCountOther,
       locale: _localeName,
-    ).replaceFirst(r'$remainingCount', formatDecimal(remainingCount));
+    ).replaceFirst(r'$remainingCount', formatDecimal(remaining));
   }
 
   @override
