@@ -644,7 +644,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   };
 
   static final Set<LogicalKeyboardKey> _shortcutKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.keyA,
     LogicalKeyboardKey.keyC,
     LogicalKeyboardKey.keyV,
     LogicalKeyboardKey.keyX,
@@ -2232,8 +2231,21 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(nextSelection, cause);
   }
 
-  // Handles shortcut functionality including cut, copy, paste and select all
-  // using control/command + (X, C, V, A).
+  /// Set the current [selection] to contain the entire text value.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  void selectAll(SelectionChangedCause cause) {
+    _setSelection(
+      selection!.copyWith(
+        baseOffset: 0,
+        extentOffset: textSelectionDelegate.textEditingValue.text.length,
+      ),
+      cause,
+    );
+  }
+
+  // Handles shortcut functionality including cut, copy, paste using
+  // using control/command + (X, C, V).
   Future<void> _handleShortcuts(LogicalKeyboardKey key) async {
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
     final String text = textSelectionDelegate.textEditingValue.text;
@@ -2266,14 +2278,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
           ),
         );
       }
-    } else if (key == LogicalKeyboardKey.keyA) {
-      value = TextEditingValue(
-        text: text,
-        selection: selection.copyWith(
-          baseOffset: 0,
-          extentOffset: textSelectionDelegate.textEditingValue.text.length,
-        ),
-      );
     }
     if (value != null) {
       _setTextEditingValue(

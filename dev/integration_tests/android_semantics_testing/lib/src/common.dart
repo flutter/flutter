@@ -183,7 +183,8 @@ class Rect {
   final double bottom;
 
   @override
-  int get hashCode => Object.hash(top, left, right, bottom);
+  int get hashCode =>
+      top.hashCode ^ left.hashCode ^ right.hashCode ^ bottom.hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -215,7 +216,7 @@ class Size {
   final double height;
 
   @override
-  int get hashCode => Object.hash(width, height);
+  int get hashCode => width.hashCode ^ height.hashCode;
 
   @override
   bool operator ==(Object other) {
