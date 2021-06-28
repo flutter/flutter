@@ -877,6 +877,29 @@ class PlatformDispatcher {
     _onSemanticsActionZone = Zone.current;
   }
 
+  // Called from the engine via hooks.dart.
+  void _updateFrameData(int frameNumber) {
+    final FrameData previous = _frameData;
+    if (previous.frameNumber == frameNumber) {
+      return;
+    }
+    _frameData = FrameData._(frameNumber: frameNumber);
+    _invoke(onFrameDataChanged, _onFrameDataChangedZone);
+  }
+
+  /// The [FrameData] object for the current frame.
+  FrameData get frameData => _frameData;
+  FrameData _frameData = const FrameData._();
+
+  /// A callback that is invoked when the window updates the [FrameData].
+  VoidCallback? get onFrameDataChanged => _onFrameDataChanged;
+  VoidCallback? _onFrameDataChanged;
+  Zone _onFrameDataChangedZone = Zone.root;
+  set onFrameDataChanged(VoidCallback? callback) {
+    _onFrameDataChanged = callback;
+    _onFrameDataChangedZone = Zone.current;
+  }
+
   // Called from the engine, via hooks.dart
   void _dispatchSemanticsAction(int id, int action, ByteData? args) {
     _invoke3<int, SemanticsAction, ByteData?>(

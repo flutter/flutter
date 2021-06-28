@@ -220,9 +220,9 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
   return Engine::RunStatus::Success;
 }
 
-void Engine::BeginFrame(fml::TimePoint frame_time) {
+void Engine::BeginFrame(fml::TimePoint frame_time, uint64_t frame_number) {
   TRACE_EVENT0("flutter", "Engine::BeginFrame");
-  runtime_controller_->BeginFrame(frame_time);
+  runtime_controller_->BeginFrame(frame_time, frame_number);
 }
 
 void Engine::ReportTimings(std::vector<int64_t> timings) {

@@ -98,6 +98,11 @@ abstract class PlatformDispatcher {
   set onSemanticsAction(SemanticsActionCallback? callback);
 
   String get defaultRouteName;
+
+  FrameData get frameData;
+
+  VoidCallback? get onFrameDataChanged => null;
+  set onFrameDataChanged(VoidCallback? callback) {}
 }
 
 class PlatformConfiguration {

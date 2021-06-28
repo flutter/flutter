@@ -177,9 +177,10 @@ bool RuntimeController::SetAccessibilityFeatures(int32_t flags) {
   return false;
 }
 
-bool RuntimeController::BeginFrame(fml::TimePoint frame_time) {
+bool RuntimeController::BeginFrame(fml::TimePoint frame_time,
+                                   uint64_t frame_number) {
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    platform_configuration->BeginFrame(frame_time);
+    platform_configuration->BeginFrame(frame_time, frame_number);
     return true;
   }
 
