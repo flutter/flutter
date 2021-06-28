@@ -667,9 +667,10 @@ void main() {
 
   testWidgets('Custom button fillColor - Non MaterialState', (WidgetTester tester) async {
     Material buttonColor(String text) {
-      return tester.widget<Material>(find.descendant(
-        of: find.byType(RawMaterialButton),
-        matching: find.widgetWithText(Material, text),
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(RawMaterialButton),
+          matching: find.widgetWithText(Material, text),
         ),
       );
     }
@@ -685,8 +686,8 @@ void main() {
             isSelected: const <bool>[false, true],
             onPressed: (int index) {},
             children: const <Widget>[
-                Text('First child'),
-                Text('Second child'),
+              Text('First child'),
+              Text('Second child'),
             ],
           ),
         ),
@@ -706,8 +707,8 @@ void main() {
             isSelected: const <bool>[false, true],
             onPressed: null,
             children: const <Widget>[
-                Text('First child'),
-                Text('Second child'),
+              Text('First child'),
+              Text('Second child'),
             ],
           ),
         ),
@@ -722,9 +723,10 @@ void main() {
 
   testWidgets('Custom button fillColor - MaterialState', (WidgetTester tester) async {
     Material buttonColor(String text) {
-      return tester.widget<Material>(find.descendant(
-        of: find.byType(RawMaterialButton),
-        matching: find.widgetWithText(Material, text),
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(RawMaterialButton),
+          matching: find.widgetWithText(Material, text),
         ),
       );
     }
@@ -733,7 +735,7 @@ void main() {
     const Color defaultFillColor = Colors.blue;
 
     Color getFillColor(Set<MaterialState> states) {
-      if(states.contains(MaterialState.selected)) {
+      if (states.contains(MaterialState.selected)) {
         return selectedFillColor;
       }
       return defaultFillColor;
@@ -747,8 +749,8 @@ void main() {
             isSelected: const <bool>[false, true],
             onPressed: (int index) {},
             children: const <Widget>[
-                Text('First child'),
-                Text('Second child'),
+              Text('First child'),
+              Text('Second child'),
             ],
           ),
         ),
@@ -769,8 +771,8 @@ void main() {
             isSelected: const <bool>[false, true],
             onPressed: null,
             children: const <Widget>[
-                Text('First child'),
-                Text('Second child'),
+              Text('First child'),
+              Text('Second child'),
             ],
           ),
         ),

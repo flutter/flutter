@@ -365,9 +365,10 @@ void main() {
 
   testWidgets('Custom Theme button fillColor in different states', (WidgetTester tester) async {
     Material buttonColor(String text) {
-      return tester.widget<Material>(find.descendant(
-        of: find.byType(RawMaterialButton),
-        matching: find.widgetWithText(Material, text),
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(RawMaterialButton),
+          matching: find.widgetWithText(Material, text),
         ),
       );
     }
@@ -377,7 +378,7 @@ void main() {
     const Color disabledFillColor = Colors.yellow;
 
     Color getColor(Set<MaterialState> states) {
-      if(states.contains(MaterialState.selected)) {
+      if (states.contains(MaterialState.selected)) {
         return selectedFillColor;
       } else if (states.contains(MaterialState.disabled)) {
         return disabledFillColor;
@@ -394,8 +395,8 @@ void main() {
               isSelected: const <bool>[true, false],
               onPressed: (int index) {},
               children: const <Widget> [
-                  Text('First child'),
-                  Text('Second child'),
+                Text('First child'),
+                Text('Second child'),
               ],
             ),
           ),
@@ -417,8 +418,8 @@ void main() {
               isSelected: const <bool>[true, false],
               onPressed: null,
               children: const <Widget>[
-                  Text('First child'),
-                  Text('Second child'),
+                Text('First child'),
+                Text('Second child'),
               ],
             ),
           ),

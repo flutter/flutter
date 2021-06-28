@@ -287,11 +287,11 @@ class ToggleButtons extends StatelessWidget {
   /// [ToggleButtonsThemeData.fillColor] is also null, then
   /// the fill color is null.
   ///
-  /// If fillColor is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// If fillColor is a [MaterialStateProperty<Color>], then [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.disabled]
-  ///  * [MaterialState.selected].
+  ///  * [MaterialState.selected]
   ///
   final Color? fillColor;
 
@@ -863,7 +863,7 @@ class _ToggleButton extends StatelessWidget {
 
   Color _resolveColor(Set<MaterialState> states, MaterialStateProperty<Color?> widgetColor,
   MaterialStateProperty<Color?> themeColor, MaterialStateProperty<Color> defaultColor) {
-  return widgetColor.resolve(states)
+    return widgetColor.resolve(states)
     ?? themeColor.resolve(states)
     ?? defaultColor.resolve(states);
   }
@@ -993,7 +993,7 @@ class _DefaultFillColor extends MaterialStateProperty<Color> with Diagnosticable
 
   @override
   Color resolve(Set<MaterialState> states) {
-    if(states.contains(MaterialState.selected)) {
+    if (states.contains(MaterialState.selected)) {
       return colorScheme.primary.withOpacity(0.12);
     }
     return colorScheme.surface.withOpacity(0.0);
