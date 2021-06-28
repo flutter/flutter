@@ -1564,5 +1564,5 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 8.0)));
   });
-  
+
 }
