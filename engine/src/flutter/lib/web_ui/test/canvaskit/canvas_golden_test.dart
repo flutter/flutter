@@ -761,6 +761,17 @@ void testMain() {
       );
     });
 
+    test('sample Bengali text', () async {
+      await testSampleText(
+        'bengali',
+        'ঈদের জামাত মসজিদে, মানতে হবে স্বাস্থ্যবিধি: ধর্ম মন্ত্রণালয়',
+      );
+    });
+
+    test('hindi svayan test', () async {
+      await testSampleText('hindi_svayan', 'स्वयं');
+    });
+
     // We've seen text break when we load many fonts simultaneously. This test
     // combines text in multiple languages into one long paragraph to make sure
     // we can handle it.
@@ -780,6 +791,10 @@ void testMain() {
             'คือ เนื้อหาจำลองแบบเรียบๆ ที่ใช้กันในธุรกิจงานพิมพ์หรืองานเรียงพิมพ์ '
             'საბეჭდი და ტიპოგრაფიული ინდუსტრიის უშინაარსო ტექსტია ',
       );
+    });
+
+    test('emoji text with skin tone', () async {
+      await testSampleText('emoji_with_skin_tone', '👋🏿 👋🏾 👋🏽 👋🏼 👋🏻');
     });
 
     // Make sure we clear the canvas in between frames.
