@@ -286,7 +286,7 @@ template("jit_runner") {
 
     binary = "flutter_jit${product_suffix}_runner"
 
-    meta_dir = "//flutter/shell/platform/fuchsia/flutter/meta"
+    cmx_file = rebase_path("meta/flutter_jit${product_suffix}_runner.cmx")
 
     resources = [
       {
@@ -345,13 +345,6 @@ template("jit_runner") {
     resources += _vulkan_icds
 
     libraries = _libs
-
-    meta = [
-      {
-        path = rebase_path("meta/flutter_jit${product_suffix}_runner.cmx")
-        dest = "flutter_jit${product_suffix}_runner.cmx"
-      },
-    ]
   }
 }
 
@@ -372,7 +365,7 @@ template("aot_runner") {
       ]
     }
 
-    meta_dir = "//flutter/shell/platform/fuchsia/flutter/meta"
+    cmx_file = rebase_path("meta/flutter_aot${product_suffix}_runner.cmx")
 
     binary = "flutter_aot${product_suffix}_runner"
 
@@ -410,13 +403,6 @@ template("aot_runner") {
     resources += _vulkan_icds
 
     libraries = _libs
-
-    meta = [
-      {
-        path = rebase_path("meta/flutter_aot${product_suffix}_runner.cmx")
-        dest = "flutter_aot${product_suffix}_runner.cmx"
-      },
-    ]
   }
 }
 
@@ -562,16 +548,9 @@ fuchsia_archive("flutter_runner_tests") {
     },
   ]
 
-  meta_dir = "//flutter/shell/platform/fuchsia/flutter/meta"
+  cmx_file = rebase_path("meta/$target_name.cmx")
 
   libraries = common_libs
-
-  meta = [
-    {
-      path = rebase_path("meta/$target_name.cmx")
-      dest = "$target_name.cmx"
-    },
-  ]
 }
 
 fuchsia_archive("flutter_runner_tzdata_tests") {
@@ -588,16 +567,9 @@ fuchsia_archive("flutter_runner_tzdata_tests") {
     },
   ]
 
-  meta_dir = "//flutter/shell/platform/fuchsia/flutter/meta"
+  cmx_file = rebase_path("meta/$target_name.cmx")
 
   libraries = common_libs
-
-  meta = [
-    {
-      path = rebase_path("meta/$target_name.cmx")
-      dest = "$target_name.cmx"
-    },
-  ]
 }
 
 fuchsia_archive("flutter_runner_scenic_tests") {
@@ -614,16 +586,9 @@ fuchsia_archive("flutter_runner_scenic_tests") {
     },
   ]
 
-  meta_dir = "//flutter/shell/platform/fuchsia/flutter/meta"
+  cmx_file = rebase_path("meta/$target_name.cmx")
 
   libraries = common_libs
-
-  meta = [
-    {
-      path = rebase_path("meta/$target_name.cmx")
-      dest = "$target_name.cmx"
-    },
-  ]
 }
 
 fuchsia_test_archive("fml_tests") {
