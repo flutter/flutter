@@ -129,8 +129,7 @@ public class PlatformPluginTest {
     when(fakeActivity.getWindow()).thenReturn(fakeWindow);
     PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
     PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
-    SystemChromeStyle style =
-        new SystemChromeStyle(0XFF000000, null, true, 0XFFC70039, null, 0XFF006DB3, true);
+    SystemChromeStyle style = new SystemChromeStyle(0XFF000000, null, 0XFFC70039, null, 0XFF006DB3);
 
     if (Build.VERSION.SDK_INT >= 28) {
       platformPlugin.mPlatformMessageHandler.setSystemUiOverlayStyle(style);
@@ -138,60 +137,6 @@ public class PlatformPluginTest {
       assertEquals(0XFF006DB3, fakeActivity.getWindow().getNavigationBarDividerColor());
       assertEquals(0XFFC70039, fakeActivity.getWindow().getStatusBarColor());
       assertEquals(0XFF000000, fakeActivity.getWindow().getNavigationBarColor());
-    }
-  }
-
-  @Config(sdk = 29)
-  @Test
-  public void setSystemUiMode() {
-    View fakeDecorView = mock(View.class);
-    Window fakeWindow = mock(Window.class);
-    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
-    Activity fakeActivity = mock(Activity.class);
-    when(fakeActivity.getWindow()).thenReturn(fakeWindow);
-    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
-    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
-
-    if (Build.VERSION.SDK_INT >= 28) {
-      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-          PlatformChannel.SystemUiMode.LEAN_BACK);
-      assertEquals(
-          View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-              | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_FULLSCREEN,
-          fakeActivity.getWindow().getDecorView().getSystemUiVisibility());
-
-      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-          PlatformChannel.SystemUiMode.IMMERSIVE);
-      assertEquals(
-          View.SYSTEM_UI_FLAG_IMMERSIVE
-              | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-              | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_FULLSCREEN,
-          fakeActivity.getWindow().getDecorView().getSystemUiVisibility());
-
-      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-          PlatformChannel.SystemUiMode.IMMERSIVE_STICKY);
-      assertEquals(
-          View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-              | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-              | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_FULLSCREEN,
-          fakeActivity.getWindow().getDecorView().getSystemUiVisibility());
-
-      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
-      assertEquals(
-          View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN,
-          fakeActivity.getWindow().getDecorView().getSystemUiVisibility());
     }
   }
 
