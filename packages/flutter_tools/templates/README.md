@@ -2,7 +2,7 @@ This directory contains templates for `flutter create`.
 
 The `app_shared` subdirectory is special. It provides files for all app
 templates (as opposed to plugin or module templates).
-As of May 2021, there are two app templates: `app` (the counter app) 
+As of May 2021, there are two app templates: `app` (the counter app)
 and `skeleton` (the more advanced list view/detail view app).
 
 ```plain
