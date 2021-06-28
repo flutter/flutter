@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import './globals.dart' show ConductorException;
+
 /// Possible string formats that `flutter --version` can return.
 enum VersionType {
   /// A stable flutter release.
@@ -20,12 +22,18 @@ enum VersionType {
   ///
   /// The last number is the number of commits past the last tagged version.
   latest,
+
+  /// A master channel flutter version from git describe.
+  ///
+  /// Example: '1.2.3-4.0.pre-10-gabc123'.
+  gitDescribe,
 }
 
 final Map<VersionType, RegExp> versionPatterns = <VersionType, RegExp>{
   VersionType.stable: RegExp(r'^(\d+)\.(\d+)\.(\d+)$'),
   VersionType.development: RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre$'),
   VersionType.latest: RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre\.(\d+)$'),
+  VersionType.gitDescribe: RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre-(\d+)-g[a-f0-9]+$'),
 };
 
 class Version {
@@ -54,6 +62,10 @@ class Version {
         assert(n != null);
         assert(commits != null);
         break;
+      case VersionType.gitDescribe:
+        throw ConductorException(
+          'VersionType.gitDescribe not supported! Use VersionType.latest instead.',
+        );
     }
   }
 
@@ -115,6 +127,24 @@ class Version {
         type: VersionType.latest,
       );
     }
+    match = versionPatterns[VersionType.gitDescribe]!.firstMatch(versionString);
+    if (match != null) {
+      // parse latest
+      final List<int> parts = match.groups(
+        <int>[1, 2, 3, 4, 5, 6],
+      ).map(
+        (String? s) => int.parse(s!),
+      ).toList();
+      return Version(
+        x: parts[0],
+        y: parts[1],
+        z: parts[2],
+        m: parts[3],
+        n: parts[4],
+        commits: parts[5],
+        type: VersionType.latest,
+      );
+    }
     throw Exception('${versionString.trim()} cannot be parsed');
   }
 
@@ -131,7 +161,7 @@ class Version {
     int? nextM = previousVersion.m;
     int? nextN = previousVersion.n;
     if (nextVersionType == null) {
-      if (previousVersion.type == VersionType.latest) {
+      if (previousVersion.type == VersionType.latest || previousVersion.type == VersionType.gitDescribe) {
         nextVersionType = VersionType.development;
       } else {
         nextVersionType = previousVersion.type;
@@ -157,10 +187,7 @@ class Version {
         nextZ += 1;
         break;
       case 'm':
-        // Regular dev release.
-        assert(previousVersion.type == VersionType.development);
-        nextM = nextM! + 1;
-        nextN = 0;
+        assert(false, "Do not increment 'm' via Version.increment, use instead Version.fromCandidateBranch()");
         break;
       case 'n':
         // Hotfix to internal roll.
@@ -176,6 +203,31 @@ class Version {
       m: nextM,
       n: nextN,
       type: nextVersionType,
+    );
+  }
+
+  factory Version.fromCandidateBranch(String branchName) {
+    // Regular dev release.
+    final RegExp pattern = RegExp(r'flutter-(\d+)\.(\d+)-candidate.(\d+)');
+    final RegExpMatch? match = pattern.firstMatch(branchName);
+    late final int x;
+    late final int y;
+    late final int m;
+    try {
+      x = int.parse(match!.group(1)!);
+      y = int.parse(match.group(2)!);
+      m = int.parse(match.group(3)!);
+    } on Exception {
+      throw ConductorException('branch named $branchName not recognized as a valid candidate branch');
+    }
+
+    return Version(
+      type: VersionType.development,
+      x: x,
+      y: y,
+      z: 0,
+      m: m,
+      n: 0,
     );
   }
 
@@ -207,6 +259,8 @@ class Version {
       case VersionType.development:
         return '$x.$y.$z-$m.$n.pre';
       case VersionType.latest:
+        return '$x.$y.$z-$m.$n.pre.$commits';
+      case VersionType.gitDescribe:
         return '$x.$y.$z-$m.$n.pre.$commits';
     }
   }
