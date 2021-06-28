@@ -23,7 +23,8 @@ abstract class ListWheelChildManager {
   /// The maximum number of children that can be provided to
   /// [RenderListWheelViewport].
   ///
-  /// If non-null, the children will have index in the range [0, childCount - 1].
+  /// If non-null, the children will have index in the range
+  /// `[0, childCount - 1]`.
   ///
   /// If null, then there's no explicit limits to the range of the children
   /// except that it has to be contiguous. If [childExistsAt] for a certain
@@ -329,9 +330,9 @@ class RenderListWheelViewport
   /// the center. So a value of `0.5` means the edges' vanishing line will touch
   /// the wheel's size's left edge.
   ///
-  /// Defaults to 0.0, which means looking at the wheel head-on.
+  /// Defaults to `0.0`, which means looking at the wheel head-on.
   /// The visual effect can be unaesthetic if this value is too far from the
-  /// range [-0.5, 0.5].
+  /// range `[-0.5, 0.5]`.
   /// {@endtemplate}
   double get offAxisFraction => _offAxisFraction;
   double _offAxisFraction = 0.0;

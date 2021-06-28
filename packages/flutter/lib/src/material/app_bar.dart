@@ -1355,52 +1355,58 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///       ],
 ///     ),
 ///     bottomNavigationBar: BottomAppBar(
-///       child: ButtonBar(
-///         alignment: MainAxisAlignment.spaceEvenly,
-///         children: <Widget>[
-///           Row(
-///             children: <Widget>[
-///               const Text('pinned'),
-///               Switch(
-///                 onChanged: (bool val) {
-///                   setState(() {
-///                     _pinned = val;
-///                   });
-///                 },
-///                 value: _pinned,
-///               ),
-///             ],
-///           ),
-///           Row(
-///             children: <Widget>[
-///               const Text('snap'),
-///               Switch(
-///                 onChanged: (bool val) {
-///                   setState(() {
-///                     _snap = val;
-///                     // Snapping only applies when the app bar is floating.
-///                     _floating = _floating || _snap;
-///                   });
-///                 },
-///                 value: _snap,
-///               ),
-///             ],
-///           ),
-///           Row(
-///             children: <Widget>[
-///               const Text('floating'),
-///               Switch(
-///                 onChanged: (bool val) {
-///                   setState(() {
-///                     _floating = val;
-///                     _snap = _snap && _floating;
-///                   });
-///                 },
-///                 value: _floating,
-///               ),
-///             ],
-///           ),
-///         ],
+///       child: Padding(
+///         padding: const EdgeInsets.all(8),
+///         child: OverflowBar(
+///           alignment: MainAxisAlignment.spaceEvenly,
+///           children: <Widget>[
+///             Row(
+///               mainAxisSize: MainAxisSize.min,
+///               children: <Widget>[
+///                 const Text('pinned'),
+///                 Switch(
+///                   onChanged: (bool val) {
+///                     setState(() {
+///                       _pinned = val;
+///                     });
+///                   },
+///                   value: _pinned,
+///                 ),
+///               ],
+///             ),
+///             Row(
+///               mainAxisSize: MainAxisSize.min,
+///               children: <Widget>[
+///                 const Text('snap'),
+///                 Switch(
+///                   onChanged: (bool val) {
+///                     setState(() {
+///                       _snap = val;
+///                       // Snapping only applies when the app bar is floating.
+///                       _floating = _floating || _snap;
+///                     });
+///                   },
+///                   value: _snap,
+///                 ),
+///               ],
+///             ),
+///             Row(
+///               mainAxisSize: MainAxisSize.min,
+///               children: <Widget>[
+///                 const Text('floating'),
+///                 Switch(
+///                   onChanged: (bool val) {
+///                     setState(() {
+///                       _floating = val;
+///                       _snap = _snap && _floating;
+///                     });
+///                   },
+///                   value: _floating,
+///                 ),
+///               ],
+///             ),
+///           ],
+///         ),
 ///       ),
 ///     ),
 ///   );
