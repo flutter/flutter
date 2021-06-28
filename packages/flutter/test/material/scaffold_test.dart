@@ -493,8 +493,10 @@ void main() {
         ),
       ),
     );
-    expect(tester.getBottomLeft(_findButtonBar()), const Offset(10.0, 560.0));
-    expect(tester.getBottomRight(_findButtonBar()), const Offset(770.0, 560.0));
+
+    final Finder buttonsBar = find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
+    expect(tester.getBottomLeft(buttonsBar), const Offset(10.0, 560.0));
+    expect(tester.getBottomRight(buttonsBar), const Offset(770.0, 560.0));
   });
 
   testWidgets('Persistent bottom buttons bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
@@ -2370,11 +2372,4 @@ class _CustomPageRoute<T> extends PageRoute<T> {
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return child;
   }
-}
-
-// What was the Scaffold's ButtonBar when many of these tests were written,
-// is now a Container with an OverflowBar child. The Container's size and location
-// match the original ButtonBar's size and location.
-Finder _findButtonBar() {
-  return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Container)).first;
 }
