@@ -2172,7 +2172,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     );
   }
 
-  /// Copy current [selection] to Clipboard.
+  /// Copy current [selection] to [Clipboard].
   void copySelection() {
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
     final String text = textSelectionDelegate.textEditingValue.text;
@@ -2204,7 +2204,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
-  /// Paste text from Clipboard, if selection exists, then selection will be replaced.
+  /// Paste text from [Clipboard].
+  ///
+  /// If there is currently a selection, it will be replaced.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   Future<void> pasteText(SelectionChangedCause cause) async {
