@@ -7,11 +7,12 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+/// Whether the current browser is Safari.
+bool get isSafari => browserEngine == BrowserEngine.webkit;
+
 /// Whether the current browser is Safari on iOS.
 // TODO: https://github.com/flutter/flutter/issues/60040
-bool get isIosSafari =>
-    browserEngine == BrowserEngine.webkit &&
-    operatingSystem == OperatingSystem.iOs;
+bool get isIosSafari => isSafari && operatingSystem == OperatingSystem.iOs;
 
 /// Whether the current browser is Firefox.
 bool get isFirefox => browserEngine == BrowserEngine.firefox;

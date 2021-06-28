@@ -89,6 +89,7 @@ void testMain() {
         final html.CanvasElement canvas =
             surface.htmlElement.children.single as html.CanvasElement;
         final dynamic ctx = canvas.getContext('webgl2');
+        expect(ctx, isNotNull);
         final dynamic loseContextExtension =
             ctx.getExtension('WEBGL_lose_context');
         loseContextExtension.loseContext();
@@ -112,7 +113,7 @@ void testMain() {
         expect(afterContextLost, isNot(same(before)));
       },
       // Firefox doesn't have the WEBGL_lose_context extension.
-      skip: isFirefox || isIosSafari,
+      skip: isFirefox || isSafari,
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/75286
