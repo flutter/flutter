@@ -2,11 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+import 'dart:js_util' as js_util;
+import 'dart:math' as math;
 
-const ui.Color _defaultTextColor = ui.Color(0xFFFF0000);
+import 'package:ui/ui.dart' as ui;
+import 'package:ui/src/engine.dart' show assertionsEnabled, BitmapCanvas, colorToCssString, canonicalizeFontFamily, domRenderer, DomRenderer, SurfacePaint;
 
-const String _placeholderClass = 'paragraph-placeholder';
+import '../browser_detection.dart';
+import '../profiler.dart';
+import '../util.dart';
+import 'canvas_paragraph.dart';
+import 'layout_service.dart';
+import 'measurement.dart';
+import 'ruler.dart';
+import 'word_breaker.dart';
+
+const ui.Color defaultTextColor = ui.Color(0xFFFF0000);
+
+const String placeholderClass = 'paragraph-placeholder';
 
 class EngineLineMetrics implements ui.LineMetrics {
   EngineLineMetrics({
@@ -264,13 +278,13 @@ class DomParagraph implements EngineParagraph {
 
   final int placeholderCount;
 
-  @visibleForTesting
   String? get plainText => _plainText;
 
-  @visibleForTesting
   html.HtmlElement get paragraphElement => _paragraphElement;
 
-  @visibleForTesting
+  ui.TextAlign get textAlign => _textAlign;
+  ui.TextDirection get textDirection => _textDirection;
+
   ParagraphGeometricStyle get geometricStyle => _geometricStyle;
 
   /// The instance of [TextMeasurementService] to be used to measure this
@@ -279,6 +293,7 @@ class DomParagraph implements EngineParagraph {
       TextMeasurementService.forParagraph(this);
 
   /// The measurement result of the last layout operation.
+  MeasurementResult? get measurementResult => _measurementResult;
   MeasurementResult? _measurementResult;
 
   bool get _hasLineMetrics => _measurementResult?.lines != null;
@@ -423,14 +438,14 @@ class DomParagraph implements EngineParagraph {
     canvas.setCssFont(_geometricStyle.cssFontString);
 
     // Then paint the text.
-    canvas._setUpPaint(_paint!.paintData, null);
+    canvas.setUpPaint(_paint!.paintData, null);
     double y = offset.dy + alphabeticBaseline;
     final int len = lines.length;
     for (int i = 0; i < len; i++) {
       _paintLine(canvas, lines[i], offset.dx, y);
       y += _lineHeight;
     }
-    canvas._tearDownPaint();
+    canvas.tearDownPaint();
   }
 
   void _paintLine(
@@ -542,7 +557,7 @@ class DomParagraph implements EngineParagraph {
   ///
   /// Ignores properties that do not affect layout, such as
   /// [ParagraphStyle.textAlign].
-  bool _debugHasSameRootStyle(ParagraphGeometricStyle style) {
+  bool debugHasSameRootStyle(ParagraphGeometricStyle style) {
     assert(() {
       if (style != _geometricStyle) {
         throw Exception('Attempted to measure a paragraph whose style is '
@@ -644,7 +659,7 @@ class DomParagraph implements EngineParagraph {
     );
   }
 
-  ui.Paragraph _cloneWithText(String plainText) {
+  ui.Paragraph cloneWithText(String plainText) {
     return DomParagraph(
       plainText: plainText,
       paragraphElement: _paragraphElement.clone(true) as html.HtmlElement,
@@ -798,49 +813,38 @@ class DomParagraph implements EngineParagraph {
 class EngineParagraphStyle implements ui.ParagraphStyle {
   /// Creates a new instance of [EngineParagraphStyle].
   EngineParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
+    this.textAlign,
+    this.textDirection,
+    this.maxLines,
+    this.fontFamily,
+    this.fontSize,
+    this.height,
     ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
+    this.fontWeight,
+    this.fontStyle,
     ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-  })  : _textAlign = textAlign,
-        _textDirection = textDirection,
-        _fontWeight = fontWeight,
-        _fontStyle = fontStyle,
-        _maxLines = maxLines,
-        _fontFamily = fontFamily,
-        _fontSize = fontSize,
-        _height = height,
-        _textHeightBehavior = textHeightBehavior,
+    this.ellipsis,
+    this.locale,
+  })  : _textHeightBehavior = textHeightBehavior,
         // TODO(b/128317744): add support for strut style.
-        _strutStyle = strutStyle as EngineStrutStyle?,
-        _ellipsis = ellipsis,
-        _locale = locale;
+        _strutStyle = strutStyle as EngineStrutStyle?;
 
-  final ui.TextAlign? _textAlign;
-  final ui.TextDirection? _textDirection;
-  final ui.FontWeight? _fontWeight;
-  final ui.FontStyle? _fontStyle;
-  final int? _maxLines;
-  final String? _fontFamily;
-  final double? _fontSize;
-  final double? _height;
+  final ui.TextAlign? textAlign;
+  final ui.TextDirection? textDirection;
+  final ui.FontWeight? fontWeight;
+  final ui.FontStyle? fontStyle;
+  final int? maxLines;
+  final String? fontFamily;
+  final double? fontSize;
+  final double? height;
   final ui.TextHeightBehavior? _textHeightBehavior;
   final EngineStrutStyle? _strutStyle;
-  final String? _ellipsis;
-  final ui.Locale? _locale;
+  final String? ellipsis;
+  final ui.Locale? locale;
 
   // The effective style attributes should be consistent with paragraph_style.h.
-  ui.TextAlign get _effectiveTextAlign => _textAlign ?? ui.TextAlign.start;
-  ui.TextDirection get _effectiveTextDirection =>
-      _textDirection ?? ui.TextDirection.ltr;
+  ui.TextAlign get effectiveTextAlign => textAlign ?? ui.TextAlign.start;
+  ui.TextDirection get effectiveTextDirection => textDirection ?? ui.TextDirection.ltr;
 
   String get _effectiveFontFamily {
     if (assertionsEnabled) {
@@ -850,21 +854,21 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
         return 'Ahem';
       }
     }
-    final String? fontFamily = _fontFamily;
+    final String? fontFamily = this.fontFamily;
     if (fontFamily == null || fontFamily.isEmpty) {
       return DomRenderer.defaultFontFamily;
     }
     return fontFamily;
   }
 
-  double? get _lineHeight {
+  double? get lineHeight {
     // TODO(mdebbar): Implement proper support for strut styles.
     // https://github.com/flutter/flutter/issues/32243
     if (_strutStyle == null ||
         _strutStyle!._height == null ||
         _strutStyle!._height == 0) {
       // When there's no strut height, always use paragraph style height.
-      return _height;
+      return height;
     }
     if (_strutStyle!._forceStrutHeight == true) {
       // When strut height is forced, ignore paragraph style height.
@@ -872,7 +876,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
     }
     // In this case, strut height acts as a minimum height for all parts of the
     // paragraph. So we take the max of strut height and paragraph style height.
-    return math.max(_strutStyle!._height!, _height ?? 0.0);
+    return math.max(_strutStyle!._height!, height ?? 0.0);
   }
 
   @override
@@ -884,50 +888,50 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
       return false;
     }
     return other is EngineParagraphStyle &&
-        other._textAlign == _textAlign &&
-        other._textDirection == _textDirection &&
-        other._fontWeight == _fontWeight &&
-        other._fontStyle == _fontStyle &&
-        other._maxLines == _maxLines &&
-        other._fontFamily == _fontFamily &&
-        other._fontSize == _fontSize &&
-        other._height == _height &&
+        other.textAlign == textAlign &&
+        other.textDirection == textDirection &&
+        other.fontWeight == fontWeight &&
+        other.fontStyle == fontStyle &&
+        other.maxLines == maxLines &&
+        other.fontFamily == fontFamily &&
+        other.fontSize == fontSize &&
+        other.height == height &&
         other._textHeightBehavior == _textHeightBehavior &&
-        other._ellipsis == _ellipsis &&
-        other._locale == _locale;
+        other.ellipsis == ellipsis &&
+        other.locale == locale;
   }
 
   @override
   int get hashCode {
     return ui.hashValues(
-        _textAlign,
-        _textDirection,
-        _fontWeight,
-        _fontStyle,
-        _maxLines,
-        _fontFamily,
-        _fontSize,
-        _height,
+        textAlign,
+        textDirection,
+        fontWeight,
+        fontStyle,
+        maxLines,
+        fontFamily,
+        fontSize,
+        height,
         _textHeightBehavior,
-        _ellipsis,
-        _locale);
+        ellipsis,
+        locale);
   }
 
   @override
   String toString() {
     if (assertionsEnabled) {
       return 'ParagraphStyle('
-          'textAlign: ${_textAlign ?? "unspecified"}, '
-          'textDirection: ${_textDirection ?? "unspecified"}, '
-          'fontWeight: ${_fontWeight ?? "unspecified"}, '
-          'fontStyle: ${_fontStyle ?? "unspecified"}, '
-          'maxLines: ${_maxLines ?? "unspecified"}, '
+          'textAlign: ${textAlign ?? "unspecified"}, '
+          'textDirection: ${textDirection ?? "unspecified"}, '
+          'fontWeight: ${fontWeight ?? "unspecified"}, '
+          'fontStyle: ${fontStyle ?? "unspecified"}, '
+          'maxLines: ${maxLines ?? "unspecified"}, '
           'textHeightBehavior: ${_textHeightBehavior ?? "unspecified"}, '
-          'fontFamily: ${_fontFamily ?? "unspecified"}, '
-          'fontSize: ${_fontSize != null ? _fontSize!.toStringAsFixed(1) : "unspecified"}, '
-          'height: ${_height != null ? "${_height!.toStringAsFixed(1)}x" : "unspecified"}, '
-          'ellipsis: ${_ellipsis != null ? "\"$_ellipsis\"" : "unspecified"}, '
-          'locale: ${_locale ?? "unspecified"}'
+          'fontFamily: ${fontFamily ?? "unspecified"}, '
+          'fontSize: ${fontSize != null ? fontSize!.toStringAsFixed(1) : "unspecified"}, '
+          'height: ${height != null ? "${height!.toStringAsFixed(1)}x" : "unspecified"}, '
+          'ellipsis: ${ellipsis != null ? "\"$ellipsis\"" : "unspecified"}, '
+          'locale: ${locale ?? "unspecified"}'
           ')';
     } else {
       return super.toString();
@@ -969,50 +973,31 @@ class EngineTextStyle implements ui.TextStyle {
   /// This constructor should be used sparingly in tests, for example. Or when
   /// we know for sure that not all properties are needed.
   EngineTextStyle.only({
-    ui.Color? color,
-    ui.TextDecoration? decoration,
-    ui.Color? decorationColor,
-    ui.TextDecorationStyle? decorationStyle,
-    double? decorationThickness,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.TextBaseline? textBaseline,
+    this.color,
+    this.decoration,
+    this.decorationColor,
+    this.decorationStyle,
+    this.decorationThickness,
+    this.fontWeight,
+    this.fontStyle,
+    this.textBaseline,
     String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? letterSpacing,
-    double? wordSpacing,
-    double? height,
-    ui.Locale? locale,
-    ui.Paint? background,
-    ui.Paint? foreground,
-    List<ui.Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
+    this.fontFamilyFallback,
+    this.fontSize,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.height,
+    this.locale,
+    this.background,
+    this.foreground,
+    this.shadows,
+    this.fontFeatures,
   })  : assert(
             color == null || foreground == null,
             'Cannot provide both a color and a foreground\n'
             'The color argument is just a shorthand for "foreground: new Paint()..color = color".'),
-        _color = color,
-        _decoration = decoration,
-        _decorationColor = decorationColor,
-        _decorationStyle = decorationStyle,
-        _decorationThickness = decorationThickness,
-        _fontWeight = fontWeight,
-        _fontStyle = fontStyle,
-        _textBaseline = textBaseline,
-        _isFontFamilyProvided = fontFamily != null,
-        _fontFamily = fontFamily ?? '',
-        _fontFamilyFallback = fontFamilyFallback,
-        // TODO: https://github.com/flutter/flutter/issues/56707
-        _fontFeatures = fontFeatures,
-        _fontSize = fontSize,
-        _letterSpacing = letterSpacing,
-        _wordSpacing = wordSpacing,
-        _height = height,
-        _locale = locale,
-        _background = background,
-        _foreground = foreground,
-        _shadows = shadows;
+        isFontFamilyProvided = fontFamily != null,
+        fontFamily = fontFamily ?? '';
 
   /// Constructs an [EngineTextStyle] by reading properties from an
   /// [EngineParagraphStyle].
@@ -1020,37 +1005,37 @@ class EngineTextStyle implements ui.TextStyle {
     EngineParagraphStyle paragraphStyle,
   ) {
     return EngineTextStyle.only(
-      fontWeight: paragraphStyle._fontWeight,
-      fontStyle: paragraphStyle._fontStyle,
-      fontFamily: paragraphStyle._fontFamily,
-      fontSize: paragraphStyle._fontSize,
-      height: paragraphStyle._height,
-      locale: paragraphStyle._locale,
+      fontWeight: paragraphStyle.fontWeight,
+      fontStyle: paragraphStyle.fontStyle,
+      fontFamily: paragraphStyle.fontFamily,
+      fontSize: paragraphStyle.fontSize,
+      height: paragraphStyle.height,
+      locale: paragraphStyle.locale,
     );
   }
 
-  final ui.Color? _color;
-  final ui.TextDecoration? _decoration;
-  final ui.Color? _decorationColor;
-  final ui.TextDecorationStyle? _decorationStyle;
-  final double? _decorationThickness;
-  final ui.FontWeight? _fontWeight;
-  final ui.FontStyle? _fontStyle;
-  final ui.TextBaseline? _textBaseline;
-  final bool _isFontFamilyProvided;
-  final String _fontFamily;
-  final List<String>? _fontFamilyFallback;
-  final List<ui.FontFeature>? _fontFeatures;
-  final double? _fontSize;
-  final double? _letterSpacing;
-  final double? _wordSpacing;
-  final double? _height;
-  final ui.Locale? _locale;
-  final ui.Paint? _background;
-  final ui.Paint? _foreground;
-  final List<ui.Shadow>? _shadows;
+  final ui.Color? color;
+  final ui.TextDecoration? decoration;
+  final ui.Color? decorationColor;
+  final ui.TextDecorationStyle? decorationStyle;
+  final double? decorationThickness;
+  final ui.FontWeight? fontWeight;
+  final ui.FontStyle? fontStyle;
+  final ui.TextBaseline? textBaseline;
+  final bool isFontFamilyProvided;
+  final String fontFamily;
+  final List<String>? fontFamilyFallback;
+  final List<ui.FontFeature>? fontFeatures;
+  final double? fontSize;
+  final double? letterSpacing;
+  final double? wordSpacing;
+  final double? height;
+  final ui.Locale? locale;
+  final ui.Paint? background;
+  final ui.Paint? foreground;
+  final List<ui.Shadow>? shadows;
 
-  String get _effectiveFontFamily {
+  String get effectiveFontFamily {
     if (assertionsEnabled) {
       // In the flutter tester environment, we use a predictable-size font
       // "Ahem". This makes widget tests predictable and less flaky.
@@ -1058,10 +1043,10 @@ class EngineTextStyle implements ui.TextStyle {
         return 'Ahem';
       }
     }
-    if (_fontFamily.isEmpty) {
+    if (fontFamily.isEmpty) {
       return DomRenderer.defaultFontFamily;
     }
-    return _fontFamily;
+    return fontFamily;
   }
 
   String? _cssFontString;
@@ -1070,11 +1055,11 @@ class EngineTextStyle implements ui.TextStyle {
   ///
   /// See <https://developer.mozilla.org/en-US/docs/Web/CSS/font>.
   String get cssFontString {
-    return _cssFontString ??= _buildCssFontString(
-      fontStyle: _fontStyle,
-      fontWeight: _fontWeight,
-      fontSize: _fontSize,
-      fontFamily: _effectiveFontFamily,
+    return _cssFontString ??= buildCssFontString(
+      fontStyle: fontStyle,
+      fontWeight: fontWeight,
+      fontSize: fontSize,
+      fontFamily: effectiveFontFamily,
     );
   }
 
@@ -1082,9 +1067,9 @@ class EngineTextStyle implements ui.TextStyle {
 
   TextHeightStyle _createHeightStyle() {
     return TextHeightStyle(
-      fontFamily: _effectiveFontFamily,
-      fontSize: _fontSize ?? DomRenderer.defaultFontSize,
-      height: _height,
+      fontFamily: effectiveFontFamily,
+      fontSize: fontSize ?? DomRenderer.defaultFontSize,
+      height: height,
       // TODO(mdebbar): Pass the actual value when font features become supported
       //                https://github.com/flutter/flutter/issues/64595
       fontFeatures: null,
@@ -1100,70 +1085,70 @@ class EngineTextStyle implements ui.TextStyle {
       return false;
     }
     return other is EngineTextStyle &&
-        other._color == _color &&
-        other._decoration == _decoration &&
-        other._decorationColor == _decorationColor &&
-        other._decorationStyle == _decorationStyle &&
-        other._fontWeight == _fontWeight &&
-        other._fontStyle == _fontStyle &&
-        other._textBaseline == _textBaseline &&
-        other._fontFamily == _fontFamily &&
-        other._fontSize == _fontSize &&
-        other._letterSpacing == _letterSpacing &&
-        other._wordSpacing == _wordSpacing &&
-        other._height == _height &&
-        other._locale == _locale &&
-        other._background == _background &&
-        other._foreground == _foreground &&
-        listEquals<ui.Shadow>(other._shadows, _shadows) &&
-        listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback);
+        other.color == color &&
+        other.decoration == decoration &&
+        other.decorationColor == decorationColor &&
+        other.decorationStyle == decorationStyle &&
+        other.fontWeight == fontWeight &&
+        other.fontStyle == fontStyle &&
+        other.textBaseline == textBaseline &&
+        other.fontFamily == fontFamily &&
+        other.fontSize == fontSize &&
+        other.letterSpacing == letterSpacing &&
+        other.wordSpacing == wordSpacing &&
+        other.height == height &&
+        other.locale == locale &&
+        other.background == background &&
+        other.foreground == foreground &&
+        listEquals<ui.Shadow>(other.shadows, shadows) &&
+        listEquals<String>(other.fontFamilyFallback, fontFamilyFallback);
   }
 
   @override
   int get hashCode => ui.hashValues(
-        _color,
-        _decoration,
-        _decorationColor,
-        _decorationStyle,
-        _decorationThickness,
-        _fontWeight,
-        _fontStyle,
-        _textBaseline,
-        _fontFamily,
-        _fontFamilyFallback,
-        _fontSize,
-        _letterSpacing,
-        _wordSpacing,
-        _height,
-        _locale,
-        _background,
-        _foreground,
-        _shadows,
+        color,
+        decoration,
+        decorationColor,
+        decorationStyle,
+        decorationThickness,
+        fontWeight,
+        fontStyle,
+        textBaseline,
+        fontFamily,
+        fontFamilyFallback,
+        fontSize,
+        letterSpacing,
+        wordSpacing,
+        height,
+        locale,
+        background,
+        foreground,
+        shadows,
       );
 
   @override
   String toString() {
     if (assertionsEnabled) {
       return 'TextStyle('
-          'color: ${_color != null ? _color : "unspecified"}, '
-          'decoration: ${_decoration ?? "unspecified"}, '
-          'decorationColor: ${_decorationColor ?? "unspecified"}, '
-          'decorationStyle: ${_decorationStyle ?? "unspecified"}, '
-          'decorationThickness: ${_decorationThickness ?? "unspecified"}, '
-          'fontWeight: ${_fontWeight ?? "unspecified"}, '
-          'fontStyle: ${_fontStyle ?? "unspecified"}, '
-          'textBaseline: ${_textBaseline ?? "unspecified"}, '
-          'fontFamily: ${_isFontFamilyProvided && _fontFamily != '' ? _fontFamily : "unspecified"}, '
-          'fontFamilyFallback: ${_isFontFamilyProvided && _fontFamilyFallback != null && _fontFamilyFallback!.isNotEmpty ? _fontFamilyFallback : "unspecified"}, '
-          'fontSize: ${_fontSize != null ? _fontSize!.toStringAsFixed(1) : "unspecified"}, '
-          'letterSpacing: ${_letterSpacing != null ? "${_letterSpacing}x" : "unspecified"}, '
-          'wordSpacing: ${_wordSpacing != null ? "${_wordSpacing}x" : "unspecified"}, '
-          'height: ${_height != null ? "${_height!.toStringAsFixed(1)}x" : "unspecified"}, '
-          'locale: ${_locale ?? "unspecified"}, '
-          'background: ${_background ?? "unspecified"}, '
-          'foreground: ${_foreground ?? "unspecified"}, '
-          'shadows: ${_shadows ?? "unspecified"}, '
-          'fontFeatures: ${_fontFeatures ?? "unspecified"}'
+          'color: ${color != null ? color : "unspecified"}, '
+          'decoration: ${decoration ?? "unspecified"}, '
+          'decorationColor: ${decorationColor ?? "unspecified"}, '
+          'decorationStyle: ${decorationStyle ?? "unspecified"}, '
+          'decorationThickness: ${decorationThickness ?? "unspecified"}, '
+          'fontWeight: ${fontWeight ?? "unspecified"}, '
+          'fontStyle: ${fontStyle ?? "unspecified"}, '
+          'textBaseline: ${textBaseline ?? "unspecified"}, '
+          'fontFamily: ${isFontFamilyProvided && fontFamily != '' ? fontFamily : "unspecified"}, '
+          'fontFamilyFallback: ${isFontFamilyProvided && fontFamilyFallback != null && fontFamilyFallback!.isNotEmpty ? fontFamilyFallback : "unspecified"}, '
+          'fontSize: ${fontSize != null ? fontSize!.toStringAsFixed(1) : "unspecified"}, '
+          'letterSpacing: ${letterSpacing != null ? "${letterSpacing}x" : "unspecified"}, '
+          'wordSpacing: ${wordSpacing != null ? "${wordSpacing}x" : "unspecified"}, '
+          'height: ${height != null ? "${height!.toStringAsFixed(1)}x" : "unspecified"}, '
+          'locale: ${locale ?? "unspecified"}, '
+          'background: ${background ?? "unspecified"}, '
+          'foreground: ${foreground ?? "unspecified"}, '
+          'shadows: ${shadows ?? "unspecified"}, '
+          'fontFeatures: ${fontFeatures ?? "unspecified"}'
           ')';
     } else {
       return super.toString();
@@ -1362,21 +1347,20 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
     ui.Color? decorationColor;
     ui.TextDecorationStyle? decorationStyle;
     double? decorationThickness;
-    ui.FontWeight? fontWeight = _paragraphStyle._fontWeight;
-    ui.FontStyle? fontStyle = _paragraphStyle._fontStyle;
+    ui.FontWeight? fontWeight = _paragraphStyle.fontWeight;
+    ui.FontStyle? fontStyle = _paragraphStyle.fontStyle;
     ui.TextBaseline? textBaseline;
     String fontFamily =
-        _paragraphStyle._fontFamily ?? DomRenderer.defaultFontFamily;
+        _paragraphStyle.fontFamily ?? DomRenderer.defaultFontFamily;
     List<String>? fontFamilyFallback;
     List<ui.FontFeature>? fontFeatures;
-    double fontSize = _paragraphStyle._fontSize ?? DomRenderer.defaultFontSize;
-    final ui.TextAlign textAlign = _paragraphStyle._effectiveTextAlign;
-    final ui.TextDirection textDirection =
-        _paragraphStyle._effectiveTextDirection;
+    double fontSize = _paragraphStyle.fontSize ?? DomRenderer.defaultFontSize;
+    final ui.TextAlign textAlign = _paragraphStyle.effectiveTextAlign;
+    final ui.TextDirection textDirection = _paragraphStyle.effectiveTextDirection;
     double? letterSpacing;
     double? wordSpacing;
     double? height;
-    ui.Locale? locale = _paragraphStyle._locale;
+    ui.Locale? locale = _paragraphStyle.locale;
     ui.Paint? background;
     ui.Paint? foreground;
     List<ui.Shadow>? shadows;
@@ -1389,66 +1373,66 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
     // loop to run once then move on to aggregating text.
     while (i < _ops.length && _ops[i] is EngineTextStyle) {
       final EngineTextStyle style = _ops[i];
-      if (style._color != null) {
-        color = style._color!;
+      if (style.color != null) {
+        color = style.color!;
       }
-      if (style._decoration != null) {
-        decoration = style._decoration;
+      if (style.decoration != null) {
+        decoration = style.decoration;
       }
-      if (style._decorationColor != null) {
-        decorationColor = style._decorationColor;
+      if (style.decorationColor != null) {
+        decorationColor = style.decorationColor;
       }
-      if (style._decorationStyle != null) {
-        decorationStyle = style._decorationStyle;
+      if (style.decorationStyle != null) {
+        decorationStyle = style.decorationStyle;
       }
-      if (style._decorationThickness != null) {
-        decorationThickness = style._decorationThickness;
+      if (style.decorationThickness != null) {
+        decorationThickness = style.decorationThickness;
       }
-      if (style._fontWeight != null) {
-        fontWeight = style._fontWeight;
+      if (style.fontWeight != null) {
+        fontWeight = style.fontWeight;
       }
-      if (style._fontStyle != null) {
-        fontStyle = style._fontStyle;
+      if (style.fontStyle != null) {
+        fontStyle = style.fontStyle;
       }
-      if (style._textBaseline != null) {
-        textBaseline = style._textBaseline;
+      if (style.textBaseline != null) {
+        textBaseline = style.textBaseline;
       }
-      fontFamily = style._fontFamily;
-      if (style._fontFamilyFallback != null) {
-        fontFamilyFallback = style._fontFamilyFallback;
+      fontFamily = style.fontFamily;
+      if (style.fontFamilyFallback != null) {
+        fontFamilyFallback = style.fontFamilyFallback;
       }
-      if (style._fontFeatures != null) {
-        fontFeatures = style._fontFeatures;
+      if (style.fontFeatures != null) {
+        fontFeatures = style.fontFeatures;
       }
-      if (style._fontSize != null) {
-        fontSize = style._fontSize!;
+      if (style.fontSize != null) {
+        fontSize = style.fontSize!;
       }
-      if (style._letterSpacing != null) {
-        letterSpacing = style._letterSpacing;
+      if (style.letterSpacing != null) {
+        letterSpacing = style.letterSpacing;
       }
-      if (style._wordSpacing != null) {
-        wordSpacing = style._wordSpacing;
+      if (style.wordSpacing != null) {
+        wordSpacing = style.wordSpacing;
       }
-      if (style._height != null) {
-        height = style._height;
+      if (style.height != null) {
+        height = style.height;
       }
-      if (style._locale != null) {
-        locale = style._locale;
+      if (style.locale != null) {
+        locale = style.locale;
       }
-      if (style._background != null) {
-        background = style._background;
+      if (style.background != null) {
+        background = style.background;
       }
-      if (style._foreground != null) {
-        foreground = style._foreground;
+      if (style.foreground != null) {
+        foreground = style.foreground;
       }
-      if (style._shadows != null) {
-        shadows = style._shadows;
+      if (style.shadows != null) {
+        shadows = style.shadows;
       }
       i++;
     }
 
     if (color == null && foreground == null) {
-      color = _defaultTextColor;
+      color = defaultTextColor;
     }
 
     final EngineTextStyle cumulativeStyle = EngineTextStyle(
@@ -1483,30 +1467,30 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
 
     if (i >= _ops.length) {
       // Empty paragraph.
-      _applyTextStyleToElement(
+      applyTextStyleToElement(
           element: _paragraphElement, style: cumulativeStyle);
       return DomParagraph(
         paragraphElement: _paragraphElement,
         geometricStyle: ParagraphGeometricStyle(
-          textDirection: _paragraphStyle._effectiveTextDirection,
-          textAlign: _paragraphStyle._effectiveTextAlign,
+          textDirection: _paragraphStyle.effectiveTextDirection,
+          textAlign: _paragraphStyle.effectiveTextAlign,
           fontFamily: fontFamily,
           fontWeight: fontWeight,
           fontStyle: fontStyle,
           fontSize: fontSize,
           lineHeight: height,
-          maxLines: _paragraphStyle._maxLines,
+          maxLines: _paragraphStyle.maxLines,
           letterSpacing: letterSpacing,
           wordSpacing: wordSpacing,
           decoration: _textDecorationToCssString(decoration, decorationStyle),
-          ellipsis: _paragraphStyle._ellipsis,
+          ellipsis: _paragraphStyle.ellipsis,
           shadows: shadows,
         ),
         plainText: '',
         paint: paint,
         textAlign: textAlign,
         textDirection: textDirection,
-        background: cumulativeStyle._background,
+        background: cumulativeStyle.background,
         placeholderCount: placeholderCount,
       );
     }
@@ -1534,36 +1518,36 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
 
     final String plainText = plainTextBuffer.toString();
     domRenderer.appendText(_paragraphElement, plainText);
-    _applyTextStyleToElement(
+    applyTextStyleToElement(
         element: _paragraphElement, style: cumulativeStyle);
     // Since this is a plain paragraph apply background color to paragraph tag
     // instead of individual spans.
-    if (cumulativeStyle._background != null) {
+    if (cumulativeStyle.background != null) {
       _applyTextBackgroundToElement(
           element: _paragraphElement, style: cumulativeStyle);
     }
     return DomParagraph(
       paragraphElement: _paragraphElement,
       geometricStyle: ParagraphGeometricStyle(
-        textDirection: _paragraphStyle._effectiveTextDirection,
-        textAlign: _paragraphStyle._effectiveTextAlign,
+        textDirection: _paragraphStyle.effectiveTextDirection,
+        textAlign: _paragraphStyle.effectiveTextAlign,
         fontFamily: fontFamily,
         fontWeight: fontWeight,
         fontStyle: fontStyle,
         fontSize: fontSize,
         lineHeight: height,
-        maxLines: _paragraphStyle._maxLines,
+        maxLines: _paragraphStyle.maxLines,
         letterSpacing: letterSpacing,
         wordSpacing: wordSpacing,
         decoration: _textDecorationToCssString(decoration, decorationStyle),
-        ellipsis: _paragraphStyle._ellipsis,
+        ellipsis: _paragraphStyle.ellipsis,
         shadows: shadows,
       ),
       plainText: plainText,
       paint: paint,
       textAlign: textAlign,
       textDirection: textDirection,
-      background: cumulativeStyle._background,
+      background: cumulativeStyle.background,
       placeholderCount: placeholderCount,
     );
   }
@@ -1577,10 +1561,9 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
     for (int i = 0; i < _ops.length; i++) {
       final dynamic op = _ops[i];
       if (op is EngineTextStyle) {
-        final html.SpanElement span =
-            domRenderer.createElement('span') as html.SpanElement;
-        _applyTextStyleToElement(element: span, style: op, isSpan: true);
-        if (op._background != null) {
+        final html.SpanElement span = domRenderer.createElement('span') as html.SpanElement;
+        applyTextStyleToElement(element: span, style: op, isSpan: true);
+        if (op.background != null) {
           _applyTextBackgroundToElement(element: span, style: op);
         }
         domRenderer.append(currentElement(), span);
@@ -1590,7 +1573,7 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
       } else if (op is ParagraphPlaceholder) {
         domRenderer.append(
           currentElement(),
-          _createPlaceholderElement(placeholder: op),
+          createPlaceholderElement(placeholder: op),
         );
       } else if (identical(op, _paragraphBuilderPop)) {
         elementStack.removeLast();
@@ -1602,20 +1585,20 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
     return DomParagraph(
       paragraphElement: _paragraphElement,
       geometricStyle: ParagraphGeometricStyle(
-        textDirection: _paragraphStyle._effectiveTextDirection,
-        textAlign: _paragraphStyle._effectiveTextAlign,
-        fontFamily: _paragraphStyle._fontFamily,
-        fontWeight: _paragraphStyle._fontWeight,
-        fontStyle: _paragraphStyle._fontStyle,
-        fontSize: _paragraphStyle._fontSize,
-        lineHeight: _paragraphStyle._height,
-        maxLines: _paragraphStyle._maxLines,
-        ellipsis: _paragraphStyle._ellipsis,
+        textDirection: _paragraphStyle.effectiveTextDirection,
+        textAlign: _paragraphStyle.effectiveTextAlign,
+        fontFamily: _paragraphStyle.fontFamily,
+        fontWeight: _paragraphStyle.fontWeight,
+        fontStyle: _paragraphStyle.fontStyle,
+        fontSize: _paragraphStyle.fontSize,
+        lineHeight: _paragraphStyle.height,
+        maxLines: _paragraphStyle.maxLines,
+        ellipsis: _paragraphStyle.ellipsis,
       ),
       plainText: null,
       paint: null,
-      textAlign: _paragraphStyle._effectiveTextAlign,
-      textDirection: _paragraphStyle._effectiveTextDirection,
+      textAlign: _paragraphStyle.effectiveTextAlign,
+      textDirection: _paragraphStyle.effectiveTextDirection,
       background: null,
       placeholderCount: placeholderCount,
     );
@@ -1703,25 +1686,25 @@ void _applyParagraphStyleToElement({
   // TODO(yjbanov): What do we do about ParagraphStyle._locale and ellipsis?
   final html.CssStyleDeclaration cssStyle = element.style;
 
-  if (style._textAlign != null) {
+  if (style.textAlign != null) {
     cssStyle.textAlign = textAlignToCssValue(
-        style._textAlign, style._textDirection ?? ui.TextDirection.ltr);
+        style.textAlign, style.textDirection ?? ui.TextDirection.ltr);
   }
-  if (style._lineHeight != null) {
-    cssStyle.lineHeight = '${style._lineHeight}';
+  if (style.lineHeight != null) {
+    cssStyle.lineHeight = '${style.lineHeight}';
   }
-  if (style._textDirection != null) {
-    cssStyle.direction = _textDirectionToCss(style._textDirection);
+  if (style.textDirection != null) {
+    cssStyle.direction = textDirectionToCss(style.textDirection);
   }
-  if (style._fontSize != null) {
-    cssStyle.fontSize = '${style._fontSize!.floor()}px';
+  if (style.fontSize != null) {
+    cssStyle.fontSize = '${style.fontSize!.floor()}px';
   }
-  if (style._fontWeight != null) {
-    cssStyle.fontWeight = fontWeightToCss(style._fontWeight);
+  if (style.fontWeight != null) {
+    cssStyle.fontWeight = fontWeightToCss(style.fontWeight);
   }
-  if (style._fontStyle != null) {
+  if (style.fontStyle != null) {
     cssStyle.fontStyle =
-        style._fontStyle == ui.FontStyle.normal ? 'normal' : 'italic';
+        style.fontStyle == ui.FontStyle.normal ? 'normal' : 'italic';
   }
   cssStyle.fontFamily = canonicalizeFontFamily(style._effectiveFontFamily);
 }
@@ -1731,7 +1714,7 @@ void _applyParagraphStyleToElement({
 ///
 /// If [isSpan] is true, the text element is a span within richtext and
 /// should not assign effectiveFontFamily if fontFamily was not specified.
-void _applyTextStyleToElement({
+void applyTextStyleToElement({
   required html.HtmlElement element,
   required EngineTextStyle style,
   bool isSpan = false,
@@ -1741,51 +1724,51 @@ void _applyTextStyleToElement({
   bool updateDecoration = false;
   final html.CssStyleDeclaration cssStyle = element.style;
 
-  final ui.Color? color = style._foreground?.color ?? style._color;
+  final ui.Color? color = style.foreground?.color ?? style.color;
   if (color != null) {
     cssStyle.color = colorToCssString(color);
   }
-  final ui.Color? background = style._background?.color;
+  final ui.Color? background = style.background?.color;
   if (background != null) {
     cssStyle.backgroundColor = colorToCssString(background);
   }
-  if (style._height != null) {
-    cssStyle.lineHeight = '${style._height}';
+  if (style.height != null) {
+    cssStyle.lineHeight = '${style.height}';
   }
-  if (style._fontSize != null) {
-    cssStyle.fontSize = '${style._fontSize!.floor()}px';
+  if (style.fontSize != null) {
+    cssStyle.fontSize = '${style.fontSize!.floor()}px';
   }
-  if (style._fontWeight != null) {
-    cssStyle.fontWeight = fontWeightToCss(style._fontWeight);
+  if (style.fontWeight != null) {
+    cssStyle.fontWeight = fontWeightToCss(style.fontWeight);
   }
-  if (style._fontStyle != null) {
+  if (style.fontStyle != null) {
     cssStyle.fontStyle =
-        style._fontStyle == ui.FontStyle.normal ? 'normal' : 'italic';
+        style.fontStyle == ui.FontStyle.normal ? 'normal' : 'italic';
   }
   // For test environment use effectiveFontFamily since we need to
   // consistently use Ahem font.
   if (isSpan && !ui.debugEmulateFlutterTesterEnvironment) {
-    cssStyle.fontFamily = canonicalizeFontFamily(style._fontFamily);
+    cssStyle.fontFamily = canonicalizeFontFamily(style.fontFamily);
   } else {
-    cssStyle.fontFamily = canonicalizeFontFamily(style._effectiveFontFamily);
+    cssStyle.fontFamily = canonicalizeFontFamily(style.effectiveFontFamily);
   }
-  if (style._letterSpacing != null) {
-    cssStyle.letterSpacing = '${style._letterSpacing}px';
+  if (style.letterSpacing != null) {
+    cssStyle.letterSpacing = '${style.letterSpacing}px';
   }
-  if (style._wordSpacing != null) {
-    cssStyle.wordSpacing = '${style._wordSpacing}px';
+  if (style.wordSpacing != null) {
+    cssStyle.wordSpacing = '${style.wordSpacing}px';
   }
-  if (style._decoration != null) {
+  if (style.decoration != null) {
     updateDecoration = true;
   }
-  if (style._shadows != null) {
-    cssStyle.textShadow = _shadowListToCss(style._shadows!);
+  if (style.shadows != null) {
+    cssStyle.textShadow = _shadowListToCss(style.shadows!);
   }
 
   if (updateDecoration) {
-    if (style._decoration != null) {
+    if (style.decoration != null) {
       final String? textDecoration =
-          _textDecorationToCssString(style._decoration, style._decorationStyle);
+          _textDecorationToCssString(style.decoration, style.decorationStyle);
       if (textDecoration != null) {
         if (browserEngine == BrowserEngine.webkit) {
           DomRenderer.setElementStyle(
@@ -1793,7 +1776,7 @@ void _applyTextStyleToElement({
         } else {
           cssStyle.textDecoration = textDecoration;
         }
-        final ui.Color? decorationColor = style._decorationColor;
+        final ui.Color? decorationColor = style.decorationColor;
         if (decorationColor != null) {
           cssStyle.textDecorationColor = colorToCssString(decorationColor)!;
         }
@@ -1801,17 +1784,17 @@ void _applyTextStyleToElement({
     }
   }
 
-  final List<ui.FontFeature>? fontFeatures = style._fontFeatures;
+  final List<ui.FontFeature>? fontFeatures = style.fontFeatures;
   if (fontFeatures != null && fontFeatures.isNotEmpty) {
     cssStyle.fontFeatureSettings = _fontFeatureListToCss(fontFeatures);
   }
 }
 
-html.Element _createPlaceholderElement({
+html.Element createPlaceholderElement({
   required ParagraphPlaceholder placeholder,
 }) {
   final html.Element element = domRenderer.createElement('span');
-  element.className = _placeholderClass;
+  element.className = placeholderClass;
   final html.CssStyleDeclaration style = element.style;
   style
     ..display = 'inline-block'
@@ -1896,7 +1879,7 @@ void _applyTextBackgroundToElement({
   required html.HtmlElement element,
   required EngineTextStyle style,
 }) {
-  final ui.Paint? newBackground = style._background;
+  final ui.Paint? newBackground = style.background;
   if (newBackground != null) {
     DomRenderer.setElementStyle(
         element, 'background-color', colorToCssString(newBackground.color));
@@ -1948,7 +1931,7 @@ String? _decorationStyleToCssString(ui.TextDecorationStyle decorationStyle) {
 /// ```css
 /// direction: rtl;
 /// ```
-String? _textDirectionToCss(ui.TextDirection? textDirection) {
+String? textDirectionToCss(ui.TextDirection? textDirection) {
   if (textDirection == null) {
     return null;
   }

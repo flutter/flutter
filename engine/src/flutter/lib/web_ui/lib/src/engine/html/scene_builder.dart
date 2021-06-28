@@ -546,8 +546,8 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     // In the HTML renderer we time the beginning of the rasterization phase
     // (counter-intuitively) in SceneBuilder.build because DOM updates happen
     // here. This is different from CanvasKit.
-    _frameTimingsOnBuildFinish();
-    _frameTimingsOnRasterStart();
+    frameTimingsOnBuildFinish();
+    frameTimingsOnRasterStart();
     timeAction<void>(kProfilePrerollFrame, () {
       while (_surfaceStack.length > 1) {
         // Auto-pop layers that were pushed without a corresponding pop.

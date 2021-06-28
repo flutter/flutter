@@ -12,7 +12,7 @@
 // # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 // # For terms of use, see http://www.unicode.org/terms_of_use.html
 
-part of engine;
+import 'unicode_range.dart';
 
 /// For an explanation of these enum values, see:
 ///
