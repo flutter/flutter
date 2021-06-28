@@ -60,7 +60,7 @@ action("generate_build_info_cc_file") {
   inputs = [
     "build_info_in.cc",
     "//flutter/.git/logs/HEAD",
-    "//fuchsia/sdk/linux/meta/manifest.json",
+    "//fuchsia/sdk/$host_os/meta/manifest.json",
     "//third_party/dart/.git/logs/HEAD",
   ]
   outputs = [ "$target_gen_dir/build_info.cc" ]

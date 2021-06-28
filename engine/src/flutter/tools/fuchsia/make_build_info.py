@@ -37,7 +37,7 @@ def GetFuchsiaSdkVersion(buildroot):
         buildroot,
         'fuchsia',
         'sdk',
-        'linux',
+        'linux' if sys.platform.startswith('linux') else 'mac',
         'meta',
         'manifest.json'),
     'r') as fuchsia_sdk_manifest:
