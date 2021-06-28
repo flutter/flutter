@@ -2,7 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+import 'dart:math' as math;
+
+import 'package:ui/ui.dart' as ui;
+import 'package:meta/meta.dart';
+
+import 'canvas_paragraph.dart';
+import 'line_breaker.dart';
+import 'measurement.dart';
+import 'paragraph.dart';
+import 'ruler.dart';
 
 /// Performs layout on a [CanvasParagraph].
 ///
@@ -38,10 +48,10 @@ class TextLayoutService {
 
   // *** Convenient shortcuts used during layout *** //
 
-  int? get maxLines => paragraph.paragraphStyle._maxLines;
+  int? get maxLines => paragraph.paragraphStyle.maxLines;
   bool get unlimitedLines => maxLines == null;
 
-  String? get ellipsis => paragraph.paragraphStyle._ellipsis;
+  String? get ellipsis => paragraph.paragraphStyle.ellipsis;
   bool get hasEllipsis => ellipsis != null;
 
   /// Performs the layout on a paragraph given the [constraints].
@@ -191,7 +201,7 @@ class TextLayoutService {
       height += line.height;
       if (alphabeticBaseline == -1.0) {
         alphabeticBaseline = line.baseline;
-        ideographicBaseline = alphabeticBaseline * _baselineRatioHack;
+        ideographicBaseline = alphabeticBaseline * baselineRatioHack;
       }
       final double longestLineWidth = longestLine?.width ?? 0.0;
       if (longestLineWidth < line.width) {
@@ -721,9 +731,9 @@ class LineBuilder {
   double get alignOffset {
     final double emptySpace = maxWidth - width;
     final ui.TextDirection textDirection =
-        paragraph.paragraphStyle._textDirection ?? ui.TextDirection.ltr;
+        paragraph.paragraphStyle.effectiveTextDirection;
     final ui.TextAlign textAlign =
-        paragraph.paragraphStyle._textAlign ?? ui.TextAlign.start;
+        paragraph.paragraphStyle.effectiveTextAlign;
 
     switch (textAlign) {
       case ui.TextAlign.center:
@@ -846,7 +856,7 @@ class LineBuilder {
       placeholder,
       index: _boxStart,
       left: _boxLeft,
-      direction: paragraph.paragraphStyle._effectiveTextDirection,
+      direction: paragraph.paragraphStyle.effectiveTextDirection,
     ));
   }
 
@@ -1021,7 +1031,7 @@ class LineBuilder {
   }
 
   ui.TextDirection get direction =>
-      paragraph.paragraphStyle._effectiveTextDirection;
+      paragraph.paragraphStyle.effectiveTextDirection;
 
   /// Cuts a new box in the line.
   ///
@@ -1044,7 +1054,7 @@ class LineBuilder {
       start: boxStart,
       end: boxEnd,
       left: _boxLeft,
-      direction: paragraph.paragraphStyle._effectiveTextDirection,
+      direction: paragraph.paragraphStyle.effectiveTextDirection,
     ));
   }
 
@@ -1132,7 +1142,7 @@ class Spanometer {
 
   String _cssFontString = '';
 
-  double? get letterSpacing => currentSpan.style._letterSpacing;
+  double? get letterSpacing => currentSpan.style.letterSpacing;
 
   TextHeightRuler? _currentRuler;
   FlatTextSpan? _currentSpan;
@@ -1195,7 +1205,7 @@ class Spanometer {
   }
 
   double measureText(String text) {
-    return _measureSubstring(context, text, 0, text.length);
+    return measureSubstring(context, text, 0, text.length);
   }
 
   /// In a continuous, unbreakable block of text from [start] to [end], finds
@@ -1257,7 +1267,7 @@ class Spanometer {
     assert(end >= span.start && end <= span.end);
 
     final String text = paragraph.toPlainText();
-    return _measureSubstring(
+    return measureSubstring(
       context,
       text,
       start,

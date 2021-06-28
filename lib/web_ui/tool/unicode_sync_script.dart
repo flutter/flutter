@@ -205,7 +205,7 @@ abstract class PropertiesSyncer {
 // Source:
 // ${header.join('\n// ')}
 
-part of engine;
+import 'unicode_range.dart';
 
 /// For an explanation of these enum values, see:
 ///

@@ -241,11 +241,11 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   /// Sets the global paint styles to correspond to [paint].
-  void _setUpPaint(SurfacePaintData paint, ui.Rect? shaderBounds) {
+  void setUpPaint(SurfacePaintData paint, ui.Rect? shaderBounds) {
     _canvasPool.contextHandle.setUpPaint(paint, shaderBounds);
   }
 
-  void _tearDownPaint() {
+  void tearDownPaint() {
     _canvasPool.contextHandle.tearDownPaint();
   }
 
@@ -383,9 +383,9 @@ class BitmapCanvas extends EngineCanvas {
     } else {
       ui.Rect? shaderBounds =
           (paint.shader != null) ? ui.Rect.fromPoints(p1, p2) : null;
-      _setUpPaint(paint, shaderBounds);
+      setUpPaint(paint, shaderBounds);
       _canvasPool.strokeLine(p1, p2);
-      _tearDownPaint();
+      tearDownPaint();
     }
   }
 
@@ -396,9 +396,9 @@ class BitmapCanvas extends EngineCanvas {
     } else {
       ui.Rect? shaderBounds =
           (paint.shader != null) ? _computePictureBounds() : null;
-      _setUpPaint(paint, shaderBounds);
+      setUpPaint(paint, shaderBounds);
       _canvasPool.fill();
-      _tearDownPaint();
+      tearDownPaint();
     }
   }
 
@@ -413,9 +413,9 @@ class BitmapCanvas extends EngineCanvas {
               math.min(rect.left, rect.right), math.min(rect.top, rect.bottom)),
           paint);
     } else {
-      _setUpPaint(paint, rect);
+      setUpPaint(paint, rect);
       _canvasPool.drawRect(rect, paint.style);
-      _tearDownPaint();
+      tearDownPaint();
     }
   }
 
@@ -458,17 +458,17 @@ class BitmapCanvas extends EngineCanvas {
               math.min(rect.left, rect.right), math.min(rect.top, rect.bottom)),
           paint);
     } else {
-      _setUpPaint(paint, rrect.outerRect);
+      setUpPaint(paint, rrect.outerRect);
       _canvasPool.drawRRect(rrect, paint.style);
-      _tearDownPaint();
+      tearDownPaint();
     }
   }
 
   @override
   void drawDRRect(ui.RRect outer, ui.RRect inner, SurfacePaintData paint) {
-    _setUpPaint(paint, outer.outerRect);
+    setUpPaint(paint, outer.outerRect);
     _canvasPool.drawDRRect(outer, inner, paint.style);
-    _tearDownPaint();
+    tearDownPaint();
   }
 
   @override
@@ -484,9 +484,9 @@ class BitmapCanvas extends EngineCanvas {
       element.style.borderRadius =
           '${(rect.width / 2.0)}px / ${(rect.height / 2.0)}px';
     } else {
-      _setUpPaint(paint, rect);
+      setUpPaint(paint, rect);
       _canvasPool.drawOval(rect, paint.style);
-      _tearDownPaint();
+      tearDownPaint();
     }
   }
 
@@ -503,13 +503,13 @@ class BitmapCanvas extends EngineCanvas {
           paint);
       element.style.borderRadius = '50%';
     } else {
-      _setUpPaint(
+      setUpPaint(
           paint,
           paint.shader != null
               ? ui.Rect.fromCircle(center: c, radius: radius)
               : null);
       _canvasPool.drawCircle(c, radius, paint.style);
-      _tearDownPaint();
+      tearDownPaint();
     }
   }
 
@@ -560,13 +560,13 @@ class BitmapCanvas extends EngineCanvas {
       _applyFilter(svgElm, paint);
       _drawElement(svgElm, ui.Offset(0, 0), paint);
     } else {
-      _setUpPaint(paint, paint.shader != null ? path.getBounds() : null);
+      setUpPaint(paint, paint.shader != null ? path.getBounds() : null);
       if (paint.style == null && paint.strokeWidth != null) {
         _canvasPool.drawPath(path, ui.PaintingStyle.stroke);
       } else {
         _canvasPool.drawPath(path, paint.style);
       }
-      _tearDownPaint();
+      tearDownPaint();
     }
   }
 
@@ -1009,10 +1009,10 @@ class BitmapCanvas extends EngineCanvas {
     final double strokeWidth =
         paint.strokeWidth == null ? 1.0 / dpr : paint.strokeWidth!;
     _drawPointsPaint.strokeWidth = strokeWidth;
-    _setUpPaint(_drawPointsPaint, null);
+    setUpPaint(_drawPointsPaint, null);
     // Draw point using circle with half radius.
     _canvasPool.drawPoints(pointMode, points, strokeWidth / 2.0);
-    _tearDownPaint();
+    tearDownPaint();
   }
 
   @override
