@@ -1,4 +1,4 @@
-Signature: f4a43a1d0ee7188b1d2cb843773c8103
+Signature: f131c0b211c8e0ac25a445ab12577ee8
 
 UNUSED LICENSES:
 
@@ -445,6 +445,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.control/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.hfp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
@@ -1171,6 +1172,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.control/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.hfp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
@@ -1794,6 +1796,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.control/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.hfp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
@@ -2238,11 +2241,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/module/internal/_m
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/module/module.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/module/module_state_exception.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/service_connection/agent_service_connection.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/child_view.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/child_view_connection.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/child_view.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/child_view_connection.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/child_view_render_box.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/services.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/service_provider_impl.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/internal/_error_node.dart
@@ -2395,15 +2393,15 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/internal
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/synchronous_interface_ptr.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/internal/logging.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/internal/synchronous_proxy.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/bridge.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/bridge_internal.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/promise.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/promise_internal.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/result.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/scheduler.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/scope.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/sequencer.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/single_threaded_executor.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/bridge.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/bridge_internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/promise.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/promise_internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/result.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/scheduler.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/scope.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/sequencer.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/single_threaded_executor.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/promise.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/scheduler.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/scope.cc
@@ -2504,7 +2502,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/boot/crash-reas
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/string_view.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/testonly-syscalls.h
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/fuchsia_view.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/child_view_render_box_2.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_view.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_view_connection.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_view_controller.dart
@@ -2523,6 +2520,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/tota
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/update.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/gesture_listener.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/audio_mode.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.hfp/hfp.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/connection_options.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/configuration.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/pairing_options.fidl
@@ -2727,7 +2725,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/flat_namespace.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/display_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/events.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/hit.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/nodes.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/renderer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/resources.fidl
@@ -3250,8 +3247,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/service_handl
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/internal/message_sender.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/internal/message_sender.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/barrier.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/barrier.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/in_place_internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/barrier.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/in_place_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/constructors_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/storage_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/utility_internal.h
@@ -3416,6 +3413,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/diagnostic_
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/diagnostic_data.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/reader.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/lib/src/scenic_context.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/focus_state.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_views_service.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.virtualkeyboard/virtual_keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/client.fidl
@@ -3430,6 +3428,14 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/virtual_keyb
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.allocation/allocator.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/inotify.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/barrier.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/bridge.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/promise.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/result.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/scheduler.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/scope.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/sequencer.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/single_threaded_executor.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/algorithm.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/cstddef.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/functional.h
