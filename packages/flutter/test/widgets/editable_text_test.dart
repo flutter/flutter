@@ -7227,9 +7227,6 @@ void main() {
     expect(controller.selection.baseOffset, 7);
     expect(controller.selection.extentOffset, 9);
 
-    final String targetPlatform = defaultTargetPlatform.toString();
-    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
-
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
