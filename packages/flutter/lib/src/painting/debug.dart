@@ -201,21 +201,23 @@ bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOv
 /// Used by tests to run assertions on the [Picture] created by
 /// [ShaderWarmUp.execute]. The return value indicates whether the assertions
 /// pass or not.
-typedef ShaderWarmUpPictureCapture = bool Function(Picture);
+typedef ShaderWarmUpPictureCallback = bool Function(Picture);
 
 /// The signature of [debugCaptureShaderWarmUpImage].
 ///
 /// Used by tests to run assertions on the [Image] created by
 /// [ShaderWarmUp.execute]. The return value indicates whether the assertions
 /// pass or not.
-typedef ShaderWarmUpImageCapture = bool Function(Image);
+typedef ShaderWarmUpImageCallback = bool Function(Image);
 
 /// Called by [ShaderWarmUp.execute] immediately after it creates a [Picture].
 ///
 /// Tests may use this to capture the picture and run assertions on it.
-ShaderWarmUpPictureCapture debugCaptureShaderWarmUpPicture = (Picture picture) => true;
+ShaderWarmUpPictureCallback debugCaptureShaderWarmUpPicture = _defaultPictureCapture;
+bool _defaultPictureCapture(Picture picture) => true;
 
-/// Called by [ShaderWarmUp.execute] immediately after it creates a [Picture].
+/// Called by [ShaderWarmUp.execute] immediately after it creates an [Image].
 ///
 /// Tests may use this to capture the picture and run assertions on it.
-ShaderWarmUpImageCapture debugCaptureShaderWarmUpImage = (Image image) => true;
+ShaderWarmUpImageCallback debugCaptureShaderWarmUpImage = _defaultImageCapture;
+bool _defaultImageCapture(Image image) => true;
