@@ -276,6 +276,7 @@ class AlertDialog extends StatelessWidget {
     this.contentTextStyle,
     this.actions,
     this.actionsPadding = EdgeInsets.zero,
+    this.actionsAlignment,
     this.actionsOverflowDirection,
     this.actionsOverflowButtonSpacing,
     this.buttonPadding,
@@ -382,6 +383,15 @@ class AlertDialog extends StatelessWidget {
   ///
   /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry actionsPadding;
+
+  /// Defines the horizontal layout of the [actions] according to the same
+  /// rules as for [Row.mainAxisAlignment].
+  ///
+  /// This parameter is passed along to the dialog's [OverflowBar].
+  ///
+  /// If this parameter is null (the default) then [MainAxisAlignment.end]
+  /// is used.
+  final MainAxisAlignment? actionsAlignment;
 
   /// The vertical direction of [actions] if the children overflow
   /// horizontally.
@@ -534,21 +544,17 @@ class AlertDialog extends StatelessWidget {
       );
     }
 
-
     if (actions != null) {
       final double spacing = (buttonPadding?.horizontal ?? 16) / 2;
       actionsWidget = Padding(
-        padding: actionsPadding,
-        child: Container(
-          alignment: AlignmentDirectional.centerEnd,
-          padding: EdgeInsets.all(spacing),
-          child: OverflowBar(
-            spacing: spacing,
-            overflowAlignment: OverflowBarAlignment.end,
-            overflowDirection: actionsOverflowDirection ?? VerticalDirection.down,
-            overflowSpacing: actionsOverflowButtonSpacing ?? 0,
-            children: actions!,
-          ),
+        padding: actionsPadding.add(EdgeInsets.all(spacing)),
+        child: OverflowBar(
+          alignment: actionsAlignment ?? MainAxisAlignment.end,
+          spacing: spacing,
+          overflowAlignment: OverflowBarAlignment.end,
+          overflowDirection: actionsOverflowDirection ?? VerticalDirection.down,
+          overflowSpacing: actionsOverflowButtonSpacing ?? 0,
+          children: actions!,
         ),
       );
     }

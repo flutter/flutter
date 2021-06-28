@@ -187,10 +187,12 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * End
     //   * Home
+    //   * Meta + A
     //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
@@ -232,11 +234,13 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
-    //   * Meta + arrow down
     //   * End
     //   * Home
+    //   * Meta + A
+    //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
     //   * Meta + arrow up
@@ -277,11 +281,13 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
-    //   * Meta + arrow down
     //   * End
     //   * Home
+    //   * Meta + A
+    //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
     //   * Meta + arrow up
@@ -322,11 +328,13 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
-    //   * Meta + arrow down
     //   * End
     //   * Home
+    //   * Meta + A
+    //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
     //   * Meta + arrow up
@@ -371,8 +379,10 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, meta: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
+    //   * Control + A
     //   * Control + arrow left
     //   * Control + arrow right
     //   * Control + shift + arrow left
@@ -416,8 +426,10 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
     SingleActivator(LogicalKeyboardKey.end, shift: true): ExpandSelectionRightByLineTextIntent(),
     SingleActivator(LogicalKeyboardKey.home, shift: true): ExpandSelectionLeftByLineTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
+    //   * Meta + A
     //   * Meta + arrow down
     //   * Meta + arrow left
     //   * Meta + arrow right
@@ -474,6 +486,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.end, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.home, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.space): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, meta: true): DoNothingAndStopPropagationTextIntent(),
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {

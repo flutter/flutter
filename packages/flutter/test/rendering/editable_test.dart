@@ -47,7 +47,7 @@ void main() {
       selection: const TextSelection(baseOffset: 0, extentOffset: 0),
     );
     layout(defaultEditable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    defaultEditable.paint(context, Offset.zero);
+    context.paintChild(defaultEditable, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
     context.clipBehavior = Clip.none; // Reset as Clip.none won't write into clipBehavior.
@@ -63,7 +63,7 @@ void main() {
         clipBehavior: clip,
       );
       layout(editable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      editable.paint(context, Offset.zero);
+      context.paintChild(editable, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
   });
