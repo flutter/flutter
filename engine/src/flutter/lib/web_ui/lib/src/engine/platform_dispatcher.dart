@@ -941,6 +941,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       }
     });
   }
+
+  ui.FrameData get frameData => const ui.FrameData.webOnly();
 }
 
 bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData? data) {

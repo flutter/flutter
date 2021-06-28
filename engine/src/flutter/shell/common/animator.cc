@@ -149,7 +149,8 @@ void Animator::BeginFrame(
   {
     TRACE_EVENT2("flutter", "Framework Workload", "mode", "basic", "frame",
                  FrameParity());
-    delegate_.OnAnimatorBeginFrame(frame_target_time);
+    uint64_t frame_number = frame_timings_recorder_->GetFrameNumber();
+    delegate_.OnAnimatorBeginFrame(frame_target_time, frame_number);
   }
 
   if (!frame_scheduled_) {
