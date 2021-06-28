@@ -1060,6 +1060,10 @@ class RawScrollbar extends StatefulWidget {
   /// [minOverscrollLength] is `double.infinity`, it will not be respected if
   /// the [ScrollMetrics.viewportDimension] and [mainAxisMargin] are finite.
   ///
+  /// Overscrolling can be made possible by setting the `physics` property
+  /// of the `child` Widget to a `BouncingScrollPhysics`, which is a special
+  /// `ScrollPhysics` that allows overscrolling.
+  ///
   /// The value is less than or equal to [minThumbLength] and greater than or equal to 0.
   /// If unspecified or set to null, it will default to the value of [minThumbLength].
   double get minOverscrollLength => _minOverscrollLength;
