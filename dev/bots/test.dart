@@ -276,13 +276,10 @@ Future<void> _runGeneralToolTests() async {
 }
 
 Future<void> _runCommandsToolTests() async {
-  // Due to https://github.com/flutter/flutter/issues/46180, skip the hermetic directory
-  // on Windows.
-  final String suffix = Platform.isWindows ? 'permeable' : '';
   await _pubRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     forceSingleCore: true,
-    testPaths: <String>[path.join('test', 'commands.shard', suffix)],
+    testPaths: <String>[path.join('test', 'commands.shard')],
   );
 }
 
@@ -1059,7 +1056,7 @@ Future<void> _ensureChromeDriverIsRunning() async {
   final HttpClientResponse response = await request.close();
   final Map<String, dynamic> webDriverStatus = json.decode(await response.transform(utf8.decoder).join('')) as Map<String, dynamic>;
   client.close();
-  final bool webDriverReady = webDriverStatus['value']['ready'] as bool;
+  final bool webDriverReady = (webDriverStatus['value'] as Map<String, dynamic>)['ready'] as bool;
   if (!webDriverReady) {
     throw Exception('WebDriver not available.');
   }

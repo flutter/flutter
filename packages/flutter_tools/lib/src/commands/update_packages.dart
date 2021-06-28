@@ -1511,7 +1511,6 @@ environment:
     ..writeAsStringSync('''
 name: sky_engine
 version: 0.0.99
-author: Flutter Authors <flutter-dev@googlegroups.com>
 description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x

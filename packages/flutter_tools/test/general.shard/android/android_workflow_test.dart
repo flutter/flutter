@@ -73,6 +73,55 @@ void main() {
     );
 
     expect(androidWorkflow.appliesToHostPlatform, false);
+    expect(androidWorkflow.canLaunchDevices, false);
+    expect(androidWorkflow.canListDevices, false);
+    expect(androidWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('AndroidWorkflow is disabled if feature is disabled', () {
+    final FakeAndroidSdk androidSdk = FakeAndroidSdk();
+    androidSdk.adbPath = 'path/to/adb';
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+      androidSdk: androidSdk,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    expect(androidWorkflow.appliesToHostPlatform, false);
+    expect(androidWorkflow.canLaunchDevices, false);
+    expect(androidWorkflow.canListDevices, false);
+    expect(androidWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('AndroidWorkflow cannot list emulators if emulatorPath is null', () {
+    final FakeAndroidSdk androidSdk = FakeAndroidSdk();
+    androidSdk.adbPath = 'path/to/adb';
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(),
+      androidSdk: androidSdk,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    expect(androidWorkflow.appliesToHostPlatform, true);
+    expect(androidWorkflow.canLaunchDevices, true);
+    expect(androidWorkflow.canListDevices, true);
+    expect(androidWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('AndroidWorkflow can list emulators', () {
+    final FakeAndroidSdk androidSdk = FakeAndroidSdk();
+    androidSdk.adbPath = 'path/to/adb';
+    androidSdk.emulatorPath = 'path/to/emulator';
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(),
+      androidSdk: androidSdk,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    expect(androidWorkflow.appliesToHostPlatform, true);
+    expect(androidWorkflow.canLaunchDevices, true);
+    expect(androidWorkflow.canListDevices, true);
+    expect(androidWorkflow.canListEmulators, true);
   });
 
   testWithoutContext('licensesAccepted returns LicensesAccepted.unknown if cannot find sdkmanager', () async {
@@ -495,6 +544,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   AndroidSdkVersion latestVersion;
+
+  @override
+  String emulatorPath;
 
   @override
   List<String> validateSdkWellFormed() => <String>[];

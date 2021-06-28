@@ -15,6 +15,226 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/60320
+  - title: "Migrate to 'viewId'"
+    date: 2020-07-05
+    element:
+      uris: [ 'services.dart' ]
+      getter: id
+      inClass: 'TextureAndroidViewController'
+    changes:
+      - kind: 'rename'
+        newName: 'viewId'
+
+  # Changes made in https://github.com/flutter/flutter/pull/60320
+  - title: "Migrate to 'viewId'"
+    date: 2020-07-05
+    element:
+      uris: [ 'services.dart' ]
+      getter: id
+      inClass: 'SurfaceAndroidViewController'
+    changes:
+      - kind: 'rename'
+        newName: 'viewId'
+
   # Changes made in https://github.com/flutter/flutter/pull/81858
   - title: "Migrate to 'supportedDevices'"
     date: 2021-05-04
@@ -797,6 +1017,67 @@ transforms:
     element:
       uris: [ 'material.dart' ]
       constructor: ''
+      inClass: 'InputDecorationTheme'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
       inClass: 'InputDecorationTheme'
     oneOf:
       - if: "hasFloatingPlaceholder == 'true'"

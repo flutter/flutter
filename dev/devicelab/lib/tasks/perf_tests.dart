@@ -314,8 +314,6 @@ TaskFunction createStackSizeTest() {
         '--driver', testDriver,
         '-d',
         deviceId,
-        '--screenshot',
-        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/stack_size.json').readAsStringSync(),
@@ -411,8 +409,6 @@ TaskFunction createsScrollSmoothnessPerfTest() {
         '-t', testTarget,
         '-d',
         deviceId,
-        '--screenshot',
-        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/scroll_smoothness_test.json').readAsStringSync(),
@@ -421,13 +417,15 @@ TaskFunction createsScrollSmoothnessPerfTest() {
       final Map<String, dynamic> result = <String, dynamic>{};
       void addResult(dynamic data, String suffix) {
         assert(data is Map<String, dynamic>);
-        const List<String> metricKeys = <String>[
-          'janky_count',
-          'average_abs_jerk',
-          'dropped_frame_count',
-        ];
-        for (final String key in metricKeys) {
-          result[key+suffix] = data[key];
+        if (data is Map<String, dynamic>) {
+          const List<String> metricKeys = <String>[
+            'janky_count',
+            'average_abs_jerk',
+            'dropped_frame_count',
+          ];
+          for (final String key in metricKeys) {
+            result[key + suffix] = data[key];
+          }
         }
       }
       addResult(data['resample on with 90Hz input'], '_with_resampler_90Hz');
@@ -462,8 +460,6 @@ TaskFunction createFramePolicyIntegrationTest() {
         '-t', testTarget,
         '-d',
         deviceId,
-        '--screenshot',
-        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/frame_policy_event_delay.json').readAsStringSync(),
@@ -583,16 +579,20 @@ class StartupTest {
           results.add(data);
         } else {
           currentFailures += 1;
-          await flutter(
-            'screenshot',
-            options: <String>[
-              '-d',
-              device.deviceId,
-              '--out',
-              hostAgent.dumpDirectory.childFile('screenshot_startup_failure_$currentFailures.png').path,
-            ],
-            canFail: true,
-          );
+          if (hostAgent.dumpDirectory != null) {
+            await flutter(
+              'screenshot',
+              options: <String>[
+                '-d',
+                device.deviceId,
+                '--out',
+                hostAgent.dumpDirectory
+                    .childFile('screenshot_startup_failure_$currentFailures.png')
+                    .path,
+              ],
+              canFail: true,
+            );
+          }
           i -= 1;
           if (currentFailures == maxFailures) {
             return TaskResult.failure('Application failed to start $maxFailures times');
@@ -828,8 +828,6 @@ class PerfTest {
           ...<String>['--dart-define', dartDefine],
         '-d',
         deviceId,
-        '--screenshot',
-        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
@@ -1459,8 +1457,6 @@ class DevToolsMemoryTest {
         'drive',
         options: <String>[
           '-d', _device.deviceId,
-          '--screenshot',
-          hostAgent.dumpDirectory.path,
           '--profile',
           '--profile-memory', _kJsonFileName,
           '--no-publish-port',
@@ -1472,15 +1468,15 @@ class DevToolsMemoryTest {
       final Map<String, dynamic> data = json.decode(
         file('$project/$_kJsonFileName').readAsStringSync(),
       ) as Map<String, dynamic>;
-      final List<dynamic> samples = data['samples']['data'] as List<dynamic>;
+      final List<dynamic> samples = (data['samples'] as Map<String, dynamic>)['data'] as List<dynamic>;
       int maxRss = 0;
       int maxAdbTotal = 0;
-      for (final dynamic sample in samples) {
+      for (final Map<String, dynamic> sample in samples.cast<Map<String, dynamic>>()) {
         if (sample['rss'] != null) {
           maxRss = math.max(maxRss, sample['rss'] as int);
         }
         if (sample['adb_memoryInfo'] != null) {
-          maxAdbTotal = math.max(maxAdbTotal, sample['adb_memoryInfo']['Total'] as int);
+          maxAdbTotal = math.max(maxAdbTotal, (sample['adb_memoryInfo'] as Map<String, dynamic>)['Total'] as int);
         }
       }
 
