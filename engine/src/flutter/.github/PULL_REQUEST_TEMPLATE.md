@@ -15,7 +15,6 @@ writing and running engine tests.
 - [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] I signed the [CLA].
 - [ ] All existing and new tests are passing.
-- [ ] The reviewer has submitted any presubmit flakes in this PR using the [engine presubmit flakes form] before re-triggering the failure.
 
 If you need help, consider asking for advice on the #hackers-new channel on [Discord].
 
@@ -29,4 +28,3 @@ If you need help, consider asking for advice on the #hackers-new channel on [Dis
 [flutter/tests]: https://github.com/flutter/tests
 [breaking change policy]: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes
 [Discord]: https://github.com/flutter/flutter/wiki/Chat
-[engine presubmit flakes form]: https://forms.gle/Wc1VyFRYJjQTH6w5A
