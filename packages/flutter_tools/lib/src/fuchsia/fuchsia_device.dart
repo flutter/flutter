@@ -324,6 +324,12 @@ class FuchsiaDevice extends Device {
     // Populate isWorkstation first
     _isWorkstation = await isWorkstation();
 
+    if (_isWorkstation) {
+      globals.printTrace('Running on a workstation build.');
+    } else {
+      globals.printTrace('Running on a non-workstation build.');
+    }
+
     if (!prebuiltApplication) {
       await buildFuchsia(
           fuchsiaProject: FlutterProject.current().fuchsia,
@@ -521,8 +527,12 @@ class FuchsiaDevice extends Device {
     String userIdentifier,
   }) async {
     if (_isWorkstation) {
-      // Currently it would be a noop in workstation, there are no way to close
-      // a running app in ermine afaik.
+      // Currently there are no way to close a running app in ermine afaik.
+      // so we just restart the launcher to ensure that it is no longer running.
+      if (!await fuchsiaDeviceTools.sessionControl.restart(this)) {
+        globals.printError('session_control unable to restart');
+        return false;
+      }
       return true;
     }
     final int appKey = await FuchsiaTilesCtl.findAppKey(this, app.id);
