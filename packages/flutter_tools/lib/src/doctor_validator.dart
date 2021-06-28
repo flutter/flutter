@@ -278,7 +278,7 @@ class ValidationMessage {
   }
 
   @override
-  int get hashCode => Object.hash(type, message, contextUrl);
+  int get hashCode => type.hashCode ^ message.hashCode ^ contextUrl.hashCode;
 }
 
 class NoIdeValidator extends DoctorValidator {

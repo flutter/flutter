@@ -326,7 +326,12 @@ class CustomDimensions {
   }
 
   @override
-  int get hashCode => Object.hashAll(toMap().values);
+  int get hashCode =>
+    toMap()
+      .values
+      .where((String element) => element != null)
+      .fold(Object().hashCode,
+            (int value, String element) => value ^ element.hashCode);
 }
 
 /// List of all fields used in CustomDimensions.

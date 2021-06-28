@@ -28,7 +28,20 @@ class RunningProcessInfo {
   }
 
   @override
-  int get hashCode => Object.hash(pid, commandLine, creationDate);
+  int get hashCode {
+    // TODO(dnfield): Replace this when Object.hashValues lands, https://github.com/dart-lang/sdk/issues/11617
+    int hash = 17;
+    if (pid != null) {
+      hash = hash * 23 + pid.hashCode;
+    }
+    if (commandLine != null) {
+      hash = hash * 23 + commandLine.hashCode;
+    }
+    if (creationDate != null) {
+      hash = hash * 23 + creationDate.hashCode;
+    }
+    return hash;
+  }
 
   @override
   String toString() {
