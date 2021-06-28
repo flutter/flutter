@@ -864,8 +864,8 @@ class _ToggleButton extends StatelessWidget {
   Color _resolveColor(Set<MaterialState> states, MaterialStateProperty<Color?> widgetColor,
   MaterialStateProperty<Color?> themeColor, MaterialStateProperty<Color> defaultColor) {
     return widgetColor.resolve(states)
-    ?? themeColor.resolve(states)
-    ?? defaultColor.resolve(states);
+      ?? themeColor.resolve(states)
+      ?? defaultColor.resolve(states);
   }
 
   @override
@@ -883,8 +883,12 @@ class _ToggleButton extends StatelessWidget {
         if (onPressed == null) MaterialState.disabled,
     };
 
-    final Color currentFillColor = _resolveColor(states, _ResolveFillColor(fillColor),
-    _ResolveFillColor(toggleButtonsTheme.fillColor), _DefaultFillColor(theme.colorScheme));
+    final Color currentFillColor = _resolveColor(
+      states,
+      _ResolveFillColor(fillColor),
+      _ResolveFillColor(toggleButtonsTheme.fillColor),
+      _DefaultFillColor(theme.colorScheme),
+    );
 
     if (onPressed != null && selected) {
       currentColor = selectedColor
