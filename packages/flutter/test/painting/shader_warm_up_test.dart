@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -56,6 +57,5 @@ void main() {
       throwsA(isA<String>().having((String message) => message, 'message', 'Object has been disposed.')),
     );
     expect(capturedImage.debugDisposed, true);
-
-  });
+  }, skip: kIsWeb); // Browser doesn't support approximateBytesUsed and doesn't rasterize the picture at this time.
 }
