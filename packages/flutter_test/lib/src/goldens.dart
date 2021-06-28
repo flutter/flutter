@@ -139,7 +139,7 @@ set goldenFileComparator(GoldenFileComparator value) {
 /// fake async constraints that are normally imposed on widget tests (i.e. the
 /// need or the ability to call [WidgetTester.pump] to advance the microtask
 /// queue). Prior to the invocation, the test framework will render only the
-/// [Element] to be compared on the screen.
+/// [widgets.Element] to be compared on the screen.
 ///
 /// See also:
 ///
