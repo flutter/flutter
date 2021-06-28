@@ -312,7 +312,7 @@ class FuchsiaDevice extends Device {
     }
     // Stop the app if it's currently running.
     await stopApp(package);
-    final String host = await hostAddress;
+
     // Find out who the device thinks we are.
     final int port = await globals.os.findFreePort();
     if (port == 0) {
@@ -357,7 +357,7 @@ class FuchsiaDevice extends Device {
       // Start up a package server.
       const String packageServerName = FuchsiaPackageServer.toolHost;
       fuchsiaPackageServer = FuchsiaPackageServer(
-          packageRepo.path, packageServerName, host, port);
+          packageRepo.path, packageServerName, '', port);
       if (!await fuchsiaPackageServer.start()) {
         globals.printError('Failed to start the Fuchsia package server');
         return LaunchResult.failed();

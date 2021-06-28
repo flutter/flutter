@@ -276,13 +276,10 @@ Future<void> _runGeneralToolTests() async {
 }
 
 Future<void> _runCommandsToolTests() async {
-  // Due to https://github.com/flutter/flutter/issues/46180, skip the hermetic directory
-  // on Windows.
-  final String suffix = Platform.isWindows ? 'permeable' : '';
   await _pubRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     forceSingleCore: true,
-    testPaths: <String>[path.join('test', 'commands.shard', suffix)],
+    testPaths: <String>[path.join('test', 'commands.shard')],
   );
 }
 

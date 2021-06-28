@@ -246,7 +246,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
-    //   * Meta + arrow down
     //   * End
     //   * Home
     //   * Meta + X
@@ -300,7 +299,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
-    //   * Meta + arrow down
     //   * End
     //   * Home
     //   * Meta + X
@@ -354,7 +352,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
-    //   * Meta + arrow down
     //   * End
     //   * Home
     //   * Meta + X
