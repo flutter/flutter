@@ -148,14 +148,7 @@ template("aot_runner_package") {
 
     binary = "dart_aot${product_suffix}_runner"
 
-    meta_dir = "//flutter/shell/platform/fuchsia/dart_runner/meta"
-
-    meta = [
-      {
-        path = rebase_path("meta/dart_aot${product_suffix}_runner.cmx")
-        dest = "dart_aot${product_suffix}_runner.cmx"
-      },
-    ]
+    cmx_file = rebase_path("meta/dart_aot${product_suffix}_runner.cmx")
 
     libraries = common_libs
 
@@ -215,7 +208,7 @@ template("jit_runner_package") {
 
     binary = "dart_jit${product_suffix}_runner"
 
-    meta_dir = "//flutter/shell/platform/fuchsia/dart_runner/meta"
+    cmx_file = rebase_path("meta/dart_jit${product_suffix}_runner.cmx")
 
     libraries = common_libs
 
@@ -257,13 +250,6 @@ template("jit_runner_package") {
         },
       ]
     }
-
-    meta = [
-      {
-        path = rebase_path("meta/dart_jit${product_suffix}_runner.cmx")
-        dest = "dart_jit${product_suffix}_runner.cmx"
-      },
-    ]
   }
 }
 

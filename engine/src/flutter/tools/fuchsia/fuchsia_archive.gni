@@ -5,10 +5,41 @@
 import("//flutter/tools/fuchsia/fuchsia_debug_symbols.gni")
 import("//flutter/tools/fuchsia/fuchsia_libs.gni")
 
+# Compiles a cml file
+template("_compile_cml") {
+  assert(defined(invoker.manifest), "_compile_cml must define manifest")
+
+  action(target_name) {
+    forward_variables_from(invoker,
+                           [
+                             "visibility",
+                             "testonly",
+                           ])
+    script = "//flutter/tools/fuchsia/compile_cml.py"
+
+    sources = [ invoker.manifest ]
+
+    inputs = [ "//fuchsia/sdk/$host_os/tools/cmc" ]
+
+    args = [
+      "--cmc-bin",
+      rebase_path("//fuchsia/sdk/$host_os/tools/cmc"),
+      "--manifest-file",
+      invoker.manifest,
+      "--output",
+      rebase_path(invoker.output, root_build_dir),
+      "--includepath",
+      get_path_info(invoker.manifest, "dir"),
+    ]
+    outputs = [ invoker.output ]
+  }
+}
+
 # Creates a Fuchsia archive (.far) file using PM from the Fuchsia SDK.
 template("fuchsia_archive") {
   assert(defined(invoker.binary), "package must define binary")
-  assert(defined(invoker.meta_dir), "package must define meta_dir")
+  assert(defined(invoker.cmx_file) || defined(invoker.cml_file),
+         "must specify either a cmx file, cml file or both")
 
   pkg_testonly = defined(invoker.testonly) && invoker.testonly
   pkg_target_name = target_name
@@ -18,16 +49,12 @@ template("fuchsia_archive") {
                            [
                              "binary",
                              "deps",
-                             "meta",
                              "resources",
                              "libraries",
                              "meta_dir",
                            ])
     if (!defined(package_name)) {
       package_name = pkg_target_name
-    }
-    if (!defined(meta)) {
-      meta = []
     }
     if (!defined(deps)) {
       deps = []
@@ -55,17 +82,20 @@ template("fuchsia_archive") {
     copy_outputs += [ "$far_base_dir/lib/${lib.name}" ]
   }
 
-  cmx_target = "$pkg_target_name.copy_cmx"
+  pkg_dir_deps = pkg.deps
 
   if (defined(invoker.cmx_file)) {
+    # cmx files are used for v1 components, only copy it if it is defined
     cmx_file = invoker.cmx_file
-  } else {
-    cmx_file = "${pkg.meta_dir}/${pkg_target_name}.cmx"
-  }
 
-  copy("$cmx_target") {
-    sources = [ "$cmx_file" ]
-    outputs = [ "$far_base_dir/meta/${pkg_target_name}.cmx" ]
+    cmx_target = "$pkg_target_name.copy_cmx"
+
+    copy("$cmx_target") {
+      sources = [ "$cmx_file" ]
+      outputs = [ "$far_base_dir/meta/${pkg_target_name}.cmx" ]
+    }
+
+    pkg_dir_deps += [ ":$cmx_target" ]
   }
 
   write_file("${far_base_dir}/meta/package",
@@ -82,7 +112,13 @@ template("fuchsia_archive") {
     binary = invoker.binary
   }
 
-  pkg_dir_deps = pkg.deps + [ ":$cmx_target" ]
+  if (defined(invoker.cml_file)) {
+    _compile_cml(target_name + "_compile_cml") {
+      manifest = invoker.cml_file
+      output = "$far_base_dir/meta/${pkg_target_name}.cm"
+    }
+    pkg_dir_deps += [ ":${target_name}_compile_cml" ]
+  }
 
   action("${target_name}_dir") {
     script = "//flutter/tools/fuchsia/copy_path.py"
@@ -145,7 +181,6 @@ template("fuchsia_test_archive") {
       libraries += invoker.libraries
     }
 
-    meta_dir = "//flutter/testing/fuchsia/meta"
-    cmx_file = "$meta_dir/fuchsia_test.cmx"
+    cmx_file = rebase_path("//flutter/testing/fuchsia/meta/fuchsia_test.cmx")
   }
 }
