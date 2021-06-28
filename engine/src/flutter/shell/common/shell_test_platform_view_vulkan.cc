@@ -5,6 +5,7 @@
 #include "flutter/shell/common/shell_test_platform_view_vulkan.h"
 
 #include "flutter/common/graphics/persistent_cache.h"
+#include "flutter/shell/common/context_options.h"
 #include "flutter/vulkan/vulkan_utilities.h"
 
 namespace flutter {
@@ -113,13 +114,8 @@ bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaGrContext() {
     return false;
   }
 
-  GrContextOptions options;
-  if (PersistentCache::cache_sksl()) {
-    options.fShaderCacheStrategy = GrContextOptions::ShaderCacheStrategy::kSkSL;
-  }
-  PersistentCache::MarkStrategySet();
-  options.fPersistentCache = PersistentCache::GetCacheForProcess();
-  options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
+  const auto options =
+      MakeDefaultContextOptions(ContextType::kRender, GrBackendApi::kVulkan);
 
   sk_sp<GrDirectContext> context =
       GrDirectContext::MakeVulkan(backend_context, options);

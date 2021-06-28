@@ -9,6 +9,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/size.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/shell/common/context_options.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
@@ -43,26 +44,8 @@ sk_sp<GrDirectContext> GPUSurfaceGL::MakeGLContext(
     return nullptr;
   }
 
-  GrContextOptions options;
-
-  if (PersistentCache::cache_sksl()) {
-    FML_LOG(INFO) << "Cache SkSL";
-    options.fShaderCacheStrategy = GrContextOptions::ShaderCacheStrategy::kSkSL;
-  }
-  PersistentCache::MarkStrategySet();
-  options.fPersistentCache = PersistentCache::GetCacheForProcess();
-
-  options.fAvoidStencilBuffers = true;
-
-  // To get video playback on the widest range of devices, we limit Skia to
-  // ES2 shading language when the ES3 external image extension is missing.
-  options.fPreferExternalImagesOverES3 = true;
-
-  // TODO(goderbauer): remove option when skbug.com/7523 is fixed.
-  // A similar work-around is also used in shell/common/io_manager.cc.
-  options.fDisableGpuYUVConversion = true;
-
-  options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
+  const auto options =
+      MakeDefaultContextOptions(ContextType::kRender, GrBackendApi::kOpenGL);
 
   auto context = GrDirectContext::MakeGL(delegate->GetGLInterface(), options);
 
