@@ -247,6 +247,8 @@ class SelectableText extends StatefulWidget {
     this.cursorHeight,
     this.cursorRadius,
     this.cursorColor,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
     this.selectionControls,
