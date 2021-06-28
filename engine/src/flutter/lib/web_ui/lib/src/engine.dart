@@ -115,6 +115,9 @@ export 'engine/pointer_binding.dart';
 // import 'engine/pointer_converter.dart';
 export 'engine/pointer_converter.dart';
 
+import 'engine/profiler.dart';
+export 'engine/profiler.dart';
+
 // This import is intentionally commented out because the analyzer says it's unused.
 // import 'engine/services/buffers.dart';
 export 'engine/services/buffers.dart';
@@ -134,6 +137,32 @@ export 'engine/shadow.dart';
 
 import 'engine/test_embedding.dart';
 export 'engine/test_embedding.dart';
+
+import 'engine/text/layout_service.dart';
+export 'engine/text/layout_service.dart';
+
+export 'engine/text/line_break_properties.dart';
+
+export 'engine/text/line_breaker.dart';
+
+import 'engine/text/measurement.dart';
+export 'engine/text/measurement.dart';
+
+export 'engine/text/paint_service.dart';
+
+import 'engine/text/paragraph.dart';
+export 'engine/text/paragraph.dart';
+
+export 'engine/text/canvas_paragraph.dart';
+
+export 'engine/text/ruler.dart';
+
+export 'engine/text/unicode_range.dart';
+
+export 'engine/text/word_break_properties.dart';
+
+export 'engine/text/word_breaker.dart';
+
 
 import 'engine/util.dart';
 export 'engine/util.dart';
@@ -253,7 +282,6 @@ part 'engine/platform_views.dart';
 part 'engine/platform_views/content_manager.dart';
 part 'engine/platform_views/message_handler.dart';
 part 'engine/platform_views/slots.dart';
-part 'engine/profiler.dart';
 part 'engine/rrect_renderer.dart';
 part 'engine/semantics/accessibility.dart';
 part 'engine/semantics/checkable.dart';
@@ -267,17 +295,6 @@ part 'engine/semantics/semantics_helper.dart';
 part 'engine/semantics/tappable.dart';
 part 'engine/semantics/text_field.dart';
 part 'engine/text/font_collection.dart';
-part 'engine/text/layout_service.dart';
-part 'engine/text/line_break_properties.dart';
-part 'engine/text/line_breaker.dart';
-part 'engine/text/measurement.dart';
-part 'engine/text/paint_service.dart';
-part 'engine/text/paragraph.dart';
-part 'engine/text/canvas_paragraph.dart';
-part 'engine/text/ruler.dart';
-part 'engine/text/unicode_range.dart';
-part 'engine/text/word_break_properties.dart';
-part 'engine/text/word_breaker.dart';
 part 'engine/text_editing/autofill_hint.dart';
 part 'engine/text_editing/input_type.dart';
 part 'engine/text_editing/text_capitalization.dart';
@@ -364,7 +381,7 @@ void initializeEngine() {
     if (!waitingForAnimation) {
       waitingForAnimation = true;
       html.window.requestAnimationFrame((num highResTime) {
-        _frameTimingsOnVsync();
+        frameTimingsOnVsync();
 
         // Reset immediately, because `frameHandler` can schedule more frames.
         waitingForAnimation = false;
@@ -379,10 +396,10 @@ void initializeEngine() {
         // In Flutter terminology "building a frame" consists of "beginning
         // frame" and "drawing frame".
         //
-        // We do not call `_frameTimingsOnBuildFinish` from here because
+        // We do not call `frameTimingsOnBuildFinish` from here because
         // part of the rasterization process, particularly in the HTML
         // renderer, takes place in the `SceneBuilder.build()`.
-        _frameTimingsOnBuildStart();
+        frameTimingsOnBuildStart();
         if (EnginePlatformDispatcher.instance._onBeginFrame != null) {
           EnginePlatformDispatcher.instance.invokeOnBeginFrame(
               Duration(microseconds: highResTimeMicroseconds));

@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:async';
+import 'dart:html' as html;
+import 'dart:js_util' as js_util;
+
+import 'package:ui/ui.dart' as ui;
+import 'package:ui/src/engine.dart' show EnginePlatformDispatcher;
 
 /// A function that receives a benchmark [value] labeleb by [name].
 typedef OnBenchmark = void Function(String name, double value);
@@ -109,7 +114,7 @@ class Profiler {
 
 /// Whether we are collecting [ui.FrameTiming]s.
 bool get _frameTimingsEnabled {
-  return EnginePlatformDispatcher.instance._onReportTimings != null;
+  return EnginePlatformDispatcher.instance.onReportTimings != null;
 }
 
 /// Collects frame timings from frames.
@@ -133,7 +138,7 @@ int _rasterStartMicros = -1;
 int _rasterFinishMicros = -1;
 
 /// Records the vsync timestamp for this frame.
-void _frameTimingsOnVsync() {
+void frameTimingsOnVsync() {
   if (!_frameTimingsEnabled) {
     return;
   }
@@ -141,7 +146,7 @@ void _frameTimingsOnVsync() {
 }
 
 /// Records the time when the framework started building the frame.
-void _frameTimingsOnBuildStart() {
+void frameTimingsOnBuildStart() {
   if (!_frameTimingsEnabled) {
     return;
   }
@@ -149,7 +154,7 @@ void _frameTimingsOnBuildStart() {
 }
 
 /// Records the time when the framework finished building the frame.
-void _frameTimingsOnBuildFinish() {
+void frameTimingsOnBuildFinish() {
   if (!_frameTimingsEnabled) {
     return;
   }
@@ -170,7 +175,7 @@ void _frameTimingsOnBuildFinish() {
 ///
 /// CanvasKit captures everything because we control the rasterization
 /// process, so we know exactly when rasterization starts and ends.
-void _frameTimingsOnRasterStart() {
+void frameTimingsOnRasterStart() {
   if (!_frameTimingsEnabled) {
     return;
   }
@@ -181,7 +186,7 @@ void _frameTimingsOnRasterStart() {
 ///
 /// See [_frameTimingsOnRasterStart] for more details on what rasterization
 /// timings mean on the web.
-void _frameTimingsOnRasterFinish() {
+void frameTimingsOnRasterFinish() {
   if (!_frameTimingsEnabled) {
     return;
   }

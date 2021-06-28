@@ -2,7 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+
+import 'package:ui/ui.dart' as ui;
+
+import 'package:ui/src/engine.dart' show BitmapCanvas, canonicalizeFontFamily, domRenderer, DomRenderer;
+
+import '../profiler.dart';
+import 'layout_service.dart';
+import 'paint_service.dart';
+import 'paragraph.dart';
+import 'word_breaker.dart';
 
 /// A paragraph made up of a flat list of text spans and placeholders.
 ///
@@ -150,7 +160,7 @@ class CanvasParagraph implements EngineParagraph {
       cssStyle.width = '${width}px';
     }
 
-    if (paragraphStyle._maxLines != null || paragraphStyle._ellipsis != null) {
+    if (paragraphStyle.maxLines != null || paragraphStyle.ellipsis != null) {
       cssStyle
         ..overflowY = 'hidden'
         ..height = '${height}px';
@@ -175,7 +185,7 @@ class CanvasParagraph implements EngineParagraph {
           if (box.span != span) {
             span = box.span;
             element = domRenderer.createElement('span') as html.HtmlElement;
-            _applyTextStyleToElement(
+            applyTextStyleToElement(
               element: element,
               style: box.span.style,
               isSpan: true
@@ -190,7 +200,7 @@ class CanvasParagraph implements EngineParagraph {
           element = rootElement;
           domRenderer.append(
             rootElement,
-            _createPlaceholderElement(placeholder: box.placeholder),
+            createPlaceholderElement(placeholder: box.placeholder),
           );
         } else {
           throw UnimplementedError('Unknown box type: ${box.runtimeType}');
@@ -271,15 +281,15 @@ void _applyNecessaryParagraphStyles({
 }) {
   final html.CssStyleDeclaration cssStyle = element.style;
 
-  if (style._textAlign != null) {
+  if (style.textAlign != null) {
     cssStyle.textAlign = textAlignToCssValue(
-        style._textAlign, style._textDirection ?? ui.TextDirection.ltr);
+        style.textAlign, style.textDirection ?? ui.TextDirection.ltr);
   }
-  if (style._lineHeight != null) {
-    cssStyle.lineHeight = '${style._lineHeight}';
+  if (style.lineHeight != null) {
+    cssStyle.lineHeight = '${style.lineHeight}';
   }
-  if (style._textDirection != null) {
-    cssStyle.direction = _textDirectionToCss(style._textDirection);
+  if (style.textDirection != null) {
+    cssStyle.direction = textDirectionToCss(style.textDirection);
   }
 }
 
@@ -297,11 +307,11 @@ void _applySpanStylesToParagraph({
   String? fontFamily;
   for (final ParagraphSpan span in spans) {
     if (span is FlatTextSpan) {
-      final double? spanFontSize = span.style._fontSize;
+      final double? spanFontSize = span.style.fontSize;
       if (spanFontSize != null && spanFontSize > fontSize) {
         fontSize = spanFontSize;
-        if (span.style._isFontFamilyProvided) {
-          fontFamily = span.style._effectiveFontFamily;
+        if (span.style.isFontFamilyProvided) {
+          fontFamily = span.style.effectiveFontFamily;
         }
       }
     }
@@ -471,64 +481,64 @@ class ChildStyleNode extends StyleNode {
   // property isn't defined, go to the parent node.
 
   @override
-  ui.Color? get _color => style._color ?? (_foreground == null ? parent._color : null);
+  ui.Color? get _color => style.color ?? (_foreground == null ? parent._color : null);
 
   @override
-  ui.TextDecoration? get _decoration => style._decoration ?? parent._decoration;
+  ui.TextDecoration? get _decoration => style.decoration ?? parent._decoration;
 
   @override
-  ui.Color? get _decorationColor => style._decorationColor ?? parent._decorationColor;
+  ui.Color? get _decorationColor => style.decorationColor ?? parent._decorationColor;
 
   @override
-  ui.TextDecorationStyle? get _decorationStyle => style._decorationStyle ?? parent._decorationStyle;
+  ui.TextDecorationStyle? get _decorationStyle => style.decorationStyle ?? parent._decorationStyle;
 
   @override
-  double? get _decorationThickness => style._decorationThickness ?? parent._decorationThickness;
+  double? get _decorationThickness => style.decorationThickness ?? parent._decorationThickness;
 
   @override
-  ui.FontWeight? get _fontWeight => style._fontWeight ?? parent._fontWeight;
+  ui.FontWeight? get _fontWeight => style.fontWeight ?? parent._fontWeight;
 
   @override
-  ui.FontStyle? get _fontStyle => style._fontStyle ?? parent._fontStyle;
+  ui.FontStyle? get _fontStyle => style.fontStyle ?? parent._fontStyle;
 
   @override
-  ui.TextBaseline? get _textBaseline => style._textBaseline ?? parent._textBaseline;
+  ui.TextBaseline? get _textBaseline => style.textBaseline ?? parent._textBaseline;
 
   @override
-  List<String>? get _fontFamilyFallback => style._fontFamilyFallback ?? parent._fontFamilyFallback;
+  List<String>? get _fontFamilyFallback => style.fontFamilyFallback ?? parent._fontFamilyFallback;
 
   @override
-  List<ui.FontFeature>? get _fontFeatures => style._fontFeatures ?? parent._fontFeatures;
+  List<ui.FontFeature>? get _fontFeatures => style.fontFeatures ?? parent._fontFeatures;
 
   @override
-  double get _fontSize => style._fontSize ?? parent._fontSize;
+  double get _fontSize => style.fontSize ?? parent._fontSize;
 
   @override
-  double? get _letterSpacing => style._letterSpacing ?? parent._letterSpacing;
+  double? get _letterSpacing => style.letterSpacing ?? parent._letterSpacing;
 
   @override
-  double? get _wordSpacing => style._wordSpacing ?? parent._wordSpacing;
+  double? get _wordSpacing => style.wordSpacing ?? parent._wordSpacing;
 
   @override
-  double? get _height => style._height ?? parent._height;
+  double? get _height => style.height ?? parent._height;
 
   @override
-  ui.Locale? get _locale => style._locale ?? parent._locale;
+  ui.Locale? get _locale => style.locale ?? parent._locale;
 
   @override
-  ui.Paint? get _background => style._background ?? parent._background;
+  ui.Paint? get _background => style.background ?? parent._background;
 
   @override
-  ui.Paint? get _foreground => style._foreground ?? parent._foreground;
+  ui.Paint? get _foreground => style.foreground ?? parent._foreground;
 
   @override
-  List<ui.Shadow>? get _shadows => style._shadows ?? parent._shadows;
+  List<ui.Shadow>? get _shadows => style.shadows ?? parent._shadows;
 
   // Font family is slightly different from the other properties above. It's
-  // never null on the TextStyle object, so we use `_isFontFamilyProvided` to
+  // never null on the TextStyle object, so we use `isFontFamilyProvided` to
   // check if font family is defined or not.
   @override
-  String get _fontFamily => style._isFontFamilyProvided ? style._fontFamily : parent._fontFamily;
+  String get _fontFamily => style.isFontFamilyProvided ? style.fontFamily : parent._fontFamily;
 }
 
 /// The root style node for the paragraph.
@@ -543,7 +553,7 @@ class RootStyleNode extends StyleNode {
   final EngineParagraphStyle paragraphStyle;
 
   @override
-  final ui.Color _color = _defaultTextColor;
+  final ui.Color _color = defaultTextColor;
 
   @override
   ui.TextDecoration? get _decoration => null;
@@ -558,15 +568,15 @@ class RootStyleNode extends StyleNode {
   double? get _decorationThickness => null;
 
   @override
-  ui.FontWeight? get _fontWeight => paragraphStyle._fontWeight;
+  ui.FontWeight? get _fontWeight => paragraphStyle.fontWeight;
   @override
-  ui.FontStyle? get _fontStyle => paragraphStyle._fontStyle;
+  ui.FontStyle? get _fontStyle => paragraphStyle.fontStyle;
 
   @override
   ui.TextBaseline? get _textBaseline => null;
 
   @override
-  String get _fontFamily => paragraphStyle._fontFamily ?? DomRenderer.defaultFontFamily;
+  String get _fontFamily => paragraphStyle.fontFamily ?? DomRenderer.defaultFontFamily;
 
   @override
   List<String>? get _fontFamilyFallback => null;
@@ -575,7 +585,7 @@ class RootStyleNode extends StyleNode {
   List<ui.FontFeature>? get _fontFeatures => null;
 
   @override
-  double get _fontSize => paragraphStyle._fontSize ?? DomRenderer.defaultFontSize;
+  double get _fontSize => paragraphStyle.fontSize ?? DomRenderer.defaultFontSize;
 
   @override
   double? get _letterSpacing => null;
@@ -584,10 +594,10 @@ class RootStyleNode extends StyleNode {
   double? get _wordSpacing => null;
 
   @override
-  double? get _height => paragraphStyle._height;
+  double? get _height => paragraphStyle.height;
 
   @override
-  ui.Locale? get _locale => paragraphStyle._locale;
+  ui.Locale? get _locale => paragraphStyle.locale;
 
   @override
   ui.Paint? get _background => null;
@@ -680,14 +690,14 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
     final int end = _plainTextBuffer.length;
 
     if (_drawOnCanvas) {
-      final ui.TextDecoration? decoration = style._decoration;
+      final ui.TextDecoration? decoration = style.decoration;
       if (decoration != null && decoration != ui.TextDecoration.none) {
         _drawOnCanvas = false;
       }
     }
 
     if (_drawOnCanvas) {
-      final List<ui.FontFeature>? fontFeatures = style._fontFeatures;
+      final List<ui.FontFeature>? fontFeatures = style.fontFeatures;
       if (fontFeatures != null && fontFeatures.isNotEmpty) {
         _drawOnCanvas = false;
       }

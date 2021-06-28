@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+
+import 'package:ui/src/engine.dart' show clampInt;
+
+import 'word_break_properties.dart';
 
 class _FindBreakDirection {
   static const _FindBreakDirection forward = _FindBreakDirection(step: 1);

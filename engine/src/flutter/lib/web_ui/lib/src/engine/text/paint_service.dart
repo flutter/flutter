@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'package:ui/ui.dart' as ui;
+import 'package:ui/src/engine.dart' show BitmapCanvas, SurfacePaint;
+
+import 'canvas_paragraph.dart';
+import 'layout_service.dart';
+import 'paragraph.dart';
 
 /// Responsible for painting a [CanvasParagraph] on a [BitmapCanvas].
 class TextPaintService {
@@ -35,7 +40,7 @@ class TextPaintService {
       final FlatTextSpan span = box.span;
 
       // Paint the background of the box, if the span has a background.
-      final SurfacePaint? background = span.style._background as SurfacePaint?;
+      final SurfacePaint? background = span.style.background as SurfacePaint?;
       if (background != null) {
         canvas.drawRect(
           box.toTextBox(line).toRect().shift(offset),
@@ -51,9 +56,9 @@ class TextPaintService {
             box.start.index,
             box.end.indexWithoutTrailingNewlines,
           );
-      final double? letterSpacing = span.style._letterSpacing;
+      final double? letterSpacing = span.style.letterSpacing;
       if (letterSpacing == null || letterSpacing == 0.0) {
-        canvas.fillText(text, x, y, shadows: span.style._shadows);
+        canvas.fillText(text, x, y, shadows: span.style.shadows);
       } else {
         // TODO(mdebbar): Implement letter-spacing on canvas more efficiently:
         //                https://github.com/flutter/flutter/issues/51234
@@ -62,7 +67,7 @@ class TextPaintService {
         for (int i = 0; i < len; i++) {
           final String char = text[i];
           canvas.fillText(char, charX.roundToDouble(), y,
-              shadows: span.style._shadows);
+              shadows: span.style.shadows);
           charX += letterSpacing + canvas.measureText(char).width!;
         }
       }
@@ -74,20 +79,20 @@ class TextPaintService {
         canvas.fillText(ellipsis, x, y);
       }
 
-      canvas._tearDownPaint();
+      canvas.tearDownPaint();
     }
   }
 
   void _applySpanStyleToCanvas(FlatTextSpan span, BitmapCanvas canvas) {
     final SurfacePaint? paint;
-    final ui.Paint? foreground = span.style._foreground;
+    final ui.Paint? foreground = span.style.foreground;
     if (foreground != null) {
       paint = foreground as SurfacePaint;
     } else {
-      paint = (ui.Paint()..color = span.style._color!) as SurfacePaint;
+      paint = (ui.Paint()..color = span.style.color!) as SurfacePaint;
     }
 
     canvas.setCssFont(span.style.cssFontString);
-    canvas._setUpPaint(paint.paintData, null);
+    canvas.setUpPaint(paint.paintData, null);
   }
 }
