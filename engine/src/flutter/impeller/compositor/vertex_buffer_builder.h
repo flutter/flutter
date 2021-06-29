@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/base/base.h"
 #include "impeller/compositor/allocator.h"
 #include "impeller/compositor/device_buffer.h"
 #include "impeller/compositor/formats.h"
@@ -27,6 +28,8 @@ class VertexBufferBuilder {
   VertexBufferBuilder() = default;
 
   ~VertexBufferBuilder() = default;
+
+  void SetLabel(std::string label) { label_ = std::move(label); }
 
   VertexBufferBuilder& AddVertices(
       std::initializer_list<VertexType_> vertices) {
@@ -57,18 +60,29 @@ class VertexBufferBuilder {
   // This is a placeholder till vertex de-duplication can be implemented. The
   // current implementation is a very dumb placeholder.
   std::vector<VertexType> vertices_;
+  std::string label_;
 
   BufferView CreateVertexBufferView(HostBuffer& buffer) const {
-    return buffer.Emplace(vertices_.data(),
-                          vertices_.size() * sizeof(VertexType),
-                          alignof(VertexType));
+    auto view =
+        buffer.Emplace(vertices_.data(), vertices_.size() * sizeof(VertexType),
+                       alignof(VertexType));
+    if (!label_.empty()) {
+      view.SetLabel(SPrintF("%s Vertices"), label_.c_str());
+    }
+    return view;
   }
 
   BufferView CreateVertexBufferView(Allocator& allocator) const {
     auto buffer = allocator.CreateBufferWithCopy(
         reinterpret_cast<const uint8_t*>(vertices_.data()),
         vertices_.size() * sizeof(VertexType));
-    return buffer ? buffer->AsBufferView() : BufferView{};
+    if (!buffer) {
+      return {};
+    }
+    if (!label_.empty()) {
+      buffer->SetLabel(SPrintF("%s Vertices", label_.c_str()));
+    }
+    return buffer->AsBufferView();
   }
 
   std::vector<IndexType> CreateIndexBuffer() const {
@@ -83,9 +97,13 @@ class VertexBufferBuilder {
 
   BufferView CreateIndexBufferView(HostBuffer& buffer) const {
     const auto index_buffer = CreateIndexBuffer();
-    return buffer.Emplace(index_buffer.data(),
-                          index_buffer.size() * sizeof(IndexType),
-                          alignof(IndexType));
+    auto view = buffer.Emplace(index_buffer.data(),
+                               index_buffer.size() * sizeof(IndexType),
+                               alignof(IndexType));
+    if (!label_.empty()) {
+      view.SetLabel(SPrintF("%s Indices"), label_);
+    }
+    return view;
   }
 
   BufferView CreateIndexBufferView(Allocator& allocator) const {
@@ -93,7 +111,13 @@ class VertexBufferBuilder {
     auto buffer = allocator.CreateBufferWithCopy(
         reinterpret_cast<const uint8_t*>(index_buffer.data()),
         index_buffer.size() * sizeof(IndexType));
-    return buffer ? buffer->AsBufferView() : BufferView{};
+    if (!buffer) {
+      return {};
+    }
+    if (!label_.empty()) {
+      buffer->SetLabel(SPrintF("%s Indices", label_.c_str()));
+    }
+    return buffer->AsBufferView();
   }
 
   size_t GetIndexCount() const { return vertices_.size(); }

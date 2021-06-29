@@ -30,7 +30,7 @@ EntityRenderer::EntityRenderer(std::string shaders_directory)
   }
 
   VertexBufferBuilder<shader::BoxVertexInfo::PerVertexData> vertex_builder;
-
+  vertex_builder.SetLabel("Box");
   vertex_builder.AddVertices({
       {{0, 0, 0.0}, {Color::Red()}},        //
       {{800, 0.0, 0.0}, {Color::Green()}},  //
@@ -39,6 +39,7 @@ EntityRenderer::EntityRenderer(std::string shaders_directory)
 
   vertex_buffer_ =
       vertex_builder.CreateVertexBuffer(*context->GetPermanentsAllocator());
+
   if (!vertex_buffer_) {
     return;
   }
