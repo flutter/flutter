@@ -61,6 +61,12 @@ Context::Context(std::string shaders_directory)
     if (!transients_allocator_) {
       return;
     }
+
+    permanents_allocator_ = std::shared_ptr<Allocator>(
+        new Allocator(device_, "Impeller Permanents Allocator"));
+    if (!permanents_allocator_) {
+      return;
+    }
   }
 
   is_valid_ = true;
@@ -91,6 +97,10 @@ std::shared_ptr<CommandBuffer> Context::CreateRenderCommandBuffer() const {
     return nullptr;
   }
   return buffer;
+}
+
+std::shared_ptr<Allocator> Context::GetPermanentsAllocator() const {
+  return permanents_allocator_;
 }
 
 std::shared_ptr<Allocator> Context::GetTransientsAllocator() const {
