@@ -277,7 +277,9 @@ class FuchsiaDevice extends Device {
   @override
   bool get supportsStartPaused => false;
 
-  bool _isWorkstation = false;
+  String get strippedId => id.split('%').first;
+
+  bool _isSession = false;
 
   @override
   Future<bool> isAppInstalled(
@@ -322,9 +324,9 @@ class FuchsiaDevice extends Device {
     String userIdentifier,
   }) async {
     // Populate isWorkstation first
-    _isWorkstation = await isWorkstation();
+    _isSession = await isSession();
 
-    if (_isWorkstation) {
+    if (_isSession) {
       globals.printTrace('Running on a workstation build.');
     } else {
       globals.printTrace('Running on a non-workstation build.');
@@ -370,7 +372,7 @@ class FuchsiaDevice extends Device {
     FuchsiaPackageServer fuchsiaPackageServer;
     bool serverRegistered = false;
     try {
-      if (_isWorkstation) {
+      if (_isSession) {
         // Prefetch session_control
         if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'session_control')) {
           globals.printError('Failed to get amber to prefetch session_control');
@@ -457,7 +459,7 @@ class FuchsiaDevice extends Device {
         return LaunchResult.failed();
       }
 
-      if (_isWorkstation) {
+      if (_isSession) {
         // Instruct session_control to start the app
         final String fuchsiaUrl =
             'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
@@ -465,6 +467,13 @@ class FuchsiaDevice extends Device {
           globals.printError('Failed to add the app to session_control');
           return LaunchResult.failed();
         }
+
+        // If we try to connect to vm service immediately, a
+        // DartDevelopmentServiceException: WebSocketChannelException on
+        // connection refused will be thrown, so we wait for 5 seconds to allow
+        // ermine to launch our app.
+        // TODO(michaellee8): Use a more robust way to detect if app has launched.
+        await Future.delayed(const Duration(seconds: 10), () {});
       } else {
         // Ensure tiles_ctl is started, and start the app.
         if (!await FuchsiaTilesCtl.ensureStarted(this)) {
@@ -526,7 +535,7 @@ class FuchsiaDevice extends Device {
     covariant FuchsiaApp app, {
     String userIdentifier,
   }) async {
-    if (_isWorkstation) {
+    if (_isSession) {
       // Currently there are no way to close a running app in ermine afaik.
       // so we just restart the launcher to ensure that it is no longer running.
       if (!await fuchsiaDeviceTools.sessionControl.restart(this)) {
@@ -661,7 +670,8 @@ class FuchsiaDevice extends Device {
   bool _ipv6;
 
   /// [true] if the current host address is IPv6.
-  bool get ipv6 => _ipv6 ??= isIPv6Address(id);
+  //  Strip interface name to avoid issues
+  bool get ipv6 => _ipv6 ??= isIPv6Address(strippedId);
 
   /// Return the address that the device should use to communicate with the
   /// host.
@@ -692,7 +702,9 @@ class FuchsiaDevice extends Device {
 
   /// List the ports currently running a dart observatory.
   Future<List<int>> servicePorts() async {
-    const String findCommand = 'find /hub -name vmservice-port';
+    // TODO(michaellee8): It seems that the _server crash won't happen if we
+    // find jit port only
+    const String findCommand = 'find /hub -name vmservice-port -path "*jit*"';
     final RunResult findResult = await shell(findCommand);
     if (findResult.exitCode != 0) {
       throwToolExit(
@@ -731,15 +743,12 @@ class FuchsiaDevice extends Device {
   ///
   /// If the device is running a workstation build, `session_control` should be
   /// used to launch apps, otherwise `tiles_ctl` should be used.
-  Future<bool> isWorkstation() async {
-    final RunResult result = await shell('cat /config/build-info/product');
+  Future<bool> isSession() async {
+    final RunResult result = await shell('which session_control');
     if (result.exitCode != 0) {
       return false;
     }
-    if (result.stdout.contains('workstation')) {
-      return true;
-    }
-    return false;
+    return true;
   }
 
   /// Run `command` on the Fuchsia device shell.
