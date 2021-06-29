@@ -32,7 +32,7 @@ def PrintDivider(char='='):
   print '\n'
 
 
-def RunCmd(cmd, forbidden_output=[], expect_failure=False, **kwargs):
+def RunCmd(cmd, forbidden_output=[], expect_failure=False, env=None, **kwargs):
   command_string = ' '.join(cmd)
 
   PrintDivider('>')
@@ -41,7 +41,7 @@ def RunCmd(cmd, forbidden_output=[], expect_failure=False, **kwargs):
   start_time = time.time()
   stdout_pipe = sys.stdout if not forbidden_output else subprocess.PIPE
   stderr_pipe = sys.stderr if not forbidden_output else subprocess.PIPE
-  process = subprocess.Popen(cmd, stdout=stdout_pipe, stderr=stderr_pipe, **kwargs)
+  process = subprocess.Popen(cmd, stdout=stdout_pipe, stderr=stderr_pipe, env=env, **kwargs)
   stdout, stderr = process.communicate()
   end_time = time.time()
 
@@ -110,12 +110,21 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
     print('Skipping %s due to filter.' % executable_name)
     return
 
-  executable = FindExecutablePath(os.path.join(build_dir, executable_name))
+  unstripped_exe = os.path.join(build_dir, 'exe.unstripped', executable_name)
+  if IsLinux() and os.path.exists(unstripped_exe):
+    # Use unstripped executables in order to get better symbolized crash
+    # stack traces on Linux.
+    executable = unstripped_exe
+    # Some tests depend on the EGL/GLES libraries placed in the build directory.
+    env = {'LD_LIBRARY_PATH': os.path.join(build_dir, 'lib.unstripped')}
+  else:
+    executable = FindExecutablePath(os.path.join(build_dir, executable_name))
+    env = None
 
   print('Running %s in %s' % (executable_name, cwd))
   test_command = [ executable ] + flags
   print(' '.join(test_command))
-  RunCmd(test_command, cwd=cwd, forbidden_output=forbidden_output, expect_failure=expect_failure)
+  RunCmd(test_command, cwd=cwd, forbidden_output=forbidden_output, expect_failure=expect_failure, env=env)
 
 
 def RunCCTests(build_dir, filter):
@@ -185,7 +194,8 @@ def RunCCTests(build_dir, filter):
 
   # https://github.com/flutter/flutter/issues/36296
   if IsLinux():
-    RunEngineExecutable(build_dir, 'txt_unittests', filter, shuffle_flags)
+    icu_flags = ['--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat')]
+    RunEngineExecutable(build_dir, 'txt_unittests', filter, icu_flags + shuffle_flags)
 
   if IsLinux():
     RunEngineExecutable(build_dir, 'flutter_linux_unittests', filter, non_repeatable_shuffle_flags)
@@ -195,14 +205,16 @@ def RunCCTests(build_dir, filter):
 def RunEngineBenchmarks(build_dir, filter):
   print("Running Engine Benchmarks.")
 
-  RunEngineExecutable(build_dir, 'shell_benchmarks', filter)
+  icu_flags = ['--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat')]
 
-  RunEngineExecutable(build_dir, 'fml_benchmarks', filter)
+  RunEngineExecutable(build_dir, 'shell_benchmarks', filter, icu_flags)
 
-  RunEngineExecutable(build_dir, 'ui_benchmarks', filter)
+  RunEngineExecutable(build_dir, 'fml_benchmarks', filter, icu_flags)
+
+  RunEngineExecutable(build_dir, 'ui_benchmarks', filter, icu_flags)
 
   if IsLinux():
-    RunEngineExecutable(build_dir, 'txt_benchmarks', filter)
+    RunEngineExecutable(build_dir, 'txt_benchmarks', filter, icu_flags)
 
 
 def SnapshotTest(build_dir, test_packages, dart_file, kernel_file_output, verbose_dart_snapshot):
@@ -266,7 +278,8 @@ def RunDartTest(build_dir, test_packages, dart_file, verbose_dart_snapshot, mult
 
   command_args += [
     '--use-test-fonts',
-    kernel_file_output
+    '--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat'),
+    kernel_file_output,
   ]
 
   if multithreaded:

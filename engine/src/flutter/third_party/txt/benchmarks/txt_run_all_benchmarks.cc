@@ -32,7 +32,9 @@ int main(int argc, char** argv) {
   }
   FML_DCHECK(txt::GetFontDir().length() > 0);
 
-  fml::icu::InitializeICU("icudtl.dat");
+  std::string icudtl_path =
+      cmd.GetOptionValueWithDefault("icu-data-file-path", "icudtl.dat");
+  fml::icu::InitializeICU(icudtl_path);
 
   ::benchmark::RunSpecifiedBenchmarks();
 }
