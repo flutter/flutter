@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
@@ -22,25 +20,25 @@ import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
-import 'globals.dart' as globals;
+import 'globals_null_migrated.dart' as globals;
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
 
-void _renderTemplateToFile(String template, dynamic context, File file, TemplateRenderer templateRenderer) {
+void _renderTemplateToFile(String template, Object? context, File file, TemplateRenderer templateRenderer) {
   final String renderedTemplate = templateRenderer
     .renderString(template, context, htmlEscapeValues: false);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
 }
 
-Plugin _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies, {FileSystem fileSystem}) {
+Plugin? _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies, {FileSystem? fileSystem}) {
   final FileSystem fs = fileSystem ?? globals.fs;
   final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
   if (!pubspecFile.existsSync()) {
     return null;
   }
-  dynamic pubspec;
+  Object? pubspec;
 
   try {
     pubspec = loadYaml(pubspecFile.readAsStringSync());
@@ -48,20 +46,20 @@ Plugin _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependenc
     globals.printTrace('Failed to parse plugin manifest for $name: $err');
     // Do nothing, potentially not a plugin.
   }
-  if (pubspec == null) {
+  if (pubspec == null || pubspec is! YamlMap) {
     return null;
   }
-  final dynamic flutterConfig = pubspec['flutter'];
-  if (flutterConfig == null || !(flutterConfig.containsKey('plugin') as bool)) {
+  final Object? flutterConfig = pubspec['flutter'];
+  if (flutterConfig == null || flutterConfig is! YamlMap || !flutterConfig.containsKey('plugin')) {
     return null;
   }
   final String packageRootPath = fs.path.fromUri(packageRoot);
-  final YamlMap dependencies = pubspec['dependencies'] as YamlMap;
+  final YamlMap? dependencies = pubspec['dependencies'] as YamlMap?;
   globals.printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(
     name,
     packageRootPath,
-    flutterConfig['plugin'] as YamlMap,
+    flutterConfig['plugin'] as YamlMap?,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
     fileSystem: fs,
     appDependencies: appDependencies,
@@ -82,7 +80,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
   );
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');
-    final Plugin plugin = _pluginFromPackage(
+    final Plugin? plugin = _pluginFromPackage(
       package.name,
       packageRoot,
       project.manifest.dependencies,
@@ -102,15 +100,15 @@ const String _kFlutterPluginsPathKey = 'path';
 const String _kFlutterPluginsDependenciesKey = 'dependencies';
 
 /// Filters [plugins] to those supported by [platformKey].
-List<Map<String, dynamic>> _filterPluginsByPlatform(List<Plugin> plugins, String platformKey) {
+List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String platformKey) {
   final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
     return p.platforms.containsKey(platformKey);
   });
 
   final Set<String> pluginNames = platformPlugins.map((Plugin plugin) => plugin.name).toSet();
-  final List<Map<String, dynamic>> pluginInfo = <Map<String, dynamic>>[];
+  final List<Map<String, Object>> pluginInfo = <Map<String, Object>>[];
   for (final Plugin plugin in platformPlugins) {
-    pluginInfo.add(<String, dynamic>{
+    pluginInfo.add(<String, Object>{
       _kFlutterPluginsNameKey: plugin.name,
       _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
       _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
@@ -179,7 +177,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final String windowsKey = project.windows.pluginConfigKey;
   final String webKey = project.web.pluginConfigKey;
 
-  final Map<String, dynamic> pluginsMap = <String, dynamic>{};
+  final Map<String, Object> pluginsMap = <String, Object>{};
   pluginsMap[iosKey] = _filterPluginsByPlatform(plugins, iosKey);
   pluginsMap[androidKey] = _filterPluginsByPlatform(plugins, androidKey);
   pluginsMap[macosKey] = _filterPluginsByPlatform(plugins, macosKey);
@@ -187,7 +185,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   pluginsMap[windowsKey] = _filterPluginsByPlatform(plugins, windowsKey);
   pluginsMap[webKey] = _filterPluginsByPlatform(plugins, webKey);
 
-  final Map<String, dynamic> result = <String, dynamic> {};
+  final Map<String, Object> result = <String, Object> {};
 
   result['info'] =  'This is a generated file; do not edit or check into version control.';
   result[_kFlutterPluginsPluginListKey] = pluginsMap;
@@ -200,7 +198,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
 
   // Only notify if the plugins list has changed. [date_created] will always be different,
   // [version] is not relevant for this check.
-  final String oldPluginsFileStringContent = _readFileContent(pluginsFile);
+  final String? oldPluginsFileStringContent = _readFileContent(pluginsFile);
   bool pluginsChanged = true;
   if (oldPluginsFileStringContent != null) {
     pluginsChanged = oldPluginsFileStringContent.contains(pluginsMap.toString());
@@ -211,12 +209,12 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   return pluginsChanged;
 }
 
-List<dynamic> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
-  final List<dynamic> directAppDependencies = <dynamic>[];
+List<Object?> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
+  final List<Object> directAppDependencies = <Object>[];
 
   final Set<String> pluginNames = plugins.map((Plugin plugin) => plugin.name).toSet();
   for (final Plugin plugin in plugins) {
-    directAppDependencies.add(<String, dynamic>{
+    directAppDependencies.add(<String, Object>{
       'name': plugin.name,
       // Extract the plugin dependencies which happen to be plugins.
       'dependencies': <String>[...plugin.dependencies.where(pluginNames.contains)],
@@ -245,7 +243,7 @@ bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins
   for (final Plugin plugin in plugins) {
     flutterPluginsBuffer.write('${plugin.name}=${globals.fsUtils.escapePath(plugin.path)}\n');
   }
-  final String oldPluginFileContent = _readFileContent(pluginsFile);
+  final String? oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = flutterPluginsBuffer.toString();
   pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
 
@@ -253,7 +251,7 @@ bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins
 }
 
 /// Returns the contents of [File] or [null] if that file does not exist.
-String _readFileContent(File file) {
+String? _readFileContent(File file) {
   return file.existsSync() ? file.readAsStringSync() : null;
 }
 
@@ -335,10 +333,10 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
-List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String type) {
-  final List<Map<String, dynamic>> pluginConfigs = <Map<String, dynamic>>[];
+List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String type) {
+  final List<Map<String, Object?>> pluginConfigs = <Map<String, Object?>>[];
   for (final Plugin p in plugins) {
-    final PluginPlatform platformPlugin = p.platforms[type];
+    final PluginPlatform? platformPlugin = p.platforms[type];
     if (platformPlugin != null) {
       pluginConfigs.add(platformPlugin.toMap());
     }
@@ -355,10 +353,10 @@ AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> androidPlugins =
+  final List<Map<String, Object?>> androidPlugins =
     _extractPlatformMaps(plugins, AndroidPlugin.kConfigKey);
 
-  final Map<String, dynamic> templateContext = <String, dynamic>{
+  final Map<String, Object> templateContext = <String, Object>{
     'plugins': androidPlugins,
     'androidX': isAppUsingAndroidX(project.android.hostAppGradleRoot),
   };
@@ -382,8 +380,10 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       templateContext['needsShim'] = false;
       // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
       // then add shim for the old plugins.
-      for (final Map<String, dynamic> plugin in androidPlugins) {
-        if (plugin['supportsEmbeddingV1'] as bool && !(plugin['supportsEmbeddingV2'] as bool)) {
+      for (final Map<String, Object?> plugin in androidPlugins) {
+        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) == true;
+        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) == true;
+        if (supportsEmbeddingV1 && !supportsEmbeddingV2) {
           templateContext['needsShim'] = true;
           if (project.isModule) {
             globals.printStatus(
@@ -401,8 +401,10 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       break;
     case AndroidEmbeddingVersion.v1:
     default:
-      for (final Map<String, dynamic> plugin in androidPlugins) {
-        if (!(plugin['supportsEmbeddingV1'] as bool) && plugin['supportsEmbeddingV2'] as bool) {
+      for (final Map<String, Object?> plugin in androidPlugins) {
+        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) == true;
+        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) == true;
+        if (!supportsEmbeddingV1 && supportsEmbeddingV2) {
           throwToolExit(
             'The plugin `${plugin['name']}` requires your app to be migrated to '
             'the Android embedding v2. Follow the steps on https://flutter.dev/go/android-project-migration '
@@ -711,8 +713,8 @@ void main(List<String> args) {
 ''';
 
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> iosPlugins = _extractPlatformMaps(plugins, IOSPlugin.kConfigKey);
-  final Map<String, dynamic> context = <String, dynamic>{
+  final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(plugins, IOSPlugin.kConfigKey);
+  final Map<String, Object> context = <String, Object>{
     'os': 'ios',
     'deploymentTarget': '9.0',
     'framework': 'Flutter',
@@ -761,8 +763,8 @@ String _cmakeRelativePluginSymlinkDirectoryPath(CmakeBasedProject project) {
 
 Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins) async {
   final List<Plugin>nativePlugins = _filterNativePlugins(plugins, LinuxPlugin.kConfigKey);
-  final List<Map<String, dynamic>> linuxPlugins = _extractPlatformMaps(nativePlugins, LinuxPlugin.kConfigKey);
-  final Map<String, dynamic> context = <String, dynamic>{
+  final List<Map<String, Object?>> linuxPlugins = _extractPlatformMaps(nativePlugins, LinuxPlugin.kConfigKey);
+  final Map<String, Object> context = <String, Object>{
     'os': 'linux',
     'plugins': linuxPlugins,
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.linux),
@@ -771,7 +773,7 @@ Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins
   await _writePluginCmakefile(project.linux.generatedPluginCmakeFile, context, globals.templateRenderer);
 }
 
-Future<void> _writeLinuxPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
+Future<void> _writeLinuxPluginRegistrant(Directory destination, Map<String, Object> templateContext) async {
   _renderTemplateToFile(
     _linuxPluginRegistryHeaderTemplate,
     templateContext,
@@ -786,7 +788,7 @@ Future<void> _writeLinuxPluginRegistrant(Directory destination, Map<String, dyna
   );
 }
 
-Future<void> _writePluginCmakefile(File destinationFile, Map<String, dynamic> templateContext, TemplateRenderer templateRenderer) async {
+Future<void> _writePluginCmakefile(File destinationFile, Map<String, Object> templateContext, TemplateRenderer templateRenderer) async {
   _renderTemplateToFile(
     _pluginCmakefileTemplate,
     templateContext,
@@ -797,8 +799,8 @@ Future<void> _writePluginCmakefile(File destinationFile, Map<String, dynamic> te
 
 Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Plugin>nativePlugins = _filterNativePlugins(plugins, MacOSPlugin.kConfigKey);
-  final List<Map<String, dynamic>> macosPlugins = _extractPlatformMaps(nativePlugins, MacOSPlugin.kConfigKey);
-  final Map<String, dynamic> context = <String, dynamic>{
+  final List<Map<String, Object?>> macosPlugins = _extractPlatformMaps(nativePlugins, MacOSPlugin.kConfigKey);
+  final Map<String, Object> context = <String, Object>{
     'os': 'macos',
     'framework': 'FlutterMacOS',
     'plugins': macosPlugins,
@@ -814,7 +816,7 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
 /// Filters out Dart-only plugins, which shouldn't be added to the native generated registrants.
 List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
   return plugins.where((Plugin element) {
-    final PluginPlatform plugin = element.platforms[platformKey];
+    final PluginPlatform? plugin = element.platforms[platformKey];
     if (plugin == null) {
       return false;
     }
@@ -830,7 +832,7 @@ List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
 /// Returns only the plugins with the given platform variant.
 List<Plugin> _filterPluginsByVariant(List<Plugin> plugins, String platformKey, PluginPlatformVariant variant) {
   return plugins.where((Plugin element) {
-    final PluginPlatform platformPlugin = element.platforms[platformKey];
+    final PluginPlatform? platformPlugin = element.platforms[platformKey];
     if (platformPlugin == null) {
       return false;
     }
@@ -844,8 +846,8 @@ List<Plugin> _filterPluginsByVariant(List<Plugin> plugins, String platformKey, P
 Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
   final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
   final List<Plugin> win32Plugins = _filterPluginsByVariant(nativePlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.win32);
-  final List<Map<String, dynamic>> pluginInfo = _extractPlatformMaps(win32Plugins, WindowsPlugin.kConfigKey);
-  final Map<String, dynamic> context = <String, dynamic>{
+  final List<Map<String, Object?>> pluginInfo = _extractPlatformMaps(win32Plugins, WindowsPlugin.kConfigKey);
+  final Map<String, Object> context = <String, Object>{
     'os': 'windows',
     'plugins': pluginInfo,
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windows),
@@ -860,8 +862,8 @@ Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugin
 Future<void> writeWindowsUwpPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
   final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
   final List<Plugin> uwpPlugins = _filterPluginsByVariant(nativePlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.winuwp);
-  final List<Map<String, dynamic>> pluginInfo = _extractPlatformMaps(uwpPlugins, WindowsPlugin.kConfigKey);
-  final Map<String, dynamic> context = <String, dynamic>{
+  final List<Map<String, Object?>> pluginInfo = _extractPlatformMaps(uwpPlugins, WindowsPlugin.kConfigKey);
+  final Map<String, Object> context = <String, Object>{
     'os': 'windows',
     'plugins': pluginInfo,
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windowsUwp),
@@ -870,7 +872,7 @@ Future<void> writeWindowsUwpPluginFiles(FlutterProject project, List<Plugin> plu
   await _writePluginCmakefile(project.windowsUwp.generatedPluginCmakeFile, context, templateRenderer);
 }
 
-Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext, TemplateRenderer templateRenderer) async {
+Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, Object> templateContext, TemplateRenderer templateRenderer) async {
   _renderTemplateToFile(
     _cppPluginRegistryHeaderTemplate,
     templateContext,
@@ -886,13 +888,13 @@ Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynami
 }
 
 Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
-  final Map<String, dynamic> context = <String, dynamic>{
+  final List<Map<String, Object?>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
+  final Map<String, Object> context = <String, Object>{
     'plugins': webPlugins,
   };
   final File pluginFile = project.web.libDirectory.childFile('generated_plugin_registrant.dart');
   if (webPlugins.isEmpty) {
-    return ErrorHandlingFileSystem.deleteIfExists(pluginFile);
+    ErrorHandlingFileSystem.deleteIfExists(pluginFile);
   } else {
     _renderTemplateToFile(
       _dartPluginRegistryTemplate,
@@ -911,34 +913,34 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 ///
 /// This uses [project.flutterPluginsDependenciesFile], so it should only be
 /// run after refreshPluginList has been run since the last plugin change.
-void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleForTesting FeatureFlags featureFlagsOverride}) {
+void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleForTesting FeatureFlags? featureFlagsOverride}) {
   final FeatureFlags localFeatureFlags = featureFlagsOverride ?? featureFlags;
-  Map<String, dynamic> platformPlugins;
-  final String pluginFileContent = _readFileContent(project.flutterPluginsDependenciesFile);
+  Map<String, Object?>? platformPlugins;
+  final String? pluginFileContent = _readFileContent(project.flutterPluginsDependenciesFile);
   if (pluginFileContent != null) {
-    final Map<String, dynamic> pluginInfo = json.decode(pluginFileContent) as Map<String, dynamic>;
-    platformPlugins = pluginInfo[_kFlutterPluginsPluginListKey] as Map<String, dynamic>;
+    final Map<String, Object?>? pluginInfo = json.decode(pluginFileContent) as Map<String, Object?>?;
+    platformPlugins = pluginInfo?[_kFlutterPluginsPluginListKey] as Map<String, Object?>?;
   }
-  platformPlugins ??= <String, dynamic>{};
+  platformPlugins ??= <String, Object?>{};
 
   if (localFeatureFlags.isWindowsEnabled && project.windows.existsSync()) {
     _createPlatformPluginSymlinks(
       project.windows.pluginSymlinkDirectory,
-      platformPlugins[project.windows.pluginConfigKey] as List<dynamic>,
+      platformPlugins[project.windows.pluginConfigKey] as List<Object?>?,
       force: force,
     );
   }
   if (localFeatureFlags.isLinuxEnabled && project.linux.existsSync()) {
     _createPlatformPluginSymlinks(
       project.linux.pluginSymlinkDirectory,
-      platformPlugins[project.linux.pluginConfigKey] as List<dynamic>,
+      platformPlugins[project.linux.pluginConfigKey] as List<Object?>?,
       force: force,
     );
   }
   if (localFeatureFlags.isWindowsUwpEnabled && project.windowsUwp.existsSync()) {
     _createPlatformPluginSymlinks(
       project.windowsUwp.pluginSymlinkDirectory,
-      platformPlugins[project.windows.pluginConfigKey] as List<dynamic>,
+      platformPlugins[project.windows.pluginConfigKey] as List<Object?>?,
       force: force,
     );
   }
@@ -948,12 +950,12 @@ void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleF
 /// failure cases.
 @visibleForTesting
 void handleSymlinkException(FileSystemException e, {
-  @required Platform platform,
-  @required OperatingSystemUtils os,
+  required Platform platform,
+  required OperatingSystemUtils os,
 }) {
   if (platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
-    final String versionString = RegExp(r'[\d.]+').firstMatch(os.name)?.group(0);
-    final Version version = Version.parse(versionString);
+    final String? versionString = RegExp(r'[\d.]+').firstMatch(os.name)?.group(0);
+    final Version? version = Version.parse(versionString);
     // Windows 10 14972 is the oldest version that allows creating symlinks
     // just by enabling developer mode; before that it requires running the
     // terminal as Administrator.
@@ -970,7 +972,7 @@ void handleSymlinkException(FileSystemException e, {
 /// Creates [symlinkDirectory] containing symlinks to each plugin listed in [platformPlugins].
 ///
 /// If [force] is true, the directory will be created only if missing.
-void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<dynamic> platformPlugins, {bool force = false}) {
+void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<Object?>? platformPlugins, {bool force = false}) {
   if (force && symlinkDirectory.existsSync()) {
     // Start fresh to avoid stale links.
     symlinkDirectory.deleteSync(recursive: true);
@@ -979,9 +981,9 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<dynamic> pla
   if (platformPlugins == null) {
     return;
   }
-  for (final Map<String, dynamic> pluginInfo in platformPlugins.cast<Map<String, dynamic>>()) {
-    final String name = pluginInfo[_kFlutterPluginsNameKey] as String;
-    final String path = pluginInfo[_kFlutterPluginsPathKey] as String;
+  for (final Map<String, Object?> pluginInfo in platformPlugins.cast<Map<String, Object?>>()) {
+    final String name = pluginInfo[_kFlutterPluginsNameKey]! as String;
+    final String path = pluginInfo[_kFlutterPluginsPathKey]! as String;
     final Link link = symlinkDirectory.childLink(name);
     if (link.existsSync()) {
       continue;
@@ -1015,10 +1017,10 @@ Future<void> refreshPluginsList(
   if (changed || legacyChanged) {
     createPluginSymlinks(project, force: true);
     if (iosPlatform) {
-      globals.cocoaPods.invalidatePodInstallOutput(project.ios);
+      globals.cocoaPods?.invalidatePodInstallOutput(project.ios);
     }
     if (macOSPlatform) {
-      globals.cocoaPods.invalidatePodInstallOutput(project.macos);
+      globals.cocoaPods?.invalidatePodInstallOutput(project.macos);
     }
   }
 }
@@ -1064,12 +1066,12 @@ Future<void> injectPlugins(
     ];
     for (final XcodeBasedProject subproject in darwinProjects) {
       if (plugins.isNotEmpty) {
-        await globals.cocoaPods.setupPodfile(subproject);
+        await globals.cocoaPods?.setupPodfile(subproject);
       }
       /// The user may have a custom maintained Podfile that they're running `pod install`
       /// on themselves.
       else if (subproject.podfile.existsSync() && subproject.podfileLock.existsSync()) {
-        globals.cocoaPods.addPodsDependencyToFlutterXcconfig(subproject);
+        globals.cocoaPods?.addPodsDependencyToFlutterXcconfig(subproject);
       }
     }
   }
@@ -1119,9 +1121,9 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         continue;
       }
       // The plugin doesn't implement an interface, verify that it has a default implementation.
-      final String implementsPackage = plugin.implementsPackage;
+      final String? implementsPackage = plugin.implementsPackage;
       if (implementsPackage == null || implementsPackage.isEmpty) {
-        final String defaultImplementation = plugin.defaultPackagePlatforms[platform];
+        final String? defaultImplementation = plugin.defaultPackagePlatforms[platform];
         if (defaultImplementation == null) {
           if (throwOnPluginPubspecError) {
             globals.printError(
@@ -1153,7 +1155,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       }
       final String resolutionKey = '$platform/$implementsPackage';
       if (directDependencyResolutions.containsKey(resolutionKey)) {
-        final PluginInterfaceResolution currResolution = directDependencyResolutions[resolutionKey];
+        final PluginInterfaceResolution? currResolution = directDependencyResolutions[resolutionKey];
         if (currResolution != null && currResolution.plugin.isDirectDependency) {
           if (plugin.isDirectDependency) {
             if (throwOnPluginPubspecError) {
@@ -1223,14 +1225,14 @@ Future<void> generateMainDartWithPluginRegistrant(
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
     packageConfig.packageOf(mainFile.absolute.uri),
-    Cache.flutterRoot,
+    Cache.flutterRoot!,
   );
-  final Map<String, dynamic> templateContext = <String, dynamic>{
+  final Map<String, Object> templateContext = <String, Object>{
     'mainEntrypoint': currentMainUri,
     'dartLanguageVersion': entrypointVersion.toString(),
-    LinuxPlugin.kConfigKey: <dynamic>[],
-    MacOSPlugin.kConfigKey: <dynamic>[],
-    WindowsPlugin.kConfigKey: <dynamic>[],
+    LinuxPlugin.kConfigKey: <Object?>[],
+    MacOSPlugin.kConfigKey: <Object?>[],
+    WindowsPlugin.kConfigKey: <Object?>[],
   };
   if (resolutions.isEmpty) {
     try {
@@ -1248,7 +1250,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   }
   for (final PluginInterfaceResolution resolution in resolutions) {
     assert(templateContext.containsKey(resolution.platform));
-    (templateContext[resolution.platform] as List<dynamic>).add(resolution.toMap());
+    (templateContext[resolution.platform] as List<Object?>?)?.add(resolution.toMap());
   }
   try {
     _renderTemplateToFile(

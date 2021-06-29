@@ -149,6 +149,60 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/82910
+  testWidgets('null value test', (WidgetTester tester) async {
+    int? value = 1;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            onChanged: (int? newValue) {
+              value = newValue;
+            },
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: null,
+                child: Text('None'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, 1);
+    final Offset nonEmptyLabel = tester.getTopLeft(find.text('labelText'));
+
+    // Switch to `null` value item from value 1.
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('None').last);
+    await tester.pump();
+
+    expect(value, null);
+    final Offset nullValueLabel = tester.getTopLeft(find.text('labelText'));
+    // The position of the label does not change.
+    expect(nonEmptyLabel, nullValueLabel);
+  });
+
   testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String? value = 'one';
     int _validateCalled = 0;

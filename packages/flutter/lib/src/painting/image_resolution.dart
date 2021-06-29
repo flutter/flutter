@@ -153,8 +153,9 @@ const double _kLowDprLimit = 2.0;
 ///   @override
 ///   void didUpdateWidget(MyImage oldWidget) {
 ///     super.didUpdateWidget(oldWidget);
-///     if (widget.assetImage != oldWidget.assetImage)
+///     if (widget.assetImage != oldWidget.assetImage) {
 ///       _getImage();
+///     }
 ///   }
 ///
 ///   void _getImage() {

@@ -275,17 +275,20 @@ class PhysicalKeyEntry {
 
   /// Populates the key from a JSON map.
   factory PhysicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map) {
+    final Map<String, dynamic> names = map['names'] as Map<String, dynamic>;
+    final Map<String, dynamic> scanCodes = map['scanCodes'] as Map<String, dynamic>;
+    final Map<String, dynamic>? keyCodes = map['keyCodes'] as Map<String, dynamic>?;
     return PhysicalKeyEntry(
-      name: map['names']['name'] as String,
-      chromiumCode: map['names']['chromium'] as String?,
-      usbHidCode: map['scanCodes']['usb'] as int,
-      androidScanCodes: (map['scanCodes']['android'] as List<dynamic>?)?.cast<int>() ?? <int>[],
-      linuxScanCode: map['scanCodes']['linux'] as int?,
-      xKbScanCode: map['scanCodes']['xkb'] as int?,
-      windowsScanCode: map['scanCodes']['windows'] as int?,
-      macOSScanCode: map['scanCodes']['macos'] as int?,
-      iOSScanCode: map['scanCodes']['ios'] as int?,
-      glfwKeyCodes: (map['keyCodes']?['glfw'] as List<dynamic>?)?.cast<int>() ?? <int>[],
+      name: names['name'] as String,
+      chromiumCode: names['chromium'] as String?,
+      usbHidCode: scanCodes['usb'] as int,
+      androidScanCodes: (scanCodes['android'] as List<dynamic>?)?.cast<int>() ?? <int>[],
+      linuxScanCode: scanCodes['linux'] as int?,
+      xKbScanCode: scanCodes['xkb'] as int?,
+      windowsScanCode: scanCodes['windows'] as int?,
+      macOSScanCode: scanCodes['macos'] as int?,
+      iOSScanCode: scanCodes['ios'] as int?,
+      glfwKeyCodes: (keyCodes?['glfw'] as List<dynamic>?)?.cast<int>() ?? <int>[],
     );
   }
 

@@ -7,6 +7,7 @@
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../bundle_builder.dart';
 import '../features.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../project.dart';

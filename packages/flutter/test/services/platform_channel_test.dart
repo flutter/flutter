@@ -128,16 +128,15 @@ void main() {
           ]);
         },
       );
-      try {
-        await channel.invokeMethod<dynamic>('sayHello', 'hello');
-        fail('Exception expected');
-      } on PlatformException catch (e) {
-        expect(e.code, equals('bad'));
-        expect(e.message, equals('Something happened'));
-        expect(e.details, equals(<String, dynamic>{'a': 42, 'b': 3.14}));
-      } catch (e) {
-        fail('PlatformException expected');
-      }
+      expect(
+        () => channel.invokeMethod<dynamic>('sayHello', 'hello'),
+        throwsA(
+          isA<PlatformException>()
+            .having((PlatformException e) => e.code, 'code', equals('bad'))
+            .having((PlatformException e) => e.message, 'message', equals('Something happened'))
+            .having((PlatformException e) => e.details, 'details', equals(<String, dynamic>{'a': 42, 'b': 3.14})),
+        ),
+      );
     });
 
     test('can invoke unimplemented method', () async {
@@ -145,15 +144,16 @@ void main() {
         'ch7',
         (ByteData? message) async => null,
       );
-      try {
-        await channel.invokeMethod<void>('sayHello', 'hello');
-        fail('Exception expected');
-      } on MissingPluginException catch (e) {
-        expect(e.message, contains('sayHello'));
-        expect(e.message, contains('ch7'));
-      } catch (e) {
-        fail('MissingPluginException expected');
-      }
+      expect(
+        () => channel.invokeMethod<void>('sayHello', 'hello'),
+        throwsA(
+          isA<MissingPluginException>()
+            .having((MissingPluginException e) => e.message, 'message', allOf(
+              contains('sayHello'),
+              contains('ch7'),
+            )),
+        ),
+      );
     });
 
     test('can invoke unimplemented method (optional)', () async {
@@ -218,15 +218,14 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (ByteData? result) {
         envelope = result;
       });
-      try {
-        jsonMethod.decodeEnvelope(envelope!);
-        fail('Exception expected');
-      } on PlatformException catch (e) {
-        expect(e.code, equals('bad'));
-        expect(e.message, equals('sayHello failed'));
-      } catch (e) {
-        fail('PlatformException expected');
-      }
+      expect(
+        () => jsonMethod.decodeEnvelope(envelope!),
+        throwsA(
+          isA<PlatformException>()
+            .having((PlatformException e) => e.code, 'code', equals('bad'))
+            .having((PlatformException e) => e.message, 'message', equals('sayHello failed')),
+        ),
+      );
     });
 
     test('can handle method call with other error result', () async {
@@ -238,15 +237,14 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (ByteData? result) {
         envelope = result;
       });
-      try {
-        jsonMethod.decodeEnvelope(envelope!);
-        fail('Exception expected');
-      } on PlatformException catch (e) {
-        expect(e.code, equals('error'));
-        expect(e.message, equals('Invalid argument(s): bad'));
-      } catch (e) {
-        fail('PlatformException expected');
-      }
+      expect(
+        () => jsonMethod.decodeEnvelope(envelope!),
+        throwsA(
+          isA<PlatformException>()
+            .having((PlatformException e) => e.code, 'code', equals('error'))
+            .having((PlatformException e) => e.message, 'message', equals('Invalid argument(s): bad')),
+        ),
+      );
     });
 
     test('can check the mock handler', () async {

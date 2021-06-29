@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
@@ -33,11 +29,11 @@ String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
 /// targetOverride: Optional parameter, if null or unspecified the default value
 /// from xcode_backend.sh is used 'lib/main.dart'.
 Future<void> updateGeneratedXcodeProperties({
-  @required FlutterProject project,
-  @required BuildInfo buildInfo,
-  String targetOverride,
+  required FlutterProject project,
+  required BuildInfo buildInfo,
+  String? targetOverride,
   bool useMacOSConfig = false,
-  String buildDirOverride,
+  String? buildDirOverride,
 }) async {
   final List<String> xcodeBuildSettings = _xcodeBuildSettingsLines(
     project: project,
@@ -64,8 +60,8 @@ Future<void> updateGeneratedXcodeProperties({
 /// for Xcode targets that need them.
 /// See [XcodeBasedProject.generatedXcodePropertiesFile].
 void _updateGeneratedXcodePropertiesFile({
-  @required FlutterProject project,
-  @required List<String> xcodeBuildSettings,
+  required FlutterProject project,
+  required List<String> xcodeBuildSettings,
   bool useMacOSConfig = false,
 }) {
   final StringBuffer localsBuffer = StringBuffer();
@@ -84,8 +80,8 @@ void _updateGeneratedXcodePropertiesFile({
 /// as flags for Flutter tools.
 /// See [XcodeBasedProject.generatedEnvironmentVariableExportScript].
 void _updateGeneratedEnvironmentVariablesScript({
-  @required FlutterProject project,
-  @required List<String> xcodeBuildSettings,
+  required FlutterProject project,
+  required List<String> xcodeBuildSettings,
   bool useMacOSConfig = false,
 }) {
   final StringBuffer localsBuffer = StringBuffer();
@@ -107,21 +103,21 @@ void _updateGeneratedEnvironmentVariablesScript({
 }
 
 /// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.
-String parsedBuildName({
-  @required FlutterManifest manifest,
-  BuildInfo buildInfo,
+String? parsedBuildName({
+  required FlutterManifest manifest,
+  BuildInfo? buildInfo,
 }) {
-  final String buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
+  final String? buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
   return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
 }
 
 /// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
-String parsedBuildNumber({
-  @required FlutterManifest manifest,
-  BuildInfo buildInfo,
+String? parsedBuildNumber({
+  required FlutterManifest manifest,
+  BuildInfo? buildInfo,
 }) {
-  String buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
-  final String buildNumber = validatedBuildNumberForPlatform(
+  String? buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
+  final String? buildNumber = validatedBuildNumberForPlatform(
     TargetPlatform.ios,
     buildNumberToParse,
     globals.logger,
@@ -141,15 +137,15 @@ String parsedBuildNumber({
 
 /// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'
 List<String> _xcodeBuildSettingsLines({
-  @required FlutterProject project,
-  @required BuildInfo buildInfo,
-  String targetOverride,
+  required FlutterProject project,
+  required BuildInfo buildInfo,
+  String? targetOverride,
   bool useMacOSConfig = false,
-  String buildDirOverride,
+  String? buildDirOverride,
 }) {
   final List<String> xcodeBuildSettings = <String>[];
 
-  final String flutterRoot = globals.fs.path.normalize(Cache.flutterRoot);
+  final String flutterRoot = globals.fs.path.normalize(Cache.flutterRoot!);
   xcodeBuildSettings.add('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
@@ -173,7 +169,7 @@ List<String> _xcodeBuildSettingsLines({
   final String buildNumber = parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
-  final Artifacts artifacts = globals.artifacts;
+  final Artifacts? artifacts = globals.artifacts;
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;

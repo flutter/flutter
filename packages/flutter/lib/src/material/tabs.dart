@@ -70,6 +70,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     this.text,
     this.icon,
     this.iconMargin = const EdgeInsets.only(bottom: 10.0),
+    this.height,
     this.child,
   }) : assert(text != null || child != null || icon != null),
        assert(text == null || child == null),
@@ -96,6 +97,13 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   /// [text] or [child] is non-null.
   final EdgeInsetsGeometry iconMargin;
 
+  /// The height of the [Tab].
+  ///
+  /// If null, the height will be calculated based on the content of the [Tab].  When `icon` is not
+  /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the
+  /// height is 46.0 pixels.
+  final double? height;
+
   Widget _buildLabelText() {
     return child ?? Text(text!, softWrap: false, overflow: TextOverflow.fade);
   }
@@ -104,16 +112,16 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
 
-    final double height;
+    final double calculatedHeight;
     final Widget label;
     if (icon == null) {
-      height = _kTabHeight;
+      calculatedHeight = _kTabHeight;
       label = _buildLabelText();
     } else if (text == null && child == null) {
-      height = _kTabHeight;
+      calculatedHeight = _kTabHeight;
       label = icon!;
     } else {
-      height = _kTextAndIconTabHeight;
+      calculatedHeight = _kTextAndIconTabHeight;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -128,7 +136,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     }
 
     return SizedBox(
-      height: height,
+      height: height ?? calculatedHeight,
       child: Center(
         widthFactor: 1.0,
         child: label,
@@ -145,7 +153,9 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
 
   @override
   Size get preferredSize {
-    if ((text != null || child != null) && icon != null)
+    if (height != null)
+      return Size.fromHeight(height!);
+    else if ((text != null || child != null) && icon != null)
       return const Size.fromHeight(_kTextAndIconTabHeight);
     else
       return const Size.fromHeight(_kTabHeight);

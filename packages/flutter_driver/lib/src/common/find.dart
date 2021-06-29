@@ -248,7 +248,7 @@ class ByValueKey extends SerializableFinder {
 
 /// A Flutter Driver finder that finds widgets by their [runtimeType].
 class ByType extends SerializableFinder {
-  /// Creates a finder that given the runtime type in string form.
+  /// Creates a finder given the runtime type in string form.
   const ByType(this.type);
 
   /// The widget's [runtimeType], in string form.

@@ -110,29 +110,36 @@ abstract class DeviceManager {
 
     // Some discoverers have hard-coded device IDs and return quickly, and others
     // shell out to other processes and can take longer.
+    // If an ID was specified, first check if it was a "well-known" device id.
+    final Set<String> wellKnownIds = _platformDiscoverers
+      .expand((DeviceDiscovery discovery) => discovery.wellKnownIds)
+      .toSet();
+    final bool hasWellKnownId = hasSpecifiedDeviceId && wellKnownIds.contains(specifiedDeviceId);
+
     // Process discoverers as they can return results, so if an exact match is
     // found quickly, we don't wait for all the discoverers to complete.
     final List<Device> prefixMatches = <Device>[];
     final Completer<Device> exactMatchCompleter = Completer<Device>();
     final List<Future<List<Device>>> futureDevices = <Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
-        discoverer
-        .devices
-        .then((List<Device> devices) {
-          for (final Device device in devices) {
-            if (exactlyMatchesDeviceId(device)) {
-              exactMatchCompleter.complete(device);
-              return null;
+        if (!hasWellKnownId || discoverer.wellKnownIds.contains(specifiedDeviceId))
+          discoverer
+          .devices
+          .then((List<Device> devices) {
+            for (final Device device in devices) {
+              if (exactlyMatchesDeviceId(device)) {
+                exactMatchCompleter.complete(device);
+                return null;
+              }
+              if (startsWithDeviceId(device)) {
+                prefixMatches.add(device);
+              }
             }
-            if (startsWithDeviceId(device)) {
-              prefixMatches.add(device);
-            }
-          }
-          return null;
-        }, onError: (dynamic error, StackTrace stackTrace) {
-          // Return matches from other discoverers even if one fails.
-          _logger.printTrace('Ignored error discovering $deviceId: $error');
-        })
+            return null;
+          }, onError: (dynamic error, StackTrace stackTrace) {
+            // Return matches from other discoverers even if one fails.
+            _logger.printTrace('Ignored error discovering $deviceId: $error');
+          })
     ];
 
     // Wait for an exact match, or for all discoverers to return results.
@@ -336,6 +343,15 @@ abstract class DeviceDiscovery {
   /// Gets a list of diagnostic messages pertaining to issues with any connected
   /// devices (will be an empty list if there are no issues).
   Future<List<String>> getDiagnostics() => Future<List<String>>.value(<String>[]);
+
+  /// Hard-coded device IDs that the discoverer can produce.
+  ///
+  /// These values are used by the device discovery to determine if it can
+  /// short-circuit the other detectors if a specific ID is provided. If a
+  /// discoverer has no valid fixed IDs, these should be left empty.
+  ///
+  /// For example, 'windows' or 'linux'.
+  List<String> get wellKnownIds;
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds

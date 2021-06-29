@@ -48,9 +48,6 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
 
   @override
-  bool get isExperimentalInvalidationStrategyEnabled => isEnabled(experimentalInvalidationStrategy);
-
-  @override
   bool get isWindowsUwpEnabled => isEnabled(windowsUwpEmbedding);
 
   @override

@@ -287,7 +287,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The primary widget displayed in the app bar.
   ///
   /// Becomes the middle component of the [NavigationToolbar] built by this widget.
-  //.
+  ///
   /// Typically a [Text] widget that contains a description of the current
   /// contents of the app.
   /// {@endtemplate}
@@ -762,7 +762,9 @@ class _AppBarState extends State<AppBar> {
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification) {
       final bool oldScrolledUnder = _scrolledUnder;
-      _scrolledUnder = notification.depth == 0 && notification.metrics.extentBefore > 0;
+      _scrolledUnder = notification.depth == 0
+          && notification.metrics.extentBefore > 0
+          && notification.metrics.axis == Axis.vertical;
       if (_scrolledUnder != oldScrolledUnder) {
         setState(() {
           // React to a change in MaterialState.scrolledUnder
@@ -1353,52 +1355,58 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///       ],
 ///     ),
 ///     bottomNavigationBar: BottomAppBar(
-///       child: ButtonBar(
-///         alignment: MainAxisAlignment.spaceEvenly,
-///         children: <Widget>[
-///           Row(
-///             children: <Widget>[
-///               const Text('pinned'),
-///               Switch(
-///                 onChanged: (bool val) {
-///                   setState(() {
-///                     _pinned = val;
-///                   });
-///                 },
-///                 value: _pinned,
-///               ),
-///             ],
-///           ),
-///           Row(
-///             children: <Widget>[
-///               const Text('snap'),
-///               Switch(
-///                 onChanged: (bool val) {
-///                   setState(() {
-///                     _snap = val;
-///                     // Snapping only applies when the app bar is floating.
-///                     _floating = _floating || _snap;
-///                   });
-///                 },
-///                 value: _snap,
-///               ),
-///             ],
-///           ),
-///           Row(
-///             children: <Widget>[
-///               const Text('floating'),
-///               Switch(
-///                 onChanged: (bool val) {
-///                   setState(() {
-///                     _floating = val;
-///                     _snap = _snap && _floating;
-///                   });
-///                 },
-///                 value: _floating,
-///               ),
-///             ],
-///           ),
-///         ],
+///       child: Padding(
+///         padding: const EdgeInsets.all(8),
+///         child: OverflowBar(
+///           alignment: MainAxisAlignment.spaceEvenly,
+///           children: <Widget>[
+///             Row(
+///               mainAxisSize: MainAxisSize.min,
+///               children: <Widget>[
+///                 const Text('pinned'),
+///                 Switch(
+///                   onChanged: (bool val) {
+///                     setState(() {
+///                       _pinned = val;
+///                     });
+///                   },
+///                   value: _pinned,
+///                 ),
+///               ],
+///             ),
+///             Row(
+///               mainAxisSize: MainAxisSize.min,
+///               children: <Widget>[
+///                 const Text('snap'),
+///                 Switch(
+///                   onChanged: (bool val) {
+///                     setState(() {
+///                       _snap = val;
+///                       // Snapping only applies when the app bar is floating.
+///                       _floating = _floating || _snap;
+///                     });
+///                   },
+///                   value: _snap,
+///                 ),
+///               ],
+///             ),
+///             Row(
+///               mainAxisSize: MainAxisSize.min,
+///               children: <Widget>[
+///                 const Text('floating'),
+///                 Switch(
+///                   onChanged: (bool val) {
+///                     setState(() {
+///                       _floating = val;
+///                       _snap = _snap && _floating;
+///                     });
+///                   },
+///                   value: _floating,
+///                 ),
+///               ],
+///             ),
+///           ],
+///         ),
 ///       ),
 ///     ),
 ///   );
