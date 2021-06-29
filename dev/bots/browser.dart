@@ -53,7 +53,7 @@ Future<String> evalTestAppInChrome({
     return await resultCompleter.future;
   } finally {
     chrome?.stop();
-    await server?.close();
+    await server.close();
   }
 }
 
@@ -107,6 +107,6 @@ class AppServer {
 
   Future<void> stop() async {
     chrome?.stop();
-    await _server?.close();
+    await _server.close();
   }
 }

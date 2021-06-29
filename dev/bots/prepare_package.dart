@@ -33,7 +33,7 @@ class PreparePackageException implements Exception {
 
   final String message;
   final ProcessResult result;
-  int get exitCode => result?.exitCode ?? -1;
+  int get exitCode => result.exitCode;
 
   @override
   String toString() {
@@ -41,7 +41,7 @@ class PreparePackageException implements Exception {
     if (message != null) {
       output += ': $message';
     }
-    final String stderr = result?.stderr as String ?? '';
+    final String stderr = result.stderr as String;
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';
     }
@@ -118,7 +118,6 @@ class ProcessRunner {
     Directory workingDirectory,
     bool failOk = false,
   }) async {
-    workingDirectory ??= defaultWorkingDirectory ?? Directory.current;
     if (subprocessOutput) {
       stderr.write('Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
     }
@@ -203,7 +202,6 @@ class ArchiveCreator {
     HttpReader httpReader,
   })  : assert(revision.length == 40),
         flutterRoot = Directory(path.join(tempDir.path, 'flutter')),
-        httpReader = httpReader ?? http.readBytes,
         _processRunner = ProcessRunner(
           processManager: processManager,
           subprocessOutput: subprocessOutput,
@@ -449,21 +447,20 @@ class ArchiveCreator {
   Future<String> _runFlutter(List<String> args, {Directory workingDirectory}) {
     return _processRunner.runProcess(
       <String>[_flutter, ...args],
-      workingDirectory: workingDirectory ?? flutterRoot,
+      workingDirectory: workingDirectory,
     );
   }
 
   Future<String> _runGit(List<String> args, {Directory workingDirectory}) {
     return _processRunner.runProcess(
       <String>['git', ...args],
-      workingDirectory: workingDirectory ?? flutterRoot,
+      workingDirectory: workingDirectory,
     );
   }
 
   /// Unpacks the given zip file into the currentDirectory (if set), or the
   /// same directory as the archive.
   Future<String> _unzipArchive(File archive, {Directory workingDirectory}) {
-    workingDirectory ??= Directory(path.dirname(archive.absolute.path));
     List<String> commandLine;
     if (platform.isWindows) {
       commandLine = <String>[

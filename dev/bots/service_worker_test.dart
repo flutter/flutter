@@ -279,6 +279,6 @@ Future<void> runWebServiceWorkerTest({
     reportedVersion = null;
   } finally {
     await _setAppVersion(1);
-    await server?.stop();
+    await server.stop();
   }
 }

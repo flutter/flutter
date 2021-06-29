@@ -166,7 +166,7 @@ void _fallbackToManual(String error) {
     final html.Element button = html.document.querySelector('#$benchmarkName');
     button.addEventListener('click', (_) {
       final html.Element manualPanel = html.document.querySelector('#manual-panel');
-      manualPanel?.remove();
+      manualPanel.remove();
       _runBenchmark(benchmarkName);
     });
   }
@@ -415,7 +415,6 @@ class LocalBenchmarkServerClient {
     final Completer<html.HttpRequest> completer = Completer<html.HttpRequest>();
     final html.HttpRequest xhr = html.HttpRequest();
 
-    method ??= 'GET';
     xhr.open(method, url, async: true);
 
     if (withCredentials != null) {

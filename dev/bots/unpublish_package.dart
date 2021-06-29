@@ -33,7 +33,7 @@ class UnpublishException implements Exception {
 
   final String message;
   final ProcessResult result;
-  int get exitCode => result?.exitCode ?? -1;
+  int get exitCode => result.exitCode;
 
   @override
   String toString() {
@@ -41,7 +41,7 @@ class UnpublishException implements Exception {
     if (message != null) {
       output += ': $message';
     }
-    final String stderr = result?.stderr as String ?? '';
+    final String stderr = result.stderr as String;
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';
     }
@@ -151,7 +151,6 @@ class ProcessRunner {
     Directory workingDirectory,
     bool failOk = false,
   }) async {
-    workingDirectory ??= defaultWorkingDirectory ?? Directory.current;
     if (subprocessOutput) {
       stderr.write('Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
     }

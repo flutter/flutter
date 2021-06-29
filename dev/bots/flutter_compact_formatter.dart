@@ -104,9 +104,9 @@ class FlutterCompactFormatter {
         _tests[testData['id'] as int] = TestResult(
           id: testData['id'] as int,
           name: testData['name'] as String,
-          line: testData['root_line'] as int ?? testData['line'] as int,
-          column: testData['root_column'] as int ?? testData['column'] as int,
-          path: testData['root_url'] as String ?? testData['url'] as String,
+          line: testData['root_line'] as int,
+          column: testData['root_column'] as int,
+          path: testData['root_url'] as String,
           startTime: decoded['time'] as int,
         );
         break;
@@ -263,7 +263,7 @@ class TestResult {
   int endTime;
 
   /// The total time, in milliseconds, that the test took.
-  int get totalTime => (endTime ?? _stopwatch.elapsedMilliseconds) - startTime;
+  int get totalTime => endTime - startTime;
 
   @override
   String toString() => '{$runtimeType: {$id, $name, ${totalTime}ms, $pathLineColumn}}';
