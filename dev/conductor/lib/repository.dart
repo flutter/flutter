@@ -361,17 +361,27 @@ abstract class Repository {
     String remote,
     String branch, {
     bool force = false,
+    bool dryRun = false,
   }) {
-    git.run(
-      <String>[
-        'push',
-        if (force) '--force',
-        remote,
-        '$commit:$branch',
-      ],
-      'update the release branch with the commit',
-      workingDirectory: checkoutDirectory.path,
-    );
+    final List<String> args = <String>[
+      'push',
+      if (force) '--force',
+      remote,
+      '$commit:$branch',
+    ];
+    if (dryRun) {
+      final String command = <String>[
+        'git',
+        ...args,
+      ].join(' ');
+      stdio.printStatus('About to execute command: `$command`');
+    } else {
+      git.run(
+        args,
+        'update the release branch with the commit',
+        workingDirectory: checkoutDirectory.path,
+      );
+    }
   }
 
   String commit(
@@ -623,6 +633,7 @@ class HostFrameworkRepository extends FrameworkRepository {
     String remote,
     String branch, {
     bool force = false,
+    bool dryRun = false,
   }) {
     throw ConductorException('updateChannel not implemented for the host repository');
   }

@@ -216,7 +216,7 @@ void runNext({
       final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {
         final bool response = prompt(
-          'Has CI passed for the framework PR?',
+          'Has CI passed for the framework PR?', // TODO tell user what is about to happen
           stdio,
         );
         if (!response) {
@@ -225,7 +225,7 @@ void runNext({
           return;
         }
       }
-      framework.tag(headRevision, state.releaseVersion, upstream.name);
+      framework.tag(headRevision, state.releaseVersion, upstream.name); // TODO use literal upstream, rather than name
       break;
     case pb.ReleasePhase.PUBLISH_CHANNEL:
       final Remote upstream = Remote(
@@ -241,7 +241,7 @@ void runNext({
       final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {
         final bool response = prompt(
-            'Are you ready to publish release ${state.releaseVersion} to '
+            'Are you ready to publish release ${state.releaseVersion} to ' // TODO print headRevision
             'channel ${state.releaseChannel} at ${state.framework.upstream.url}?',
           stdio,
         );
@@ -251,12 +251,14 @@ void runNext({
           return;
         }
       }
+      // TODO catch exception and give helpful message about branch protection
       framework.updateChannel(
         headRevision,
         state.framework.upstream.url,
         state.releaseChannel,
         force: force,
       );
+      // TODO this doesn't log what it did
       break;
     case pb.ReleasePhase.VERIFY_RELEASE:
       stdio.printStatus(
@@ -273,7 +275,7 @@ void runNext({
           writeStateToFile(stateFile, state, stdio.logs);
           return;
         }
-      }
+      } // TODO let internal rollers know to increment y if this was beta
       break;
     case pb.ReleasePhase.RELEASE_COMPLETED:
       throw ConductorException('This release is finished.');

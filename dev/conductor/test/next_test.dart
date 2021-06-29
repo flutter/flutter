@@ -72,193 +72,196 @@ void main() {
       );
     });
 
-    test('does not prompt user and updates state.currentPhase from APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES if there are no engine cherrypicks', () async {
-      final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[],
-      );
-      final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-        },
-        operatingSystem: localOperatingSystem,
-        pathSeparator: localPathSeparator,
-      );
-      final pb.ConductorState state = pb.ConductorState(
-        currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
-      );
-      writeStateToFile(
-        fileSystem.file(stateFile),
-        state,
-        <String>[],
-      );
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-      await runner.run(<String>[
-        'next',
-        '--$kStateOption',
-        stateFile,
-      ]);
+    group('APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES', () {
+      test('does not prompt user and updates currentPhase if there are no engine cherrypicks', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(
+          <FakeCommand>[],
+        );
+        final FakePlatform platform = FakePlatform(
+          environment: <String, String>{
+            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+          },
+          operatingSystem: localOperatingSystem,
+          pathSeparator: localPathSeparator,
+        );
+        final pb.ConductorState state = pb.ConductorState(
+          currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
+        );
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        await runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
 
-      final pb.ConductorState finalState = readStateFromFile(
-        fileSystem.file(stateFile),
-      );
+        final pb.ConductorState finalState = readStateFromFile(
+          fileSystem.file(stateFile),
+        );
 
-      expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
-      expect(stdio.error, isEmpty);
+        expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
+        expect(stdio.error, isEmpty);
+      });
+
+      test('updates lastPhase if user responds yes', () async {
+        const String remoteUrl = 'https://githost.com/org/repo.git';
+        stdio.stdin.add('y');
+        final FakeProcessManager processManager = FakeProcessManager.list(
+          <FakeCommand>[],
+        );
+        final FakePlatform platform = FakePlatform(
+          environment: <String, String>{
+            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+          },
+          operatingSystem: localOperatingSystem,
+          pathSeparator: localPathSeparator,
+        );
+        final pb.ConductorState state = pb.ConductorState(
+          engine: pb.Repository(
+            cherrypicks: <pb.Cherrypick>[
+              pb.Cherrypick(
+                trunkRevision: 'abc123',
+                state: pb.CherrypickState.PENDING,
+              ),
+            ],
+            mirror: pb.Remote(url: remoteUrl),
+          ),
+          currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
+        );
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        await runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
+
+        final pb.ConductorState finalState = readStateFromFile(
+          fileSystem.file(stateFile),
+        );
+
+        expect(stdio.stdout, contains(
+                'Are you ready to push your engine branch to the repository $remoteUrl? (y/n) '));
+        expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
+        expect(stdio.error, isEmpty);
+      });
     });
 
+    group('CODESIGN_ENGINE_BINARIES to APPLY_FRAMEWORK_CHERRYPICKS', () {
+      test('does not update state.currentPhase from CODESIGN_ENGINE_BINARIES if user responds no', () async {
+        stdio.stdin.add('n');
+        final FakeProcessManager processManager = FakeProcessManager.list(
+          <FakeCommand>[],
+        );
+        final FakePlatform platform = FakePlatform(
+          environment: <String, String>{
+            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+          },
+          operatingSystem: localOperatingSystem,
+          pathSeparator: localPathSeparator,
+        );
+        final pb.ConductorState state = pb.ConductorState(
+          engine: pb.Repository(
+            cherrypicks: <pb.Cherrypick>[
+              pb.Cherrypick(
+                trunkRevision: 'abc123',
+                state: pb.CherrypickState.PENDING,
+              ),
+            ],
+          ),
+          currentPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
+        );
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        await runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
 
-    test('updates state.lastPhase from APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES if user responds yes', () async {
-      const String remoteUrl = 'https://githost.com/org/repo.git';
-      stdio.stdin.add('y');
-      final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[],
-      );
-      final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-        },
-        operatingSystem: localOperatingSystem,
-        pathSeparator: localPathSeparator,
-      );
-      final pb.ConductorState state = pb.ConductorState(
-        engine: pb.Repository(
-          cherrypicks: <pb.Cherrypick>[
-            pb.Cherrypick(
-              trunkRevision: 'abc123',
-              state: pb.CherrypickState.PENDING,
-            ),
-          ],
-          mirror: pb.Remote(url: remoteUrl),
-        ),
-        currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
-      );
-      writeStateToFile(
-        fileSystem.file(stateFile),
-        state,
-        <String>[],
-      );
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-      await runner.run(<String>[
-        'next',
-        '--$kStateOption',
-        stateFile,
-      ]);
+        final pb.ConductorState finalState = readStateFromFile(
+          fileSystem.file(stateFile),
+        );
 
-      final pb.ConductorState finalState = readStateFromFile(
-        fileSystem.file(stateFile),
-      );
+        expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
+        expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
+        expect(stdio.error.contains('Aborting command.'), true);
+      });
 
-      expect(stdio.stdout, contains(
-              'Are you ready to push your engine branch to the repository $remoteUrl? (y/n) '));
-      expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
-      expect(stdio.error, isEmpty);
-    });
+      test('updates state.currentPhase from CODESIGN_ENGINE_BINARIES to APPLY_FRAMEWORK_CHERRYPICKS if user responds yes', () async {
+        stdio.stdin.add('y');
+        final FakeProcessManager processManager = FakeProcessManager.list(
+          <FakeCommand>[],
+        );
+        final FakePlatform platform = FakePlatform(
+          environment: <String, String>{
+            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+          },
+          operatingSystem: localOperatingSystem,
+          pathSeparator: localPathSeparator,
+        );
+        final pb.ConductorState state = pb.ConductorState(
+          currentPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
+        );
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        await runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
 
-    test('does not update state.currentPhase from CODESIGN_ENGINE_BINARIES if user responds no', () async {
-      stdio.stdin.add('n');
-      final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[],
-      );
-      final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-        },
-        operatingSystem: localOperatingSystem,
-        pathSeparator: localPathSeparator,
-      );
-      final pb.ConductorState state = pb.ConductorState(
-        engine: pb.Repository(
-          cherrypicks: <pb.Cherrypick>[
-            pb.Cherrypick(
-              trunkRevision: 'abc123',
-              state: pb.CherrypickState.PENDING,
-            ),
-          ],
-        ),
-        currentPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
-      );
-      writeStateToFile(
-        fileSystem.file(stateFile),
-        state,
-        <String>[],
-      );
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-      await runner.run(<String>[
-        'next',
-        '--$kStateOption',
-        stateFile,
-      ]);
+        final pb.ConductorState finalState = readStateFromFile(
+          fileSystem.file(stateFile),
+        );
 
-      final pb.ConductorState finalState = readStateFromFile(
-        fileSystem.file(stateFile),
-      );
-
-      expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
-      expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
-      expect(stdio.error.contains('Aborting command.'), true);
-    });
-
-    test('updates state.currentPhase from CODESIGN_ENGINE_BINARIES to APPLY_FRAMEWORK_CHERRYPICKS if user responds yes', () async {
-      stdio.stdin.add('y');
-      final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[],
-      );
-      final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-        },
-        operatingSystem: localOperatingSystem,
-        pathSeparator: localPathSeparator,
-      );
-      final pb.ConductorState state = pb.ConductorState(
-        currentPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
-      );
-      writeStateToFile(
-        fileSystem.file(stateFile),
-        state,
-        <String>[],
-      );
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-      await runner.run(<String>[
-        'next',
-        '--$kStateOption',
-        stateFile,
-      ]);
-
-      final pb.ConductorState finalState = readStateFromFile(
-        fileSystem.file(stateFile),
-      );
-
-      expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
-      expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
+        expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
+        expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
+      });
     });
 
     test('does not prompt user and updates state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION if there are no framework cherrypicks', () async {
