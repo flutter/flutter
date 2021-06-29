@@ -34,8 +34,8 @@ import io.flutter.plugin.platform.PlatformPlugin;
  * <ol>
  *   <li>{@link #onPostResume()}
  *   <li>{@link #onBackPressed()}
- *   <li>{@link #onRequestPermissionsResult(int, String[], int[])} ()}
- *   <li>{@link #onNewIntent(Intent)} ()}
+ *   <li>{@link #onRequestPermissionsResult(int, String[], int[])}
+ *   <li>{@link #onNewIntent(Intent)}
  *   <li>{@link #onUserLeaveHint()}
  * </ol>
  *
