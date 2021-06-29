@@ -925,18 +925,18 @@ class SkImageFilterNamespace {
     double sigmaX,
     double sigmaY,
     SkTileMode tileMode,
-    Null input, // we don't use this yet
+    void input, // we don't use this yet
   );
 
   external SkImageFilter MakeMatrixTransform(
     Float32List matrix, // 3x3 matrix
     SkFilterQuality filterQuality,
-    Null input, // we don't use this yet
+    void input, // we don't use this yet
   );
 
   external SkImageFilter MakeColorFilter(
     SkColorFilter colorFilter,
-    Null input, // we don't use this yet
+    void input, // we don't use this yet
   );
 
   external SkImageFilter MakeCompose(
