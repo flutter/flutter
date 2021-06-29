@@ -1819,6 +1819,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return moveSelectionLeftByLine(cause);
     }
 
+    // If the previous character is the edge of a line, don't do anything.
+    final int previousPoint = previousCharacter(selection!.extentOffset, _plainText, true);
+    final TextSelection line = _getLineAtOffset(TextPosition(offset: previousPoint));
+    if (line.extentOffset == previousPoint) {
+      return;
+    }
+
     final int firstOffset = math.min(selection!.baseOffset, selection!.extentOffset);
     final int startPoint = previousCharacter(firstOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
@@ -1937,6 +1944,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
     if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
+    }
+
+    // If already at the right edge of the line, do nothing.
+    final TextSelection currentLine = _getLineAtOffset(TextPosition(
+      offset: selection!.extentOffset,
+    ));
+    if (currentLine.extentOffset == selection!.extentOffset) {
+      return;
     }
 
     final int lastOffset = math.max(selection!.baseOffset, selection!.extentOffset);
