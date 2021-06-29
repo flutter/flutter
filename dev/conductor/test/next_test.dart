@@ -170,19 +170,12 @@ void main() {
     });
 
     group('CODESIGN_ENGINE_BINARIES to APPLY_FRAMEWORK_CHERRYPICKS', () {
-      test('does not update state.currentPhase from CODESIGN_ENGINE_BINARIES if user responds no', () async {
-        stdio.stdin.add('n');
-        final FakeProcessManager processManager = FakeProcessManager.list(
-          <FakeCommand>[],
-        );
-        final FakePlatform platform = FakePlatform(
-          environment: <String, String>{
-            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-          },
-          operatingSystem: localOperatingSystem,
-          pathSeparator: localPathSeparator,
-        );
-        final pb.ConductorState state = pb.ConductorState(
+      pb.ConductorState state;
+      FakeProcessManager processManager;
+      FakePlatform platform;
+
+      setUp(() {
+        state = pb.ConductorState(
           engine: pb.Repository(
             cherrypicks: <pb.Cherrypick>[
               pb.Cherrypick(
@@ -193,6 +186,20 @@ void main() {
           ),
           currentPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
         );
+
+        processManager = FakeProcessManager.empty();
+
+        platform = FakePlatform(
+          environment: <String, String>{
+            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+          },
+          operatingSystem: localOperatingSystem,
+          pathSeparator: localPathSeparator,
+        );
+      });
+
+      test('does not update currentPhase if user responds no', () async {
+        stdio.stdin.add('n');
         writeStateToFile(
           fileSystem.file(stateFile),
           state,
@@ -221,20 +228,14 @@ void main() {
         expect(stdio.error.contains('Aborting command.'), true);
       });
 
-      test('updates state.currentPhase from CODESIGN_ENGINE_BINARIES to APPLY_FRAMEWORK_CHERRYPICKS if user responds yes', () async {
+      test('updates currentPhase if user responds yes', () async {
         stdio.stdin.add('y');
-        final FakeProcessManager processManager = FakeProcessManager.list(
-          <FakeCommand>[],
-        );
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
             'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
           },
           operatingSystem: localOperatingSystem,
           pathSeparator: localPathSeparator,
-        );
-        final pb.ConductorState state = pb.ConductorState(
-          currentPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
         );
         writeStateToFile(
           fileSystem.file(stateFile),
@@ -264,159 +265,197 @@ void main() {
       });
     });
 
-    test('does not prompt user and updates state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION if there are no framework cherrypicks', () async {
-      final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[],
-      );
-      final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-        },
-        operatingSystem: localOperatingSystem,
-        pathSeparator: localPathSeparator,
-      );
-      final pb.ConductorState state = pb.ConductorState(
-        currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
-      );
-      writeStateToFile(
-        fileSystem.file(stateFile),
-        state,
-        <String>[],
-      );
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-      await runner.run(<String>[
-        'next',
-        '--$kStateOption',
-        stateFile,
-      ]);
-
-      final pb.ConductorState finalState = readStateFromFile(
-        fileSystem.file(stateFile),
-      );
-
-      expect(stdio.stdout, isNot(contains('Did you apply all framework cherrypicks? (y/n) ')));
-      expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
-      expect(stdio.error, isEmpty);
-    });
-
-    test('does not update state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS if user responds no', () async {
+    group('APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION', () {
       const String remoteUrl = 'https://githost.com/org/repo.git';
-      stdio.stdin.add('n');
-      final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[],
-      );
-      final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-        },
-        operatingSystem: localOperatingSystem,
-        pathSeparator: localPathSeparator,
-      );
-      final pb.ConductorState state = pb.ConductorState(
-        framework: pb.Repository(
-          cherrypicks: <pb.Cherrypick>[
-            pb.Cherrypick(
-              trunkRevision: 'abc123',
-              state: pb.CherrypickState.PENDING,
-            ),
-          ],
-          mirror: pb.Remote(url: remoteUrl),
-        ),
-        currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
-      );
-      writeStateToFile(
-        fileSystem.file(stateFile),
-        state,
-        <String>[],
-      );
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-      await runner.run(<String>[
-        'next',
-        '--$kStateOption',
-        stateFile,
-      ]);
+      FakeProcessManager processManager;
+      FakePlatform platform;
+      pb.ConductorState state;
 
-      final pb.ConductorState finalState = readStateFromFile(
-        fileSystem.file(stateFile),
-      );
+      setUp(() {
+        processManager = FakeProcessManager.empty();
+        platform = FakePlatform(
+          environment: <String, String>{
+            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+          },
+          operatingSystem: localOperatingSystem,
+          pathSeparator: localPathSeparator,
+        );
+        state = pb.ConductorState(
+          framework: pb.Repository(
+            cherrypicks: <pb.Cherrypick>[
+              pb.Cherrypick(
+                trunkRevision: 'abc123',
+                state: pb.CherrypickState.PENDING,
+              ),
+            ],
+            mirror: pb.Remote(url: remoteUrl),
+          ),
+          currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
+        );
+      });
 
-      expect(stdio.stdout, contains('Are you ready to push your framework branch to the repository $remoteUrl? (y/n) '));
-      expect(stdio.error, contains('Aborting command.'));
-      expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
+      test('does not prompt user and updates state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION if there are no framework cherrypicks', () async {
+        final pb.ConductorState state = pb.ConductorState(
+          currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
+        );
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        await runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
+
+        final pb.ConductorState finalState = readStateFromFile(
+          fileSystem.file(stateFile),
+        );
+
+        expect(stdio.stdout, isNot(contains('Did you apply all framework cherrypicks? (y/n) ')));
+        expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
+        expect(stdio.error, isEmpty);
+      });
+
+      test('does not update state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS if user responds no', () async {
+        stdio.stdin.add('n');
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        await runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
+
+        final pb.ConductorState finalState = readStateFromFile(
+          fileSystem.file(stateFile),
+        );
+
+        expect(stdio.stdout, contains('Are you ready to push your framework branch to the repository $remoteUrl? (y/n) '));
+        expect(stdio.error, contains('Aborting command.'));
+        expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
+      });
+
+      test('updates state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION if user responds yes', () async {
+        stdio.stdin.add('y');
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        await runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
+
+        final pb.ConductorState finalState = readStateFromFile(
+          fileSystem.file(stateFile),
+        );
+
+        expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
+        expect(stdio.stdout, contains('Are you ready to push your framework branch to the repository $remoteUrl? (y/n)'));
+      });
     });
 
-    test('updates state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION if user responds yes', () async {
-      const String remoteUrl = 'https://githost.com/org/repo.git';
-      stdio.stdin.add('y');
-      final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[],
-      );
-      final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-        },
-        operatingSystem: localOperatingSystem,
-        pathSeparator: localPathSeparator,
-      );
-      final pb.ConductorState state = pb.ConductorState(
-        framework: pb.Repository(
-          cherrypicks: <pb.Cherrypick>[
-            pb.Cherrypick(
-              trunkRevision: 'abc123',
-              state: pb.CherrypickState.PENDING,
-            ),
-          ],
-          mirror: pb.Remote(url: remoteUrl),
-        ),
-        currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
-      );
-      writeStateToFile(
-        fileSystem.file(stateFile),
-        state,
-        <String>[],
-      );
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-      await runner.run(<String>[
-        'next',
-        '--$kStateOption',
-        stateFile,
-      ]);
-
-      final pb.ConductorState finalState = readStateFromFile(
-        fileSystem.file(stateFile),
-      );
-
-      expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
-      expect(stdio.stdout, contains('Are you ready to push your framework branch to the repository $remoteUrl? (y/n)'));
-    });
-
-
-    test('does not update state.currentPhase from PUBLISH_VERSION if user responds no', () async {
+    group('PUBLISH_VERSION to PUBLISH_CHANNEL', () {
       const String remoteName = 'upstream';
-      stdio.stdin.add('n');
-      final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[
+      const String releaseVersion = '1.2.0-3.0.pre';
+      pb.ConductorState state;
+      FakePlatform platform;
+
+      setUp(() {
+        state = pb.ConductorState(
+          currentPhase: ReleasePhase.PUBLISH_VERSION,
+          framework: pb.Repository(
+            candidateBranch: candidateBranch,
+            upstream: pb.Remote(url: FrameworkRepository.defaultUpstream),
+          ),
+          releaseVersion: releaseVersion,
+        );
+        platform = FakePlatform(
+          environment: <String, String>{
+            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+          },
+          operatingSystem: localOperatingSystem,
+          pathSeparator: localPathSeparator,
+        );
+      });
+
+      test('does not update state.currentPhase if user responds no', () async {
+        stdio.stdin.add('n');
+        final FakeProcessManager processManager = FakeProcessManager.list(
+          <FakeCommand>[
+            const FakeCommand(
+              command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+            ),
+            const FakeCommand(
+              command: <String>['git', 'rev-parse', 'HEAD'],
+              stdout: revision1,
+            ),
+          ],
+        );
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        await runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
+
+        final pb.ConductorState finalState = readStateFromFile(
+          fileSystem.file(stateFile),
+        );
+
+        expect(stdio.stdout, contains('Has CI passed for the framework PR?'));
+        expect(stdio.error, contains('Aborting command.'));
+        expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
+        expect(finalState.logs, stdio.logs);
+        expect(processManager.hasRemainingExpectations, false);
+      });
+
+      test('updates state.currentPhase if user responds yes', () async {
+        stdio.stdin.add('y');
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
           ),
@@ -424,113 +463,48 @@ void main() {
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
-        ],
-      );
-      final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-        },
-        operatingSystem: localOperatingSystem,
-        pathSeparator: localPathSeparator,
-      );
-      final pb.ConductorState state = pb.ConductorState(
-        currentPhase: ReleasePhase.PUBLISH_VERSION,
-        framework: pb.Repository(
-          candidateBranch: candidateBranch,
-          upstream: pb.Remote(url: FrameworkRepository.defaultUpstream),
-        ),
-      );
-      writeStateToFile(
-        fileSystem.file(stateFile),
-        state,
-        <String>[],
-      );
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-      await runner.run(<String>[
-        'next',
-        '--$kStateOption',
-        stateFile,
-      ]);
+          const FakeCommand(
+            command: <String>['git', 'tag', releaseVersion, revision1],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'push', remoteName, releaseVersion],
+          ),
+        ]);
+        final FakePlatform platform = FakePlatform(
+          environment: <String, String>{
+            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+          },
+          operatingSystem: localOperatingSystem,
+          pathSeparator: localPathSeparator,
+        );
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        await runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
 
-      final pb.ConductorState finalState = readStateFromFile(
-        fileSystem.file(stateFile),
-      );
+        final pb.ConductorState finalState = readStateFromFile(
+          fileSystem.file(stateFile),
+        );
 
-      expect(stdio.stdout, contains('Has CI passed for the framework PR?'));
-      expect(stdio.error, contains('Aborting command.'));
-      expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
-      expect(finalState.logs, stdio.logs);
-      expect(processManager.hasRemainingExpectations, false);
-    });
-
-    test('updates state.currentPhase from PUBLISH_VERSION to PUBLISH_CHANNEL if user responds yes', () async {
-      const String remoteName = 'upstream';
-      const String releaseVersion = '1.2.0-3.0.pre';
-      stdio.stdin.add('y');
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'rev-parse', 'HEAD'],
-          stdout: revision1,
-        ),
-        const FakeCommand(
-          command: <String>['git', 'tag', releaseVersion, revision1],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'push', remoteName, releaseVersion],
-        ),
-      ]);
-      final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-        },
-        operatingSystem: localOperatingSystem,
-        pathSeparator: localPathSeparator,
-      );
-      final pb.ConductorState state = pb.ConductorState(
-        currentPhase: ReleasePhase.PUBLISH_VERSION,
-        framework: pb.Repository(
-          candidateBranch: candidateBranch,
-          upstream: pb.Remote(url: FrameworkRepository.defaultUpstream),
-        ),
-        releaseVersion: releaseVersion,
-      );
-      writeStateToFile(
-        fileSystem.file(stateFile),
-        state,
-        <String>[],
-      );
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-      await runner.run(<String>[
-        'next',
-        '--$kStateOption',
-        stateFile,
-      ]);
-
-      final pb.ConductorState finalState = readStateFromFile(
-        fileSystem.file(stateFile),
-      );
-
-      expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
-      expect(stdio.stdout, contains('Has CI passed for the framework PR?'));
-      expect(finalState.logs, stdio.logs);
-      expect(processManager.hasRemainingExpectations, false);
+        expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
+        expect(stdio.stdout, contains('Has CI passed for the framework PR?'));
+        expect(finalState.logs, stdio.logs);
+        expect(processManager.hasRemainingExpectations, false);
+      });
     });
 
     test('throws exception if state.currentPhase is RELEASE_COMPLETED', () async {
