@@ -46,7 +46,7 @@ compiled_action("generate_snapshot_bin") {
   ]
 
   args = [
-    "--enable-experiment=non-nullable",
+    "--sound-null-safety",
     "--snapshot_kind=core",
     "--enable_mirrors=false",
     "--vm_snapshot_data=" + rebase_path(vm_snapshot_data),
