@@ -475,8 +475,9 @@ void testMain() {
 
     test('Should be able to construct from empty path', () {
       final SurfacePath path = SurfacePath();
-      final SurfacePath? path2 = SurfacePath.from(path);
-      expect(path2, isNotNull);
+      expect(path.isEmpty, isTrue);
+      final SurfacePath path2 = SurfacePath.from(path);
+      expect(path2.isEmpty, isTrue);
     });
   });
 

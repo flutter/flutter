@@ -1,91 +1,101 @@
-# This is copy of the root analysis_options.yaml. As we clean up the Web code,
-# we'll be uncommenting rules and gradually fix the code. When all rules are
-# uncommented, we'll delete this file and simply inherit the root options.
+# Web-specific analysis options.
+#
+# As of today the web code contains quite a few deviations from the repo-wide
+# analysis options due to having been migrated from google3. The ultimate goal
+# is to clean up our code and delete this file.
+
+include: ../../analysis_options.yaml
 
 analyzer:
-  exclude:
-    - build/**
-  enable-experiment:
-    - non-nullable
   strong-mode:
-    # TODO(uncomment) implicit-casts: false
-    implicit-dynamic: false
-  errors:
-    missing_required_param: warning
-    missing_return: warning
-    native_function_body_in_non_sdk_code: ignore
-    todo: ignore
+    implicit-casts: true
+    implicit-dynamic: true
 
 linter:
   rules:
-    - always_declare_return_types
-    - always_put_control_body_on_new_line
-    # TODO(uncomment) - always_specify_types
-    # TODO(uncomment) - annotate_overrides
-    # TODO(uncomment) - avoid_classes_with_only_static_members
-    # TODO(uncomment) - avoid_empty_else
-    # TODO(uncomment) - avoid_function_literals_in_foreach_calls
-    # TODO(uncomment) - avoid_init_to_null
-    # TODO(uncomment) - avoid_null_checks_in_equality_operators
-    # TODO(uncomment) - avoid_relative_lib_imports
-    # TODO(uncomment) - avoid_renaming_method_parameters
-    # TODO(uncomment) - avoid_return_types_on_setters
-    # TODO(uncomment) - avoid_slow_async_io
-    # TODO(uncomment) - await_only_futures
-    # TODO(uncomment) - camel_case_types
-    # TODO(uncomment) - cancel_subscriptions
-    # TODO(uncomment) - control_flow_in_finally
-    # TODO(uncomment) - directives_ordering
-    # TODO(uncomment) - empty_catches
-    # TODO(uncomment) - empty_constructor_bodies
-    # TODO(uncomment) - empty_statements
-    # TODO(uncomment) - hash_and_equals
-    # TODO(uncomment) - implementation_imports
-    # TODO(uncomment) - iterable_contains_unrelated_type
-    # TODO(uncomment) - library_names
-    # TODO(uncomment) - library_prefixes
-    # TODO(uncomment) - list_remove_unrelated_type
-    # TODO(uncomment) - no_adjacent_strings_in_list
-    # TODO(uncomment) - no_duplicate_case_values
-    # TODO(uncomment) - non_constant_identifier_names
-    # TODO(uncomment) - overridden_fields
-    # TODO(uncomment) - package_api_docs
-    # TODO(uncomment) - package_names
-    # TODO(uncomment) - package_prefixed_library_names
-    # TODO(uncomment) - prefer_adjacent_string_concatenation
-    # TODO(uncomment) - prefer_asserts_in_initializer_lists
-    # TODO(uncomment) - prefer_collection_literals
-    # TODO(uncomment) - prefer_conditional_assignment
-    # TODO(uncomment) - prefer_const_constructors
-    # TODO(uncomment) - prefer_const_constructors_in_immutables
-    # TODO(uncomment) - prefer_const_declarations
-    # TODO(uncomment) - prefer_const_literals_to_create_immutables
-    # TODO(uncomment) - prefer_contains
-    # TODO(uncomment) - prefer_equal_for_default_values
-    # TODO(uncomment) - prefer_final_locals
-    # TODO(uncomment) - prefer_foreach
-    # TODO(uncomment) - prefer_generic_function_type_aliases
-    # TODO(uncomment) - prefer_initializing_formals
-    # TODO(uncomment) - prefer_is_empty
-    # TODO(uncomment) - prefer_is_not_empty
-    # TODO(uncomment) - prefer_single_quotes
-    # TODO(uncomment) - prefer_typing_uninitialized_variables
-    # TODO(uncomment) - public_member_api_docs
-    # TODO(uncomment) - recursive_getters
-    # TODO(uncomment) - slash_for_doc_comments
-    # TODO(uncomment) - sort_unnamed_constructors_first
-    # TODO(uncomment) - test_types_in_equals
-    # TODO(uncomment) - throw_in_finally
-    # TODO(uncomment) - type_init_formals
-    # TODO(uncomment) - unnecessary_brace_in_string_interps
-    # TODO(uncomment) - unnecessary_const
-    # TODO(uncomment) - unnecessary_getters_setters
-    # TODO(uncomment) - unnecessary_new
-    # TODO(uncomment) - unnecessary_null_aware_assignments
-    # TODO(uncomment) - unnecessary_null_in_if_null_operators
-    # TODO(uncomment) - unnecessary_overrides
-    # TODO(uncomment) - unnecessary_parenthesis
-    # TODO(uncomment) - unnecessary_this
-    # TODO(uncomment) - unrelated_type_equality_checks
-    # TODO(uncomment) - use_rethrow_when_possible
-    # TODO(uncomment) - valid_regexps
+    always_declare_return_types: true
+    always_put_control_body_on_new_line: true
+    always_specify_types: false
+    annotate_overrides: false
+    avoid_classes_with_only_static_members: false
+    avoid_empty_else: false
+    avoid_function_literals_in_foreach_calls: false
+    avoid_init_to_null: false
+    avoid_null_checks_in_equality_operators: false
+    avoid_relative_lib_imports: false
+    avoid_renaming_method_parameters: false
+    avoid_return_types_on_setters: false
+    avoid_slow_async_io: false
+    await_only_futures: false
+    camel_case_types: false
+    cancel_subscriptions: false
+    control_flow_in_finally: false
+    directives_ordering: false
+    empty_catches: false
+    empty_constructor_bodies: false
+    empty_statements: false
+    hash_and_equals: false
+    implementation_imports: false
+    iterable_contains_unrelated_type: false
+    library_names: false
+    library_prefixes: false
+    list_remove_unrelated_type: false
+    no_adjacent_strings_in_list: false
+    no_duplicate_case_values: false
+    non_constant_identifier_names: false
+    overridden_fields: false
+    package_api_docs: false
+    package_names: false
+    package_prefixed_library_names: false
+    prefer_adjacent_string_concatenation: false
+    prefer_asserts_in_initializer_lists: false
+    prefer_collection_literals: false
+    prefer_conditional_assignment: false
+    prefer_const_constructors: false
+    prefer_const_constructors_in_immutables: false
+    prefer_const_declarations: false
+    prefer_const_literals_to_create_immutables: false
+    prefer_contains: false
+    prefer_equal_for_default_values: false
+    prefer_final_locals: false
+    prefer_foreach: false
+    prefer_generic_function_type_aliases: false
+    prefer_initializing_formals: false
+    prefer_is_empty: false
+    prefer_is_not_empty: false
+    prefer_single_quotes: false
+    prefer_typing_uninitialized_variables: false
+    public_member_api_docs: false
+    recursive_getters: false
+    slash_for_doc_comments: false
+    sort_unnamed_constructors_first: false
+    test_types_in_equals: false
+    throw_in_finally: false
+    type_init_formals: false
+    unnecessary_brace_in_string_interps: false
+    unnecessary_const: false
+    unnecessary_getters_setters: false
+    unnecessary_new: false
+    unnecessary_null_aware_assignments: false
+    unnecessary_null_in_if_null_operators: false
+    unnecessary_overrides: false
+    unnecessary_parenthesis: false
+    unnecessary_this: false
+    unrelated_type_equality_checks: false
+    use_rethrow_when_possible: false
+    valid_regexps: false
+    use_function_type_syntax_for_parameters: false
+    prefer_final_in_for_each: false
+    avoid_single_cascade_in_expression_statements: false
+    unnecessary_string_interpolations: false
+    unnecessary_string_escapes: false
+    cast_nullable_to_non_nullable: false
+    flutter_style_todos: false
+    avoid_unused_constructor_parameters: false
+    avoid_void_async: false
+    prefer_if_elements_to_conditional_expressions: false
+    unnecessary_await_in_return: false
+    avoid_bool_literals_in_conditional_expressions: false
+    unnecessary_statements: false
+    # We have some legitimate use-cases for this (preserve tear-off identity)
+    prefer_function_declarations_over_variables: false

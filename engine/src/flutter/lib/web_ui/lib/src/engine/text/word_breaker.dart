@@ -57,8 +57,8 @@ abstract class WordBreaker {
       return false;
     }
 
-    final WordCharProperty? immediateRight = wordLookup.find(text, index);
-    WordCharProperty? immediateLeft = wordLookup.find(text, index - 1);
+    final WordCharProperty immediateRight = wordLookup.find(text, index);
+    WordCharProperty immediateLeft = wordLookup.find(text, index - 1);
 
     // Do not break within CRLF.
     // WB3: CR × LF

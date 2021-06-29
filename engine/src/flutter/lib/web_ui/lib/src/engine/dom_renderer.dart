@@ -441,7 +441,7 @@ class DomRenderer {
       late StreamSubscription<html.Event> loadSubscription;
       loadSubscription = _canvasKitScript!.onLoad.listen((_) {
         loadSubscription.cancel();
-        canvasKitLoadCompleter.complete(true);
+        canvasKitLoadCompleter.complete();
       });
 
       // TODO(hterkelsen): Rather than this monkey-patch hack, we should
