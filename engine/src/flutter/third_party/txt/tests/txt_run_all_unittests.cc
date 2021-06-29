@@ -37,7 +37,9 @@ int main(int argc, char** argv) {
 #if defined(OS_FUCHSIA)
   fml::icu::InitializeICU("/pkg/data/icudtl.dat");
 #else
-  fml::icu::InitializeICU("icudtl.dat");
+  std::string icudtl_path =
+      cmd.GetOptionValueWithDefault("icu-data-file-path", "icudtl.dat");
+  fml::icu::InitializeICU(icudtl_path);
 #endif
   SkGraphics::Init();
   testing::InitGoogleTest(&argc, argv);
