@@ -66,6 +66,7 @@ class DefaultTextEditingActions extends Actions{
     MoveSelectionToEndTextIntent: _MoveSelectionToEndTextAction(),
     MoveSelectionToStartTextIntent: _MoveSelectionToStartTextAction(),
     MoveSelectionUpTextIntent: _MoveSelectionUpTextAction(),
+    SelectAllTextIntent: _SelectAllTextAction(),
   };
 }
 
@@ -289,5 +290,12 @@ class _MoveSelectionToStartTextAction extends TextEditingAction<MoveSelectionToS
   @override
   Object? invoke(MoveSelectionToStartTextIntent intent, [BuildContext? context]) {
     textEditingActionTarget!.renderEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
+  }
+}
+
+class _SelectAllTextAction extends TextEditingAction<SelectAllTextIntent> {
+  @override
+  Object? invoke(SelectAllTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.selectAll(SelectionChangedCause.keyboard);
   }
 }

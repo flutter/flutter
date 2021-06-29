@@ -122,6 +122,8 @@ void main() {
       const String revision3 = '123abc';
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+      const String previousVersion = '1.2.0-1.0.pre';
+      const String nextVersion = '1.2.0-3.0.pre';
 
       final Directory engine = fileSystem.directory(checkoutsParentDirectory)
           .childDirectory('flutter_conductor_checkouts')
@@ -182,6 +184,7 @@ void main() {
           stdout: revision2,
         ),
       ];
+
       final List<FakeCommand> frameworkCommands = <FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -220,10 +223,22 @@ void main() {
           ],
         ),
         const FakeCommand(
+          command: <String>[
+            'git',
+            'describe',
+            '--match',
+            '*.*.*',
+            '--tags',
+            'refs/remotes/upstream/$candidateBranch',
+          ],
+          stdout: '$previousVersion-42-gabc123',
+        ),
+        const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
           stdout: revision3,
         ),
       ];
+
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
           const FakeCommand(
@@ -254,6 +269,8 @@ void main() {
         stateFilePath,
         '--$kDartRevisionOption',
         nextDartRevision,
+        '--$kIncrementOption',
+        'm',
       ]);
 
       final File stateFile = fileSystem.file(stateFilePath);
@@ -265,12 +282,13 @@ void main() {
 
       expect(state.isInitialized(), true);
       expect(state.releaseChannel, releaseChannel);
+      expect(state.releaseVersion, nextVersion);
       expect(state.engine.candidateBranch, candidateBranch);
       expect(state.engine.startingGitHead, revision2);
       expect(state.engine.dartRevision, nextDartRevision);
       expect(state.framework.candidateBranch, candidateBranch);
       expect(state.framework.startingGitHead, revision3);
-      expect(state.lastPhase, ReleasePhase.INITIALIZE);
+      expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, revision);
     });
   }, onPlatform: <String, dynamic>{

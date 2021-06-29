@@ -4,7 +4,7 @@
 # for every commit.
 #
 # More information at:
-#  * https://github.com/flutter/cocoon/blob/master/scheduler/README.md
+#  * https://github.com/flutter/cocoon/blob/master/CI_YAML.md
 enabled_branches:
   - master
 
@@ -824,6 +824,7 @@ targets:
 
   - name: linux_docs_test
     builder: Linux docs_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/84609
     presubmit: false
     scheduler: luci
 
