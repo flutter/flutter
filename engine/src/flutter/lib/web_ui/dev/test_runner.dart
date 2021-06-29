@@ -194,8 +194,8 @@ class TestCommand extends Command<bool> with ArgUtils {
     }
 
     final Pipeline testPipeline = Pipeline(steps: <PipelineStep>[
-      () async => clearTerminalScreen(),
-      () => runTests(),
+      ClearTerminalScreenStep(),
+      TestRunnerStep(this),
     ]);
     await testPipeline.start();
 
@@ -206,7 +206,7 @@ class TestCommand extends Command<bool> with ArgUtils {
       print(
           'Watching ${dir.relativeToCwd}/lib and ${dir.relativeToCwd}/test to re-run tests');
       print('');
-      PipelineWatcher(
+      await PipelineWatcher(
           dir: dir.absolute,
           pipeline: testPipeline,
           ignore: (event) {
@@ -215,31 +215,18 @@ class TestCommand extends Command<bool> with ArgUtils {
               return true;
             }
 
-            // Ignore auto-generated JS files.
-            // The reason we are using `.contains()` instead of `.endsWith()` is
-            // because the auto-generated files could end with any of the
-            // following:
-            //
-            // - browser_test.dart.js
-            // - browser_test.dart.js.map
-            // - browser_test.dart.js.deps
-            if (event.path.contains('browser_test.dart.js')) {
-              return true;
-            }
-
             // React to changes in lib/ and test/ folders.
             final String relativePath =
                 path.relative(event.path, from: dir.absolute);
-            if (relativePath.startsWith('lib/') ||
-                relativePath.startsWith('test/')) {
+            if (path.isWithin('lib', relativePath) ||
+                path.isWithin('test', relativePath)) {
               return false;
             }
 
             // Ignore anything else.
             return true;
           }).start();
-      // Return a never-ending future.
-      return Completer<bool>().future;
+      return true;
     } else {
       if (!allShardsPassed) {
         io.stderr.writeln(_createFailedShardsMessage());
@@ -821,4 +808,50 @@ class NameOnlyReporter implements hack.Reporter {
 
   @override
   void resume() {}
+}
+
+/// Clears the terminal screen and places the cursor at the top left corner.
+///
+/// This works on Linux and Mac. On Windows, it's a no-op.
+class ClearTerminalScreenStep implements PipelineStep {
+  @override
+  String get name => 'clearing terminal screen';
+
+  @override
+  bool get isSafeToInterrupt => false;
+
+  @override
+  Future<void> interrupt() async {}
+
+  @override
+  Future<void> run() async {
+    if (!io.Platform.isWindows) {
+      // See: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_sequences
+      print("\x1B[2J\x1B[1;2H");
+    }
+  }
+}
+
+/// Runs tests by calling [TestCommand.runTests].
+class TestRunnerStep implements PipelineStep {
+  TestRunnerStep(this.testCommand);
+
+  TestCommand testCommand;
+
+  @override
+  String get name => 'test runner';
+
+  @override
+  Future<void> interrupt() async {
+    // Interrupt this step by killing all spawned processes (browsers, web drivers, etc).
+    cleanup();
+  }
+
+  @override
+  bool get isSafeToInterrupt => true;
+
+  @override
+  Future<void> run() async {
+    await testCommand.runTests();
+  }
 }
