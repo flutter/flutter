@@ -604,6 +604,59 @@ public class TextInputPluginTest {
     assertEquals(0, testImm.getLastCursorAnchorInfo().getComposingText().length());
   }
 
+  @Test
+  public void inputConnection_textInputTypeNone() {
+    View testView = new View(RuntimeEnvironment.application);
+    DartExecutor dartExecutor = mock(DartExecutor.class);
+    TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.NONE, false, false),
+            null,
+            null,
+            null,
+            null));
+
+    InputConnection connection =
+        textInputPlugin.createInputConnection(
+            testView, mock(KeyboardManager.class), new EditorInfo());
+    assertEquals(connection, null);
+  }
+
+  @Test
+  public void showTextInput_textInputTypeNone() {
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = new View(RuntimeEnvironment.application);
+    DartExecutor dartExecutor = mock(DartExecutor.class);
+    TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.NONE, false, false),
+            null,
+            null,
+            null,
+            null));
+
+    textInputPlugin.showTextInput(testView);
+    assertEquals(testImm.isSoftInputVisible(), false);
+  }
+
   // -------- Start: Autofill Tests -------
   @Test
   public void autofill_onProvideVirtualViewStructure() {
