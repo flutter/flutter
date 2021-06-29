@@ -25,6 +25,16 @@ class Context {
 
   bool IsValid() const;
 
+  //----------------------------------------------------------------------------
+  /// @return     An allocator suitable for allocations that persist between
+  ///             frames.
+  ///
+  std::shared_ptr<Allocator> GetPermanentsAllocator() const;
+
+  //----------------------------------------------------------------------------
+  /// @return     An allocator suitable for allocations that used only for one
+  ///             frame or render pass.
+  ///
   std::shared_ptr<Allocator> GetTransientsAllocator() const;
 
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const;
@@ -39,6 +49,7 @@ class Context {
   id<MTLCommandQueue> transfer_queue_ = nullptr;
   std::shared_ptr<ShaderLibrary> shader_library_;
   std::shared_ptr<PipelineLibrary> pipeline_library_;
+  std::shared_ptr<Allocator> permanents_allocator_;
   std::shared_ptr<Allocator> transients_allocator_;
   bool is_valid_ = false;
 

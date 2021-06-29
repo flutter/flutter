@@ -62,4 +62,11 @@ bool DeviceBuffer::SetLabel(const std::string& label, Range range) {
   return true;
 }
 
+BufferView DeviceBuffer::AsBufferView() const {
+  BufferView view;
+  view.buffer = shared_from_this();
+  view.range = {0u, size_};
+  return view;
+}
+
 }  // namespace impeller

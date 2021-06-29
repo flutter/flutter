@@ -12,6 +12,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/allocator.h"
 #include "impeller/compositor/buffer.h"
+#include "impeller/compositor/buffer_view.h"
 #include "impeller/compositor/range.h"
 
 namespace impeller {
@@ -30,6 +31,8 @@ class DeviceBuffer final : public Buffer,
   bool SetLabel(const std::string& label);
 
   bool SetLabel(const std::string& label, Range range);
+
+  BufferView AsBufferView() const;
 
  private:
   friend class Allocator;
