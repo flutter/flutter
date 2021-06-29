@@ -3,20 +3,88 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 import 'package:watcher/watcher.dart';
 
+import 'utils.dart';
+
 enum PipelineStatus {
+  /// The pipeline has not started yet.
+  ///
+  /// This is the initial state of the pipeline.
   idle,
+
+  /// The pipeline is running build steps.
   started,
+
+  /// The pipeline is stopping.
   stopping,
-  stopped,
+
+  /// The pipeline is not running anything because it has been interrupted.
+  interrupted,
+
+  /// The pipeline is not running anything because it encountered an error.
   error,
+
+  /// The pipeline is not running anything because it finished all build steps successfully.
   done,
 }
 
-typedef PipelineStep = Future<void> Function();
+/// A step in the build pipeline.
+abstract class PipelineStep {
+  /// The name of this step.
+  ///
+  /// This value appears in logs, so it should be descriptive and human-readable.
+  String get name;
+
+  /// Whether it is safe to interrupt this step while it's running.
+  bool get isSafeToInterrupt;
+
+  /// Runs this step.
+  ///
+  /// The returned future is completed when the step is finished. The future
+  /// completes with an error if the step failed.
+  Future<void> run();
+
+  /// Interrupts this step, if it's already running.
+  ///
+  /// [Pipeline] only calls this if [isSafeToInterrupt] returns true.
+  Future<void> interrupt();
+}
+
+/// A helper class for implementing [PipelineStep] in terms of a process.
+abstract class ProcessStep implements PipelineStep {
+  ProcessManager? _process;
+  bool _isInterrupted = false;
+
+  /// Starts and returns the process that implements the logic of this pipeline
+  /// step.
+  Future<ProcessManager> createProcess();
+
+  @override
+  Future<void> interrupt() async {
+    _isInterrupted = true;
+    _process?.kill();
+  }
+
+  @override
+  Future<void> run() async {
+    final ProcessManager process = await createProcess();
+
+    if (_isInterrupted) {
+      // If the step was interrupted while creating the process, the
+      // `interrupt` won't kill the process; it must be done here.
+      process.kill();
+      return;
+    }
+
+    _process = process;
+    await process.wait();
+    _process = null;
+  }
+}
 
 /// Represents a sequence of asynchronous tasks to be executed.
 ///
@@ -30,7 +98,8 @@ class Pipeline {
 
   final Iterable<PipelineStep> steps;
 
-  Future<dynamic>? _currentStepFuture;
+  PipelineStep? _currentStep;
+  Future<void>? _currentStepFuture;
 
   PipelineStatus get status => _status;
   PipelineStatus _status = PipelineStatus.idle;
@@ -45,7 +114,8 @@ class Pipeline {
         if (status != PipelineStatus.started) {
           break;
         }
-        _currentStepFuture = step();
+        _currentStep = step;
+        _currentStepFuture = step.run();
         await _currentStepFuture;
       }
       _status = PipelineStatus.done;
@@ -54,18 +124,31 @@ class Pipeline {
       print('Error in the pipeline: $error');
       print(stackTrace);
     } finally {
-      _currentStepFuture = null;
+      _currentStep = null;
     }
   }
 
   /// Stops executing any more tasks in the pipeline.
   ///
-  /// If a task is already being executed, it won't be interrupted.
-  Future<void> stop() {
+  /// Tasks that are safe to interrupt (according to [PipelineStep.isSafeToInterrupt]),
+  /// are interrupted. Otherwise, waits for the current step to finish before
+  /// interrupting the pipeline.
+  Future<void> stop() async {
     _status = PipelineStatus.stopping;
-    return (_currentStepFuture ?? Future<void>.value(null)).then((_) {
-      _status = PipelineStatus.stopped;
-    });
+    final PipelineStep? step = _currentStep;
+    if (step == null) {
+      _status = PipelineStatus.interrupted;
+      return;
+    }
+    if (step.isSafeToInterrupt) {
+      print('Interrupting ${step.name}');
+      await step.interrupt();
+      _status = PipelineStatus.interrupted;
+      return;
+    }
+    print('${step.name} cannot be interrupted. Waiting for it to complete.');
+    await _currentStepFuture;
+    _status = PipelineStatus.interrupted;
   }
 }
 
@@ -98,8 +181,25 @@ class PipelineWatcher {
   final WatchEventPredicate? ignore;
 
   /// Activates the watcher.
-  void start() {
+  Future<void> start() async {
     watcher.events.listen(_onEvent);
+
+    // Listen to the `q` key stroke to stop the pipeline.
+    print('Press \'q\' to exit felt');
+
+    // Key strokes should be reported immediately and one at a time rather than
+    // wait for the user to hit ENTER and report the whole line. To achieve
+    // that, echo mode and line mode must be disabled.
+    io.stdin.echoMode = false;
+    io.stdin.lineMode = false;
+
+    await io.stdin.firstWhere((List<int> event) {
+      const int qKeyCode = 113;
+      final bool qEntered = event.isNotEmpty && event.first == qKeyCode;
+      return qEntered;
+    });
+    print('Stopping felt');
+    await pipeline.stop();
   }
 
   int _pipelineRunCount = 0;

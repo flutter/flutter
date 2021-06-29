@@ -54,7 +54,7 @@ void main(List<String> rawArgs) async {
         'executable: ${e.executable} '
         'arguments: ${e.arguments} '
         'exit code: ${e.exitCode}');
-    exitCode = e.exitCode;
+    exitCode = e.exitCode ?? 1;
   } catch (e) {
     rethrow;
   } finally {

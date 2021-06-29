@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' show utf8, LineSplitter;
 import 'dart:io' as io;
 
 import 'package:args/args.dart';
@@ -12,16 +13,6 @@ import 'package:path/path.dart' as path;
 
 import 'environment.dart';
 import 'exceptions.dart';
-
-/// Clears the terminal screen and places the cursor at the top left corner.
-///
-/// This works on Linux and Mac. On Windows, it's a no-op.
-void clearTerminalScreen() {
-  if (!io.Platform.isWindows) {
-    // See: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_sequences
-    print("\x1B[2J\x1B[1;2H");
-  }
-}
 
 class FilePath {
   FilePath.fromCwd(String relativePath)
@@ -50,7 +41,39 @@ Future<int> runProcess(
   String executable,
   List<String> arguments, {
   String? workingDirectory,
-  bool mustSucceed: false,
+  bool failureIsSuccess = false,
+  Map<String, String> environment = const <String, String>{},
+}) async {
+  final ProcessManager manager = await startProcess(
+    executable,
+    arguments,
+    workingDirectory: workingDirectory,
+    failureIsSuccess: failureIsSuccess,
+    environment: environment,
+  );
+  return manager.wait();
+}
+
+/// Starts a process using the [executable], passing it [arguments].
+///
+/// Returns a process manager that decorates the process with extra
+/// functionality. See [ProcessManager] for what it can do.
+///
+/// If [workingDirectory] is not null makes it the current working directory of
+/// the process. Otherwise, the process inherits this processes working
+/// directory.
+///
+/// If [failureIsSuccess] is set to true, the returned [ProcessManager] treats
+/// non-zero exit codes as success, and zero exit code as failure.
+///
+/// If [evalOutput] is set to true, collects and decodes the process' standard
+/// streams into in-memory strings.
+Future<ProcessManager> startProcess(
+  String executable,
+  List<String> arguments, {
+  String? workingDirectory,
+  bool failureIsSuccess = false,
+  bool evalOutput = false,
   Map<String, String> environment = const <String, String>{},
 }) async {
   final io.Process process = await io.Process.start(
@@ -60,64 +83,155 @@ Future<int> runProcess(
     // Running the process in a system shell for Windows. Otherwise
     // the process is not able to get Dart from path.
     runInShell: io.Platform.isWindows,
-    mode: io.ProcessStartMode.inheritStdio,
+    mode: io.ProcessStartMode.normal,
     environment: environment,
   );
-  final int exitCode = await process.exitCode;
-  if (mustSucceed && exitCode != 0) {
+  processesToCleanUp.add(process);
+
+  return ProcessManager._(
+    executable: executable,
+    arguments: arguments,
+    workingDirectory: workingDirectory,
+    process: process,
+    evalOutput: evalOutput,
+    failureIsSuccess: failureIsSuccess,
+  );
+}
+
+/// Manages a process running outside `felt`.
+class ProcessManager {
+  /// Creates a process manager that manages [process].
+  ProcessManager._({
+    required this.executable,
+    required this.arguments,
+    required this.workingDirectory,
+    required this.process,
+    required bool evalOutput,
+    required bool failureIsSuccess,
+  }) : _evalOutput = evalOutput, _failureIsSuccess = failureIsSuccess {
+    if (_evalOutput) {
+      _forwardStream(process.stdout, _stdout);
+      _forwardStream(process.stderr, _stderr);
+    } else {
+      _forwardStream(process.stdout, io.stdout);
+      _forwardStream(process.stderr, io.stderr);
+    }
+  }
+
+  /// The executable, from which the process was spawned.
+  final String executable;
+
+  /// The arguments passed to the prcess.
+  final List<String> arguments;
+
+  /// The current working directory (CWD) of the child process.
+  ///
+  /// If null, the child process inherits `felt`'s CWD.
+  final String? workingDirectory;
+
+  /// The process being managed by this manager.
+  final io.Process process;
+
+  /// Whether the standard output and standard error should be decoded into
+  /// strings while running the process.
+  final bool _evalOutput;
+
+  /// Whether non-zero exit code is considered successful completion of the
+  /// process.
+  ///
+  /// See also [wait].
+  final bool _failureIsSuccess;
+
+  final StringBuffer _stdout = StringBuffer();
+  final StringBuffer _stderr = StringBuffer();
+
+  void _forwardStream(Stream<List<int>> stream, StringSink buffer) {
+    stream
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen(buffer.writeln);
+  }
+
+  /// Waits for the [process] to exit. Returns the exit code.
+  ///
+  /// The returned future completes successfully if:
+  ///
+  ///  * [failureIsSuccess] is false and the process exited with exit code 0.
+  ///  * [failureIsSuccess] is true and the process exited with a non-zero exit code.
+  ///
+  /// In all other cicumstances the future completes with an error.
+  Future<int> wait() async {
+    final int exitCode = await process.exitCode;
+    if (!_failureIsSuccess && exitCode != 0) {
+      _throwProcessException(
+        description: 'Sub-process failed.',
+        exitCode: exitCode,
+      );
+    }
+    return exitCode;
+  }
+
+  /// If [evalOutput] is true, wait for the process to finish then returns the
+  /// decoded standard streams.
+  Future<ProcessOutput> eval() async {
+    if (!_evalOutput) {
+      kill();
+      _throwProcessException(
+        description: 'Cannot eval process output. The process was launched '
+            'with `evalOutput` set to false.',
+      );
+    }
+    final int exitCode = await wait();
+    return ProcessOutput(
+      exitCode: exitCode,
+      stdout: _stdout.toString(),
+      stderr: _stderr.toString(),
+    );
+  }
+
+  /// A convenience method on top of [eval] that only extracts standard output.
+  Future<String> evalStdout() async {
+    return (await eval()).stdout;
+  }
+
+  /// A convenience method on top of [eval] that only extracts standard error.
+  Future<String> evalStderr() async {
+    return (await eval()).stderr;
+  }
+
+  @alwaysThrows
+  void _throwProcessException({required String description, int? exitCode}) {
     throw ProcessException(
-      description: 'Sub-process failed.',
+      description: description,
       executable: executable,
       arguments: arguments,
       workingDirectory: workingDirectory,
       exitCode: exitCode,
     );
   }
-  return exitCode;
-}
 
-/// Runs [executable]. Do not follow the exit code or the output.
-Future<void> startProcess(
-  String executable,
-  List<String> arguments, {
-  String? workingDirectory,
-  bool mustSucceed: false,
-}) async {
-  final io.Process process = await io.Process.start(
-    executable,
-    arguments,
-    workingDirectory: workingDirectory,
-    // Running the process in a system shell for Windows. Otherwise
-    // the process is not able to get Dart from path.
-    runInShell: io.Platform.isWindows,
-    mode: io.ProcessStartMode.inheritStdio,
-  );
-  processesToCleanUp.add(process);
-}
-
-/// Runs [executable] and returns its standard output as a string.
-///
-/// If the process fails, throws a [ProcessException].
-Future<String> evalProcess(
-  String executable,
-  List<String> arguments, {
-  String? workingDirectory,
-}) async {
-  final io.ProcessResult result = await io.Process.run(
-    executable,
-    arguments,
-    workingDirectory: workingDirectory,
-  );
-  if (result.exitCode != 0) {
-    throw ProcessException(
-      description: result.stderr as String,
-      executable: executable,
-      arguments: arguments,
-      workingDirectory: workingDirectory,
-      exitCode: result.exitCode,
-    );
+  /// Kills the [process] by sending it the [signal].
+  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    return process.kill(signal);
   }
-  return result.stdout as String;
+}
+
+/// Stringified standard output and standard error streams from a process.
+class ProcessOutput {
+  ProcessOutput({
+    required this.exitCode,
+    required this.stdout,
+    required this.stderr,
+  });
+
+  /// The exit code of the process.
+  final int exitCode;
+
+  /// Standard output of the process decoded as a string.
+  final String stdout;
+
+  /// Standard error of the process decoded as a string.
+  final String stderr;
 }
 
 Future<void> runFlutter(
@@ -140,6 +254,7 @@ Future<void> runFlutter(
   }
 }
 
+/// An exception related to an attempt to spawn a sub-process.
 @immutable
 class ProcessException implements Exception {
   ProcessException({
@@ -147,14 +262,20 @@ class ProcessException implements Exception {
     required this.executable,
     required this.arguments,
     required this.workingDirectory,
-    required this.exitCode,
+    this.exitCode,
   });
 
   final String description;
   final String executable;
   final List<String> arguments;
   final String? workingDirectory;
-  final int exitCode;
+
+  /// The exit code of the process.
+  ///
+  /// The value is null if the exception is thrown before the process exits.
+  /// For example, this can happen on invalid attempts to start a process, or
+  /// when a process is stuck and is unable to exit.
+  final int? exitCode;
 
   @override
   String toString() {
@@ -162,9 +283,10 @@ class ProcessException implements Exception {
     message
       ..writeln(description)
       ..writeln('Command: $executable ${arguments.join(' ')}')
-      ..writeln(
-          'Working directory: ${workingDirectory ?? io.Directory.current.path}')
-      ..writeln('Exit code: $exitCode');
+      ..writeln('Working directory: ${workingDirectory ?? io.Directory.current.path}');
+    if (exitCode != null) {
+      message.writeln('Exit code: $exitCode');
+    }
     return '$message';
   }
 }

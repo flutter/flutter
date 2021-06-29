@@ -33,8 +33,12 @@ class MacOSInfo {
   /// Print information on applications in the system that contains string
   /// `Safari`.
   Future<void> _printSafariApplications() async {
-    final String systemProfileJson = await evalProcess(
-        'system_profiler', ['SPApplicationsDataType', '-json']);
+    final ProcessManager systemProfiler = await startProcess(
+      'system_profiler',
+      ['SPApplicationsDataType', '-json'],
+      evalOutput: true,
+    );
+    final String systemProfileJson = await systemProfiler.evalStdout();
 
     final Map<String, dynamic> json =
         jsonDecode(systemProfileJson) as Map<String, dynamic>;
@@ -52,20 +56,21 @@ class MacOSInfo {
 
   /// Print all the defaults in the system related to Safari.
   Future<void> _printSafariDefaults() async {
-    final String defaults =
-        await evalProcess('/usr/bin/defaults', ['find', 'Safari']);
-
-    print('Safari related defaults:\n $defaults');
+    final ProcessManager defaults = await startProcess(
+      '/usr/bin/defaults',
+      ['find', 'Safari'],
+    );
+    print('Safari related defaults:\n ${await defaults.evalStdout()}');
   }
 
   /// Print user limits (file and process).
   Future<void> _printUserLimits() async {
-    final String fileLimit = await evalProcess('ulimit', ['-n']);
-
+    ProcessManager ulimit = await startProcess('ulimit', ['-n']);
+    final String fileLimit = await ulimit.evalStdout();
     print('MacOS file limit: $fileLimit');
 
-    final String processLimit = await evalProcess('ulimit', ['-u']);
-
+    ulimit = await startProcess('ulimit', ['-u']);
+    final String processLimit = await ulimit.evalStdout();
     print('MacOS process limit: $processLimit');
   }
 }

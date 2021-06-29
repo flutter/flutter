@@ -36,45 +36,69 @@ class BuildCommand extends Command<bool> with ArgUtils {
   FutureOr<bool> run() async {
     final FilePath libPath = FilePath.fromWebUi('lib');
     final Pipeline buildPipeline = Pipeline(steps: <PipelineStep>[
-      gn,
-      ninja,
+      GnPipelineStep(),
+      NinjaPipelineStep(),
     ]);
     await buildPipeline.start();
 
     if (isWatchMode) {
       print('Initial build done!');
       print('Watching directory: ${libPath.relativeToCwd}/');
-      PipelineWatcher(
+      await PipelineWatcher(
         dir: libPath.absolute,
         pipeline: buildPipeline,
         // Ignore font files that are copied whenever tests run.
         ignore: (event) => event.path.endsWith('.ttf'),
       ).start();
-      // Return a never-ending future.
-      return Completer<bool>().future;
-    } else {
-      return true;
     }
+    return true;
   }
 }
 
-Future<void> gn() {
-  print('Running gn...');
-  return runProcess(
-    path.join(environment.flutterDirectory.path, 'tools', 'gn'),
-    <String>[
-      '--unopt',
-      if (Platform.isMacOS) '--xcode-symlinks',
-      '--full-dart-sdk',
-    ],
-  );
+/// Runs `gn`.
+///
+/// Not safe to interrupt as it may leave the `out/` directory in a corrupted
+/// state. GN is pretty quick though, so it's OK to not support interruption.
+class GnPipelineStep extends ProcessStep {
+  @override
+  String get name => 'gn';
+
+  @override
+  bool get isSafeToInterrupt => false;
+
+  @override
+  Future<ProcessManager> createProcess() {
+    print('Running gn...');
+    return startProcess(
+      path.join(environment.flutterDirectory.path, 'tools', 'gn'),
+      <String>[
+        '--unopt',
+        if (Platform.isMacOS) '--xcode-symlinks',
+        '--full-dart-sdk',
+      ],
+    );
+  }
 }
 
-// TODO(mdebbar): Make the ninja step interruptable in the pipeline.
-Future<void> ninja() {
-  print('Running autoninja...');
-  return runProcess('autoninja', <String>[
-    '-C',
-    environment.hostDebugUnoptDir.path,
-  ]);
+/// Runs `autoninja`.
+///
+/// Can be safely interrupted.
+class NinjaPipelineStep extends ProcessStep {
+  @override
+  String get name => 'ninja';
+
+  @override
+  bool get isSafeToInterrupt => true;
+
+  @override
+  Future<ProcessManager> createProcess() {
+    print('Running autoninja...');
+    return startProcess(
+      'autoninja',
+      <String>[
+        '-C',
+        environment.hostDebugUnoptDir.path,
+      ],
+    );
+  }
 }
