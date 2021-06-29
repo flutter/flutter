@@ -1,4 +1,4 @@
-Signature: 52222961e58221cf87c5d6807fbf1f98
+Signature: 29f9d167d2d7d39135049897a7216a27
 
 UNUSED LICENSES:
 
@@ -3118,17 +3118,11 @@ FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRRectBlurEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRectBlurEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRectBlurEffect.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuad.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrClampedGradientEffect.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.h
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.h
-FILE: ../../../third_party/skia/src/gpu/gradients/GrTiledGradientEffect.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrUnrolledBinaryGradientColorizer.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrClampedGradientEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrClampedGradientEffect.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTiledGradientEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTiledGradientEffect.h
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrUnrolledBinaryGradientColorizer.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrUnrolledBinaryGradientColorizer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlAttachment.h
