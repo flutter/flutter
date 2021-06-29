@@ -31,7 +31,7 @@ GrContextOptions MakeDefaultContextOptions(ContextType type,
 
   options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
 
-  options.fReducedShaderVariations = true;
+  options.fReducedShaderVariations = false;
 
   return options;
 };
