@@ -61,6 +61,9 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
+  final String category = FlutterCommandCategories.installation;
+
+  @override
   bool get shouldUpdateCache => false;
 
   @override

@@ -55,6 +55,9 @@ class ConfigCommand extends FlutterCommand {
     "Flutter tools over time. See Google's privacy policy: https://www.google.com/intl/en/policies/privacy/";
 
   @override
+  final String category = FlutterCommandCategories.installation;
+
+  @override
   final List<String> aliases = <String>['configure'];
 
   @override

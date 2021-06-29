@@ -51,6 +51,9 @@ class PackagesCommand extends FlutterCommand {
   final String description = 'Commands for managing Flutter packages.';
 
   @override
+  String get category => FlutterCommandCategories.project;
+
+  @override
   Future<FlutterCommandResult> runCommand() async => null;
 }
 

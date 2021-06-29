@@ -122,6 +122,13 @@ class FlutterOptions {
   static const String kInitializeFromDill = 'initialize-from-dill';
 }
 
+/// flutter command categories for usage.
+class FlutterCommandCategories {
+  static const String project = 'Project';
+  static const String tools = 'Tools & devices';
+  static const String installation = 'Flutter installation';
+}
+
 abstract class FlutterCommand extends Command<void> {
   /// The currently executing command (or sub-command).
   ///
