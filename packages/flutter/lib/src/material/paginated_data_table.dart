@@ -491,7 +491,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                         height: 64.0,
                         color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
                         child: Padding(
-                          padding: EdgeInsetsDirectional.only(start: 24, end: 14.0),
+                          padding: const EdgeInsetsDirectional.only(start: 24, end: 14.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: headerWidgets,
