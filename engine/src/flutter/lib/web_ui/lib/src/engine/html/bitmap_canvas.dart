@@ -1267,7 +1267,7 @@ List<html.Element> _clipContent(List<_SaveClipEntry> clipStack,
     content,
     transformWithOffset(currentTransform, offset).storage,
   );
-  return <html.Element>[root]..addAll(clipDefs);
+  return <html.Element>[root, ...clipDefs];
 }
 
 /// Converts a [maskFilter] to the value to be used on a `<canvas>`.

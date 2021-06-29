@@ -1130,7 +1130,7 @@ class EngineTextStyle implements ui.TextStyle {
   String toString() {
     if (assertionsEnabled) {
       return 'TextStyle('
-          'color: ${color != null ? color : "unspecified"}, '
+          'color: ${color ?? "unspecified"}, '
           'decoration: ${decoration ?? "unspecified"}, '
           'decorationColor: ${decorationColor ?? "unspecified"}, '
           'decorationStyle: ${decorationStyle ?? "unspecified"}, '

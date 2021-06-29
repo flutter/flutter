@@ -104,7 +104,7 @@ void testMain() async {
       await ui.loadFontFromList(Uint8List.view(response.response),
           fontFamily: 'Blehm');
       final Completer<void> completer = Completer();
-      html.window.requestAnimationFrame( (_) { completer.complete(true); } );
+      html.window.requestAnimationFrame( (_) { completer.complete(); } );
       await(completer.future);
       window.onPlatformMessage = oldHandler;
       expect(actualName, 'flutter/system');

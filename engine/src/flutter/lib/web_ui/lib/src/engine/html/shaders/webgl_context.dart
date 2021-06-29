@@ -364,26 +364,24 @@ class GlContext {
 
   /// Sets float uniform value.
   void setUniform1f(Object uniform, double value) {
-    return js_util
-        .callMethod(glContext, 'uniform1f', <dynamic>[uniform, value]);
+    js_util.callMethod(glContext, 'uniform1f', <dynamic>[uniform, value]);
   }
 
   /// Sets vec2 uniform values.
   void setUniform2f(Object uniform, double value1, double value2) {
-    return js_util
-        .callMethod(glContext, 'uniform2f', <dynamic>[uniform, value1, value2]);
+    js_util.callMethod(glContext, 'uniform2f', <dynamic>[uniform, value1, value2]);
   }
 
   /// Sets vec4 uniform values.
   void setUniform4f(Object uniform, double value1, double value2, double value3,
       double value4) {
-    return js_util.callMethod(
+    js_util.callMethod(
         glContext, 'uniform4f', <dynamic>[uniform, value1, value2, value3, value4]);
   }
 
   /// Sets mat4 uniform values.
   void setUniformMatrix4fv(Object uniform, bool transpose, Float32List value) {
-    return js_util.callMethod(
+    js_util.callMethod(
         glContext, 'uniformMatrix4fv', <dynamic>[uniform, transpose, value]);
   }
 
