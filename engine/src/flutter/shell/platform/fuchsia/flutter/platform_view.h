@@ -161,23 +161,23 @@ class PlatformView final : public flutter::PlatformView,
   // Channel handler for kAccessibilityChannel. This is currently not
   // being used, but it is necessary to handle accessibility messages
   // that are sent by Flutter when semantics is enabled.
-  void HandleAccessibilityChannelPlatformMessage(
+  bool HandleAccessibilityChannelPlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message);
 
   // Channel handler for kFlutterPlatformChannel
-  void HandleFlutterPlatformChannelPlatformMessage(
+  bool HandleFlutterPlatformChannelPlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message);
 
   // Channel handler for kTextInputChannel
-  void HandleFlutterTextInputChannelPlatformMessage(
+  bool HandleFlutterTextInputChannelPlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message);
 
   // Channel handler for kPlatformViewsChannel.
-  void HandleFlutterPlatformViewsChannelPlatformMessage(
+  bool HandleFlutterPlatformViewsChannelPlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message);
 
   // Channel handler for kFuchsiaShaderWarmupChannel.
-  static void HandleFuchsiaShaderWarmupChannelPlatformMessage(
+  static bool HandleFuchsiaShaderWarmupChannelPlatformMessage(
       OnShaderWarmup on_shader_warmup,
       std::unique_ptr<flutter::PlatformMessage> message);
 
@@ -230,7 +230,7 @@ class PlatformView final : public flutter::PlatformView,
 
   std::set<int> down_pointers_;
   std::map<std::string /* channel */,
-           std::function<void(
+           std::function<bool /* response_handled */ (
                std::unique_ptr<
                    flutter::PlatformMessage> /* message */)> /* handler */>
       platform_message_handlers_;

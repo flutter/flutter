@@ -76,7 +76,7 @@ TEST_F(FocusDelegateTest, WatchCallbackSeries) {
     // CompleteCurrentFocusState should complete with the current (up to date)
     // focus state.
     auto response = FakePlatformMessageResponse::Create();
-    focus_delegate->CompleteCurrentFocusState(response);
+    EXPECT_TRUE(focus_delegate->CompleteCurrentFocusState(response));
     response->ExpectCompleted(focus_state ? "[true]" : "[false]");
 
     // Ensure this callback always happens in lockstep with
@@ -92,13 +92,12 @@ TEST_F(FocusDelegateTest, WatchCallbackSeries) {
   do {
     // Ensure the next focus state is handled correctly.
     auto response1 = FakePlatformMessageResponse::Create();
-    focus_delegate->CompleteNextFocusState(response1);
+    EXPECT_TRUE(focus_delegate->CompleteNextFocusState(response1));
 
     // Since there's already an outstanding PlatformMessageResponse, this one
     // should be completed empty.
     auto response = FakePlatformMessageResponse::Create();
-    focus_delegate->CompleteNextFocusState(response);
-    response->ExpectCompleted("");
+    EXPECT_FALSE(focus_delegate->CompleteNextFocusState(response));
 
     // Post watch events and trigger the next vrf event.
     RunLoopUntilIdle();
@@ -111,7 +110,7 @@ TEST_F(FocusDelegateTest, WatchCallbackSeries) {
     // Check CompleteCurrentFocusState again, and increment vrf_index, since we
     // move on to the next focus state.
     response = FakePlatformMessageResponse::Create();
-    focus_delegate->CompleteCurrentFocusState(response);
+    EXPECT_TRUE(focus_delegate->CompleteCurrentFocusState(response));
     response->ExpectCompleted(vrf_states[vrf_index++] ? "[true]" : "[false]");
 
     // vrf->times_watched should always be 1 more than the amount of vrf events

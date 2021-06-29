@@ -31,7 +31,7 @@ class FocusDelegate {
 
   /// Completes the platform message request with the FocusDelegate's most
   /// recent focus state.
-  virtual void CompleteCurrentFocusState(
+  virtual bool CompleteCurrentFocusState(
       fml::RefPtr<flutter::PlatformMessageResponse> response);
 
   /// Completes the platform message request with the FocusDelegate's next focus
@@ -39,12 +39,12 @@ class FocusDelegate {
   ///
   /// Only one outstanding request may exist at a time. Any others will be
   /// completed empty.
-  virtual void CompleteNextFocusState(
+  virtual bool CompleteNextFocusState(
       fml::RefPtr<flutter::PlatformMessageResponse> response);
 
   /// Completes a platform message request by attempting to give focus for a
   /// given viewRef.
-  virtual void RequestFocus(
+  virtual bool RequestFocus(
       rapidjson::Value request,
       fml::RefPtr<flutter::PlatformMessageResponse> response);
 

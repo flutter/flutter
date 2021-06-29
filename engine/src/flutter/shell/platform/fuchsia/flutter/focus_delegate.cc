@@ -24,38 +24,39 @@ void FocusDelegate::WatchLoop(std::function<void(bool)> callback) {
   view_ref_focused_->Watch(watch_loop_);
 }
 
-void FocusDelegate::CompleteCurrentFocusState(
+bool FocusDelegate::CompleteCurrentFocusState(
     fml::RefPtr<flutter::PlatformMessageResponse> response) {
   std::string result(is_focused_ ? "[true]" : "[false]");
   response->Complete(std::make_unique<fml::DataMapping>(
       std::vector<uint8_t>(result.begin(), result.end())));
+  return true;
 }
 
-void FocusDelegate::CompleteNextFocusState(
+bool FocusDelegate::CompleteNextFocusState(
     fml::RefPtr<flutter::PlatformMessageResponse> response) {
   if (next_focus_request_) {
     FML_LOG(ERROR) << "An outstanding PlatformMessageResponse already exists "
                       "for the next focus state!";
-    response->CompleteEmpty();
-  } else {
-    next_focus_request_ = std::move(response);
+    return false;
   }
+  next_focus_request_ = std::move(response);
+  return true;
 }
 
-void FocusDelegate::RequestFocus(
+bool FocusDelegate::RequestFocus(
     rapidjson::Value request,
     fml::RefPtr<flutter::PlatformMessageResponse> response) {
   auto args_it = request.FindMember("args");
   if (args_it == request.MemberEnd() || !args_it->value.IsObject()) {
     FML_LOG(ERROR) << "No arguments found.";
-    return;
+    return false;
   }
   const auto& args = args_it->value;
 
   auto view_ref = args.FindMember("viewRef");
   if (!view_ref->value.IsUint64()) {
     FML_LOG(ERROR) << "Argument 'viewRef' is not a int64";
-    return;
+    return false;
   }
 
   zx_handle_t handle = view_ref->value.GetUint64();
@@ -64,7 +65,7 @@ void FocusDelegate::RequestFocus(
       zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &out_handle);
   if (status != ZX_OK) {
     FML_LOG(ERROR) << "Argument 'viewRef' is not valid";
-    return;
+    return false;
   }
   auto ref = fuchsia::ui::views::ViewRef({
       .reference = zx::eventpair(out_handle),
@@ -73,7 +74,7 @@ void FocusDelegate::RequestFocus(
       std::move(ref),
       [view_ref = view_ref->value.GetUint64(), response = std::move(response)](
           fuchsia::ui::views::Focuser_RequestFocus_Result result) {
-        if (!response.get()) {
+        if (!response) {
           return;
         }
         int result_code =
@@ -89,6 +90,7 @@ void FocusDelegate::RequestFocus(
         response->Complete(std::make_unique<fml::DataMapping>(
             std::vector<uint8_t>(output.begin(), output.end())));
       });
+  return true;
 }
 
 }  // namespace flutter_runner
