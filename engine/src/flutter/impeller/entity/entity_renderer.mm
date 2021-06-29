@@ -29,6 +29,20 @@ EntityRenderer::EntityRenderer(std::string shaders_directory)
     return;
   }
 
+  VertexBufferBuilder<shader::BoxVertexInfo::PerVertexData> vertex_builder;
+
+  vertex_builder.AddVertices({
+      {{0, 0, 0.0}, {Color::Red()}},        //
+      {{800, 0.0, 0.0}, {Color::Green()}},  //
+      {{0.0, 600, 0.0}, {Color::Blue()}},   //
+  });
+
+  vertex_buffer_ =
+      vertex_builder.CreateVertexBuffer(*context->GetPermanentsAllocator());
+  if (!vertex_buffer_) {
+    return;
+  }
+
   is_valid_ = true;
 }
 
@@ -45,25 +59,16 @@ bool EntityRenderer::OnRender(const Surface& surface, RenderPass& pass) {
 
   uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
 
-  VertexBufferBuilder<shader::BoxVertexInfo::PerVertexData> vertex_builder;
-
-  vertex_builder.AddVertices({
-      {{0, 0, 0.0}, {Color::Red()}},        //
-      {{800, 0.0, 0.0}, {Color::Green()}},  //
-      {{0.0, 600, 0.0}, {Color::Blue()}},   //
-  });
-
   Command cmd;
   cmd.label = "Box";
   cmd.pipeline = box_primitive_->GetPipeline();
   cmd.vertex_bindings.buffers[box_primitive_->GetVertexBufferIndex()] =
-      vertex_builder.CreateVertexBuffer(pass.GetTransientsBuffer());
+      vertex_buffer_.vertex_buffer;
   cmd.vertex_bindings
       .buffers[shader::BoxVertexInfo::kUniformUniformBuffer.binding] =
       pass.GetTransientsBuffer().EmplaceUniform(uniforms);
-  cmd.index_buffer =
-      vertex_builder.CreateIndexBuffer(pass.GetTransientsBuffer());
-  cmd.index_count = vertex_builder.GetIndexCount();
+  cmd.index_buffer = vertex_buffer_.index_buffer;
+  cmd.index_count = vertex_buffer_.index_count;
   cmd.primitive_type = PrimitiveType::kTriange;
   if (!pass.RecordCommand(std::move(cmd))) {
     return false;
