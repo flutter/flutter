@@ -482,6 +482,7 @@ targets:
   - name: mac_module_test_ios
     builder: Mac module_test_ios
     scheduler: luci
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/85578
     runIf:
       - dev/**
       - packages/flutter_tools/**
