@@ -94,23 +94,17 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         );
       }
 
-      if (offline) {
-        // TODO(kenz): we should launch an already activated version of DevTools
-        // here, if available, once DevTools has offline support. DevTools does
-        // not work without internet currently due to the failed request of a
-        // couple scripts. See https://github.com/flutter/devtools/issues/2420.
-        return;
-      } else {
-        bool devToolsActive = await _checkForActiveDevTools();
+      bool devToolsActive = await _checkForActiveDevTools();
+      if (!offline) {
         await _activateDevTools(throttleUpdates: devToolsActive);
-        if (!devToolsActive) {
-          devToolsActive = await _checkForActiveDevTools();
-        }
-        if (!devToolsActive) {
-          // We don't have devtools installed and installing it failed;
-          // _activateDevTools will have reported the error already.
-          return;
-        }
+      }
+      if (!devToolsActive && !offline) {
+        devToolsActive = await _checkForActiveDevTools();
+      }
+      if (!devToolsActive) {
+        // We don't have devtools installed and installing it failed;
+        // _activateDevTools will have reported the error already.
+        return;
       }
 
       _devToolsProcess = await _processManager.start(<String>[

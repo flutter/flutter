@@ -137,6 +137,51 @@ void main() {
     ),
   });
 
+  testUsingContext('can create a skeleton (list/detail) app', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['-t', 'skeleton', '-i', 'objc', '-a', 'java', '--implementation-tests'],
+      <String>[
+        'analysis_options.yaml',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+        'lib/main.dart',
+        'l10n.yaml',
+        'assets/images/2.0x/flutter_logo.png',
+        'assets/images/flutter_logo.png',
+        'assets/images/3.0x/flutter_logo.png',
+        'test/unit_test.dart',
+        'test/widget_test.dart',
+        'test/implementation_test.dart',
+        'lib/src/localization/app_en.arb',
+        'lib/src/app.dart',
+        'lib/src/sample_feature/sample_item_details_view.dart',
+        'lib/src/sample_feature/sample_item_list_view.dart',
+        'lib/src/sample_feature/sample_item.dart',
+        'lib/src/settings/settings_controller.dart',
+        'lib/src/settings/settings_view.dart',
+        'lib/src/settings/settings_service.dart',
+        'lib/main.dart',
+        'pubspec.yaml',
+        'README.md',
+      ],
+    );
+    return _runFlutterTest(projectDir);
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
+
   testUsingContext('can create a default project if empty directory exists', () async {
     await projectDir.create(recursive: true);
     await _createAndAnalyzeProject(

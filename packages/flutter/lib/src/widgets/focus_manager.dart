@@ -15,12 +15,15 @@ import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 
-// Used for debugging focus code. Set to true to see highly verbose debug output
-// when focus changes occur.
-const bool _kDebugFocus = false;
+/// Setting to true will cause extensive logging to occur when focus changes occur.
+///
+/// Can be used to debug focus issues: each time the focus changes, the focus
+/// tree will be printed and requests for focus and other focus operations will
+/// be logged.
+bool debugFocusChanges = false;
 
 bool _focusDebug(String message, [Iterable<String>? details]) {
-  if (_kDebugFocus) {
+  if (debugFocusChanges) {
     debugPrint('FOCUS: $message');
     if (details != null && details.isNotEmpty) {
       for (final String detail in details) {
@@ -28,6 +31,7 @@ bool _focusDebug(String message, [Iterable<String>? details]) {
       }
     }
   }
+  // Return true so that it can be easily used inside of an assert.
   return true;
 }
 
@@ -1735,8 +1739,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  // The list of autofocus requests made since the prevous _appyFocusChange
-  // call.
+  // The list of autofocus requests made since the last _appyFocusChange call.
   final List<_Autofocus> _pendingAutofocuses = <_Autofocus>[];
 
   // True indicates that there is an update pending.
@@ -1800,7 +1803,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       notifyListeners();
     }
     assert(() {
-      if (_kDebugFocus) {
+      if (debugFocusChanges) {
         debugDumpFocusTree();
       }
       return true;

@@ -427,6 +427,45 @@ class _MacOSUtils extends _PosixUtils {
     }
     return _hostPlatform!;
   }
+
+  // unzip, then rsync
+  @override
+  void unzip(File file, Directory targetDirectory) {
+    if (!_processManager.canRun('unzip')) {
+      // unzip is not available. this error message is modeled after the download
+      // error in bin/internal/update_dart_sdk.sh
+      throwToolExit('Missing "unzip" tool. Unable to extract ${file.path}.\nConsider running "brew install unzip".');
+    }
+    if (_processManager.canRun('rsync')) {
+      final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('flutter_${file.basename}.');
+      try {
+        // Unzip to a temporary directory.
+        _processUtils.runSync(
+          <String>['unzip', '-o', '-q', file.path, '-d', tempDirectory.path],
+          throwOnError: true,
+          verboseExceptions: true,
+        );
+        for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
+          // rsync --delete the unzipped files so files removed from the archive are also removed from the target.
+          _processUtils.runSync(
+            <String>['rsync', '-av', '--delete', unzippedFile.path, targetDirectory.path],
+            throwOnError: true,
+            verboseExceptions: true,
+          );
+        }
+      } finally {
+        tempDirectory.deleteSync(recursive: true);
+      }
+    } else {
+      // Fall back to just unzipping.
+      _logger.printTrace('Unable to find rsync, falling back to direct unzipping.');
+      _processUtils.runSync(
+        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+        throwOnError: true,
+        verboseExceptions: true,
+      );
+    }
+  }
 }
 
 class _WindowsUtils extends OperatingSystemUtils {

@@ -130,7 +130,6 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
     await driver.scrollUntilVisible(demoList, demoItem,
       dyScroll: -48.0,
       alignment: 0.5,
-      timeout: const Duration(seconds: 30),
     );
 
     for (int i = 0; i < 2; i += 1) {
@@ -181,7 +180,7 @@ void main([List<String> args = const <String>[]]) {
       // Assert that we can use semantics related finders in profile mode.
       final int id = await driver.getSemanticsId(find.bySemanticsLabel('Material'));
       expect(id, greaterThan(-1));
-    }, skip: !withSemantics);
+    }, skip: !withSemantics, timeout: Timeout.none);
 
     test('all demos', () async {
       // Collect timeline data for just a limited set of demos to avoid OOMs.
@@ -218,6 +217,6 @@ void main([List<String> args = const <String>[]]) {
         await runDemos(unprofiledDemos.toList(), driver);
       }
 
-    }, timeout: const Timeout(Duration(minutes: 5)));
+    }, timeout: Timeout.none);
   });
 }
