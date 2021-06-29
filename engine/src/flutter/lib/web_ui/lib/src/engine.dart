@@ -165,6 +165,8 @@ export 'engine/text/canvas_paragraph.dart';
 
 export 'engine/text/ruler.dart';
 
+export 'engine/text/text_direction.dart';
+
 export 'engine/text/unicode_range.dart';
 
 export 'engine/text/word_break_properties.dart';

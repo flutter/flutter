@@ -84,7 +84,10 @@ void testMain() async {
         // "Lorem "
         paragraph.getBoxesForRange(0, 6),
         <ui.TextBox>[
-          box(0, 0, 60, 10),
+          // "Lorem"
+          box(0, 0, 50, 10),
+          // " "
+          box(50, 0, 60, 10),
         ],
       );
 
@@ -101,7 +104,10 @@ void testMain() async {
         // "um "
         paragraph.getBoxesForRange(9, 12),
         <ui.TextBox>[
-          box(90, 0, 120, 10),
+          // "um"
+          box(90, 0, 110, 10),
+          // " "
+          box(110, 0, 120, 10),
         ],
       );
 
@@ -111,7 +117,11 @@ void testMain() async {
         // "rem ipsum"
         paragraph.getBoxesForRange(2, 11),
         <ui.TextBox>[
-          box(20, 0, 60, 10),
+          // "rem"
+          box(20, 0, 50, 10),
+          // " "
+          box(50, 0, 60, 10),
+          // "ipsum"
           box(60, 0, 110, 10),
         ],
       );
@@ -119,11 +129,18 @@ void testMain() async {
       // Across all spans "Lorem ", "ipsum ", ".".
 
       expect(
-        // "Lorem ipsum."
+        // "Lorem ipsum ."
         paragraph.getBoxesForRange(0, 13),
         <ui.TextBox>[
-          box(0, 0, 60, 10),
-          box(60, 0, 120, 10),
+          // "Lorem"
+          box(0, 0, 50, 10),
+          // " "
+          box(50, 0, 60, 10),
+          // "ipsum"
+          box(60, 0, 110, 10),
+          // " "
+          box(110, 0, 120, 10),
+          // "."
           box(120, 0, 130, 10),
         ],
       );
@@ -155,7 +172,10 @@ void testMain() async {
         // "Lorem "
         paragraph.getBoxesForRange(0, 6),
         <ui.TextBox>[
-          box(0, 0, 60, 10),
+          // "Lorem"
+          box(0, 0, 50, 10),
+          // " "
+          box(50, 0, 60, 10),
         ],
       );
 
@@ -165,7 +185,10 @@ void testMain() async {
         // "psum "
         paragraph.getBoxesForRange(7, 12),
         <ui.TextBox>[
-          box(10, 10, 60, 20),
+          // "psum"
+          box(10, 10, 50, 20),
+          // " "
+          box(50, 10, 60, 20),
         ],
       );
 
@@ -177,9 +200,20 @@ void testMain() async {
         // "dolor s"
         paragraph.getBoxesForRange(3, 19),
         <ui.TextBox>[
-          box(30, 0, 60, 10),
-          box(0, 10, 60, 20),
-          box(0, 20, 70, 30),
+          // "em"
+          box(30, 0, 50, 10),
+          // " "
+          box(50, 0, 60, 10),
+          // "ipsum"
+          box(0, 10, 50, 20),
+          // " "
+          box(50, 10, 60, 20),
+          // "dolor"
+          box(0, 20, 50, 30),
+          // " "
+          box(50, 20, 60, 30),
+          // "s"
+          box(60, 20, 70, 30),
         ],
       );
     });
@@ -213,7 +247,10 @@ void testMain() async {
         // "Lorem "
         paragraph.getBoxesForRange(0, 6),
         <ui.TextBox>[
-          box(0, 0, 60, 10),
+          // "Lorem"
+          box(0, 0, 50, 10),
+          // " "
+          box(50, 0, 60, 10),
         ],
       );
 
@@ -223,7 +260,10 @@ void testMain() async {
         // "psum "
         paragraph.getBoxesForRange(7, 12),
         <ui.TextBox>[
-          box(10, 10, 60, 20),
+          // "psum"
+          box(10, 10, 50, 20),
+          // " "
+          box(50, 10, 60, 20),
         ],
       );
 
@@ -233,7 +273,11 @@ void testMain() async {
         // "lor sit"
         paragraph.getBoxesForRange(14, 21),
         <ui.TextBox>[
-          box(20, 20, 60, 30),
+          // "lor"
+          box(20, 20, 50, 30),
+          // " "
+          box(50, 20, 60, 30),
+          // "sit"
           box(60, 20, 90, 30),
         ],
       );
@@ -246,9 +290,19 @@ void testMain() async {
         // "dolor s"
         paragraph.getBoxesForRange(3, 19),
         <ui.TextBox>[
-          box(30, 0, 60, 10),
-          box(0, 10, 60, 20),
-          box(0, 20, 60, 30),
+          //    "em"
+          box(30, 0, 50, 10),
+          //    " "
+          box(50, 0, 60, 10),
+          // "ipsum"
+          box(0, 10, 50, 20),
+          // " "
+          box(50, 10, 60, 20),
+          // "dolor"
+          box(0, 20, 50, 30),
+          // " "
+          box(50, 20, 60, 30),
+          // "s"
           box(60, 20, 70, 30),
         ],
       );
@@ -287,8 +341,15 @@ void testMain() async {
         // "em ipsum dol"
         paragraph.getBoxesForRange(3, 15),
         <ui.TextBox>[
-          box(60, 16, 120, 36),
-          box(120, 0, 360, 40),
+          // "em"
+          box(60, 16, 100, 36),
+          // " "
+          box(100, 16, 120, 36),
+          // "ipsum"
+          box(120, 0, 320, 40),
+          // " "
+          box(320, 0, 360, 40),
+          // "dol"
           box(360, 24, 390, 34),
         ],
       );
@@ -298,9 +359,19 @@ void testMain() async {
         // "sit amet"
         paragraph.getBoxesForRange(8, 26),
         <ui.TextBox>[
-          box(200, 0, 360, 40),
-          box(360, 24, 420, 34),
-          box(0, 40, 120, 70),
+          // "sum"
+          box(200, 0, 320, 40),
+          // " "
+          box(320, 0, 360, 40),
+          // "dolor"
+          box(360, 24, 410, 34),
+          // " "
+          box(410, 24, 420, 34),
+          // "sit"
+          box(0, 40, 90, 70),
+          // " "
+          box(90, 40, 120, 70),
+          // "amet"
           box(120, 48, 200, 68),
         ],
       );
