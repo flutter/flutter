@@ -964,9 +964,8 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
           // The client is waiting for view creation. Send an empty response
           // back to signal the view was created.
           if (message->response()) {
-            message->response()->Complete(
-                std::make_unique<fml::NonOwnedMapping>((const uint8_t*)"[0]",
-                                                       3u));
+            message->response()->Complete(std::make_unique<fml::DataMapping>(
+                std::vector<uint8_t>({'[', '0', ']'})));
           }
         });
     auto on_view_bound =
