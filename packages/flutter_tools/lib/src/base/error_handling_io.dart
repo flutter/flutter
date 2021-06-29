@@ -324,7 +324,6 @@ class ErrorHandlingFile
       failureMessage: 'Flutter failed to copy $path to $newPath due to source location error',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[path]),
     );
-    print('1');
     // Next check if the destination file can be written. If not, bail through
     // error handling.
     _runSync<void>(
@@ -332,14 +331,12 @@ class ErrorHandlingFile
       platform: _platform,
       failureMessage: 'Flutter failed to copy $path to $newPath due to destination location error'
     );
-    print('2');
     // If both of the above checks passed, attempt to copy the file and catch
     // any thrown errors.
     try {
       return wrapFile(delegate.copySync(newPath));
-    } on FileSystemException catch (err) {
+    } on FileSystemException {
       // Proceed below
-          print('3:$err');
     }
     // If the copy failed but both of the above checks passed, copy the bytes
     // directly.

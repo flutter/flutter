@@ -37,8 +37,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
-      ..onSemanticsAction = _handleSemanticsAction
-      ..onFrameDataChanged = _handleFrameDataChanged;
+      ..onSemanticsAction = _handleSemanticsAction;
+    if (kDebugMode) {
+      window.onFrameDataChanged = _handleFrameDataChanged;
+    }
     initRenderView();
     _handleSemanticsEnabledChanged();
     assert(renderView != null);
@@ -54,8 +56,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   static RendererBinding? _instance;
 
   /// The current frame number.
-  int get frameNumber => _frameNumber;
-  int _frameNumber = -1;
+  ///
+  /// Only valid in debug mode, in other modes this will always return
+  /// `-1`.
+  int get debugFrameNumber => _debugFrameNumber;
+  int _debugFrameNumber = -1;
 
   @override
   void initServiceExtensions() {
@@ -310,7 +315,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   void _handleFrameDataChanged() {
-    _frameNumber = window.frameData.frameNumber;
+    _debugFrameNumber = window.frameData.frameNumber;
   }
 
   void _handleWebFirstFrame(Duration _) {

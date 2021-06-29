@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, PlatformDispatcher;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -908,8 +907,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       SchedulerBinding.instance!.removeTimingsCallback(firstFrameCallback!);
     }
     assert(() {
-      print(RendererBinding.instance!.frameNumber);
-      Element.debugBuildRecorder?.finishFrame(RendererBinding.instance!.frameNumber);
+      Element.debugBuildRecorder?.finishFrame(RendererBinding.instance!.debugFrameNumber);
       return true;
     }());
   }
