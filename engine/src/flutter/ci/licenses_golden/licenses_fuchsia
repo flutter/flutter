@@ -1,4 +1,4 @@
-Signature: f131c0b211c8e0ac25a445ab12577ee8
+Signature: 2ba531a352a2c1e5999fa8cc8a6fc8bb
 
 UNUSED LICENSES:
 
@@ -591,7 +591,10 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
@@ -1318,7 +1321,10 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
@@ -1942,7 +1948,10 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
