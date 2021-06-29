@@ -194,6 +194,20 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(inputView.keyboardType, UIKeyboardTypeURL);
 }
 
+- (void)testSettingKeyboardTypeNoneDisablesSystemKeyboard {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [config setValue:@{@"name" : @"TextInputType.none"} forKey:@"inputType"];
+  [self setClientId:123 configuration:config];
+
+  // Verify the view's inputViewController is not nil;
+  XCTAssertNotNil(textInputPlugin.activeView.inputViewController);
+
+  [config setValue:@{@"name" : @"TextInputType.url"} forKey:@"inputType"];
+  [self setClientId:124 configuration:config];
+  XCTAssertNotNil(textInputPlugin.activeView);
+  XCTAssertNil(textInputPlugin.activeView.inputViewController);
+}
+
 - (void)testAutocorrectionPromptRectAppears {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithFrame:CGRectZero];
   inputView.textInputDelegate = engine;

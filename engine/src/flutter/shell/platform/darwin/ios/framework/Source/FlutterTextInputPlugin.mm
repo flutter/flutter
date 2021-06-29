@@ -55,6 +55,14 @@ static NSString* const kAutocorrectionType = @"autocorrect";
 
 #pragma mark - Static Functions
 
+// "TextInputType.none" is a made-up input type that's typically
+// used when there's an in-app virtual keyboard. If
+// "TextInputType.none" is specified, disable the system
+// keyboard.
+static BOOL shouldShowSystemKeyboard(NSDictionary* type) {
+  NSString* inputType = type[@"name"];
+  return ![inputType isEqualToString:@"TextInputType.none"];
+}
 static UIKeyboardType ToUIKeyboardType(NSDictionary* type) {
   NSString* inputType = type[@"name"];
   if ([inputType isEqualToString:@"TextInputType.address"])
@@ -516,7 +524,12 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   int _textInputClient;
   const char* _selectionAffinity;
   FlutterTextRange* _selectedTextRange;
+  UIInputViewController* _inputViewController;
   CGRect _cachedFirstRect;
+  // Whether to show the system keyboard when this view
+  // becomes the first responder. Typically set to false
+  // when the app shows its own in-flutter keyboard.
+  bool _isSystemKeyboardEnabled;
   bool _isFloatingCursorActive;
   // The view has reached end of life, and is no longer
   // allowed to access its textInputDelegate.
@@ -579,6 +592,8 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   NSDictionary* autofill = configuration[kAutofillProperties];
 
   self.secureTextEntry = [configuration[kSecureTextEntry] boolValue];
+
+  _isSystemKeyboardEnabled = shouldShowSystemKeyboard(inputType);
   self.keyboardType = ToUIKeyboardType(inputType);
   self.returnKeyType = ToUIReturnKeyType(configuration[kInputAction]);
   self.autocapitalizationType = ToUITextAutoCapitalizationType(configuration);
@@ -625,6 +640,17 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   return _textContentType;
 }
 
+- (UIInputViewController*)inputViewController {
+  if (_isSystemKeyboardEnabled) {
+    return nil;
+  }
+
+  if (!_inputViewController) {
+    _inputViewController = [UIInputViewController new];
+  }
+  return _inputViewController;
+}
+
 - (id<FlutterTextInputDelegate>)textInputDelegate {
   return _decommissioned ? nil : _textInputDelegate;
 }
@@ -649,6 +675,7 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   [_selectedTextRange release];
   [_tokenizer release];
   [_autofillId release];
+  [_inputViewController release];
   [super dealloc];
 }
 
