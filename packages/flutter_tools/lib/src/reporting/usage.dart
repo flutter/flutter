@@ -486,7 +486,7 @@ class TestUsageCommand {
   }
 
   @override
-  int get hashCode => Object.hash(command, parameters);
+  int get hashCode => command.hashCode ^ parameters.hashCode;
 
   @override
   String toString() => 'TestUsageCommand($command, parameters:$parameters)';
@@ -514,7 +514,11 @@ class TestUsageEvent {
   }
 
   @override
-  int get hashCode => Object.hash(category, parameter, label, value, parameters);
+  int get hashCode => category.hashCode ^
+    parameter.hashCode ^
+    label.hashCode ^
+    value.hashCode ^
+    parameters.hashCode;
 
   @override
   String toString() => 'TestUsageEvent($category, $parameter, label:$label, value:$value, parameters:$parameters)';
@@ -540,7 +544,10 @@ class TestTimingEvent {
   }
 
   @override
-  int get hashCode => Object.hash(category, variableName, duration, label);
+  int get hashCode => category.hashCode ^
+    variableName.hashCode ^
+    duration.hashCode ^
+    label.hashCode;
 
   @override
   String toString() => 'TestTimingEvent($category, $variableName, $duration, label:$label)';

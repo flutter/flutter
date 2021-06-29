@@ -166,14 +166,15 @@ class CommandArgs {
   }
 
   @override
-  int get hashCode {
-    return Object.hash(
-      command,
-      Object.hashAll(arguments ?? const <String>[]),
-      Object.hashAllUnordered(environment?.keys ?? const <String>[]),
-      Object.hashAllUnordered(environment?.values ?? const <String>[]),
-    );
-  }
+  int get hashCode => 17 * (17 * command.hashCode + _hashArguments) + _hashEnvironment;
+
+  int get _hashArguments => arguments != null
+    ? const ListEquality<String>().hash(arguments)
+    : null.hashCode;
+
+  int get _hashEnvironment => environment != null
+    ? const MapEquality<String, String>().hash(environment)
+    : null.hashCode;
 }
 
 class FakeDevice extends AndroidDevice {

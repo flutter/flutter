@@ -128,7 +128,10 @@ class Fingerprint {
   }
 
   @override
-  int get hashCode => Object.hash(Object.hashAllUnordered(_checksums.keys), Object.hashAllUnordered(_checksums.values));
+  // Ignore map entries here to avoid becoming inconsistent with equals
+  // due to differences in map entry order. This is a really bad hash
+  // function and should eventually be deprecated and removed.
+  int get hashCode => _checksums.length.hashCode;
 
   @override
   String toString() => '{checksums: $_checksums}';

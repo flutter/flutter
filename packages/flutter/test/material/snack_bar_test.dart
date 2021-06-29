@@ -744,7 +744,6 @@ void main() {
       popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
       dividerTheme: const DividerThemeData(color: Colors.black),
-      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.fixed),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.red)),

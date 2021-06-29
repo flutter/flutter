@@ -403,6 +403,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end, shift: true): ExpandSelectionToEndTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home, shift: true): ExpandSelectionToStartTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyX, meta: true): CutSelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteTextIntent(),
@@ -419,8 +421,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Control + shift + arrow right
     //   * End
     //   * Home
-    //   * Shift + end
-    //   * Shift + home
     //   * Control + delete
     //   * Control + backspace
   };
