@@ -49,8 +49,3 @@ task:
         cp -r $ENGINE_PATH/src/out/host_debug_unopt/gen/dart-pkg/sky_engine bin/cache/pkg/
         bin/flutter update-packages --local-engine=host_debug_unopt
         bin/flutter analyze --flutter-repo --local-engine=host_debug_unopt
-    # TODO(fujino): remove this once ci/licenses.sh is run on LUCI
-    - name: licenses_check
-      build_script: |
-        cd $ENGINE_PATH/src/flutter
-        ./ci/licenses.sh
