@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:file/file.dart';
 
