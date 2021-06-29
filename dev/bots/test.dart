@@ -1380,6 +1380,18 @@ Future<void> _pubRunTest(String workingDirectory, {
   }
 }
 
+// Used as an argument to the runTests internal function in the _runFlutterTest
+// function.
+enum _ShuffleMode {
+  // Runs only the tests not tagged with "no-shuffle" in a shuffled order.
+  shuffled,
+  // Runs only the tests that would fail if shuffled (those tagged with
+  // "no-shuffle").
+  unshuffled,
+  // Runs all tests without shuffling.
+  sequential,
+}
+
 Future<void> _runFlutterTest(String workingDirectory, {
   String script,
   bool expectFailure = false,
@@ -1419,16 +1431,34 @@ Future<void> _runFlutterTest(String workingDirectory, {
 
   testArgs.addAll(tests);
 
-  Future<void> runTestsOnce({@required bool separateShuffled, int seed}) async {
-    final bool runShuffled = separateShuffled && seed != null;
-    final bool runUnshuffled = separateShuffled && seed == null;
+  Future<void> runTests(_ShuffleMode shuffleMode) async {
+    int seed = 0;
+    final List<String> shuffleArgs = <String>[];
+    switch (shuffleMode) {
+      case _ShuffleMode.shuffled:
+        final DateTime now = DateTime.now();
+        // Generates YYYYMMDD as the seed, so that testing continues to fail on the
+        // day it was originally run, and on other days the seed can be used to
+        // replicate failures.
+        seed = now.year * 10000 + now.month * 100 + now.day;
+        print('Shuffling test order using arbitrary daily seed $seed.');
+        print('To run locally, run "flutter test -x no-shuffle --test-randomize-ordering-seed=$seed '
+            '&& flutter test -t no-shuffle" to run all tests (the latter part runs all the tests that '
+            "currently don't work when shuffled, the former skips those tests and shuffles the order "
+            'of the remaining tests).');
+        shuffleArgs.addAll(<String>['-x', 'no-shuffle', '--test-randomize-ordering-seed=$seed']);
+        break;
+      case _ShuffleMode.unshuffled:
+        shuffleArgs.addAll(<String>['-t', 'no-shuffle']);
+        break;
+      case _ShuffleMode.sequential:
+        break;
+    }
     final List<String> args = <String>[
       'test',
-      if (runShuffled) ... <String>['-x', 'no-shuffle', '--test-randomize-ordering-seed=$seed'],
-      if (runUnshuffled) ... <String>['-t', 'no-shuffle'],
+      ...shuffleArgs,
       ...testArgs,
     ];
-
     if (!shouldProcessOutput) {
       final OutputMode outputMode = outputChecker == null && printOutput
         ? OutputMode.print
@@ -1439,7 +1469,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
         args,
         workingDirectory: workingDirectory,
         expectNonZeroExit: expectFailure,
-        expectNoTests: runUnshuffled,
+        expectNoTests: shuffleMode == _ShuffleMode.unshuffled,
         outputMode: outputMode,
         skip: skip,
         environment: environment,
@@ -1461,7 +1491,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
           args,
           workingDirectory: workingDirectory,
           expectNonZeroExit: expectFailure,
-          expectNoTests: runUnshuffled,
+          expectNoTests: shuffleMode == _ShuffleMode.unshuffled,
           environment: environment,
         );
       } finally {
@@ -1474,29 +1504,20 @@ Future<void> _runFlutterTest(String workingDirectory, {
         args,
         workingDirectory: workingDirectory,
         expectNonZeroExit: expectFailure,
-        expectNoTests: runUnshuffled,
+        expectNoTests: shuffleMode == _ShuffleMode.unshuffled,
       );
     }
   }
 
   if (shuffleOrder) {
-    final DateTime now = DateTime.now();
-    // Generates YYYYMMDD as the seed, so that testing continues to fail on the
-    // day it was originally run, and on other days the seed can be used to
-    // replicate failures.
-    final int seed = now.year * 10000 + now.month * 100 + now.day;
-    // Runs the tests not tagged with "no-shuffle" in a shuffled order.
-    print('Shuffling test order using arbitrary daily seed $seed.');
-    print('To run locally, run both "flutter test -x no-shuffle --test-randomize-ordering-seed=$seed" '
-      'and "flutter test -t no-shuffle" to run all tests (the latter runs all the tests that '
-      "currently don't work when shuffled, the former skips those tests and shuffles the order).");
-    await runTestsOnce(separateShuffled: true, seed: seed);
-    // Runs only tests that can't currently be shuffled (those tagged with
+    // Runs only the tests not tagged with "no-shuffle" in a shuffled order.
+    await runTests(_ShuffleMode.shuffled);
+    // Runs only the tests that would fail if shuffled (those tagged with
     // "no-shuffle").
-    await runTestsOnce(separateShuffled: true);
+    await runTests(_ShuffleMode.unshuffled);
   } else {
     // Runs all tests without shuffling.
-    await runTestsOnce(separateShuffled: false);
+    await runTests(_ShuffleMode.sequential);
   }
 }
 

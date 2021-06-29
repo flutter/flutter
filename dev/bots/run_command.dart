@@ -192,6 +192,15 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
 
   final CommandResult result = await command.onExit;
 
+  // Currently, the test infrastructure fails if it doesn't find any tests to
+  // run, but in the case of tests tagged as "no-shuffle", there might either be
+  // none that can be shuffled, or none that shouldn't be shuffled, and since
+  // we're running it twice to get all the tests in either category, it
+  // shouldn't fail if no tests are run.
+  //
+  // TODO(gspencergoog): This is a workaround until
+  // https://github.com/dart-lang/test/issues/1546 is addressed. Remove the
+  // workaround (parsing the test output) when/if that issue is fixed.
   final bool skipErrorExit = expectNoTests &&
       result != null &&
       result.flattenedStdout != null &&
