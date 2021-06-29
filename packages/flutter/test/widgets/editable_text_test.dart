@@ -7261,9 +7261,6 @@ void main() {
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 1);
 
-    final String targetPlatform = defaultTargetPlatform.toString();
-    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
-
     // And the testShortcuts also moves to the right due to the Shortcuts override.
     for (final SingleActivator singleActivator in testShortcuts.keys) {
       controller.selection = const TextSelection.collapsed(offset: 0);
@@ -7273,7 +7270,7 @@ void main() {
         tester,
         <LogicalKeyboardKey>[singleActivator.trigger],
         shortcutModifier: singleActivator.control,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, 1);
@@ -7567,9 +7564,6 @@ void main() {
     expect(controller.selection.baseOffset, 1);
     expect(myIntentWasCalled, isFalse);
 
-    final String targetPlatform = defaultTargetPlatform.toString();
-    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
-
     // And the testSingleActivators also moves to the right due to the Shortcuts override.
     for (final SingleActivator singleActivator in testSingleActivators) {
       myIntentWasCalled = false;
@@ -7580,7 +7574,7 @@ void main() {
         tester,
         <LogicalKeyboardKey>[singleActivator.trigger],
         shortcutModifier: singleActivator.control,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, 1);
