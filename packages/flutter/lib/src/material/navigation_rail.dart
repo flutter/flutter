@@ -215,8 +215,9 @@ class NavigationRail extends StatefulWidget {
 
   /// The rail's elevation or z-coordinate.
   ///
-  /// If [Directionality] is [TextDirection.LTR], the inner side is the right
-  /// side, and if [Directionality] is [TextDirection.RTL], it is the left side.
+  /// If [Directionality] is [intl.TextDirection.LTR], the inner side is the
+  /// right side, and if [Directionality] is [intl.TextDirection.RTL], it is
+  /// the left side.
   ///
   /// The default value is 0.
   final double? elevation;
