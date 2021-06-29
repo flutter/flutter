@@ -57,6 +57,24 @@ enum KeyEventResult {
 /// was handled.
 typedef FocusOnKeyCallback = KeyEventResult Function(FocusNode node, RawKeyEvent event);
 
+// Represents a pending autofocus request.
+@immutable
+class _Autofocus {
+  const _Autofocus({ required this.scope, required this.autofocusNode });
+
+  final FocusScopeNode scope;
+  final FocusNode autofocusNode;
+
+  void apply() {
+    if (scope.focusedChild == null && autofocusNode.ancestors.contains(scope)) {
+      assert(_focusDebug('Applying autofocus: $autofocusNode'));
+      autofocusNode._doRequestFocus(findFirstFocus: true);
+    } else {
+      assert(_focusDebug('Autofocus request discarded for node: $autofocusNode.'));
+    }
+  }
+}
+
 /// An attachment point for a [FocusNode].
 ///
 /// Using a [FocusAttachment] is rarely needed, unless you are building
@@ -1287,14 +1305,16 @@ class FocusScopeNode extends FocusNode {
   /// The node is notified that it has received the primary focus in a
   /// microtask, so notification may lag the request by up to one frame.
   void autofocus(FocusNode node) {
-    assert(_focusDebug('Node autofocusing: $node'));
-    if (focusedChild == null) {
-      if (node._parent == null) {
-        _reparent(node);
-      }
-      assert(node.ancestors.contains(this), 'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
-      node._doRequestFocus(findFirstFocus: true);
+    // Attach the node to the tree first, so in _applyFocusChange if the node
+    // is detached we don't add it back to the tree.
+    if (node._parent == null) {
+      _reparent(node);
     }
+
+    assert(_manager != null);
+    assert(_focusDebug('Autofocus scheduled for $node: scope $this'));
+    _manager?._pendingAutofocuses.add(_Autofocus(scope: this, autofocusNode: node));
+    _manager?._markNeedsUpdate();
   }
 
   @override
@@ -1302,13 +1322,14 @@ class FocusScopeNode extends FocusNode {
     assert(findFirstFocus != null);
 
     // It is possible that a previously focused child is no longer focusable.
-    while (focusedChild != null && !focusedChild!.canRequestFocus)
+    while (this.focusedChild != null && !this.focusedChild!.canRequestFocus)
       _focusedChildren.removeLast();
 
+    final FocusNode? focusedChild = this.focusedChild;
     // If findFirstFocus is false, then the request is to make this scope the
     // focus instead of looking for the ultimate first focus for this scope and
     // its descendants.
-    if (!findFirstFocus) {
+    if (!findFirstFocus || focusedChild == null) {
       if (canRequestFocus) {
         _setAsFocusedChildForScope();
         _markNextFocus(this);
@@ -1316,28 +1337,7 @@ class FocusScopeNode extends FocusNode {
       return;
     }
 
-    // Start with the primary focus as the focused child of this scope, if there
-    // is one. Otherwise start with this node itself.
-    FocusNode primaryFocus = focusedChild ?? this;
-    // Keep going down through scopes until the ultimately focusable item is
-    // found, a scope doesn't have a focusedChild, or a non-scope is
-    // encountered.
-    while (primaryFocus is FocusScopeNode && primaryFocus.focusedChild != null) {
-      primaryFocus = primaryFocus.focusedChild!;
-    }
-    if (identical(primaryFocus, this)) {
-      // We didn't find a FocusNode at the leaf, so we're focusing the scope, if
-      // allowed.
-      if (primaryFocus.canRequestFocus) {
-        _setAsFocusedChildForScope();
-        _markNextFocus(this);
-      }
-    } else {
-      // We found a FocusScopeNode at the leaf, so ask it to focus itself
-      // instead of this scope. That will cause this scope to return true from
-      // hasFocus, but false from hasPrimaryFocus.
-      primaryFocus._doRequestFocus(findFirstFocus: findFirstFocus);
-    }
+    focusedChild._doRequestFocus(findFirstFocus: true);
   }
 
   @override
@@ -1735,6 +1735,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
+  // The list of autofocus requests made since the prevous _appyFocusChange
+  // call.
+  final List<_Autofocus> _pendingAutofocuses = <_Autofocus>[];
+
   // True indicates that there is an update pending.
   bool _haveScheduledUpdate = false;
 
@@ -1752,6 +1756,13 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   void _applyFocusChange() {
     _haveScheduledUpdate = false;
     final FocusNode? previousFocus = _primaryFocus;
+    for (final _Autofocus autofocus in _pendingAutofocuses) {
+      if (identical(autofocus.scope._manager, this)) {
+        autofocus.apply();
+      }
+    }
+    _pendingAutofocuses.clear();
+
     if (_primaryFocus == null && _markedForFocus == null) {
       // If we don't have any current focus, and nobody has asked to focus yet,
       // then revert to the root scope.

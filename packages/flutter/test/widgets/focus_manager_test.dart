@@ -166,6 +166,7 @@ void main() {
       ]);
     });
   });
+
   group(FocusScopeNode, () {
 
     testWidgets('Can setFirstFocus on a scope with no manager.', (WidgetTester tester) async {
@@ -1102,6 +1103,62 @@ void main() {
           '           PRIMARY FOCUS\n',
         ),
       );
+    });
+  });
+
+
+  group('Autofocus', () {
+    testWidgets(
+      'works when the previous focused node is detached',
+      (WidgetTester tester) async {
+        final FocusNode node1 = FocusNode();
+        final FocusNode node2 = FocusNode();
+
+        await tester.pumpWidget(
+          FocusScope(
+            child: Focus(autofocus: true, focusNode: node1, child: const Placeholder()),
+          ),
+        );
+        await tester.pump();
+        expect(node1.hasPrimaryFocus, isTrue);
+
+        await tester.pumpWidget(
+          FocusScope(
+            child: SizedBox(
+              child: Focus(autofocus: true, focusNode: node2, child: const Placeholder()),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(node2.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets(
+      'node detached before autofocus is applied',
+      (WidgetTester tester) async {
+        final FocusScopeNode scopeNode = FocusScopeNode();
+        final FocusNode node1 = FocusNode();
+
+        await tester.pumpWidget(
+          FocusScope(
+            node: scopeNode,
+            child: Focus(
+              autofocus: true,
+              focusNode: node1,
+              child: const Placeholder(),
+            ),
+          ),
+        );
+        await tester.pumpWidget(
+          FocusScope(
+            node: scopeNode,
+            child: const Focus(child: Placeholder()),
+          ),
+        );
+
+        await tester.pump();
+        expect(node1.hasPrimaryFocus, isFalse);
+        expect(scopeNode.hasPrimaryFocus, isTrue);
     });
   });
 
