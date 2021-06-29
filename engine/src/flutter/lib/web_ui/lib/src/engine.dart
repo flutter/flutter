@@ -93,6 +93,14 @@ export 'engine/html/shaders/vertex_shaders.dart';
 
 export 'engine/html/shaders/webgl_context.dart';
 
+import 'engine/keyboard_binding.dart';
+export 'engine/keyboard_binding.dart';
+
+import 'engine/keyboard.dart';
+export 'engine/keyboard.dart';
+
+export 'engine/key_map.dart';
+
 import 'engine/mouse_cursor.dart';
 export 'engine/mouse_cursor.dart';
 
@@ -272,9 +280,6 @@ part 'engine/html/shader_mask.dart';
 part 'engine/html/surface.dart';
 part 'engine/html/surface_stats.dart';
 part 'engine/html/transform.dart';
-part 'engine/keyboard_binding.dart';
-part 'engine/keyboard.dart';
-part 'engine/key_map.dart';
 part 'engine/onscreen_logging.dart';
 part 'engine/picture.dart';
 part 'engine/platform_dispatcher.dart';
