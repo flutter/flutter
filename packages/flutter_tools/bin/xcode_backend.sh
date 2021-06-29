@@ -187,7 +187,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
     -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                      \
     -dDartObfuscation="${DART_OBFUSCATION}"                               \
     -dEnableBitcode="${bitcode_flag}"                                     \
-    "${codesign_identity_flag}"                                           \
+    ${codesign_identity_flag}                                             \
     ${bundle_sksl_path}                                                   \
     ${code_size_directory}                                                \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \

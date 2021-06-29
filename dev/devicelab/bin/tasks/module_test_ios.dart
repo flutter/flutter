@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -358,21 +360,24 @@ Future<void> main() async {
         );
 
         if (testResultExit != 0) {
-          // Zip the test results to the artifacts directory for upload.
-          await inDirectory(resultBundleTemp, () {
-            final String zipPath = path.join(hostAgent.dumpDirectory.path,
-                'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
-            return exec(
-              'zip',
-              <String>[
-                '-r',
-                '-9',
-                zipPath,
-                'result.xcresult',
-              ],
-              canFail: true, // Best effort to get the logs.
-            );
-          });
+          final Directory dumpDirectory = hostAgent.dumpDirectory;
+          if (dumpDirectory != null) {
+            // Zip the test results to the artifacts directory for upload.
+            await inDirectory(resultBundleTemp, () {
+              final String zipPath = path.join(dumpDirectory.path,
+                  'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
+              return exec(
+                'zip',
+                <String>[
+                  '-r',
+                  '-9',
+                  zipPath,
+                  'result.xcresult',
+                ],
+                canFail: true, // Best effort to get the logs.
+              );
+            });
+          }
 
           throw TaskResult.failure('Platform unit tests failed');
         }

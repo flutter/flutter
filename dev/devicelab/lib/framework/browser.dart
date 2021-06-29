@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert' show json, utf8, LineSplitter, JsonEncoder;
 import 'dart:io' as io;
@@ -271,7 +273,7 @@ Future<Uri> _getRemoteDebuggerUrl(Uri base) async {
   if (jsonObject == null || jsonObject.isEmpty) {
     return base;
   }
-  return base.resolve(jsonObject.first['webSocketDebuggerUrl'] as String);
+  return base.resolve((jsonObject.first as Map<String, dynamic>)['webSocketDebuggerUrl'] as String);
 }
 
 /// Summarizes a Blink trace down to a few interesting values.

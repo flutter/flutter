@@ -3,6 +3,13 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependency have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=456"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -134,17 +141,19 @@ class CyclicDiagnostic extends DiagnosticableTree {
 }
 
 class _CreationLocation {
-  const _CreationLocation({
+  _CreationLocation({
     required this.file,
     required this.line,
     required this.column,
     required this.id,
+    this.name,
   });
 
   final String file;
   final int line;
   final int column;
   final int id;
+  String? name;
 }
 
 typedef InspectorServiceExtensionCallback = FutureOr<Map<String, Object>> Function(Map<String, String> parameters);
@@ -316,11 +325,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      expect(getInspectorState().selection.current, isNull);
+      expect(getInspectorState().selection.current, isNull); // ignore: avoid_dynamic_calls
       await tester.tap(find.text('TOP'), warnIfMissed: false);
       await tester.pump();
       // Tap intercepted by the inspector
       expect(log, equals(<String>[]));
+      // ignore: avoid_dynamic_calls
       final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
       expect(paragraphText(selection.current! as RenderParagraph), equals('TOP'));
       final RenderObject topButton = find.byKey(topButtonKey).evaluate().first.renderObject!;
@@ -334,6 +344,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(log, equals(<String>['bottom']));
       log.clear();
       // Ensure the inspector selection has not changed to bottom.
+      // ignore: avoid_dynamic_calls
       expect(paragraphText(getInspectorState().selection.current as RenderParagraph), equals('TOP'));
 
       await tester.tap(find.byKey(selectButtonKey));
@@ -344,6 +355,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.tap(find.text('BOTTOM'), warnIfMissed: false);
       expect(log, equals(<String>[]));
       log.clear();
+      // ignore: avoid_dynamic_calls
       expect(paragraphText(getInspectorState().selection.current as RenderParagraph), equals('BOTTOM'));
     });
 
@@ -417,7 +429,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       await tester.tap(find.byType(ListView), warnIfMissed: false);
       await tester.pump();
-      expect(getInspectorState().selection.current, isNotNull);
+      expect(getInspectorState().selection.current, isNotNull); // ignore: avoid_dynamic_calls
 
       // Now out of inspect mode due to the click.
       await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0);
@@ -507,10 +519,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final dynamic inspectorState = inspectorKey.currentState;
       // The object with width 95.0 wins over the object with width 94.0 because
       // the subtree with width 94.0 is offstage.
+      // ignore: avoid_dynamic_calls
       expect(inspectorState.selection.current.semanticBounds.width, equals(95.0));
 
       // Exactly 2 out of the 3 text elements should be in the candidate list of
       // objects to select as only 2 are onstage.
+      // ignore: avoid_dynamic_calls
       expect(inspectorState.selection.candidates.where((RenderObject object) => object is RenderParagraph).length, equals(2));
     });
 
@@ -618,6 +632,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
+      // ignore: avoid_dynamic_calls
       final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
       // The selection is static, so it may be initialized from previous tests.
       selection.clear();
@@ -943,7 +958,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final String fileA = creationLocationA['file']! as String;
       final int lineA = creationLocationA['line']! as int;
       final int columnA = creationLocationA['column']! as int;
-      final List<Object?> parameterLocationsA = creationLocationA['parameterLocations']! as List<Object?>;
+      final String nameA = creationLocationA['name']! as String;
+      expect(nameA, equals('Text'));
 
       service.setSelection(elementB, 'my-group');
       final Map<String, Object?> jsonB = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
@@ -952,7 +968,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final String fileB = creationLocationB['file']! as String;
       final int lineB = creationLocationB['line']! as int;
       final int columnB = creationLocationB['column']! as int;
-      final List<Object?> parameterLocationsB = creationLocationB['parameterLocations']! as List<Object?>;
+      final String? nameB = creationLocationB['name'] as String?;
+      expect(nameB, equals('Text'));
       expect(fileA, endsWith('widget_inspector_test.dart'));
       expect(fileA, equals(fileB));
       // We don't hardcode the actual lines the widgets are created on as that
@@ -961,21 +978,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(columnA, equals(15));
       expect(columnA, equals(columnB));
-      expect(parameterLocationsA.length, equals(1));
-      final Map<String, Object?> paramA = parameterLocationsA[0]! as Map<String, Object?>;
-      expect(paramA['name'], equals('data'));
-      expect(paramA['line'], equals(lineA));
-      expect(paramA['column'], equals(20));
-
-      expect(parameterLocationsB.length, equals(2));
-      final Map<String, Object?> paramB1 = parameterLocationsB[0]! as Map<String, Object?>;
-      expect(paramB1['name'], equals('data'));
-      expect(paramB1['line'], equals(lineB));
-      expect(paramB1['column'], equals(20));
-      final Map<String, Object?> paramB2 = parameterLocationsB[1]! as Map<String, Object?>;
-      expect(paramB2['name'], equals('textDirection'));
-      expect(paramB2['line'], equals(lineB));
-      expect(paramB2['column'], equals(25));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('test transformDebugCreator will re-order if after stack trace', (WidgetTester tester) async {
@@ -1743,7 +1745,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final String fileA = creationLocationA['file']! as String;
       final int lineA = creationLocationA['line']! as int;
       final int columnA = creationLocationA['column']! as int;
-      final List<Object?> parameterLocationsA = creationLocationA['parameterLocations']! as List<Object?>;
 
       service.setSelection(elementB, 'my-group');
       final Map<String, Object?> jsonB = (await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}))! as Map<String, Object?>;
@@ -1752,7 +1753,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final String fileB = creationLocationB['file']! as String;
       final int lineB = creationLocationB['line']! as int;
       final int columnB = creationLocationB['column']! as int;
-      final List<Object?> parameterLocationsB = creationLocationB['parameterLocations']! as List<Object?>;
       expect(fileA, endsWith('widget_inspector_test.dart'));
       expect(fileA, equals(fileB));
       // We don't hardcode the actual lines the widgets are created on as that
@@ -1761,21 +1761,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(columnA, equals(15));
       expect(columnA, equals(columnB));
-      expect(parameterLocationsA.length, equals(1));
-      final Map<String, Object?> paramA = parameterLocationsA[0]! as Map<String, Object?>;
-      expect(paramA['name'], equals('data'));
-      expect(paramA['line'], equals(lineA));
-      expect(paramA['column'], equals(20));
-
-      expect(parameterLocationsB.length, equals(2));
-      final Map<String, Object?> paramB1 = parameterLocationsB[0]! as Map<String, Object?>;
-      expect(paramB1['name'], equals('data'));
-      expect(paramB1['line'], equals(lineB));
-      expect(paramB1['column'], equals(20));
-      final Map<String, Object?> paramB2 = parameterLocationsB[1]! as Map<String, Object?>;
-      expect(paramB2['name'], equals('textDirection'));
-      expect(paramB2['line'], equals(lineB));
-      expect(paramB2['column'], equals(25));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.setPubRootDirectories', (WidgetTester tester) async {
@@ -1953,6 +1938,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(newLocations, isNotNull);
       expect(newLocations.length, equals(1));
       expect(newLocations.keys.first, equals(file));
+      final Map<String, Map<int, String>> newLocationsNames = event['newLocationsNames']! as Map<String, Map<int, String>>;
+      expect(newLocationsNames, isNotNull);
+      expect(newLocationsNames.length, equals(1));
+      expect(newLocationsNames.keys.first, equals(file));
       final List<int> locationsForFile = newLocations[file]!;
       expect(locationsForFile.length, equals(21));
       final int numLocationEntries = locationsForFile.length ~/ 3;
@@ -1962,6 +1951,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _addToKnownLocationsMap(
         knownLocations: knownLocations,
         newLocations: newLocations,
+        newLocationsNames: newLocationsNames,
       );
       int totalCount = 0;
       int maxCount = 0;
@@ -1990,6 +1980,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
+      expect(event, isNot(contains('newLocationsNames')));
 
       // There were two rebuilds: one for the ClockText element itself and one
       // for its child.
@@ -1999,8 +1990,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(53));
+      expect(location.line, equals(60));
       expect(location.column, equals(9));
+      expect(location.name, equals('ClockText'));
       expect(count, equals(1));
 
       id = data[2];
@@ -2008,8 +2000,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(91));
+      expect(location.line, equals(98));
       expect(location.column, equals(12));
+      expect(location.name, equals('Text'));
       expect(count, equals(1));
 
       // Update 3 of the clocks;
@@ -2026,6 +2019,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
+      expect(event, isNot(contains('newLocationsNames')));
 
       expect(data.length, equals(4));
       id = data[0];
@@ -2033,8 +2027,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(53));
+      expect(location.line, equals(60));
       expect(location.column, equals(9));
+      expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
       id = data[2];
@@ -2042,8 +2037,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(91));
+      expect(location.line, equals(98));
       expect(location.column, equals(12));
+      expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
       // Update one clock 3 times.
@@ -2060,6 +2056,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
+      expect(event, isNot(contains('newLocationsNames')));
 
       expect(data.length, equals(4));
       id = data[0];
@@ -2087,6 +2084,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _addToKnownLocationsMap(
         knownLocations: knownLocations,
         newLocations: newLocations,
+        newLocationsNames: newLocationsNames,
       );
       // Verify the rebuild location was included in the newLocations data.
       expect(knownLocations, contains(id));
@@ -2151,6 +2149,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(newLocations, isNotNull);
       expect(newLocations.length, equals(1));
       expect(newLocations.keys.first, equals(file));
+      final Map<String, Map<int, String>> newLocationsNames = event['newLocationsNames']! as Map<String, Map<int, String>>;
+      expect(newLocationsNames, isNotNull);
+      expect(newLocationsNames.length, equals(1));
+      expect(newLocationsNames.keys.first, equals(file));
       final List<int> locationsForFile = newLocations[file]!;
       expect(locationsForFile.length, equals(27));
       final int numLocationEntries = locationsForFile.length ~/ 3;
@@ -2161,6 +2163,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _addToKnownLocationsMap(
         knownLocations: knownLocations,
         newLocations: newLocations,
+        newLocationsNames: newLocationsNames,
       );
       int totalCount = 0;
       int maxCount = 0;
@@ -2189,6 +2192,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
+      expect(event, isNot(contains('newLocationsNames')));
 
       // Triggering a rebuild of one widget in this app causes the whole app
       // to repaint.
@@ -2862,12 +2866,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       service.setPubRootDirectories(<String>[pubRootTest]);
 
       final String summary = service.getRootWidgetSummaryTree('foo1');
+      // ignore: avoid_dynamic_calls
       final List<Object?> childrenOfRoot = json.decode(summary)['children'] as List<Object?>;
       final List<Object?> childrenOfMaterialApp = (childrenOfRoot.first! as Map<String, Object?>)['children']! as List<Object?>;
       final Map<String, Object?> scaffold = childrenOfMaterialApp.first! as Map<String, Object?>;
       expect(scaffold['description'], 'Scaffold');
       final String objectId = scaffold['objectId']! as String;
       final String details = service.getDetailsSubtree(objectId, 'foo2');
+      // ignore: avoid_dynamic_calls
       final List<Object?> detailedChildren = json.decode(details)['children'] as List<Object?>;
 
       final List<Map<String, Object?>> appBars = <Map<String, Object?>>[];
@@ -3042,6 +3048,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 void _addToKnownLocationsMap({
   required Map<int, _CreationLocation> knownLocations,
   required Map<String, List<int>> newLocations,
+  required Map<String, Map<int, String>> newLocationsNames,
 }) {
   newLocations.forEach((String file, List<int> entries) {
     assert(entries.length % 3 == 0);
@@ -3053,5 +3060,10 @@ void _addToKnownLocationsMap({
       knownLocations[id] =
           _CreationLocation(file: file, line: line, column: column, id: id);
     }
+  });
+  newLocationsNames.forEach((String file, Map<int, String> namesInfo) {
+    namesInfo.forEach((int id, String name) {
+      knownLocations[id]!.name = name;
+    });
   });
 }

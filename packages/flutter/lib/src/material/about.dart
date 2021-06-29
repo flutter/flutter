@@ -675,23 +675,23 @@ class _PackagesViewState extends State<_PackagesView> {
             .asMap()
             .entries
             .map<Widget>((MapEntry<int, String> entry) {
-          final String packageName = entry.value;
-          final int index = entry.key;
-          final List<int> bindings = data.packageLicenseBindings[packageName]!;
-          return _PackageListTile(
-            packageName: packageName,
-            index: index,
-            isSelected: drawSelection && entry.key == (selectedId ?? 0),
-            numberLicenses: bindings.length,
-            onTap: () {
-              widget.selectedId.value = index;
-              _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
-                packageName,
-                bindings.map((int i) => data.licenses[i]).toList(growable: false),
-              ));
-            },
-          );
-        }),
+              final String packageName = entry.value;
+              final int index = entry.key;
+              final List<int> bindings = data.packageLicenseBindings[packageName]!;
+              return _PackageListTile(
+                packageName: packageName,
+                index: index,
+                isSelected: drawSelection && entry.key == (selectedId ?? 0),
+                numberLicenses: bindings.length,
+                onTap: () {
+                  widget.selectedId.value = index;
+                  _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
+                    packageName,
+                    bindings.map((int i) => data.licenses[i]).toList(growable: false),
+                  ));
+                },
+              );
+            }),
       ],
     );
   }
@@ -1419,7 +1419,7 @@ class _MasterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      return Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: title,
           leading: leading,

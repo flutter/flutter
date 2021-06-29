@@ -57,18 +57,16 @@ class AndroidWorkflow implements Workflow {
     && _operatingSystemUtils.hostPlatform != HostPlatform.linux_arm64;
 
   @override
-  bool get canListDevices => _androidSdk != null
+  bool get canListDevices => appliesToHostPlatform && _androidSdk != null
     && _androidSdk?.adbPath != null;
 
   @override
-  bool get canLaunchDevices => _androidSdk != null
+  bool get canLaunchDevices => appliesToHostPlatform && _androidSdk != null
     && _androidSdk?.adbPath != null
     && _androidSdk?.validateSdkWellFormed().isEmpty == true;
 
   @override
-  bool get canListEmulators => _androidSdk != null
-    && _androidSdk?.adbPath != null
-    && _androidSdk?.emulatorPath != null;
+  bool get canListEmulators => canListDevices && _androidSdk?.emulatorPath != null;
 }
 
 /// A validator that checks if the Android SDK and Java SDK are available and

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependency have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -262,6 +268,7 @@ void main() {
         r'   owner: RenderView#[0-9a-f]{5}\n'
         r'   creator: RenderView\n'
         r'   engine layer: (TransformEngineLayer|PersistedTransform)#[0-9a-f]{5}\n'
+        r'   handles: 1\n'
         r'   offset: Offset\(0\.0, 0\.0\)\n'
         r'   transform:\n'
         r'     \[0] 3\.0,0\.0,0\.0,0\.0\n'

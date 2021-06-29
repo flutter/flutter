@@ -104,8 +104,8 @@ void main() {
       await start(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
-  });
-
+  }, skip: true, // Flaky tests: https://github.com/flutter/flutter/issues/84012
+  );
 
   group('Flutter test for web', () {
     final TestsProject project = TestsProject();
@@ -170,7 +170,8 @@ void main() {
       await startPaused(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
-  });
+  }, skip: true, // Flaky tests: https://github.com/flutter/flutter/issues/84012
+  );
 }
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {

@@ -540,20 +540,24 @@ class _AndroidMotionEventConverter {
     );
   }
 
-  void handlePointerUpEvent(PointerUpEvent event) {
-    pointerPositions.remove(event.pointer);
-    usedAndroidPointerIds.remove(pointerProperties[event.pointer]!.id);
-    pointerProperties.remove(event.pointer);
+  void _remove(int pointer) {
+    pointerPositions.remove(pointer);
+    usedAndroidPointerIds.remove(pointerProperties[pointer]!.id);
+    pointerProperties.remove(pointer);
     if (pointerProperties.isEmpty) {
       downTimeMillis = null;
     }
   }
 
+  void handlePointerUpEvent(PointerUpEvent event) {
+    _remove(event.pointer);
+  }
+
   void handlePointerCancelEvent(PointerCancelEvent event) {
-    pointerPositions.clear();
-    pointerProperties.clear();
-    usedAndroidPointerIds.clear();
-    downTimeMillis = null;
+    // The pointer cancel event is handled like pointer up. Normally,
+    // the difference is that pointer cancel doesn't perform any action,
+    // but in this case neither up or cancel perform any action.
+    _remove(event.pointer);
   }
 
   AndroidMotionEvent? toAndroidMotionEvent(PointerEvent event) {

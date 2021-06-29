@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:flutter_devicelab/common.dart';
 
-import '../framework/adb.dart';
+import '../framework/devices.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -107,7 +108,7 @@ abstract class BuildTestTask {
     }
 
     if (!testOnly) {
-      unawaited(build());
+      await build();
     }
 
     if (buildOnly) {

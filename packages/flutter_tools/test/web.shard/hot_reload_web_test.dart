@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file/file.dart';
 
@@ -70,5 +71,5 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  });
+  }, skip: Platform.isWindows); // Skipping for https://github.com/flutter/flutter/issues/85043
 }

@@ -302,6 +302,44 @@ FlutterError
     expect(curved.value, moreOrLessEquals(0.0));
   });
 
+  test('CurvedAnimation stops listening to parent when disposed.', () async {
+    const Interval forwardCurve = Interval(0.0, 0.5);
+    const Interval reverseCurve = Interval(0.5, 1.0);
+
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+    final CurvedAnimation curved = CurvedAnimation(
+        parent: controller, curve: forwardCurve, reverseCurve: reverseCurve);
+
+    expect(forwardCurve.transform(0.5), 1.0);
+    expect(reverseCurve.transform(0.5), 0.0);
+
+    controller.forward(from: 0.5);
+    expect(controller.status, equals(AnimationStatus.forward));
+    expect(curved.value, equals(1.0));
+
+    controller.value = 1.0;
+    expect(controller.status, equals(AnimationStatus.completed));
+
+    controller.reverse(from: 0.5);
+    expect(controller.status, equals(AnimationStatus.reverse));
+    expect(curved.value, equals(0.0));
+
+    expect(curved.isDisposed, isFalse);
+    curved.dispose();
+    expect(curved.isDisposed, isTrue);
+
+    controller.value = 0.0;
+    expect(controller.status, equals(AnimationStatus.dismissed));
+
+    controller.forward(from: 0.5);
+    expect(controller.status, equals(AnimationStatus.forward));
+    expect(curved.value, equals(0.0));
+  });
+
   test('ReverseAnimation running with different forward and reverse durations.', () {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
