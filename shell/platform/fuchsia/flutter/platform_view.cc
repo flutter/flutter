@@ -909,12 +909,13 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     return false;
   }
   auto root = document.GetObject();
-  auto method = root.FindMember("method");
-  if (method == root.MemberEnd() || !method->value.IsString()) {
+  auto method_member = root.FindMember("method");
+  if (method_member == root.MemberEnd() || !method_member->value.IsString()) {
     return false;
   }
+  std::string method(method_member->value.GetString());
 
-  if (method->value == "View.enableWireframe") {
+  if (method == "View.enableWireframe") {
     auto args_it = root.FindMember("args");
     if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
       FML_LOG(ERROR) << "No arguments found.";
@@ -929,7 +930,7 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     }
 
     wireframe_enabled_callback_(enable->value.GetBool());
-  } else if (method->value == "View.create") {
+  } else if (method == "View.create") {
     auto args_it = root.FindMember("args");
     if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
       FML_LOG(ERROR) << "No arguments found.";
@@ -988,7 +989,7 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
         view_id_raw, std::move(on_view_created), std::move(on_view_bound),
         hit_testable->value.GetBool(), focusable->value.GetBool());
     return true;
-  } else if (method->value == "View.update") {
+  } else if (method == "View.update") {
     auto args_it = root.FindMember("args");
     if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
       FML_LOG(ERROR) << "No arguments found.";
@@ -1055,7 +1056,7 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     on_update_view_callback_(
         view_id->value.GetUint64(), view_occlusion_hint_raw,
         hit_testable->value.GetBool(), focusable->value.GetBool());
-  } else if (method->value == "View.dispose") {
+  } else if (method == "View.dispose") {
     auto args_it = root.FindMember("args");
     if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
       FML_LOG(ERROR) << "No arguments found.";
@@ -1087,15 +1088,16 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
           });
         };
     on_destroy_view_callback_(view_id_raw, std::move(on_view_unbound));
-  } else if (method->value == "HostView.getCurrentFocusState") {
+  } else if (method.rfind("View.focus", 0) == 0) {
+    return focus_delegate_->HandlePlatformMessage(root, message->response());
+  } else if (method == "HostView.getCurrentFocusState") {
     return focus_delegate_->CompleteCurrentFocusState(message->response());
-  } else if (method->value == "HostView.getNextFocusState") {
+  } else if (method == "HostView.getNextFocusState") {
     return focus_delegate_->CompleteNextFocusState(message->response());
-  } else if (method->value == "View.requestFocus") {
+  } else if (method == "View.requestFocus") {
     return focus_delegate_->RequestFocus(root, message->response());
   } else {
-    FML_DLOG(ERROR) << "Unknown " << message->channel() << " method "
-                    << method->value.GetString();
+    FML_DLOG(ERROR) << "Unknown " << message->channel() << " method " << method;
   }
   // Complete with an empty response by default.
   return false;
