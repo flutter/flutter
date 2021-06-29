@@ -1012,4 +1012,32 @@ void main() {
     expect(icons.elementAt(2).color, arrowHeadColor);
     expect(icons.elementAt(3).color, arrowHeadColor);
   });
+
+  testWidgets('OverflowBar header left alignment', (WidgetTester tester) async {
+    // Test an old special case that tried to align the first child of a ButtonBar
+    // and the left edge of a Text header widget. Still possible with OverflowBar
+    // albeit without any special case in the implementation's build method.
+    Widget buildFrame(Widget header) {
+      return MaterialApp(
+        home: PaginatedDataTable(
+          header: header,
+          rowsPerPage: 2,
+          source: TestDataSource(),
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(const Text('HEADER')));
+    final double headerX = tester.getTopLeft(find.text('HEADER')).dx;
+    final Widget overflowBar = OverflowBar(
+      children: <Widget>[ElevatedButton(onPressed: () {}, child: const Text('BUTTON'))],
+    );
+    await tester.pumpWidget(buildFrame(overflowBar));
+    expect(headerX, tester.getTopLeft(find.byType(ElevatedButton)).dx);
+  });
 }
