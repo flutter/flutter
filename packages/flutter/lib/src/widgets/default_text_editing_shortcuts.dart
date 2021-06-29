@@ -522,14 +522,14 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.end, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.home, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.space): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
-    SingleActivator(LogicalKeyboardKey.keyX, meta: true): CutSelectionTextIntent(),
-    SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
-    SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent(),
-    SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
-    SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteTextIntent(),
-    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
-    SingleActivator(LogicalKeyboardKey.keyA, meta: true): SelectAllTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, meta: true): DoNothingAndStopPropagationTextIntent(),
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {
