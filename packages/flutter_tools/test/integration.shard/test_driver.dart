@@ -620,10 +620,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     }
 
     _debugPrint('Performing ${ pause ? "paused " : "" }${ fullRestart ? "hot restart" : "hot reload" }...');
-    final Map<String, dynamic> hotReloadResponse = await _sendRequest(
+    final Map<String, dynamic>? hotReloadResponse = await _sendRequest(
       'app.restart',
       <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause, 'debounce': debounce, 'debounceDurationOverrideMs': debounceDurationOverrideMs},
-    ) as Map<String, dynamic>;
+    ) as Map<String, dynamic>?;
     _debugPrint('${fullRestart ? "Hot restart" : "Hot reload"} complete.');
 
     if (hotReloadResponse == null || hotReloadResponse['code'] != 0) {
