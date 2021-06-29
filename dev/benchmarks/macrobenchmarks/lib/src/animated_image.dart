@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart';
 
 class AnimatedImagePage extends StatelessWidget {
-  const AnimatedImagePage({Key key, this.onFrame}) : super(key: key);
+  const AnimatedImagePage({Key? key, this.onFrame}) : super(key: key);
 
-  final ValueChanged<int> onFrame;
+  final ValueChanged<int>? onFrame;
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +18,9 @@ class AnimatedImagePage extends StatelessWidget {
       body: Image.asset(
         'animated_images/animated_flutter_lgtm.gif',
         package: 'flutter_gallery_assets',
-        frameBuilder: (BuildContext context, Widget child, int/*?*/ frame, bool syncCall) {
+        frameBuilder: (BuildContext context, Widget child, int? frame, bool syncCall) {
           if (onFrame != null && frame != null) {
-            onFrame(frame);
+            onFrame?.call(frame);
           }
           return child;
         },

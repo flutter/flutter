@@ -81,7 +81,7 @@ final GetStackPointerCallback getStackPointer = () {
 }();
 
 class StackSizePage extends StatelessWidget {
-  const StackSizePage({Key key}) : super(key: key);
+  const StackSizePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +100,7 @@ class StackSizePage extends StatelessWidget {
 }
 
 class ParentWidget extends StatelessWidget {
-  const ParentWidget({Key key}) : super(key: key);
+  const ParentWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +110,7 @@ class ParentWidget extends StatelessWidget {
 }
 
 class ChildWidget extends StatelessWidget {
-  const ChildWidget({this.parentStackSize, Key key}) : super(key: key);
+  const ChildWidget({required this.parentStackSize, Key? key}) : super(key: key);
   final int parentStackSize;
 
   @override
