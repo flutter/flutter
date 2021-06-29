@@ -284,7 +284,7 @@ class CodesignCommand extends Command<void> {
     // First print all deviations from expectations
     if (unsignedBinaries.isNotEmpty) {
       stdio.printError('Found ${unsignedBinaries.length} unsigned binaries:');
-      unsignedBinaries.forEach(print);
+      unsignedBinaries.forEach(stdio.printError);
     }
 
     if (wrongEntitlementBinaries.isNotEmpty) {
