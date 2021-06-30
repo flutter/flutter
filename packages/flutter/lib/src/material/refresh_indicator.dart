@@ -122,12 +122,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = 2.0,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
-  }) : assert(child != null),
-       assert(onRefresh != null),
-       assert(notificationPredicate != null),
-       assert(strokeWidth != null),
-       assert(triggerMode != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -436,7 +431,6 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
       .then<void>((void value) {
         if (mounted && _mode == _RefreshIndicatorMode.snap) {
-          assert(widget.onRefresh != null);
           setState(() {
             // Show the indeterminate progress indicator.
             _mode = _RefreshIndicatorMode.refresh;

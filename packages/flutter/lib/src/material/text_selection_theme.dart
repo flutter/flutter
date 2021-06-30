@@ -72,7 +72,6 @@ class TextSelectionThemeData with Diagnosticable {
   static TextSelectionThemeData? lerp(TextSelectionThemeData? a, TextSelectionThemeData? b, double t) {
     if (a == null && b == null)
       return null;
-    assert(t != null);
     return TextSelectionThemeData(
       cursorColor: Color.lerp(a?.cursorColor, b?.cursorColor, t),
       selectionColor: Color.lerp(a?.selectionColor, b?.selectionColor, t),
@@ -140,7 +139,7 @@ class TextSelectionTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// The properties for descendant [TextField] and [SelectableText] widgets.
   final TextSelectionThemeData data;

@@ -156,9 +156,6 @@ class Typography with Diagnosticable {
     TextTheme tall,
   ) {
     assert(platform != null || (black != null && white != null));
-    assert(englishLike != null);
-    assert(dense != null);
-    assert(tall != null);
     switch (platform) {
       case TargetPlatform.iOS:
         black ??= blackCupertino;
@@ -187,12 +184,7 @@ class Typography with Diagnosticable {
     return Typography._(black!, white!, englishLike, dense, tall);
   }
 
-  const Typography._(this.black, this.white, this.englishLike, this.dense, this.tall)
-    : assert(black != null),
-      assert(white != null),
-      assert(englishLike != null),
-      assert(dense != null),
-      assert(tall != null);
+  const Typography._(this.black, this.white, this.englishLike, this.dense, this.tall);
 
   /// A material design text theme with dark glyphs.
   ///
@@ -250,7 +242,6 @@ class Typography with Diagnosticable {
 
   /// Returns one of [englishLike], [dense], or [tall].
   TextTheme geometryThemeFor(ScriptCategory category) {
-    assert(category != null);
     switch (category) {
       case ScriptCategory.englishLike:
         return englishLike;

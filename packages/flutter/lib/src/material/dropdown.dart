@@ -441,8 +441,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.menuMaxHeight,
     required this.enableFeedback,
     this.borderRadius,
-  }) : assert(style != null),
-       itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
+  }) : itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
 
   final List<_MenuItem<T>> items;
   final EdgeInsetsGeometry padding;
@@ -659,7 +658,7 @@ class _MenuItem<T> extends SingleChildRenderObjectWidget {
     Key? key,
     required this.onLayout,
     required this.item,
-  }) : assert(onLayout != null), super(key: key, child: item);
+  }) : super(key: key, child: item);
 
   final ValueChanged<Size> onLayout;
   final DropdownMenuItem<T>? item;
@@ -676,7 +675,7 @@ class _MenuItem<T> extends SingleChildRenderObjectWidget {
 }
 
 class _RenderMenuItem extends RenderProxyBox {
-  _RenderMenuItem(this.onLayout, [RenderBox? child]) : assert(onLayout != null), super(child);
+  _RenderMenuItem(this.onLayout, [RenderBox? child]) : super(child);
 
   ValueChanged<Size> onLayout;
 
@@ -698,8 +697,7 @@ class _DropdownMenuItemContainer extends StatelessWidget {
     Key? key,
     this.alignment = AlignmentDirectional.centerStart,
     required this.child,
-  }) : assert(child != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -743,8 +741,7 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
     this.enabled = true,
     AlignmentGeometry alignment = AlignmentDirectional.centerStart,
     required Widget child,
-  }) : assert(child != null),
-       super(key: key, alignment:alignment, child: child);
+  }) : super(key: key, alignment:alignment, child: child);
 
   /// Called when the dropdown menu item is tapped.
   final VoidCallback? onTap;
@@ -772,8 +769,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
   const DropdownButtonHideUnderline({
     Key? key,
     required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// Returns whether the underline of [DropdownButton] widgets should
   /// be hidden.
@@ -921,11 +917,6 @@ class DropdownButton<T> extends StatefulWidget {
                 'Either zero or 2 or more [DropdownMenuItem]s were detected '
                 'with the same value',
               ),
-       assert(elevation != null),
-       assert(iconSize != null),
-       assert(isDense != null),
-       assert(isExpanded != null),
-       assert(autofocus != null),
        assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
        super(key: key);
 
@@ -1623,13 +1614,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                 'Either zero or 2 or more [DropdownMenuItem]s were detected '
                 'with the same value',
               ),
-       assert(elevation != null),
-       assert(iconSize != null),
-       assert(isDense != null),
-       assert(isExpanded != null),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
-       assert(autofocus != null),
-       assert(autovalidate != null),
        assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,

@@ -48,8 +48,7 @@ class Dialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.child,
-  }) : assert(clipBehavior != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
   /// The background color of the surface of this [Dialog].
@@ -286,9 +285,7 @@ class AlertDialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.scrollable = false,
-  }) : assert(contentPadding != null),
-       assert(clipBehavior != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -767,9 +764,7 @@ class SimpleDialog extends StatelessWidget {
     this.insetPadding = _defaultInsetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
-  }) : assert(titlePadding != null),
-       assert(contentPadding != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -1052,10 +1047,6 @@ Future<T?> showDialog<T>({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
 }) {
-  assert(builder != null);
-  assert(barrierDismissible != null);
-  assert(useSafeArea != null);
-  assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   final CapturedThemes themes = InheritedTheme.capture(
@@ -1131,8 +1122,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     bool useSafeArea = true,
     RouteSettings? settings,
-  }) : assert(barrierDismissible != null),
-       super(
+  }) : super(
          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
            final Widget pageChild = Builder(builder: builder);
            Widget dialog = themes?.wrap(pageChild) ?? pageChild;

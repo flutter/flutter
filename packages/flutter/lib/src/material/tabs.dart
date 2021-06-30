@@ -237,9 +237,7 @@ class _TabLabelBarRenderer extends RenderFlex {
     required TextDirection textDirection,
     required VerticalDirection verticalDirection,
     required this.onPerformLayout,
-  }) : assert(onPerformLayout != null),
-       assert(textDirection != null),
-       super(
+  }) : super(
          children: children,
          direction: direction,
          mainAxisSize: mainAxisSize,
@@ -266,7 +264,6 @@ class _TabLabelBarRenderer extends RenderFlex {
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
-    assert(textDirection != null);
     switch (textDirection!) {
       case TextDirection.rtl:
         xOffsets.insert(0, size.width);
@@ -341,9 +338,7 @@ class _IndicatorPainter extends CustomPainter {
     required this.tabKeys,
     required _IndicatorPainter? old,
     required this.indicatorPadding,
-  }) : assert(controller != null),
-       assert(indicator != null),
-       super(repaint: controller.animation) {
+  }) : super(repaint: controller.animation) {
     if (old != null)
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
   }
@@ -544,7 +539,6 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
       // scenario, setting the actual dimension would cause a strange scroll
       // effect without this guard because the super call below would starts a
       // ballistic scroll activity.
-      assert(viewportDimension != null);
       _initialViewportDimensionWasZero = viewportDimension != 0.0;
       correctPixels(tabBar._initialScrollOffset(viewportDimension, minScrollExtent, maxScrollExtent));
       result = false;
@@ -728,11 +722,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.enableFeedback,
     this.onTap,
     this.physics,
-  }) : assert(tabs != null),
-       assert(isScrollable != null),
-       assert(dragStartBehavior != null),
-       assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
-       assert(indicator != null || (indicatorPadding != null)),
+  }) : assert(indicator != null || indicatorWeight > 0.0),
        super(key: key);
 
   /// Typically a list of two or more [Tab] widgets.
@@ -1351,9 +1341,7 @@ class TabBarView extends StatefulWidget {
     this.controller,
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(children != null),
-       assert(dragStartBehavior != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// This widget's selection and animation state.
   ///
@@ -1576,10 +1564,7 @@ class TabPageSelectorIndicator extends StatelessWidget {
     required this.backgroundColor,
     required this.borderColor,
     required this.size,
-  }) : assert(backgroundColor != null),
-       assert(borderColor != null),
-       assert(size != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The indicator circle's background color.
   final Color backgroundColor;
@@ -1620,7 +1605,7 @@ class TabPageSelector extends StatelessWidget {
     this.indicatorSize = 12.0,
     this.color,
     this.selectedColor,
-  }) : assert(indicatorSize != null && indicatorSize > 0.0),
+  }) : assert(indicatorSize > 0.0),
        super(key: key);
 
   /// This widget's selection and animation state.

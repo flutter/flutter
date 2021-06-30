@@ -60,9 +60,7 @@ class FlatButton extends MaterialButton {
     required Widget child,
     double? height,
     double? minWidth,
-  }) : assert(clipBehavior != null),
-       assert(autofocus != null),
-       super(
+  }) : super(
          key: key,
          height: height,
          minWidth: minWidth,
@@ -197,11 +195,7 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
     required Widget label,
     double? minWidth,
     double? height,
-  }) : assert(icon != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       super(
+  }) : super(
          key: key,
          onPressed: onPressed,
          onLongPress: onLongPress,

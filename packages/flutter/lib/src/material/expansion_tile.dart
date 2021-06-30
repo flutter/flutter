@@ -108,9 +108,7 @@ class ExpansionTile extends StatefulWidget {
     this.iconColor,
     this.collapsedIconColor,
     this.controlAffinity,
-  }) : assert(initiallyExpanded != null),
-       assert(maintainState != null),
-       assert(
+  }) : assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
            'are aligned in a column, not a row. Try to use another constant.',

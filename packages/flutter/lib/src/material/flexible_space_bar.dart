@@ -158,8 +158,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.titlePadding,
     this.collapseMode = CollapseMode.parallax,
     this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
-  }) : assert(collapseMode != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The primary contents of the flexible space bar when expanded.
   ///
@@ -225,7 +224,6 @@ class FlexibleSpaceBar extends StatefulWidget {
     required double currentExtent,
     required Widget child,
   }) {
-    assert(currentExtent != null);
     return FlexibleSpaceBarSettings(
       toolbarOpacity: toolbarOpacity ?? 1.0,
       minExtent: minExtent ?? currentExtent,
@@ -244,7 +242,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   bool _getEffectiveCenterTitle(ThemeData theme) {
     if (widget.centerTitle != null)
       return widget.centerTitle!;
-    assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -261,7 +258,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     if (effectiveCenterTitle)
       return Alignment.bottomCenter;
     final TextDirection textDirection = Directionality.of(context);
-    assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.rtl:
         return Alignment.bottomRight;
@@ -449,10 +445,9 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
     required this.currentExtent,
     required Widget child,
     this.isScrolledUnder,
-  }) : assert(toolbarOpacity != null),
-       assert(minExtent != null && minExtent >= 0),
-       assert(maxExtent != null && maxExtent >= 0),
-       assert(currentExtent != null && currentExtent >= 0),
+  }) : assert(minExtent >= 0),
+       assert(maxExtent >= 0),
+       assert(currentExtent >= 0),
        assert(toolbarOpacity >= 0.0),
        assert(minExtent <= maxExtent),
        assert(minExtent <= currentExtent),

@@ -142,7 +142,7 @@ class Drawer extends StatelessWidget {
     this.elevation = 16.0,
     this.child,
     this.semanticLabel,
-  }) : assert(elevation != null && elevation >= 0.0),
+  }) : assert(elevation >= 0.0),
        super(key: key);
 
   /// The z-coordinate at which to place this drawer relative to its parent.
@@ -236,10 +236,7 @@ class DrawerController extends StatefulWidget {
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
-  }) : assert(child != null),
-       assert(dragStartBehavior != null),
-       assert(alignment != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -496,7 +493,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerOuterAlignment {
-    assert(widget.alignment != null);
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerStart;
@@ -506,7 +502,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerInnerAlignment {
-    assert(widget.alignment != null);
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerEnd;
@@ -565,7 +560,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = false;
           break;
       }
-      assert(platformHasBackButton != null);
       return GestureDetector(
         key: _gestureDetectorKey,
         onHorizontalDragDown: _handleDragDown,

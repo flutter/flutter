@@ -80,7 +80,6 @@ class ListTileTheme extends InheritedTheme {
     double? minLeadingWidth,
     required Widget child,
   }) {
-    assert(child != null);
     return Builder(
       builder: (BuildContext context) {
         final ListTileTheme parent = ListTileTheme.of(context);
@@ -755,11 +754,7 @@ class ListTile extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.minLeadingWidth,
-  }) : assert(isThreeLine != null),
-       assert(enabled != null),
-       assert(selected != null),
-       assert(autofocus != null),
-       assert(!isThreeLine || subtitle != null),
+  }) : assert(!isThreeLine || subtitle != null),
        super(key: key);
 
   /// A widget to display before the title.
@@ -977,7 +972,6 @@ class ListTile extends StatelessWidget {
   ///
   ///  * [Divider], which you can use to obtain this effect manually.
   static Iterable<Widget> divideTiles({ BuildContext? context, required Iterable<Widget> tiles, Color? color }) sync* {
-    assert(tiles != null);
     assert(color != null || context != null);
 
     final Iterator<Widget> iterator = tiles.iterator;
@@ -1235,15 +1229,7 @@ class _ListTile extends RenderObjectWidget {
     required this.minVerticalPadding,
     required this.minLeadingWidth,
     this.subtitleBaselineType,
-  }) : assert(isThreeLine != null),
-       assert(isDense != null),
-       assert(visualDensity != null),
-       assert(textDirection != null),
-       assert(titleBaselineType != null),
-       assert(horizontalTitleGap != null),
-       assert(minVerticalPadding != null),
-       assert(minLeadingWidth != null),
-       super(key: key);
+  }) : super(key: key);
 
   final Widget? leading;
   final Widget title;
@@ -1407,15 +1393,7 @@ class _RenderListTile extends RenderBox {
     required double horizontalTitleGap,
     required double minVerticalPadding,
     required double minLeadingWidth,
-  }) : assert(isDense != null),
-       assert(visualDensity != null),
-       assert(isThreeLine != null),
-       assert(textDirection != null),
-       assert(titleBaselineType != null),
-       assert(horizontalTitleGap != null),
-       assert(minVerticalPadding != null),
-       assert(minLeadingWidth != null),
-       _isDense = isDense,
+  }) : _isDense = isDense,
        _visualDensity = visualDensity,
        _isThreeLine = isThreeLine,
        _textDirection = textDirection,
@@ -1478,7 +1456,6 @@ class _RenderListTile extends RenderBox {
   bool get isDense => _isDense;
   bool _isDense;
   set isDense(bool value) {
-    assert(value != null);
     if (_isDense == value)
       return;
     _isDense = value;
@@ -1488,7 +1465,6 @@ class _RenderListTile extends RenderBox {
   VisualDensity get visualDensity => _visualDensity;
   VisualDensity _visualDensity;
   set visualDensity(VisualDensity value) {
-    assert(value != null);
     if (_visualDensity == value)
       return;
     _visualDensity = value;
@@ -1498,7 +1474,6 @@ class _RenderListTile extends RenderBox {
   bool get isThreeLine => _isThreeLine;
   bool _isThreeLine;
   set isThreeLine(bool value) {
-    assert(value != null);
     if (_isThreeLine == value)
       return;
     _isThreeLine = value;
@@ -1508,7 +1483,6 @@ class _RenderListTile extends RenderBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value)
       return;
     _textDirection = value;
@@ -1518,7 +1492,6 @@ class _RenderListTile extends RenderBox {
   TextBaseline get titleBaselineType => _titleBaselineType;
   TextBaseline _titleBaselineType;
   set titleBaselineType(TextBaseline value) {
-    assert(value != null);
     if (_titleBaselineType == value)
       return;
     _titleBaselineType = value;
@@ -1539,7 +1512,6 @@ class _RenderListTile extends RenderBox {
   double get _effectiveHorizontalTitleGap => _horizontalTitleGap + visualDensity.horizontal * 2.0;
 
   set horizontalTitleGap(double value) {
-    assert(value != null);
     if (_horizontalTitleGap == value)
       return;
     _horizontalTitleGap = value;
@@ -1550,7 +1522,6 @@ class _RenderListTile extends RenderBox {
   double _minVerticalPadding;
 
   set minVerticalPadding(double value) {
-    assert(value != null);
     if (_minVerticalPadding == value)
       return;
     _minVerticalPadding = value;
@@ -1561,7 +1532,6 @@ class _RenderListTile extends RenderBox {
   double _minLeadingWidth;
 
   set minLeadingWidth(double value) {
-    assert(value != null);
     if (_minLeadingWidth == value)
       return;
     _minLeadingWidth = value;
@@ -1857,7 +1827,6 @@ class _RenderListTile extends RenderBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    assert(position != null);
     for (final RenderBox child in _children) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(

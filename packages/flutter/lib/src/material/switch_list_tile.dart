@@ -281,11 +281,7 @@ class SwitchListTile extends StatelessWidget {
     this.shape,
     this.selectedTileColor,
   }) : _switchListTileType = _SwitchListTileType.material,
-       assert(value != null),
-       assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(autofocus != null),
        super(key: key);
 
   /// Creates a Material [ListTile] with an adaptive [Switch], following
@@ -323,11 +319,7 @@ class SwitchListTile extends StatelessWidget {
     this.shape,
     this.selectedTileColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
-       assert(value != null),
-       assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(autofocus != null),
        super(key: key);
 
   /// Whether this switch is checked.

@@ -21,7 +21,6 @@ class MatrixUtils {
   ///
   /// Otherwise, returns null.
   static Offset? getAsTranslation(Matrix4 transform) {
-    assert(transform != null);
     final Float64List values = transform.storage;
     // Values are stored in column-major order.
     if (values[0] == 1.0 && // col 1
@@ -48,7 +47,6 @@ class MatrixUtils {
   ///
   /// Otherwise, returns null.
   static double? getAsScale(Matrix4 transform) {
-    assert(transform != null);
     final Float64List values = transform.storage;
     // Values are stored in column-major order.
     if (values[1] == 0.0 && // col 1 (value 0 is the scale)
@@ -81,7 +79,7 @@ class MatrixUtils {
       return isIdentity(b!);
     if (b == null)
       return isIdentity(a);
-    assert(a != null && b != null);
+    assert(a != null && b != null); // TODO(werainkhatri): verify redundancy
     return a.storage[0] == b.storage[0]
         && a.storage[1] == b.storage[1]
         && a.storage[2] == b.storage[2]
@@ -102,7 +100,6 @@ class MatrixUtils {
 
   /// Whether the given matrix is the identity matrix.
   static bool isIdentity(Matrix4 a) {
-    assert(a != null);
     return a.storage[0] == 1.0 // col 1
         && a.storage[1] == 0.0
         && a.storage[2] == 0.0
@@ -437,7 +434,6 @@ class MatrixUtils {
   /// The transformed rect is then projected back into the plane with z equals
   /// 0.0 before computing its bounding rect.
   static Rect inverseTransformRect(Matrix4 transform, Rect rect) {
-    assert(rect != null);
     // As exposed by `unrelated_type_equality_checks`, this assert was a no-op.
     // Fixing it introduces a bunch of runtime failures; for more context see:
     // https://github.com/flutter/flutter/pull/31568
@@ -486,10 +482,7 @@ class MatrixUtils {
     double perspective = 0.001,
     Axis orientation = Axis.vertical,
   }) {
-    assert(radius != null);
-    assert(angle != null);
     assert(perspective >= 0 && perspective <= 1.0);
-    assert(orientation != null);
 
     // Pre-multiplied matrix of a projection matrix and a view matrix.
     //
@@ -559,9 +552,7 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
     bool showName = true,
     Object? defaultValue = kNoDefaultValue,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(showName != null),
-       assert(level != null),
-       super(
+  }) : super(
          name,
          value,
          showName: showName,

@@ -143,7 +143,6 @@ class ButtonBarThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ButtonBarThemeData? lerp(ButtonBarThemeData? a, ButtonBarThemeData? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     return ButtonBarThemeData(
@@ -237,7 +236,7 @@ class ButtonBarTheme extends InheritedWidget {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// The properties used for all descendant [ButtonBar] widgets.
   final ButtonBarThemeData data;

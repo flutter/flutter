@@ -90,11 +90,7 @@ class HSVColor {
   /// All the arguments must not be null and be in their respective ranges. See
   /// the fields for each parameter for a description of their ranges.
   const HSVColor.fromAHSV(this.alpha, this.hue, this.saturation, this.value)
-    : assert(alpha != null),
-      assert(hue != null),
-      assert(saturation != null),
-      assert(value != null),
-      assert(alpha >= 0.0),
+    : assert(alpha >= 0.0),
       assert(alpha <= 1.0),
       assert(hue >= 0.0),
       assert(hue <= 360.0),
@@ -199,7 +195,6 @@ class HSVColor {
   ///
   /// Values outside of the valid range for each channel will be clamped.
   static HSVColor? lerp(HSVColor? a, HSVColor? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -259,11 +254,7 @@ class HSLColor {
   /// All the arguments must not be null and be in their respective ranges. See
   /// the fields for each parameter for a description of their ranges.
   const HSLColor.fromAHSL(this.alpha, this.hue, this.saturation, this.lightness)
-    : assert(alpha != null),
-      assert(hue != null),
-      assert(saturation != null),
-      assert(lightness != null),
-      assert(alpha >= 0.0),
+    : assert(alpha >= 0.0),
       assert(alpha <= 1.0),
       assert(hue >= 0.0),
       assert(hue <= 360.0),
@@ -383,7 +374,6 @@ class HSLColor {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static HSLColor? lerp(HSLColor? a, HSLColor? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -472,10 +462,7 @@ class ColorProperty extends DiagnosticsProperty<Color> {
     Object? defaultValue = kNoDefaultValue,
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(showName != null),
-       assert(style != null),
-       assert(level != null),
-       super(name, value,
+  }) : super(name, value,
          defaultValue: defaultValue,
          showName: showName,
          style: style,

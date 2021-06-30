@@ -260,7 +260,6 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        assert(child != null);
         child.build(
           builder,
           textScaleFactor: textScaleFactor,

@@ -171,9 +171,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.initialValue,
-  }) : assert(displayStringForOption != null),
-       assert(optionsBuilder != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
   final AutocompleteOptionToString<T> displayStringForOption;

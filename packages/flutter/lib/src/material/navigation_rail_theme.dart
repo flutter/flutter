@@ -106,7 +106,6 @@ class NavigationRailThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static NavigationRailThemeData? lerp(NavigationRailThemeData? a, NavigationRailThemeData? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     return NavigationRailThemeData(
@@ -182,7 +181,7 @@ class NavigationRailTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// Specifies the background color, elevation, label text style, icon theme,
   /// group alignment, and label type and border values for descendant

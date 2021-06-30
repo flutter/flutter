@@ -102,7 +102,6 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   }) {
     assert(cacheWidth == null || cacheWidth > 0);
     assert(cacheHeight == null || cacheHeight > 0);
-    assert(allowUpscaling != null);
     return ui.instantiateImageCodec(
       bytes,
       targetWidth: cacheWidth,

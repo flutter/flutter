@@ -22,11 +22,8 @@ class _ColorsAndStops {
 
 /// Calculate the color at position [t] of the gradient defined by [colors] and [stops].
 Color _sample(List<Color> colors, List<double> stops, double t) {
-  assert(colors != null);
   assert(colors.isNotEmpty);
-  assert(stops != null);
   assert(stops.isNotEmpty);
-  assert(t != null);
   if (t <= stops.first)
     return colors.first;
   if (t >= stops.last)
@@ -107,7 +104,6 @@ class GradientRotation extends GradientTransform {
 
   @override
   Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
-    assert(bounds != null);
     final double sinRadians = math.sin(radians);
     final double oneMinusCosRadians = 1 - math.cos(radians);
     final Offset center = bounds.center;
@@ -150,7 +146,7 @@ abstract class Gradient {
     required this.colors,
     this.stops,
     this.transform,
-  }) : assert(colors != null);
+  });
 
   /// The colors the gradient should obtain at each of the stops.
   ///
@@ -288,7 +284,6 @@ abstract class Gradient {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Gradient? lerp(Gradient? a, Gradient? b, double t) {
-    assert(t != null);
     Gradient? result;
     if (b != null)
       result = b.lerpFrom(a, t); // if a is null, this must return non-null

@@ -38,9 +38,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   const ContinuousRectangleBorder({
     BorderSide side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
-  }) : assert(side != null),
-       assert(borderRadius != null),
-       super(side: side);
+  }) : super(side: side);
 
   /// The radius for each corner.
   ///
@@ -61,7 +59,6 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -73,7 +70,6 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    assert(t != null);
     if (b is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),

@@ -94,7 +94,7 @@ class OutlinedButtonTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// The configuration of this theme.
   final OutlinedButtonThemeData data;

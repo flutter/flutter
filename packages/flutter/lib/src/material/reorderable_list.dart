@@ -94,10 +94,7 @@ class ReorderableListView extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(scrollDirection != null),
-       assert(onReorder != null),
-       assert(children != null),
-       assert(
+  }) : assert(
          itemExtent == null || prototypeItem == null,
          'You can only pass itemExtent or prototypeItem, not both',
        ),
@@ -105,7 +102,6 @@ class ReorderableListView extends StatefulWidget {
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
        ),
-       assert(buildDefaultDragHandles != null),
        itemBuilder = ((BuildContext context, int index) => children[index]),
        itemCount = children.length,
        super(key: key);
@@ -192,14 +188,11 @@ class ReorderableListView extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(scrollDirection != null),
-       assert(itemCount >= 0),
-       assert(onReorder != null),
+  }) : assert(itemCount >= 0),
        assert(
          itemExtent == null || prototypeItem == null,
          'You can only pass itemExtent or prototypeItem, not both',
        ),
-       assert(buildDefaultDragHandles != null),
        super(key: key);
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}

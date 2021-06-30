@@ -28,7 +28,7 @@ class CircleBorder extends OutlinedBorder {
   /// Create a circle border.
   ///
   /// The [side] argument must not be null.
-  const CircleBorder({ BorderSide side = BorderSide.none }) : assert(side != null), super(side: side);
+  const CircleBorder({ BorderSide side = BorderSide.none }) : super(side: side);
 
   @override
   EdgeInsetsGeometry get dimensions {

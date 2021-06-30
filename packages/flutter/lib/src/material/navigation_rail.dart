@@ -140,14 +140,12 @@ class NavigationRail extends StatefulWidget {
     this.selectedIconTheme,
     this.minWidth,
     this.minExtendedWidth,
-  }) :  assert(destinations != null && destinations.length >= 2),
-        assert(selectedIndex != null),
+  }) :  assert(destinations.length >= 2),
         assert(0 <= selectedIndex && selectedIndex < destinations.length),
         assert(elevation == null || elevation > 0),
         assert(minWidth == null || minWidth > 0),
         assert(minExtendedWidth == null || minExtendedWidth > 0),
         assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
-        assert(extended != null),
         assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none)),
         super(key: key);
 
@@ -583,19 +581,7 @@ class _RailDestination extends StatelessWidget {
     required this.onTap,
     required this.indexLabel,
     this.padding,
-  }) : assert(minWidth != null),
-       assert(minExtendedWidth != null),
-       assert(icon != null),
-       assert(label != null),
-       assert(destinationAnimation != null),
-       assert(extendedTransitionAnimation != null),
-       assert(labelType != null),
-       assert(selected != null),
-       assert(iconTheme != null),
-       assert(labelTextStyle != null),
-       assert(onTap != null),
-       assert(indexLabel != null),
-       _positionAnimation = CurvedAnimation(
+  }) : _positionAnimation = CurvedAnimation(
           parent: ReverseAnimation(destinationAnimation),
           curve: Curves.easeInOut,
           reverseCurve: Curves.easeInOut.flipped,
@@ -823,9 +809,7 @@ class NavigationRailDestination {
     Widget? selectedIcon,
     required this.label,
     this.padding,
-  }) : selectedIcon = selectedIcon ?? icon,
-       assert(icon != null),
-       assert(label != null);
+  }) : selectedIcon = selectedIcon ?? icon;
 
   /// The icon of the destination.
   ///
@@ -871,8 +855,7 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
     Key? key,
     required this.animation,
     required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   final Animation<double> animation;
 

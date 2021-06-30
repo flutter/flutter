@@ -113,7 +113,6 @@ class Card extends StatelessWidget {
     this.child,
     this.semanticContainer = true,
   }) : assert(elevation == null || elevation >= 0.0),
-       assert(borderOnForeground != null),
        super(key: key);
 
   /// The card's background color.

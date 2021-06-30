@@ -66,10 +66,7 @@ class BorderSide {
     this.color = const Color(0xFF000000),
     this.width = 1.0,
     this.style = BorderStyle.solid,
-  }) : assert(color != null),
-       assert(width != null),
-       assert(width >= 0.0),
-       assert(style != null);
+  }) : assert(width >= 0.0);
 
   /// Creates a [BorderSide] that represents the addition of the two given
   /// [BorderSide]s.
@@ -83,8 +80,6 @@ class BorderSide {
   ///
   /// The arguments must not be null.
   static BorderSide merge(BorderSide a, BorderSide b) {
-    assert(a != null);
-    assert(b != null);
     assert(canMerge(a, b));
     final bool aIsNone = a.style == BorderStyle.none && a.width == 0.0;
     final bool bIsNone = b.style == BorderStyle.none && b.width == 0.0;
@@ -157,7 +152,6 @@ class BorderSide {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   BorderSide scale(double t) {
-    assert(t != null);
     return BorderSide(
       color: color,
       width: math.max(0.0, width * t),
@@ -194,8 +188,6 @@ class BorderSide {
   ///
   /// The arguments must not be null.
   static bool canMerge(BorderSide a, BorderSide b) {
-    assert(a != null);
-    assert(b != null);
     if ((a.style == BorderStyle.none && a.width == 0.0) ||
         (b.style == BorderStyle.none && b.width == 0.0))
       return true;
@@ -209,9 +201,6 @@ class BorderSide {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
-    assert(a != null);
-    assert(b != null);
-    assert(t != null);
     if (t == 0.0)
       return a;
     if (t == 1.0)
@@ -426,7 +415,6 @@ abstract class ShapeBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ShapeBorder? lerp(ShapeBorder? a, ShapeBorder? b, double t) {
-    assert(t != null);
     ShapeBorder? result;
     if (b != null)
       result = b.lerpFrom(a, t);
@@ -499,7 +487,7 @@ abstract class OutlinedBorder extends ShapeBorder {
   /// const constructors so that they can be used in const expressions.
   ///
   /// The value of [side] must not be null.
-  const OutlinedBorder({ this.side = BorderSide.none }) : assert(side != null);
+  const OutlinedBorder({ this.side = BorderSide.none });
 
   /// The border outline's color and weight.
   ///
@@ -517,8 +505,7 @@ abstract class OutlinedBorder extends ShapeBorder {
 /// The borders are listed from the outside to the inside.
 class _CompoundBorder extends ShapeBorder {
   _CompoundBorder(this.borders)
-    : assert(borders != null),
-      assert(borders.length >= 2),
+    : assert(borders.length >= 2),
       assert(!borders.any((ShapeBorder border) => border is _CompoundBorder));
 
   final List<ShapeBorder> borders;
@@ -581,7 +568,6 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   static _CompoundBorder lerp(ShapeBorder? a, ShapeBorder? b, double t) {
-    assert(t != null);
     assert(a is _CompoundBorder || b is _CompoundBorder); // Not really necessary, but all call sites currently intend this.
     final List<ShapeBorder?> aList = a is _CompoundBorder ? a.borders : <ShapeBorder?>[a];
     final List<ShapeBorder?> bList = b is _CompoundBorder ? b.borders : <ShapeBorder?>[b];
@@ -677,13 +663,6 @@ void paintBorder(
   BorderSide bottom = BorderSide.none,
   BorderSide left = BorderSide.none,
 }) {
-  assert(canvas != null);
-  assert(rect != null);
-  assert(top != null);
-  assert(right != null);
-  assert(bottom != null);
-  assert(left != null);
-
   // We draw the borders as filled shapes, unless the borders are hairline
   // borders, in which case we use PaintingStyle.stroke, with the stroke width
   // specified here.

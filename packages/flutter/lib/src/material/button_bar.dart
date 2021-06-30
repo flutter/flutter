@@ -312,8 +312,7 @@ class _RenderButtonBarRow extends RenderFlex {
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline? textBaseline,
     this.overflowButtonSpacing,
-  }) : assert(textDirection != null),
-       assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0),
+  }) : assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0),
        super(
          children: children,
          direction: direction,

@@ -31,19 +31,7 @@ class ColorScheme with Diagnosticable {
     required this.onBackground,
     required this.onError,
     required this.brightness,
-  }) : assert(primary != null),
-       assert(primaryVariant != null),
-       assert(secondary != null),
-       assert(secondaryVariant != null),
-       assert(surface != null),
-       assert(background != null),
-       assert(error != null),
-       assert(onPrimary != null),
-       assert(onSecondary != null),
-       assert(onSurface != null),
-       assert(onBackground != null),
-       assert(onError != null),
-       assert(brightness != null);
+  });
 
   /// Create a ColorScheme based on a purple primary color that matches the
   /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
@@ -61,19 +49,7 @@ class ColorScheme with Diagnosticable {
     this.onBackground = Colors.black,
     this.onError = Colors.white,
     this.brightness = Brightness.light,
-  }) : assert(primary != null),
-       assert(primaryVariant != null),
-       assert(secondary != null),
-       assert(secondaryVariant != null),
-       assert(surface != null),
-       assert(background != null),
-       assert(error != null),
-       assert(onPrimary != null),
-       assert(onSecondary != null),
-       assert(onSurface != null),
-       assert(onBackground != null),
-       assert(onError != null),
-       assert(brightness != null);
+  });
 
   /// Create the recommended dark color scheme that matches the
   /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
@@ -91,19 +67,7 @@ class ColorScheme with Diagnosticable {
     this.onBackground = Colors.white,
     this.onError = Colors.black,
     this.brightness = Brightness.dark,
-  }) : assert(primary != null),
-       assert(primaryVariant != null),
-       assert(secondary != null),
-       assert(secondaryVariant != null),
-       assert(surface != null),
-       assert(background != null),
-       assert(error != null),
-       assert(onPrimary != null),
-       assert(onSecondary != null),
-       assert(onSurface != null),
-       assert(onBackground != null),
-       assert(onError != null),
-       assert(brightness != null);
+  });
 
 
   /// Create a high contrast ColorScheme based on a purple primary color that
@@ -122,19 +86,7 @@ class ColorScheme with Diagnosticable {
     this.onBackground = Colors.black,
     this.onError = Colors.white,
     this.brightness = Brightness.light,
-  }) : assert(primary != null),
-        assert(primaryVariant != null),
-        assert(secondary != null),
-        assert(secondaryVariant != null),
-        assert(surface != null),
-        assert(background != null),
-        assert(error != null),
-        assert(onPrimary != null),
-        assert(onSecondary != null),
-        assert(onSurface != null),
-        assert(onBackground != null),
-        assert(onError != null),
-        assert(brightness != null);
+  });
 
   /// Create a high contrast ColorScheme based on the dark
   /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
@@ -152,19 +104,7 @@ class ColorScheme with Diagnosticable {
     this.onBackground = Colors.white,
     this.onError = Colors.black,
     this.brightness = Brightness.dark,
-  }) : assert(primary != null),
-        assert(primaryVariant != null),
-        assert(secondary != null),
-        assert(secondaryVariant != null),
-        assert(surface != null),
-        assert(background != null),
-        assert(error != null),
-        assert(onPrimary != null),
-        assert(onSecondary != null),
-        assert(onSurface != null),
-        assert(onBackground != null),
-        assert(onError != null),
-        assert(brightness != null);
+  });
 
   /// Create a color scheme from a [MaterialColor] swatch.
   ///
@@ -179,9 +119,6 @@ class ColorScheme with Diagnosticable {
     Color? errorColor,
     Brightness brightness = Brightness.light,
   }) {
-    assert(primarySwatch != null);
-    assert(brightness != null);
-
     final bool isDark = brightness == Brightness.dark;
     final bool primaryIsDark = _brightnessFor(primarySwatch) == Brightness.dark;
     final Color secondary = accentColor ?? (isDark ? Colors.tealAccent[200]! : primarySwatch);

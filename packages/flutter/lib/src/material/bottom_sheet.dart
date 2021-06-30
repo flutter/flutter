@@ -81,10 +81,7 @@ class BottomSheet extends StatefulWidget {
     this.constraints,
     required this.onClosing,
     required this.builder,
-  }) : assert(enableDrag != null),
-       assert(onClosing != null),
-       assert(builder != null),
-       assert(elevation == null || elevation >= 0.0),
+  }) : assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
   /// The animation controller that controls the bottom sheet's entrance and
@@ -347,9 +344,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.constraints,
     this.isScrollControlled = false,
     this.enableDrag = true,
-  }) : assert(isScrollControlled != null),
-       assert(enableDrag != null),
-       super(key: key);
+  }) : super(key: key);
 
   final _ModalBottomSheetRoute<T>? route;
   final bool isScrollControlled;
@@ -459,10 +454,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     required this.isScrollControlled,
     RouteSettings? settings,
     this.transitionAnimationController,
-  }) : assert(isScrollControlled != null),
-       assert(isDismissible != null),
-       assert(enableDrag != null),
-       super(settings: settings);
+  }) : super(settings: settings);
 
   final WidgetBuilder? builder;
   final CapturedThemes capturedThemes;
@@ -551,8 +543,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   const _BottomSheetSuspendedCurve(
     this.startingPoint, {
     this.curve = Curves.easeOutCubic,
-  }) : assert(startingPoint != null),
-       assert(curve != null);
+  });
 
   /// The progress value at which [curve] should begin.
   ///
@@ -701,12 +692,6 @@ Future<T?> showModalBottomSheet<T>({
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
 }) {
-  assert(context != null);
-  assert(builder != null);
-  assert(isScrollControlled != null);
-  assert(useRootNavigator != null);
-  assert(isDismissible != null);
-  assert(enableDrag != null);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -780,8 +765,6 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   BoxConstraints? constraints,
   AnimationController? transitionAnimationController,
 }) {
-  assert(context != null);
-  assert(builder != null);
   assert(debugCheckHasScaffold(context));
 
   return Scaffold.of(context).showBottomSheet<T>(

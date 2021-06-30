@@ -57,9 +57,7 @@ class InlineSpanSemanticsInformation {
     this.isPlaceholder = false,
     this.semanticsLabel,
     this.recognizer,
-  }) : assert(text != null),
-       assert(isPlaceholder != null),
-       assert(isPlaceholder == false || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
+  }) : assert(isPlaceholder == false || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
        requiresOwnNode = isPlaceholder || recognizer != null;
 
   /// The text info for a [PlaceholderSpan].

@@ -40,9 +40,7 @@ class Theme extends StatelessWidget {
     Key? key,
     required this.data,
     required this.child,
-  }) : assert(child != null),
-       assert(data != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
@@ -142,8 +140,7 @@ class _InheritedTheme extends InheritedTheme {
     Key? key,
     required this.theme,
     required Widget child,
-  }) : assert(theme != null),
-       super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   final Theme theme;
 
@@ -200,9 +197,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
     Duration duration = kThemeAnimationDuration,
     VoidCallback? onEnd,
     required this.child,
-  }) : assert(child != null),
-       assert(data != null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  }) : super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;

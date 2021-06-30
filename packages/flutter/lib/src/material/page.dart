@@ -39,10 +39,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
     RouteSettings? settings,
     this.maintainState = true,
     bool fullscreenDialog = false,
-  }) : assert(builder != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null),
-       super(settings: settings, fullscreenDialog: fullscreenDialog) {
+  }) : super(settings: settings, fullscreenDialog: fullscreenDialog) {
     assert(opaque);
   }
 
@@ -157,10 +154,7 @@ class MaterialPage<T> extends Page<T> {
     String? name,
     Object? arguments,
     String? restorationId,
-  }) : assert(child != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null),
-       super(key: key, name: name, arguments: arguments, restorationId: restorationId);
+  }) : super(key: key, name: name, arguments: arguments, restorationId: restorationId);
 
   /// The content to be shown in the [Route] created by this page.
   final Widget child;
@@ -184,8 +178,7 @@ class MaterialPage<T> extends Page<T> {
 class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
   _PageBasedMaterialPageRoute({
     required MaterialPage<T> page,
-  }) : assert(page != null),
-       super(settings: page) {
+  }) : super(settings: page) {
     assert(opaque);
   }
 

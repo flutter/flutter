@@ -84,7 +84,6 @@ class DividerThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static DividerThemeData lerp(DividerThemeData? a, DividerThemeData? b, double t) {
-    assert(t != null);
     return DividerThemeData(
       color: Color.lerp(a?.color, b?.color, t),
       space: lerpDouble(a?.space, b?.space, t),
@@ -141,8 +140,7 @@ class DividerTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null),
-       super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// The properties for descendant [Divider]s, [VerticalDivider]s, dividers
   /// between [ListTile]s, and dividers between rows in [DataTable]s.

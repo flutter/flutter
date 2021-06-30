@@ -87,7 +87,6 @@ class Switch extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
   })  : _switchType = _SwitchType.material,
-        assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
         super(key: key);
@@ -130,8 +129,7 @@ class Switch extends StatelessWidget {
     this.splashRadius,
     this.focusNode,
     this.autofocus = false,
-  })  : assert(autofocus != null),
-        assert(activeThumbImage != null || onActiveThumbImageError == null),
+  })  : assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
         _switchType = _SwitchType.adaptive,
         super(key: key);
@@ -426,7 +424,6 @@ class Switch extends StatelessWidget {
 
       case _SwitchType.adaptive: {
         final ThemeData theme = Theme.of(context);
-        assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -474,8 +471,7 @@ class _MaterialSwitch extends StatefulWidget {
     this.splashRadius,
     this.focusNode,
     this.autofocus = false,
-  })  : assert(dragStartBehavior != null),
-        assert(activeThumbImage != null || onActiveThumbImageError == null),
+  })  : assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
         super(key: key);
 
@@ -790,7 +786,6 @@ class _SwitchPainter extends ToggleablePainter {
   Color get activeTrackColor => _activeTrackColor!;
   Color? _activeTrackColor;
   set activeTrackColor(Color value) {
-    assert(value != null);
     if (value == _activeTrackColor)
       return;
     _activeTrackColor = value;
@@ -800,7 +795,6 @@ class _SwitchPainter extends ToggleablePainter {
   Color get inactiveTrackColor => _inactiveTrackColor!;
   Color? _inactiveTrackColor;
   set inactiveTrackColor(Color value) {
-    assert(value != null);
     if (value == _inactiveTrackColor)
       return;
     _inactiveTrackColor = value;
@@ -810,7 +804,6 @@ class _SwitchPainter extends ToggleablePainter {
   ImageConfiguration get configuration => _configuration!;
   ImageConfiguration? _configuration;
   set configuration(ImageConfiguration value) {
-    assert(value != null);
     if (value == _configuration)
       return;
     _configuration = value;
@@ -820,7 +813,6 @@ class _SwitchPainter extends ToggleablePainter {
   TextDirection get textDirection => _textDirection!;
   TextDirection? _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value)
       return;
     _textDirection = value;
@@ -830,7 +822,6 @@ class _SwitchPainter extends ToggleablePainter {
   Color get surfaceColor => _surfaceColor!;
   Color? _surfaceColor;
   set surfaceColor(Color value) {
-    assert(value != null);
     if (value == _surfaceColor)
       return;
     _surfaceColor = value;

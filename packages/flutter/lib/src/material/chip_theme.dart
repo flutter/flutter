@@ -47,9 +47,7 @@ class ChipTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.
@@ -197,14 +195,7 @@ class ChipThemeData with Diagnosticable {
     required this.brightness,
     this.elevation,
     this.pressElevation,
-  }) : assert(backgroundColor != null),
-       assert(disabledColor != null),
-       assert(selectedColor != null),
-       assert(secondarySelectedColor != null),
-       assert(padding != null),
-       assert(labelStyle != null),
-       assert(secondaryLabelStyle != null),
-       assert(brightness != null);
+  });
 
   /// Generates a ChipThemeData from a brightness, a primary color, and a text
   /// style.
@@ -231,8 +222,6 @@ class ChipThemeData with Diagnosticable {
   }) {
     assert(primaryColor != null || brightness != null, 'One of primaryColor or brightness must be specified');
     assert(primaryColor == null || brightness == null, 'Only one of primaryColor or brightness may be specified');
-    assert(secondaryColor != null);
-    assert(labelStyle != null);
 
     if (primaryColor != null) {
       brightness = ThemeData.estimateBrightnessForColor(primaryColor);

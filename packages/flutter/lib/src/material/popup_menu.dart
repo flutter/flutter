@@ -129,7 +129,7 @@ class _MenuItem extends SingleChildRenderObjectWidget {
     Key? key,
     required this.onLayout,
     required Widget? child,
-  }) : assert(onLayout != null), super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   final ValueChanged<Size> onLayout;
 
@@ -145,7 +145,7 @@ class _MenuItem extends SingleChildRenderObjectWidget {
 }
 
 class _RenderMenuItem extends RenderShiftedBox {
-  _RenderMenuItem(this.onLayout, [RenderBox? child]) : assert(onLayout != null), super(child);
+  _RenderMenuItem(this.onLayout, [RenderBox? child]) : super(child);
 
   ValueChanged<Size> onLayout;
 
@@ -226,9 +226,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
     this.textStyle,
     this.mouseCursor,
     required this.child,
-  }) : assert(enabled != null),
-       assert(height != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The value that will be returned by [showMenu] if this entry is selected.
   final T? value;
@@ -454,8 +452,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
     EdgeInsets? padding,
     double height = kMinInteractiveDimension,
     Widget? child,
-  }) : assert(checked != null),
-       super(
+  }) : super(
          key: key,
          value: value,
          enabled: enabled,
@@ -684,7 +681,6 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       x = position.left;
     } else {
       // Menu button is equidistant from both edges, so grow in reading direction.
-      assert(textDirection != null);
       switch (textDirection) {
         case TextDirection.rtl:
           x = size.width - position.right - childSize.width;
@@ -871,10 +867,6 @@ Future<T?> showMenu<T>({
   Color? color,
   bool useRootNavigator = false,
 }) {
-  assert(context != null);
-  assert(position != null);
-  assert(useRootNavigator != null);
-  assert(items != null && items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
 
   switch (Theme.of(context).platform) {
@@ -993,10 +985,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.shape,
     this.color,
     this.enableFeedback,
-  }) : assert(itemBuilder != null),
-       assert(offset != null),
-       assert(enabled != null),
-       assert(
+  }) : assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
        ),

@@ -100,7 +100,6 @@ class ImageCache {
   /// returning it to its original value will therefore immediately clear the
   /// cache.
   set maximumSize(int value) {
-    assert(value != null);
     assert(value >= 0);
     if (value == maximumSize)
       return;
@@ -139,7 +138,6 @@ class ImageCache {
   /// returning it to its original value will therefore immediately clear the
   /// cache.
   set maximumSizeBytes(int value) {
-    assert(value != null);
     assert(value >= 0);
     if (value == _maximumSizeBytes)
       return;
@@ -236,7 +234,6 @@ class ImageCache {
   ///
   ///  * [ImageProvider], for providing images to the [Image] widget.
   bool evict(Object key, { bool includeLive = true }) {
-    assert(includeLive != null);
     if (includeLive) {
       // Remove from live images - the cache will not be able to mark
       // it as complete, and it might be getting evicted because it
@@ -320,8 +317,6 @@ class ImageCache {
   /// no completers are cached and `null` is returned instead of a new
   /// completer.
   ImageStreamCompleter? putIfAbsent(Object key, ImageStreamCompleter Function() loader, { ImageErrorListener? onError }) {
-    assert(key != null);
-    assert(loader != null);
     TimelineTask? timelineTask;
     TimelineTask? listenerTask;
     if (!kReleaseMode) {
@@ -610,8 +605,7 @@ abstract class _CachedImageBase {
   _CachedImageBase(
     this.completer, {
     this.sizeBytes,
-  }) : assert(completer != null),
-       handle = completer.keepAlive();
+  }) : handle = completer.keepAlive();
 
   final ImageStreamCompleter completer;
   int? sizeBytes;

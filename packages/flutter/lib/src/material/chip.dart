@@ -615,11 +615,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
-  }) : assert(label != null),
-       assert(autofocus != null),
-       assert(clipBehavior != null),
-       assert(elevation == null || elevation >= 0.0),
-       assert(useDeleteButtonTooltip != null),
+  }) : assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
   @override
@@ -789,14 +785,8 @@ class InputChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(selected != null),
-       assert(isEnabled != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
-       assert(useDeleteButtonTooltip != null),
        super(key: key);
 
   @override
@@ -996,11 +986,7 @@ class ChoiceChip extends StatelessWidget
     this.shadowColor,
     this.selectedShadowColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(selected != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
@@ -1215,11 +1201,7 @@ class FilterChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(selected != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
@@ -1384,15 +1366,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
-  }) : assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(
-         onPressed != null,
-         'Rather than disabling an ActionChip by setting onPressed to null, '
-         'remove it from the interface entirely.',
-       ),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
@@ -1542,14 +1516,8 @@ class RawChip extends StatefulWidget
     this.showCheckmark = true,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(label != null),
-       assert(isEnabled != null),
-       assert(selected != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
-       assert(useDeleteButtonTooltip != null),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
        super(key: key);
 
@@ -2084,8 +2052,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
     required this.deleteDrawerAnimation,
     required this.enableAnimation,
     this.avatarBorder,
-  }) : assert(theme != null),
-       super(key: key);
+  }) : super(key: key);
 
   final _ChipRenderTheme theme;
   final bool? value;
@@ -2311,9 +2278,7 @@ class _RenderChip extends RenderBox {
     required this.deleteDrawerAnimation,
     required this.enableAnimation,
     this.avatarBorder,
-  }) : assert(theme != null),
-       assert(textDirection != null),
-       _theme = theme,
+  }) : _theme = theme,
        _textDirection = textDirection {
     checkmarkAnimation.addListener(markNeedsPaint);
     avatarDrawerAnimation.addListener(markNeedsLayout);

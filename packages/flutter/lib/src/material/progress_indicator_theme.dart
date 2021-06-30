@@ -83,7 +83,6 @@ class ProgressIndicatorThemeData with Diagnosticable {
   static ProgressIndicatorThemeData? lerp(ProgressIndicatorThemeData? a, ProgressIndicatorThemeData? b, double t) {
     if (a == null && b == null)
       return null;
-    assert(t != null);
     return ProgressIndicatorThemeData(
       color: Color.lerp(a?.color, b?.color, t),
       linearTrackColor : Color.lerp(a?.linearTrackColor, b?.linearTrackColor, t),
@@ -157,7 +156,7 @@ class ProgressIndicatorTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// The properties for descendant [ProgressIndicator] widgets.
   final ProgressIndicatorThemeData data;

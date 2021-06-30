@@ -77,8 +77,7 @@ class ShapeDecoration extends Decoration {
     this.gradient,
     this.shadows,
     required this.shape,
-  }) : assert(!(color != null && gradient != null)),
-       assert(shape != null);
+  }) : assert(!(color != null && gradient != null));
 
   /// Creates a shape decoration configured to match a [BoxDecoration].
   ///
@@ -92,7 +91,6 @@ class ShapeDecoration extends Decoration {
   /// transition from a [BoxShape.circle] to [BoxShape.rectangle]).
   factory ShapeDecoration.fromBoxDecoration(BoxDecoration source) {
     final ShapeBorder shape;
-    assert(source.shape != null);
     switch (source.shape) {
       case BoxShape.circle:
         if (source.border != null) {
@@ -228,7 +226,6 @@ class ShapeDecoration extends Decoration {
   ///    and which use [ShapeDecoration.lerp] when interpolating two
   ///    [ShapeDecoration]s or a [ShapeDecoration] to or from null.
   static ShapeDecoration? lerp(ShapeDecoration? a, ShapeDecoration? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a != null && b != null) {
@@ -297,8 +294,7 @@ class ShapeDecoration extends Decoration {
 /// An object that paints a [ShapeDecoration] into a canvas.
 class _ShapeDecorationPainter extends BoxPainter {
   _ShapeDecorationPainter(this._decoration, VoidCallback onChanged)
-    : assert(_decoration != null),
-      super(onChanged);
+    : super(onChanged);
 
   final ShapeDecoration _decoration;
 
@@ -315,7 +311,6 @@ class _ShapeDecorationPainter extends BoxPainter {
   VoidCallback get onChanged => super.onChanged!;
 
   void _precache(Rect rect, TextDirection? textDirection) {
-    assert(rect != null);
     if (rect == _lastRect && textDirection == _lastTextDirection)
       return;
 
@@ -380,7 +375,6 @@ class _ShapeDecorationPainter extends BoxPainter {
 
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration != null);
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size!;
     final TextDirection? textDirection = configuration.textDirection;

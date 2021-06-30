@@ -87,9 +87,7 @@ class SnackBarAction extends StatefulWidget {
     this.disabledTextColor,
     required this.label,
     required this.onPressed,
-  }) : assert(label != null),
-       assert(onPressed != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
@@ -254,12 +252,10 @@ class SnackBar extends StatefulWidget {
     this.onVisible,
     this.dismissDirection = DismissDirection.down,
   }) : assert(elevation == null || elevation >= 0.0),
-       assert(content != null),
        assert(
          width == null || margin == null,
          'Width and margin can not be used together',
        ),
-       assert(duration != null),
        super(key: key);
 
   /// The primary content of the snack bar.

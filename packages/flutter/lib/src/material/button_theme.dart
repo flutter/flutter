@@ -96,11 +96,8 @@ class ButtonTheme extends InheritedTheme {
     ColorScheme? colorScheme,
     MaterialTapTargetSize? materialTapTargetSize,
     required Widget child,
-  }) : assert(textTheme != null),
-       assert(minWidth != null && minWidth >= 0.0),
-       assert(height != null && height >= 0.0),
-       assert(alignedDropdown != null),
-       assert(layoutBehavior != null),
+  }) : assert(minWidth >= 0.0),
+       assert(height >= 0.0),
        data = ButtonThemeData(
          textTheme: textTheme,
          minWidth: minWidth,
@@ -127,8 +124,7 @@ class ButtonTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null),
-       super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// Specifies the color and geometry of buttons.
   final ButtonThemeData data;
@@ -215,11 +211,8 @@ class ButtonThemeData with Diagnosticable {
     Color? splashColor,
     this.colorScheme,
     MaterialTapTargetSize? materialTapTargetSize,
-  }) : assert(textTheme != null),
-       assert(minWidth != null && minWidth >= 0.0),
-       assert(height != null && height >= 0.0),
-       assert(alignedDropdown != null),
-       assert(layoutBehavior != null),
+  }) : assert(minWidth >= 0.0),
+       assert(height >= 0.0),
        _buttonColor = buttonColor,
        _disabledColor = disabledColor,
        _focusColor = focusColor,

@@ -65,7 +65,6 @@ abstract class EdgeInsetsGeometry {
 
   /// The total offset in the given direction.
   double along(Axis axis) {
-    assert(axis != null);
     switch (axis) {
       case Axis.horizontal:
         return horizontal;
@@ -217,7 +216,6 @@ abstract class EdgeInsetsGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsetsGeometry? lerp(EdgeInsetsGeometry? a, EdgeInsetsGeometry? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -596,7 +594,6 @@ class EdgeInsets extends EdgeInsetsGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsets? lerp(EdgeInsets? a, EdgeInsets? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -837,7 +834,6 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsetsDirectional? lerp(EdgeInsetsDirectional? a, EdgeInsetsDirectional? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)

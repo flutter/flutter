@@ -73,8 +73,6 @@ class OutlineButton extends MaterialButton {
     MaterialTapTargetSize? materialTapTargetSize,
     Widget? child,
   }) : assert(highlightElevation == null || highlightElevation >= 0.0),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
        super(
          key: key,
          onPressed: onPressed,
@@ -241,10 +239,6 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
     required Widget icon,
     required Widget label,
   }) : assert(highlightElevation == null || highlightElevation >= 0.0),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(icon != null),
-       assert(label != null),
        super(
          key: key,
          onPressed: onPressed,
@@ -307,10 +301,7 @@ class _OutlineButton extends StatefulWidget {
     this.autofocus = false,
     this.child,
     this.materialTapTargetSize,
-  }) : assert(highlightElevation != null && highlightElevation >= 0.0),
-       assert(highlightedBorderColor != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
+  }) : assert(highlightElevation >= 0.0),
        super(key: key);
 
   final VoidCallback? onPressed;
@@ -500,8 +491,7 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
   const _OutlineBorder({
     required this.shape,
     required this.side,
-  }) : assert(shape != null),
-       assert(side != null);
+  });
 
   final ShapeBorder shape;
   final BorderSide side;
@@ -521,7 +511,6 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is _OutlineBorder) {
       return _OutlineBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -533,7 +522,6 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    assert(t != null);
     if (b is _OutlineBorder) {
       return _OutlineBorder(
         side: BorderSide.lerp(side, b.side, t),

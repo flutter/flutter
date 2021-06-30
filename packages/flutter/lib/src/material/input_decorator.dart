@@ -139,10 +139,7 @@ class _BorderContainer extends StatefulWidget {
     required this.hoverColor,
     required this.isHovering,
     this.child,
-  }) : assert(border != null),
-       assert(gap != null),
-       assert(fillColor != null),
-       super(key: key);
+  }) : super(key: key);
 
   final InputBorder border;
   final _InputBorderGap gap;
@@ -516,11 +513,7 @@ class _Decoration {
     this.counter,
     this.container,
     this.fixTextFieldOutlineLabel = false,
-  }) : assert(contentPadding != null),
-       assert(isCollapsed != null),
-       assert(floatingLabelHeight != null),
-       assert(floatingLabelProgress != null),
-       assert(fixTextFieldOutlineLabel != null);
+  });
 
   final EdgeInsetsGeometry contentPadding;
   final bool isCollapsed;
@@ -631,11 +624,7 @@ class _RenderDecoration extends RenderBox {
     required bool isFocused,
     required bool expands,
     TextAlignVertical? textAlignVertical,
-  }) : assert(decoration != null),
-       assert(textDirection != null),
-       assert(textBaseline != null),
-       assert(expands != null),
-       _decoration = decoration,
+  }) : _decoration = decoration,
        _textDirection = textDirection,
        _textBaseline = textBaseline,
        _textAlignVertical = textAlignVertical,
@@ -752,7 +741,6 @@ class _RenderDecoration extends RenderBox {
   _Decoration get decoration => _decoration;
   _Decoration _decoration;
   set decoration(_Decoration value) {
-    assert(value != null);
     if (_decoration == value)
       return;
     _decoration = value;
@@ -762,7 +750,6 @@ class _RenderDecoration extends RenderBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value)
       return;
     _textDirection = value;
@@ -772,7 +759,6 @@ class _RenderDecoration extends RenderBox {
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
   set textBaseline(TextBaseline value) {
-    assert(value != null);
     if (_textBaseline == value)
       return;
     _textBaseline = value;
@@ -800,7 +786,6 @@ class _RenderDecoration extends RenderBox {
   bool get isFocused => _isFocused;
   bool _isFocused;
   set isFocused(bool value) {
-    assert(value != null);
     if (_isFocused == value)
       return;
     _isFocused = value;
@@ -810,7 +795,6 @@ class _RenderDecoration extends RenderBox {
   bool get expands => _expands;
   bool _expands = false;
   set expands(bool value) {
-    assert(value != null);
     if (_expands == value)
       return;
     _expands = value;
@@ -1529,7 +1513,6 @@ class _RenderDecoration extends RenderBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    assert(position != null);
     for (final RenderBox child in _children) {
       // The label must be handled specially since we've transformed it.
       final Offset offset = _boxParentData(child).offset;
@@ -1707,11 +1690,7 @@ class _Decorator extends RenderObjectWidget {
     required this.textBaseline,
     required this.isFocused,
     required this.expands,
-  }) : assert(decoration != null),
-       assert(textDirection != null),
-       assert(textBaseline != null),
-       assert(expands != null),
-       super(key: key);
+  }) : super(key: key);
 
   final _Decoration decoration;
   final TextDirection textDirection;
@@ -1813,12 +1792,7 @@ class InputDecorator extends StatefulWidget {
     this.expands = false,
     this.isEmpty = false,
     this.child,
-  }) : assert(decoration != null),
-       assert(isFocused != null),
-       assert(isHovering != null),
-       assert(expands != null),
-       assert(isEmpty != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The text and styles to use when decorating the child.
   ///
@@ -2564,8 +2538,7 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
-  }) : assert(enabled != null),
-       assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
+  }) : assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
   /// Defines an [InputDecorator] that is the same size as the input field.
@@ -2584,8 +2557,7 @@ class InputDecoration {
     this.hoverColor,
     this.border = InputBorder.none,
     this.enabled = true,
-  }) : assert(enabled != null),
-       icon = null,
+  }) : icon = null,
        labelText = null,
        labelStyle = null,
        helperText = null,
@@ -3639,10 +3611,7 @@ class InputDecorationTheme with Diagnosticable {
     this.border,
     this.alignLabelWithHint = false,
     this.constraints,
-  }) : assert(isDense != null),
-       assert(isCollapsed != null),
-       assert(filled != null),
-       assert(alignLabelWithHint != null);
+  });
 
   /// The style to use for [InputDecoration.labelText] when the label is
   /// above (i.e., vertically adjacent to) the input field.

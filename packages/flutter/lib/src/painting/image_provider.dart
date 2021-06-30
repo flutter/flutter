@@ -323,7 +323,6 @@ abstract class ImageProvider<T extends Object> {
   /// See the Lifecycle documentation on [ImageProvider] for more information.
   @nonVirtual
   ImageStream resolve(ImageConfiguration configuration) {
-    assert(configuration != null);
     final ImageStream stream = createStream(configuration);
     // Load the key (potentially asynchronously), set up an error handling zone,
     // and call resolveStreamForKey.
@@ -382,7 +381,6 @@ abstract class ImageProvider<T extends Object> {
     required ImageConfiguration configuration,
     ImageErrorListener? handleError,
   }) {
-    assert(configuration != null);
     final Completer<ImageCacheStatus?> completer = Completer<ImageCacheStatus?>();
     _createErrorHandlerAndKey(
       configuration,
@@ -599,9 +597,7 @@ class AssetBundleImageKey {
     required this.bundle,
     required this.name,
     required this.scale,
-  }) : assert(bundle != null),
-       assert(name != null),
-       assert(scale != null);
+  });
 
   /// The bundle from which the image will be obtained.
   ///
@@ -731,8 +727,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     this.width,
     this.height,
     this.allowUpscaling = false,
-  }) : assert(width != null || height != null),
-       assert(allowUpscaling != null);
+  }) : assert(width != null || height != null);
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
@@ -857,9 +852,7 @@ class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
   ///
   /// The arguments must not be null.
-  const FileImage(this.file, { this.scale = 1.0 })
-    : assert(file != null),
-      assert(scale != null);
+  const FileImage(this.file, { this.scale = 1.0 });
 
   /// The file to decode into an image.
   final File file;
@@ -931,9 +924,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
   ///
   /// The arguments must not be null.
-  const MemoryImage(this.bytes, { this.scale = 1.0 })
-    : assert(bytes != null),
-      assert(scale != null);
+  const MemoryImage(this.bytes, { this.scale = 1.0 });
 
   /// The bytes to decode into an image.
   ///
@@ -1079,8 +1070,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
     this.scale = 1.0,
     this.bundle,
     this.package,
-  }) : assert(assetName != null),
-       assert(scale != null);
+  });
 
   /// The name of the asset.
   final String assetName;
@@ -1140,9 +1130,7 @@ class NetworkImageLoadException implements Exception {
   /// Creates a [NetworkImageLoadException] with the specified http [statusCode]
   /// and [uri].
   NetworkImageLoadException({required this.statusCode, required this.uri})
-      : assert(uri != null),
-        assert(statusCode != null),
-        _message = 'HTTP request failed, statusCode: $statusCode, $uri';
+      : _message = 'HTTP request failed, statusCode: $statusCode, $uri';
 
   /// The HTTP status code from the server.
   final int statusCode;

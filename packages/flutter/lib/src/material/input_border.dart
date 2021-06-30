@@ -36,7 +36,7 @@ abstract class InputBorder extends ShapeBorder {
   /// [InputDecorator.isFocused].
   const InputBorder({
     this.borderSide = BorderSide.none,
-  }) : assert(borderSide != null);
+  });
 
   /// No input border.
   ///
@@ -148,8 +148,7 @@ class UnderlineInputBorder extends InputBorder {
       topLeft: Radius.circular(4.0),
       topRight: Radius.circular(4.0),
     ),
-  }) : assert(borderRadius != null),
-       super(borderSide: borderSide);
+  }) : super(borderSide: borderSide);
 
   /// The radii of the border's rounded rectangle corners.
   ///
@@ -288,8 +287,7 @@ class OutlineInputBorder extends InputBorder {
     BorderSide borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
     this.gapPadding = 4.0,
-  }) : assert(borderRadius != null),
-       assert(gapPadding != null && gapPadding >= 0.0),
+  }) : assert(gapPadding >= 0.0),
        super(borderSide: borderSide);
 
   // The label text's gap can extend into the corners (even both the top left
@@ -467,7 +465,6 @@ class OutlineInputBorder extends InputBorder {
     double gapPercentage = 0.0,
     TextDirection? textDirection,
   }) {
-    assert(gapExtent != null);
     assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
     assert(_cornersAreCircular(borderRadius));
 

@@ -277,8 +277,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.showUnselectedLabels,
     this.mouseCursor,
     this.enableFeedback,
-  }) : assert(items != null),
-       assert(items.length >= 2),
+  }) : assert(items.length >= 2),
        assert(
         items.every((BottomNavigationBarItem item) => item.title != null) ||
         items.every((BottomNavigationBarItem item) => item.label != null),
@@ -286,13 +285,13 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(elevation == null || elevation >= 0.0),
-       assert(iconSize != null && iconSize >= 0.0),
+       assert(iconSize >= 0.0),
        assert(
          selectedItemColor == null || fixedColor == null,
          'Either selectedItemColor or fixedColor can be specified, but not both',
        ),
-       assert(selectedFontSize != null && selectedFontSize >= 0.0),
-       assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
+       assert(selectedFontSize >= 0.0),
+       assert(unselectedFontSize >= 0.0),
        selectedItemColor = selectedItemColor ?? fixedColor,
        super(key: key);
 
@@ -447,13 +446,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.indexLabel,
     required this.mouseCursor,
     required this.enableFeedback,
-    }) : assert(type != null),
-         assert(item != null),
-         assert(animation != null),
-         assert(selected != null),
-         assert(selectedLabelStyle != null),
-         assert(unselectedLabelStyle != null),
-         assert(mouseCursor != null);
+    });
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -628,9 +621,7 @@ class _TileIcon extends StatelessWidget {
     required this.item,
     required this.selectedIconTheme,
     required this.unselectedIconTheme,
-  }) : assert(selected != null),
-       assert(item != null),
-       super(key: key);
+  }) : super(key: key);
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -674,14 +665,7 @@ class _Label extends StatelessWidget {
     required this.unselectedLabelStyle,
     required this.showSelectedLabels,
     required this.showUnselectedLabels,
-  }) : assert(colorTween != null),
-       assert(animation != null),
-       assert(item != null),
-       assert(selectedLabelStyle != null),
-       assert(unselectedLabelStyle != null),
-       assert(showSelectedLabels != null),
-       assert(showUnselectedLabels != null),
-       super(key: key);
+  }) : super(key: key);
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -919,7 +903,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   List<Widget> _createTiles() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    assert(localizations != null);
 
     final ThemeData themeData = Theme.of(context);
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
@@ -1063,9 +1046,7 @@ class _Circle {
     required this.index,
     required this.color,
     required TickerProvider vsync,
-  }) : assert(state != null),
-       assert(index != null),
-       assert(color != null) {
+  }) {
     controller = AnimationController(
       duration: kThemeAnimationDuration,
       vsync: vsync,
@@ -1108,8 +1089,7 @@ class _RadialPainter extends CustomPainter {
   _RadialPainter({
     required this.circles,
     required this.textDirection,
-  }) : assert(circles != null),
-       assert(textDirection != null);
+  });
 
   final List<_Circle> circles;
   final TextDirection textDirection;

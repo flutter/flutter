@@ -78,10 +78,7 @@ class ExpansionPanel {
     this.isExpanded = false,
     this.canTapOnHeader = false,
     this.backgroundColor,
-  }) : assert(headerBuilder != null),
-       assert(body != null),
-       assert(isExpanded != null),
-       assert(canTapOnHeader != null);
+  });
 
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;
@@ -128,8 +125,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required Widget body,
     bool canTapOnHeader = false,
     Color? backgroundColor,
-  }) : assert(value != null),
-      super(
+  }) : super(
         body: body,
         headerBuilder: headerBuilder,
         canTapOnHeader: canTapOnHeader,
@@ -237,9 +233,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
     this.elevation = 2,
-  }) : assert(children != null),
-       assert(animationDuration != null),
-       _allowOnlyOnePanelOpen = false,
+  }) : _allowOnlyOnePanelOpen = false,
        initialOpenPanelValue = null,
        super(key: key);
 
@@ -328,9 +322,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
     this.elevation = 2,
-  }) : assert(children != null),
-       assert(animationDuration != null),
-       _allowOnlyOnePanelOpen = true,
+  }) : _allowOnlyOnePanelOpen = true,
        super(key: key);
 
   /// The children of the expansion panel list. They are laid out in a similar

@@ -84,11 +84,7 @@ class _TimePickerFragmentContext {
     required this.onHourDoubleTapped,
     required this.onMinuteDoubleTapped,
     required this.use24HourDials,
-  }) : assert(selectedTime != null),
-       assert(mode != null),
-       assert(onTimeChange != null),
-       assert(onModeChange != null),
-       assert(use24HourDials != null);
+  });
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
@@ -110,10 +106,7 @@ class _TimePickerHeader extends StatelessWidget {
     required this.onMinuteDoubleTapped,
     required this.use24HourDials,
     required this.helpText,
-  }) : assert(selectedTime != null),
-       assert(mode != null),
-       assert(orientation != null),
-       assert(use24HourDials != null);
+  });
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
@@ -257,9 +250,7 @@ class _HourMinuteControl extends StatelessWidget {
     required this.onTap,
     required this.onDoubleTap,
     required this.isSelected,
-  }) : assert(text != null),
-       assert(onTap != null),
-       assert(isSelected != null);
+  });
 
   final String text;
   final GestureTapCallback onTap;
@@ -919,9 +910,7 @@ class _Dial extends StatefulWidget {
     required this.use24HourDials,
     required this.onChanged,
     required this.onHourSelected,
-  }) : assert(selectedTime != null),
-       assert(mode != null),
-       assert(use24HourDials != null);
+  });
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
@@ -1297,9 +1286,7 @@ class _TimePickerInput extends StatefulWidget {
     required this.autofocusMinute,
     required this.onChanged,
     this.restorationId,
-  }) : assert(initialSelectedTime != null),
-       assert(onChanged != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialSelectedTime;
@@ -1807,8 +1794,7 @@ class TimePickerDialog extends StatefulWidget {
     this.minuteLabelText,
     this.restorationId,
     this.initialEntryMode = TimePickerEntryMode.dial,
-  }) : assert(initialTime != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialTime;
@@ -2381,10 +2367,6 @@ Future<TimeOfDay?> showTimePicker({
   String? minuteLabelText,
   RouteSettings? routeSettings,
 }) async {
-  assert(context != null);
-  assert(initialTime != null);
-  assert(useRootNavigator != null);
-  assert(initialEntryMode != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   final Widget dialog = TimePickerDialog(

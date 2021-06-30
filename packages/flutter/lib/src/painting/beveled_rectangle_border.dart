@@ -27,9 +27,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
   const BeveledRectangleBorder({
     BorderSide side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
-  }) : assert(side != null),
-       assert(borderRadius != null),
-       super(side: side);
+  }) : super(side: side);
 
   /// The radii for each corner.
   ///
@@ -57,7 +55,6 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is BeveledRectangleBorder) {
       return BeveledRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -69,7 +66,6 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    assert(t != null);
     if (b is BeveledRectangleBorder) {
       return BeveledRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),

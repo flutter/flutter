@@ -89,12 +89,7 @@ class DayPicker extends StatelessWidget {
     required this.displayedMonth,
     this.selectableDayPredicate,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(selectedDate != null),
-       assert(currentDate != null),
-       assert(onChanged != null),
-       assert(displayedMonth != null),
-       assert(dragStartBehavior != null),
-       assert(!firstDate.isAfter(lastDate)),
+  }) : assert(!firstDate.isAfter(lastDate)),
        assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate)),
        super(key: key);
 
@@ -374,9 +369,7 @@ class MonthPicker extends StatefulWidget {
     required this.lastDate,
     this.selectableDayPredicate,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(selectedDate != null),
-       assert(onChanged != null),
-       assert(!firstDate.isAfter(lastDate)),
+  }) : assert(!firstDate.isAfter(lastDate)),
        assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate)),
        super(key: key);
 

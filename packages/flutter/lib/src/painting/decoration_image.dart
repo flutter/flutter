@@ -52,11 +52,7 @@ class DecorationImage {
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
     this.scale = 1.0,
-  }) : assert(image != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       assert(scale != null);
+  });
 
   /// The image to be painted into the decoration.
   ///
@@ -147,7 +143,6 @@ class DecorationImage {
   /// image needs to be repainted, e.g. because it is loading incrementally or
   /// because it is animated.
   DecorationImagePainter createPainter(VoidCallback onChanged) {
-    assert(onChanged != null);
     return DecorationImagePainter._(this, onChanged);
   }
 
@@ -206,7 +201,7 @@ class DecorationImage {
 /// This object should be disposed using the [dispose] method when it is no
 /// longer needed.
 class DecorationImagePainter {
-  DecorationImagePainter._(this._details, this._onChanged) : assert(_details != null);
+  DecorationImagePainter._(this._details, this._onChanged);
 
   final DecorationImage _details;
   final VoidCallback _onChanged;
@@ -229,10 +224,6 @@ class DecorationImagePainter {
   /// then the `onChanged` callback passed to [DecorationImage.createPainter]
   /// will be called.
   void paint(Canvas canvas, Rect rect, Path? clipPath, ImageConfiguration configuration) {
-    assert(canvas != null);
-    assert(rect != null);
-    assert(configuration != null);
-
     bool flipHorizontally = false;
     if (_details.matchTextDirection) {
       assert(() {
@@ -301,7 +292,6 @@ class DecorationImagePainter {
     }
     _image?.dispose();
     _image = value;
-    assert(_onChanged != null);
     if (!synchronousCall)
       _onChanged();
   }
@@ -433,12 +423,6 @@ void paintImage({
   FilterQuality filterQuality = FilterQuality.low,
   bool isAntiAlias = false,
 }) {
-  assert(canvas != null);
-  assert(image != null);
-  assert(alignment != null);
-  assert(repeat != null);
-  assert(flipHorizontally != null);
-  assert(isAntiAlias != null);
   assert(
     image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
     'Cannot paint an image that is disposed.\n'

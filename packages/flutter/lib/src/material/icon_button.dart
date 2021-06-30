@@ -160,12 +160,7 @@ class IconButton extends StatelessWidget {
     this.enableFeedback = true,
     this.constraints,
     required this.icon,
-  }) : assert(iconSize != null),
-       assert(padding != null),
-       assert(alignment != null),
-       assert(splashRadius == null || splashRadius > 0),
-       assert(autofocus != null),
-       assert(icon != null),
+  }) : assert(splashRadius == null || splashRadius > 0),
        super(key: key);
 
   /// The size of the icon inside the button.

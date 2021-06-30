@@ -24,8 +24,7 @@ import 'theme.dart';
 const int iOSHorizontalOffset = -2;
 
 class _TextSpanEditingController extends TextEditingController {
-  _TextSpanEditingController({required TextSpan textSpan}):
-    assert(textSpan != null),
+  _TextSpanEditingController({required TextSpan textSpan}) :
     _textSpan = textSpan,
     super(text: textSpan.toPlainText(includeSemanticsLabels: false));
 
@@ -201,12 +200,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-  }) :  assert(showCursor != null),
-        assert(autofocus != null),
-        assert(dragStartBehavior != null),
-        assert(selectionHeightStyle != null),
-        assert(selectionWidthStyle != null),
-        assert(maxLines == null || maxLines > 0),
+  }) :  assert(maxLines == null || maxLines > 0),
         assert(minLines == null || minLines > 0),
         assert(
           (maxLines == null) || (minLines == null) || (maxLines >= minLines),
@@ -258,10 +252,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-  }) :  assert(showCursor != null),
-    assert(autofocus != null),
-    assert(dragStartBehavior != null),
-    assert(maxLines == null || maxLines > 0),
+  }) : assert(maxLines == null || maxLines > 0),
     assert(minLines == null || minLines > 0),
     assert(
       (maxLines == null) || (minLines == null) || (maxLines >= minLines),

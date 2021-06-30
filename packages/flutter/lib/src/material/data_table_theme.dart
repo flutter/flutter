@@ -119,7 +119,6 @@ class DataTableThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static DataTableThemeData lerp(DataTableThemeData a, DataTableThemeData b, double t) {
-    assert(t != null);
     return DataTableThemeData(
       decoration: Decoration.lerp(a.decoration, b.decoration, t),
       dataRowColor: _lerpProperties<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
@@ -234,7 +233,7 @@ class DataTableTheme extends InheritedWidget {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// The properties used for all descendant [DataTable] widgets.
   final DataTableThemeData data;

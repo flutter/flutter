@@ -81,7 +81,6 @@ class PopupMenuThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static PopupMenuThemeData? lerp(PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     return PopupMenuThemeData(
@@ -143,7 +142,7 @@ class PopupMenuTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// The properties for descendant popup menu widgets.
   final PopupMenuThemeData data;
