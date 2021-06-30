@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 /// Make `n` copies of flutter_gallery.
 
 import 'dart:io';
@@ -164,7 +162,7 @@ class SourceStats {
   String toString() => '${_comma(files).padLeft(3)} files, ${_comma(lines).padLeft(6)} lines';
 }
 
-SourceStats getStatsFor(Directory dir, [SourceStats stats]) {
+SourceStats getStatsFor(Directory dir, [SourceStats? stats]) {
   stats ??= SourceStats();
 
   for (final FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {

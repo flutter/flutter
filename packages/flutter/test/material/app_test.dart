@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependency have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -326,11 +332,13 @@ void main() {
     );
     final dynamic exception = tester.takeException();
     expect(exception, isA<String>());
-    expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
-    expect(find.text('route "/"'), findsOneWidget);
-    expect(find.text('route "/a"'), findsNothing);
-    expect(find.text('route "/a/b"'), findsNothing);
-    expect(find.text('route "/b"'), findsNothing);
+    if (exception is String) {
+      expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
+      expect(find.text('route "/"'), findsOneWidget);
+      expect(find.text('route "/a"'), findsNothing);
+      expect(find.text('route "/a/b"'), findsNothing);
+      expect(find.text('route "/b"'), findsNothing);
+    }
   });
 
   testWidgets('Make sure initialRoute is only used the first time', (WidgetTester tester) async {

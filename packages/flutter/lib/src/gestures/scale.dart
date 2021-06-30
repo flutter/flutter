@@ -64,7 +64,7 @@ class ScaleStartDetails {
   ///
   /// Typically this is the number of fingers being used to pan the widget using the gesture
   /// recognizer.
- final int pointerCount;
+  final int pointerCount;
 
   @override
   String toString() => 'ScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, pointersCount: $pointerCount)';
@@ -282,7 +282,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  /// * [https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation],
+  /// * https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation,
   ///   which provides more information about the gesture arena.
   DragStartBehavior dragStartBehavior;
 
@@ -294,7 +294,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  /// * [https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation],
+  /// * https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation,
   ///   which provides more information about the gesture arena.
   GestureScaleStartCallback? onStart;
 
