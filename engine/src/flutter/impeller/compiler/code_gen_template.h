@@ -25,8 +25,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   static constexpr std::string_view kLabel = "{{camel_case(shader_name)}}";
   static constexpr std::string_view kEntrypointName = "{{entrypoint}}";
   static constexpr ShaderStage kShaderStage = {{to_shader_stage(shader_stage)}};
-
-
+{% if length(struct_definitions) > 0 %}
   // ===========================================================================
   // Struct Definitions ========================================================
   // ===========================================================================
@@ -38,7 +37,8 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
 {% endfor %}
   }; // struct {{def.name}}
 {% endfor %}
-
+{% endif %}
+{% if length(uniform_buffers) > 0 %}
   // ===========================================================================
   // Stage Uniforms ============================================================
   // ===========================================================================
@@ -49,10 +49,11 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
     {{uniform.binding}}u,   // binding
   };
 {% endfor %}
-
+{% endif %}
   // ===========================================================================
   // Stage Inputs ==============================================================
   // ===========================================================================
+{% if length(stage_inputs) > 0 %}
 {% for stage_input in stage_inputs %}
 
   static constexpr auto kInput{{camel_case(stage_input.name)}} = ShaderStageIOSlot { // {{stage_input.name}}
@@ -64,6 +65,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
     {{stage_input.type.columns}}u       // number of columns
   };
 {% endfor %}
+{% endif %}
 
   static constexpr std::array<const ShaderStageIOSlot*, {{length(stage_inputs)}}> kAllShaderStageInputs = {
 {% for stage_input in stage_inputs %}
@@ -71,6 +73,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
 {% endfor %}
   };
 
+{% if length(sampled_images) > 0 %}
   // ===========================================================================
   // Sampled Images ============================================================
   // ===========================================================================
@@ -85,10 +88,11 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
     {{sampled_image.type.columns}}u       // number of columns
   };
 {% endfor %}
-
+{% endif %}
   // ===========================================================================
   // Stage Outputs =============================================================
   // ===========================================================================
+{% if length(stage_outputs) > 0 %}
 {% for stage_output in stage_outputs %}
   static constexpr auto kOutput{{camel_case(stage_output.name)}} = ShaderStageIOSlot { // {{stage_output.name}}
     "{{stage_output.name}}",             // name
@@ -99,12 +103,12 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
     {{stage_output.type.columns}}u       // number of columns
   };
 {% endfor %}
-
   static constexpr std::array<const ShaderStageIOSlot*, {{length(stage_outputs)}}> kAllShaderStageOutputs = {
 {% for stage_output in stage_outputs %}
     &kOutput{{camel_case(stage_output.name)}}, // {{stage_output.name}}
 {% endfor %}
   };
+{% endif %}
 
 }; // struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info
 
