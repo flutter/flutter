@@ -6,6 +6,7 @@
 
 #include "flutter/fml/time/time_point.h"
 #include "impeller/compositor/command.h"
+#include "impeller/compositor/sampler_descriptor.h"
 #include "impeller/compositor/surface.h"
 #include "impeller/compositor/vertex_buffer_builder.h"
 #include "impeller/primitives/box.frag.h"
@@ -67,11 +68,23 @@ bool EntityRenderer::OnRender(const Surface& surface, RenderPass& pass) {
   Command cmd;
   cmd.label = "Box";
   cmd.pipeline = box_primitive_->GetPipeline();
+
   cmd.vertex_bindings.buffers[box_primitive_->GetVertexBufferIndex()] =
       vertex_buffer_.vertex_buffer;
   cmd.vertex_bindings
       .buffers[shader::BoxVertexInfo::kUniformUniformBuffer.binding] =
       pass.GetTransientsBuffer().EmplaceUniform(uniforms);
+
+  cmd.fragment_bindings
+      .samplers[shader::BoxFragmentInfo::kInputContents1.location] =
+      GetContext()->GetSamplerLibrary()->GetSampler({});
+  cmd.fragment_bindings
+      .samplers[shader::BoxFragmentInfo::kInputContents2.location] =
+      GetContext()->GetSamplerLibrary()->GetSampler({});
+  cmd.fragment_bindings
+      .samplers[shader::BoxFragmentInfo::kInputContents3.location] =
+      GetContext()->GetSamplerLibrary()->GetSampler({});
+
   cmd.index_buffer = vertex_buffer_.index_buffer;
   cmd.index_count = vertex_buffer_.index_count;
   cmd.primitive_type = PrimitiveType::kTriange;

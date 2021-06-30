@@ -19,4 +19,8 @@ id<MTLTexture> Texture::GetMTLTexture() const {
   return texture_;
 }
 
+bool Texture::IsValid() const {
+  return texture_;
+}
+
 }  // namespace impeller

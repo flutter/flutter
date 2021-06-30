@@ -20,8 +20,8 @@ class Sampler;
 
 struct Bindings {
   std::map<size_t, BufferView> buffers;
-  std::map<size_t, std::shared_ptr<Texture>> textures;
-  std::map<size_t, std::shared_ptr<Sampler>> samplers;
+  std::map<size_t, std::shared_ptr<const Texture>> textures;
+  std::map<size_t, std::shared_ptr<const Sampler>> samplers;
 };
 
 struct Command {
