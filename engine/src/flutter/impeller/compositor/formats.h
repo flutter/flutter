@@ -66,6 +66,23 @@ enum class PrimitiveType {
   // checks. Hence, they are not supported here.
 };
 
+enum class MinMagFilter {
+  /// Select nearest to the sample point. Most widely supported.
+  kNearest,
+  /// Select two points and linearly interpolate between them. Some formats may
+  /// not support this.
+  kLinear,
+};
+
+enum class SamplerAddressMode {
+  kClampToEdge,
+  kRepeat,
+  kMirror,
+  // More modes are almost always supported but they are usually behind
+  // extensions checks. The ones current in these structs are safe (always
+  // supported) defaults.
+};
+
 enum class ColorWriteMask : uint64_t {
   kNone = 0,
   kRed = 1 << 0,

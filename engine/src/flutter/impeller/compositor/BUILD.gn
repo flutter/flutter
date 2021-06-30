@@ -44,6 +44,8 @@ impeller_component("compositor") {
     "renderer.mm",
     "sampler.h",
     "sampler.mm",
+    "sampler_descriptor.h",
+    "sampler_descriptor.mm",
     "shader_function.h",
     "shader_function.mm",
     "shader_library.h",
