@@ -89,6 +89,10 @@ float FlutterWindowWin32::GetDpiScale() {
   return static_cast<float>(GetCurrentDPI()) / static_cast<float>(base_dpi);
 }
 
+bool FlutterWindowWin32::IsVisible() {
+  return IsWindowVisible(GetWindowHandle());
+}
+
 PhysicalWindowBounds FlutterWindowWin32::GetPhysicalWindowBounds() {
   return {GetCurrentWidth(), GetCurrentHeight()};
 }
