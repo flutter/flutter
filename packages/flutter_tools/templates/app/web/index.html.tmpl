@@ -85,6 +85,8 @@
       scriptTag.src = 'main.dart.js';
       scriptTag.type = 'application/javascript';
       document.body.append(scriptTag);
+      
+      document.getElementById('loading-indicator-id');
     }
 
     if ('serviceWorker' in navigator) {
