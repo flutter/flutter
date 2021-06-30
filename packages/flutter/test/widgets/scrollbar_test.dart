@@ -1482,4 +1482,70 @@ void main() {
         ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
     );
   });
+
+  testWidgets('shape property of RawScrollbar can draw a BeveledRectangleBorder', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..path(
+          includes: <Offset>[
+            const Offset(797.0, 0.0),
+            const Offset(797.0, 18.0),
+          ],
+          excludes: <Offset>[
+            const Offset(796.0, 0.0),
+            const Offset(798.0, 0.0),
+          ],
+        ),
+    );
+  });
+
+
+  testWidgets('shape property of RawScrollbar can draw a CircleBorder', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            shape: const CircleBorder(side: BorderSide(width: 2.0)),
+            thickness: 36.0,
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..circle(x: 782.0, y: 180.0, radius: 17.0)
+        ..circle(x: 782.0, y: 180.0, radius: 17.0, strokeWidth: 2.0)
+    );
+  });
+
 }
