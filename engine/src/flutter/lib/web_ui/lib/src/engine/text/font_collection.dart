@@ -2,12 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:async';
+import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:js_util' as js_util;
+import 'dart:typed_data';
 
-const String _ahemFontFamily = 'Ahem';
-const String _ahemFontUrl = 'packages/ui/assets/ahem.ttf';
-const String _robotoFontFamily = 'Roboto';
-const String _robotoTestFontUrl = 'packages/ui/assets/Roboto-Regular.ttf';
+import '../assets.dart';
+import '../browser_detection.dart';
+import '../util.dart';
+import 'measurement.dart';
+import 'layout_service.dart';
+
+const String ahemFontFamily = 'Ahem';
+const String ahemFontUrl = 'packages/ui/assets/ahem.ttf';
+const String robotoFontFamily = 'Roboto';
+const String robotoTestFontUrl = 'packages/ui/assets/Roboto-Regular.ttf';
 
 /// This class is responsible for registering and loading fonts.
 ///
@@ -76,9 +86,9 @@ class FontCollection {
   void debugRegisterTestFonts() {
     _testFontManager = FontManager();
     _testFontManager!.registerAsset(
-        _ahemFontFamily, 'url($_ahemFontUrl)', const <String, String>{});
-    _testFontManager!.registerAsset(_robotoFontFamily,
-        'url($_robotoTestFontUrl)', const <String, String>{});
+        ahemFontFamily, 'url($ahemFontUrl)', const <String, String>{});
+    _testFontManager!.registerAsset(robotoFontFamily,
+        'url($robotoTestFontUrl)', const <String, String>{});
   }
 
   /// Returns a [Future] that completes when the registered fonts are loaded

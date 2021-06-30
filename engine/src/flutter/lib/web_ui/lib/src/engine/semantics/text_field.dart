@@ -42,8 +42,8 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   /// Current input configuration supplied by the "flutter/textinput" channel.
   InputConfiguration? inputConfig;
 
-  _OnChangeCallback? onChange;
-  _OnActionCallback? onAction;
+  OnChangeCallback? onChange;
+  OnActionCallback? onAction;
 
   /// The semantics implementation does not operate on DOM nodes, but only
   /// remembers the config and callbacks. This is because the DOM nodes are
@@ -51,8 +51,8 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   @override
   void enable(
     InputConfiguration inputConfig, {
-    required _OnChangeCallback onChange,
-    required _OnActionCallback onAction,
+    required OnChangeCallback onChange,
+    required OnActionCallback onAction,
   }) {
     this.inputConfig = inputConfig;
     this.onChange = onChange;
@@ -104,14 +104,14 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     }
 
     isEnabled = false;
-    _style = null;
-    _geometry = null;
+    style = null;
+    geometry = null;
 
-    for (int i = 0; i < _subscriptions.length; i++) {
-      _subscriptions[i].cancel();
+    for (int i = 0; i < subscriptions.length; i++) {
+      subscriptions[i].cancel();
     }
-    _subscriptions.clear();
-    _lastEditingState = null;
+    subscriptions.clear();
+    lastEditingState = null;
 
     // If the text element still has focus, remove focus from the editable
     // element to cause the on-screen keyboard, if any, to hide (e.g. on iOS,
@@ -126,26 +126,26 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 
   @override
   void addEventHandlers() {
-    if (_inputConfiguration.autofillGroup != null) {
-      _subscriptions
-          .addAll(_inputConfiguration.autofillGroup!.addInputEventListeners());
+    if (inputConfiguration.autofillGroup != null) {
+      subscriptions
+          .addAll(inputConfiguration.autofillGroup!.addInputEventListeners());
     }
 
     // Subscribe to text and selection changes.
-    _subscriptions.add(activeDomElement.onInput.listen(_handleChange));
-    _subscriptions.add(activeDomElement.onKeyDown.listen(_maybeSendAction));
-    _subscriptions.add(html.document.onSelectionChange.listen(_handleChange));
+    subscriptions.add(activeDomElement.onInput.listen(handleChange));
+    subscriptions.add(activeDomElement.onKeyDown.listen(maybeSendAction));
+    subscriptions.add(html.document.onSelectionChange.listen(handleChange));
     preventDefaultForMouseEvents();
   }
 
   @override
   void initializeTextEditing(InputConfiguration inputConfig,
-      {_OnChangeCallback? onChange, _OnActionCallback? onAction}) {
+      {OnChangeCallback? onChange, OnActionCallback? onAction}) {
     isEnabled = true;
-    _inputConfiguration = inputConfig;
-    _onChange = onChange;
-    _onAction = onAction;
-    _applyConfiguration(inputConfig);
+    inputConfiguration = inputConfig;
+    onChange = onChange;
+    onAction = onAction;
+    applyConfiguration(inputConfig);
   }
 
   @override

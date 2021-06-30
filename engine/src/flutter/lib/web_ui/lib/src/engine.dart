@@ -35,8 +35,13 @@ import '../ui.dart' as ui;
 import 'engine/alarm_clock.dart';
 export 'engine/alarm_clock.dart';
 
+export 'engine/assets.dart';
+
 import 'engine/browser_detection.dart';
 export 'engine/browser_detection.dart';
+
+import 'engine/host_node.dart';
+export 'engine/host_node.dart';
 
 import 'engine/html_image_codec.dart';
 export 'engine/html_image_codec.dart';
@@ -146,7 +151,8 @@ export 'engine/shadow.dart';
 import 'engine/test_embedding.dart';
 export 'engine/test_embedding.dart';
 
-import 'engine/text/layout_service.dart';
+export 'engine/text/font_collection.dart';
+
 export 'engine/text/layout_service.dart';
 
 export 'engine/text/line_break_properties.dart';
@@ -173,6 +179,14 @@ export 'engine/text/word_break_properties.dart';
 
 export 'engine/text/word_breaker.dart';
 
+export 'engine/text_editing/autofill_hint.dart';
+
+export 'engine/text_editing/input_type.dart';
+
+export 'engine/text_editing/text_capitalization.dart';
+
+import 'engine/text_editing/text_editing.dart';
+export 'engine/text_editing/text_editing.dart';
 
 import 'engine/util.dart';
 export 'engine/util.dart';
@@ -253,7 +267,6 @@ export 'engine/canvaskit/util.dart';
 
 export 'engine/canvaskit/vertices.dart';
 
-part 'engine/assets.dart';
 part 'engine/html/bitmap_canvas.dart';
 part 'engine/canvas_pool.dart';
 part 'engine/clipboard.dart';
@@ -263,7 +276,6 @@ part 'engine/dom_renderer.dart';
 part 'engine/engine_canvas.dart';
 part 'engine/font_change_util.dart';
 part 'engine/frame_reference.dart';
-part 'engine/host_node.dart';
 part 'engine/html/backdrop_filter.dart';
 part 'engine/html/canvas.dart';
 part 'engine/html/clip.dart';
@@ -301,11 +313,6 @@ part 'engine/semantics/semantics.dart';
 part 'engine/semantics/semantics_helper.dart';
 part 'engine/semantics/tappable.dart';
 part 'engine/semantics/text_field.dart';
-part 'engine/text/font_collection.dart';
-part 'engine/text_editing/autofill_hint.dart';
-part 'engine/text_editing/input_type.dart';
-part 'engine/text_editing/text_capitalization.dart';
-part 'engine/text_editing/text_editing.dart';
 part 'engine/window.dart';
 
 // The mode the app is running in.
