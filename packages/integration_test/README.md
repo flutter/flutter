@@ -78,7 +78,7 @@ To run the `integration_test/foo_test.dart` test with the
 flutter drive \
   --driver=test_driver/integration_test.dart \
   --target=integration_test/foo_test.dart
-``` d
+```
 
 ### Web
 
