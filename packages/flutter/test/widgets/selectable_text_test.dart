@@ -4812,17 +4812,20 @@ void main() {
                 SelectableText.rich(
                   TextSpan(
                     children: <TextSpan>[
-                      TextSpan(text: 'Atwater Peel ',
+                      TextSpan(
+                        text: 'Atwater Peel ',
                         style: TextStyle(
                           fontSize: 30.0,
                         ),
                       ),
-                      TextSpan(text: 'Sherbrooke Bonaventure ',
+                      TextSpan(
+                        text: 'Sherbrooke Bonaventure ',
                         style: TextStyle(
                           fontSize: 15.0,
                         ),
                       ),
-                      TextSpan(text: 'hi wassup!',
+                      TextSpan(
+                        text: 'hi wassup!',
                         style: TextStyle(
                           fontSize: 10.0,
                         ),
@@ -4861,17 +4864,20 @@ void main() {
                 SelectableText.rich(
                   TextSpan(
                     children: <TextSpan>[
-                      TextSpan(text: 'Atwater Peel ',
+                      TextSpan(
+                        text: 'Atwater Peel ',
                         style: TextStyle(
                           fontSize: 30.0,
                         ),
                       ),
-                      TextSpan(text: 'Sherbrooke Bonaventure ',
+                      TextSpan(
+                        text: 'Sherbrooke Bonaventure ',
                         style: TextStyle(
                           fontSize: 15.0,
                         ),
                       ),
-                      TextSpan(text: 'hi wassup!',
+                      TextSpan(
+                        text: 'hi wassup!',
                         style: TextStyle(
                           fontSize: 10.0,
                         ),
