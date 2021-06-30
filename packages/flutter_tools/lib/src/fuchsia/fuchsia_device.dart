@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/fuchsia/session_control.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
@@ -33,6 +32,7 @@ import 'fuchsia_build.dart';
 import 'fuchsia_pm.dart';
 import 'fuchsia_sdk.dart';
 import 'fuchsia_workflow.dart';
+import 'session_control.dart';
 import 'tiles_ctl.dart';
 
 /// The [FuchsiaDeviceTools] instance.
