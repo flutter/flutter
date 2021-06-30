@@ -179,6 +179,23 @@ class PlatformViewsService {
     return controller;
   }
 
+  /// Whether the render surface of the Android FlutterView should be converted.
+  ///
+  /// When adding platform views using
+  /// [Hybrid Composition](https://flutter.dev/docs/development/platform-integration/platform-views),
+  /// the engine converts the render surface to help improve animation
+  /// synchronization on Android. On Android versions < 10, this can have some
+  /// performance consequences. This flag allows disabling this conversion.
+  ///
+  /// Defaults to false.
+  static Future<void> disableConvertingRenderSurfaceOnAndroid(bool disabled) {
+    assert(defaultTargetPlatform == TargetPlatform.android);
+    return SystemChannels.platform_views.invokeMethod<void>(
+      'disableConvertingRenderSurface',
+      disabled,
+    );
+  }
+
   // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
   /// This is work in progress, not yet ready to be used, and requires a custom engine build. Creates a controller for a new iOS UIView.
   ///
