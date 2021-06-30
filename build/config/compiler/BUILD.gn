@@ -659,8 +659,6 @@ if (is_win) {
     # Disables.
     "-Wno-missing-field-initializers",  # "struct foo f = {0};"
     "-Wno-unused-parameter",  # Unused function parameters.
-    "-Wno-unused-but-set-parameter",  # Unused but set function parameters.
-    "-Wno-unused-but-set-variable",  # Unused but set variables.
   ]
 
   if (is_wasm) {
@@ -675,6 +673,8 @@ if (is_win) {
 
   if (!use_xcode) {
     default_warning_flags += [
+      "-Wno-unused-but-set-parameter",
+      "-Wno-unused-but-set-variable",
       "-Wno-implicit-int-float-conversion",
       "-Wno-c99-designator",
       "-Wno-deprecated-copy",
