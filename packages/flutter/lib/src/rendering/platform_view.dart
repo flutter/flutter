@@ -82,11 +82,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
     Clip clipBehavior = Clip.hardEdge,
-  }) : assert(viewController != null),
-       assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null),
-       assert(clipBehavior != null),
-       _viewController = viewController,
+  }) : _viewController = viewController,
        _clipBehavior = clipBehavior {
     _viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
     updateGestureRecognizers(gestureRecognizers);
@@ -103,8 +99,6 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   ///
   /// `viewController` must not be null.
   set viewController(AndroidViewController viewController) {
-    assert(_viewController != null);
-    assert(viewController != null);
     if (_viewController == viewController)
       return;
     _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
@@ -122,7 +116,6 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -290,10 +283,7 @@ class RenderUiKitView extends RenderBox {
     required UiKitViewController viewController,
     required this.hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-  }) : assert(viewController != null),
-       assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null),
-       _viewController = viewController {
+  }) : _viewController = viewController {
     updateGestureRecognizers(gestureRecognizers);
   }
 
@@ -305,7 +295,6 @@ class RenderUiKitView extends RenderBox {
   UiKitViewController get viewController => _viewController;
   UiKitViewController _viewController;
   set viewController(UiKitViewController viewController) {
-    assert(viewController != null);
     final bool needsSemanticsUpdate = _viewController.id != viewController.id;
     _viewController = viewController;
     markNeedsPaint();
@@ -321,7 +310,6 @@ class RenderUiKitView extends RenderBox {
 
   /// {@macro flutter.rendering.RenderAndroidView.updateGestureRecognizers}
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
-    assert(gestureRecognizers != null);
     assert(
       _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
       'There were multiple gesture recognizer factories for the same type, there must only be a single '
@@ -623,9 +611,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     required PlatformViewController controller,
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-  }) :  assert(controller != null && controller.viewId != null && controller.viewId > -1),
-        assert(hitTestBehavior != null),
-        assert(gestureRecognizers != null),
+  }) :  assert(controller.viewId > -1),
         _controller = controller {
     this.hitTestBehavior = hitTestBehavior;
     updateGestureRecognizers(gestureRecognizers);
@@ -635,8 +621,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   ///
   /// This value must not be null, and setting it to a new value will result in a repaint.
   set controller(PlatformViewController controller) {
-    assert(controller != null);
-    assert(controller.viewId != null && controller.viewId > -1);
+    assert(controller.viewId > -1);
 
     if ( _controller == controller) {
       return;
@@ -675,7 +660,6 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(_controller.viewId != null);
     context.addLayer(PlatformViewLayer(
       rect: offset & size,
       viewId: _controller.viewId,
@@ -685,7 +669,6 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   @override
   void describeSemanticsConfiguration (SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    assert(_controller.viewId != null);
     config.isSemanticBoundary = true;
     config.platformViewId = _controller.viewId;
   }
@@ -712,7 +695,6 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
   void _updateGestureRecognizersWithCallBack(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent handlePointerEvent) {
-    assert(gestureRecognizers != null);
     assert(
       _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
       'There were multiple gesture recognizer factories for the same type, there must only be a single '

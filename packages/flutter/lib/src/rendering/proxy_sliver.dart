@@ -72,14 +72,12 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
 
   @override
   double childMainAxisPosition(RenderSliver child) {
-    assert(child != null);
     assert(child == this.child);
     return 0.0;
   }
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    assert(child != null);
     final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
@@ -103,8 +101,7 @@ class RenderSliverOpacity extends RenderProxySliver {
     double opacity = 1.0,
     bool alwaysIncludeSemantics = false,
     RenderSliver? sliver,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       assert(alwaysIncludeSemantics != null),
+  }) : assert(opacity >= 0.0 && opacity <= 1.0),
        _opacity = opacity,
        _alwaysIncludeSemantics = alwaysIncludeSemantics,
        _alpha = ui.Color.getAlphaFromOpacity(opacity) {
@@ -129,7 +126,6 @@ class RenderSliverOpacity extends RenderProxySliver {
   double get opacity => _opacity;
   double _opacity;
   set opacity(double value) {
-    assert(value != null);
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
@@ -215,8 +211,7 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
     RenderSliver? sliver,
     bool ignoring = true,
     bool? ignoringSemantics,
-  }) : assert(ignoring != null),
-       _ignoring = ignoring,
+  }) : _ignoring = ignoring,
        _ignoringSemantics = ignoringSemantics {
     child = sliver;
   }
@@ -228,7 +223,6 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   bool get ignoring => _ignoring;
   bool _ignoring;
   set ignoring(bool value) {
-    assert(value != null);
     if (value == _ignoring)
       return;
     _ignoring = value;
@@ -287,8 +281,7 @@ class RenderSliverOffstage extends RenderProxySliver {
   RenderSliverOffstage({
     bool offstage = true,
     RenderSliver? sliver,
-  }) : assert(offstage != null),
-       _offstage = offstage {
+  }) : _offstage = offstage {
     child = sliver;
   }
 
@@ -303,7 +296,6 @@ class RenderSliverOffstage extends RenderProxySliver {
   bool _offstage;
 
   set offstage(bool value) {
-    assert(value != null);
     if (value == _offstage)
       return;
     _offstage = value;
@@ -386,8 +378,7 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
     required Animation<double> opacity,
     bool alwaysIncludeSemantics = false,
     RenderSliver? sliver,
-  }) : assert(opacity != null),
-       assert(alwaysIncludeSemantics != null) {
+  }) {
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
     child = sliver;

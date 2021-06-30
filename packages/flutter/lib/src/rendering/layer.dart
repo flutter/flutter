@@ -23,7 +23,7 @@ class AnnotationEntry<T> {
   const AnnotationEntry({
     required this.annotation,
     required this.localPosition,
-  }) : assert(localPosition != null);
+  });
 
   /// The annotation object that is found.
   final T annotation;
@@ -768,8 +768,7 @@ class TextureLayer extends Layer {
     required this.textureId,
     this.freeze = false,
     this.filterQuality = ui.FilterQuality.low,
-  }) : assert(rect != null),
-       assert(textureId != null);
+  });
 
   /// Bounding rectangle of this layer.
   final Rect rect;
@@ -817,8 +816,7 @@ class PlatformViewLayer extends Layer {
   PlatformViewLayer({
     required this.rect,
     required this.viewId,
-  }) : assert(rect != null),
-       assert(viewId != null);
+  });
 
   /// Bounding rectangle of this layer in the global coordinate space.
   final Rect rect;
@@ -901,7 +899,6 @@ class PerformanceOverlayLayer extends Layer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    assert(optionsMask != null);
     final Rect shiftedOverlayRect = layerOffset == Offset.zero ? overlayRect : overlayRect.shift(layerOffset);
     builder.addPerformanceOverlay(optionsMask, shiftedOverlayRect);
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
@@ -1266,7 +1263,6 @@ class ContainerLayer extends Layer {
   /// position.
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
-    assert(transform != null);
   }
 
   /// Returns the descendants of this layer in depth first order.
@@ -1344,7 +1340,6 @@ class OffsetLayer extends ContainerLayer {
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
-    assert(transform != null);
     transform.multiply(Matrix4.translationValues(offset.dx, offset.dy, 0.0));
   }
 
@@ -1387,8 +1382,6 @@ class OffsetLayer extends ContainerLayer {
   ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage(Rect bounds, { double pixelRatio = 1.0 }) async {
-    assert(bounds != null);
-    assert(pixelRatio != null);
     final ui.SceneBuilder builder = ui.SceneBuilder();
     final Matrix4 transform = Matrix4.translationValues(
       (-bounds.left  - offset.dx) * pixelRatio,
@@ -1429,7 +1422,6 @@ class ClipRectLayer extends ContainerLayer {
     Clip clipBehavior = Clip.hardEdge,
   }) : _clipRect = clipRect,
        _clipBehavior = clipBehavior,
-       assert(clipBehavior != null),
        assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
@@ -1455,7 +1447,6 @@ class ClipRectLayer extends ContainerLayer {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
-    assert(value != null);
     assert(value != Clip.none);
     if (value != _clipBehavior) {
       _clipBehavior = value;
@@ -1473,7 +1464,6 @@ class ClipRectLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(clipRect != null);
-    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1517,7 +1507,6 @@ class ClipRRectLayer extends ContainerLayer {
     Clip clipBehavior = Clip.antiAlias,
   }) : _clipRRect = clipRRect,
        _clipBehavior = clipBehavior,
-       assert(clipBehavior != null),
        assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
@@ -1539,7 +1528,6 @@ class ClipRRectLayer extends ContainerLayer {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
-    assert(value != null);
     assert(value != Clip.none);
     if (value != _clipBehavior) {
       _clipBehavior = value;
@@ -1557,7 +1545,6 @@ class ClipRRectLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(clipRRect != null);
-    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1601,7 +1588,6 @@ class ClipPathLayer extends ContainerLayer {
     Clip clipBehavior = Clip.antiAlias,
   }) : _clipPath = clipPath,
        _clipBehavior = clipBehavior,
-       assert(clipBehavior != null),
        assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
@@ -1623,7 +1609,6 @@ class ClipPathLayer extends ContainerLayer {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
-    assert(value != null);
     assert(value != Clip.none);
     if (value != _clipBehavior) {
       _clipBehavior = value;
@@ -1641,7 +1626,6 @@ class ClipPathLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(clipPath != null);
-    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1833,7 +1817,6 @@ class TransformLayer extends OffsetLayer {
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
-    assert(transform != null);
     assert(_lastEffectiveTransform != null || this.transform != null);
     if (_lastEffectiveTransform == null) {
       transform.multiply(this.transform!);
@@ -1898,7 +1881,6 @@ class OpacityLayer extends ContainerLayer {
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
-    assert(transform != null);
     transform.translate(offset!.dx, offset!.dy);
   }
 
@@ -2006,7 +1988,6 @@ class ShaderMaskLayer extends ContainerLayer {
     assert(shader != null);
     assert(maskRect != null);
     assert(blendMode != null);
-    assert(layerOffset != null);
     final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect! : maskRect!.shift(layerOffset);
     engineLayer = builder.pushShaderMask(
       shader!,
@@ -2138,7 +2119,6 @@ class PhysicalModelLayer extends ContainerLayer {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsAddToScene();
@@ -2197,7 +2177,6 @@ class PhysicalModelLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(clipPath != null);
-    assert(clipBehavior != null);
     assert(elevation != null);
     assert(color != null);
     assert(shadowColor != null);
@@ -2275,18 +2254,13 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({ required LayerLink link, this.offset = Offset.zero }) : assert(link != null), _link = link;
+  LeaderLayer({ required this.link, this.offset = Offset.zero });
 
   /// The object with which this layer should register.
   ///
   /// The link will be established when this layer is [attach]ed, and will be
   /// cleared when this layer is [detach]ed.
-  LayerLink get link => _link;
-  set link(LayerLink value) {
-    assert(value != null);
-    _link = value;
-  }
-  LayerLink _link;
+  LayerLink link;
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -2331,7 +2305,6 @@ class LeaderLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    assert(offset != null);
     _lastOffset = offset + layerOffset;
     if (_lastOffset != Offset.zero)
       engineLayer = builder.pushTransform(
@@ -2383,23 +2356,18 @@ class FollowerLayer extends ContainerLayer {
   /// The [unlinkedOffset], [linkedOffset], and [showWhenUnlinked] properties
   /// must be non-null before the compositing phase of the pipeline.
   FollowerLayer({
-    required LayerLink link,
+    required this.link,
     this.showWhenUnlinked = true,
     this.unlinkedOffset = Offset.zero,
     this.linkedOffset = Offset.zero,
-  }) : assert(link != null), _link = link;
+  });
 
   /// The link to the [LeaderLayer].
   ///
   /// The same object should be provided to a [LeaderLayer] that is earlier in
   /// the layer tree. When this layer is composited, it will apply a transform
   /// that moves its children to match the position of the [LeaderLayer].
-  LayerLink get link => _link;
-  set link(LayerLink value) {
-    assert(value != null);
-    _link = value;
-  }
-  LayerLink _link;
+  LayerLink link;
 
   /// Whether to show the layer's contents when the [link] does not point to a
   /// [LeaderLayer].
@@ -2539,7 +2507,6 @@ class FollowerLayer extends ContainerLayer {
 
   /// Populate [_lastTransform] given the current state of the tree.
   void _establishTransform() {
-    assert(link != null);
     _lastTransform = null;
     final LeaderLayer? leader = link.leader;
     // Check to see if we are linked.
@@ -2601,7 +2568,6 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    assert(link != null);
     assert(showWhenUnlinked != null);
     if (link.leader == null && !showWhenUnlinked!) {
       _lastTransform = null;
@@ -2635,7 +2601,6 @@ class FollowerLayer extends ContainerLayer {
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
-    assert(transform != null);
     if (_lastTransform != null) {
       transform.multiply(_lastTransform!);
     } else {
@@ -2681,9 +2646,7 @@ class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
     this.size,
     Offset? offset,
     this.opaque = false,
-  }) : assert(value != null),
-       assert(opaque != null),
-       offset = offset ?? Offset.zero;
+  }) : offset = offset ?? Offset.zero;
 
   /// The annotated object, which is added to the result if all restrictions are
   /// met.

@@ -84,15 +84,8 @@ class RenderParagraph extends RenderBox
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
     List<RenderBox>? children,
-  }) : assert(text != null),
-       assert(text.debugAssertIsValid()),
-       assert(textAlign != null),
-       assert(textDirection != null),
-       assert(softWrap != null),
-       assert(overflow != null),
-       assert(textScaleFactor != null),
+  }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
-       assert(textWidthBasis != null),
        _softWrap = softWrap,
        _overflow = overflow,
        _textPainter = TextPainter(
@@ -122,7 +115,6 @@ class RenderParagraph extends RenderBox
   /// The text to display.
   InlineSpan get text => _textPainter.text!;
   set text(InlineSpan value) {
-    assert(value != null);
     switch (_textPainter.text!.compareTo(value)) {
       case RenderComparison.identical:
       case RenderComparison.metadata:
@@ -156,7 +148,6 @@ class RenderParagraph extends RenderBox
   /// How the text should be aligned horizontally.
   TextAlign get textAlign => _textPainter.textAlign;
   set textAlign(TextAlign value) {
-    assert(value != null);
     if (_textPainter.textAlign == value)
       return;
     _textPainter.textAlign = value;
@@ -178,7 +169,6 @@ class RenderParagraph extends RenderBox
   /// This must not be null.
   TextDirection get textDirection => _textPainter.textDirection!;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textPainter.textDirection == value)
       return;
     _textPainter.textDirection = value;
@@ -195,7 +185,6 @@ class RenderParagraph extends RenderBox
   bool get softWrap => _softWrap;
   bool _softWrap;
   set softWrap(bool value) {
-    assert(value != null);
     if (_softWrap == value)
       return;
     _softWrap = value;
@@ -206,7 +195,6 @@ class RenderParagraph extends RenderBox
   TextOverflow get overflow => _overflow;
   TextOverflow _overflow;
   set overflow(TextOverflow value) {
-    assert(value != null);
     if (_overflow == value)
       return;
     _overflow = value;
@@ -220,7 +208,6 @@ class RenderParagraph extends RenderBox
   /// the specified font size.
   double get textScaleFactor => _textPainter.textScaleFactor;
   set textScaleFactor(double value) {
-    assert(value != null);
     if (_textPainter.textScaleFactor == value)
       return;
     _textPainter.textScaleFactor = value;
@@ -274,7 +261,6 @@ class RenderParagraph extends RenderBox
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
-    assert(value != null);
     if (_textPainter.textWidthBasis == value)
       return;
     _textPainter.textWidthBasis = value;
@@ -334,7 +320,6 @@ class RenderParagraph extends RenderBox
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!debugNeedsLayout);
-    assert(constraints != null);
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
     // TODO(garyq): Since our metric for ideographic baseline is currently
@@ -653,7 +638,6 @@ class RenderParagraph extends RenderBox
           _overflowShader = null;
           break;
         case TextOverflow.fade:
-          assert(textDirection != null);
           _needsClipping = true;
           final TextPainter fadeSizePainter = TextPainter(
             text: TextSpan(style: _textPainter.text!.style, text: '\u2026'),

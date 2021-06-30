@@ -111,8 +111,7 @@ class RenderPadding extends RenderShiftedBox {
     required EdgeInsetsGeometry padding,
     TextDirection? textDirection,
     RenderBox? child,
-  }) : assert(padding != null),
-       assert(padding.isNonNegative),
+  }) : assert(padding.isNonNegative),
        _textDirection = textDirection,
        _padding = padding,
        super(child);
@@ -138,7 +137,6 @@ class RenderPadding extends RenderShiftedBox {
   EdgeInsetsGeometry get padding => _padding;
   EdgeInsetsGeometry _padding;
   set padding(EdgeInsetsGeometry value) {
-    assert(value != null);
     assert(value.isNonNegative);
     if (_padding == value)
       return;
@@ -270,8 +268,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
     AlignmentGeometry alignment = Alignment.center,
     required TextDirection? textDirection,
     RenderBox? child,
-  }) : assert(alignment != null),
-       _alignment = alignment,
+  }) : _alignment = alignment,
        _textDirection = textDirection,
        super(child);
 
@@ -312,7 +309,6 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   ///
   /// The new alignment must not be null.
   set alignment(AlignmentGeometry value) {
-    assert(value != null);
     if (_alignment == value)
       return;
     _alignment = value;
@@ -688,10 +684,7 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
     required BoxConstraintsTransform constraintsTransform,
     RenderBox? child,
     Clip clipBehavior = Clip.none,
-  }) : assert(alignment != null),
-       assert(clipBehavior != null),
-       assert(constraintsTransform != null),
-       _constraintsTransform = constraintsTransform,
+  }) : _constraintsTransform = constraintsTransform,
        _clipBehavior = clipBehavior,
        super.mixin(alignment, textDirection, child);
 
@@ -717,7 +710,6 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -771,7 +763,6 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
     final RenderBox? child = this.child;
     if (child != null) {
       final BoxConstraints childConstraints = constraintsTransform(constraints);
-      assert(childConstraints != null);
       assert(childConstraints.isNormalized, '$childConstraints is not normalized');
       _childConstraints = childConstraints;
       child.layout(childConstraints, parentUsesSize: true);
@@ -890,9 +881,7 @@ class RenderUnconstrainedBox extends RenderConstraintsTransformBox {
     Axis? constrainedAxis,
     RenderBox? child,
     Clip clipBehavior = Clip.none,
-  }) : assert(alignment != null),
-       assert(clipBehavior != null),
-       _constrainedAxis = constrainedAxis,
+  }) : _constrainedAxis = constrainedAxis,
        super(
          alignment: alignment,
          textDirection: textDirection,
@@ -958,15 +947,13 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
     required Size requestedSize,
     AlignmentGeometry alignment = Alignment.center,
     TextDirection? textDirection,
-  }) : assert(requestedSize != null),
-       _requestedSize = requestedSize,
+  }) : _requestedSize = requestedSize,
        super(child: child, alignment: alignment, textDirection: textDirection);
 
   /// The size this render box should attempt to be.
   Size get requestedSize => _requestedSize;
   Size _requestedSize;
   set requestedSize(Size value) {
-    assert(value != null);
     if (_requestedSize == value)
       return;
     _requestedSize = value;
@@ -1272,15 +1259,13 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   RenderCustomSingleChildLayoutBox({
     RenderBox? child,
     required SingleChildLayoutDelegate delegate,
-  }) : assert(delegate != null),
-       _delegate = delegate,
+  }) : _delegate = delegate,
        super(child);
 
   /// A delegate that controls this object's layout.
   SingleChildLayoutDelegate get delegate => _delegate;
   SingleChildLayoutDelegate _delegate;
   set delegate(SingleChildLayoutDelegate newDelegate) {
-    assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;
     final SingleChildLayoutDelegate oldDelegate = _delegate;
@@ -1387,9 +1372,7 @@ class RenderBaseline extends RenderShiftedBox {
     RenderBox? child,
     required double baseline,
     required TextBaseline baselineType,
-  }) : assert(baseline != null),
-       assert(baselineType != null),
-       _baseline = baseline,
+  }) : _baseline = baseline,
        _baselineType = baselineType,
        super(child);
 
@@ -1398,7 +1381,6 @@ class RenderBaseline extends RenderShiftedBox {
   double get baseline => _baseline;
   double _baseline;
   set baseline(double value) {
-    assert(value != null);
     if (_baseline == value)
       return;
     _baseline = value;
@@ -1409,7 +1391,6 @@ class RenderBaseline extends RenderShiftedBox {
   TextBaseline get baselineType => _baselineType;
   TextBaseline _baselineType;
   set baselineType(TextBaseline value) {
-    assert(value != null);
     if (_baselineType == value)
       return;
     _baselineType = value;

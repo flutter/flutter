@@ -90,10 +90,7 @@ class BoxConstraints extends Constraints {
     this.maxWidth = double.infinity,
     this.minHeight = 0.0,
     this.maxHeight = double.infinity,
-  }) : assert(minWidth != null),
-       assert(maxWidth != null),
-       assert(minHeight != null),
-       assert(maxHeight != null);
+  });
 
   /// Creates box constraints that is respected only by the given size.
   BoxConstraints.tight(Size size)
@@ -184,7 +181,6 @@ class BoxConstraints extends Constraints {
 
   /// Returns new box constraints that are smaller by the given edge dimensions.
   BoxConstraints deflate(EdgeInsets edges) {
-    assert(edges != null);
     assert(debugAssertIsValid());
     final double horizontal = edges.horizontal;
     final double vertical = edges.vertical;
@@ -467,7 +463,6 @@ class BoxConstraints extends Constraints {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxConstraints? lerp(BoxConstraints? a, BoxConstraints? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -738,8 +733,6 @@ class BoxHitTestResult extends HitTestResult {
     required Offset position,
     required BoxHitTest hitTest,
   }) {
-    assert(position != null);
-    assert(hitTest != null);
     if (transform != null) {
       transform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
       if (transform == null) {
@@ -777,8 +770,6 @@ class BoxHitTestResult extends HitTestResult {
     required Offset position,
     required BoxHitTest hitTest,
   }) {
-    assert(position != null);
-    assert(hitTest != null);
     final Offset transformedPosition = offset == null ? position : position - offset;
     if (offset != null) {
       pushOffset(-offset);
@@ -814,9 +805,6 @@ class BoxHitTestResult extends HitTestResult {
     required Offset position,
     required BoxHitTest hitTest,
   }) {
-    assert(position != null);
-    assert(hitTest != null);
-    assert(position != null);
     final Offset transformedPosition = transform == null ?
         position : MatrixUtils.transformPoint(transform, position);
     if (transform != null) {
@@ -863,7 +851,6 @@ class BoxHitTestResult extends HitTestResult {
     Matrix4? rawTransform,
     required BoxHitTestWithOutOfBandPosition hitTest,
   }) {
-    assert(hitTest != null);
     assert(
       (paintOffset == null && paintTransform == null && rawTransform != null) ||
       (paintOffset == null && paintTransform != null && rawTransform == null) ||
@@ -892,8 +879,7 @@ class BoxHitTestEntry extends HitTestEntry {
   ///
   /// The [localPosition] argument must not be null.
   BoxHitTestEntry(RenderBox target, this.localPosition)
-    : assert(localPosition != null),
-      super(target);
+    : super(target);
 
   @override
   RenderBox get target => super.target as RenderBox;
@@ -981,6 +967,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// AxisDirection get axis => _axis;
 /// AxisDirection _axis;
 /// set axis(AxisDirection value) {
+// TODO(werainkhatri): verify redundancy
 ///   assert(value != null); // same check as in the constructor
 ///   if (value == _axis)
 ///     return;
@@ -2163,7 +2150,6 @@ abstract class RenderBox extends RenderObject {
 
   @override
   void debugAssertDoesMeetConstraints() {
-    assert(constraints != null);
     assert(() {
       if (!hasSize) {
         final DiagnosticsNode contract;
@@ -2472,7 +2458,6 @@ abstract class RenderBox extends RenderObject {
   /// child's [parentData] in the [BoxParentData.offset] field.
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    assert(child != null);
     assert(child.parent == this);
     assert(() {
       if (child.parentData is! BoxParentData) {

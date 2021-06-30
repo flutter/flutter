@@ -187,8 +187,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// The [childManager] argument must not be null.
   RenderSliverMultiBoxAdaptor({
     required RenderSliverBoxChildManager childManager,
-  }) : assert(childManager != null),
-       _childManager = childManager {
+  }) : _childManager = childManager {
     assert(() {
       _debugDanglingKeepAlives = <RenderBox>[];
       return true;
@@ -227,7 +226,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   bool get debugChildIntegrityEnabled => _debugChildIntegrityEnabled;
   bool _debugChildIntegrityEnabled = true;
   set debugChildIntegrityEnabled(bool enabled) {
-    assert(enabled != null);
     assert(() {
       _debugChildIntegrityEnabled = enabled;
       return _debugVerifyChildOrder() &&
@@ -530,7 +528,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// Returns the index of the given child, as given by the
   /// [SliverMultiBoxAdaptorParentData.index] field of the child's [parentData].
   int indexOf(RenderBox child) {
-    assert(child != null);
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     assert(childParentData.index != null);
     return childParentData.index!;
@@ -540,7 +537,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// child's [RenderBox.size] property. This is only valid after layout.
   @protected
   double paintExtentOf(RenderBox child) {
-    assert(child != null);
     assert(child.hasSize);
     switch (constraints.axis) {
       case Axis.horizontal:
@@ -569,7 +565,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   @override
   double? childScrollOffset(RenderObject child) {
-    assert(child != null);
     assert(child.parent == this);
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     return childParentData.layoutOffset;
@@ -628,8 +623,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         addExtent = true;
         break;
     }
-    assert(mainAxisUnit != null);
-    assert(addExtent != null);
     RenderBox? child = firstChild;
     while (child != null) {
       final double mainAxisDelta = childMainAxisPosition(child);
