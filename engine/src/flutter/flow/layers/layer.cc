@@ -13,7 +13,6 @@ Layer::Layer()
     : paint_bounds_(SkRect::MakeEmpty()),
       unique_id_(NextUniqueID()),
       original_layer_id_(unique_id_),
-      needs_system_composite_(false),
       subtree_has_platform_view_(false) {}
 
 Layer::~Layer() = default;
@@ -56,31 +55,6 @@ Layer::AutoPrerollSaveLayerState::~AutoPrerollSaveLayerState() {
         (prev_surface_needs_readback_ || layer_itself_performs_readback_);
   }
 }
-
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-
-void Layer::CheckForChildLayerBelow(PrerollContext* context) {
-  // If there is embedded Fuchsia content in the scene (a ChildSceneLayer),
-  // PhysicalShapeLayers that appear above the embedded content will be turned
-  // into their own Scenic layers.
-  child_layer_exists_below_ = context->child_scene_layer_exists_below;
-  if (child_layer_exists_below_) {
-    set_needs_system_composite(true);
-  }
-}
-
-void Layer::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
-  FML_DCHECK(needs_system_composite());
-  FML_DCHECK(child_layer_exists_below_);
-
-  SceneUpdateContext::Frame frame(
-      context, SkRRect::MakeRect(paint_bounds()), SK_ColorTRANSPARENT,
-      SkScalarRoundToInt(context->alphaf() * 255), "flutter::Layer");
-
-  frame.AddPaintLayer(this);
-}
-
-#endif
 
 Layer::AutoSaveLayer::AutoSaveLayer(const PaintContext& paint_context,
                                     const SkRect& bounds,

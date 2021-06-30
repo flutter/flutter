@@ -31,10 +31,6 @@ class LayerTree {
   bool Preroll(CompositorContext::ScopedFrame& frame,
                bool ignore_raster_cache = false);
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  void UpdateScene(std::shared_ptr<SceneUpdateContext> context);
-#endif
-
   void Paint(CompositorContext::ScopedFrame& frame,
              bool ignore_raster_cache = false) const;
 
