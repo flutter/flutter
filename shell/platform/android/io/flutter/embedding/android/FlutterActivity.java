@@ -210,6 +210,14 @@ public class FlutterActivity extends Activity
   private static final String TAG = "FlutterActivity";
 
   /**
+   * The ID of the {@code FlutterView} created by this activity.
+   *
+   * <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For more,
+   * see {@link android.view.View#findViewById}.
+   */
+  public static final int FLUTTER_VIEW_ID = 0xF1F2;
+
+  /**
    * Creates an {@link Intent} that launches a {@code FlutterActivity}, which creates a {@link
    * FlutterEngine} that executes a {@code main()} Dart entrypoint, and displays the "/" route as
    * Flutter's initial route.
@@ -424,7 +432,11 @@ public class FlutterActivity extends Activity
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
 
     configureWindowForTransparency();
-    setContentView(createFlutterView());
+
+    View flutterView = createFlutterView();
+    flutterView.setId(FLUTTER_VIEW_ID);
+    setContentView(flutterView);
+
     configureStatusBarForFullscreenFlutterExperience();
   }
 
