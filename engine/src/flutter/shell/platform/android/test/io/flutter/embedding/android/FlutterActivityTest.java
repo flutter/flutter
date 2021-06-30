@@ -69,6 +69,17 @@ public class FlutterActivityTest {
   }
 
   @Test
+  public void flutterViewHasId() {
+    Intent intent = FlutterActivity.createDefaultIntent(RuntimeEnvironment.application);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity activity = activityController.get();
+
+    activity.onCreate(null);
+    assertNotNull(activity.findViewById(FlutterActivity.FLUTTER_VIEW_ID));
+  }
+
+  @Test
   public void itCreatesDefaultIntentWithExpectedDefaults() {
     Intent intent = FlutterActivity.createDefaultIntent(RuntimeEnvironment.application);
     ActivityController<FlutterActivity> activityController =
