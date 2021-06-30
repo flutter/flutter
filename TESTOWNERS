@@ -14,6 +14,7 @@
 /dev/devicelab/bin/tasks/android_obfuscate_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_stack_size_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/animated_image_gc_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/animated_placeholder_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/backdrop_filter_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/basic_material_app_android__compile.dart @zanderso @flutter/tool
@@ -205,3 +206,4 @@
 # web_tests @ferhatb @flutter/web
 # web_tool_tests @zanderso @flutter/tool
 # fuchsia_precache @zanderso @flutter/tool
+# skp_generator @Hixie
