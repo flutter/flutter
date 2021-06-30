@@ -180,6 +180,27 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     return std::nullopt;
   }
 
+  {
+    auto combined_sampled_images =
+        ReflectResources(shader_resources.sampled_images);
+    auto images = ReflectResources(shader_resources.separate_images);
+    auto samplers = ReflectResources(shader_resources.separate_samplers);
+    if (!combined_sampled_images.has_value() || !images.has_value() ||
+        !samplers.has_value()) {
+      return std::nullopt;
+    }
+    auto& stage_inputs = root["sampled_images"] = nlohmann::json::array_t{};
+    for (auto value : combined_sampled_images.value()) {
+      stage_inputs.emplace_back(std::move(value));
+    }
+    for (auto value : images.value()) {
+      stage_inputs.emplace_back(std::move(value));
+    }
+    for (auto value : samplers.value()) {
+      stage_inputs.emplace_back(std::move(value));
+    }
+  }
+
   if (auto stage_outputs = ReflectResources(shader_resources.stage_outputs);
       stage_outputs.has_value()) {
     root["stage_outputs"] = std::move(stage_outputs.value());
