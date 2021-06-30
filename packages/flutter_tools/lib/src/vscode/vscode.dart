@@ -326,5 +326,5 @@ class VsCodeInstallLocation {
 
   @override
   // Lowest bit is for isInsiders boolean.
-  int get hashCode => Object.hash(installPath, extensionsFolder, edition);
+  int get hashCode => installPath.hashCode ^ extensionsFolder.hashCode ^ edition.hashCode;
 }

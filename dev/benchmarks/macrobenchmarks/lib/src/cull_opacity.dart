@@ -5,15 +5,15 @@
 import 'package:flutter/material.dart';
 
 class CullOpacityPage extends StatefulWidget {
-  const CullOpacityPage({Key key}) : super(key: key);
+  const CullOpacityPage({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _CullOpacityPageState();
 }
 
 class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProviderStateMixin {
-  Animation<double> _offsetY;
-  AnimationController _controller;
+  late Animation<double> _offsetY;
+  late AnimationController _controller;
 
   @override
   void initState() {

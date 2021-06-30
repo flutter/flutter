@@ -979,9 +979,10 @@ abstract class WidgetController {
   /// soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
-  /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
+  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// that type of system. Defaults to "web" on web, and "android" everywhere
+  /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
+  /// supported.
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -1009,9 +1010,10 @@ abstract class WidgetController {
   /// from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
-  /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
+  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// that type of system. Defaults to "web" on web, and "android" everywhere
+  /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
+  /// supported.
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -1033,8 +1035,9 @@ abstract class WidgetController {
   /// not from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to "web" on web, and "android" everywhere else. May not be null.
+  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// that type of system. Defaults to "web" on web, and "android" everywhere
+  /// else. May not be null.
   ///
   /// Returns true if the key event was handled by the framework.
   ///

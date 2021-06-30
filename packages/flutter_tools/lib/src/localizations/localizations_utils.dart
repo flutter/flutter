@@ -129,7 +129,9 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   }
 
   @override
-  int get hashCode => originalString.hashCode;
+  int get hashCode {
+    return originalString.hashCode;
+  }
 
   @override
   String toString() {

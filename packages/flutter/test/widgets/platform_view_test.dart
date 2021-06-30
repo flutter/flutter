@@ -3,6 +3,12 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependency have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=4281596210"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';

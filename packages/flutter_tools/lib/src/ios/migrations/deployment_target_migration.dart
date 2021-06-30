@@ -5,7 +5,7 @@
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
-import '../../project.dart';
+import '../../xcode_project.dart';
 
 /// Update the minimum iOS deployment version to the minimum allowed by Xcode without causing a warning.
 class DeploymentTargetMigration extends ProjectMigrator {
