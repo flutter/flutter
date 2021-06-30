@@ -83,7 +83,12 @@ Future<ProcessManager> startProcess(
     // Running the process in a system shell for Windows. Otherwise
     // the process is not able to get Dart from path.
     runInShell: io.Platform.isWindows,
-    mode: io.ProcessStartMode.normal,
+    // When [evalOutput] is false, we don't need to intercept the stdout of the
+    // sub-process. In this case, it's better to run the sub-process in the
+    // `inheritStdio` mode which lets it print directly to the terminal.
+    // This allows sub-processes such as `ninja` to use all kinds of terminal
+    // features like printing colors, printing progress on the same line, etc.
+    mode: evalOutput ? io.ProcessStartMode.normal : io.ProcessStartMode.inheritStdio,
     environment: environment,
   );
   processesToCleanUp.add(process);
@@ -112,9 +117,6 @@ class ProcessManager {
     if (_evalOutput) {
       _forwardStream(process.stdout, _stdout);
       _forwardStream(process.stderr, _stderr);
-    } else {
-      _forwardStream(process.stdout, io.stdout);
-      _forwardStream(process.stderr, io.stderr);
     }
   }
 

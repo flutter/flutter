@@ -245,6 +245,7 @@ class PipelineWatcher {
   void _pipelineDone(int pipelineRunCount) {
     if (pipelineRunCount == _pipelineRunCount) {
       print('*** Done! ***');
+      print('Press \'q\' to exit felt');
     }
   }
 }
