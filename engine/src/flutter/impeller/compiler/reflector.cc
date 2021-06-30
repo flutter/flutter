@@ -173,11 +173,15 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     return std::nullopt;
   }
 
-  if (auto stage_inputs = ReflectResources(shader_resources.stage_inputs);
-      stage_inputs.has_value()) {
-    root["stage_inputs"] = std::move(stage_inputs.value());
-  } else {
-    return std::nullopt;
+  {
+    auto& stage_inputs = root["stage_inputs"] = nlohmann::json::array_t{};
+    if (auto stage_inputs_json =
+            ReflectResources(shader_resources.stage_inputs);
+        stage_inputs_json.has_value()) {
+      stage_inputs = std::move(stage_inputs_json.value());
+    } else {
+      return std::nullopt;
+    }
   }
 
   {
@@ -189,15 +193,15 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
         !samplers.has_value()) {
       return std::nullopt;
     }
-    auto& stage_inputs = root["sampled_images"] = nlohmann::json::array_t{};
+    auto& sampled_images = root["sampled_images"] = nlohmann::json::array_t{};
     for (auto value : combined_sampled_images.value()) {
-      stage_inputs.emplace_back(std::move(value));
+      sampled_images.emplace_back(std::move(value));
     }
     for (auto value : images.value()) {
-      stage_inputs.emplace_back(std::move(value));
+      sampled_images.emplace_back(std::move(value));
     }
     for (auto value : samplers.value()) {
-      stage_inputs.emplace_back(std::move(value));
+      sampled_images.emplace_back(std::move(value));
     }
   }
 
