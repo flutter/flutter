@@ -10,7 +10,14 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
-import 'package:ui/src/engine.dart' hide window;
+import 'package:ui/src/engine.dart' show domRenderer;
+import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/services.dart';
+import 'package:ui/src/engine/text_editing/autofill_hint.dart';
+import 'package:ui/src/engine/text_editing/input_type.dart';
+import 'package:ui/src/engine/text_editing/text_editing.dart';
+import 'package:ui/src/engine/util.dart';
+import 'package:ui/src/engine/vector_math.dart';
 
 import 'spy.dart';
 

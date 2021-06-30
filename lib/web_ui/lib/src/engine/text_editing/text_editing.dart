@@ -2,7 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:async';
+import 'dart:html' as html;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart' show domRenderer, EnginePlatformDispatcher, EngineSemanticsOwner, SemanticsTextEditingStrategy;
+import 'package:ui/ui.dart' as ui;
+
+import '../browser_detection.dart';
+import '../host_node.dart';
+import '../services.dart';
+import '../text/paragraph.dart';
+import '../util.dart';
+import 'autofill_hint.dart';
+import 'input_type.dart';
+import 'text_capitalization.dart';
 
 /// Make the content editable span visible to facilitate debugging.
 bool _debugVisibleTextEditing = false;
@@ -249,7 +265,7 @@ class EngineAutofillForm {
   /// Registering to the listeners could have been done in the constructor.
   /// On the other hand, overall for text editing there is already a lifecycle
   /// for subscriptions: All the subscriptions of the DOM elements are to the
-  /// `_subscriptions` property of [DefaultTextEditingStrategy].
+  /// `subscriptions` property of [DefaultTextEditingStrategy].
   /// [TextEditingStrategy] manages all subscription lifecyle. All
   /// listeners with no exceptions are added during
   /// [TextEditingStrategy.addEventHandlers] method call and all
@@ -266,14 +282,14 @@ class EngineAutofillForm {
               'Autofill would not work withuot Autofill value set');
         } else {
           final AutofillInfo autofillInfo = items![key]!;
-          _handleChange(element, autofillInfo);
+          handleChange(element, autofillInfo);
         }
       }));
     });
     return subscriptions;
   }
 
-  void _handleChange(html.Element domElement, AutofillInfo autofillInfo) {
+  void handleChange(html.Element domElement, AutofillInfo autofillInfo) {
     EditingState newEditingState = EditingState.fromDomElement(
         domElement as html.HtmlElement?,
         textCapitalization: autofillInfo.textCapitalization);
@@ -326,7 +342,7 @@ class AutofillInfo {
   /// to upper case.
   ///
   /// This value is not necessary for autofilling the focused element since
-  /// [DefaultTextEditingStrategy._inputConfiguration] already has this
+  /// [DefaultTextEditingStrategy.inputConfiguration] already has this
   /// information.
   ///
   /// On the other hand for the multi element forms, for the input elements
@@ -378,7 +394,6 @@ class AutofillInfo {
 }
 
 /// The current text and selection state of a text field.
-@visibleForTesting
 class EditingState {
   EditingState({this.text, int? baseOffset, int? extentOffset}) :
     // Don't allow negative numbers. Pick the smallest selection index for base.
@@ -605,8 +620,8 @@ class InputConfiguration {
   final TextCapitalizationConfig textCapitalization;
 }
 
-typedef _OnChangeCallback = void Function(EditingState? editingState);
-typedef _OnActionCallback = void Function(String? inputAction);
+typedef OnChangeCallback = void Function(EditingState? editingState);
+typedef OnActionCallback = void Function(String? inputAction);
 
 /// Provides HTML DOM functionality for editable text.
 ///
@@ -615,8 +630,8 @@ typedef _OnActionCallback = void Function(String? inputAction);
 abstract class TextEditingStrategy {
   void initializeTextEditing(
     InputConfiguration inputConfig, {
-    required _OnChangeCallback onChange,
-    required _OnActionCallback onAction,
+    required OnChangeCallback onChange,
+    required OnActionCallback onAction,
   });
 
   /// Sets the initial placement of the DOM element on the UI.
@@ -667,13 +682,13 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
   @override
   void placeElement() {
     if (hasAutofillGroup) {
-      _geometry?.applyToDomElement(focusedFormElement!);
+      geometry?.applyToDomElement(focusedFormElement!);
       placeForm();
       // Set the last editing state if it exists, this is critical for a
       // users ongoing work to continue uninterrupted when there is an update to
       // the transform.
-      if (_lastEditingState != null) {
-        _lastEditingState!.applyToDomElement(domElement);
+      if (lastEditingState != null) {
+        lastEditingState!.applyToDomElement(domElement);
       }
       // On Chrome, when a form is focused, it opens an autofill menu
       // immediately.
@@ -688,7 +703,7 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       focusedFormElement!.focus();
       activeDomElement.focus();
     } else {
-      _geometry?.applyToDomElement(activeDomElement);
+      geometry?.applyToDomElement(activeDomElement);
     }
   }
 }
@@ -719,7 +734,7 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
   /// Making an extra `focus` request causes flickering in Safari.
   @override
   void placeElement() {
-    _geometry?.applyToDomElement(activeDomElement);
+    geometry?.applyToDomElement(activeDomElement);
     if (hasAutofillGroup) {
       placeForm();
       // On Safari Desktop, when a form is focused, it opens an autofill menu
@@ -737,8 +752,8 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
       // the transform.
       // If domElement is not focused cursor location will not be correct.
       activeDomElement.focus();
-      if (_lastEditingState != null) {
-        _lastEditingState!.applyToDomElement(activeDomElement);
+      if (lastEditingState != null) {
+        lastEditingState!.applyToDomElement(activeDomElement);
       }
     }
   }
@@ -775,7 +790,6 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
   DefaultTextEditingStrategy(this.owner);
 
-  @visibleForTesting
   bool isEnabled = false;
 
   /// The DOM element used for editing, if any.
@@ -793,43 +807,43 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
     return domElement!;
   }
 
-  late InputConfiguration _inputConfiguration;
-  EditingState? _lastEditingState;
+  late InputConfiguration inputConfiguration;
+  EditingState? lastEditingState;
 
   /// Styles associated with the editable text.
-  EditableTextStyle? _style;
+  EditableTextStyle? style;
 
   /// Size and transform of the editable text on the page.
-  EditableTextGeometry? _geometry;
+  EditableTextGeometry? geometry;
 
-  _OnChangeCallback? _onChange;
-  _OnActionCallback? _onAction;
+  OnChangeCallback? onChange;
+  OnActionCallback? onAction;
 
-  final List<StreamSubscription<html.Event>> _subscriptions =
+  final List<StreamSubscription<html.Event>> subscriptions =
       <StreamSubscription<html.Event>>[];
 
-  bool get hasAutofillGroup => _inputConfiguration.autofillGroup != null;
+  bool get hasAutofillGroup => inputConfiguration.autofillGroup != null;
 
   /// Whether the focused input element is part of a form.
   bool get appendedToForm => _appendedToForm;
   bool _appendedToForm = false;
 
   html.FormElement? get focusedFormElement =>
-      _inputConfiguration.autofillGroup?.formElement;
+      inputConfiguration.autofillGroup?.formElement;
 
   @override
   void initializeTextEditing(
     InputConfiguration inputConfig, {
-    required _OnChangeCallback onChange,
-    required _OnActionCallback onAction,
+    required OnChangeCallback onChange,
+    required OnActionCallback onAction,
   }) {
     assert(!isEnabled);
 
     domElement = inputConfig.inputType.createDomElement();
-    _applyConfiguration(inputConfig);
+    applyConfiguration(inputConfig);
 
     _setStaticStyleAttributes(activeDomElement);
-    _style?.applyToDomElement(activeDomElement);
+    style?.applyToDomElement(activeDomElement);
 
     if (!hasAutofillGroup) {
       // If there is an Autofill Group the `FormElement`, it will be appended to the
@@ -843,12 +857,12 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
     initializeElementPlacement();
 
     isEnabled = true;
-    _onChange = onChange;
-    _onAction = onAction;
+    this.onChange = onChange;
+    this.onAction = onAction;
   }
 
-  void _applyConfiguration(InputConfiguration config) {
-    _inputConfiguration = config;
+  void applyConfiguration(InputConfiguration config) {
+    inputConfiguration = config;
 
     if (config.readOnly) {
       activeDomElement.setAttribute('readonly', 'readonly');
@@ -877,21 +891,21 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
   @override
   void addEventHandlers() {
-    if (_inputConfiguration.autofillGroup != null) {
-      _subscriptions
-          .addAll(_inputConfiguration.autofillGroup!.addInputEventListeners());
+    if (inputConfiguration.autofillGroup != null) {
+      subscriptions
+          .addAll(inputConfiguration.autofillGroup!.addInputEventListeners());
     }
 
     // Subscribe to text and selection changes.
-    _subscriptions.add(activeDomElement.onInput.listen(_handleChange));
+    subscriptions.add(activeDomElement.onInput.listen(handleChange));
 
-    _subscriptions.add(activeDomElement.onKeyDown.listen(_maybeSendAction));
+    subscriptions.add(activeDomElement.onKeyDown.listen(maybeSendAction));
 
-    _subscriptions.add(html.document.onSelectionChange.listen(_handleChange));
+    subscriptions.add(html.document.onSelectionChange.listen(handleChange));
 
     // Refocus on the activeDomElement after blur, so that user can keep editing the
     // text field.
-    _subscriptions.add(activeDomElement.onBlur.listen((_) {
+    subscriptions.add(activeDomElement.onBlur.listen((_) {
       activeDomElement.focus();
     }));
 
@@ -899,18 +913,18 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
   }
 
   @override
-  void updateElementPlacement(EditableTextGeometry geometry) {
-    _geometry = geometry;
+  void updateElementPlacement(EditableTextGeometry textGeometry) {
+    geometry = textGeometry;
     if (isEnabled) {
       placeElement();
     }
   }
 
   @override
-  void updateElementStyle(EditableTextStyle style) {
-    _style = style;
+  void updateElementStyle(EditableTextStyle textStyle) {
+    style = textStyle;
     if (isEnabled) {
-      _style!.applyToDomElement(activeDomElement);
+      textStyle.applyToDomElement(activeDomElement);
     }
   }
 
@@ -919,23 +933,23 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
     assert(isEnabled);
 
     isEnabled = false;
-    _lastEditingState = null;
-    _style = null;
-    _geometry = null;
+    lastEditingState = null;
+    style = null;
+    geometry = null;
 
-    for (int i = 0; i < _subscriptions.length; i++) {
-      _subscriptions[i].cancel();
+    for (int i = 0; i < subscriptions.length; i++) {
+      subscriptions[i].cancel();
     }
-    _subscriptions.clear();
+    subscriptions.clear();
     // If focused element is a part of a form, it needs to stay on the DOM
     // until the autofill context of the form is finalized.
     // More details on `TextInput.finishAutofillContext` call.
     if (_appendedToForm &&
-        _inputConfiguration.autofillGroup?.formElement != null) {
+        inputConfiguration.autofillGroup?.formElement != null) {
       // Subscriptions are removed, listeners won't be triggered.
       activeDomElement.blur();
       _hideAutofillElements(activeDomElement, isOffScreen: true);
-      _inputConfiguration.autofillGroup?.storeForm();
+      inputConfiguration.autofillGroup?.storeForm();
     } else {
       activeDomElement.remove();
     }
@@ -944,11 +958,11 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
   @override
   void setEditingState(EditingState? editingState) {
-    _lastEditingState = editingState;
+    lastEditingState = editingState;
     if (!isEnabled || !editingState!.isValid) {
       return;
     }
-    _lastEditingState!.applyToDomElement(domElement);
+    lastEditingState!.applyToDomElement(domElement);
   }
 
   void placeElement() {
@@ -956,28 +970,28 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
   }
 
   void placeForm() {
-    _inputConfiguration.autofillGroup!.placeForm(activeDomElement);
+    inputConfiguration.autofillGroup!.placeForm(activeDomElement);
     _appendedToForm = true;
   }
 
-  void _handleChange(html.Event event) {
+  void handleChange(html.Event event) {
     assert(isEnabled);
 
     EditingState newEditingState = EditingState.fromDomElement(activeDomElement,
-        textCapitalization: _inputConfiguration.textCapitalization);
+        textCapitalization: inputConfiguration.textCapitalization);
 
-    if (newEditingState != _lastEditingState) {
-      _lastEditingState = newEditingState;
-      _onChange!(_lastEditingState);
+    if (newEditingState != lastEditingState) {
+      lastEditingState = newEditingState;
+      onChange!(lastEditingState);
     }
   }
 
-  void _maybeSendAction(html.Event event) {
+  void maybeSendAction(html.Event event) {
     if (event is html.KeyboardEvent) {
-      if (_inputConfiguration.inputType.submitActionOnEnter &&
+      if (inputConfiguration.inputType.submitActionOnEnter &&
           event.keyCode == _kReturnKeyCode) {
         event.preventDefault();
-        _onAction!(_inputConfiguration.inputAction);
+        onAction!(inputConfiguration.inputAction);
       }
     }
   }
@@ -992,8 +1006,8 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
   /// - Selection changes.
   void enable(
     InputConfiguration inputConfig, {
-    required _OnChangeCallback onChange,
-    required _OnActionCallback onAction,
+    required OnChangeCallback onChange,
+    required OnActionCallback onAction,
   }) {
     assert(!isEnabled);
 
@@ -1001,8 +1015,8 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
     addEventHandlers();
 
-    if (_lastEditingState != null) {
-      setEditingState(this._lastEditingState);
+    if (lastEditingState != null) {
+      setEditingState(lastEditingState);
     }
 
     // Re-focuses after setting editing state.
@@ -1015,15 +1029,15 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
   /// selection conflicts with selection sent from the framework, which creates
   /// flickering during selection by mouse.
   void preventDefaultForMouseEvents() {
-    _subscriptions.add(activeDomElement.onMouseDown.listen((_) {
+    subscriptions.add(activeDomElement.onMouseDown.listen((_) {
       _.preventDefault();
     }));
 
-    _subscriptions.add(activeDomElement.onMouseUp.listen((_) {
+    subscriptions.add(activeDomElement.onMouseUp.listen((_) {
       _.preventDefault();
     }));
 
-    _subscriptions.add(activeDomElement.onMouseMove.listen((_) {
+    subscriptions.add(activeDomElement.onMouseMove.listen((_) {
       _.preventDefault();
     }));
   }
@@ -1077,8 +1091,8 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   @override
   void initializeTextEditing(
     InputConfiguration inputConfig, {
-    required _OnChangeCallback onChange,
-    required _OnActionCallback onAction,
+    required OnChangeCallback onChange,
+    required OnActionCallback onAction,
   }) {
     super.initializeTextEditing(inputConfig,
         onChange: onChange, onAction: onAction);
@@ -1101,20 +1115,20 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
   @override
   void addEventHandlers() {
-    if (_inputConfiguration.autofillGroup != null) {
-      _subscriptions
-          .addAll(_inputConfiguration.autofillGroup!.addInputEventListeners());
+    if (inputConfiguration.autofillGroup != null) {
+      subscriptions
+          .addAll(inputConfiguration.autofillGroup!.addInputEventListeners());
     }
 
     // Subscribe to text and selection changes.
-    _subscriptions.add(activeDomElement.onInput.listen(_handleChange));
+    subscriptions.add(activeDomElement.onInput.listen(handleChange));
 
-    _subscriptions.add(activeDomElement.onKeyDown.listen(_maybeSendAction));
+    subscriptions.add(activeDomElement.onKeyDown.listen(maybeSendAction));
 
-    _subscriptions.add(html.document.onSelectionChange.listen(_handleChange));
+    subscriptions.add(html.document.onSelectionChange.listen(handleChange));
 
     // Position the DOM element after it is focused.
-    _subscriptions.add(activeDomElement.onFocus.listen((_) {
+    subscriptions.add(activeDomElement.onFocus.listen((_) {
       // Cancel previous timer if exists.
       _schedulePlacement();
     }));
@@ -1126,14 +1140,14 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     //
     // Since in all these cases, the connection needs to be closed,
     // [domRenderer.windowHasFocus] is not checked in [IOSTextEditingStrategy].
-    _subscriptions.add(activeDomElement.onBlur.listen((_) {
+    subscriptions.add(activeDomElement.onBlur.listen((_) {
       owner.sendTextConnectionClosedToFrameworkIfAny();
     }));
   }
 
   @override
-  void updateElementPlacement(EditableTextGeometry geometry) {
-    _geometry = geometry;
+  void updateElementPlacement(EditableTextGeometry textGeometry) {
+    geometry = textGeometry;
     if (isEnabled && _canPosition) {
       placeElement();
     }
@@ -1164,7 +1178,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   /// [_positionInputElementTimer] timer is restarted. The element will be
   /// placed to its correct position after [_delayBeforePlacement].
   void _addTapListener() {
-    _subscriptions.add(activeDomElement.onClick.listen((_) {
+    subscriptions.add(activeDomElement.onClick.listen((_) {
       // Check if the element is already positioned. If not this does not fall
       // under `The user was using the long press, now they want to enter text
       // via keyboard` journey.
@@ -1189,7 +1203,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   @override
   void placeElement() {
     activeDomElement.focus();
-    _geometry?.applyToDomElement(activeDomElement);
+    geometry?.applyToDomElement(activeDomElement);
   }
 }
 
@@ -1206,8 +1220,8 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   @override
   void initializeTextEditing(
     InputConfiguration inputConfig, {
-    required _OnChangeCallback onChange,
-    required _OnActionCallback onAction,
+    required OnChangeCallback onChange,
+    required OnActionCallback onAction,
   }) {
     super.initializeTextEditing(inputConfig,
         onChange: onChange, onAction: onAction);
@@ -1222,19 +1236,19 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
   @override
   void addEventHandlers() {
-    if (_inputConfiguration.autofillGroup != null) {
-      _subscriptions
-          .addAll(_inputConfiguration.autofillGroup!.addInputEventListeners());
+    if (inputConfiguration.autofillGroup != null) {
+      subscriptions
+          .addAll(inputConfiguration.autofillGroup!.addInputEventListeners());
     }
 
     // Subscribe to text and selection changes.
-    _subscriptions.add(activeDomElement.onInput.listen(_handleChange));
+    subscriptions.add(activeDomElement.onInput.listen(handleChange));
 
-    _subscriptions.add(activeDomElement.onKeyDown.listen(_maybeSendAction));
+    subscriptions.add(activeDomElement.onKeyDown.listen(maybeSendAction));
 
-    _subscriptions.add(html.document.onSelectionChange.listen(_handleChange));
+    subscriptions.add(html.document.onSelectionChange.listen(handleChange));
 
-    _subscriptions.add(activeDomElement.onBlur.listen((_) {
+    subscriptions.add(activeDomElement.onBlur.listen((_) {
       if (domRenderer.windowHasFocus) {
         // Chrome on Android will hide the onscreen keyboard when you tap outside
         // the text box. Instead, we want the framework to tell us to hide the
@@ -1250,7 +1264,7 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   @override
   void placeElement() {
     activeDomElement.focus();
-    _geometry?.applyToDomElement(activeDomElement);
+    geometry?.applyToDomElement(activeDomElement);
   }
 }
 
@@ -1264,8 +1278,8 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   @override
   void initializeTextEditing(
     InputConfiguration inputConfig, {
-    required _OnChangeCallback onChange,
-    required _OnActionCallback onAction,
+    required OnChangeCallback onChange,
+    required OnActionCallback onAction,
   }) {
     super.initializeTextEditing(inputConfig,
         onChange: onChange, onAction: onAction);
@@ -1276,15 +1290,15 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
   @override
   void addEventHandlers() {
-    if (_inputConfiguration.autofillGroup != null) {
-      _subscriptions
-          .addAll(_inputConfiguration.autofillGroup!.addInputEventListeners());
+    if (inputConfiguration.autofillGroup != null) {
+      subscriptions
+          .addAll(inputConfiguration.autofillGroup!.addInputEventListeners());
     }
 
     // Subscribe to text and selection changes.
-    _subscriptions.add(activeDomElement.onInput.listen(_handleChange));
+    subscriptions.add(activeDomElement.onInput.listen(handleChange));
 
-    _subscriptions.add(activeDomElement.onKeyDown.listen(_maybeSendAction));
+    subscriptions.add(activeDomElement.onKeyDown.listen(maybeSendAction));
 
     // Detects changes in text selection.
     //
@@ -1299,18 +1313,18 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     //
     // After each keyup, the start/end values of the selection is compared to
     // the previously saved editing state.
-    _subscriptions.add(activeDomElement.onKeyUp.listen((event) {
-      _handleChange(event);
+    subscriptions.add(activeDomElement.onKeyUp.listen((event) {
+      handleChange(event);
     }));
 
     // In Firefox the context menu item "Select All" does not work without
     // listening to onSelect. On the other browsers onSelectionChange is
     // enough for covering "Select All" functionality.
-    _subscriptions.add(activeDomElement.onSelect.listen(_handleChange));
+    subscriptions.add(activeDomElement.onSelect.listen(handleChange));
 
     // Refocus on the activeDomElement after blur, so that user can keep editing the
     // text field.
-    _subscriptions.add(activeDomElement.onBlur.listen((_) {
+    subscriptions.add(activeDomElement.onBlur.listen((_) {
       _postponeFocus();
     }));
 
@@ -1330,12 +1344,12 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   @override
   void placeElement() {
     activeDomElement.focus();
-    _geometry?.applyToDomElement(activeDomElement);
+    geometry?.applyToDomElement(activeDomElement);
     // Set the last editing state if it exists, this is critical for a
     // users ongoing work to continue uninterrupted when there is an update to
     // the transform.
-    if (_lastEditingState != null) {
-      _lastEditingState!.applyToDomElement(activeDomElement);
+    if (lastEditingState != null) {
+      lastEditingState!.applyToDomElement(activeDomElement);
     }
   }
 }
@@ -1396,7 +1410,7 @@ class TextInputUpdateConfig extends TextInputCommand {
   TextInputUpdateConfig();
 
   void run(HybridTextEditing textEditing) {
-    textEditing.strategy._applyConfiguration(textEditing.configuration!);
+    textEditing.strategy.applyConfiguration(textEditing.configuration!);
   }
 }
 
@@ -1623,13 +1637,13 @@ class TextEditingChannel {
         break;
 
       default:
-        EnginePlatformDispatcher.instance._replyToPlatformMessage(callback, null);
+        EnginePlatformDispatcher.instance.replyToPlatformMessage(callback, null);
         return;
     }
 
     implementation.acceptCommand(command, () {
       EnginePlatformDispatcher.instance
-          ._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+          .replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
     });
   }
 
@@ -1716,7 +1730,6 @@ class HybridTextEditing {
   /// Flag which shows if there is an ongoing editing.
   ///
   /// Also used to define if a keyboard is needed.
-  @visibleForTesting
   bool isEditing = false;
 
   InputConfiguration? configuration;
