@@ -117,6 +117,10 @@ float FlutterWindowWinUWP::GetDpiScale() {
   return display_helper_->GetDpiScale();
 }
 
+bool FlutterWindowWinUWP::IsVisible() {
+  return window_.Visible();
+}
+
 void FlutterWindowWinUWP::OnDpiChanged(
     winrt::Windows::Graphics::Display::DisplayInformation const& args,
     winrt::Windows::Foundation::IInspectable const&) {

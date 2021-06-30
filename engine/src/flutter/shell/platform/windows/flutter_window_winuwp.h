@@ -43,6 +43,9 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
   // |WindowBindingHandler|
   float GetDpiScale() override;
 
+  // |FlutterWindowBindingHandler|
+  bool IsVisible() override;
+
   // |WindowBindingHandler|
   PhysicalWindowBounds GetPhysicalWindowBounds() override;
 
