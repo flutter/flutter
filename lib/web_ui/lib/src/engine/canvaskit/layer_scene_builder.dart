@@ -36,17 +36,6 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   late ContainerLayer currentLayer;
 
   @override
-  void addChildScene({
-    ui.Offset offset = ui.Offset.zero,
-    double width = 0.0,
-    double height = 0.0,
-    ui.SceneHost? sceneHost,
-    bool hitTestable = true,
-  }) {
-    throw UnimplementedError();
-  }
-
-  @override
   void addPerformanceOverlay(int enabledOptions, ui.Rect bounds) {
     // We don't plan to implement this on the web.
     throw UnimplementedError();

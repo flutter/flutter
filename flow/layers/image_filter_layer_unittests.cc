@@ -24,7 +24,6 @@ TEST_F(ImageFilterLayerTest, PaintingEmptyLayerDies) {
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
   EXPECT_FALSE(layer->needs_painting(paint_context()));
-  EXPECT_FALSE(layer->needs_system_composite());
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
                             "needs_painting\\(context\\)");
@@ -261,7 +260,7 @@ TEST_F(ImageFilterLayerTest, Readback) {
 
   // ImageFilterLayer blocks child with readback
   auto mock_layer =
-      std::make_shared<MockLayer>(SkPath(), SkPaint(), false, false, true);
+      std::make_shared<MockLayer>(SkPath(), SkPaint(), false, true);
   layer->Add(mock_layer);
   preroll_context()->surface_needs_readback = false;
   layer->Preroll(preroll_context(), initial_transform);

@@ -109,10 +109,6 @@ sk_sp<SkData> PictureLayer::SerializedPicture() const {
 void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "PictureLayer::Preroll");
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  CheckForChildLayerBelow(context);
-#endif
-
   SkPicture* sk_picture = picture();
 
   if (auto* cache = context->raster_cache) {

@@ -30,10 +30,6 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-#include "flutter/flow/layers/child_scene_layer.h"  // nogncheck
-#endif
-
 namespace flutter {
 
 static void SceneBuilder_constructor(Dart_NativeArguments args) {
@@ -67,18 +63,11 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, build)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-DART_NATIVE_CALLBACK(SceneBuilder, addChildScene)
-#endif
 
 void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register({
-    {"SceneBuilder_constructor", SceneBuilder_constructor, 1, true},
-        FOR_EACH_BINDING(DART_REGISTER_NATIVE)
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-            DART_REGISTER_NATIVE(SceneBuilder, addChildScene)
-#endif
-  });
+  natives->Register(
+      {{"SceneBuilder_constructor", SceneBuilder_constructor, 1, true},
+       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
 SceneBuilder::SceneBuilder() {
@@ -305,20 +294,6 @@ void SceneBuilder::addPlatformView(double dx,
       SkPoint::Make(dx, dy), SkSize::Make(width, height), viewId);
   AddLayer(std::move(layer));
 }
-
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-void SceneBuilder::addChildScene(double dx,
-                                 double dy,
-                                 double width,
-                                 double height,
-                                 SceneHost* sceneHost,
-                                 bool hitTestable) {
-  auto layer = std::make_unique<flutter::ChildSceneLayer>(
-      sceneHost->id(), SkPoint::Make(dx, dy), SkSize::Make(width, height),
-      hitTestable);
-  AddLayer(std::move(layer));
-}
-#endif
 
 void SceneBuilder::addPerformanceOverlay(uint64_t enabledOptions,
                                          double left,

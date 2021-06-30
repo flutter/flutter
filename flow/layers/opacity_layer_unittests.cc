@@ -407,7 +407,7 @@ TEST_F(OpacityLayerTest, Readback) {
 
   // OpacityLayer blocks child with readback
   auto mock_layer =
-      std::make_shared<MockLayer>(SkPath(), SkPaint(), false, false, true);
+      std::make_shared<MockLayer>(SkPath(), SkPaint(), false, true);
   layer->Add(mock_layer);
   preroll_context()->surface_needs_readback = false;
   layer->Preroll(preroll_context(), initial_transform);

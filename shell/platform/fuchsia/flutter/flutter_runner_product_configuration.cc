@@ -48,13 +48,6 @@ FlutterRunnerProductConfiguration::FlutterRunnerProductConfiguration(
     if (val.IsBool())
       enable_shader_warmup_dart_hooks_ = val.GetBool();
   }
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  if (document.HasMember("use_legacy_renderer")) {
-    auto& val = document["use_legacy_renderer"];
-    if (val.IsBool())
-      use_legacy_renderer_ = val.GetBool();
-  }
-#endif
 }
 
 }  // namespace flutter_runner
