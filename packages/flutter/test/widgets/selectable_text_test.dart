@@ -4851,7 +4851,7 @@ void main() {
     );
   });
 
-  testWidgets('text selection style 1', (WidgetTester tester) async {
+  testWidgets('text selection style 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
