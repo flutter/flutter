@@ -305,7 +305,6 @@ targets:
 
   - name: Linux web_long_running_tests_1_5
     builder: Linux web_long_running_tests_1_5
-    postsubmit: false
     scheduler: luci
     runIf:
       - dev/
@@ -314,7 +313,6 @@ targets:
 
   - name: Linux web_long_running_tests_2_5
     builder: Linux web_long_running_tests_2_5
-    postsubmit: false
     scheduler: luci
     runIf:
       - dev/
@@ -323,7 +321,6 @@ targets:
 
   - name: Linux web_long_running_tests_3_5
     builder: Linux web_long_running_tests_3_5
-    postsubmit: false
     scheduler: luci
     runIf:
       - dev/
@@ -332,7 +329,6 @@ targets:
 
   - name: Linux web_long_running_tests_4_5
     builder: Linux web_long_running_tests_4_5
-    postsubmit: false
     scheduler: luci
     runIf:
       - dev/
@@ -341,7 +337,6 @@ targets:
 
   - name: Linux web_long_running_tests_5_5
     builder: Linux web_long_running_tests_5_5
-    postsubmit: false
     scheduler: luci
     runIf:
       - dev/
@@ -390,7 +385,6 @@ targets:
 
   - name: Mac framework_tests_libraries
     builder: Mac framework_tests_libraries
-    postsubmit: false
     scheduler: luci
     runIf:
       - dev/**
@@ -522,7 +516,6 @@ targets:
 
   - name: Windows tool_tests_commands
     builder: Windows tool_tests_commands
-    postsubmit: false
     scheduler: luci
     runIf:
       - dev/**
@@ -611,7 +604,6 @@ targets:
 
   - name: Windows framework_tests_misc
     builder: Windows framework_tests_misc
-    postsubmit: false
     scheduler: luci
     runIf:
       - dev/
@@ -627,7 +619,6 @@ targets:
 
   - name: Windows framework_tests_widgets
     builder: Windows framework_tests_widgets
-    postsubmit: false
     scheduler: luci
     runIf:
       - dev/
@@ -689,7 +680,6 @@ targets:
 
   - name: Windows tool_tests_general
     builder: Windows tool_tests_general
-    postsubmit: false
     scheduler: luci
     runIf:
       - dev/**
@@ -1002,31 +992,6 @@ targets:
     presubmit: false
     scheduler: luci
 
-  - name: Linux web_long_running_tests_1_5
-    builder: Linux web_long_running_tests_1_5
-    presubmit: false
-    scheduler: luci
-
-  - name: Linux web_long_running_tests_2_5
-    builder: Linux web_long_running_tests_2_5
-    presubmit: false
-    scheduler: luci
-
-  - name: Linux web_long_running_tests_3_5
-    builder: Linux web_long_running_tests_3_5
-    presubmit: false
-    scheduler: luci
-
-  - name: Linux web_long_running_tests_4_5
-    builder: Linux web_long_running_tests_4_5
-    presubmit: false
-    scheduler: luci
-
-  - name: Linux web_long_running_tests_5_5
-    builder: Linux web_long_running_tests_5_5
-    presubmit: false
-    scheduler: luci
-
   - name: Mac_android android_semantics_integration_test
     builder: Mac_android android_semantics_integration_test
     presubmit: false
@@ -1225,11 +1190,6 @@ targets:
 
   - name: Mac_android tiles_scroll_perf__timeline_summary
     builder: Mac_android tiles_scroll_perf__timeline_summary
-    presubmit: false
-    scheduler: luci
-
-  - name: Mac framework_tests_libraries
-    builder: Mac framework_tests_libraries
     presubmit: false
     scheduler: luci
 
@@ -1440,28 +1400,8 @@ targets:
     presubmit: false
     scheduler: luci
 
-  - name: Windows framework_tests_misc
-    builder: Windows framework_tests_misc
-    presubmit: false
-    scheduler: luci
-
-  - name: Windows framework_tests_widgets
-    builder: Windows framework_tests_widgets
-    presubmit: false
-    scheduler: luci
-
   - name: Windows gradle_plugin_fat_apk_test
     builder: Windows gradle_plugin_fat_apk_test
-    presubmit: false
-    scheduler: luci
-
-  - name: Windows tool_tests_general
-    builder: Windows tool_tests_general
-    presubmit: false
-    scheduler: luci
-
-  - name: Windows tool_tests_commands
-    builder: Windows tool_tests_commands
     presubmit: false
     scheduler: luci
 
