@@ -6,7 +6,6 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 
-import 'button_bar.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dialog_theme.dart';
@@ -339,18 +338,15 @@ class AlertDialog extends StatelessWidget {
   final TextStyle? contentTextStyle;
 
   /// The (optional) set of actions that are displayed at the bottom of the
-  /// dialog.
+  /// dialog with an [OverflowBar].
   ///
   /// Typically this is a list of [TextButton] widgets. It is recommended to
   /// set the [Text.textAlign] to [TextAlign.end] for the [Text] within the
   /// [TextButton], so that buttons whose labels wrap to an extra line align
-  /// with the overall [ButtonBar]'s alignment within the dialog.
-  ///
-  /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
-  /// of padding on each side.
+  /// with the overall [OverflowBar]'s alignment within the dialog.
   ///
   /// If the [title] is not null but the [content] _is_ null, then an extra 20
-  /// pixels of padding is added above the [ButtonBar] to separate the [title]
+  /// pixels of padding is added above the [OverflowBar] to separate the [title]
   /// from the [actions].
   final List<Widget>? actions;
 
@@ -381,7 +377,7 @@ class AlertDialog extends StatelessWidget {
   ///
   /// See also:
   ///
-  /// * [ButtonBar], which [actions] configures to lay itself out.
+  /// * [OverflowBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry actionsPadding;
 
   /// Defines the horizontal layout of the [actions] according to the same
@@ -404,16 +400,13 @@ class AlertDialog extends StatelessWidget {
   /// property is set to [VerticalDirection.up], since it "starts" at the
   /// bottom and "ends" at the top.
   ///
-  /// If null then it will use the surrounding
-  /// [ButtonBarThemeData.overflowDirection]. If that is null, it will
-  /// default to [VerticalDirection.down].
-  ///
   /// See also:
   ///
-  /// * [ButtonBar], which [actions] configures to lay itself out.
+  /// * [OverflowBar], which [actions] configures to lay itself out.
   final VerticalDirection? actionsOverflowDirection;
 
-  /// The spacing between [actions] when the button bar overflows.
+  /// The spacing between [actions] when the [OverflowBar] switches
+  /// to a column layout because the actions don't fit horizontally.
   ///
   /// If the widgets in [actions] do not fit into a single row, they are
   /// arranged into a column. This parameter provides additional

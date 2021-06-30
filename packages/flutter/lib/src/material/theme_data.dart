@@ -774,7 +774,7 @@ class ThemeData with Diagnosticable {
   ///
   /// The [colorScheme] can not be null.
   ///
-  /// If [colorScheme.brightness] is [Brightness.dark] then
+  /// If [colorScheme].brightness is [Brightness.dark] then
   /// [ThemeData.applyElevationOverlayColor] will be set to true to support
   /// the Material dark theme method for indicating elevation by applying
   /// a semi-transparent onSurface color on top of the surface color.
