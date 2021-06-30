@@ -815,7 +815,7 @@ targets:
     scheduler: luci
 
   - name: Linux docs_test
-    builder: Linux docs_test
+    builder: Linux docs_test # Flaky https://github.com/flutter/flutter/issues/84609
     bringup: true
     presubmit: false
     scheduler: luci
@@ -857,7 +857,7 @@ targets:
 
   - name: Linux flutter_gallery__transition_perf_e2e
     builder: Linux flutter_gallery__transition_perf_e2e
-    bringup: true
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
     presubmit: false
     scheduler: luci
 
@@ -883,7 +883,7 @@ targets:
 
   - name: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
     builder: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
-    bringup: true
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
     presubmit: false
     scheduler: luci
 
