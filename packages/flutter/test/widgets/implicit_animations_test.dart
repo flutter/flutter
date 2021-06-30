@@ -199,9 +199,9 @@ void main() {
       ),
     ));
 
-    final _TestAnimatedWidgetState state = tester.widget<TestAnimatedWidget>(
+    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
       find.byType(TestAnimatedWidget)
-    ).state;
+    ).rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final ScaleTransition scaleWidget = tester.widget<ScaleTransition>(
       find.ancestor(
@@ -257,9 +257,9 @@ void main() {
       ),
     ));
 
-    final _TestAnimatedWidgetState state = tester.widget<TestAnimatedWidget>(
+    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
         find.byType(TestAnimatedWidget)
-    ).state;
+    ).rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final RotationTransition rotationWidget = tester.widget<RotationTransition>(
       find.ancestor(
@@ -315,9 +315,9 @@ void main() {
       ),
     ));
 
-    final _TestAnimatedWidgetState state = tester.widget<TestAnimatedWidget>(
+    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
         find.byType(TestAnimatedWidget)
-    ).state;
+    ).rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final FadeTransition opacityWidget = tester.widget<FadeTransition>(
       find.ancestor(
@@ -373,9 +373,9 @@ void main() {
       ),
     ));
 
-    final _TestAnimatedWidgetState state = tester.widget<TestAnimatedWidget>(
+    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
         find.byType(TestAnimatedWidget)
-    ).state;
+    ).rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
       find.ancestor(
@@ -550,6 +550,10 @@ Widget wrap({required Widget child}) {
   );
 }
 
+abstract class RebuildCountingState<T extends StatefulWidget> extends State<T> {
+  int builds = 0;
+}
+
 class TestAnimatedWidget extends StatefulWidget {
   const TestAnimatedWidget({
     Key? key,
@@ -559,15 +563,17 @@ class TestAnimatedWidget extends StatefulWidget {
   }) : super(key: key);
   final VoidCallback? callback;
   final Key switchKey;
-  final _TestAnimatedWidgetState state;
+  final State<StatefulWidget> state;
+
+  RebuildCountingState<StatefulWidget>? get rebuildState =>
+    state is RebuildCountingState<StatefulWidget> ? state as RebuildCountingState<StatefulWidget> : null;
 
   @override
   State<StatefulWidget> createState() => state; // ignore: no_logic_in_create_state, this test predates the lint
 }
 
-abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
+abstract class _TestAnimatedWidgetState extends RebuildCountingState<TestAnimatedWidget> {
   bool toggle = false;
-  int builds = 0;
   final Widget child = const Placeholder();
   final Duration duration = animationDuration;
 
