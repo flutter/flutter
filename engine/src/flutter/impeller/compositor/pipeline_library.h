@@ -32,7 +32,7 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
                                        std::shared_ptr<const Pipeline>,
                                        ComparableHash<PipelineDescriptor>,
                                        ComparableEqual<PipelineDescriptor>>;
-  id<MTLDevice> device_;
+  id<MTLDevice> device_ = nullptr;
   Pipelines pipelines_;
 
   PipelineLibrary(id<MTLDevice> device);

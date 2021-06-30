@@ -32,9 +32,13 @@ EntityRenderer::EntityRenderer(std::string shaders_directory)
   VertexBufferBuilder<shader::BoxVertexInfo::PerVertexData> vertex_builder;
   vertex_builder.SetLabel("Box");
   vertex_builder.AddVertices({
-      {{0, 0, 0.0}, {Color::Red()}},        //
-      {{800, 0.0, 0.0}, {Color::Green()}},  //
-      {{0.0, 600, 0.0}, {Color::Blue()}},   //
+      {{100, 100, 0.0}, {Color::Red()}},    // 1
+      {{800, 100, 0.0}, {Color::Green()}},  // 2
+      {{800, 800, 0.0}, {Color::Blue()}},   // 3
+
+      {{100, 100, 0.0}, {Color::Cyan()}},    // 1
+      {{800, 800, 0.0}, {Color::White()}},   // 3
+      {{100, 800, 0.0}, {Color::Purple()}},  // 4
   });
 
   vertex_buffer_ =

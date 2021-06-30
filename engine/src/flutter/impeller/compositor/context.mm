@@ -8,6 +8,7 @@
 #include "flutter/fml/paths.h"
 #include "impeller/compositor/allocator.h"
 #include "impeller/compositor/command_buffer.h"
+#include "impeller/compositor/sampler_descriptor.h"
 #include "impeller/compositor/shader_library.h"
 
 namespace impeller {
@@ -55,6 +56,12 @@ Context::Context(std::string shaders_directory)
         std::shared_ptr<PipelineLibrary>(new PipelineLibrary(device_));
   }
 
+  // Setup the sampler library.
+  {  //
+    sampler_library_ =
+        std::shared_ptr<SamplerLibrary>(new SamplerLibrary(device_));
+  }
+
   {
     transients_allocator_ = std::shared_ptr<Allocator>(
         new Allocator(device_, "Impeller Transients Allocator"));
@@ -84,6 +91,10 @@ std::shared_ptr<ShaderLibrary> Context::GetShaderLibrary() const {
 
 std::shared_ptr<PipelineLibrary> Context::GetPipelineLibrary() const {
   return pipeline_library_;
+}
+
+std::shared_ptr<SamplerLibrary> Context::GetSamplerLibrary() const {
+  return sampler_library_;
 }
 
 std::shared_ptr<CommandBuffer> Context::CreateRenderCommandBuffer() const {

@@ -14,6 +14,7 @@
 namespace impeller {
 
 class ShaderLibrary;
+class SamplerLibrary;
 class CommandBuffer;
 class Allocator;
 
@@ -39,6 +40,8 @@ class Context {
 
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const;
 
+  std::shared_ptr<SamplerLibrary> GetSamplerLibrary() const;
+
   std::shared_ptr<PipelineLibrary> GetPipelineLibrary() const;
 
   std::shared_ptr<CommandBuffer> CreateRenderCommandBuffer() const;
@@ -49,6 +52,7 @@ class Context {
   id<MTLCommandQueue> transfer_queue_ = nullptr;
   std::shared_ptr<ShaderLibrary> shader_library_;
   std::shared_ptr<PipelineLibrary> pipeline_library_;
+  std::shared_ptr<SamplerLibrary> sampler_library_;
   std::shared_ptr<Allocator> permanents_allocator_;
   std::shared_ptr<Allocator> transients_allocator_;
   bool is_valid_ = false;

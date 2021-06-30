@@ -215,6 +215,29 @@ constexpr StoreAction FromMTLStoreAction(MTLStoreAction action) {
   return StoreAction::kDontCare;
 }
 
+constexpr MTLSamplerMinMagFilter ToMTLSamplerMinMagFilter(MinMagFilter filter) {
+  switch (filter) {
+    case MinMagFilter::kNearest:
+      return MTLSamplerMinMagFilterNearest;
+    case MinMagFilter::kLinear:
+      return MTLSamplerMinMagFilterLinear;
+  }
+  return MTLSamplerMinMagFilterNearest;
+}
+
+constexpr MTLSamplerAddressMode ToMTLSamplerAddressMode(
+    SamplerAddressMode mode) {
+  switch (mode) {
+    case SamplerAddressMode::kClampToEdge:
+      return MTLSamplerAddressModeClampToEdge;
+    case SamplerAddressMode::kRepeat:
+      return MTLSamplerAddressModeRepeat;
+    case SamplerAddressMode::kMirror:
+      return MTLSamplerAddressModeMirrorRepeat;
+  }
+  return MTLSamplerAddressModeClampToEdge;
+}
+
 constexpr MTLClearColor ToMTLClearColor(const Color& color) {
   return MTLClearColorMake(color.red, color.green, color.blue, color.alpha);
 }
