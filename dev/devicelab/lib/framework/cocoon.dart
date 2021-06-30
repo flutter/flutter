@@ -48,7 +48,7 @@ class Cocoon {
   static const String baseCocoonApiUrl = 'https://flutter-dashboard.appspot.com/api';
 
   /// Threshold to auto retry a failed test.
-  static const int retry = 2;
+  static const int retryNumber = 2;
 
   /// Underlying [FileSystem] to use.
   final FileSystem fs;

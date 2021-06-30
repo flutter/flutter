@@ -30,7 +30,7 @@ Future<void> runTasks(
   for (final String taskName in taskNames) {
     TaskResult result;
     int retry = 0;
-    while (retry <= Cocoon.retry) {
+    while (retry <= Cocoon.retryNumber) {
       result = await rerunTask(
         taskName,
         deviceId: deviceId,
