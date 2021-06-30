@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'text_button_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
@@ -37,6 +38,7 @@ class AppBarTheme with Diagnosticable {
     this.iconTheme,
     this.actionsIconTheme,
     this.textTheme,
+    this.textButtonTheme,
     this.centerTitle,
     this.titleSpacing,
     this.toolbarHeight,
@@ -135,6 +137,17 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.titleTextStyle in all descendant [AppBar] widgets.
   final TextTheme? textTheme;
 
+  /// Overrides the default value of the [AppBar.textButtonTheme]
+  /// property in all descendant [AppBar] widgets.
+  ///
+  /// See also:
+  ///
+  ///  * [actionsIconTheme], which overrides the default value for
+  ///    [AppBar.actionsIconTheme] in all descendant [AppBar] widgets.
+  ///  * [foregroundColor], which overrides the default value
+  ///    [AppBar.foregroundColor] in all descendant widgets.
+  final TextButtonThemeData? textButtonTheme;
+
   /// Overrides the default value for [AppBar.centerTitle].
   /// property in all descendant widgets.
   final bool? centerTitle;
@@ -196,6 +209,7 @@ class AppBarTheme with Diagnosticable {
     Color? shadowColor,
     IconThemeData? iconTheme,
     TextTheme? textTheme,
+    TextButtonThemeData? textButtonTheme,
     bool? centerTitle,
     double? titleSpacing,
     double? toolbarHeight,
@@ -217,6 +231,7 @@ class AppBarTheme with Diagnosticable {
       iconTheme: iconTheme ?? this.iconTheme,
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       textTheme: textTheme ?? this.textTheme,
+      textButtonTheme: textButtonTheme ?? this.textButtonTheme,
       centerTitle: centerTitle ?? this.centerTitle,
       titleSpacing: titleSpacing ?? this.titleSpacing,
       toolbarHeight: toolbarHeight ?? this.toolbarHeight,
@@ -248,6 +263,7 @@ class AppBarTheme with Diagnosticable {
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
+      textButtonTheme: TextButtonThemeData.lerp(a?.textButtonTheme, b?.textButtonTheme, t),
       centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
       titleSpacing: lerpDouble(a?.titleSpacing, b?.titleSpacing, t),
       toolbarHeight: lerpDouble(a?.toolbarHeight, b?.toolbarHeight, t),
@@ -269,6 +285,7 @@ class AppBarTheme with Diagnosticable {
       iconTheme,
       actionsIconTheme,
       textTheme,
+      textButtonTheme,
       centerTitle,
       titleSpacing,
       toolbarHeight,
@@ -294,6 +311,7 @@ class AppBarTheme with Diagnosticable {
         && other.iconTheme == iconTheme
         && other.actionsIconTheme == actionsIconTheme
         && other.textTheme == textTheme
+        && other.textButtonTheme == textButtonTheme
         && other.centerTitle == centerTitle
         && other.titleSpacing == titleSpacing
         && other.toolbarHeight == toolbarHeight
@@ -314,6 +332,7 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextButtonThemeData>('textButtonTheme', textButtonTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('toolbarHeight', toolbarHeight, defaultValue: null));

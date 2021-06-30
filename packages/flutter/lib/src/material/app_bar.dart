@@ -22,6 +22,8 @@ import 'material_localizations.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
+import 'text_button.dart';
+import 'text_button_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
@@ -193,6 +195,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.iconTheme,
     this.actionsIconTheme,
     this.textTheme,
+    this.textButtonTheme,
     this.primary = true,
     this.centerTitle,
     this.excludeHeaderSemantics = false,
@@ -518,6 +521,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   ///  * [actionsIconTheme], which defines the appearance of icons in
   ///    in the [actions] list.
+  ///  * [textButtonTheme], which defines the appearance of [TextButton]s
+  ///    in the tool bar.
   final IconThemeData? iconTheme;
 
   /// {@template flutter.material.appbar.actionsIconTheme}
@@ -547,6 +552,25 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [ThemeData.primaryTextTheme] is used.
   /// {@endtemplate}
   final TextTheme? textTheme;
+
+  /// {@template flutter.material.appbar.textButtonTheme}
+  /// Defines the [ButtonStyle] applied to [TextButton]s that
+  /// appear in the in the app bar's toolbar.
+  ///
+  /// If this property is null, then a [ButtonStyle] configured with
+  /// [foregroundColor] is used. This is useful because the default
+  /// [ButtonStyle.foregroundColor] is [ColorScheme.primary], which
+  /// is the same as the default value for the app bar's [backgroundColor].
+  ///
+  /// This property is null by default.
+  ///
+  /// See also:
+  ///
+  ///  * [actionsIconTheme], which defines the appearance of icons in
+  ///    in the [actions] list.
+  ///  * [iconTheme], which defines the appearance of all of the toolbar icons.
+  /// {@endtemplate}
+  final TextButtonThemeData? textButtonTheme;
 
   /// {@template flutter.material.appbar.primary}
   /// Whether this app bar is being displayed at the top of the screen.
@@ -829,6 +853,10 @@ class _AppBarState extends State<AppBar> {
         ?? appBarTheme.iconTheme
         ?? theme.iconTheme.copyWith(color: foregroundColor);
 
+    final TextButtonThemeData textButtonTheme = widget.textButtonTheme
+      ?? appBarTheme.textButtonTheme
+      ?? TextButtonThemeData(style: TextButton.styleFrom(primary: foregroundColor));
+
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
       ?? overallIconTheme;
@@ -973,7 +1001,10 @@ class _AppBarState extends State<AppBar> {
           data: overallIconTheme,
           child: DefaultTextStyle(
             style: toolbarTextStyle!,
-            child: toolbar,
+            child: TextButtonTheme(
+              data: textButtonTheme,
+              child: toolbar,
+            ),
           ),
         ),
       ),
@@ -1086,6 +1117,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.iconTheme,
     required this.actionsIconTheme,
     required this.textTheme,
+    required this.textButtonTheme,
     required this.primary,
     required this.centerTitle,
     required this.excludeHeaderSemantics,
@@ -1128,6 +1160,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final IconThemeData? iconTheme;
   final IconThemeData? actionsIconTheme;
   final TextTheme? textTheme;
+  final TextButtonThemeData? textButtonTheme;
   final bool primary;
   final bool? centerTitle;
   final bool excludeHeaderSemantics;
@@ -1202,6 +1235,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         iconTheme: iconTheme,
         actionsIconTheme: actionsIconTheme,
         textTheme: textTheme,
+        textButtonTheme: textButtonTheme,
         primary: primary,
         centerTitle: centerTitle,
         excludeHeaderSemantics: excludeHeaderSemantics,
@@ -1237,6 +1271,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || iconTheme != oldDelegate.iconTheme
         || actionsIconTheme != oldDelegate.actionsIconTheme
         || textTheme != oldDelegate.textTheme
+        || textButtonTheme != oldDelegate.textButtonTheme
         || primary != oldDelegate.primary
         || centerTitle != oldDelegate.centerTitle
         || titleSpacing != oldDelegate.titleSpacing
@@ -1473,6 +1508,7 @@ class SliverAppBar extends StatefulWidget {
     this.iconTheme,
     this.actionsIconTheme,
     this.textTheme,
+    this.textButtonTheme,
     this.primary = true,
     this.centerTitle,
     this.excludeHeaderSemantics = false,
@@ -1585,6 +1621,11 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// This property is used to configure an [AppBar].
   final TextTheme? textTheme;
+
+  /// {@macro flutter.material.appbar.textButtonTheme}
+  ///
+  /// This property is used to configure an [AppBar].
+  final TextButtonThemeData? textButtonTheme;
 
   /// {@macro flutter.material.appbar.primary}
   ///
@@ -1842,6 +1883,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           iconTheme: widget.iconTheme,
           actionsIconTheme: widget.actionsIconTheme,
           textTheme: widget.textTheme,
+          textButtonTheme: widget.textButtonTheme,
           primary: widget.primary,
           centerTitle: widget.centerTitle,
           excludeHeaderSemantics: widget.excludeHeaderSemantics,
