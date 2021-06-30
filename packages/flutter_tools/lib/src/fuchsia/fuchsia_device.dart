@@ -889,29 +889,33 @@ class FuchsiaIsolateDiscoveryProtocol {
         final int localPort = await _device.portForwarder.forward(port);
         try {
           final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
-          await _ddsStarter(_device, uri, true);
-          service = await _vmServiceConnector(_device.dds.uri);
-          _ports[port] = service;
+          _foundUri.complete(uri);
+          _status.stop();
+          return;
+          // await _ddsStarter(_device, uri, true);
+          // service = await _vmServiceConnector(_device.dds.uri);
+          // _ports[port] = service;
         } on SocketException catch (err) {
           globals.printTrace('Failed to connect to $localPort: $err');
           continue;
         }
       }
-      final List<FlutterView> flutterViews = await service.getFlutterViews();
-      for (final FlutterView flutterView in flutterViews) {
-        if (flutterView.uiIsolate == null) {
-          continue;
-        }
-        if (flutterView.uiIsolate.name.contains(_isolateName)) {
-          _foundUri.complete(_device.ipv6
-              ? Uri.parse(
-                  'http://[$_ipv6Loopback]:${service.httpAddress.port}/')
-              : Uri.parse(
-                  'http://$_ipv4Loopback:${service.httpAddress.port}/'));
-          _status.stop();
-          return;
-        }
-      }
+      // final List<FlutterView> flutterViews = await service.getFlutterViews();
+      // for (final FlutterView flutterView in flutterViews) {
+      //   if (flutterView.uiIsolate == null) {
+      //     continue;
+      //   }
+      //   if (flutterView.uiIsolate.name.contains(_isolateName)) {
+      //     _foundUri.complete(_device.ipv6
+      //         ? Uri.parse(
+      //             'http://[$_ipv6Loopback]:${service.httpAddress.port}/')
+      //         : Uri.parse(
+      //             'http://$_ipv4Loopback:${service.httpAddress.port}/'));
+      //     await service.dispose();
+      //     _status.stop();
+      //     return;
+      //   }
+      // }
     }
     if (_pollOnce) {
       _foundUri.completeError(Exception('Max iterations exceeded'));
