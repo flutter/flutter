@@ -672,8 +672,9 @@ String _getIosEngineArtifactPath(String engineDirectory,
     if (!platformDirectory.basename.startsWith('ios-')) {
       continue;
     }
-    // ios-x86_64-simulator, ios-arm64_x86_64-simulator, ios-armv7_arm64 (Xcode 11), or ios-arm64_armv7 (Xcode 12).
-    final bool simulatorDirectory = platformDirectory.basename.endsWith('-simulator');
+    // ios-x86_64-simulator, ios-armv7_arm64 (Xcode 11), or ios-arm64_armv7 (Xcode 12).
+    final bool simulatorDirectory =
+        platformDirectory.basename.endsWith('-simulator');
     if ((environmentType == EnvironmentType.simulator && simulatorDirectory) ||
         (environmentType == EnvironmentType.physical && !simulatorDirectory)) {
       flutterFrameworkSource = platformDirectory;
