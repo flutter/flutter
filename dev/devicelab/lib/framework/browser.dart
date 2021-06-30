@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 import 'dart:convert' show json, utf8, LineSplitter, JsonEncoder;
 import 'dart:io' as io;
@@ -124,7 +122,7 @@ class Chrome {
   }
 
   final io.Process? _chromeProcess;
-  late final ChromeErrorCallback _onError;
+  final ChromeErrorCallback _onError;
   final WipConnection? _debugConnection;
   bool _isStopped = false;
 
@@ -231,19 +229,19 @@ String _findSystemChromeExecutable() {
     return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   } else if (io.Platform.isWindows) {
     const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
-    final List<String?> kWindowsPrefixes = <String?>[
+    final List<String> kWindowsPrefixes = <String?>[
       io.Platform.environment['LOCALAPPDATA'],
       io.Platform.environment['PROGRAMFILES'],
       io.Platform.environment['PROGRAMFILES(X86)'],
-    ];
-    final String? windowsPrefix = kWindowsPrefixes.firstWhere((String? prefix) {
+    ].whereType<String>().toList();
+    final String windowsPrefix = kWindowsPrefixes.firstWhere((String? prefix) {
       if (prefix == null) {
         return false;
       }
       final String expectedPath = path.join(prefix, kWindowsExecutable);
       return io.File(expectedPath).existsSync();
     }, orElse: () => '.');
-    return path.join(windowsPrefix!, kWindowsExecutable);
+    return path.join(windowsPrefix, kWindowsExecutable);
   } else {
     throw Exception('Web benchmarks cannot run on ${io.Platform.operatingSystem}.');
   }
@@ -351,8 +349,8 @@ class BlinkTraceSummary {
 
       // Compute averages and summarize.
       return BlinkTraceSummary._(
-        averageBeginFrameTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.beginFrame).toList()),
-        averageUpdateLifecyclePhasesTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.updateAllLifecyclePhases).toList()),
+        averageBeginFrameTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.beginFrame).whereType<BlinkTraceEvent>().toList()),
+        averageUpdateLifecyclePhasesTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.updateAllLifecyclePhases).whereType<BlinkTraceEvent>().toList()),
       );
     } catch (_, __) {
       final io.File traceFile = io.File('./chrome-trace.json');
@@ -405,15 +403,15 @@ class BlinkFrame {
 
 /// Takes a list of events that have non-null [BlinkTraceEvent.tdur] computes
 /// their average as a [Duration] value.
-Duration _computeAverageDuration(List<BlinkTraceEvent?>? events) {
+Duration _computeAverageDuration(List<BlinkTraceEvent>? events) {
   // Compute the sum of "tdur" fields of the last _kMeasuredSampleCount events.
   final double sum = events
     !.skip(math.max(events.length - _kMeasuredSampleCount, 0))
-    .fold(0.0, (double previousValue, BlinkTraceEvent? event) {
-      if (event?.tdur == null) {
+    .fold(0.0, (double previousValue, BlinkTraceEvent event) {
+      if (event.tdur == null) {
         throw FormatException('Trace event lacks "tdur" field: $event');
       }
-      return previousValue + event!.tdur!;
+      return previousValue + event.tdur!;
     });
   final int sampleCount = math.min(events.length, _kMeasuredSampleCount);
   return Duration(microseconds: sum ~/ sampleCount);
@@ -604,7 +602,7 @@ Future<io.Process> _spawnChromiumProcess(String executable, List<String> args, {
         }
         return line;
       })
-      .firstWhere((String? line) => line!.startsWith('DevTools listening'), orElse: () {
+      .firstWhere((String? line) => line != null && line.startsWith('DevTools listening'), orElse: () {
         if (hitGlibcBug) {
           print(
             'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
