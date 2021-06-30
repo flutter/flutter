@@ -41,6 +41,9 @@ def Main():
     # debugging but should be removed from release builds.
     "-MO",
     "-gline-tables-only",
+    # These warnings are from generated code and would make no sense to the GLSL
+    # author.
+    "-Wno-unused-variable",
     # Both user and system header will be tracked.
     "-MMD",
     "-MF",

@@ -17,6 +17,8 @@ class Texture {
 
   ~Texture();
 
+  bool IsValid() const;
+
   Size GetSize() const;
 
   id<MTLTexture> GetMTLTexture() const;

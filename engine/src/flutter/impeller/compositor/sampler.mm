@@ -14,4 +14,8 @@ bool Sampler::IsValid() const {
   return state_;
 }
 
+id<MTLSamplerState> Sampler::GetMTLSamplerState() const {
+  return state_;
+}
+
 }  // namespace impeller

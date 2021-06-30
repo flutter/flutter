@@ -9,6 +9,7 @@
 #include "impeller/base/base.h"
 #include "impeller/compositor/device_buffer.h"
 #include "impeller/compositor/formats_metal.h"
+#include "impeller/compositor/sampler.h"
 #include "impeller/shader_glue/shader_types.h"
 
 namespace impeller {
@@ -195,23 +196,71 @@ static bool Bind(id<MTLRenderCommandEncoder> pass,
     return false;
   }
 
-  [pass setVertexBuffer:buffer offset:view.range.offset atIndex:bind_index];
-  return true;
-}
+  switch (stage) {
+    case ShaderStage::kVertex:
+      [pass setVertexBuffer:buffer offset:view.range.offset atIndex:bind_index];
+      return true;
+    case ShaderStage::kFragment:
+      [pass setFragmentBuffer:buffer
+                       offset:view.range.offset
+                      atIndex:bind_index];
+      return true;
+    default:
+      FML_DLOG(ERROR) << "Cannot bind buffer to unknown shader stage.";
+      return false;
+  }
 
-static bool Bind(Allocator& allocator,
-                 ShaderStage stage,
-                 size_t bind_index,
-                 const Texture& view) {
-  FML_CHECK(false);
   return false;
 }
 
-static bool Bind(Allocator& allocator,
+static bool Bind(id<MTLRenderCommandEncoder> pass,
+                 Allocator& allocator,
                  ShaderStage stage,
                  size_t bind_index,
-                 const Sampler& view) {
-  FML_CHECK(false);
+                 const Texture& texture) {
+  if (!texture.IsValid()) {
+    return false;
+  }
+
+  switch (stage) {
+    case ShaderStage::kVertex:
+      [pass setVertexTexture:texture.GetMTLTexture() atIndex:bind_index];
+      return true;
+    case ShaderStage::kFragment:
+      [pass setFragmentTexture:texture.GetMTLTexture() atIndex:bind_index];
+      return true;
+    default:
+      FML_DLOG(ERROR) << "Cannot bind buffer to unknown shader stage.";
+      return false;
+  }
+
+  return false;
+}
+
+static bool Bind(id<MTLRenderCommandEncoder> pass,
+                 Allocator& allocator,
+                 ShaderStage stage,
+                 size_t bind_index,
+                 const Sampler& sampler) {
+  if (!sampler.IsValid()) {
+    return false;
+  }
+
+  switch (stage) {
+    case ShaderStage::kVertex:
+      [pass setVertexSamplerState:sampler.GetMTLSamplerState()
+                          atIndex:bind_index];
+
+      return true;
+    case ShaderStage::kFragment:
+      [pass setFragmentSamplerState:sampler.GetMTLSamplerState()
+                            atIndex:bind_index];
+      return true;
+    default:
+      FML_DLOG(ERROR) << "Cannot bind buffer to unknown shader stage.";
+      return false;
+  }
+
   return false;
 }
 
@@ -228,12 +277,12 @@ bool RenderPass::EncodeCommands(Allocator& allocator,
       }
     }
     for (const auto texture : bindings.textures) {
-      if (!Bind(allocator, stage, texture.first, *texture.second)) {
+      if (!Bind(pass, allocator, stage, texture.first, *texture.second)) {
         return false;
       }
     }
     for (const auto sampler : bindings.samplers) {
-      if (!Bind(allocator, stage, sampler.first, *sampler.second)) {
+      if (!Bind(pass, allocator, stage, sampler.first, *sampler.second)) {
         return false;
       }
     }

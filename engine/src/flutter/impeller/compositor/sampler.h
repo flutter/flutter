@@ -18,6 +18,8 @@ class Sampler {
 
   ~Sampler();
 
+  id<MTLSamplerState> GetMTLSamplerState() const;
+
  private:
   friend SamplerLibrary;
 

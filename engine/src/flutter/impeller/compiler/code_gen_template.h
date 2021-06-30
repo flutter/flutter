@@ -72,6 +72,21 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   };
 
   // ===========================================================================
+  // Sampled Images ============================================================
+  // ===========================================================================
+{% for sampled_image in sampled_images %}
+
+  static constexpr auto kInput{{camel_case(sampled_image.name)}} = ShaderStageIOSlot { // {{sampled_image.name}}
+    "{{sampled_image.name}}",             // name
+    {{sampled_image.location}}u,          // attribute location
+    {{sampled_image.type.type_name}},     // type
+    {{sampled_image.type.bit_width}}u,    // bit width of type
+    {{sampled_image.type.vec_size}}u,     // vec size
+    {{sampled_image.type.columns}}u       // number of columns
+  };
+{% endfor %}
+
+  // ===========================================================================
   // Stage Outputs =============================================================
   // ===========================================================================
 {% for stage_output in stage_outputs %}
