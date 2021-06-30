@@ -218,6 +218,11 @@ void main() {
         ]),
       );
     });
+
+    test('disableConvertingRenderSurfaceOnAndroid', () async {
+      await PlatformViewsService.disableConvertingRenderSurfaceOnAndroid(true);
+      expect(viewsController.disableConvertingRenderSurface, true);
+    });
   });
 
   group('iOS', () {

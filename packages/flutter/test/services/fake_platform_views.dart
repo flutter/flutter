@@ -141,6 +141,8 @@ class FakeAndroidPlatformViewsController {
 
   int? lastClearedFocusViewId;
 
+  bool disableConvertingRenderSurface = false;
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -166,6 +168,8 @@ class FakeAndroidPlatformViewsController {
         return _setDirection(call);
       case 'clearFocus':
         return _clearFocus(call);
+      case 'disableConvertingRenderSurface':
+        return _disableConvertingRenderSurface(call);
     }
     return Future<dynamic>.sync(() => null);
   }
@@ -296,6 +300,11 @@ class FakeAndroidPlatformViewsController {
       );
 
     lastClearedFocusViewId = id;
+    return Future<dynamic>.sync(() => null);
+  }
+
+  Future<dynamic> _disableConvertingRenderSurface(MethodCall call) {
+    disableConvertingRenderSurface = call.arguments as bool;
     return Future<dynamic>.sync(() => null);
   }
 }
