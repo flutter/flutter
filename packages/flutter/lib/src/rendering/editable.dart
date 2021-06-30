@@ -997,7 +997,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   //
   // See also:
   //
-  //   * _expandSelectionToEnd
+  //   * _extendSelectionToEnd
   void _extendSelectionToStart(SelectionChangedCause cause) {
     if (selection!.extentOffset == 0) {
       return;

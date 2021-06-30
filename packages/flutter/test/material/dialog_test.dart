@@ -47,8 +47,8 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
 }
 
 // What was the AlertDialog's ButtonBar when many of these tests were written,
-// is now a Container with an OverflowBar child. The Container's size and location
-// match the original ButtonBar's size and location.
+// is now a Padding widget with an OverflowBar child. The Padding widget's size
+// and location  match the original ButtonBar's size and location.
 Finder _findButtonBar() {
   return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
 }

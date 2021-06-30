@@ -274,7 +274,7 @@ class FrameData {
   }
 
   @override
-  int get hashCode => size.hashCode ^ paths.hashCode;
+  int get hashCode => Object.hash(size, Object.hashAll(paths));
 
   @override
   String toString() {
@@ -328,7 +328,7 @@ class SvgPath {
   }
 
   @override
-  int get hashCode => id.hashCode ^ commands.hashCode ^ opacity.hashCode;
+  int get hashCode => Object.hash(id, Object.hashAll(commands), opacity);
 
   @override
   String toString() {
@@ -377,7 +377,7 @@ class SvgPathCommand {
   }
 
   @override
-  int get hashCode => type.hashCode ^ points.hashCode;
+  int get hashCode => Object.hash(type, Object.hashAll(points));
 
   @override
   String toString() {

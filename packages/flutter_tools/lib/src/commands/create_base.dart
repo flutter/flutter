@@ -123,6 +123,13 @@ abstract class CreateBase extends FlutterCommand {
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
+    argParser.addFlag(
+      'implementation-tests',
+      help:
+          'Include implementation tests that verify the template functions correctly. '
+          'This is only intended to enable testing of the tool itself.',
+      hide: !verboseHelp,
+    );
   }
 
   /// The output directory of the command.
@@ -328,6 +335,7 @@ abstract class CreateBase extends FlutterCommand {
     bool macos = false,
     bool windows = false,
     bool windowsUwp = false,
+    bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
     final String pluginClass = pluginDartClass.endsWith('Plugin')
@@ -379,6 +387,7 @@ abstract class CreateBase extends FlutterCommand {
       'winuwp': windowsUwp,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
+      'implementationTests': implementationTests,
     };
   }
 
@@ -400,16 +409,36 @@ abstract class CreateBase extends FlutterCommand {
     return template.render(directory, context, overwriteExisting: overwrite);
   }
 
+  /// Merges named templates into a single template, output to `directory`.
+  ///
+  /// `names` should match directory names under flutter_tools/template/.
+  ///
+  /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
+  @protected
+  Future<int> renderMerged(
+      List<String> names, Directory directory, Map<String, Object> context,
+      {bool overwrite = false}) async {
+    final Template template = await Template.merged(
+      names,
+      directory,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+      templateManifest: _templateManifest,
+    );
+    return template.render(directory, context, overwriteExisting: overwrite);
+  }
+
   /// Generate application project in the `directory` using `templateContext`.
   ///
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> generateApp(
-      Directory directory, Map<String, Object> templateContext,
+      String templateName, Directory directory, Map<String, Object> templateContext,
       {bool overwrite = false, bool pluginExampleApp = false}) async {
     int generatedCount = 0;
-    generatedCount += await renderTemplate(
-      'app',
+    generatedCount += await renderMerged(
+      <String>[templateName, 'app_shared'],
       directory,
       templateContext,
       overwrite: overwrite,
@@ -424,7 +453,9 @@ abstract class CreateBase extends FlutterCommand {
         context: PubContext.create,
         directory: directory.path,
         offline: boolArg('offline'),
-        generateSyntheticPackage: false,
+        // For templates that use the l10n localization tooling, make sure
+        // importing the generated package works right after `flutter create`.
+        generateSyntheticPackage: true,
       );
 
       await project.ensureReadyForPlatformSpecificTooling(

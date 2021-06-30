@@ -22,6 +22,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
   bool expectNonZeroExit = false,
+  bool expectNoTests = false,
 }) async* {
   final StreamController<String> output = StreamController<String>();
   final Future<CommandResult> command = runCommand(
@@ -30,6 +31,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
     workingDirectory: workingDirectory,
     environment: environment,
     expectNonZeroExit: expectNonZeroExit,
+    expectNoTests: expectNoTests,
     // Capture the output so it's not printed to the console by default.
     outputMode: OutputMode.capture,
     outputListener: (String line, io.Process process) {
@@ -113,7 +115,8 @@ Future<Command> startCommand(String executable, List<String> arguments, {
     environment: environment,
   );
 
-  Future<List<List<int>>> savedStdout, savedStderr;
+  Future<List<List<int>>> savedStdout = Future<List<List<int>>>.value(<List<int>>[]);
+  Future<List<List<int>>> savedStderr = Future<List<List<int>>>.value(<List<int>>[]);
   final Stream<List<int>> stdoutSource = process.stdout
     .transform<String>(const Utf8Decoder())
     .transform(const LineSplitter())
@@ -128,8 +131,14 @@ Future<Command> startCommand(String executable, List<String> arguments, {
     .transform(const Utf8Encoder());
   switch (outputMode) {
     case OutputMode.print:
-      stdoutSource.listen(io.stdout.add);
-      process.stderr.listen(io.stderr.add);
+      stdoutSource.listen((List<int> output) {
+        io.stdout.add(output);
+        savedStdout.then((List<List<int>> list) => list.add(output));
+      });
+      process.stderr.listen((List<int> output) {
+        io.stderr.add(output);
+        savedStdout.then((List<List<int>> list) => list.add(output));
+      });
       break;
     case OutputMode.capture:
       savedStdout = stdoutSource.toList();
@@ -158,6 +167,7 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
   bool expectNonZeroExit = false,
+  bool expectNoTests = false,
   int expectedExitCode,
   String failureMessage,
   OutputMode outputMode = OutputMode.print,
@@ -182,7 +192,21 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
 
   final CommandResult result = await command.onExit;
 
-  if ((result.exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && result.exitCode != expectedExitCode)) {
+  // Currently, the test infrastructure fails if it doesn't find any tests to
+  // run, but in the case of tests tagged as "no-shuffle", there might either be
+  // none that can be shuffled, or none that shouldn't be shuffled, and since
+  // we're running it twice to get all the tests in either category, it
+  // shouldn't fail if no tests are run.
+  //
+  // TODO(gspencergoog): This is a workaround until
+  // https://github.com/dart-lang/test/issues/1546 is addressed. Remove the
+  // workaround (parsing the test output) when/if that issue is fixed.
+  final bool skipErrorExit = expectNoTests &&
+      result != null &&
+      result.flattenedStdout != null &&
+      result.flattenedStdout.trimRight().endsWith('No tests ran.');
+
+  if (!skipErrorExit && ((result.exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && result.exitCode != expectedExitCode))) {
     // Print the output when we get unexpected results (unless output was
     // printed already).
     switch (outputMode) {

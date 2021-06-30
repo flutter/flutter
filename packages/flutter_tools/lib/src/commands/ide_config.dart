@@ -250,7 +250,6 @@ class IdeConfigCommand extends FlutterCommand {
   int _renderTemplate(String templateName, String dirPath, Map<String, Object> context) {
     final Template template = Template(
       _templateDirectory,
-      _templateDirectory,
       null,
       fileSystem: globals.fs,
       templateManifest: null,

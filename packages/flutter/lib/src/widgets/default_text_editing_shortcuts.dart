@@ -379,6 +379,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end, shift: true): ExpandSelectionToEndTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home, shift: true): ExpandSelectionToStartTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyA, meta: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
@@ -389,8 +391,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Control + shift + arrow right
     //   * End
     //   * Home
-    //   * Shift + end
-    //   * Shift + home
     //   * Control + delete
     //   * Control + backspace
   };
