@@ -30,10 +30,6 @@
 #include "thread.h"
 #include "vulkan_surface_producer.h"
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-#include "flutter/flow/scene_update_context.h"  // nogncheck
-#endif
-
 namespace flutter_runner {
 
 namespace testing {
@@ -78,9 +74,6 @@ class Engine final {
   std::shared_ptr<DefaultSessionConnection> session_connection_;
   std::optional<VulkanSurfaceProducer> surface_producer_;
   std::shared_ptr<FuchsiaExternalViewEmbedder> external_view_embedder_;
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  std::shared_ptr<flutter::SceneUpdateContext> legacy_external_view_embedder_;
-#endif
 
   std::unique_ptr<IsolateConfigurator> isolate_configurator_;
   std::unique_ptr<flutter::Shell> shell_;
@@ -90,9 +83,6 @@ class Engine final {
 
   zx::event vsync_event_;
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  bool use_legacy_renderer_ = true;
-#endif
   bool intercept_all_input_ = false;
 
   fml::WeakPtrFactory<Engine> weak_factory_;

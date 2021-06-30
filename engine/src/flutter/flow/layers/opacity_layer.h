@@ -37,10 +37,6 @@ class OpacityLayer : public MergedContainerLayer {
 
   void Paint(PaintContext& context) const override;
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  void UpdateScene(std::shared_ptr<SceneUpdateContext> context) override;
-#endif
-
  private:
   SkAlpha alpha_;
   SkPoint offset_;
