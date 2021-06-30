@@ -853,7 +853,7 @@ class _AppBarState extends State<AppBar> {
         ?? appBarTheme.iconTheme
         ?? theme.iconTheme.copyWith(color: foregroundColor);
 
-    TextButtonThemeData textButtonTheme = widget.textButtonTheme
+    final TextButtonThemeData textButtonTheme = widget.textButtonTheme
       ?? appBarTheme.textButtonTheme
       ?? TextButtonThemeData(style: TextButton.styleFrom(primary: foregroundColor));
 

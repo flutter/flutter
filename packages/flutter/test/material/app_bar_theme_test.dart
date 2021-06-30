@@ -562,8 +562,8 @@ AppBarTheme _appBarTheme() {
     iconTheme: iconThemeData,
     textButtonTheme: textButtonThemeData,
     toolbarHeight: 96,
-    toolbarTextStyle: TextStyle(color: Colors.yellow),
-    titleTextStyle: TextStyle(color: Colors.pink),
+    toolbarTextStyle: const TextStyle(color: Colors.yellow),
+    titleTextStyle: const TextStyle(color: Colors.pink),
   );
 }
 
