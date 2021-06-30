@@ -57,24 +57,6 @@ class FuchsiaDeviceTools {
 final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
-// Enables testing the fuchsia isolate discovery
-Future<FlutterVmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
-  return connectToVmService(uri, logger: globals.logger);
-}
-
-Future<void> _kDefaultDartDevelopmentServiceStarter(
-  Device device,
-  Uri observatoryUri,
-  bool disableServiceAuthCodes,
-) async {
-  await device.dds.startDartDevelopmentService(
-    observatoryUri,
-    0,
-    true,
-    disableServiceAuthCodes,
-    logger: globals.logger,
-  );
-}
 
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
@@ -862,8 +844,6 @@ class FuchsiaIsolateDiscoveryProtocol {
   FuchsiaIsolateDiscoveryProtocol(
     this._device,
     this._fuchsiaUrl, [
-    this._vmServiceConnector = _kDefaultFuchsiaIsolateDiscoveryConnector,
-    this._ddsStarter = _kDefaultDartDevelopmentServiceStarter,
     this._pollOnce = false,
   ]);
 
@@ -871,8 +851,6 @@ class FuchsiaIsolateDiscoveryProtocol {
   final FuchsiaDevice _device;
   final String _fuchsiaUrl;
   final Completer<Uri> _foundUri = Completer<Uri>();
-  final Future<FlutterVmService> Function(Uri) _vmServiceConnector;
-  final Future<void> Function(Device, Uri, bool) _ddsStarter;
 
   // whether to only poll once.
   final bool _pollOnce;
