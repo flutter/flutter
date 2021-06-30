@@ -219,7 +219,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'App.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'App.framework',
       'Info.plist',
     ));
