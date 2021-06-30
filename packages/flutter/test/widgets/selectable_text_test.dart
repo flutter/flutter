@@ -4808,8 +4808,8 @@ void main() {
         home: Material(
           child: Center(
             child: Column(
-              children: <Widget>[
-                const SelectableText.rich(
+              children: const <Widget>[
+                SelectableText.rich(
                   TextSpan(
                     children: <TextSpan>[
                       TextSpan(text: 'Atwater Peel ',
@@ -4857,8 +4857,8 @@ void main() {
         home: Material(
           child: Center(
             child: Column(
-              children: <Widget>[
-                const SelectableText.rich(
+              children: const <Widget>[
+                SelectableText.rich(
                   TextSpan(
                     children: <TextSpan>[
                       TextSpan(text: 'Atwater Peel ',
