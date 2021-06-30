@@ -100,7 +100,7 @@ class StartCommand extends Command<void> {
         'y': 'Indicates the first dev release after a beta release.',
         'z': 'Indicates a hotfix to a stable release.',
         'm': 'Indicates a standard dev release.',
-        'n': 'Indicates a hotfix to a dev release.',
+        'n': 'Indicates a hotfix to a dev or beta release.',
       },
     );
     final Git git = Git(processManager);

@@ -446,7 +446,7 @@ void main() {
           fileSystem.file(stateFile),
         );
 
-        expect(stdio.stdout, contains('Has CI passed for the framework PR?'));
+        expect(stdio.stdout, contains('Are you ready to tag commit $revision1 as $releaseVersion'));
         expect(stdio.error, contains('Aborting command.'));
         expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
         expect(finalState.logs, stdio.logs);
@@ -501,16 +501,84 @@ void main() {
         );
 
         expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
-        expect(stdio.stdout, contains('Has CI passed for the framework PR?'));
+        expect(stdio.stdout, contains('Are you ready to tag commit $revision1 as $releaseVersion'));
         expect(finalState.logs, stdio.logs);
         expect(processManager.hasRemainingExpectations, false);
       });
     });
 
+    group('PUBLISH_CHANNEL to RELEASE_COMPLETED', () {
+      const String remoteName = 'upstream';
+      const String releaseVersion = '1.2.0-3.0.pre';
+      const String releaseChannel = 'beta';
+      pb.ConductorState state;
+      FakePlatform platform;
+
+      setUp(() {
+        state = pb.ConductorState(
+          currentPhase: ReleasePhase.PUBLISH_CHANNEL,
+          framework: pb.Repository(
+            candidateBranch: candidateBranch,
+            upstream: pb.Remote(url: FrameworkRepository.defaultUpstream),
+          ),
+          releaseChannel: releaseChannel,
+          releaseVersion: releaseVersion,
+        );
+        platform = FakePlatform(
+          environment: <String, String>{
+            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+          },
+          operatingSystem: localOperatingSystem,
+          pathSeparator: localPathSeparator,
+        );
+      });
+
+      test('does not update currentPhase if user responds no', () async {
+        stdio.stdin.add('n');
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision1,
+          ),
+        ]);
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
+
+        final pb.ConductorState finalState = readStateFromFile(
+          fileSystem.file(stateFile),
+        );
+
+        expect(stdio.error, contains('Aborting command.'));
+        expect(
+          stdio.stdout,
+          contains('About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
+        );
+        expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
+        print(stdio.stdout);
+      });
+    });
+
     test('throws exception if state.currentPhase is RELEASE_COMPLETED', () async {
-      final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[],
-      );
+      final FakeProcessManager processManager = FakeProcessManager.empty();
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{
           'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),

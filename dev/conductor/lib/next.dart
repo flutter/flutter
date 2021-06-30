@@ -216,7 +216,7 @@ void runNext({
       final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {
         final bool response = prompt(
-          'Has CI passed for the framework PR?', // TODO tell user what is about to happen
+          'Are you ready to tag commit $headRevision as ${state.releaseVersion} and push to remote ${state.framework.upstream.url}?',
           stdio,
         );
         if (!response) {
@@ -225,7 +225,7 @@ void runNext({
           return;
         }
       }
-      framework.tag(headRevision, state.releaseVersion, upstream.name); // TODO use literal upstream, rather than name
+      framework.tag(headRevision, state.releaseVersion, upstream.name);
       break;
     case pb.ReleasePhase.PUBLISH_CHANNEL:
       final Remote upstream = Remote(
@@ -240,9 +240,17 @@ void runNext({
       );
       final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {
+        // dryRun: true means print out git command
+        framework.updateChannel(
+          headRevision,
+          state.framework.upstream.url,
+          state.releaseChannel,
+          force: force,
+          dryRun: true,
+        );
+
         final bool response = prompt(
-            'Are you ready to publish release ${state.releaseVersion} to ' // TODO print headRevision
-            'channel ${state.releaseChannel} at ${state.framework.upstream.url}?',
+          'Are you ready to publish this release?',
           stdio,
         );
         if (!response) {
@@ -258,7 +266,6 @@ void runNext({
         state.releaseChannel,
         force: force,
       );
-      // TODO this doesn't log what it did
       break;
     case pb.ReleasePhase.VERIFY_RELEASE:
       stdio.printStatus(

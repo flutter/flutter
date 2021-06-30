@@ -369,11 +369,11 @@ abstract class Repository {
       remote,
       '$commit:$branch',
     ];
+    final String command = <String>[
+      'git',
+      ...args,
+    ].join(' ');
     if (dryRun) {
-      final String command = <String>[
-        'git',
-        ...args,
-      ].join(' ');
       stdio.printStatus('About to execute command: `$command`');
     } else {
       git.run(
@@ -381,6 +381,7 @@ abstract class Repository {
         'update the release branch with the commit',
         workingDirectory: checkoutDirectory.path,
       );
+      stdio.printStatus('Executed command: `$command`');
     }
   }
 
