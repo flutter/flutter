@@ -7530,6 +7530,56 @@ void main() {
     expect(controller.selection.isCollapsed, false);
     expect(controller.selection.baseOffset, 15);
     expect(controller.selection.extentOffset, 24);
+
+    // Set the caret to the end of a line.
+    controller.selection = const TextSelection(
+      baseOffset: 24,
+      extentOffset: 24,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 24);
+    expect(controller.selection.extentOffset, 24);
+
+    // Can select the entire line from the end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      lineModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 24);
+    expect(controller.selection.extentOffset, 15);
+
+    // Set the caret to the start of a line.
+    controller.selection = const TextSelection(
+      baseOffset: 15,
+      extentOffset: 15,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 15);
+    expect(controller.selection.extentOffset, 15);
+
+    // Can select the entire line from the start.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      shift: true,
+      lineModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 15);
+    expect(controller.selection.extentOffset, 24);
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
   testWidgets('expanding selection to start/end', (WidgetTester tester) async {
