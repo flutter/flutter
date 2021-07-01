@@ -143,6 +143,8 @@ class UIDartState : public tonic::DartState {
 
   bool enable_skparagraph() const;
 
+  bool enable_display_list() const;
+
   template <class T>
   static flutter::SkiaGPUObject<T> CreateGPUObject(sk_sp<T> object) {
     if (!object) {
@@ -163,6 +165,7 @@ class UIDartState : public tonic::DartState {
               std::shared_ptr<IsolateNameServer> isolate_name_server,
               bool is_root_isolate_,
               bool enable_skparagraph,
+              bool enable_display_list,
               const UIDartState::Context& context);
 
   ~UIDartState() override;
@@ -189,6 +192,7 @@ class UIDartState : public tonic::DartState {
   LogMessageCallback log_message_callback_;
   const std::shared_ptr<IsolateNameServer> isolate_name_server_;
   const bool enable_skparagraph_;
+  const bool enable_display_list_;
   UIDartState::Context context_;
 
   void AddOrRemoveTaskObserver(bool add);

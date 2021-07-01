@@ -105,6 +105,7 @@ void MockCanvas::onDrawPath(const SkPath& path, const SkPaint& paint) {
 
 void MockCanvas::onDrawShadowRec(const SkPath& path,
                                  const SkDrawShadowRec& rec) {
+  // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
   (void)rec;  // Can't use b/c Skia keeps this type anonymous.
   draw_calls_.emplace_back(DrawCall{current_layer_, DrawShadowData{path}});
 }
