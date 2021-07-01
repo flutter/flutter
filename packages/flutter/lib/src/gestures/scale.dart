@@ -332,6 +332,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   late List<int> _pointerQueue; // A queue to sort pointers in order of entrance
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
   late Offset _delta;
+  bool _updated = false;
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
@@ -412,7 +413,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void _update() {
     final int count = _pointerLocations.keys.length;
 
-    final Offset? previousFocalPoint = _state != _ScaleState.started ? null : _currentFocalPoint;
+    final Offset? previousFocalPoint = _updated ? _currentFocalPoint : null;
 
     // Compute the focal point
     Offset focalPoint = Offset.zero;
@@ -424,12 +425,13 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _lastTransform,
       _currentFocalPoint,
     );
-    final Offset localPreviousFocalPoint = _state != _ScaleState.started
-        ? localFocalPoint
-        : PointerEvent.transformPosition(
+    final Offset localPreviousFocalPoint = _updated
+        ? PointerEvent.transformPosition(
             _lastTransform,
             previousFocalPoint!,
-          );
+          )
+        : localFocalPoint;
+    _updated = true;
     _delta = localFocalPoint - localPreviousFocalPoint;
 
     // Span is the average deviation from focal point. Horizontal and vertical
