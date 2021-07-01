@@ -326,6 +326,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   late double _currentHorizontalSpan;
   late double _initialVerticalSpan;
   late double _currentVerticalSpan;
+  late Offset _localFocalPoint;
   _LineBetweenPointers? _initialLine;
   _LineBetweenPointers? _currentLine;
   late Map<int, Offset> _pointerLocations;
@@ -421,7 +422,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       focalPoint += _pointerLocations[pointer]!;
     _currentFocalPoint = count > 0 ? focalPoint / count.toDouble() : Offset.zero;
 
-    final Offset localFocalPoint = PointerEvent.transformPosition(
+    _localFocalPoint = PointerEvent.transformPosition(
       _lastTransform,
       _currentFocalPoint,
     );
@@ -430,9 +431,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
             _lastTransform,
             previousFocalPoint!,
           )
-        : localFocalPoint;
+        : _localFocalPoint;
     _updated = true;
-    _delta = localFocalPoint - localPreviousFocalPoint;
+    _delta = _localFocalPoint - localPreviousFocalPoint;
 
     // Span is the average deviation from focal point. Horizontal and vertical
     // spans are the average deviations from the focal point's horizontal and
@@ -531,7 +532,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           horizontalScale: _horizontalScaleFactor,
           verticalScale: _verticalScaleFactor,
           focalPoint: _currentFocalPoint,
-          localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
+          localFocalPoint: _localFocalPoint,
           rotation: _computeRotationFactor(),
           pointerCount: _pointerQueue.length,
           delta: _delta,
@@ -545,7 +546,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       invokeCallback<void>('onStart', () {
         onStart!(ScaleStartDetails(
           focalPoint: _currentFocalPoint,
-          localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
+          localFocalPoint: _localFocalPoint,
           pointerCount: _pointerQueue.length,
         ));
       });
