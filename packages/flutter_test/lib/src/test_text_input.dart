@@ -278,7 +278,7 @@ class TestTextInput {
     // test this code does not run in a package:test test zone.
     if (_client == 0)
       throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
-    await _binaryMessenger.handlePlatformMessage(
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
@@ -293,7 +293,7 @@ class TestTextInput {
   /// Simulates a Scribble focus
   Future<void> scribbleFocusElement(String elementIdentifier, Offset offset) async {
     assert(isRegistered);
-    await _binaryMessenger.handlePlatformMessage(
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
@@ -309,7 +309,7 @@ class TestTextInput {
   Future<List<List<dynamic>>> scribbleRequestElementsInRect(Rect rect) async {
     assert(isRegistered);
     List<List<dynamic>> response = <List<dynamic>>[];
-    await _binaryMessenger.handlePlatformMessage(
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
@@ -333,7 +333,7 @@ class TestTextInput {
     if (_client == 0)
       throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
 
-    await _binaryMessenger.handlePlatformMessage(
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
@@ -353,7 +353,7 @@ class TestTextInput {
     if (_client == 0)
       throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
 
-    await _binaryMessenger.handlePlatformMessage(
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
