@@ -255,7 +255,7 @@ class FuchsiaDevice extends Device {
 
   bool _isSession = false;
 
-  /// Determine if the fuchsia device is running a workstation build.
+  /// Determine if the Fuchsia device is running a workstation build.
   ///
   /// If the device is running a workstation build, `session_control` should be
   /// used to launch apps, otherwise `tiles_ctl` should be used.
