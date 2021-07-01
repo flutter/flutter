@@ -1415,9 +1415,9 @@ class TextInput {
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
     if (method == 'TextInputClient.focusElement') {
-      final List<dynamic> args = methodCall.arguments as List<dynamic>;
+      final List<num> args = methodCall.arguments as List<num>;
       if (_scribbleClients.containsKey(args[0])) {
-        _scribbleClients[args[0]]?.onScribbleFocus(Offset(args[1].toDouble() as double, args[2].toDouble() as double));
+        _scribbleClients[args[0]]?.onScribbleFocus(Offset(args[1].toDouble(), args[2].toDouble()));
       }
       return;
     } else if (method == 'TextInputClient.requestElementsInRect') {
@@ -1520,7 +1520,7 @@ class TextInput {
         _currentConnection!._client.showToolbar();
         break;
       case 'TextInputClient.insertTextPlaceholder':
-        _currentConnection!._client.insertTextPlaceholder(Size(args[1].toDouble() as double, args[2].toDouble() as double));
+        _currentConnection!._client.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
         break;
       case 'TextInputClient.removeTextPlaceholder':
         _currentConnection!._client.removeTextPlaceholder();

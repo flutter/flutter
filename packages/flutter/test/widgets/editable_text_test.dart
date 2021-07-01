@@ -1746,7 +1746,7 @@ void main() {
     await tester.testTextInput.scribbleInsertPlaceholder();
     await tester.pumpAndSettle();
 
-    TextSpan textSpan = findRenderEditable(tester).text!;
+    TextSpan textSpan = findRenderEditable(tester).text! as TextSpan;
     expect(textSpan.children!.length, 3);
     expect((textSpan.children![0] as TextSpan).text, 'Lorem');
     expect(textSpan.children![1] is WidgetSpan, true);
@@ -1755,7 +1755,7 @@ void main() {
     await tester.testTextInput.scribbleRemovePlaceholder();
     await tester.pumpAndSettle();
 
-    textSpan = findRenderEditable(tester).text!;
+    textSpan = findRenderEditable(tester).text! as TextSpan;
     expect(textSpan.children, null);
     expect(textSpan.text, 'Lorem ipsum dolor sit amet');
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
@@ -1789,7 +1789,7 @@ void main() {
     await tester.testTextInput.scribbleInsertPlaceholder();
     await tester.pumpAndSettle();
 
-    TextSpan textSpan = findRenderEditable(tester).text!;
+    TextSpan textSpan = findRenderEditable(tester).text! as TextSpan;
     expect(textSpan.children!.length, 4);
     expect((textSpan.children![0] as TextSpan).text, 'Lorem');
     expect(textSpan.children![1] is WidgetSpan, true);
@@ -1799,7 +1799,7 @@ void main() {
     await tester.testTextInput.scribbleRemovePlaceholder();
     await tester.pumpAndSettle();
 
-    textSpan = findRenderEditable(tester).text!;
+    textSpan = findRenderEditable(tester).text! as TextSpan;
     expect(textSpan.children, null);
     expect(textSpan.text, 'Lorem ipsum dolor sit amet');
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
@@ -3770,7 +3770,7 @@ void main() {
     // There should be a new platform message updating the selection rects.
     final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setSelectionRects');
     expect(methodCall.method, 'TextInput.setSelectionRects');
-    expect(methodCall.arguments.length, 5);
+    expect((methodCall.arguments as List<dynamic>).length, 5);
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
