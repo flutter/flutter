@@ -56,6 +56,7 @@ UIDartState::UIDartState(
     std::shared_ptr<IsolateNameServer> isolate_name_server,
     bool is_root_isolate,
     bool enable_skparagraph,
+    bool enable_display_list,
     const UIDartState::Context& context)
     : add_callback_(std::move(add_callback)),
       remove_callback_(std::move(remove_callback)),
@@ -65,6 +66,7 @@ UIDartState::UIDartState(
       log_message_callback_(log_message_callback),
       isolate_name_server_(std::move(isolate_name_server)),
       enable_skparagraph_(enable_skparagraph),
+      enable_display_list_(enable_display_list),
       context_(std::move(context)) {
   AddOrRemoveTaskObserver(true /* add */);
 }
@@ -236,6 +238,10 @@ void UIDartState::LogMessage(const std::string& tag,
 
 bool UIDartState::enable_skparagraph() const {
   return enable_skparagraph_;
+}
+
+bool UIDartState::enable_display_list() const {
+  return enable_display_list_;
 }
 
 }  // namespace flutter

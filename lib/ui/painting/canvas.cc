@@ -85,6 +85,7 @@ fml::RefPtr<Canvas> Canvas::Create(PictureRecorder* recorder,
   fml::RefPtr<Canvas> canvas = fml::MakeRefCounted<Canvas>(
       recorder->BeginRecording(SkRect::MakeLTRB(left, top, right, bottom)));
   recorder->set_canvas(canvas);
+  canvas->display_list_recorder_ = recorder->display_list_recorder();
   return canvas;
 }
 
@@ -383,8 +384,19 @@ void Canvas::drawImageNine(const CanvasImage* image,
   center.round(&icenter);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
   auto filter = ImageFilter::FilterModeFromIndex(bitmapSamplingIndex);
-  canvas_->drawImageNine(image->image().get(), icenter, dst, filter,
-                         paint.paint());
+  if (display_list_recorder_) {
+    // SkCanvas turns a simple 2-rect DrawImageNine operation into a
+    // drawImageLattice operation which has arrays to allocate and
+    // pass along. For simplicity, we will bypass the canvas and ask
+    // the recorder to record our paint attributes and record a much
+    // simpler DrawImageNineOp record directly.
+    display_list_recorder_->RecordPaintAttributes(
+        paint.paint(), DisplayListCanvasRecorder::DrawType::kImageOpType);
+    builder()->drawImageNine(image->image(), icenter, dst, filter);
+  } else {
+    canvas_->drawImageNine(image->image().get(), icenter, dst, filter,
+                           paint.paint());
+  }
 }
 
 void Canvas::drawPicture(Picture* picture) {
@@ -396,7 +408,17 @@ void Canvas::drawPicture(Picture* picture) {
         ToDart("Canvas.drawPicture called with non-genuine Picture."));
     return;
   }
-  canvas_->drawPicture(picture->picture().get());
+  if (picture->picture()) {
+    canvas_->drawPicture(picture->picture().get());
+  } else if (picture->display_list()) {
+    if (display_list_recorder_) {
+      builder()->drawDisplayList(picture->display_list());
+    } else {
+      picture->display_list()->RenderTo(canvas_);
+    }
+  } else {
+    FML_DCHECK(false);
+  }
 }
 
 void Canvas::drawPoints(const Paint& paint,
@@ -477,13 +499,24 @@ void Canvas::drawShadow(const CanvasPath* path,
         ToDart("Canvas.drawShader called with non-genuine Path."));
     return;
   }
-  SkScalar dpr = UIDartState::Current()
-                     ->platform_configuration()
-                     ->get_window(0)
-                     ->viewport_metrics()
-                     .device_pixel_ratio;
-  flutter::PhysicalShapeLayer::DrawShadow(canvas_, path->path(), color,
-                                          elevation, transparentOccluder, dpr);
+  if (display_list_recorder_) {
+    // The DrawShadow mechanism results in non-public operations to be
+    // performed on the canvas involving an SkDrawShadowRec. Since we
+    // cannot include the header that defines that structure, we cannot
+    // record an operation that it injects into an SkCanvas. To prevent
+    // that situation we bypass the canvas interface and inject the
+    // shadow parameters directly into the underlying DisplayList.
+    // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
+    builder()->drawShadow(path->path(), color, elevation, transparentOccluder);
+  } else {
+    SkScalar dpr = UIDartState::Current()
+                       ->platform_configuration()
+                       ->get_window(0)
+                       ->viewport_metrics()
+                       .device_pixel_ratio;
+    flutter::PhysicalShapeLayer::DrawShadow(
+        canvas_, path->path(), color, elevation, transparentOccluder, dpr);
+  }
 }
 
 void Canvas::Invalidate() {
