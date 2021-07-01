@@ -1191,5 +1191,5 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       enableFeedback: enableFeedback,
       splashRadius: widget.splashRadius,
     );
-  } 
+  }
 }
