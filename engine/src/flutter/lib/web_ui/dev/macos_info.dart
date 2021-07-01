@@ -11,23 +11,9 @@ class MacOSInfo {
   ///
   /// Built in tools such as `system_profiler` and `defaults` are utilized.
   Future<void> printInformation() async {
-    try {
-      await _printSafariApplications();
-    } catch (error) {
-      print('Error thrown while getting Safari Applications: $error');
-    }
-
-    try {
-      await _printSafariDefaults();
-    } catch (error) {
-      print('Error thrown while getting Safari defaults: $error');
-    }
-
-    try {
-      await _printUserLimits();
-    } catch (error) {
-      print('Error thrown while getting user limits defaults: $error');
-    }
+    await _printSafariApplications();
+    await _printSafariDefaults();
+    await _printUserLimits();
   }
 
   /// Print information on applications in the system that contains string
@@ -59,17 +45,18 @@ class MacOSInfo {
     final ProcessManager defaults = await startProcess(
       '/usr/bin/defaults',
       ['find', 'Safari'],
+      evalOutput: true,
     );
     print('Safari related defaults:\n ${await defaults.evalStdout()}');
   }
 
   /// Print user limits (file and process).
   Future<void> _printUserLimits() async {
-    ProcessManager ulimit = await startProcess('ulimit', ['-n']);
+    ProcessManager ulimit = await startProcess('ulimit', ['-n'], evalOutput: true);
     final String fileLimit = await ulimit.evalStdout();
     print('MacOS file limit: $fileLimit');
 
-    ulimit = await startProcess('ulimit', ['-u']);
+    ulimit = await startProcess('ulimit', ['-u'], evalOutput: true);
     final String processLimit = await ulimit.evalStdout();
     print('MacOS process limit: $processLimit');
   }

@@ -187,8 +187,8 @@ class TestCommand extends Command<bool> with ArgUtils {
       ..argParsers.forEach((t) => t.parseOptions(argResults!));
     GeneralTestsArgumentParser.instance.parseOptions(argResults!);
 
-    if (isSafariOnMacOS) {
-      /// Collect information on the bot.
+    /// Collect information on the bot.
+    if (isSafariOnMacOS && isLuci) {
       final MacOSInfo macOsInfo = new MacOSInfo();
       await macOsInfo.printInformation();
     }
