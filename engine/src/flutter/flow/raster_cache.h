@@ -8,6 +8,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "flutter/flow/display_list.h"
 #include "flutter/flow/raster_cache_key.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
@@ -70,6 +71,12 @@ class RasterCache {
    */
   virtual std::unique_ptr<RasterCacheResult> RasterizePicture(
       SkPicture* picture,
+      GrDirectContext* context,
+      const SkMatrix& ctm,
+      SkColorSpace* dst_color_space,
+      bool checkerboard) const;
+  virtual std::unique_ptr<RasterCacheResult> RasterizeDisplayList(
+      DisplayList* display_list,
       GrDirectContext* context,
       const SkMatrix& ctm,
       SkColorSpace* dst_color_space,
@@ -138,6 +145,12 @@ class RasterCache {
                SkColorSpace* dst_color_space,
                bool is_complex,
                bool will_change);
+  bool Prepare(GrDirectContext* context,
+               DisplayList* display_list,
+               const SkMatrix& transformation_matrix,
+               SkColorSpace* dst_color_space,
+               bool is_complex,
+               bool will_change);
 
   void Prepare(PrerollContext* context, Layer* layer, const SkMatrix& ctm);
 
@@ -145,6 +158,11 @@ class RasterCache {
   //
   // Return true if it's found and drawn.
   bool Draw(const SkPicture& picture, SkCanvas& canvas) const;
+
+  // Find the raster cache for the display list and draw it to the canvas.
+  //
+  // Return true if it's found and drawn.
+  bool Draw(const DisplayList& display_list, SkCanvas& canvas) const;
 
   // Find the raster cache for the layer and draw it to the canvas.
   //
@@ -168,6 +186,8 @@ class RasterCache {
 
   size_t GetPictureCachedEntriesCount() const;
 
+  size_t GetDisplayListCachedEntriesCount() const;
+
   /**
    * @brief Estimate how much memory is used by picture raster cache entries in
    * bytes.
@@ -177,6 +197,16 @@ class RasterCache {
    * estimate the SkImage memory usage.
    */
   size_t EstimatePictureCacheByteSize() const;
+
+  /**
+   * @brief Estimate how much memory is used by display list raster cache
+   * entries in bytes.
+   *
+   * Only SkImage's memory usage is counted as other objects are often much
+   * smaller compared to SkImage. SkImageInfo::computeMinByteSize is used to
+   * estimate the SkImage memory usage.
+   */
+  size_t EstimateDisplayListCacheByteSize() const;
 
   /**
    * @brief Estimate how much memory is used by layer raster cache entries in
@@ -216,6 +246,7 @@ class RasterCache {
   const size_t picture_cache_limit_per_frame_;
   size_t picture_cached_this_frame_ = 0;
   mutable PictureRasterCacheKey::Map<Entry> picture_cache_;
+  mutable DisplayListRasterCacheKey::Map<Entry> display_list_cache_;
   mutable LayerRasterCacheKey::Map<Entry> layer_cache_;
   bool checkerboard_images_;
 

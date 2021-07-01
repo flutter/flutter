@@ -42,6 +42,20 @@ std::shared_ptr<PictureLayer> DiffContextTest::CreatePictureLayer(
       offset, SkiaGPUObject(picture, unref_queue()), false, false);
 }
 
+sk_sp<DisplayList> DiffContextTest::CreateDisplayList(const SkRect& bounds,
+                                                      SkColor color) {
+  DisplayListBuilder builder;
+  builder.setColor(color);
+  builder.drawRect(bounds);
+  return builder.Build();
+}
+
+std::shared_ptr<DisplayListLayer> DiffContextTest::CreateDisplayListLayer(
+    sk_sp<DisplayList> display_list,
+    const SkPoint& offset) {
+  return std::make_shared<DisplayListLayer>(offset, display_list, false, false);
+}
+
 std::shared_ptr<ContainerLayer> DiffContextTest::CreateContainerLayer(
     std::initializer_list<std::shared_ptr<Layer>> layers) {
   auto res = std::make_shared<ContainerLayer>();

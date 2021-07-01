@@ -12,6 +12,10 @@ namespace flutter {
 
 class SnapshotDelegate {
  public:
+  virtual sk_sp<SkImage> MakeRasterSnapshot(
+      std::function<void(SkCanvas*)> draw_callback,
+      SkISize picture_size) = 0;
+
   virtual sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,
                                             SkISize picture_size) = 0;
 

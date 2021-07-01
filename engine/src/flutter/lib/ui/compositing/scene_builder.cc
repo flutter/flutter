@@ -10,6 +10,7 @@
 #include "flutter/flow/layers/clip_rrect_layer.h"
 #include "flutter/flow/layers/color_filter_layer.h"
 #include "flutter/flow/layers/container_layer.h"
+#include "flutter/flow/layers/display_list_layer.h"
 #include "flutter/flow/layers/image_filter_layer.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/layers/layer_tree.h"
@@ -265,10 +266,17 @@ void SceneBuilder::addPicture(double dx,
                               double dy,
                               Picture* picture,
                               int hints) {
-  auto layer = std::make_unique<flutter::PictureLayer>(
-      SkPoint::Make(dx, dy), UIDartState::CreateGPUObject(picture->picture()),
-      !!(hints & 1), !!(hints & 2));
-  AddLayer(std::move(layer));
+  if (picture->picture()) {
+    auto layer = std::make_unique<flutter::PictureLayer>(
+        SkPoint::Make(dx, dy), UIDartState::CreateGPUObject(picture->picture()),
+        !!(hints & 1), !!(hints & 2));
+    AddLayer(std::move(layer));
+  } else {
+    auto layer = std::make_unique<flutter::DisplayListLayer>(
+        SkPoint::Make(dx, dy), picture->display_list(), !!(hints & 1),
+        !!(hints & 2));
+    AddLayer(std::move(layer));
+  }
 }
 
 void SceneBuilder::addTexture(double dx,

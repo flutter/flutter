@@ -450,6 +450,11 @@ class Rasterizer final : public SnapshotDelegate {
   bool shared_engine_block_thread_merging_ = false;
 
   // |SnapshotDelegate|
+  sk_sp<SkImage> MakeRasterSnapshot(
+      std::function<void(SkCanvas*)> draw_callback,
+      SkISize picture_size) override;
+
+  // |SnapshotDelegate|
   sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,
                                     SkISize picture_size) override;
 

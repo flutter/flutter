@@ -37,29 +37,50 @@ fml::RefPtr<Picture> Picture::Create(
   return canvas_picture;
 }
 
+fml::RefPtr<Picture> Picture::Create(Dart_Handle dart_handle,
+                                     sk_sp<DisplayList> display_list) {
+  auto canvas_picture = fml::MakeRefCounted<Picture>(std::move(display_list));
+
+  canvas_picture->AssociateWithDartWrapper(dart_handle);
+  return canvas_picture;
+}
+
 Picture::Picture(flutter::SkiaGPUObject<SkPicture> picture)
     : picture_(std::move(picture)) {}
+
+Picture::Picture(sk_sp<DisplayList> display_list)
+    : display_list_(std::move(display_list)) {}
 
 Picture::~Picture() = default;
 
 Dart_Handle Picture::toImage(uint32_t width,
                              uint32_t height,
                              Dart_Handle raw_image_callback) {
-  if (!picture_.get()) {
-    return tonic::ToDart("Picture is null");
+  if (display_list_) {
+    return RasterizeToImage(
+        [display_list = display_list_.get()](SkCanvas* canvas) {
+          display_list->RenderTo(canvas);
+        },
+        width, height, raw_image_callback);
+  } else {
+    if (!picture_.get()) {
+      return tonic::ToDart("Picture is null");
+    }
+    return RasterizeToImage(picture_.get(), width, height, raw_image_callback);
   }
-
-  return RasterizeToImage(picture_.get(), width, height, raw_image_callback);
 }
 
 void Picture::dispose() {
   picture_.reset();
+  display_list_.reset();
   ClearDartWrapper();
 }
 
 size_t Picture::GetAllocationSize() const {
   if (auto picture = picture_.get()) {
     return picture->approximateBytesUsed() + sizeof(Picture);
+  } else if (auto display_list = display_list_.get()) {
+    return display_list_->bytes() + sizeof(Picture);
   } else {
     return sizeof(Picture);
   }
@@ -69,6 +90,18 @@ Dart_Handle Picture::RasterizeToImage(sk_sp<SkPicture> picture,
                                       uint32_t width,
                                       uint32_t height,
                                       Dart_Handle raw_image_callback) {
+  return RasterizeToImage(
+      [sk_picture = picture.get()](SkCanvas* canvas) {
+        canvas->drawPicture(sk_picture);
+      },
+      width, height, raw_image_callback);
+}
+
+Dart_Handle Picture::RasterizeToImage(
+    std::function<void(SkCanvas*)> draw_callback,
+    uint32_t width,
+    uint32_t height,
+    Dart_Handle raw_image_callback) {
   if (Dart_IsNull(raw_image_callback) || !Dart_IsClosure(raw_image_callback)) {
     return tonic::ToDart("Image callback was invalid");
   }
@@ -121,10 +154,10 @@ Dart_Handle Picture::RasterizeToImage(sk_sp<SkPicture> picture,
 
   // Kick things off on the raster rask runner.
   fml::TaskRunner::RunNowOrPostTask(
-      raster_task_runner,
-      [ui_task_runner, snapshot_delegate, picture, picture_bounds, ui_task] {
-        sk_sp<SkImage> raster_image =
-            snapshot_delegate->MakeRasterSnapshot(picture, picture_bounds);
+      raster_task_runner, [ui_task_runner, snapshot_delegate, draw_callback,
+                           picture_bounds, ui_task] {
+        sk_sp<SkImage> raster_image = snapshot_delegate->MakeRasterSnapshot(
+            draw_callback, picture_bounds);
 
         fml::TaskRunner::RunNowOrPostTask(
             ui_task_runner,

@@ -36,6 +36,14 @@ FILE: ../../../flutter/flow/compositor_context.cc
 FILE: ../../../flutter/flow/compositor_context.h
 FILE: ../../../flutter/flow/diff_context.cc
 FILE: ../../../flutter/flow/diff_context.h
+FILE: ../../../flutter/flow/display_list.cc
+FILE: ../../../flutter/flow/display_list.h
+FILE: ../../../flutter/flow/display_list_canvas.cc
+FILE: ../../../flutter/flow/display_list_canvas.h
+FILE: ../../../flutter/flow/display_list_canvas_unittests.cc
+FILE: ../../../flutter/flow/display_list_unittests.cc
+FILE: ../../../flutter/flow/display_list_utils.cc
+FILE: ../../../flutter/flow/display_list_utils.h
 FILE: ../../../flutter/flow/embedded_view_params_unittests.cc
 FILE: ../../../flutter/flow/embedded_views.cc
 FILE: ../../../flutter/flow/embedded_views.h
@@ -67,6 +75,9 @@ FILE: ../../../flutter/flow/layers/color_filter_layer_unittests.cc
 FILE: ../../../flutter/flow/layers/container_layer.cc
 FILE: ../../../flutter/flow/layers/container_layer.h
 FILE: ../../../flutter/flow/layers/container_layer_unittests.cc
+FILE: ../../../flutter/flow/layers/display_list_layer.cc
+FILE: ../../../flutter/flow/layers/display_list_layer.h
+FILE: ../../../flutter/flow/layers/display_list_layer_unittests.cc
 FILE: ../../../flutter/flow/layers/image_filter_layer.cc
 FILE: ../../../flutter/flow/layers/image_filter_layer.h
 FILE: ../../../flutter/flow/layers/image_filter_layer_unittests.cc

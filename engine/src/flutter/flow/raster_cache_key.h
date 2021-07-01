@@ -52,6 +52,9 @@ class RasterCacheKey {
 // The ID is the uint32_t picture uniqueID
 using PictureRasterCacheKey = RasterCacheKey<uint32_t>;
 
+// The ID is the uint32_t DisplayList uniqueID
+using DisplayListRasterCacheKey = RasterCacheKey<uint32_t>;
+
 class Layer;
 
 // The ID is the uint64_t layer unique_id
