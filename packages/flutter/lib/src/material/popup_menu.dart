@@ -1174,6 +1174,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       return Tooltip(
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
+          radius: widget.splashRadius,
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
           enableFeedback: enableFeedback,
@@ -1190,5 +1191,5 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       enableFeedback: enableFeedback,
       splashRadius: widget.splashRadius,
     );
-  }
+  } 
 }
