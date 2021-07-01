@@ -6,7 +6,9 @@ package io.flutter.view;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -22,6 +24,7 @@ import android.text.style.TtsSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -35,6 +38,7 @@ import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
 import io.flutter.util.Predicate;
+import io.flutter.util.ViewUtils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
@@ -1507,18 +1511,29 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (rootObject != null) {
       final float[] identity = new float[16];
       Matrix.setIdentityM(identity, 0);
-      // in android devices API 23 and above, the system nav bar can be placed on the left side
+      // In Android devices API 23 and above, the system nav bar can be placed on the left side
       // of the screen in landscape mode. We must handle the translation ourselves for the
       // a11y nodes.
       if (Build.VERSION.SDK_INT >= 23) {
-        WindowInsets insets = rootAccessibilityView.getRootWindowInsets();
-        if (insets != null) {
-          if (!lastLeftFrameInset.equals(insets.getSystemWindowInsetLeft())) {
-            rootObject.globalGeometryDirty = true;
-            rootObject.inverseTransformDirty = true;
+        boolean needsToApplyLeftCutoutInset = true;
+        // In Android devices API 28 and above, the `layoutInDisplayCutoutMode` window attribute
+        // can be set to allow overlapping content within the cutout area. Query the attribute
+        // to figure out whether the content overlaps with the cutout and decide whether to
+        // apply cutout inset.
+        if (Build.VERSION.SDK_INT >= 28) {
+          needsToApplyLeftCutoutInset = doesLayoutInDisplayCutoutModeRequireLeftInset();
+        }
+
+        if (needsToApplyLeftCutoutInset) {
+          WindowInsets insets = rootAccessibilityView.getRootWindowInsets();
+          if (insets != null) {
+            if (!lastLeftFrameInset.equals(insets.getSystemWindowInsetLeft())) {
+              rootObject.globalGeometryDirty = true;
+              rootObject.inverseTransformDirty = true;
+            }
+            lastLeftFrameInset = insets.getSystemWindowInsetLeft();
+            Matrix.translateM(identity, 0, lastLeftFrameInset, 0, 0);
           }
-          lastLeftFrameInset = insets.getSystemWindowInsetLeft();
-          Matrix.translateM(identity, 0, lastLeftFrameInset, 0, 0);
         }
       }
       rootObject.updateRecursively(identity, visitedObjects, false);
@@ -1820,6 +1835,29 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     event.setPackageName(rootAccessibilityView.getContext().getPackageName());
     event.setSource(rootAccessibilityView, virtualViewId);
     return event;
+  }
+
+  /**
+   * Reads the {@code layoutInDisplayCutoutMode} value from the window attribute and returns whether
+   * a left cutout inset is required.
+   *
+   * <p>The {@code layoutInDisplayCutoutMode} is added after API level 28.
+   */
+  @TargetApi(28)
+  @RequiresApi(28)
+  private boolean doesLayoutInDisplayCutoutModeRequireLeftInset() {
+    Context context = rootAccessibilityView.getContext();
+    Activity activity = ViewUtils.getActivity(context);
+    if (activity == null || activity.getWindow() == null) {
+      // The activity is not visible, it does not matter whether to apply left inset
+      // or not.
+      return false;
+    }
+    int layoutInDisplayCutoutMode = activity.getWindow().getAttributes().layoutInDisplayCutoutMode;
+    return layoutInDisplayCutoutMode
+            == WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+        || layoutInDisplayCutoutMode
+            == WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
   }
 
   /**

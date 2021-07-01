@@ -241,6 +241,7 @@ android_java_sources = [
   "io/flutter/util/PathUtils.java",
   "io/flutter/util/Preconditions.java",
   "io/flutter/util/Predicate.java",
+  "io/flutter/util/ViewUtils.java",
   "io/flutter/view/AccessibilityBridge.java",
   "io/flutter/view/AccessibilityViewEmbedder.java",
   "io/flutter/view/FlutterCallbackInformation.java",
@@ -504,6 +505,7 @@ action("robolectric_tests") {
     "test/io/flutter/plugins/GeneratedPluginRegistrant.java",
     "test/io/flutter/util/FakeKeyEvent.java",
     "test/io/flutter/util/PreconditionsTest.java",
+    "test/io/flutter/util/ViewUtilsTest.java",
     "test/io/flutter/view/AccessibilityBridgeTest.java",
   ]
 
