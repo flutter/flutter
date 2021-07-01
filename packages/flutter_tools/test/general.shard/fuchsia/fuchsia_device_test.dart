@@ -343,7 +343,7 @@ void main() {
       ));
       final FuchsiaDevice device = FuchsiaDevice('id');
 
-      await expectLater(await device.servicePorts(), throwsToolExit(message: 'No Dart Observatories found. Are you running a debug build?'));
+      await expectLater(device.servicePorts, throwsToolExit(message: 'No Dart Observatories found. Are you running a debug build?'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(
@@ -838,7 +838,7 @@ void main() {
         ]);
         final FuchsiaDevice device = FuchsiaDevice('id');
 
-        await expectLater(device.servicePorts(), throwsToolExit);
+        await expectLater(device.servicePorts, throwsToolExit());
       }, overrides: <Type, Generator>{
         ProcessManager: () => processManager,
         FuchsiaArtifacts: () => FuchsiaArtifacts(
@@ -864,7 +864,7 @@ void main() {
         ]);
         final FuchsiaDevice device = FuchsiaDevice('id');
 
-        await expectLater(device.servicePorts(), throwsToolExit);
+        await expectLater(device.servicePorts, throwsToolExit());
       }, overrides: <Type, Generator>{
         ProcessManager: () => processManager,
         FuchsiaArtifacts: () => FuchsiaArtifacts(
@@ -898,7 +898,7 @@ void main() {
         ]);
         final FuchsiaDevice device = FuchsiaDevice('id');
 
-        await expectLater(device.servicePorts(), throwsToolExit);
+        await expectLater(device.servicePorts, throwsToolExit());
       }, overrides: <Type, Generator>{
         ProcessManager: () => processManager,
         FuchsiaArtifacts: () => FuchsiaArtifacts(
@@ -938,7 +938,7 @@ void main() {
         ]);
         final FuchsiaDevice device = FuchsiaDevice('id');
 
-        await expectLater(device.servicePorts(), throwsToolExit);
+        await expectLater(device.servicePorts, throwsToolExit());
       }, overrides: <Type, Generator>{
         ProcessManager: () => processManager,
         FuchsiaArtifacts: () => FuchsiaArtifacts(

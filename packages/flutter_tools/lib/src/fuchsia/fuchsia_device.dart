@@ -894,6 +894,7 @@ class FuchsiaIsolateDiscoveryProtocol {
         return;
       }
     }
+    globals.printTrace('No observatory with correct app component found yet.');
     if (_pollOnce) {
       _foundUri.completeError(Exception('Max iterations exceeded'));
       _status.stop();
