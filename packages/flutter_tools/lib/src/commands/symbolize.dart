@@ -87,7 +87,7 @@ class SymbolizeCommand extends FlutterCommand {
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
-       output = outputFile.openWrite();
+      output = outputFile.openWrite();
     } else {
       final StreamController<List<int>> outputController = StreamController<List<int>>();
       outputController
