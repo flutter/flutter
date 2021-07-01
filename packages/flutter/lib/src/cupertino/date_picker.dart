@@ -1986,7 +1986,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         // label on top of it.
         List<Widget> columns;
 
-        if (widget.mode == CupertinoTimerPickerMode.hms){
+        if (widget.mode == CupertinoTimerPickerMode.hms) {
           // Pad the widget to make it as wide as `_kPickerWidth`.
           pickerColumnWidth =
               _kTimerPickerColumnIntrinsicWidth + (_kTimerPickerHalfColumnPadding * 2);

@@ -1425,7 +1425,7 @@ class FocusTraversalOrder extends InheritedWidget {
   static FocusOrder of(BuildContext context) {
     assert(context != null);
     final FocusTraversalOrder? marker = context.getElementForInheritedWidgetOfExactType<FocusTraversalOrder>()?.widget as FocusTraversalOrder?;
-    assert((){
+    assert(() {
       if (marker == null) {
         throw FlutterError(
           'FocusTraversalOrder.of() was called with a context that '
