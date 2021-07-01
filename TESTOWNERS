@@ -116,7 +116,7 @@
 /dev/devicelab/bin/tasks/complex_layout_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/external_ui_integration_test_ios.dart @zanderso @flutter/engine
-/dev/devicelab/bin/tasks/flavors_test_ios.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/flavors_test_ios.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_ios__compile.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_ios__start_up.dart @zanderso @flutter/engine
@@ -129,8 +129,8 @@
 /dev/devicelab/bin/tasks/integration_ui_ios_keyboard_resize.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_screenshot.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_textfield.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/ios_content_validation_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @jmagman @flutter/tool
+/dev/devicelab/bin/tasks/ios_content_validation_test.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/ios_defines_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/ios_platform_view_tests.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/large_image_changer_perf_ios.dart @zanderso @flutter/engine
@@ -166,13 +166,13 @@
 /dev/devicelab/bin/tasks/technical_debt__cost.dart @HansMuller @flutter/framework
 /dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @ferhatb @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_html.dart @ferhatb @flutter/web
-/dev/devicelab/bin/tasks/build_ios_framework_module_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/build_ios_framework_module_test.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/dart_plugin_registry_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_non_android_plugin_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_bundle_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_fat_apk_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @stuartmorgan @flutter/plugin
-/dev/devicelab/bin/tasks/module_test_ios.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/module_test_ios.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/plugin_lint_mac.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_non_android_plugin_test.dart @stuartmorgan @flutter/plugin
