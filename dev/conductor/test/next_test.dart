@@ -573,7 +573,6 @@ void main() {
           contains('About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
         );
         expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
-        print(stdio.stdout);
       });
     });
 

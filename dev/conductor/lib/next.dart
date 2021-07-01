@@ -140,8 +140,14 @@ void runNext({
           }
         }
       }
+      // TODO push branch to mirror
       break;
     case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
+      // TODO read final engine hash, either from remote or from user and store
+      // in state
+      stdio.printStatus(<String>[
+        'You must have validated pre-submit CI for your engine PR, ',
+      ].join('\n'));
       if (autoAccept == false) {
         // TODO(fujino): actually test if binaries have been codesigned on macOS
         final bool response = prompt(
@@ -156,6 +162,7 @@ void runNext({
       }
       break;
     case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
+      // TODO roll engine hash, read from state
       final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
       for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
         if (!finishedStates.contains(cherrypick.state)) {
@@ -199,6 +206,7 @@ void runNext({
           }
         }
       }
+      // TODO push branch to mirror
       break;
     case pb.ReleasePhase.PUBLISH_VERSION:
       stdio.printStatus('Please ensure that you have merged your framework PR and that');
