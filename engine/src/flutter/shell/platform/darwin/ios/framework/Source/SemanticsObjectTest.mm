@@ -31,6 +31,7 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
     window_ = [[UIWindow alloc] initWithFrame:kScreenSize];
     [window_ addSubview:view_];
   }
+  bool isVoiceOverRunning() const override { return isVoiceOverRunningValue; }
   UIView* view() const override { return view_; }
   UIView<UITextInput>* textInputView() override { return nil; }
   void DispatchSemanticsAction(int32_t id, SemanticsAction action) override {
@@ -49,6 +50,7 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
     return nil;
   }
   std::vector<SemanticsActionObservation> observations;
+  bool isVoiceOverRunningValue;
 
  private:
   UIView* view_;
@@ -342,6 +344,30 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   [scrollable_object setSemanticsNode:&node];
   [scrollable_object accessibilityBridgeDidFinishUpdate];
   XCTAssertEqual([scrollable hitTest:CGPointMake(10, 10) withEvent:nil], nil);
+}
+
+- (void)testFlutterScrollableSemanticsObjectIsHiddenWhenVoiceOverIsRunning {
+  flutter::MockAccessibilityBridge* mock = new flutter::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = false;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  node.actions = flutter::kHorizontalScrollSemanticsActions;
+  node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  node.scrollExtentMax = 100.0;
+  node.scrollPosition = 0.0;
+
+  FlutterSemanticsObject* delegate = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithSemanticsObject:delegate];
+  SemanticsObject* scrollable_object = static_cast<SemanticsObject*>(scrollable);
+  [scrollable_object setSemanticsNode:&node];
+  [scrollable_object accessibilityBridgeDidFinishUpdate];
+  XCTAssertTrue(scrollable_object.isAccessibilityElement);
+  mock->isVoiceOverRunningValue = true;
+  XCTAssertFalse(scrollable_object.isAccessibilityElement);
 }
 
 - (void)testSemanticsObjectBuildsAttributedString {

@@ -224,6 +224,32 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   OCMVerifyAll(mockFlutterView);
 }
 
+- (void)testIsVoiceOverRunning {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  OCMStub([mockFlutterViewController isVoiceOverRunning]).andReturn(YES);
+
+  __block auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil);
+
+  XCTAssertTrue(bridge->isVoiceOverRunning());
+}
+
 - (void)testSemanticsDeallocated {
   @autoreleasepool {
     flutter::MockDelegate mock_delegate;

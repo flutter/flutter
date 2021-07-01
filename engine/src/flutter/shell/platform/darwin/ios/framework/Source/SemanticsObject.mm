@@ -193,12 +193,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   [self setFrame:[_semanticsObject accessibilityFrame]];
   [self setContentSize:[self contentSizeInternal]];
   [self setContentOffset:[self contentOffsetInternal] animated:NO];
-  if (self.contentSize.width > self.frame.size.width ||
-      self.contentSize.height > self.frame.size.height) {
-    self.isAccessibilityElement = YES;
-  } else {
-    self.isAccessibilityElement = NO;
-  }
 }
 
 - (void)setChildren:(NSArray<SemanticsObject*>*)children {
@@ -217,6 +211,18 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
                          bridge:[_semanticsObject bridge]]);
   }
   return _container.get();
+}
+
+- (BOOL)isAccessibilityElement {
+  if (![_semanticsObject isAccessibilityBridgeAlive]) {
+    return NO;
+  }
+  if (self.contentSize.width > self.frame.size.width ||
+      self.contentSize.height > self.frame.size.height) {
+    return !_semanticsObject.bridge->isVoiceOverRunning();
+  } else {
+    return NO;
+  }
 }
 
 // private methods

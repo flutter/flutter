@@ -18,9 +18,9 @@
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge_ios.h"
 #include "third_party/skia/include/core/SkRect.h"
@@ -67,6 +67,8 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   UIView<UITextInput>* textInputView() override;
 
   UIView* view() const override { return view_controller_.view; }
+
+  bool isVoiceOverRunning() const override { return view_controller_.isVoiceOverRunning; }
 
   fml::WeakPtr<AccessibilityBridge> GetWeakPtr();
 
