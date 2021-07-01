@@ -1,5 +1,5 @@
 {
-  "program": { 
+  "program": {
     "binary": "bin/app"
   },
 "sandbox": {

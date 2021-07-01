@@ -14,13 +14,17 @@ import sys
 def main():
   parser = argparse.ArgumentParser()
 
-  parser.add_argument('--cmc-bin', dest='cmc_bin', action='store', required=True)
+  parser.add_argument(
+      '--cmc-bin', dest='cmc_bin', action='store', required=True)
   parser.add_argument(
       '--output', dest='output', action='store', required=True)
   parser.add_argument(
       '--manifest-file', dest='manifest_file', action='store', required=True)
   parser.add_argument(
-      '--includepath', dest='includepath', action='store', required=True
+      '--includepath',
+      dest='includepath',
+      action='append',
+      required=True,
   )
 
   args = parser.parse_args()
@@ -28,16 +32,13 @@ def main():
   assert os.path.exists(args.cmc_bin)
   assert os.path.exists(args.manifest_file)
 
-  print(args.includepath)
   subprocess.check_output([
       args.cmc_bin,
       'compile',
       '--output',
       args.output,
       args.manifest_file,
-      '--includepath',
-      args.includepath,
-  ])
+  ] + (args.includepath and [ '--includepath' ] + args.includepath))
 
   return 0
 
