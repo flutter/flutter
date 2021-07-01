@@ -96,6 +96,17 @@ void main() {
     ).devices, hasLength(1));
   });
 
+  testWithoutContext('LinuxDevice has well known id "linux"', () async {
+    expect(LinuxDevices(
+      fileSystem: MemoryFileSystem.test(),
+      platform: linux,
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    ).wellKnownIds, <String>['linux']);
+  });
+
   testWithoutContext('LinuxDevice: discoverDevices', () async {
     // Timeout ignored.
     final List<Device> devices = await LinuxDevices(

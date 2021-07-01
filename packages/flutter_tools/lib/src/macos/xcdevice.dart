@@ -301,12 +301,21 @@ class XCDevice {
           continue;
         }
 
+        String sdkVersion = _sdkVersion(device);
+
+        if (sdkVersion != null) {
+          final String buildVersion = _buildVersion(device);
+          if (buildVersion != null) {
+            sdkVersion = '$sdkVersion $buildVersion';
+          }
+        }
+
         devices.add(IOSDevice(
           device['identifier'] as String,
           name: device['name'] as String,
           cpuArchitecture: _cpuArchitecture(device),
           interfaceType: interface,
-          sdkVersion: _sdkVersion(device),
+          sdkVersion: sdkVersion,
           iProxy: _iProxy,
           fileSystem: globals.fs,
           logger: _logger,
@@ -317,6 +326,7 @@ class XCDevice {
       }
     }
     return devices;
+
   }
 
   /// Despite the name, com.apple.platform.iphoneos includes iPhone, iPads, and all iOS devices.
@@ -363,7 +373,20 @@ class XCDevice {
       // "13.3 (17C54)"
       final RegExp operatingSystemRegex = RegExp(r'(.*) \(.*\)$');
       final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
-      return operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
+      if(operatingSystemRegex.hasMatch(operatingSystemVersion.trim())) {
+        return operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
+      }
+      return operatingSystemVersion;
+    }
+    return null;
+  }
+
+  static String _buildVersion(Map<String, dynamic> deviceProperties) {
+    if (deviceProperties.containsKey('operatingSystemVersion')) {
+      // Parse out the build version, for example 17C54 from "13.3 (17C54)".
+      final RegExp buildVersionRegex = RegExp(r'\(.*\)$');
+      final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
+      return buildVersionRegex.firstMatch(operatingSystemVersion)?.group(0)?.replaceAll(RegExp('[()]'), '');
     }
     return null;
   }

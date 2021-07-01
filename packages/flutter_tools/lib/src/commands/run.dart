@@ -593,7 +593,7 @@ class RunCommand extends RunCommandBase {
       }
       if (await device.isLocalEmulator && await device.supportsHardwareRendering) {
         if (boolArg('enable-software-rendering')) {
-           globals.printStatus(
+          globals.printStatus(
             'Using software rendering with device ${device.name}. You may get better performance '
             'with hardware mode by configuring hardware rendering for your device.'
            );

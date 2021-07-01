@@ -113,18 +113,18 @@ Future<void> main(List<String> args) async {
         persistentToolState: globals.persistentToolState,
       ),
       Logger: () {
-       final LoggerFactory loggerFactory = LoggerFactory(
-         outputPreferences: globals.outputPreferences,
-         terminal: globals.terminal,
-         stdio: globals.stdio,
-       );
-       return loggerFactory.createLogger(
-         daemon: daemon,
-         machine: runMachine,
-         verbose: verbose && !muteCommandLogging,
-         prefixedErrors: prefixedErrors,
-         windows: globals.platform.isWindows,
-       );
+        final LoggerFactory loggerFactory = LoggerFactory(
+          outputPreferences: globals.outputPreferences,
+          terminal: globals.terminal,
+          stdio: globals.stdio,
+        );
+        return loggerFactory.createLogger(
+          daemon: daemon,
+          machine: runMachine,
+          verbose: verbose && !muteCommandLogging,
+          prefixedErrors: prefixedErrors,
+          windows: globals.platform.isWindows,
+        );
       },
     },
   );

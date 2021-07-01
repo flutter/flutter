@@ -163,9 +163,10 @@ void main() {
     );
     layout(root);
     dynamic error;
+    final PaintingContext context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     try {
       s.debugPaint(
-        PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        context,
         const Offset(0.0, 500),
       );
     } catch (e) {
@@ -195,9 +196,10 @@ void main() {
     );
     layout(root);
     dynamic error;
+    final PaintingContext context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     try {
       s.debugPaint(
-        PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        context,
         const Offset(0.0, 500),
       );
     } catch (e) {

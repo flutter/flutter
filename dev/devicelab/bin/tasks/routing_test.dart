@@ -11,7 +11,6 @@ import 'dart:io';
 import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
@@ -31,8 +30,6 @@ void main() {
           '--verbose',
           '-d',
           device.deviceId,
-          '--screenshot',
-          hostAgent.dumpDirectory.path,
           '--route',
           '/smuggle-it',
           'lib/route.dart',

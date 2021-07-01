@@ -89,7 +89,8 @@ void main() {
         testWithoutContext('flutter build ios builds a valid app', () {
           // Should only contain Flutter.framework and App.framework.
           expect(frameworkDirectory.listSync().length, 2);
-          expect(outputAppFramework.childFile('App'), exists);
+          expect(outputAppFrameworkBinary, exists);
+          expect(outputAppFramework.childFile('Info.plist'), exists);
 
           final File vmSnapshot = fileSystem.file(fileSystem.path.join(
             outputAppFramework.path,
