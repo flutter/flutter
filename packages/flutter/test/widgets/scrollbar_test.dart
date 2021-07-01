@@ -1496,7 +1496,7 @@ void main() {
             isAlwaysShown: true,
             child: SingleChildScrollView(
               controller: scrollController,
-              child: const SizedBox(width: 1000.0, height: 1000.0),
+              child: const SizedBox(height: 1000.0),
             ),
           ),
         )));
@@ -1534,7 +1534,7 @@ void main() {
             isAlwaysShown: true,
             child: SingleChildScrollView(
               controller: scrollController,
-              child: const SizedBox(width: 1000.0, height: 1000.0),
+              child: const SizedBox(height: 1000.0),
             ),
           ),
         )));
@@ -1545,6 +1545,62 @@ void main() {
       paints
         ..circle(x: 782.0, y: 180.0, radius: 17.0)
         ..circle(x: 782.0, y: 180.0, radius: 17.0, strokeWidth: 2.0)
+    );
+  });
+
+
+  testWidgets('shape property of RawScrollbar can draw a RoundedRectangleBorder', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thickness: 20,
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8))),
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 600.0))
+        ..rrect(rrect: RRect.fromLTRBAndCorners(780.0, 0.0, 800.0, 360.0, topLeft: const Radius.circular(8.0)))
+    );
+  });
+
+
+  testWidgets('not passing any shape or radius to RawScrollbar will draw the usual rectangular thumb', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0))
     );
   });
 
