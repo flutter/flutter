@@ -59,6 +59,8 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   static constexpr auto kInput{{camel_case(stage_input.name)}} = ShaderStageIOSlot { // {{stage_input.name}}
     "{{stage_input.name}}",             // name
     {{stage_input.location}}u,          // attribute location
+    {{stage_input.descriptor_set}}u,    // attribute set
+    {{stage_input.binding}}u,           // attribute binding
     {{stage_input.type.type_name}},     // type
     {{stage_input.type.bit_width}}u,    // bit width of type
     {{stage_input.type.vec_size}}u,     // vec size
@@ -82,6 +84,8 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   static constexpr auto kInput{{camel_case(sampled_image.name)}} = ShaderStageIOSlot { // {{sampled_image.name}}
     "{{sampled_image.name}}",             // name
     {{sampled_image.location}}u,          // attribute location
+    {{sampled_image.descriptor_set}}u,    // attribute set
+    {{sampled_image.binding}}u,           // attribute binding
     {{sampled_image.type.type_name}},     // type
     {{sampled_image.type.bit_width}}u,    // bit width of type
     {{sampled_image.type.vec_size}}u,     // vec size
@@ -97,6 +101,8 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   static constexpr auto kOutput{{camel_case(stage_output.name)}} = ShaderStageIOSlot { // {{stage_output.name}}
     "{{stage_output.name}}",             // name
     {{stage_output.location}}u,          // attribute location
+    {{stage_output.descriptor_set}}u,    // attribute set
+    {{stage_output.binding}}u,           // attribute binding
     {{stage_output.type.type_name}},     // type
     {{stage_output.type.bit_width}}u,    // bit width of type
     {{stage_output.type.vec_size}}u,     // vec size

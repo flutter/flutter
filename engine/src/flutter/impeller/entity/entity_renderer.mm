@@ -33,13 +33,13 @@ EntityRenderer::EntityRenderer(std::string shaders_directory)
   VertexBufferBuilder<shader::BoxVertexInfo::PerVertexData> vertex_builder;
   vertex_builder.SetLabel("Box");
   vertex_builder.AddVertices({
-      {{100, 100, 0.0}, {Color::Red()}},    // 1
-      {{800, 100, 0.0}, {Color::Green()}},  // 2
-      {{800, 800, 0.0}, {Color::Blue()}},   // 3
+      {{100, 100, 0.0}, {Color::Red()}, {0.0, 0.0}},    // 1
+      {{800, 100, 0.0}, {Color::Green()}, {1.0, 0.0}},  // 2
+      {{800, 800, 0.0}, {Color::Blue()}, {1.0, 1.0}},   // 3
 
-      {{100, 100, 0.0}, {Color::Cyan()}},    // 1
-      {{800, 800, 0.0}, {Color::White()}},   // 3
-      {{100, 800, 0.0}, {Color::Purple()}},  // 4
+      {{100, 100, 0.0}, {Color::Cyan()}, {0.0, 0.0}},    // 1
+      {{800, 800, 0.0}, {Color::White()}, {1.0, 1.0}},   // 3
+      {{100, 800, 0.0}, {Color::Purple()}, {0.0, 1.0}},  // 4
   });
 
   vertex_buffer_ =
@@ -76,13 +76,13 @@ bool EntityRenderer::OnRender(const Surface& surface, RenderPass& pass) {
       pass.GetTransientsBuffer().EmplaceUniform(uniforms);
 
   cmd.fragment_bindings
-      .samplers[shader::BoxFragmentInfo::kInputContents1.location] =
+      .samplers[shader::BoxFragmentInfo::kInputContents1.binding] =
       GetContext()->GetSamplerLibrary()->GetSampler({});
   cmd.fragment_bindings
-      .samplers[shader::BoxFragmentInfo::kInputContents2.location] =
+      .samplers[shader::BoxFragmentInfo::kInputContents2.binding] =
       GetContext()->GetSamplerLibrary()->GetSampler({});
   cmd.fragment_bindings
-      .samplers[shader::BoxFragmentInfo::kInputContents3.location] =
+      .samplers[shader::BoxFragmentInfo::kInputContents3.binding] =
       GetContext()->GetSamplerLibrary()->GetSampler({});
 
   cmd.index_buffer = vertex_buffer_.index_buffer;
