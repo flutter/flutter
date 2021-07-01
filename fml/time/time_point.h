@@ -25,6 +25,8 @@ class TimePoint {
 
   static TimePoint Now();
 
+  static TimePoint CurrentWallTime();
+
   static constexpr TimePoint Min() {
     return TimePoint(std::numeric_limits<int64_t>::min());
   }

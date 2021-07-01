@@ -523,6 +523,12 @@ static void CheckFrameTimings(const std::vector<FrameTiming>& timings,
 
     fml::TimePoint last_phase_time;
     for (auto phase : FrameTiming::kPhases) {
+      // raster finish wall time doesn't use the same clock base
+      // as rest of the frame timings.
+      if (phase == FrameTiming::kRasterFinishWallTime) {
+        continue;
+      }
+
       ASSERT_TRUE(timings[i].Get(phase) >= start);
       ASSERT_TRUE(timings[i].Get(phase) <= finish);
 
