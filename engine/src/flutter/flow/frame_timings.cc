@@ -9,6 +9,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/time/time_point.h"
 
 namespace flutter {
 
@@ -66,6 +67,12 @@ fml::TimePoint FrameTimingsRecorder::GetRasterEndTime() const {
   return raster_end_;
 }
 
+fml::TimePoint FrameTimingsRecorder::GetRasterEndWallTime() const {
+  std::scoped_lock state_lock(state_mutex_);
+  FML_DCHECK(state_ >= State::kRasterEnd);
+  return raster_end_wall_time_;
+}
+
 fml::TimeDelta FrameTimingsRecorder::GetBuildDuration() const {
   std::scoped_lock state_lock(state_mutex_);
   FML_DCHECK(state_ >= State::kBuildEnd);
@@ -102,16 +109,18 @@ void FrameTimingsRecorder::RecordRasterStart(fml::TimePoint raster_start) {
   raster_start_ = raster_start;
 }
 
-FrameTiming FrameTimingsRecorder::RecordRasterEnd(fml::TimePoint raster_end) {
+FrameTiming FrameTimingsRecorder::RecordRasterEnd() {
   std::scoped_lock state_lock(state_mutex_);
   FML_DCHECK(state_ == State::kRasterStart);
   state_ = State::kRasterEnd;
-  raster_end_ = raster_end;
+  raster_end_ = fml::TimePoint::Now();
+  raster_end_wall_time_ = fml::TimePoint::CurrentWallTime();
   timing_.Set(FrameTiming::kVsyncStart, vsync_start_);
   timing_.Set(FrameTiming::kBuildStart, build_start_);
   timing_.Set(FrameTiming::kBuildFinish, build_end_);
   timing_.Set(FrameTiming::kRasterStart, raster_start_);
   timing_.Set(FrameTiming::kRasterFinish, raster_end_);
+  timing_.Set(FrameTiming::kRasterFinishWallTime, raster_end_wall_time_);
   timing_.SetFrameNumber(GetFrameNumber());
   return timing_;
 }

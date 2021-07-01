@@ -518,7 +518,7 @@ RasterStatus Rasterizer::DrawToSurface(
       frame->Submit();
     }
 
-    frame_timings_recorder.RecordRasterEnd(fml::TimePoint::Now());
+    frame_timings_recorder.RecordRasterEnd();
     FireNextFrameCallbackIfPresent();
 
     if (surface_->GetContext()) {

@@ -29,11 +29,13 @@ class FrameTiming {
     kBuildFinish,
     kRasterStart,
     kRasterFinish,
+    kRasterFinishWallTime,
     kCount
   };
 
   static constexpr Phase kPhases[kCount] = {
-      kVsyncStart, kBuildStart, kBuildFinish, kRasterStart, kRasterFinish};
+      kVsyncStart,  kBuildStart,   kBuildFinish,
+      kRasterStart, kRasterFinish, kRasterFinishWallTime};
 
   fml::TimePoint Get(Phase phase) const { return data_[phase]; }
   fml::TimePoint Set(Phase phase, fml::TimePoint value) {

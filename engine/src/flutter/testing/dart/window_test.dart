@@ -27,6 +27,7 @@ void main() {
       buildFinish: 8000,
       rasterStart: 9000,
       rasterFinish: 19500,
+      rasterFinishWallTime: 19501,
       frameNumber: 23,
     );
     expect(timing.toString(), 'FrameTiming(buildDuration: 7.0ms, rasterDuration: 10.5ms, vsyncOverhead: 0.5ms, totalSpan: 19.0ms, frameNumber: 23)');
