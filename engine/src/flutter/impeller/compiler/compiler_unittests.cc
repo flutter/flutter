@@ -5,6 +5,7 @@
 #include "flutter/impeller/compiler/compiler.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
+#include "third_party/inja/include/inja/inja.hpp"
 
 namespace impeller {
 namespace compiler {
@@ -13,27 +14,35 @@ namespace testing {
 class CompilerTest : public ::testing::Test {
  public:
   CompilerTest()
-      : directory_(fml::OpenDirectory("/Users/chinmaygarde/Desktop/shaders",
-                                      false,
-                                      fml::FilePermission::kRead)) {
-    FML_CHECK(directory_.is_valid());
+      : intermediates_directory_(
+            fml::OpenDirectory(flutter::testing::GetFixturesPath(),
+                               false,
+                               fml::FilePermission::kRead)) {
+    FML_CHECK(intermediates_directory_.is_valid());
   }
 
-  ~CompilerTest() {}
+  ~CompilerTest() = default;
 
-  void WriteCompilerIntermediates(const Compiler& compiler,
-                                  const std::string& base_name) {
-    ASSERT_TRUE(compiler.IsValid());
-    fml::WriteAtomically(directory_,
-                         std::string{base_name + std::string{".spirv"}}.c_str(),
-                         *compiler.GetSPIRVAssembly());
-    fml::WriteAtomically(directory_,
-                         std::string{base_name + std::string{".metal"}}.c_str(),
-                         *compiler.GetMSLShaderSource());
+  bool CanCompileFixture(const char* fixture_name) const {
+    auto fixture = flutter::testing::OpenFixtureAsMapping(fixture_name);
+    if (!fixture->GetMapping()) {
+      FML_LOG(ERROR) << "Could not find shader in fixtures: " << fixture_name;
+      return false;
+    }
+    Compiler::SourceOptions compiler_options(fixture_name);
+    compiler_options.working_directory = std::make_shared<fml::UniqueFD>(
+        flutter::testing::OpenFixturesDirectory());
+    Reflector::Options reflector_options;
+    Compiler compiler(*fixture.get(), compiler_options, reflector_options);
+    if (!compiler.IsValid()) {
+      FML_LOG(ERROR) << "Compilation failed: " << compiler.GetErrorMessages();
+      return false;
+    }
+    return true;
   }
 
  private:
-  fml::UniqueFD directory_;
+  fml::UniqueFD intermediates_directory_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CompilerTest);
 };
@@ -50,19 +59,7 @@ TEST_F(CompilerTest, ShaderKindMatchingIsSuccessful) {
 }
 
 TEST_F(CompilerTest, CanCompileSample) {
-  constexpr const char* kShaderFixtureName = "sample.vert";
-  auto fixture = flutter::testing::OpenFixtureAsMapping(kShaderFixtureName);
-  ASSERT_NE(fixture->GetMapping(), nullptr);
-  Compiler::SourceOptions compiler_options(kShaderFixtureName);
-  compiler_options.working_directory = std::make_shared<fml::UniqueFD>(
-      flutter::testing::OpenFixturesDirectory());
-  Reflector::Options reflector_options;
-  Compiler compiler(*fixture.get(), compiler_options, reflector_options);
-  if (!compiler.IsValid()) {
-    FML_LOG(ERROR) << compiler.GetErrorMessages();
-  }
-  ASSERT_TRUE(compiler.IsValid());
-  WriteCompilerIntermediates(compiler, kShaderFixtureName);
+  ASSERT_TRUE(CanCompileFixture("sample.vert"));
 }
 
 }  // namespace testing

@@ -2,9 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/testing/testing.gni")
+import("//flutter/impeller/tools/impeller.gni")
 
-source_set("compiler_lib") {
+impeller_component("compiler_lib") {
   sources = [
     "code_gen_template.h",
     "compiler.cc",
@@ -40,15 +40,7 @@ group("compiler") {
   deps = [ ":impellerc" ]
 }
 
-test_fixtures("compiler_test_fixtures") {
-  fixtures = [
-    "fixtures/sample.frag",
-    "fixtures/sample.vert",
-    "fixtures/types.h",
-  ]
-}
-
-source_set("compiler_unittests") {
+impeller_component("compiler_unittests") {
   testonly = true
 
   output_name = "impellerc_unittests"
@@ -57,7 +49,6 @@ source_set("compiler_unittests") {
 
   deps = [
     ":compiler_lib",
-    ":compiler_test_fixtures",
     "//flutter/testing:testing_lib",
   ]
 }
