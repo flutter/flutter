@@ -752,7 +752,7 @@ void testMain() {
         'thai',
         'คือ เนื้อหาจำลองแบบเรียบๆ ที่ใช้กันในธุรกิจงานพิมพ์หรืองานเรียงพิมพ์ มันได้กลายมาเป็นเนื้อหาจำลองมาตรฐานของธุรกิจดังกล่าวมาตั้งแต่ศตวรรษที่',
       );
-    });
+    }, skip: true);  // https://github.com/flutter/flutter/issues/85700
 
     test('sample Georgian text', () async {
       await testSampleText(
@@ -791,7 +791,7 @@ void testMain() {
             'คือ เนื้อหาจำลองแบบเรียบๆ ที่ใช้กันในธุรกิจงานพิมพ์หรืองานเรียงพิมพ์ '
             'საბეჭდი და ტიპოგრაფიული ინდუსტრიის უშინაარსო ტექსტია ',
       );
-    });
+    }, skip: true);  // https://github.com/flutter/flutter/issues/85700
 
     test('emoji text with skin tone', () async {
       await testSampleText('emoji_with_skin_tone', '👋🏿 👋🏾 👋🏽 👋🏼 👋🏻');
