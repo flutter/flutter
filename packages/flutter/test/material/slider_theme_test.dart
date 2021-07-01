@@ -1218,6 +1218,32 @@ void main() {
 
     await gesture.up();
   });
+
+  testWidgets('activeTrackRadius is taken into account when painting the border of the active track', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        trackShape: const RoundedRectSliderTrackShape()
+      )
+    ));
+    await tester.pumpAndSettle();
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          24.0, 297.0, 24.0, 303.0,
+          topLeft: const Radius.circular(3.0),
+          bottomLeft: const Radius.circular(3.0),
+        ))
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          24.0, 298.0, 776.0, 302.0,
+          topRight: const Radius.circular(2.0),
+          bottomRight: const Radius.circular(2.0),
+        )),
+    );
+  });
+
 }
 
 Widget _buildApp(
