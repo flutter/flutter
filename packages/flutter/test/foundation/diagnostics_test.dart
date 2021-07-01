@@ -2280,4 +2280,22 @@ void main() {
     expect(json['name'], 'string2');
     expect(json['value'], 'world');
   });
+
+  test('IntProperty arguments passed to super', () {
+    final DiagnosticsProperty<num> property = IntProperty(
+      'Example',
+      0,
+      ifNull: 'is null',
+      showName: false,
+      defaultValue: 1,
+      style: DiagnosticsTreeStyle.none,
+      level: DiagnosticLevel.off,
+    );
+    expect(property.value, equals(0));
+    expect(property.ifNull, equals('is null'));
+    expect(property.showName, equals(false));
+    expect(property.defaultValue, equals(1));
+    expect(property.style, equals(DiagnosticsTreeStyle.none));
+    expect(property.level, equals(DiagnosticLevel.off));
+  });
 }
