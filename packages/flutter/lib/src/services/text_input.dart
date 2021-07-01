@@ -921,7 +921,8 @@ abstract class TextInputClient {
   /// in the text.
   ///
   /// For example, this is called when responding to UIKit requesting
-  /// a text placeholder be added at the current selection.
+  /// a text placeholder be added at the current selection, such as when
+  /// requesting additional writing space with iPadOS14 Scribble.
   void insertTextPlaceholder(Size size);
 
   /// Requests that the client remove the text placeholder.
@@ -947,7 +948,7 @@ abstract class ScribbleClient {
   Rect get bounds;
 }
 
-/// Represents a selection rect and it's position in the text.
+/// Represents a selection rect for a character and it's position in the text.
 ///
 /// This is used to report the current text selection rect and position data
 /// to the engine for Scribble support on iPadOS 14.
@@ -1417,9 +1418,9 @@ class TextInput {
       }
       return;
     } else if (method == 'TextInputClient.requestElementsInRect') {
-      final List<dynamic> args = methodCall.arguments as List<dynamic>;
+      final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
       return _scribbleClients.keys.where((String elementIdentifier) {
-        final Rect rect = Rect.fromLTWH(args[0].toDouble() as double, args[1].toDouble() as double, args[2].toDouble() as double, args[3].toDouble() as double);
+        final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
         return _scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false;
       }).where((String elementIdentifier) {
         final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;

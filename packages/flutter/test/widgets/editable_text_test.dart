@@ -1545,7 +1545,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(selectionCause, SelectionChangedCause.scribble);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Requests focus and changes the selection when onScribbleFocus is called', (WidgetTester tester) async {
     final TextEditingController controller =
@@ -1688,7 +1688,7 @@ void main() {
     textSpan = findRenderEditable(tester).text!;
     expect(textSpan.children, null);
     expect(textSpan.text, 'Lorem ipsum dolor sit amet');
-  }, skip: kIsWeb);
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('multiline Scribble fields can show a vertical placeholder', (WidgetTester tester) async {
     final TextEditingController controller =
@@ -1732,8 +1732,7 @@ void main() {
     textSpan = findRenderEditable(tester).text!;
     expect(textSpan.children, null);
     expect(textSpan.text, 'Lorem ipsum dolor sit amet');
-  }, skip: kIsWeb);
-
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
     bool readOnly = true;

@@ -57,6 +57,9 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
 
+// The minimum width of an iPad screen.
+const double _kIPadWidth = 1536.0;
+
 /// A controller for an editable text field.
 ///
 /// Whenever the user modifies a text field with an associated
@@ -2447,17 +2450,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _updateSelectionRects({bool force = false}) {
     if (defaultTargetPlatform != TargetPlatform.iOS)
       return;
-    // This is to avoid sending selection rects on non-iPad devices
-    if (WidgetsBinding.instance!.window.physicalSize.shortestSide < 1536.0)
+    // This is to avoid sending selection rects on non-iPad devices.
+    if (WidgetsBinding.instance!.window.physicalSize.shortestSide < _kIPadWidth)
       return;
     final String text = buildTextSpan().toPlainText(includeSemanticsLabels: false, includePlaceholders: false);
     final List<Rect> firstSelectionBoxes = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1));
     final Rect? firstRect = firstSelectionBoxes.isNotEmpty ? firstSelectionBoxes.first : null;
     final ScrollDirection scrollDirection = _scrollController?.position.userScrollDirection ?? ScrollDirection.idle;
     final Size size = renderEditable.size;
-    if (scrollDirection == ScrollDirection.idle && (force || text != _cachedText ||
-        _cachedFirstRect != firstRect || _cachedSize != size ||
-        _cachedPlaceholder != _placeholderLocation)) {
+    final bool textChanged = text != _cachedText;
+    final bool firstRectChanged = _cachedFirstRect != firstRect;
+    final bool sizeChanged = _cachedSize != size;
+    final bool placeholderChanged = _cachedPlaceholder != _placeholderLocation;
+    if (scrollDirection == ScrollDirection.idle && (force || textChanged || firstRectChanged || sizeChanged || placeholderChanged)) {
       _cachedText = text;
       _cachedFirstRect = firstRect;
       _cachedSize = size;
