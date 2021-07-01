@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <gtest/gtest.h>
+#include <cstdlib>
 
 #include "runner.h"
 #include "third_party/icu/source/i18n/unicode/timezone.h"
@@ -10,6 +11,10 @@
 namespace flutter_runner {
 
 TEST(RunnerTest, TZData) {
+  // TODO(fxbug.dev/69570): Move to cml file if env_vars gains supported for the
+  // gtest_runner.
+  setenv("ICU_TIMEZONE_FILES_DIR", "/pkg/data/tzdata", true);
+
   UErrorCode err = U_ZERO_ERROR;
   const auto version_before = std::string(icu::TimeZone::getTZDataVersion(err));
   ASSERT_EQ(U_ZERO_ERROR, err) << "unicode error: " << u_errorName(err);
