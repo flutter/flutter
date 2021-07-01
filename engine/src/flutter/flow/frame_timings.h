@@ -64,6 +64,9 @@ class FrameTimingsRecorder {
   /// Timestamp of when the frame rasterization finished.
   fml::TimePoint GetRasterEndTime() const;
 
+  /// Timestamp of when the frame rasterization is complete in wall-time.
+  fml::TimePoint GetRasterEndWallTime() const;
+
   /// Duration of the frame build time.
   fml::TimeDelta GetBuildDuration() const;
 
@@ -84,7 +87,7 @@ class FrameTimingsRecorder {
 
   /// Records a raster end event, and builds a `FrameTiming` that summarizes all
   /// the events. This summary is sent to the framework.
-  FrameTiming RecordRasterEnd(fml::TimePoint raster_end);
+  FrameTiming RecordRasterEnd();
 
   /// Returns the frame number. Frame number is unique per frame and a frame
   /// built earlier will have a frame number less than a frame that has been
@@ -112,6 +115,7 @@ class FrameTimingsRecorder {
   fml::TimePoint build_end_;
   fml::TimePoint raster_start_;
   fml::TimePoint raster_end_;
+  fml::TimePoint raster_end_wall_time_;
 
   // Set when `RecordRasterEnd` is called. Cannot be reset once set.
   FrameTiming timing_;
