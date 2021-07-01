@@ -225,7 +225,7 @@ void main() {
           'FLUTTER_XCODE_ONLY_ACTIVE_ARCH': 'NO',
         },
       );
-      // This test case would fail if arm64 or i386 were not excluded.
+      // This test case would fail if arm64 or x86_64 simulators could not build.
       expect(buildSimulator.exitCode, 0);
 
       final File simulatorAppFrameworkBinary = fileSystem.file(fileSystem.path.join(
@@ -243,6 +243,7 @@ void main() {
         <String>['file', simulatorAppFrameworkBinary.path],
       );
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
+      expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
     });
   }, skip: !platform.isMacOS, timeout: const Timeout(Duration(minutes: 5))
   );
