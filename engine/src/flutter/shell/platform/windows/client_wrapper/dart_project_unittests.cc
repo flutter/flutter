@@ -35,4 +35,11 @@ TEST_F(DartProjectTest, StandardProjectFormat) {
   EXPECT_EQ(GetProjectAotLibraryPath(project), L"test\\app.so");
 }
 
+TEST_F(DartProjectTest, ProjectWithCustomPaths) {
+  DartProject project(L"data\\assets", L"icu\\icudtl.dat", L"lib\\file.so");
+  EXPECT_EQ(GetProjectIcuDataPath(project), L"icu\\icudtl.dat");
+  EXPECT_EQ(GetProjectAssetsPath(project), L"data\\assets");
+  EXPECT_EQ(GetProjectAotLibraryPath(project), L"lib\\file.so");
+}
+
 }  // namespace flutter
