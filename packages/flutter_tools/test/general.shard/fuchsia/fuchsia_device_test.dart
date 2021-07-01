@@ -28,7 +28,6 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -344,7 +343,7 @@ void main() {
       ));
       final FuchsiaDevice device = FuchsiaDevice('id');
 
-      await expectLater(device.servicePorts, throwsToolExit(message: 'No Dart Observatories found. Are you running a debug build?'));
+      await expectLater(await device.servicePorts(), throwsToolExit(message: 'No Dart Observatories found. Are you running a debug build?'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(
@@ -699,81 +698,256 @@ void main() {
 
 
   group('FuchsiaIsolateDiscoveryProtocol', () {
-    Future<Uri> findUri(List<FlutterView> views, String expectedIsolateName) async {
-      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          FakeVmServiceRequest(
-            method: kListViewsMethod,
-            jsonResponse: <String, Object>{
-              'views': <Object>[
-                for (FlutterView view in views)
-                  view.toJson()
-              ],
-            },
+
+    group('finding flutter app from servicePort() result', () {
+      testUsingContext('can find flutter app with matching component url', () async {
+        final MockFuchsiaDevice fuchsiaDevice = MockFuchsiaDevice('123', const NoOpDevicePortForwarder(), false);
+        final FuchsiaIsolateDiscoveryProtocol discoveryProtocol = FuchsiaIsolateDiscoveryProtocol(
+            fuchsiaDevice,
+            'fuchsia-pkg://flutter_tool/app_name#meta/app_name.cmx',
+        );
+        expect((await discoveryProtocol.uri).toString(), 'http://[${InternetAddress.loopbackIPv6.address}]:0');
+      });
+
+      testUsingContext('can handle no matching component', () async {
+        final MockFuchsiaDevice fuchsiaDevice = MockFuchsiaDevice('123', const NoOpDevicePortForwarder(), false);
+        final FuchsiaIsolateDiscoveryProtocol discoveryProtocol = FuchsiaIsolateDiscoveryProtocol(
+          fuchsiaDevice,
+          'fuchsia-pkg://flutter_tool/no#meta/no.cmx',
+          true,
+        );
+        await expectLater(discoveryProtocol.uri, throwsException);
+      });
+
+      testUsingContext('can handle multiple component', () async {
+        final MockFuchsiaDevice fuchsiaDevice = MockFuchsiaDevice(
+          '123',
+          const NoOpDevicePortForwarder(),
+          false,
+          const <int, List<String>>{
+            5678: <String>[
+              'uchsia-pkg://flutter_tool/app_name#meta/app_name.cmx',
+              'efg',
+            ],
+            1234: <String>[
+              'abc',
+              'fuchsia-pkg://flutter_tool/app_name#meta/app_name.cmx',
+              'efg',
+            ],
+          },
+        );
+        final FuchsiaIsolateDiscoveryProtocol discoveryProtocol = FuchsiaIsolateDiscoveryProtocol(
+          fuchsiaDevice,
+          'fuchsia-pkg://flutter_tool/app_name#meta/app_name.cmx',
+        );
+        expect((await discoveryProtocol.uri).toString(), 'http://[${InternetAddress.loopbackIPv6.address}]:1234');
+      });
+    });
+
+    group('servicePort() querying fuchsia /hub through ssh', (){
+      FakeProcessManager processManager;
+      File artifactFile;
+      setUp((){
+        processManager = FakeProcessManager.empty();
+        artifactFile = MemoryFileSystem.test().file('artifact');
+      });
+
+      testUsingContext('can find multiple servicePorts', () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+            stdout:
+              '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port\n'
+              '/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port',
           ),
-        ],
-        httpAddress: Uri.parse('example'),
-      );
-      final MockFuchsiaDevice fuchsiaDevice = MockFuchsiaDevice('123', const NoOpDevicePortForwarder(), false);
-      final FuchsiaIsolateDiscoveryProtocol discoveryProtocol =
-        FuchsiaIsolateDiscoveryProtocol(
-        fuchsiaDevice,
-        expectedIsolateName,
-        (Uri uri) async => fakeVmServiceHost.vmService,
-        (Device device, Uri uri, bool enableServiceAuthCodes) => null,
-        true, // only poll once.
-      );
-      return discoveryProtocol.uri;
-    }
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'ls /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port'],
+            // Practically this should be impossible, we should only get one port.
+            // But let's tests it anyway. Also tests handing of trailing newline.
+            stdout:
+              '12345\n'
+              '19643\n',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c -name url'],
+            stdout:
+              '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/abc.cmx/1/url\n'
+              '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/ermine.cmx/2/url',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'cat /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/abc.cmx/1/url'],
+            stdout: 'fuchsia-pkg://fuchsia.com/abc#meta/abc.cmx',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'cat /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/ermine.cmx/2/url'],
+            stdout: 'fuchsia-pkg://fuchsia.com/ermine#meta/ermine.cmx',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'ls /hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port'],
+            stdout: '23125',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port/../../../c -name url'],
+            stdout: '/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port/../../../c/gallery.cmx/2/url',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'cat /hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port/../../../c/gallery.cmx/2/url'],
+            stdout: 'fuchsia-pkg://flutter_tool/gallery#meta/gallery.cmx',
+          ),
+        ]);
+        final FuchsiaDevice device = FuchsiaDevice('id');
 
-    testUsingContext('can find flutter view with matching isolate name', () async {
-      const String expectedIsolateName = 'foobar';
-      final Uri uri = await findUri(<FlutterView>[
-        // no ui isolate.
-        FlutterView(id: '1', uiIsolate: null),
-        // wrong name.
-        FlutterView(
-          id: '2',
-          uiIsolate: vm_service.Isolate.parse(<String, dynamic>{
-            ...fakeIsolate.toJson(),
-            'name': 'Wrong name',
-          }),
+        await expectLater(await device.servicePorts(), equals(<int, List<String>>{
+          12345: <String>['fuchsia-pkg://fuchsia.com/abc#meta/abc.cmx', 'fuchsia-pkg://fuchsia.com/ermine#meta/ermine.cmx'],
+          19643: <String>['fuchsia-pkg://fuchsia.com/abc#meta/abc.cmx', 'fuchsia-pkg://fuchsia.com/ermine#meta/ermine.cmx'],
+          23125: <String>['fuchsia-pkg://flutter_tool/gallery#meta/gallery.cmx'],
+        }));
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        FuchsiaArtifacts: () => FuchsiaArtifacts(
+          sshConfig: artifactFile,
+          devFinder: artifactFile,
+          ffx: artifactFile,
         ),
-        // matching name.
-        FlutterView(
-          id: '3',
-          uiIsolate: vm_service.Isolate.parse(<String, dynamic>{
-             ...fakeIsolate.toJson(),
-            'name': expectedIsolateName,
-          }),
+        FuchsiaSdk: () => FakeFuchsiaSdk(),
+      });
+
+      testUsingContext('No vmservices found', () async {
+        processManager.addCommand(const FakeCommand(
+          command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+        ));
+        final FuchsiaDevice device = FuchsiaDevice('id');
+
+        await expectLater(device.servicePorts, throwsToolExit(message: 'No Dart Observatories found. Are you running a debug build?'));
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        FuchsiaArtifacts: () => FuchsiaArtifacts(
+          sshConfig: artifactFile,
+          devFinder: artifactFile,
+          ffx: artifactFile,
         ),
-      ], expectedIsolateName);
+        FuchsiaSdk: () => FakeFuchsiaSdk(),
+      });
 
-      expect(uri.toString(), 'http://${InternetAddress.loopbackIPv4.address}:0/');
-    });
+      testUsingContext('can hendle failed to find vmservice-port', () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+            exitCode: 1,
+          ),
+        ]);
+        final FuchsiaDevice device = FuchsiaDevice('id');
 
-    testUsingContext('can handle flutter view without matching isolate name', () async {
-      const String expectedIsolateName = 'foobar';
-      final Future<Uri> uri = findUri(<FlutterView>[
-        // no ui isolate.
-        FlutterView(id: '1', uiIsolate: null),
-        // wrong name.
-        FlutterView(id: '2', uiIsolate: vm_service.Isolate.parse(<String, Object>{
-           ...fakeIsolate.toJson(),
-          'name': 'wrong name',
-        })),
-      ], expectedIsolateName);
+        await expectLater(device.servicePorts(), throwsToolExit);
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        FuchsiaArtifacts: () => FuchsiaArtifacts(
+          sshConfig: artifactFile,
+          devFinder: artifactFile,
+          ffx: artifactFile,
+        ),
+        FuchsiaSdk: () => FakeFuchsiaSdk(),
+      });
 
-      expect(uri, throwsException);
-    });
+      testUsingContext('can hendle failed to list ports', () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+            stdout:
+            '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port\n'
+                '/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'ls /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port'],
+            exitCode: 1,
+          ),
+        ]);
+        final FuchsiaDevice device = FuchsiaDevice('id');
 
-    testUsingContext('can handle non flutter view', () async {
-      const String expectedIsolateName = 'foobar';
-      final Future<Uri> uri = findUri(<FlutterView>[
-        FlutterView(id: '1', uiIsolate: null), // no ui isolate.
-      ], expectedIsolateName);
+        await expectLater(device.servicePorts(), throwsToolExit);
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        FuchsiaArtifacts: () => FuchsiaArtifacts(
+          sshConfig: artifactFile,
+          devFinder: artifactFile,
+          ffx: artifactFile,
+        ),
+        FuchsiaSdk: () => FakeFuchsiaSdk(),
+      });
 
-      expect(uri, throwsException);
+      testUsingContext('can hendle failed to find paths to component url', () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+            stdout:
+            '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port\n'
+                '/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'ls /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port'],
+            // Practically this should be impossible, we should only get one port.
+            // But let's tests it anyway. Also tests handing of trailing newline.
+            stdout:
+            '12345\n'
+                '19643\n',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c -name url'],
+            exitCode: 1,
+          ),
+        ]);
+        final FuchsiaDevice device = FuchsiaDevice('id');
+
+        await expectLater(device.servicePorts(), throwsToolExit);
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        FuchsiaArtifacts: () => FuchsiaArtifacts(
+          sshConfig: artifactFile,
+          devFinder: artifactFile,
+          ffx: artifactFile,
+        ),
+        FuchsiaSdk: () => FakeFuchsiaSdk(),
+      });
+
+      testUsingContext('can hendle failed to read component url', () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+            stdout:
+              '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port\n'
+              '/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'ls /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port'],
+            // Practically this should be impossible, we should only get one port.
+            // But let's tests it anyway. Also tests handing of trailing newline.
+            stdout:
+              '12345\n'
+              '19643\n',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c -name url'],
+            stdout:
+              '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/abc.cmx/1/url\n'
+              '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/ermine.cmx/2/url',
+          ),
+          const FakeCommand(
+            command: <String>['ssh', '-F', '/artifact', 'id', 'cat /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/abc.cmx/1/url'],
+            exitCode: 1,
+          ),
+        ]);
+        final FuchsiaDevice device = FuchsiaDevice('id');
+
+        await expectLater(device.servicePorts(), throwsToolExit);
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        FuchsiaArtifacts: () => FuchsiaArtifacts(
+          sshConfig: artifactFile,
+          devFinder: artifactFile,
+          ffx: artifactFile,
+        ),
+        FuchsiaSdk: () => FakeFuchsiaSdk(),
+      });
     });
   });
 
@@ -888,9 +1062,15 @@ class FuchsiaModulePackage extends ApplicationPackage {
 }
 
 class MockFuchsiaDevice extends Fake implements FuchsiaDevice {
-  MockFuchsiaDevice(this.id, this.portForwarder, this._ipv6);
+  MockFuchsiaDevice(this.id, this.portForwarder, this._ipv6,[
+    this._servicePorts = const <int, List<String>>{
+      0: <String>['fuchsia-pkg://flutter_tool/app_name#meta/app_name.cmx']
+    },
+  ]);
 
   final bool _ipv6;
+
+  final Map<int, List<String>> _servicePorts;
 
   @override
   bool get ipv6 => _ipv6;
@@ -908,7 +1088,7 @@ class MockFuchsiaDevice extends Fake implements FuchsiaDevice {
   String get name => 'fuchsia';
 
   @override
-  Future<List<int>> servicePorts() async => <int>[1];
+  Future<Map<int, List<String>>> servicePorts() async => _servicePorts;
 
   @override
   DartDevelopmentService get dds => FakeDartDevelopmentService();

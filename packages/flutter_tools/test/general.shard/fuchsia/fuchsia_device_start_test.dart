@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_ffx.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
+import 'package:flutter_tools/src/fuchsia/session_control.dart';
 import 'package:flutter_tools/src/fuchsia/tiles_ctl.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
@@ -474,18 +475,41 @@ class FailingTilesCtl implements FuchsiaTilesCtl {
   }
 }
 
+class FakeFuchsiaSessionControl implements FuchsiaSessionControl {
+  @override
+  Future<bool> add(FuchsiaDevice device, String url) async {
+    return true;
+  }
+
+  @override
+  Future<bool> launch(FuchsiaDevice device, String url) async {
+    return true;
+  }
+
+  @override
+  Future<bool> restart(FuchsiaDevice device) async {
+    return true;
+  }
+
+}
+
 class FakeFuchsiaDeviceTools implements FuchsiaDeviceTools {
   FakeFuchsiaDeviceTools({
     FuchsiaAmberCtl amber,
     FuchsiaTilesCtl tiles,
+    FuchsiaSessionControl sessionControl,
   }) : amberCtl = amber ?? FakeFuchsiaAmberCtl(),
-       tilesCtl = tiles ?? FakeFuchsiaTilesCtl();
+       tilesCtl = tiles ?? FakeFuchsiaTilesCtl(),
+       sessionControl = sessionControl ?? FakeFuchsiaSessionControl();
 
   @override
   final FuchsiaAmberCtl amberCtl;
 
   @override
   final FuchsiaTilesCtl tilesCtl;
+
+  @override
+  final FuchsiaSessionControl sessionControl;
 }
 
 class FakeFuchsiaPM implements FuchsiaPM {
