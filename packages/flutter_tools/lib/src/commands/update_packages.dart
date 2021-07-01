@@ -27,8 +27,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Therefore, we control the version of flutter_gallery_assets so that
   // existing tests do not fail when the package has a new version.
   'flutter_gallery_assets': '^1.0.1',
-  'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
-  'mockito': '4.1.1+1', // Prevent mockito from upgrading to the source gen version.
+  'flutter_template_images': '4.0.0', // Must always exactly match flutter_tools template.
   // DART TEAM OWNED NNBD DEPS
   'archive': '">=3.0.0-nullsafety.0"',
   'async': '">=2.5.0-nullsafety.3"',
@@ -69,7 +68,12 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'process': '">=4.0.0-nullsafety.4"',
   'process_runner': '">=4.0.0-nullsafety.5"',
   'url_launcher': '">=6.0.0-nullsafety.1"',
-  'video_player': '">=2.0.0-nullsafety.2"',
+  // This is pinned to avoid the performance regression from a reverted feature
+  // from https://github.com/dart-lang/shelf/issues/189 . This can be removed
+  // when a new major version of shelf is published.
+  'shelf': '1.1.4',
+  // Latest version does not resolve on our CI.
+  'video_player': '2.1.1',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -1112,7 +1116,7 @@ class PubspecDependency extends PubspecLine {
       final String trailingComment = line.substring(hashIndex, line.length);
       assert(line.endsWith(trailingComment));
       isTransitive = trailingComment == kTransitiveMagicString;
-      suffix = ' ' + trailingComment;
+      suffix = ' $trailingComment';
       stripped = line.substring(colonIndex + 1, hashIndex).trimRight();
     } else {
       stripped = line.substring(colonIndex + 1, line.length).trimRight();
@@ -1507,7 +1511,6 @@ environment:
     ..writeAsStringSync('''
 name: sky_engine
 version: 0.0.99
-author: Flutter Authors <flutter-dev@googlegroups.com>
 description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x

@@ -54,8 +54,8 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
 
   static const String benchmarkName = 'text_out_of_picture_bounds';
 
-  List<Paragraph> singleLineParagraphs;
-  List<Paragraph> multiLineParagraphs;
+  late List<Paragraph> singleLineParagraphs;
+  late List<Paragraph> multiLineParagraphs;
 
   @override
   void onDrawFrame(SceneBuilder sceneBuilder) {

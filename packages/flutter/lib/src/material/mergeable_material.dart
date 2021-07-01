@@ -142,7 +142,7 @@ class MergeableMaterial extends StatefulWidget {
   }
 
   @override
-  _MergeableMaterialState createState() => _MergeableMaterialState();
+  State<MergeableMaterial> createState() => _MergeableMaterialState();
 }
 
 class _AnimationTuple {

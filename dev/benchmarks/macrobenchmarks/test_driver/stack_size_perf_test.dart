@@ -16,7 +16,7 @@ const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
 void main() {
   test('stack_size', () async {
-    int stackSizeInBytes;
+    late int stackSizeInBytes;
     await runDriverTestForRoute(kStackSizeRouteName, (FlutterDriver driver) async {
       final String stackSize = await driver.getText(find.byValueKey(kStackSizeKey));
       expect(stackSize.isNotEmpty, isTrue);
@@ -30,7 +30,7 @@ void main() {
     await file.writeAsString(_encodeJson(<String, dynamic>{
       'stack_size': stackSizeInBytes,
     }));
-  }, timeout: const Timeout(kTimeout));
+  }, timeout: Timeout.none);
 }
 
 String _encodeJson(Map<String, dynamic> jsonObject) {

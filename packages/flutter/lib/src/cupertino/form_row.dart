@@ -44,7 +44,7 @@ const EdgeInsetsGeometry _kDefaultPadding =
 ///   const FlutterDemo({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _FlutterDemoState createState() => _FlutterDemoState();
+///   State<FlutterDemo> createState() => _FlutterDemoState();
 /// }
 ///
 /// class _FlutterDemoState extends State<FlutterDemo> {

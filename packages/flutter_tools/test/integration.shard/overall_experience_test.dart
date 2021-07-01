@@ -113,7 +113,7 @@ class Multiple extends Transition {
 
   @override
   String toString() {
-    return _originalPatterns.map(describe).join(', ') + ' (matched ${_originalPatterns.length - patterns.length} so far)';
+    return '${_originalPatterns.map(describe).join(', ')} (matched ${_originalPatterns.length - patterns.length} so far)';
   }
 }
 
@@ -445,8 +445,19 @@ void main() {
   }, skip: Platform.isWindows); // TODO(jonahwilliams): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81556
 
   testWithoutContext('flutter error messages include a DevTools link', () async {
-    final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String testDirectory = fileSystem.path.join(flutterRoot, 'dev', 'integration_tests', 'ui');
+
+    // Ensure that DevTools is activated.
+    final ProcessResult pubResult = await processManager.run(<String>[
+      fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+      'pub', 'global', 'activate', 'devtools',
+    ], workingDirectory: testDirectory).timeout(const Duration(seconds: 20));
+    if (pubResult.exitCode != 0) {
+      print('Unable to activate devtools:\n${pubResult.stderr}');
+    }
+    expect(pubResult.exitCode, 0);
+
+    final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String testScript = fileSystem.path.join('lib', 'overflow.dart');
     try {
       final ProcessTestResult result = await runFlutter(
@@ -552,6 +563,7 @@ void main() {
       'Flutter run key commands.',
       startsWith('r Hot reload.'),
       'R Hot restart.',
+      'v Open Flutter DevTools.',
       'w Dump widget hierarchy to the console.                                               (debugDumpApp)',
       't Dump rendering tree to the console.                                          (debugDumpRenderTree)',
       'L Dump layer tree to the console.                                               (debugDumpLayerTree)',

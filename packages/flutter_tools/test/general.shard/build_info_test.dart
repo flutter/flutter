@@ -95,6 +95,38 @@ void main() {
     expect(() => getIOSArchForName('bogus'), throwsException);
   });
 
+  testWithoutContext('toBuildSystemEnvironment encoding of standard values', () {
+    const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
+      treeShakeIcons: true,
+      trackWidgetCreation: true,
+      dartDefines: <String>['foo=2', 'bar=2'],
+      dartObfuscation: true,
+      splitDebugInfoPath: 'foo/',
+      extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
+      extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
+      bundleSkSLPath: 'foo/bar/baz.sksl.json',
+      packagesPath: 'foo/.packages',
+      codeSizeDirectory: 'foo/code-size',
+      fileSystemRoots: <String>['test5', 'test6'],
+      fileSystemScheme: 'scheme',
+    );
+
+    expect(buildInfo.toBuildSystemEnvironment(), <String, String>{
+      'BuildMode': 'debug',
+      'DartDefines': 'Zm9vPTI=,YmFyPTI=',
+      'DartObfuscation': 'true',
+      'ExtraFrontEndOptions': '--enable-experiment=non-nullable,bar',
+      'ExtraGenSnapshotOptions': '--enable-experiment=non-nullable,fizz',
+      'SplitDebugInfo': 'foo/',
+      'TrackWidgetCreation': 'true',
+      'TreeShakeIcons': 'true',
+      'BundleSkSLPath': 'foo/bar/baz.sksl.json',
+      'CodeSizeDirectory': 'foo/code-size',
+      'FileSystemRoots': 'test5,test6',
+      'FileSystemScheme': 'scheme',
+    });
+  });
+
   testWithoutContext('toEnvironmentConfig encoding of standard values', () {
     const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
       treeShakeIcons: true,
@@ -107,6 +139,8 @@ void main() {
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
       packagesPath: 'foo/.packages',
       codeSizeDirectory: 'foo/code-size',
+      // These values are ignored by toEnvironmentConfig
+      androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
     );
 
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
@@ -135,6 +169,7 @@ void main() {
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
       packagesPath: 'foo/.packages',
       codeSizeDirectory: 'foo/code-size',
+      androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
     );
 
     expect(buildInfo.toGradleConfig(), <String>[
@@ -146,7 +181,9 @@ void main() {
       '-Ptrack-widget-creation=true',
       '-Ptree-shake-icons=true',
       '-Pbundle-sksl-path=foo/bar/baz.sksl.json',
-      '-Pcode-size-directory=foo/code-size'
+      '-Pcode-size-directory=foo/code-size',
+      '-Pfoo=bar',
+      '-Pfizz=bazz'
     ]);
   });
 

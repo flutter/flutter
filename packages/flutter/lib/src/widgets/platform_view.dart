@@ -537,7 +537,7 @@ class _AndroidViewState extends State<AndroidView> {
     }
     SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setPlatformViewClient',
-      _id,
+      <String, dynamic>{'platformViewId': _id, 'usesVirtualDisplay': true},
     ).catchError((dynamic e) {
       if (e is MissingPluginException) {
         // We land the framework part of Android platform views keyboard
@@ -893,6 +893,10 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     if (!isFocused) {
       _controller?.clearFocus();
     }
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setPlatformViewClient',
+      <String, dynamic>{'platformViewId': _id},
+    );
   }
 
   void _handlePlatformFocusChanged(bool isFocused){

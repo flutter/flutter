@@ -68,12 +68,12 @@ void main() {
               onTap: () {
                 log.add(state);
               },
+              dragStartBehavior: DragStartBehavior.down,
               child: Container(
                 height: 200.0,
                 color: const Color(0xFF0000FF),
                 child: Text(state),
               ),
-              dragStartBehavior: DragStartBehavior.down,
             );
           }).toList(),
         ),

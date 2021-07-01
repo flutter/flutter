@@ -41,28 +41,31 @@ void main() {
 
   test('analyze.dart - verifyDeprecations', () async {
     final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), exitCode: 1);
+    final String lines = <String>[
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice does not match required pattern.',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice should be a grammatically correct sentence and end with a period.',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:29: Deprecation notice does not match required pattern.',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:32: Deprecation notice does not match required pattern.',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:37: Deprecation notice does not match required pattern.',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern.',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:48: End of deprecation notice does not match required pattern.',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:51: Unexpected deprecation notice indent.',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:70: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:76: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:82: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.',
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:99: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
+      ]
+      .map((String line) {
+        return line
+          .replaceAll('/', Platform.isWindows ? r'\' : '/')
+          .replaceAll('STYLE_GUIDE_URL', 'https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo')
+          .replaceAll('RELEASES_URL', 'https://flutter.dev/docs/development/tools/sdk/releases');
+      })
+      .join('\n');
     expect(result,
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      +
-      (
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice does not match required pattern.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice should be a grammatically correct sentence and end with a period.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:29: Deprecation notice does not match required pattern.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:32: Deprecation notice does not match required pattern.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:37: Deprecation notice does not match required pattern.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:48: End of deprecation notice does not match required pattern.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:51: Unexpected deprecation notice indent.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:70: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:76: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:82: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:99: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').\n'
-        .replaceAll('/', Platform.isWindows ? r'\' : '/')
-        .replaceAll('STYLE_GUIDE_URL', 'https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo')
-        .replaceAll('RELEASES_URL', 'https://flutter.dev/docs/development/tools/sdk/releases')
-      )
-      +
+      '$lines\n'
       'See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
     );
@@ -70,15 +73,12 @@ void main() {
 
   test('analyze.dart - verifyNoMissingLicense', () async {
     final String result = await capture(() => verifyNoMissingLicense(testRootPath, checkMinimums: false), exitCode: 1);
+    final String lines = 'test/analyze-test-input/root/packages/foo/foo.dart'
+      .replaceAll('/', Platform.isWindows ? r'\' : '/');
     expect(result,
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      +
-      (
-        'The following 1 file does not have the right license header:\n'
-        'test/analyze-test-input/root/packages/foo/foo.dart\n'
-        .replaceAll('/', Platform.isWindows ? r'\' : '/')
-      )
-      +
+      'The following 1 file does not have the right license header:\n'
+      '$lines\n'
       'The expected license header is:\n'
       '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
       '// Use of this source code is governed by a BSD-style license that can be\n'
@@ -90,15 +90,15 @@ void main() {
 
   test('analyze.dart - verifyNoTrailingSpaces', () async {
     final String result = await capture(() => verifyNoTrailingSpaces(testRootPath, minimumMatches: 2), exitCode: 1);
+    final String lines = <String>[
+        'test/analyze-test-input/root/packages/foo/spaces.txt:5: trailing U+0020 space character',
+        'test/analyze-test-input/root/packages/foo/spaces.txt:9: trailing blank line',
+      ]
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
     expect(result,
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      +
-      (
-        'test/analyze-test-input/root/packages/foo/spaces.txt:5: trailing U+0020 space character\n'
-        'test/analyze-test-input/root/packages/foo/spaces.txt:9: trailing blank line\n'
-        .replaceAll('/', Platform.isWindows ? r'\' : '/')
-      )
-      +
+      '$lines\n'
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
     );
   });

@@ -5,6 +5,6 @@ A RenderFlex overflowed by 2858 pixels on the right\.
 
 The relevant error-causing widget was:
   Row
-  file:\/\/\/.+print_correct_local_widget_test\.dart:[0-9]+:[0-9]+
+  Row:file:\/\/\/.+print_correct_local_widget_test\.dart:[0-9]+:[0-9]+
 
 The overflowing RenderFlex has an orientation of Axis.horizontal\.

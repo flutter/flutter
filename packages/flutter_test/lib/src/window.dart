@@ -379,8 +379,16 @@ class TestWindow implements ui.SingletonFlutterWindow {
     platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
+  @Deprecated(
+    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
   @override
   ui.PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
+  @Deprecated(
+    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
   @override
   set onPlatformMessage(ui.PlatformMessageCallback? callback) {
     platformDispatcher.onPlatformMessage = callback;

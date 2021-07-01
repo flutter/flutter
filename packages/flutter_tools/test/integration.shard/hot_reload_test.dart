@@ -190,6 +190,6 @@ bool _isHotReloadCompletionEvent(Map<String, dynamic> event) {
   return event != null &&
       event['event'] == 'app.progress' &&
       event['params'] != null &&
-      event['params']['progressId'] == 'hot.reload' &&
-      event['params']['finished'] == true;
+      (event['params'] as Map<String, dynamic>)['progressId'] == 'hot.reload' &&
+      (event['params'] as Map<String, dynamic>)['finished'] == true;
 }

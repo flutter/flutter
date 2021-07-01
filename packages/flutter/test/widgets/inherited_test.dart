@@ -73,12 +73,12 @@ void main() {
 
     expect(log, equals(<TestInherited>[first]));
 
-    final TestInherited second = TestInherited(child: builder, shouldNotify: false);
+    final TestInherited second = TestInherited(shouldNotify: false, child: builder);
     await tester.pumpWidget(second);
 
     expect(log, equals(<TestInherited>[first]));
 
-    final TestInherited third = TestInherited(child: builder, shouldNotify: true);
+    final TestInherited third = TestInherited(shouldNotify: true, child: builder);
     await tester.pumpWidget(third);
 
     expect(log, equals(<TestInherited>[first, third]));

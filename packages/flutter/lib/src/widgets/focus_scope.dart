@@ -540,7 +540,7 @@ class Focus extends StatefulWidget {
   }
 
   @override
-  _FocusState createState() => _FocusState();
+  State<Focus>  createState() => _FocusState();
 }
 
 class _FocusState extends State<Focus> {
@@ -944,7 +944,7 @@ class FocusScope extends Focus {
   }
 
   @override
-  _FocusScopeState createState() => _FocusScopeState();
+  State<Focus> createState() => _FocusScopeState();
 }
 
 class _FocusScopeState extends _FocusState {

@@ -112,7 +112,7 @@ class BottomNavigationDemo extends StatefulWidget {
   static const String routeName = '/material/bottom_navigation';
 
   @override
-  _BottomNavigationDemoState createState() => _BottomNavigationDemoState();
+  State<BottomNavigationDemo> createState() => _BottomNavigationDemoState();
 }
 
 class _BottomNavigationDemoState extends State<BottomNavigationDemo>

@@ -259,9 +259,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              child: const Text('OutlineButton'),
               onPressed: () {},
               focusNode: focusNode,
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -322,10 +322,10 @@ void main() {
               colorScheme: colorScheme,
               textTheme: ButtonTextTheme.primary,
               child: OutlineButton(
-                child: const Text('OutlineButton'),
                 onPressed: () {},
                 focusNode: focusNode,
                 textColor: MaterialStateColor.resolveWith(getTextColor),
+                child: const Text('OutlineButton'),
               ),
             ),
           ),
@@ -388,10 +388,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              child: const Text('OutlineButton'),
               onPressed: () {},
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -514,10 +514,10 @@ void main() {
           body: Center(
             child: OutlineButton(
               onPressed: null,
-              child: const Text('OutlineButton'),
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
               disabledTextColor: unusedDisabledTextColor,
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -559,10 +559,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              child: const Text('OutlineButton'),
               onPressed: () {},
               focusNode: focusNode,
               borderSide: BorderSide(color: MaterialStateColor.resolveWith(getBorderColor)),
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -613,10 +613,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              child: const Text('OutlineButton'),
               onPressed: () {},
               borderSide: BorderSide(color: MaterialStateColor.resolveWith(getBorderColor)),
               highlightedBorderColor: ignoredPressedColor,
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -651,10 +651,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              child: const Text('OutlineButton'),
               onPressed: null,
               borderSide: BorderSide(color: MaterialStateColor.resolveWith(getBorderColor)),
               highlightedBorderColor: ignoredDisabledColor,
+              child: const Text('OutlineButton'),
             ),
           ),
         ),
@@ -674,9 +674,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: OutlineButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }

@@ -102,7 +102,7 @@ Future<void> main() async {
   });
 
   tearDownAll(() async {
-    // This part is outside the group so that `request` has been compeleted as
+    // This part is outside the group so that `request` has been completed as
     // part of the `tearDownAll` registered in the group during
     // `IntegrationTestWidgetsFlutterBinding` initialization.
     final Map<String, dynamic> response =

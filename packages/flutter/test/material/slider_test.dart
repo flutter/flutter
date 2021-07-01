@@ -908,6 +908,46 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets('Slider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28115
+
+    int startFired = 0;
+    int endFired = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: GestureDetector(
+                onHorizontalDragUpdate: (_) { },
+                child: Slider(
+                  value: 0.0,
+                  onChanged: (double newValue) { },
+                  onChangeStart: (double value) {
+                    startFired += 1;
+                  },
+                  onChangeEnd: (double value) {
+                    endFired += 1;
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.timedDrag(
+      find.byType(Slider),
+      const Offset(20.0, 0.0),
+      const Duration(milliseconds: 100),
+    );
+
+    expect(startFired, equals(1));
+    expect(endFired, equals(1));
+  });
+
   testWidgets('Slider sizing', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -2472,5 +2512,106 @@ void main() {
     // The right of the active track shape is the position of the thumb.
     // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
     expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
+  });
+
+
+  testWidgets('Slider paints thumbColor', (WidgetTester tester) async {
+    const Color color = Color(0xffffc107);
+
+    final Widget sliderAdaptive = MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: Material(
+        child: Slider(
+          value: 0,
+          onChanged: (double newValue) {},
+          thumbColor: color,
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(sliderAdaptive);
+    await tester.pumpAndSettle();
+
+    final MaterialInkController material =
+        Material.of(tester.element(find.byType(Slider)))!;
+    expect(material, paints..circle(color: color));
+  });
+
+  testWidgets('Slider.adaptive paints thumbColor on Android',
+      (WidgetTester tester) async {
+    const Color color = Color(0xffffc107);
+
+    final Widget sliderAdaptive = MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.android),
+      home: Material(
+        child: Slider.adaptive(
+          value: 0,
+          onChanged: (double newValue) {},
+          thumbColor: color,
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(sliderAdaptive);
+    await tester.pumpAndSettle();
+
+    final MaterialInkController material =
+        Material.of(tester.element(find.byType(Slider)))!;
+    expect(material, paints..circle(color: color));
+  });
+
+  testWidgets('If thumbColor is null, it defaults to CupertinoColors.white',
+      (WidgetTester tester) async {
+    final Widget sliderAdaptive = MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: Material(
+        child: Slider.adaptive(
+          value: 0,
+          onChanged: (double newValue) {},
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(sliderAdaptive);
+    await tester.pumpAndSettle();
+
+    final MaterialInkController material =
+        Material.of(tester.element(find.byType(CupertinoSlider)))!;
+    expect(
+      material,
+      paints
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: CupertinoColors.white),
+    );
+  });
+
+  testWidgets('Slider.adaptive passes thumbColor to CupertinoSlider',
+      (WidgetTester tester) async {
+    const Color color = Color(0xffffc107);
+
+    final Widget sliderAdaptive = MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: Material(
+        child: Slider.adaptive(
+          value: 0,
+          onChanged: (double newValue) {},
+          thumbColor: color,
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(sliderAdaptive);
+    await tester.pumpAndSettle();
+
+    final MaterialInkController material =
+        Material.of(tester.element(find.byType(CupertinoSlider)))!;
+    expect(
+      material,
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: color),
+    );
   });
 }

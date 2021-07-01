@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -18,10 +16,10 @@ import '../src/fakes.dart';
 
 void main() {
   group('CachedArtifacts', () {
-    CachedArtifacts artifacts;
-    Cache cache;
-    FileSystem fileSystem;
-    Platform platform;
+    late CachedArtifacts artifacts;
+    late Cache cache;
+    late FileSystem fileSystem;
+    late Platform platform;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -86,12 +84,12 @@ void main() {
 
       fileSystem
           .directory(xcframeworkPath)
-          .childDirectory('ios-x86_64-simulator')
+          .childDirectory('ios-arm64_x86_64-simulator')
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
       fileSystem
           .directory(xcframeworkPath)
-          .childDirectory('ios-armv7_arm64')
+          .childDirectory('ios-arm64_armv7')
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
       expect(
@@ -100,12 +98,12 @@ void main() {
             mode: BuildMode.release,
             environmentType: EnvironmentType.simulator),
         fileSystem.path
-            .join(xcframeworkPath, 'ios-x86_64-simulator', 'Flutter.framework'),
+            .join(xcframeworkPath, 'ios-arm64_x86_64-simulator', 'Flutter.framework'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterFramework,
             platform: TargetPlatform.ios, mode: BuildMode.release, environmentType: EnvironmentType.physical),
-        fileSystem.path.join(xcframeworkPath, 'ios-armv7_arm64', 'Flutter.framework'),
+        fileSystem.path.join(xcframeworkPath, 'ios-arm64_armv7', 'Flutter.framework'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: BuildMode.release),
@@ -185,10 +183,10 @@ void main() {
   });
 
   group('LocalEngineArtifacts', () {
-    LocalEngineArtifacts artifacts;
-    Cache cache;
-    FileSystem fileSystem;
-    Platform platform;
+    late LocalEngineArtifacts artifacts;
+    late Cache cache;
+    late FileSystem fileSystem;
+    late Platform platform;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -251,12 +249,12 @@ void main() {
 
       fileSystem
           .directory(xcframeworkPath)
-          .childDirectory('ios-x86_64-simulator')
+          .childDirectory('ios-arm64_x86_64-simulator')
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
       fileSystem
           .directory(xcframeworkPath)
-          .childDirectory('ios-armv7_arm64')
+          .childDirectory('ios-arm64_armv7')
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
       expect(
@@ -267,7 +265,7 @@ void main() {
           environmentType: EnvironmentType.simulator,
         ),
         fileSystem.path
-            .join(xcframeworkPath, 'ios-x86_64-simulator', 'Flutter.framework'),
+            .join(xcframeworkPath, 'ios-arm64_x86_64-simulator', 'Flutter.framework'),
       );
       expect(
         artifacts.getArtifactPath(
@@ -277,7 +275,7 @@ void main() {
           environmentType: EnvironmentType.physical,
         ),
         fileSystem.path
-            .join(xcframeworkPath, 'ios-armv7_arm64', 'Flutter.framework'),
+            .join(xcframeworkPath, 'ios-arm64_armv7', 'Flutter.framework'),
       );
       expect(
         artifacts.getArtifactPath(

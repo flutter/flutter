@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -28,21 +26,21 @@ class TestBuildSystem implements BuildSystem {
       _onRun = null;
 
   final List<BuildResult> _results;
-  final BuildResult _singleResult;
-  final dynamic _exception;
-  final void Function(Target target, Environment environment) _onRun;
+  final BuildResult? _singleResult;
+  final Object? _exception;
+  final void Function(Target target, Environment environment)? _onRun;
   int _nextResult = 0;
 
   @override
   Future<BuildResult> build(Target target, Environment environment, {BuildSystemConfig buildSystemConfig = const BuildSystemConfig()}) async {
     if (_onRun != null) {
-      _onRun(target, environment);
+      _onRun?.call(target, environment);
     }
     if (_exception != null) {
-      throw _exception;
+      throw _exception!;
     }
     if (_singleResult != null) {
-      return _singleResult;
+      return _singleResult!;
     }
     if (_nextResult >= _results.length) {
       throw StateError('Unexpected build request of ${target.name}');
@@ -51,15 +49,15 @@ class TestBuildSystem implements BuildSystem {
   }
 
   @override
-  Future<BuildResult> buildIncremental(Target target, Environment environment, BuildResult previousBuild) async {
+  Future<BuildResult> buildIncremental(Target target, Environment environment, BuildResult? previousBuild) async {
     if (_onRun != null) {
-      _onRun(target, environment);
+      _onRun?.call(target, environment);
     }
     if (_exception != null) {
-      throw _exception;
+      throw _exception!;
     }
     if (_singleResult != null) {
-      return _singleResult;
+      return _singleResult!;
     }
     if (_nextResult >= _results.length) {
       throw StateError('Unexpected buildIncremental request of ${target.name}');

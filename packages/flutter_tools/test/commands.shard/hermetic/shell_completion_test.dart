@@ -61,15 +61,16 @@ void main() {
       final ShellCompletionCommand command = ShellCompletionCommand();
       const String outputFile = 'bash-setup.sh';
       globals.fs.file(outputFile).createSync();
-      try {
-        await createTestCommandRunner(command).run(
+      await expectLater(
+        () => createTestCommandRunner(command).run(
           <String>['bash-completion', outputFile],
-        );
-        fail('Expect ToolExit exception');
-      } on ToolExit catch (error) {
-        expect(error.exitCode ?? 1, 1);
-        expect(error.message, contains('Use --overwrite'));
-      }
+        ),
+        throwsA(
+          isA<ToolExit>()
+            .having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))
+            .having((ToolExit error) => error.message, 'message', contains('Use --overwrite')),
+        ),
+      );
       expect(globals.fs.isFileSync(outputFile), isTrue);
       expect(globals.fs.file(outputFile).readAsStringSync(), isEmpty);
     }, overrides: <Type, Generator>{

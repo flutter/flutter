@@ -42,7 +42,8 @@ Tests live under the `test/` subdirectory.
 - Hermetic unit tests of tool internals go under `test/general.shard`.
 - Tests of tool commands go under `test/commands.shard`. Hermetic tests go under
   its `hermetic/` subdirectory. Non-hermetic tests go under its `permeable`
-  sub-directory.
+  sub-directory. Avoid adding tests here and prefer writing either a unit test or a full
+  integration test.
 - Integration tests (e.g. tests that run the tool in a subprocess) go under
   `test/integration.shard`.
 
@@ -66,16 +67,30 @@ flutter test test/integration.shard/some_test_case
 
 ### Running the tests
 
-To run the tests in the `test/` directory:
+To run all of the unit tests:
 
 ```shell
-$ flutter test
+$ flutter test test/general.shard
 ```
 
 The tests in `test/integration.shard` are slower to run than the tests in
-`test/general.shard`. They also require the `FLUTTER_ROOT` environment variable
-to be set and pointing to the root of the Flutter SDK. To run only the tests in `test/general.shard`, in this
-directory run:
+`test/general.shard`. Depending on your development computer, you might
+want to increase timeouts and limit concurrency. Generally it is easier to run
+these on CI, or to manually verify the behavior you are changing instead of running
+the test.
+
+The integration tests also require the `FLUTTER_ROOT` environment variable
+to be set. The full invocation to run everything might therefore look something like:
+
+```shell
+$ FLUTTER_ROOT=~/path/to/flutter-sdk
+$ flutter test --timeout 2x --concurrency 1
+```
+
+This will take about an hour to complete.
+
+To run only the tests in `test/general.shard` (which takes about a minute),
+in this directory run:
 ```shell
 $ flutter test test/general.shard
 ```

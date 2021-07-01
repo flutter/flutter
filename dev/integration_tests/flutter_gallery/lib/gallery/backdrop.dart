@@ -196,7 +196,7 @@ class Backdrop extends StatefulWidget {
   final Widget? backLayer;
 
   @override
-  _BackdropState createState() => _BackdropState();
+  State<Backdrop> createState() => _BackdropState();
 }
 
 class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
@@ -296,9 +296,9 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                 AnimationStatus.dismissed,
                 controller: _controller,
                 child: Visibility(
-                  child: widget.backLayer!,
                   visible: _controller!.status != AnimationStatus.completed,
                   maintainState: true,
+                  child: widget.backLayer!,
                 ),
               ),
             ),

@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
-import '../../project.dart';
+import '../../xcode_project.dart';
 
 // Xcode legacy build system no longer supported by Xcode.
 // Set in https://github.com/flutter/flutter/pull/21901/.

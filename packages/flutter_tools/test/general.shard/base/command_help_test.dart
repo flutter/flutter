@@ -206,6 +206,7 @@ void main() {
         expect(commandHelp.r.toString(), equals('\x1B[1mr\x1B[22m Hot reload. $fire$fire$fire'));
         expect(commandHelp.s.toString(), equals('\x1B[1ms\x1B[22m Save a screenshot to flutter.png.'));
         expect(commandHelp.t.toString(), equals('\x1B[1mt\x1B[22m Dump rendering tree to the console.                          \x1B[90m(debugDumpRenderTree)\x1B[39m\x1B[22m'));
+        expect(commandHelp.v.toString(), equals('\x1B[1mv\x1B[22m Open Flutter DevTools.'));
         expect(commandHelp.w.toString(), equals('\x1B[1mw\x1B[22m Dump widget hierarchy to the console.                               \x1B[90m(debugDumpApp)\x1B[39m\x1B[22m'));
         expect(commandHelp.z.toString(), equals('\x1B[1mz\x1B[22m Toggle elevation checker.                            \x1B[90m(debugCheckElevationsEnabled)\x1B[39m\x1B[22m'));
       });
@@ -237,6 +238,7 @@ void main() {
         expect(commandHelp.r.toString(), equals('r Hot reload. $fire$fire$fire'));
         expect(commandHelp.s.toString(), equals('s Save a screenshot to flutter.png.'));
         expect(commandHelp.t.toString(), equals('t Dump rendering tree to the console.                          (debugDumpRenderTree)'));
+        expect(commandHelp.v.toString(), equals('v Open Flutter DevTools.'));
         expect(commandHelp.w.toString(), equals('w Dump widget hierarchy to the console.                               (debugDumpApp)'));
         expect(commandHelp.z.toString(), equals('z Toggle elevation checker.                            (debugCheckElevationsEnabled)'));
       });

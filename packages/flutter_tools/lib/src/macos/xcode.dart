@@ -198,10 +198,10 @@ class Xcode {
   }
 }
 
-EnvironmentType? environmentTypeFromSdkroot(Directory sdkroot) {
+EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
   assert(sdkroot != null);
   // iPhoneSimulator.sdk or iPhoneOS.sdk
-  final String sdkName = sdkroot.basename.toLowerCase();
+  final String sdkName = fileSystem.path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {
     return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
   }

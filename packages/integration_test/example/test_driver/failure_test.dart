@@ -20,5 +20,5 @@ Future<void> main() async {
       response.allTestsPassed,
       false,
     );
-  });
+  }, timeout: Timeout.none);
 }

@@ -12,7 +12,7 @@ class CupertinoSwitchDemo extends StatefulWidget {
   static const String routeName = '/cupertino/switch';
 
   @override
-  _CupertinoSwitchDemoState createState() => _CupertinoSwitchDemoState();
+  State<CupertinoSwitchDemo> createState() => _CupertinoSwitchDemoState();
 }
 
 class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {

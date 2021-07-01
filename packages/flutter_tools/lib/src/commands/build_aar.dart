@@ -75,21 +75,25 @@ class BuildAarCommand extends BuildSubCommand {
   };
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
-    final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
+  Future<CustomDimensions> get usageValues async {
     final FlutterProject flutterProject = _getProject();
     if (flutterProject == null) {
-      return usage;
+      return const CustomDimensions();
     }
+
+    String projectType;
     if (flutterProject.manifest.isModule) {
-      usage[CustomDimensions.commandBuildAarProjectType] = 'module';
+      projectType = 'module';
     } else if (flutterProject.manifest.isPlugin) {
-      usage[CustomDimensions.commandBuildAarProjectType] = 'plugin';
+      projectType = 'plugin';
     } else {
-      usage[CustomDimensions.commandBuildAarProjectType] = 'app';
+      projectType = 'app';
     }
-    usage[CustomDimensions.commandBuildAarTargetPlatform] = stringsArg('target-platform').join(',');
-    return usage;
+
+    return CustomDimensions(
+      commandBuildAarProjectType: projectType,
+      commandBuildAarTargetPlatform: stringsArg('target-platform').join(','),
+    );
   }
 
   @override

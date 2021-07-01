@@ -957,8 +957,7 @@ abstract class WidgetController {
           'The hit test result at that offset is: $result\n'
           '${StackTrace.current}'
           'To silence this warning, pass "warnIfMissed: false" to "$callee()".\n'
-          'To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.\n'
-          ''
+          'To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.\n',
         );
       }
     }
@@ -980,9 +979,10 @@ abstract class WidgetController {
   /// soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
-  /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
+  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// that type of system. Defaults to "web" on web, and "android" everywhere
+  /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
+  /// supported.
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -1010,9 +1010,10 @@ abstract class WidgetController {
   /// from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
-  /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
+  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// that type of system. Defaults to "web" on web, and "android" everywhere
+  /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
+  /// supported.
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -1022,10 +1023,10 @@ abstract class WidgetController {
   ///
   ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
-    return simulateKeyDownEvent(key, platform: platform);
+    return simulateKeyDownEvent(key, character: character, platform: platform);
   }
 
   /// Simulates sending a physical key up event through the system channel.
@@ -1034,8 +1035,9 @@ abstract class WidgetController {
   /// not from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to "web" on web, and "android" everywhere else. May not be null.
+  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// that type of system. Defaults to "web" on web, and "android" everywhere
+  /// else. May not be null.
   ///
   /// Returns true if the key event was handled by the framework.
   ///

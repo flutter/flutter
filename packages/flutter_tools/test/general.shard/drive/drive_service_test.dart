@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -14,6 +16,8 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
+import 'package:flutter_tools/src/drive/web_driver_service.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
@@ -66,6 +70,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
         tokenPos: 0,
         script: vm_service.ScriptRef(id: 'test-script', uri: 'foo.dart'),
       ),
+      enabled: true,
       resolved: true,
     ),
   ],
@@ -179,6 +184,39 @@ void main() {
       PackageConfig(<Package>[Package('test', Uri.base)]),
     );
 
+    expect(testResult, 23);
+  });
+
+  testWithoutContext('Connects to device VM Service and runs test application with devtools memory profile', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      getVM,
+    ]);
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        exitCode: 23,
+        environment: <String, String>{
+          'FOO': 'BAR',
+          'VM_SERVICE_URL': 'http://127.0.0.1:1234/' // dds forwarded URI
+        },
+      ),
+    ]);
+    final FakeDevtoolsLauncher launcher = FakeDevtoolsLauncher();
+    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService, devtoolsLauncher: launcher);
+    final Device device = FakeDevice(LaunchResult.succeeded(
+      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+    ));
+
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
+    final int testResult = await driverService.startTest(
+      'foo.test',
+      <String>['--enable-experiment=non-nullable'],
+      <String, String>{'FOO': 'BAR'},
+      PackageConfig(<Package>[Package('test', Uri.base)]),
+      profileMemory: 'devtools_memory.json',
+    );
+
+    expect(launcher.closed, true);
     expect(testResult, 23);
   });
 
@@ -354,6 +392,53 @@ void main() {
     await driverService.stop();
   });
 
+  testWithoutContext('Can connect to existing application using ws URI (no trailing slash)', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      getVM,
+      getVM,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.exit',
+        args: <String, Object>{
+          'isolateId': '1',
+        }
+      )
+    ]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
+    final FakeDevice device = FakeDevice(LaunchResult.failed());
+
+    await driverService.reuseApplication(
+      Uri.parse('ws://127.0.0.1:63426/1UasC_ihpXY=/ws'),
+      device,
+      DebuggingOptions.enabled(BuildInfo.debug),
+      false,
+    );
+    await driverService.stop();
+  });
+
+  testWithoutContext('Can connect to existing application using ws URI (no trailing slash, ws in auth code)', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      getVM,
+      getVM,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.exit',
+        args: <String, Object>{
+          'isolateId': '1',
+        }
+      )
+    ]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
+    final FakeDevice device = FakeDevice(LaunchResult.failed());
+
+    await driverService.reuseApplication(
+      Uri.parse('ws://127.0.0.1:63426/wsasC_ihpXY=/ws'),
+      device,
+      DebuggingOptions.enabled(BuildInfo.debug),
+      false,
+    );
+    await driverService.stop();
+  });
 
   testWithoutContext('Does not call flutterExit on device types that do not support it', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
@@ -371,12 +456,32 @@ void main() {
     );
     await driverService.stop();
   });
+
+  testWithoutContext('WebDriver error message includes link to documentation', () async {
+    const String link = 'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser';
+    final DriverService driverService = WebDriverService(
+      dartSdkPath: 'dart',
+      processUtils: ProcessUtils(
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
+      ),
+    );
+
+    expect(() => driverService.startTest(
+      'foo.test',
+      <String>[],
+      <String, String>{},
+      PackageConfig(<Package>[Package('test', Uri.base)]),
+      browserName: 'chrome',
+    ), throwsToolExit(message: RegExp('\nFor more information see: $link\n')));
+  });
 }
 
 FlutterDriverService setUpDriverService({
   Logger logger,
   ProcessManager processManager,
   FlutterVmService vmService,
+  DevtoolsLauncher devtoolsLauncher,
 }) {
   logger ??= BufferLogger.test();
   return FlutterDriverService(
@@ -387,6 +492,7 @@ FlutterDriverService setUpDriverService({
       processManager: processManager ?? FakeProcessManager.any(),
     ),
     dartSdkPath: 'dart',
+    devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
     vmServiceConnector: (Uri httpUri, {
       ReloadSources reloadSources,
       Restart restart,
@@ -395,10 +501,14 @@ FlutterDriverService setUpDriverService({
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       Object compression,
       Device device,
-      Logger logger,
+      @required Logger logger,
     }) async {
+      assert(logger != null);
       if (httpUri.scheme != 'http') {
         fail('Expected an HTTP scheme, found $httpUri');
+      }
+      if (httpUri.path.endsWith('/ws')) {
+        fail('Expected HTTP uri to not contain `/ws`, found $httpUri');
       }
       return vmService;
     }
@@ -428,6 +538,8 @@ class FakeDevice extends Fake implements Device {
   bool didUninstallApp = false;
   bool didDispose = false;
   bool failOnce = false;
+  @override
+  final PlatformType platformType = PlatformType.web;
 
   @override
   String get name => 'test';
@@ -504,5 +616,24 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> shutdown() async {
     disposed = true;
+  }
+}
+
+class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
+  bool closed = false;
+  final Completer<void> _processStarted = Completer<void>();
+
+  @override
+  Future<void> launch(Uri vmServiceUri, {List<String> additionalArguments}) {
+    _processStarted.complete();
+    return Completer<void>().future;
+  }
+
+  @override
+  Future<void> get processStart => _processStarted.future;
+
+  @override
+  Future<void> close() async {
+    closed = true;
   }
 }

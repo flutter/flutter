@@ -148,7 +148,8 @@ class _DefaultPub implements Pub {
        _processUtils = ProcessUtils(
          logger: logger,
          processManager: processManager,
-       );
+       ),
+       _processManager = processManager;
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -156,6 +157,7 @@ class _DefaultPub implements Pub {
   final Platform _platform;
   final BotDetector _botDetector;
   final Usage _usage;
+  final ProcessManager _processManager;
 
   @override
   Future<void> get({
@@ -391,11 +393,15 @@ class _DefaultPub implements Pub {
       'cache',
       'dart-sdk',
       'bin',
-      if (_platform.isWindows)
-        'pub.bat'
-      else
-        'pub'
+      'pub',
     ]);
+    if (!_processManager.canRun(sdkPath)) {
+      throwToolExit(
+        'Your Flutter SDK download may be corrupt or missing permissions to run. '
+        'Try re-downloading the Flutter SDK into a directory that has read/write '
+        'permissions for the current user.'
+      );
+    }
     return <String>[sdkPath, ...arguments];
   }
 
@@ -490,10 +496,10 @@ class _DefaultPub implements Pub {
 
     // Because [loadPackageConfigWithLogging] succeeded [packageConfigFile]
     // we can rely on the file to exist and be correctly formatted.
-    final dynamic jsonContents =
-        json.decode(packageConfigFile.readAsStringSync());
+    final Map<String, dynamic> jsonContents =
+        json.decode(packageConfigFile.readAsStringSync()) as Map<String, dynamic>;
 
-    jsonContents['packages'].add(<String, dynamic>{
+    (jsonContents['packages'] as List<dynamic>).add(<String, dynamic>{
       'name': 'flutter_gen',
       'rootUri': 'flutter_gen',
       'languageVersion': '2.12',

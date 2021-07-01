@@ -363,7 +363,7 @@ class Stdio {
   /// Adds [stream] to [stdout].
   Future<void> addStdoutStream(Stream<List<int>> stream) => stdout.addStream(stream);
 
-  /// Adds [srtream] to [stderr].
+  /// Adds [stream] to [stderr].
   Future<void> addStderrStream(Stream<List<int>> stream) => stderr.addStream(stream);
 }
 

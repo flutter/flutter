@@ -244,10 +244,10 @@ void main() {
                     color: Colors.red,
                   ),
                   Container(
+                    color: Colors.green,
                     child: TextField(
                       controller: textController,
                     ),
-                    color: Colors.green,
                   ),
                   Container(
                     color: Colors.red,

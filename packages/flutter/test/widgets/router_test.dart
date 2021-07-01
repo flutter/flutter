@@ -85,17 +85,13 @@ void main() {
     final BuildContext textContext = key.currentContext!;
 
     // This should not throw error.
-    Router<dynamic>? router = Router.maybeOf(textContext);
+    final Router<dynamic>? router = Router.maybeOf(textContext);
     expect(router, isNull);
 
-    bool hasFlutterError = false;
-    try {
-      router = Router.of(textContext);
-    } on FlutterError catch(e) {
-      expect(e.message.startsWith('Router'), isTrue);
-      hasFlutterError = true;
-    }
-    expect(hasFlutterError, isTrue);
+    expect(
+      () => Router.of(textContext),
+      throwsA(isFlutterError.having((FlutterError e) => e.message, 'message', startsWith('Router')))
+    );
   });
 
   testWidgets('Simple router can handle pop route', (WidgetTester tester) async {
@@ -137,46 +133,48 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
-  testWidgets('Router throw when passes only routeInformationProvider', (WidgetTester tester) async {
+  testWidgets('Router throw when passing routeInformationProvider without routeInformationParser', (WidgetTester tester) async {
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
     provider.value = const RouteInformation(
       location: 'initial',
     );
-    try {
-      Router<RouteInformation>(
-        routeInformationProvider: provider,
-        routerDelegate: SimpleRouterDelegate(
-          builder: (BuildContext context, RouteInformation? information) {
-            return Text(information!.location!);
-          },
-        ),
-      );
-    } on AssertionError catch(e) {
-      expect(
-        e.message,
-        'Both routeInformationProvider and routeInformationParser must be provided if this router '
-        'parses route information. Otherwise, they should both be null.',
-      );
-    }
+    expect(
+      () {
+        Router<RouteInformation>(
+          routeInformationProvider: provider,
+          routerDelegate: SimpleRouterDelegate(
+            builder: (BuildContext context, RouteInformation? information) {
+              return Text(information!.location!);
+            },
+          ),
+        );
+      },
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.message,
+        'message',
+        'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.',
+      )),
+    );
   });
 
-  testWidgets('Router throw when passes only routeInformationParser', (WidgetTester tester) async {
-    try {
-      Router<RouteInformation>(
-        routeInformationParser: SimpleRouteInformationParser(),
-        routerDelegate: SimpleRouterDelegate(
-          builder: (BuildContext context, RouteInformation? information) {
-            return Text(information!.location!);
-          },
-        ),
-      );
-    } on AssertionError catch(e) {
-      expect(
-        e.message,
-        'Both routeInformationProvider and routeInformationParser must be provided if this router '
-        'parses route information. Otherwise, they should both be null.',
-      );
-    }
+  testWidgets('Router throw when passing restorationId without routeInformationParser', (WidgetTester tester) async {
+    expect(
+      () {
+        Router<RouteInformation>(
+          restorationScopeId: 'foo',
+          routerDelegate: SimpleRouterDelegate(
+            builder: (BuildContext context, RouteInformation? information) {
+              return Text(information!.location!);
+            },
+          ),
+        );
+      },
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.message,
+        'message',
+        'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.',
+      )),
+    );
   });
 
   testWidgets('PopNavigatorRouterDelegateMixin works', (WidgetTester tester) async {
@@ -265,7 +263,7 @@ void main() {
           },
           onPopRoute: () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           },
@@ -334,7 +332,7 @@ void main() {
           },
           onPopRoute: () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           },
@@ -349,7 +347,7 @@ void main() {
     result = await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
     expect(result, isTrue);
     await tester.pump();
-    expect(find.text('popped outter'), findsOneWidget);
+    expect(find.text('popped outer'), findsOneWidget);
 
     innerDispatcher1.takePriority();
     result = false;
@@ -468,7 +466,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
         ),
       ),
     ));
-    // This should work without calling the takePrioirty on the innerDispatcher2
+    // This should work without calling the takePriority on the innerDispatcher2
     // and the innerDispatcher1.
     innerDispatcher3.takePriority();
     bool result = false;
@@ -759,7 +757,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
           },
           onPopRoute: () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           },
@@ -801,7 +799,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
           }
         ..onPopRoute = () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           };
@@ -835,7 +833,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       }
       ..onPopRoute = () {
         provider.value = const RouteInformation(
-          location: 'popped outter',
+          location: 'popped outer',
         );
         return SynchronousFuture<bool>(true);
       };
@@ -880,7 +878,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
           }
         ..onPopRoute = () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           };
@@ -905,7 +903,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       }
       ..onPopRoute = () {
         provider.value = const RouteInformation(
-          location: 'popped outter',
+          location: 'popped outer',
         );
         return SynchronousFuture<bool>(true);
       };
@@ -921,7 +919,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await tester.pump();
     await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
     await tester.pump();
-    expect(find.text('popped outter'), findsOneWidget);
+    expect(find.text('popped outer'), findsOneWidget);
   });
 
   testWidgets('Nested backButtonListener should take priority', (WidgetTester tester) async {
@@ -963,7 +961,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
           },
           onPopRoute: () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           },
@@ -1018,7 +1016,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
           },
           onPopRoute: () {
             provider.value = const RouteInformation(
-              location: 'popped outter',
+              location: 'popped outer',
             );
             return SynchronousFuture<bool>(true);
           },
@@ -1067,7 +1065,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       }
       ..onPopRoute = () {
         provider.value = const RouteInformation(
-          location: 'popped outter',
+          location: 'popped outer',
         );
         return SynchronousFuture<bool>(true);
       };
@@ -1090,6 +1088,35 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
     await tester.pump();
     expect(find.text('second callback'), findsOneWidget);
+  });
+
+  testWidgets('Router reports location if it is different from location given by OS', (WidgetTester tester) async {
+    final List<RouteInformation> reportedRouteInformation = <RouteInformation>[];
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(
+      onRouterReport: reportedRouteInformation.add,
+    )..value = const RouteInformation(location: '/home');
+
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        routeInformationProvider: provider,
+        routeInformationParser: RedirectingInformationParser(<String, RouteInformation>{
+          '/doesNotExist' : const RouteInformation(location: '/404'),
+        }),
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext _, RouteInformation? info) => Text('Current route: ${info?.location}'),
+          reportConfiguration: true,
+        ),
+      ),
+    ));
+
+    expect(find.text('Current route: /home'), findsOneWidget);
+    expect(reportedRouteInformation, isEmpty);
+
+    provider.value = const RouteInformation(location: '/doesNotExist');
+    await tester.pump();
+
+    expect(find.text('Current route: /404'), findsOneWidget);
+    expect(reportedRouteInformation.single.location, '/404');
   });
 }
 
@@ -1274,4 +1301,21 @@ class SimpleAsyncRouterDelegate extends RouterDelegate<RouteInformation> with Ch
 
   @override
   Widget build(BuildContext context) => builder(context, routeInformation);
+}
+
+class RedirectingInformationParser extends RouteInformationParser<RouteInformation> {
+
+  RedirectingInformationParser(this.redirects);
+
+  final Map<String, RouteInformation> redirects;
+
+  @override
+  Future<RouteInformation> parseRouteInformation(RouteInformation information) {
+    return SynchronousFuture<RouteInformation>(redirects[information.location] ?? information);
+  }
+
+  @override
+  RouteInformation restoreRouteInformation(RouteInformation configuration) {
+    return configuration;
+  }
 }

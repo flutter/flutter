@@ -303,7 +303,7 @@ class Table extends RenderObjectWidget {
   final List<Decoration?>? _rowDecorations;
 
   @override
-  _TableElement createElement() => _TableElement(this);
+  RenderObjectElement createElement() => _TableElement(this);
 
   @override
   RenderTable createRenderObject(BuildContext context) {
@@ -392,8 +392,7 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void removeRenderObjectChild(RenderBox child, _TableSlot slot) {
-    final TableCellParentData childParentData = child.parentData! as TableCellParentData;
-    renderObject.setChild(childParentData.x!, childParentData.y!, null);
+    renderObject.setChild(slot.column, slot.row, null);
   }
 
   final Set<Element> _forgottenChildren = HashSet<Element>();

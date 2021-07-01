@@ -37,7 +37,7 @@ class AutomaticKeepAlive extends StatefulWidget {
   final Widget? child;
 
   @override
-  _AutomaticKeepAliveState createState() => _AutomaticKeepAliveState();
+  State<AutomaticKeepAlive> createState() => _AutomaticKeepAliveState();
 }
 
 class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {

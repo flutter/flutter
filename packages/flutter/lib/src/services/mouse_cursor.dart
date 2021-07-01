@@ -345,7 +345,7 @@ class _SystemMouseCursorSession extends MouseCursorSession {
 /// I-beam, etc.
 ///
 /// An instance of [SystemMouseCursor] refers to one cursor from each platform
-/// that represents the same concept, such as being text text, being clickable,
+/// that represents the same concept, such as being text, being clickable,
 /// or being a forbidden operation. Since the set of system cursors supported by
 /// each platform varies, multiple instances can correspond to the same system
 /// cursor.
@@ -381,7 +381,7 @@ class SystemMouseCursor extends MouseCursor {
 
   @override
   @protected
-  _SystemMouseCursorSession createSession(int device) => _SystemMouseCursorSession(this, device);
+  MouseCursorSession createSession(int device) => _SystemMouseCursorSession(this, device);
 
   @override
   bool operator ==(Object other) {
@@ -417,7 +417,7 @@ class SystemMouseCursor extends MouseCursor {
 class SystemMouseCursors {
   // This class only contains static members, and should not be instantiated or
   // extended.
-  factory SystemMouseCursors._() => throw Error();
+  SystemMouseCursors._();
 
   // The mapping in this class must be kept in sync with the following files in
   // the engine:

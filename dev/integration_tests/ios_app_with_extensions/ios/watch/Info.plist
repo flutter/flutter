@@ -26,7 +26,7 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 	<key>WKCompanionAppBundleIdentifier</key>
-	<string>io.flutter.extensionTest</string>
+	<string>$(APP_BUNDLE_IDENTIFIER)</string>
 	<key>WKWatchKitApp</key>
 	<true/>
 </dict>

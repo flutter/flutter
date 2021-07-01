@@ -81,16 +81,7 @@ enum ScriptCategory {
 class Typography with Diagnosticable {
   /// Creates a typography instance.
   ///
-  /// This constructor is identical to [Typography.material2014]. It is
-  /// deprecated because the 2014 material design defaults used by that
-  /// constructor are obsolete. The current material design specification
-  /// recommendations are those reflected by [Typography.material2018].
-  @Deprecated(
-    'The default Typography constructor defaults to the 2014 material design defaults. '
-    'Applications are urged to migrate to Typography.material2018(), or, if the 2014 defaults '
-    'are desired, to explicitly request them using Typography.material2014(). '
-    'This feature was deprecated after v1.13.8.',
-  )
+  /// This constructor is identical to [Typography.material2018].
   factory Typography({
     TargetPlatform? platform,
     TextTheme? black,
@@ -98,7 +89,7 @@ class Typography with Diagnosticable {
     TextTheme? englishLike,
     TextTheme? dense,
     TextTheme? tall,
-  }) = Typography.material2014;
+  }) = Typography.material2018;
 
   /// Creates a typography instance using material design's 2014 defaults.
   ///

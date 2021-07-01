@@ -52,13 +52,14 @@ void main() {
 
       expect(testLogger.statusText, isNotEmpty);
       final dynamic jsonObject = json.decode(testLogger.statusText);
-      expect(jsonObject, isMap);
+      expect(jsonObject, const TypeMatcher<Map<String, dynamic>>());
+      if (jsonObject is Map<String, dynamic>) {
+        expect(jsonObject.containsKey('android-studio-dir'), true);
+        expect(jsonObject['android-studio-dir'], isNotNull);
 
-      expect(jsonObject.containsKey('android-studio-dir'), true);
-      expect(jsonObject['android-studio-dir'], isNotNull);
-
-      expect(jsonObject.containsKey('android-sdk'), true);
-      expect(jsonObject['android-sdk'], isNotNull);
+        expect(jsonObject.containsKey('android-sdk'), true);
+        expect(jsonObject['android-sdk'], isNotNull);
+      }
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       AndroidStudio: () => fakeAndroidStudio,

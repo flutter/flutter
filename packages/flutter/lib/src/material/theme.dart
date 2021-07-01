@@ -213,7 +213,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   final Widget child;
 
   @override
-  _AnimatedThemeState createState() => _AnimatedThemeState();
+  AnimatedWidgetBaseState<AnimatedTheme> createState() => _AnimatedThemeState();
 }
 
 class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
@@ -227,8 +227,8 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      child: widget.child,
       data: _data!.evaluate(animation),
+      child: widget.child,
     );
   }
 

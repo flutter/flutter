@@ -461,6 +461,7 @@ void main() {
     final RenderObject renderTextfield = tester.renderObject(find.descendant(of: find.byKey(textField), matching: find.byType(Semantics)).first);
 
     expect(
+      // ignore: avoid_dynamic_calls
       semanticsDebuggerPainter.getMessage(renderTextfield.debugSemantics),
       'textfield',
     );
@@ -483,6 +484,7 @@ void main() {
       ),
     );
 
+    // ignore: avoid_dynamic_calls
     expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
   });
 }
@@ -493,6 +495,7 @@ String _getMessageShownInSemanticsDebugger({
   required WidgetTester tester,
 }) {
   final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debuggerKey, tester: tester);
+  // ignore: avoid_dynamic_calls
   return semanticsDebuggerPainter.getMessage(tester.renderObject(find.byKey(widgetKey)).debugSemantics) as String;
 }
 

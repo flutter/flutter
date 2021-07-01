@@ -128,7 +128,7 @@ class ProtocolDiscovery {
     } on FormatException catch (error, stackTrace) {
       _uriStreamController.addError(error, stackTrace);
     }
-    if (uri == null) {
+    if (uri == null || uri.host.isEmpty) {
       return;
     }
     if (devicePort != null && uri.port != devicePort) {
@@ -177,8 +177,8 @@ class _BufferedStreamController<T> {
           _streamControllerInstance.add(event);
         } else {
           _streamControllerInstance.addError(
-            event.first as Object,
-            event.last as StackTrace,
+            (event as Iterable<dynamic>).first as Object,
+            (event as Iterable<dynamic>).last as StackTrace,
           );
         }
       }

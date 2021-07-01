@@ -199,8 +199,8 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     if (widget.onTap != null) {
       accountDetails = InkWell(
         onTap: widget.onTap,
-        child: accountDetails,
         excludeFromSemantics: true,
+        child: accountDetails,
       );
     }
 
@@ -348,7 +348,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   final Color arrowColor;
 
   @override
-  _UserAccountsDrawerHeaderState createState() => _UserAccountsDrawerHeaderState();
+  State<UserAccountsDrawerHeader> createState() => _UserAccountsDrawerHeaderState();
 }
 
 class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {

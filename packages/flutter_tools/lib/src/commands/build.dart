@@ -10,7 +10,7 @@ import '../build_info.dart';
 import '../commands/build_linux.dart';
 import '../commands/build_macos.dart';
 import '../commands/build_windows.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';

@@ -90,8 +90,11 @@ InputBorder? getBorder(WidgetTester tester) {
     return null;
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  // ignore: avoid_dynamic_calls
   final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+  // ignore: avoid_dynamic_calls
   final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+  // ignore: avoid_dynamic_calls
   final InputBorder border = inputBorderTween.evaluate(animation) as InputBorder;
   return border;
 }
@@ -115,6 +118,7 @@ Color getBorderColor(WidgetTester tester) => getBorderSide(tester)!.color;
 Color getContainerColor(WidgetTester tester) {
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  // ignore: avoid_dynamic_calls
   return inputBorderPainter.blendedColor as Color;
 }
 
@@ -2894,7 +2898,7 @@ void main() {
         isEmpty: true,
         decoration: const InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),
-          hasFloatingPlaceholder: false,
+          floatingLabelBehavior: FloatingLabelBehavior.never,
           labelText: 'label',
         ),
       ),
@@ -2918,7 +2922,7 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),
-          hasFloatingPlaceholder: false,
+          floatingLabelBehavior: FloatingLabelBehavior.never,
           labelText: 'label',
         ),
       ),
@@ -4094,7 +4098,6 @@ void main() {
       helperMaxLines: 6,
       hintStyle: TextStyle(),
       errorMaxLines: 5,
-      hasFloatingPlaceholder: false,
       floatingLabelBehavior: FloatingLabelBehavior.never,
       contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
       prefixStyle: TextStyle(),
@@ -4120,7 +4123,6 @@ void main() {
       'helperMaxLines: 6',
       'hintStyle: TextStyle(<all styles inherited>)',
       'errorMaxLines: 5',
-      'hasFloatingPlaceholder: false',
       'floatingLabelBehavior: FloatingLabelBehavior.never',
       'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
       'prefixStyle: TextStyle(<all styles inherited>)',

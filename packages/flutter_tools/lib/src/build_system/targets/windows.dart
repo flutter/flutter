@@ -144,7 +144,7 @@ class UnpackWindowsUwp extends Target {
       );
     final String clientSourcePath = environment.artifacts
       .getArtifactPath(
-        Artifact.windowsCppClientWrapper,
+        Artifact.windowsUwpCppClientWrapper,
         platform: TargetPlatform.windows_x64,
         mode: buildMode,
       );

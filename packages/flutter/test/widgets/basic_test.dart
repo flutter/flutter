@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -211,6 +212,152 @@ void main() {
     });
   });
 
+  group('Semantics', () {
+    testWidgets('Semantics can set attributed Text', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key,
+              attributedLabel: AttributedString(
+                'label',
+                attributes: <StringAttribute>[
+                  SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+                ],
+              ),
+              attributedValue: AttributedString(
+                'value',
+                attributes: <StringAttribute>[
+                  LocaleStringAttribute(range: const TextRange(start: 0, end: 5), locale: const Locale('en', 'MX')),
+                ],
+              ),
+              attributedHint: AttributedString(
+                'hint',
+                attributes: <StringAttribute>[
+                  SpellOutStringAttribute(range: const TextRange(start: 1, end: 2)),
+                ],
+              ),
+              child: const Placeholder(),
+            )
+          ),
+        )
+      );
+      final AttributedString attributedLabel = tester.getSemantics(find.byKey(key)).attributedLabel;
+      expect(attributedLabel.string, 'label');
+      expect(attributedLabel.attributes.length, 1);
+      expect(attributedLabel.attributes[0] is SpellOutStringAttribute, isTrue);
+      expect(attributedLabel.attributes[0].range, const TextRange(start:0, end: 5));
+
+      final AttributedString attributedValue = tester.getSemantics(find.byKey(key)).attributedValue;
+      expect(attributedValue.string, 'value');
+      expect(attributedValue.attributes.length, 1);
+      expect(attributedValue.attributes[0] is LocaleStringAttribute, isTrue);
+      final LocaleStringAttribute valueLocale =  attributedValue.attributes[0] as LocaleStringAttribute;
+      expect(valueLocale.range, const TextRange(start:0, end: 5));
+      expect(valueLocale.locale, const Locale('en', 'MX'));
+
+      final AttributedString attributedHint = tester.getSemantics(find.byKey(key)).attributedHint;
+      expect(attributedHint.string, 'hint');
+      expect(attributedHint.attributes.length, 1);
+      expect(attributedHint.attributes[0] is SpellOutStringAttribute, isTrue);
+      expect(attributedHint.attributes[0].range, const TextRange(start:1, end: 2));
+    });
+
+    testWidgets('Semantics can merge attributed strings', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+                body: Semantics(
+                  key: key,
+                  attributedLabel: AttributedString(
+                    'label',
+                    attributes: <StringAttribute>[
+                      SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+                    ],
+                  ),
+                  attributedHint: AttributedString(
+                    'hint',
+                    attributes: <StringAttribute>[
+                      SpellOutStringAttribute(range: const TextRange(start: 1, end: 2)),
+                    ],
+                  ),
+                  child: Semantics(
+                    attributedLabel: AttributedString(
+                      'label',
+                      attributes: <StringAttribute>[
+                        SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+                      ],
+                    ),
+                    attributedHint: AttributedString(
+                      'hint',
+                      attributes: <StringAttribute>[
+                        SpellOutStringAttribute(range: const TextRange(start: 1, end: 2)),
+                      ],
+                    ),
+                    child: const Placeholder(),
+                  )
+                )
+            ),
+          )
+      );
+      final AttributedString attributedLabel = tester.getSemantics(find.byKey(key)).attributedLabel;
+      expect(attributedLabel.string, 'label\nlabel');
+      expect(attributedLabel.attributes.length, 2);
+      expect(attributedLabel.attributes[0] is SpellOutStringAttribute, isTrue);
+      expect(attributedLabel.attributes[0].range, const TextRange(start:0, end: 5));
+      expect(attributedLabel.attributes[1] is SpellOutStringAttribute, isTrue);
+      expect(attributedLabel.attributes[1].range, const TextRange(start:6, end: 11));
+
+      final AttributedString attributedHint = tester.getSemantics(find.byKey(key)).attributedHint;
+      expect(attributedHint.string, 'hint\nhint');
+      expect(attributedHint.attributes.length, 2);
+      expect(attributedHint.attributes[0] is SpellOutStringAttribute, isTrue);
+      expect(attributedHint.attributes[0].range, const TextRange(start:1, end: 2));
+      expect(attributedHint.attributes[1] is SpellOutStringAttribute, isTrue);
+      expect(attributedHint.attributes[1].range, const TextRange(start:6, end: 7));
+    });
+
+    testWidgets('Semantics can merge attributed strings with non attributed string', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+                body: Semantics(
+                    key: key,
+                    attributedLabel: AttributedString(
+                      'label1',
+                      attributes: <StringAttribute>[
+                        SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+                      ],
+                    ),
+                    child: Semantics(
+                      label: 'label2',
+                      child: Semantics(
+                        attributedLabel: AttributedString(
+                          'label3',
+                          attributes: <StringAttribute>[
+                            SpellOutStringAttribute(range: const TextRange(start: 1, end: 3)),
+                          ],
+                        ),
+                        child: const Placeholder(),
+                      ),
+                    )
+                )
+            ),
+          )
+      );
+      final AttributedString attributedLabel = tester.getSemantics(find.byKey(key)).attributedLabel;
+      expect(attributedLabel.string, 'label1\nlabel2\nlabel3');
+      expect(attributedLabel.attributes.length, 2);
+      expect(attributedLabel.attributes[0] is SpellOutStringAttribute, isTrue);
+      expect(attributedLabel.attributes[0].range, const TextRange(start:0, end: 5));
+      expect(attributedLabel.attributes[1] is SpellOutStringAttribute, isTrue);
+      expect(attributedLabel.attributes[1].range, const TextRange(start:15, end: 17));
+    });
+  });
+
   group('Row', () {
     testWidgets('multiple baseline aligned children', (WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
@@ -387,7 +534,7 @@ void main() {
       expect(mockCanvas.rects, isEmpty);
       expect(mockCanvas.paints, isEmpty);
       expect(mockContext.children, isEmpty);
-      expect(mockContext.offets, isEmpty);
+      expect(mockContext.offsets, isEmpty);
     });
 
     testWidgets('ColoredBox - no size, child', (WidgetTester tester) async {
@@ -411,7 +558,7 @@ void main() {
       expect(mockCanvas.rects, isEmpty);
       expect(mockCanvas.paints, isEmpty);
       expect(mockContext.children.single, renderSizedBox);
-      expect(mockContext.offets.single, Offset.zero);
+      expect(mockContext.offsets.single, Offset.zero);
     });
 
     testWidgets('ColoredBox - size, no child', (WidgetTester tester) async {
@@ -424,7 +571,7 @@ void main() {
       expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
       expect(mockCanvas.paints.single.color, colorToPaint);
       expect(mockContext.children, isEmpty);
-      expect(mockContext.offets, isEmpty);
+      expect(mockContext.offsets, isEmpty);
     });
 
     testWidgets('ColoredBox - size, child', (WidgetTester tester) async {
@@ -440,7 +587,7 @@ void main() {
       expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
       expect(mockCanvas.paints.single.color, colorToPaint);
       expect(mockContext.children.single, renderSizedBox);
-      expect(mockContext.offets.single, Offset.zero);
+      expect(mockContext.offsets.single, Offset.zero);
     });
 
     testWidgets('ColoredBox - properties', (WidgetTester tester) async {
@@ -666,7 +813,7 @@ class DoesNotHitRenderBox extends Matcher {
 
 class _MockPaintingContext extends Fake implements PaintingContext {
   final List<RenderObject> children = <RenderObject>[];
-  final List<Offset> offets = <Offset>[];
+  final List<Offset> offsets = <Offset>[];
 
   @override
   final _MockCanvas canvas = _MockCanvas();
@@ -674,7 +821,7 @@ class _MockPaintingContext extends Fake implements PaintingContext {
   @override
   void paintChild(RenderObject child, Offset offset) {
     children.add(child);
-    offets.add(offset);
+    offsets.add(offset);
   }
 }
 

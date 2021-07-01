@@ -20,12 +20,6 @@ class TestDelegate extends BinaryMessenger {
   Future<void> handlePlatformMessage(String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback) => throw UnimplementedError();
   @override
   void setMessageHandler(String channel, MessageHandler? handler) => throw UnimplementedError();
-  @override
-  bool checkMessageHandler(String channel, MessageHandler? handler) => throw UnimplementedError();
-  @override
-  void setMockMessageHandler(String channel, MessageHandler? handler) => throw UnimplementedError();
-  @override
-  bool checkMockMessageHandler(String channel, MessageHandler? handler) => throw UnimplementedError();
 }
 
 void main() {

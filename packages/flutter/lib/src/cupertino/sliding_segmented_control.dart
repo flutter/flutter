@@ -402,7 +402,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   final EdgeInsetsGeometry padding;
 
   @override
-  _SegmentedControlState<T> createState() => _SegmentedControlState<T>();
+  State<CupertinoSlidingSegmentedControl<T>> createState() => _SegmentedControlState<T>();
 }
 
 class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T>>
@@ -687,11 +687,11 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
           animation: thumbScaleAnimation,
           builder: (BuildContext context, Widget? child) {
             return _SegmentedControlRenderWidget<T>(
-              children: children,
               highlightedIndex: highlightedIndex,
               thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
               thumbScale: thumbScaleAnimation.value,
               state: this,
+              children: children,
             );
           },
         ),
@@ -993,7 +993,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     assert(rightMost > leftMost);
 
     // Ignore the horizontal position and the height of `thumbRect`, and
-    // calcuates them from `children`.
+    // calculates them from `children`.
     return Rect.fromLTRB(
       math.max(thumbRect.left, leftMost - _kThumbInsets.left),
       firstChildOffset.dy - _kThumbInsets.top,

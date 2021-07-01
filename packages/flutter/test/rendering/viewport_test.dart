@@ -45,6 +45,50 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 }
 
 void main() {
+  testWidgets('Scrollable widget scrollDirection update test', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget buildFrame(Axis axis) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 100.0,
+            width: 100.0,
+            child: SingleChildScrollView(
+              controller: controller,
+              scrollDirection: axis,
+              child: const SizedBox(
+                width: 200,
+                height: 200,
+                child: SizedBox.shrink(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Axis.vertical));
+    expect(controller.position.pixels, 0.0);
+
+    // Change the SingleChildScrollView.scrollDirection to horizontal.
+    await tester.pumpWidget(buildFrame(Axis.horizontal));
+    expect(controller.position.pixels, 0.0);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 300.0));
+    // Drag in the vertical direction should not cause scrolling.
+    await gesture.moveBy(const Offset(0.0, 10.0));
+    expect(controller.position.pixels, 0.0);
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    expect(controller.position.pixels, 0.0);
+
+    // Drag in the horizontal direction should cause scrolling.
+    await gesture.moveBy(const Offset(-10.0, 0.0));
+    expect(controller.position.pixels, 10.0);
+    await gesture.moveBy(const Offset(10.0, 0.0));
+    expect(controller.position.pixels, 0.0);
+  });
+
   testWidgets('Viewport getOffsetToReveal - down', (WidgetTester tester) async {
     List<Widget> children;
     await tester.pumpWidget(

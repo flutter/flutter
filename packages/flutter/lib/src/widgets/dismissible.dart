@@ -212,8 +212,9 @@ class Dismissible extends StatefulWidget {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag gesture used to dismiss a
-  /// dismissible will begin upon the detection of a drag gesture. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// dismissible will begin at the position where the drag gesture won the arena.
+  /// If set to [DragStartBehavior.down] it will begin at the position where
+  /// a down event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -232,7 +233,7 @@ class Dismissible extends StatefulWidget {
   final HitTestBehavior behavior;
 
   @override
-  _DismissibleState createState() => _DismissibleState();
+  State<Dismissible> createState() => _DismissibleState();
 }
 
 class _DismissibleClipper extends CustomClipper<Rect> {
@@ -609,6 +610,12 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         content,
       ]);
     }
+
+    // If the DismissDirection is none, we do not add drag gestures because the content
+    // cannot be dragged.
+    if (widget.direction == DismissDirection.none)
+      return content;
+
     // We are not resizing but we may be being dragging in widget.direction.
     return GestureDetector(
       onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,
@@ -618,8 +625,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
       behavior: widget.behavior,
-      child: content,
       dragStartBehavior: widget.dragStartBehavior,
+      child: content,
     );
   }
 }

@@ -103,7 +103,7 @@ abstract class AssetBundle {
 /// This asset bundle does not cache any resources, though the underlying
 /// network stack may implement some level of caching itself.
 class NetworkAssetBundle extends AssetBundle {
-  /// Creates an network asset bundle that resolves asset keys as URLs relative
+  /// Creates a network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
   NetworkAssetBundle(Uri baseUrl)
     : _baseUrl = baseUrl,

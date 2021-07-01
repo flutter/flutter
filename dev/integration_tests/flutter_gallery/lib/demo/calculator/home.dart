@@ -10,10 +10,10 @@ class Calculator extends StatefulWidget {
   const Calculator({Key? key}) : super(key: key);
 
   @override
-  _CalculatorState createState() => _CalculatorState();
+  State<Calculator> createState() => CalculatorState();
 }
 
-class _CalculatorState extends State<Calculator> {
+class CalculatorState extends State<Calculator> {
   /// As the user taps keys we update the current `_expression` and we also
   /// keep a stack of previous expressions so we can return to earlier states
   /// when the user hits the DEL key.
@@ -156,7 +156,7 @@ class CalcDisplay extends StatelessWidget {
 class KeyPad extends StatelessWidget {
   const KeyPad({ Key? key, this.calcState }) : super(key: key);
 
-  final _CalculatorState? calcState;
+  final CalculatorState? calcState;
 
   @override
   Widget build(BuildContext context) {
@@ -265,7 +265,7 @@ class CalcKey extends StatelessWidget {
 }
 
 class NumberKey extends CalcKey {
-  NumberKey(int value, _CalculatorState? calcState, {Key? key})
+  NumberKey(int value, CalculatorState? calcState, {Key? key})
     : super('$value', () {
         calcState!.handleNumberTap(value);
       }, key: key);

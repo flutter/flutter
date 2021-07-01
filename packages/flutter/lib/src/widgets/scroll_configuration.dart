@@ -108,9 +108,9 @@ class ScrollBehavior {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       return GlowingOverscrollIndicator(
-        child: child,
         axisDirection: axisDirection,
         color: _kDefaultGlowColor,
+        child: child,
       );
     }
   }
@@ -124,8 +124,8 @@ class ScrollBehavior {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return RawScrollbar(
-          child: child,
           controller: details.controller,
+          child: child,
         );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:

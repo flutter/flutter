@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -952,6 +953,24 @@ void main() {
       expect(glyphBox, newGlyphBox);
     });
   }, skip: isBrowser);
+
+  test('TextPainter handles invalid UTF-16', () {
+    Object? exception;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exception = details.exception;
+    };
+
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    const String text = 'Hello\uD83DWorld';
+    const double fontSize = 20.0;
+    painter.text = const TextSpan(text: text, style: TextStyle(fontSize: fontSize));
+    painter.layout();
+    // The layout should include one replacement character.
+    expect(painter.width, equals(fontSize));
+    expect(exception, isNotNull);
+  }, skip: kIsWeb);
 }
 
 class MockCanvas extends Fake implements Canvas {

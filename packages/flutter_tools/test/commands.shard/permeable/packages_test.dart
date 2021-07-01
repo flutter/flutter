@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
-import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -240,8 +239,7 @@ void main() {
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues,
-             containsPair(CustomDimensions.commandPackagesNumberPlugins, '0'));
+      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 0);
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -263,8 +261,7 @@ void main() {
       final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues,
-          containsPair(CustomDimensions.commandPackagesNumberPlugins, '1'));
+      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 1);
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -284,8 +281,7 @@ void main() {
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues,
-             containsPair(CustomDimensions.commandPackagesProjectModule, 'false'));
+      expect((await getCommand.usageValues).commandPackagesProjectModule, false);
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -305,8 +301,7 @@ void main() {
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues,
-             containsPair(CustomDimensions.commandPackagesProjectModule, 'true'));
+      expect((await getCommand.usageValues).commandPackagesProjectModule, true);
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -335,8 +330,7 @@ void main() {
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues,
-             containsPair(CustomDimensions.commandPackagesAndroidEmbeddingVersion, 'v1'));
+      expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -356,8 +350,7 @@ void main() {
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues,
-             containsPair(CustomDimensions.commandPackagesAndroidEmbeddingVersion, 'v2'));
+      expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,

@@ -12,7 +12,7 @@ class PersistentBottomSheetDemo extends StatefulWidget {
   static const String routeName = '/material/persistent-bottom-sheet';
 
   @override
-  _PersistentBottomSheetDemoState createState() => _PersistentBottomSheetDemoState();
+  State<PersistentBottomSheetDemo> createState() => _PersistentBottomSheetDemoState();
 }
 
 class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {

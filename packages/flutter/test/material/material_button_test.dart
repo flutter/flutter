@@ -307,9 +307,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MaterialButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -622,8 +622,8 @@ void main() {
       child: Material(
         child: Center(
           child: MaterialButton(
-            child: Text('Button'),
             onPressed: null, // button is disabled
+            child: Text('Button'),
           ),
         ),
       ),

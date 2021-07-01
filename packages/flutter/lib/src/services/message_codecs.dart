@@ -154,7 +154,7 @@ class JSONMethodCodec implements MethodCodec {
         && (decoded[1] == null || decoded[1] is String))
       throw PlatformException(
         code: decoded[0] as String,
-        message: decoded[1] as String,
+        message: decoded[1] as String?,
         details: decoded[2],
       );
     if (decoded.length == 4
@@ -163,9 +163,9 @@ class JSONMethodCodec implements MethodCodec {
         && (decoded[3] == null || decoded[3] is String))
       throw PlatformException(
         code: decoded[0] as String,
-        message: decoded[1] as String,
+        message: decoded[1] as String?,
         details: decoded[2],
-        stacktrace: decoded[3] as String,
+        stacktrace: decoded[3] as String?,
       );
     throw FormatException('Invalid envelope: $decoded');
   }

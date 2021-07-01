@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/convert.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 
@@ -56,7 +55,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testUsingContext('flutter run --observatory-port', () async {
+  testWithoutContext('flutter run --observatory-port', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int port = await getFreePort();
     // If only --observatory-port is provided, --observatory-port will be used by DDS
@@ -74,7 +73,7 @@ void main() {
     await process.exitCode;
   });
 
-  testUsingContext('flutter run --dds-port --observatory-port', () async {
+  testWithoutContext('flutter run --dds-port --observatory-port', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int observatoryPort = await getFreePort();
     int ddsPort = await getFreePort();
@@ -97,7 +96,7 @@ void main() {
     await process.exitCode;
   });
 
-  testUsingContext('flutter run --dds-port', () async {
+  testWithoutContext('flutter run --dds-port', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int ddsPort = await getFreePort();
     // If only --dds-port is provided, --dds-port will be used by DDS and the VM service

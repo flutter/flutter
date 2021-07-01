@@ -30,12 +30,12 @@ void main() {
 
       await expectLater(() => createTestCommandRunner(ScreenshotCommand())
         .run(<String>['screenshot', '--type=skia', '--observatory-url=http://localhost:8181']),
-        throwsA(isA<Exception>().having((dynamic exception) => exception.toString(), 'message', contains('dummy'))),
+        throwsA(isException.having((Exception exception) => exception.toString(), 'message', contains('dummy'))),
       );
 
       await expectLater(() => createTestCommandRunner(ScreenshotCommand())
         .run(<String>['screenshot', '--type=rasterizer', '--observatory-url=http://localhost:8181']),
-        throwsA(isA<Exception>().having((dynamic exception) => exception.toString(), 'message', contains('dummy'))),
+        throwsA(isException.having((Exception exception) => exception.toString(), 'message', contains('dummy'))),
       );
     });
 

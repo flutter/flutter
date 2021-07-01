@@ -16,7 +16,7 @@ class ShoppingCartPage extends StatefulWidget {
   const ShoppingCartPage({Key? key}) : super(key: key);
 
   @override
-  _ShoppingCartPageState createState() => _ShoppingCartPageState();
+  State<ShoppingCartPage> createState() => _ShoppingCartPageState();
 }
 
 class _ShoppingCartPageState extends State<ShoppingCartPage> {

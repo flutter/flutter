@@ -1364,7 +1364,7 @@ class ListView extends BoxScrollView {
   ///   const MyListView({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   _MyListViewState createState() => _MyListViewState();
+  ///   State<MyListView> createState() => _MyListViewState();
   /// }
   ///
   /// class _MyListViewState extends State<MyListView> {
@@ -1421,7 +1421,7 @@ class ListView extends BoxScrollView {
   ///   final String data;
   ///
   ///   @override
-  ///   _KeepAliveState createState() => _KeepAliveState();
+  ///   State<KeepAlive> createState() => _KeepAliveState();
   /// }
   ///
   /// class _KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin{

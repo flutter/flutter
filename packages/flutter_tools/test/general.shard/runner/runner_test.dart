@@ -282,7 +282,7 @@ class CrashingUsage implements Usage {
   String get clientId => _impl.clientId;
 
   @override
-  void sendCommand(String command, {Map<String, String> parameters}) =>
+  void sendCommand(String command, {CustomDimensions parameters}) =>
       _impl.sendCommand(command, parameters: parameters);
 
   @override
@@ -291,7 +291,7 @@ class CrashingUsage implements Usage {
     String parameter, {
     String label,
     int value,
-    Map<String, String> parameters,
+    CustomDimensions parameters,
   }) => _impl.sendEvent(
     category,
     parameter,

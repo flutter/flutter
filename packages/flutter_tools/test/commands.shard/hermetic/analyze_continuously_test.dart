@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:process/process.dart';
 
 import '../../src/common.dart';

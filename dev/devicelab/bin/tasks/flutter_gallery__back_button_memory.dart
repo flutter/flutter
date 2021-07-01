@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// Measure application memory usage after pausing and resuming the app
 /// with the Android back button.
 
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/perf_tests.dart';

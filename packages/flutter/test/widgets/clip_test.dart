@@ -389,10 +389,10 @@ void main() {
               width: 100.0,
               height: 100.0,
               child: ClipRect(
+                clipBehavior: Clip.hardEdge,
                 child: Container(
                   color: Colors.blue,
                 ),
-                clipBehavior: Clip.hardEdge,
               ),
             ),
             Positioned(
@@ -835,8 +835,8 @@ void main() {
 
     await tester.pumpWidget(
       ClipRect(
-        child: const Placeholder(),
         clipper: NotifyClipper<Rect>(clip: clip),
+        child: const Placeholder(),
       ),
     );
 

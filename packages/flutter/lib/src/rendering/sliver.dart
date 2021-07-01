@@ -919,7 +919,7 @@ class SliverHitTestEntry extends HitTestEntry {
 class SliverLogicalParentData extends ParentData {
   /// The position of the child relative to the zero scroll offset.
   ///
-  /// The number of pixels from from the zero scroll offset of the parent sliver
+  /// The number of pixels from the zero scroll offset of the parent sliver
   /// (the line at which its [SliverConstraints.scrollOffset] is zero) to the
   /// side of the child closest to that offset. A [layoutOffset] can be null
   /// when it cannot be determined. The value will be set after layout.

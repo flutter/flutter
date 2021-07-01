@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class ColorTestingDemo extends StatelessWidget {
-  const ColorTestingDemo({ Key key }) : super(key: key);
+  const ColorTestingDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/color_demo';
 
@@ -14,7 +14,7 @@ class ColorTestingDemo extends StatelessWidget {
 }
 
 class ColorDemoHome extends StatelessWidget {
-  const ColorDemoHome({Key key}) : super(key: key);
+  const ColorDemoHome({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class ColorDemoHome extends StatelessWidget {
 }
 
 class GradientRow extends StatelessWidget {
-  const GradientRow({ Key key, this.rightColor, this.leftColor }) : super(key: key);
+  const GradientRow({ Key? key, required this.rightColor, required this.leftColor }) : super(key: key);
 
   final Color leftColor;
   final Color rightColor;
@@ -73,7 +73,7 @@ class GradientRow extends StatelessWidget {
 }
 
 class ColorRow extends StatelessWidget {
-  const ColorRow({ Key key, this.color }) : super(key: key);
+  const ColorRow({ Key? key, required this.color }) : super(key: key);
 
   final Color color;
 

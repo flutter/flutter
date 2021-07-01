@@ -254,7 +254,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// If there is any overscroll, it is reported using [didOverscrollBy].
   double setPixels(double newPixels) {
     assert(hasPixels);
-    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks, 'A scrollable\'s position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.');
+    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks, "A scrollable's position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.");
     if (newPixels != pixels) {
       final double overscroll = applyBoundaryConditions(newPixels);
       assert(() {
@@ -506,6 +506,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   bool _pendingDimensions = false;
   ScrollMetrics? _lastMetrics;
+  Axis? _lastAxis;
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
@@ -514,12 +515,14 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(haveDimensions == (_lastMetrics != null));
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
-        _didChangeViewportDimensionOrReceiveCorrection) {
+        _didChangeViewportDimensionOrReceiveCorrection ||
+        _lastAxis != axis) {
       assert(minScrollExtent != null);
       assert(maxScrollExtent != null);
       assert(minScrollExtent <= maxScrollExtent);
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
+      _lastAxis = axis;
       final ScrollMetrics? currentMetrics = haveDimensions ? copyWith() : null;
       _didChangeViewportDimensionOrReceiveCorrection = false;
       _pendingDimensions = true;

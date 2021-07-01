@@ -76,7 +76,7 @@ search for files named `api.py` or `example.py` under `infra/build`.
 ### Editing a recipe
 
 Flutter has several recipes depending on the test. The recipes share common
-actions through `recipe_modules`. Searching the builder config in [flutter/infra](https://github.com/flutter/infra)
+actions through `recipe_modules`. Searching the builder config in [infra](https://flutter.googlesource.com/infra/+/refs/heads/main)
 will indicate the recipe used for a test.
 
 Recipes are just Python with some limitations on what can be imported. They are
@@ -102,7 +102,7 @@ The typical cycle for editing a recipe is:
 
 ### The infra config repository
 
-The [flutter/infra](https://github.com/flutter/infra) repository contains
+The [infra](https://flutter.googlesource.com/infra/+/refs/heads/main) repository contains
 configuration files for the dashboard, builder groups, scheduling, and
 individual builders. Edits to this may require changes other internal Google
 repositories - e.g., to change the operating system or number of machines. If

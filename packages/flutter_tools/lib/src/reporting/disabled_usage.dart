@@ -21,7 +21,7 @@ class DisabledUsage implements Usage {
   String get clientId => '';
 
   @override
-  void sendCommand(String command, { Map<String, String>? parameters }) { }
+  void sendCommand(String command, { CustomDimensions? parameters }) { }
 
   @override
   void sendEvent(
@@ -29,7 +29,7 @@ class DisabledUsage implements Usage {
     String parameter, {
     String? label,
     int? value,
-    Map<String, String>? parameters,
+    CustomDimensions? parameters,
   }) { }
 
   @override

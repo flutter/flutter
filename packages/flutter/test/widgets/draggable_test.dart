@@ -3036,7 +3036,7 @@ void main() {
             feedback: const Text('Feedback'),
             dragAnchorStrategy: (Draggable<Object> widget, BuildContext context, Offset position) {
               dragAnchorStrategyCalled = true;
-              return const Offset(0, 0);
+              return Offset.zero;
             },
           ),
         ],
@@ -3107,7 +3107,7 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
   bool onDragStartedCalled = false;
 
   int hapticFeedbackCalls = 0;
-  SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
     if (methodCall.method == 'HapticFeedback.vibrate') {
       hapticFeedbackCalls++;
     }

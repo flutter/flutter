@@ -49,7 +49,7 @@ final RegExp _bannedQuotePatterns = RegExp(r" '|' |'\.|\('|'\)|`");
 final RegExp _bannedArgumentReferencePatterns = RegExp(r'[^"=]--[^ ]');
 final RegExp _questionablePatterns = RegExp(r'[a-z]\.[A-Z]');
 final RegExp _bannedUri = RegExp(r'\b[Uu][Rr][Ii]\b');
-const String _needHelp = 'Every option must have help explaining what it does, even if it\'s '
+const String _needHelp = "Every option must have help explaining what it does, even if it's "
                          'for testing purposes, because this is the bare minimum of '
                          'documentation we can add just for ourselves. If it is not intended '
                          'for developers, then use "hide: !verboseHelp" to only show the '
@@ -86,6 +86,16 @@ void verifyOptions(String command, Iterable<Option> options) {
     expect(option.help, isNot(matches(_questionablePatterns)), reason: '${_header}Help for $target--${option.name}" may have a typo. (If it does not you may have to update args_test.dart, sorry. Search for "_questionablePatterns")');
     if (option.defaultsTo != null) {
       expect(option.help, isNot(contains('Default')), reason: '${_header}Help for $target--${option.name}" mentions the default value but that is redundant with the defaultsTo option which is also specified (and preferred).');
+
+      if (option.allowedHelp != null) {
+        for (final String allowedValue in option.allowedHelp.keys) {
+          expect(
+            option.allowedHelp[allowedValue],
+            isNot(anyOf(contains('default'), contains('Default'))),
+            reason: '${_header}Help for $target--${option.name} $allowedValue" mentions the default value but that is redundant with the defaultsTo option which is also specified (and preferred).',
+          );
+        }
+      }
     }
     expect(option.help, isNot(matches(_bannedArgumentReferencePatterns)), reason: '${_header}Help for $target--${option.name}" contains the string "--" in an unexpected way. If it\'s trying to mention another argument, it should be quoted, as in "--foo".');
     for (final String line in option.help.split('\n')) {

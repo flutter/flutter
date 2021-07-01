@@ -1918,6 +1918,21 @@ void main() {
     expect(selectedIndex, 2);
   });
 
+  testWidgets('onDestinationSelected is not called if null', (WidgetTester tester) async {
+    const int selectedIndex = 0;
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: selectedIndex,
+        destinations: _destinations(),
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    await tester.tap(find.text('Def'));
+    expect(selectedIndex, 0);
+  });
+
   testWidgets('Changing destinations animate when [labelType]=selected', (WidgetTester tester) async {
     int selectedIndex = 0;
 

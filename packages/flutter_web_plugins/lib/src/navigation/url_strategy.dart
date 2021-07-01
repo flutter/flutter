@@ -58,12 +58,12 @@ abstract class UrlStrategy {
   /// Moves forwards or backwards through the history stack.
   ///
   /// A negative [count] value causes a backward move in the history stack. And
-  /// a positive [count] value causs a forward move.
+  /// a positive [count] value causes a forward move.
   ///
   /// Examples:
   ///
   /// * `go(-2)` moves back 2 steps in history.
-  /// * `go(3)` moves forward 3 steps in hisotry.
+  /// * `go(3)` moves forward 3 steps in history.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
   Future<void> go(int count);
@@ -87,7 +87,7 @@ class HashUrlStrategy extends UrlStrategy {
   /// Creates an instance of [HashUrlStrategy].
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
-  /// interations.
+  /// interactions.
   const HashUrlStrategy(
       [this._platformLocation = const BrowserPlatformLocation()]);
 
@@ -173,7 +173,7 @@ class PathUrlStrategy extends HashUrlStrategy {
   /// Creates an instance of [PathUrlStrategy].
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
-  /// interations.
+  /// interactions.
   PathUrlStrategy([
     PlatformLocation _platformLocation = const BrowserPlatformLocation(),
   ])  : _basePath = stripTrailingSlash(extractPathname(checkBaseHref(
@@ -255,12 +255,12 @@ abstract class PlatformLocation {
   /// Moves forwards or backwards through the history stack.
   ///
   /// A negative [count] value causes a backward move in the history stack. And
-  /// a positive [count] value causs a forward move.
+  /// a positive [count] value causes a forward move.
   ///
   /// Examples:
   ///
   /// * `go(-2)` moves back 2 steps in history.
-  /// * `go(3)` moves forward 3 steps in hisotry.
+  /// * `go(3)` moves forward 3 steps in history.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
   void go(int count);

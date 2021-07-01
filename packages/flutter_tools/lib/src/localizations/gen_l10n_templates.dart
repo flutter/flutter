@@ -263,15 +263,15 @@ case '@(languageCode)': {
 }''';
 
 const String languageCodeSwitchTemplate = '''
-@(comment)
-switch (locale.languageCode) {
-  @(switchClauses)
-}
+  @(comment)
+  switch (locale.languageCode) {
+    @(switchClauses)
+  }
 ''';
 
 const String allCodesLookupTemplate = '''
-// Lookup logic when language+script+country codes are specified.
-switch (locale.toString()) {
-  @(allCodesSwitchClauses)
-}
+  // Lookup logic when language+script+country codes are specified.
+  switch (locale.toString()) {
+    @(allCodesSwitchClauses)
+  }
 ''';

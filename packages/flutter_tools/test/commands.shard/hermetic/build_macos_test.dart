@@ -45,6 +45,15 @@ final Platform macosPlatform = FakePlatform(
     'HOME': '/',
   }
 );
+
+final FakePlatform macosPlatformCustomEnv = FakePlatform(
+    operatingSystem: 'macos',
+    environment: <String, String>{
+      'FLUTTER_ROOT': '/',
+      'HOME': '/',
+    }
+);
+
 final Platform notMacosPlatform = FakePlatform(
   operatingSystem: 'linux',
   environment: <String, String>{
@@ -55,6 +64,8 @@ final Platform notMacosPlatform = FakePlatform(
 void main() {
   FileSystem fileSystem;
   TestUsage usage;
+  FakeProcessManager fakeProcessManager;
+  XcodeProjectInterpreter xcodeProjectInterpreter;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -63,6 +74,8 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     usage = TestUsage();
+    fakeProcessManager = FakeProcessManager.empty();
+    xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -299,6 +312,50 @@ void main() {
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Artifacts: () => Artifacts.test(),
+  });
+
+  testUsingContext('build settings contains Flutter Xcode environment variables', () async {
+
+    macosPlatformCustomEnv.environment = Map<String, String>.unmodifiable(<String, String>{
+      'FLUTTER_XCODE_ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon.special'
+    });
+
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
+    final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          '/usr/bin/env',
+          'xcrun',
+          'xcodebuild',
+          '-workspace', flutterProject.macos.xcodeWorkspace.path,
+          '-configuration', 'Debug',
+          '-scheme', 'Runner',
+          '-derivedDataPath', flutterBuildDir.absolute.path,
+          'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+          'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+          '-quiet',
+          'COMPILER_INDEX_STORE_ENABLE=NO',
+          'ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon.special',
+        ],
+      ),
+    ]);
+
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'macos', '--debug', '--no-pub']
+    );
+
+    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatformCustomEnv,
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    XcodeProjectInterpreter: () => xcodeProjectInterpreter,
   });
 
   testUsingContext('macOS build supports build-name and build-number', () async {

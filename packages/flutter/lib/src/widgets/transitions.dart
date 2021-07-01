@@ -133,7 +133,7 @@ abstract class AnimatedWidget extends StatefulWidget {
 
   /// Subclasses typically do not override this method.
   @override
-  _AnimatedState createState() => _AnimatedState();
+  State<AnimatedWidget> createState() => _AnimatedState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -356,6 +356,7 @@ class ScaleTransition extends AnimatedWidget {
     Key? key,
     required Animation<double> scale,
     this.alignment = Alignment.center,
+    this.filterQuality,
     this.child,
   }) : assert(scale != null),
        super(key: key, listenable: scale);
@@ -373,6 +374,11 @@ class ScaleTransition extends AnimatedWidget {
   /// an alignment of (0.0, 1.0).
   final Alignment alignment;
 
+  /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@macro flutter.widgets.Transform.optional.FilterQuality}
+  final FilterQuality? filterQuality;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -380,12 +386,10 @@ class ScaleTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scaleValue = scale.value;
-    final Matrix4 transform = Matrix4.identity()
-      ..scale(scaleValue, scaleValue, 1.0);
-    return Transform(
-      transform: transform,
+    return Transform.scale(
+      scale: scale.value,
       alignment: alignment,
+      filterQuality: filterQuality,
       child: child,
     );
   }
@@ -449,6 +453,7 @@ class RotationTransition extends AnimatedWidget {
     Key? key,
     required Animation<double> turns,
     this.alignment = Alignment.center,
+    this.filterQuality,
     this.child,
   }) : assert(turns != null),
        super(key: key, listenable: turns);
@@ -466,6 +471,11 @@ class RotationTransition extends AnimatedWidget {
   /// an alignment of (1.0, -1.0) or use [Alignment.topRight]
   final Alignment alignment;
 
+  /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@macro flutter.widgets.Transform.optional.FilterQuality}
+  final FilterQuality? filterQuality;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -473,11 +483,10 @@ class RotationTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double turnsValue = turns.value;
-    final Matrix4 transform = Matrix4.rotationZ(turnsValue * math.pi * 2.0);
-    return Transform(
-      transform: transform,
+    return Transform.rotate(
+      angle: turns.value * math.pi * 2.0,
       alignment: alignment,
+      filterQuality: filterQuality,
       child: child,
     );
   }

@@ -269,13 +269,13 @@ void _movingInsertionSort<T>(
 /// Allows target to be the same list as `list`, as long as it's not overlapping
 /// the `start..end` range.
 void _mergeSort<T>(
-    List<T> list,
-    int Function(T, T) compare,
-    int start,
-    int end,
-    List<T> target,
-    int targetOffset,
-    ) {
+  List<T> list,
+  int Function(T, T) compare,
+  int start,
+  int end,
+  List<T> target,
+  int targetOffset,
+) {
   final int length = end - start;
   if (length < _kMergeSortLimit) {
     _movingInsertionSort<T>(list, compare, start, end, target, targetOffset);

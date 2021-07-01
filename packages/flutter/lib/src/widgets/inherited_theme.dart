@@ -44,7 +44,7 @@ import 'framework.dart';
 ///     final NavigatorState navigator = Navigator.of(context);
 ///     // This InheritedTheme.capture() saves references to themes that are
 ///     // found above the context provided to this widget's build method
-///     // excluding themes are are found above the navigator. Those themes do
+///     // excluding themes are found above the navigator. Those themes do
 ///     // not have to be captured, because they will already be visible from
 ///     // the new route pushed onto said navigator.
 ///     // Themes are captured outside of the route's builder because when the

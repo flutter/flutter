@@ -632,21 +632,27 @@ class RenderStack extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (clipBehavior != Clip.none && _hasVisualOverflow) {
-      _clipRectLayer = context.pushClipRect(
+      _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
         Offset.zero & size,
         paintStack,
         clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer,
+        oldLayer: _clipRectLayer.layer,
       );
     } else {
-      _clipRectLayer = null;
+      _clipRectLayer.layer = null;
       paintStack(context, offset);
     }
   }
 
-  ClipRectLayer? _clipRectLayer;
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  @override
+  void dispose() {
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;

@@ -13,11 +13,10 @@ typedef ControlCallback = Future<void> Function(WidgetController controller);
 void macroPerfTestE2E(
   String testName,
   String routeName, {
-  Duration pageDelay,
+  Duration? pageDelay,
   Duration duration = const Duration(seconds: 3),
-  Duration timeout = const Duration(seconds: 30),
-  ControlCallback body,
-  ControlCallback setup,
+  ControlCallback? body,
+  ControlCallback? setup,
 }) {
   final WidgetsBinding _binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   assert(_binding is IntegrationTestWidgetsFlutterBinding);
@@ -63,5 +62,5 @@ void macroPerfTestE2E(
       }
       await durationFuture;
     });
-  }, semanticsEnabled: false, timeout: Timeout(timeout));
+  }, semanticsEnabled: false, timeout: Timeout.none);
 }

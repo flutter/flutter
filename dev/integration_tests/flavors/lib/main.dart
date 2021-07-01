@@ -15,7 +15,7 @@ class Flavor extends StatefulWidget {
   const Flavor({Key? key}) : super(key: key);
 
   @override
-  _FlavorState createState() => _FlavorState();
+  State<Flavor> createState() => _FlavorState();
 }
 
 class _FlavorState extends State<Flavor> {

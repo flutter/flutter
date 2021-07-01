@@ -474,7 +474,7 @@ class StrutStyle with Diagnosticable {
   final FontStyle? fontStyle;
 
   /// The additional leading to apply to the strut as a multiple of [fontSize],
-  /// indepdent of [height] and [leadingDistribution].
+  /// independent of [height] and [leadingDistribution].
   ///
   /// Leading is additional spacing between lines. Half of the leading is added
   /// to the top and the other half to the bottom of the line. This differs

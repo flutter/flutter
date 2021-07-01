@@ -182,7 +182,7 @@ class ExpansionPanelsDemo extends StatefulWidget {
   static const String routeName = '/material/expansion_panels';
 
   @override
-  _ExpansionPanelsDemoState createState() => _ExpansionPanelsDemoState();
+  State<ExpansionPanelsDemo> createState() => _ExpansionPanelsDemoState();
 }
 
 class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {

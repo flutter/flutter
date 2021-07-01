@@ -287,7 +287,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The primary widget displayed in the app bar.
   ///
   /// Becomes the middle component of the [NavigationToolbar] built by this widget.
-  //.
+  ///
   /// Typically a [Text] widget that contains a description of the current
   /// contents of the app.
   /// {@endtemplate}
@@ -402,7 +402,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final double? elevation;
 
   /// {@template flutter.material.appbar.shadowColor}
-  /// The of the shadow below the app bar.
+  /// The color of the shadow below the app bar.
   ///
   /// If this property is null, then [AppBarTheme.shadowColor] of
   /// [ThemeData.appBarTheme] is used. If that is also null, the default value
@@ -639,7 +639,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// value is true.
   ///
   /// This is a temporary property. When setting it to false is no
-  /// longer considered a breaking change, it will be depreacted and
+  /// longer considered a breaking change, it will be deprecated and
   /// its default value will be changed to false. App developers are
   /// encouraged to opt into the new features by setting it to false
   /// and using the [foregroundColor] and [systemOverlayStyle]
@@ -722,7 +722,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   }
 
   @override
-  _AppBarState createState() => _AppBarState();
+  State<AppBar> createState() => _AppBarState();
 }
 
 class _AppBarState extends State<AppBar> {
@@ -762,7 +762,9 @@ class _AppBarState extends State<AppBar> {
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification) {
       final bool oldScrolledUnder = _scrolledUnder;
-      _scrolledUnder = notification.depth == 0 && notification.metrics.extentBefore > 0;
+      _scrolledUnder = notification.depth == 0
+          && notification.metrics.extentBefore > 0
+          && notification.metrics.axis == Axis.vertical;
       if (_scrolledUnder != oldScrolledUnder) {
         setState(() {
           // React to a change in MaterialState.scrolledUnder
@@ -901,8 +903,8 @@ class _AppBarState extends State<AppBar> {
       if (!widget.excludeHeaderSemantics) {
         title = Semantics(
           namesRoute: namesRoute,
-          child: title,
           header: true,
+          child: title,
         );
       }
 
@@ -1186,7 +1188,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         title: title,
         actions: actions,
         flexibleSpace: (title == null && flexibleSpace != null && !excludeHeaderSemantics)
-          ? Semantics(child: flexibleSpace, header: true)
+          ? Semantics(
+              header: true,
+              child: flexibleSpace,
+            )
           : flexibleSpace,
         bottom: bottom,
         elevation: forceElevated || isScrolledUnder ? elevation : 0.0,
@@ -1350,52 +1355,58 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///       ],
 ///     ),
 ///     bottomNavigationBar: BottomAppBar(
-///       child: ButtonBar(
-///         alignment: MainAxisAlignment.spaceEvenly,
-///         children: <Widget>[
-///           Row(
-///             children: <Widget>[
-///               const Text('pinned'),
-///               Switch(
-///                 onChanged: (bool val) {
-///                   setState(() {
-///                     _pinned = val;
-///                   });
-///                 },
-///                 value: _pinned,
-///               ),
-///             ],
-///           ),
-///           Row(
-///             children: <Widget>[
-///               const Text('snap'),
-///               Switch(
-///                 onChanged: (bool val) {
-///                   setState(() {
-///                     _snap = val;
-///                     // Snapping only applies when the app bar is floating.
-///                     _floating = _floating || _snap;
-///                   });
-///                 },
-///                 value: _snap,
-///               ),
-///             ],
-///           ),
-///           Row(
-///             children: <Widget>[
-///               const Text('floating'),
-///               Switch(
-///                 onChanged: (bool val) {
-///                   setState(() {
-///                     _floating = val;
-///                     _snap = _snap && _floating;
-///                   });
-///                 },
-///                 value: _floating,
-///               ),
-///             ],
-///           ),
-///         ],
+///       child: Padding(
+///         padding: const EdgeInsets.all(8),
+///         child: OverflowBar(
+///           alignment: MainAxisAlignment.spaceEvenly,
+///           children: <Widget>[
+///             Row(
+///               mainAxisSize: MainAxisSize.min,
+///               children: <Widget>[
+///                 const Text('pinned'),
+///                 Switch(
+///                   onChanged: (bool val) {
+///                     setState(() {
+///                       _pinned = val;
+///                     });
+///                   },
+///                   value: _pinned,
+///                 ),
+///               ],
+///             ),
+///             Row(
+///               mainAxisSize: MainAxisSize.min,
+///               children: <Widget>[
+///                 const Text('snap'),
+///                 Switch(
+///                   onChanged: (bool val) {
+///                     setState(() {
+///                       _snap = val;
+///                       // Snapping only applies when the app bar is floating.
+///                       _floating = _floating || _snap;
+///                     });
+///                   },
+///                   value: _snap,
+///                 ),
+///               ],
+///             ),
+///             Row(
+///               mainAxisSize: MainAxisSize.min,
+///               children: <Widget>[
+///                 const Text('floating'),
+///                 Switch(
+///                   onChanged: (bool val) {
+///                     setState(() {
+///                       _floating = val;
+///                       _snap = _snap && _floating;
+///                     });
+///                   },
+///                   value: _floating,
+///                 ),
+///               ],
+///             ),
+///           ],
+///         ),
 ///       ),
 ///     ),
 ///   );
@@ -1747,7 +1758,7 @@ class SliverAppBar extends StatefulWidget {
   final SystemUiOverlayStyle? systemOverlayStyle;
 
   @override
-  _SliverAppBarState createState() => _SliverAppBarState();
+  State<SliverAppBar> createState() => _SliverAppBarState();
 }
 
 // This class is only Stateful because it owns the TickerProvider used

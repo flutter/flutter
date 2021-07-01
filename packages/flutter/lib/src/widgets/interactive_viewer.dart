@@ -548,7 +548,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// At the time this is called, the [TransformationController] will have
   /// already been updated to reflect the change caused by the interaction, if
-  /// the interation caused the matrix to change.
+  /// the interaction caused the matrix to change.
   ///
   /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///
@@ -691,7 +691,7 @@ class InteractiveViewer extends StatefulWidget {
     // the point.
     final Vector3 l1P = point - l1;
     final Vector3 l1L2 = l2 - l1;
-    final double fraction = (l1P.dot(l1L2) / lengthSquared).clamp(0.0, 1.0).toDouble();
+    final double fraction = (l1P.dot(l1L2) / lengthSquared).clamp(0.0, 1.0);
     return l1 + l1L2 * fraction;
   }
 
@@ -794,7 +794,8 @@ class InteractiveViewer extends StatefulWidget {
     return closestOverall;
   }
 
-  @override _InteractiveViewerState createState() => _InteractiveViewerState();
+  @override
+  State<InteractiveViewer> createState() => _InteractiveViewerState();
 }
 
 class _InteractiveViewerState extends State<InteractiveViewer> with TickerProviderStateMixin {

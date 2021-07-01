@@ -12,7 +12,7 @@ class CupertinoSliderDemo extends StatefulWidget {
   static const String routeName = '/cupertino/slider';
 
   @override
-  _CupertinoSliderDemoState createState() => _CupertinoSliderDemoState();
+  State<CupertinoSliderDemo> createState() => _CupertinoSliderDemoState();
 }
 
 class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
