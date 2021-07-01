@@ -15,13 +15,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowDisplay;
-import org.robolectric.shadows.ShadowDisplayManager;
-import org.robolectric.shadows.ShadowInputMethodManager;
 
-@Config(
-    manifest = Config.NONE,
-    shadows = {ShadowInputMethodManager.class, ShadowDisplayManager.class, ShadowDisplay.class})
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 @TargetApi(28)
 public class SingleViewPresentationTest {

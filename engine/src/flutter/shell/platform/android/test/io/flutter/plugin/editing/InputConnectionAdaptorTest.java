@@ -55,12 +55,11 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadow.api.Shadow;
-import org.robolectric.shadows.ShadowClipboardManager;
 import org.robolectric.shadows.ShadowInputMethodManager;
 
 @Config(
     manifest = Config.NONE,
-    shadows = {ShadowClipboardManager.class, InputConnectionAdaptorTest.TestImm.class})
+    shadows = {InputConnectionAdaptorTest.TestImm.class})
 @RunWith(RobolectricTestRunner.class)
 public class InputConnectionAdaptorTest {
   @Mock KeyboardManager mockKeyboardManager;
