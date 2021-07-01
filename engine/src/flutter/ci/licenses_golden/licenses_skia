@@ -1,4 +1,4 @@
-Signature: 670ba23a205ee1d668d6bdfbcbf4ffd4
+Signature: 1e8fb553a50b60cc32567f81bfdab322
 
 UNUSED LICENSES:
 
@@ -3101,22 +3101,10 @@ FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrRRectBlurEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleBlurFragmentProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleBlurFragmentProcessor.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConfigConversionEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConfigConversionEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRRectBlurEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRRectBlurEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRectBlurEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRectBlurEffect.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuad.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.h
@@ -4713,7 +4701,6 @@ FILE: ../../../third_party/skia/docs/examples/Path_dump_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_empty_constructor.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_equal_operator.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_getBounds.cpp
-FILE: ../../../third_party/skia/docs/examples/Path_getConvexityOrUnknown.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_getFillType.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_getGenerationID.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_getLastPt.cpp
@@ -5206,6 +5193,7 @@ FILE: ../../../third_party/skia/src/effects/imagefilters/SkRuntimeImageFilter.h
 FILE: ../../../third_party/skia/src/gpu/GrDstProxyView.h
 FILE: ../../../third_party/skia/src/gpu/GrEagerVertexAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrInnerFanTriangulator.h
+FILE: ../../../third_party/skia/src/gpu/GrMeshDrawTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/GrMeshDrawTarget.h
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSubRunAllocator.cpp
