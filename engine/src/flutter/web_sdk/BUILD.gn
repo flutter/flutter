@@ -116,7 +116,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline") {
   script = "//third_party/dart/utils/bazel/kernel_worker.dart"
 
   args = [
-    "--enable-experiment=non-nullable",
+    "--no-sound-null-safety",
     "--summary-only",
     "--target",
     "ddc",
@@ -162,7 +162,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
   ]
 
   args = [
-    "--enable-experiment=non-nullable",
+    "--no-sound-null-safety",
     "--compile-sdk",
     "dart:core",
 
@@ -215,7 +215,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk") {
   ]
 
   args = [
-    "--enable-experiment=non-nullable",
+    "--no-sound-null-safety",
     "--compile-sdk",
     "dart:core",
 
@@ -270,7 +270,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_html_kernel_sdk") {
   ]
 
   args = [
-    "--enable-experiment=non-nullable",
+    "--no-sound-null-safety",
     "--compile-sdk",
     "dart:core",
 
@@ -325,7 +325,6 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_sound") {
   ]
 
   args = [
-    "--enable-experiment=non-nullable",
     "--sound-null-safety",
     "--compile-sdk",
     "dart:core",
@@ -380,7 +379,6 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
   ]
 
   args = [
-    "--enable-experiment=non-nullable",
     "--sound-null-safety",
     "--compile-sdk",
     "dart:core",
@@ -436,7 +434,6 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_html_kernel_sdk_sound") {
   ]
 
   args = [
-    "--enable-experiment=non-nullable",
     "--sound-null-safety",
     "--compile-sdk",
     "dart:core",
@@ -487,7 +484,6 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline_sound") {
   script = "//third_party/dart/utils/bazel/kernel_worker.dart"
 
   args = [
-    "--enable-experiment=non-nullable",
     "--sound-null-safety",
     "--summary-only",
     "--target",

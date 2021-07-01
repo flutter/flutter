@@ -654,7 +654,6 @@ class TestCommand extends Command<bool> with ArgUtils {
       '--no-minify',
       '--disable-inlining',
       '--enable-asserts',
-      '--enable-experiment=non-nullable',
       '--no-sound-null-safety',
 
       // We do not want to auto-select a renderer in tests. As of today, tests

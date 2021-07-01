@@ -46,7 +46,6 @@ compiled_action("generate_snapshot_bin") {
   ]
 
   args = [
-    "--enable-experiment=non-nullable",
     "--snapshot_kind=core",
     "--enable_mirrors=false",
     "--vm_snapshot_data=" + rebase_path(vm_snapshot_data),
@@ -256,7 +255,6 @@ compile_platform("strong_platform") {
   is_runtime_mode_release =
       flutter_runtime_mode == "release" || flutter_runtime_mode == "jit_release"
   args = [
-    "--enable-experiment=non-nullable",
     "--nnbd-agnostic",
     "--target=flutter",
     "-Ddart.vm.product=$is_runtime_mode_release",
