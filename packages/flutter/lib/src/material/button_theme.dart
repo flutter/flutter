@@ -55,8 +55,8 @@ enum ButtonBarLayoutBehavior {
 /// Please use one or more of the new buttons and their themes
 /// instead: [TextButton] and [TextButtonTheme], [ElevatedButton] and
 /// [ElevatedButtonTheme], [OutlinedButton] and
-/// [OutlinedButtonTheme]. The original classes will be deprecated
-/// soon, please migrate code that uses them.  There's a detailed
+/// [OutlinedButtonTheme]. The original classes have been deprecated,
+/// please migrate code that uses them.  There's a detailed
 /// migration guide for the new button and button theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
 ///
@@ -179,7 +179,7 @@ class ButtonTheme extends InheritedTheme {
 /// TextButton, ElevatedButton, and OutlinedButton respectively.
 /// ButtonTheme has been replaced by TextButtonTheme,
 /// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
-/// will be deprecated soon, please migrate code that uses them.
+/// have been deprecated, please migrate code that uses them.
 /// There's a detailed migration guide for the new button and button
 /// theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).

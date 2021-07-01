@@ -76,8 +76,16 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     if (numPadKey != null) {
       return numPadKey;
     }
+
+    // Keys that can't be derived with characterIgnoringModifiers will be
+    // derived from their key codes using this map.
+    final LogicalKeyboardKey? knownKey = kMacOsToLogicalKey[keyCode];
+    if (knownKey != null) {
+      return knownKey;
+    }
+
     // If this key is printable, generate the LogicalKeyboardKey from its
-    // Unicode value. Control keys such as ESC, CRTL, and SHIFT are not
+    // Unicode value. Control keys such as ESC, CTRL, and SHIFT are not
     // printable. HOME, DEL, arrow keys, and function keys are considered
     // modifier function keys, which generate invalid Unicode scalar values.
     if (keyLabel.isNotEmpty &&

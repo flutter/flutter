@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Brightness;
-import 'package:flutter_test/flutter_test.dart';
+
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
@@ -40,7 +41,7 @@ void main() {
         '   that was passed to MediaQuery.of(). This can happen because you\n'
         '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
         '   (those widgets introduce a MediaQuery), or it can happen if the\n'
-        '   context you use comes from a widget above those widgets.\n'
+        '   context you use comes from a widget above those widgets.\n',
       ),
     );
   });

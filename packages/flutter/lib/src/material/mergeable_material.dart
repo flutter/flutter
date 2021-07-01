@@ -7,9 +7,9 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'divider.dart';
 import 'material.dart';
-import 'shadows.dart';
 import 'theme.dart';
 
 /// The base type for [MaterialSlice] and [MaterialGap].
@@ -122,13 +122,8 @@ class MergeableMaterial extends StatefulWidget {
 
   /// The z-coordinate at which to place all the [Material] slices.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24.
-  ///
   /// Defaults to 2, the appropriate elevation for cards.
-  ///
-  /// This uses [kElevationToShadow] to simulate shadows, it does not use
-  /// [Material]'s arbitrary elevation feature.
-  final int elevation;
+  final double elevation;
 
   /// Whether connected pieces of [MaterialSlice] have dividers between them.
   final bool hasDividers;
@@ -143,11 +138,11 @@ class MergeableMaterial extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<Axis>('mainAxis', mainAxis));
-    properties.add(DoubleProperty('elevation', elevation.toDouble()));
+    properties.add(DoubleProperty('elevation', elevation));
   }
 
   @override
-  _MergeableMaterialState createState() => _MergeableMaterialState();
+  State<MergeableMaterial> createState() => _MergeableMaterialState();
 }
 
 class _AnimationTuple {
@@ -620,7 +615,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
     return _MergeableMaterialListBody(
       mainAxis: widget.mainAxis,
-      boxShadows: kElevationToShadow[widget.elevation]!,
+      elevation: widget.elevation,
       items: _children,
       children: widgets,
     );
@@ -654,11 +649,11 @@ class _MergeableMaterialListBody extends ListBody {
     required List<Widget> children,
     Axis mainAxis = Axis.vertical,
     required this.items,
-    required this.boxShadows,
+    required this.elevation,
   }) : super(children: children, mainAxis: mainAxis);
 
   final List<MergeableMaterialItem> items;
-  final List<BoxShadow> boxShadows;
+  final double elevation;
 
   AxisDirection _getDirection(BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, mainAxis, false);
@@ -668,7 +663,7 @@ class _MergeableMaterialListBody extends ListBody {
   RenderListBody createRenderObject(BuildContext context) {
     return _RenderMergeableMaterialListBody(
       axisDirection: _getDirection(context),
-      boxShadows: boxShadows,
+      elevation: elevation,
     );
   }
 
@@ -677,7 +672,7 @@ class _MergeableMaterialListBody extends ListBody {
     final _RenderMergeableMaterialListBody materialRenderListBody = renderObject as _RenderMergeableMaterialListBody;
     materialRenderListBody
       ..axisDirection = _getDirection(context)
-      ..boxShadows = boxShadows;
+      ..elevation = elevation;
   }
 }
 
@@ -685,38 +680,41 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
   _RenderMergeableMaterialListBody({
     List<RenderBox>? children,
     AxisDirection axisDirection = AxisDirection.down,
-    required this.boxShadows,
-  }) : super(children: children, axisDirection: axisDirection);
+    double elevation = 0.0,
+  }) : _elevation = elevation,
+       super(children: children, axisDirection: axisDirection);
 
-  List<BoxShadow> boxShadows;
+  double get elevation => _elevation;
+  double _elevation;
+  set elevation(double value) {
+    if (value == _elevation)
+      return;
+    _elevation = value;
+    markNeedsPaint();
+  }
 
   void _paintShadows(Canvas canvas, Rect rect) {
-    for (final BoxShadow boxShadow in boxShadows) {
-      final Paint paint = boxShadow.toPaint();
-      // TODO(dragostis): Right now, we are only interpolating the border radii
-      // of the visible Material slices, not the shadows; they are not getting
-      // interpolated and always have the same rounded radii. Once shadow
-      // performance is better, shadows should be redrawn every single time the
-      // slices' radii get interpolated and use those radii not the defaults.
-      canvas.drawRRect(kMaterialEdges[MaterialType.card]!.toRRect(rect), paint);
-    }
+    // TODO(ianh): We should interpolate the border radii of the shadows the same way we do those of the visible Material slices.
+    canvas.drawShadow(
+      Path()..addRRect(kMaterialEdges[MaterialType.card]!.toRRect(rect)),
+      Colors.black,
+      elevation,
+      true, // occluding object is not (necessarily) opaque
+    );
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     RenderBox? child = firstChild;
-    int i = 0;
-
+    int index = 0;
     while (child != null) {
       final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
       final Rect rect = (childParentData.offset + offset) & child.size;
-      if (i.isEven)
+      if (index.isEven)
         _paintShadows(context.canvas, rect);
       child = childParentData.nextSibling;
-
-      i += 1;
+      index += 1;
     }
-
     defaultPaint(context, offset);
   }
 }

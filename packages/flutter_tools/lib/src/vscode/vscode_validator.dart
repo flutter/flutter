@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart';
@@ -14,9 +16,9 @@ class VsCodeValidator extends DoctorValidator {
 
   final VsCode _vsCode;
 
-  static Iterable<DoctorValidator> installedValidators(FileSystem fileSystem, Platform platform) {
+  static Iterable<DoctorValidator> installedValidators(FileSystem fileSystem, Platform platform, ProcessManager processManager) {
     return VsCode
-        .allInstalled(fileSystem, platform)
+        .allInstalled(fileSystem, platform, processManager)
         .map<DoctorValidator>((VsCode vsCode) => VsCodeValidator(vsCode));
   }
 

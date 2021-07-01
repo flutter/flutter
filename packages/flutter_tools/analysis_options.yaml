@@ -5,7 +5,8 @@ include: ../../analysis_options.yaml
 
 linter:
   rules:
-    unawaited_futures: true
-    curly_braces_in_flow_control_structures: true
     avoid_catches_without_on_clauses: true
+    curly_braces_in_flow_control_structures: true
+    library_private_types_in_public_api: false # Tool does not have any public API
     prefer_relative_imports: true
+    unawaited_futures: true

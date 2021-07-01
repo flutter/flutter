@@ -341,7 +341,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ### Stretching [SliverAppBar]s
 ///
-// TODO(Piinks): Support stretching, https://github.com/flutter/flutter/issues/54059
+// See https://github.com/flutter/flutter/issues/54059
 /// Currently, [NestedScrollView] does not support stretching the outer
 /// scrollable, e.g. when using [SliverAppBar.stretch].
 ///
@@ -1103,6 +1103,13 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         delta < 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
     );
 
+    // Set the isScrollingNotifier. Even if only one position actually receives
+    // the delta, the NestedScrollView's intention is to treat multiple
+    // ScrollPositions as one.
+    _outerPosition!.isScrollingNotifier.value = true;
+    for (final _NestedScrollPosition position in _innerPositions)
+      position.isScrollingNotifier.value = true;
+
     if (_innerPositions.isEmpty) {
       // Does not enter overscroll.
       _outerPosition!.applyClampedPointerSignalUpdate(delta);
@@ -1243,10 +1250,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
           outerDelta -= _outerPosition!.applyClampedDragUpdate(outerDelta);
 
         // Now deal with any overscroll
-        // TODO(Piinks): Configure which scrollable receives overscroll to
-        // support stretching app bars. createOuterBallisticScrollActivity will
-        // need to be updated as it currently assumes the outer position will
-        // never overscroll, https://github.com/flutter/flutter/issues/54059
         for (int i = 0; i < innerPositions.length; ++i) {
           final double remainingDelta = overscrolls[i] - outerDelta;
           if (remainingDelta > 0.0)
@@ -1317,6 +1320,7 @@ class _NestedScrollController extends ScrollController {
   @override
   void detach(ScrollPosition position) {
     assert(position is _NestedScrollPosition);
+    (position as _NestedScrollPosition).setParent(null);
     position.removeListener(_scheduleUpdateShadow);
     super.detach(position);
     _scheduleUpdateShadow();
@@ -1620,12 +1624,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
     return coordinator.drag(details, dragCancelCallback);
-  }
-
-  @override
-  void dispose() {
-    _parent?.detach(this);
-    super.dispose();
   }
 }
 

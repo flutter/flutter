@@ -91,7 +91,9 @@ void main() {
 
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
     await expectLater(
       find.byKey(key),
@@ -460,9 +462,10 @@ void main() {
             width: 300,
             height: 300,
             child: Material(
-                elevation: 2.0,
-                color: Colors.red,
-                shape: CircleBorder()),
+              elevation: 2.0,
+              color: Colors.red,
+              shape: CircleBorder(),
+            ),
           ),
         ),
       ];
@@ -501,9 +504,10 @@ void main() {
             width: 300,
             height: 300,
             child: Material(
-                elevation: 2.0,
-                color: Colors.red,
-                shape: CircleBorder()),
+              elevation: 2.0,
+              color: Colors.red,
+              shape: CircleBorder(),
+            ),
           ),
         ),
       ];

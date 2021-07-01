@@ -163,7 +163,7 @@ class SystemUiOverlayStyle {
   }
 
   @override
-  String toString() => _toMap().toString();
+  String toString() => '${objectRuntimeType(this, 'SystemUiOverlayStyle')}(${_toMap()})';
 
   /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({

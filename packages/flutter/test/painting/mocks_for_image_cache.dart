@@ -75,7 +75,7 @@ class TestImageProvider extends ImageProvider<int> {
   @override
   ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image.clone()))
+      SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image.clone())),
     );
   }
 

@@ -90,8 +90,11 @@ InputBorder? getBorder(WidgetTester tester) {
     return null;
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  // ignore: avoid_dynamic_calls
   final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+  // ignore: avoid_dynamic_calls
   final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+  // ignore: avoid_dynamic_calls
   final InputBorder border = inputBorderTween.evaluate(animation) as InputBorder;
   return border;
 }
@@ -115,6 +118,7 @@ Color getBorderColor(WidgetTester tester) => getBorderSide(tester)!.color;
 Color getContainerColor(WidgetTester tester) {
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  // ignore: avoid_dynamic_calls
   return inputBorderPainter.blendedColor as Color;
 }
 
@@ -178,7 +182,7 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          floatingLabelBehavior: FloatingLabelBehavior.always
+          floatingLabelBehavior: FloatingLabelBehavior.always,
         ),
       ),
     );
@@ -193,7 +197,7 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          floatingLabelBehavior: FloatingLabelBehavior.never
+          floatingLabelBehavior: FloatingLabelBehavior.never,
         ),
       ),
     );
@@ -1728,6 +1732,49 @@ void main() {
     expect(tester.getTopLeft(find.byKey(prefixKey)).dy, 0.0);
   });
 
+  group('constraints', () {
+    testWidgets('No InputDecorator constraints', (WidgetTester tester) async {
+      await tester.pumpWidget(buildInputDecorator());
+
+      // Should fill the screen width and be default height
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(800, 48));
+    });
+
+    testWidgets('InputDecoratorThemeData constraints', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              inputDecorationTheme: const InputDecorationTheme(
+                constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
+              ),
+            ),
+          ),
+      );
+
+      // Theme settings should make it 300x40 pixels
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(300, 40));
+    });
+
+    testWidgets('InputDecorator constraints', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          theme: ThemeData(
+            inputDecorationTheme: const InputDecorationTheme(
+              constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
+            ),
+          ),
+          decoration: const InputDecoration(
+            constraints: BoxConstraints(maxWidth: 200, maxHeight: 32),
+          ),
+        ),
+      );
+
+      // InputDecoration.constraints should override the theme. It should be
+      // only 200x32 pixels
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(200, 32));
+    });
+  });
+
   group('textAlignVertical position', () {
     group('simple case', () {
       testWidgets('align top (default)', (WidgetTester tester) async {
@@ -2851,7 +2898,7 @@ void main() {
         isEmpty: true,
         decoration: const InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),
-          hasFloatingPlaceholder: false,
+          floatingLabelBehavior: FloatingLabelBehavior.never,
           labelText: 'label',
         ),
       ),
@@ -2875,7 +2922,7 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),
-          hasFloatingPlaceholder: false,
+          floatingLabelBehavior: FloatingLabelBehavior.never,
           labelText: 'label',
         ),
       ),
@@ -3094,7 +3141,7 @@ void main() {
     ]));
 
     final Set<Object> nodeValues = Set<Object>.from(
-      renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!)
+      renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!),
     );
     expect(nodeValues.length, 11);
   });
@@ -3139,6 +3186,7 @@ void main() {
         focusColor: Colors.blue,
         border: InputBorder.none,
         alignLabelWithHint: true,
+        constraints: BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
       ),
     );
 
@@ -3155,6 +3203,7 @@ void main() {
     expect(decoration.fillColor, Colors.red);
     expect(decoration.border, InputBorder.none);
     expect(decoration.alignLabelWithHint, true);
+    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
     decoration = const InputDecoration(
@@ -3171,6 +3220,7 @@ void main() {
       fillColor: Colors.blue,
       border: OutlineInputBorder(),
       alignLabelWithHint: false,
+      constraints: BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
     ).applyDefaults(
       const InputDecorationTheme(
         labelStyle: themeStyle,
@@ -3189,6 +3239,7 @@ void main() {
         focusColor: Colors.blue,
         border: InputBorder.none,
         alignLabelWithHint: true,
+        constraints: BoxConstraints(minWidth: 40, maxWidth: 30, minHeight: 20, maxHeight: 10),
       ),
     );
 
@@ -3207,6 +3258,7 @@ void main() {
     expect(decoration.fillColor, Colors.blue);
     expect(decoration.border, const OutlineInputBorder());
     expect(decoration.alignLabelWithHint, false);
+    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
   });
 
   testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
@@ -4046,7 +4098,6 @@ void main() {
       helperMaxLines: 6,
       hintStyle: TextStyle(),
       errorMaxLines: 5,
-      hasFloatingPlaceholder: false,
       floatingLabelBehavior: FloatingLabelBehavior.never,
       contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
       prefixStyle: TextStyle(),
@@ -4072,7 +4123,6 @@ void main() {
       'helperMaxLines: 6',
       'hintStyle: TextStyle(<all styles inherited>)',
       'errorMaxLines: 5',
-      'hasFloatingPlaceholder: false',
       'floatingLabelBehavior: FloatingLabelBehavior.never',
       'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
       'prefixStyle: TextStyle(<all styles inherited>)',

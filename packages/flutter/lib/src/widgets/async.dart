@@ -485,7 +485,6 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///    [Stream].
 ///  * [StreamBuilderBase], which supports widget building based on a computation
 ///    that spans all interactions made with the stream.
-// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1139 is fixed
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build

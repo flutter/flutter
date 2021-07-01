@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -19,7 +20,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -47,18 +48,18 @@ void main() {
   });
 
   group('_IOSSimulatorDevicePortForwarder', () {
-    MockSimControl mockSimControl;
+    FakeSimControl simControl;
     Xcode xcode;
 
     setUp(() {
-      mockSimControl = MockSimControl();
+      simControl = FakeSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
 
     testUsingContext('dispose() does not throw an exception', () async {
       final IOSSimulator simulator = IOSSimulator(
         '123',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
       final DevicePortForwarder portForwarder = simulator.portForwarder;
       await portForwarder.forward(123);
@@ -81,7 +82,7 @@ void main() {
   testUsingContext('simulators only support debug mode', () async {
     final IOSSimulator simulator = IOSSimulator(
       '123',
-      simControl: MockSimControl(),
+      simControl: FakeSimControl(),
     );
 
     expect(simulator.supportsRuntimeMode(BuildMode.debug), true);
@@ -95,17 +96,17 @@ void main() {
   });
 
   group('logFilePath', () {
-    MockSimControl mockSimControl;
+    FakeSimControl simControl;
 
     setUp(() {
-      mockSimControl = MockSimControl();
+      simControl = FakeSimControl();
     });
 
     testUsingContext('defaults to rooted from HOME', () {
       osx.environment['HOME'] = '/foo/bar';
       final IOSSimulator simulator = IOSSimulator(
         '123',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
       expect(simulator.logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
     }, overrides: <Type, Generator>{
@@ -120,7 +121,7 @@ void main() {
       osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
       final IOSSimulator simulator = IOSSimulator(
         '456',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
       expect(simulator.logFilePath, '/baz/qux/456/system.log');
     }, overrides: <Type, Generator>{
@@ -181,10 +182,10 @@ void main() {
   });
 
   group('sdkMajorVersion', () {
-    MockSimControl mockSimControl;
+    FakeSimControl simControl;
 
     setUp(() {
-      mockSimControl = MockSimControl();
+      simControl = FakeSimControl();
     });
 
     // This new version string appears in SimulatorApp-850 CoreSimulator-518.16 beta.
@@ -193,7 +194,7 @@ void main() {
         'x',
         name: 'iPhone SE',
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
 
       expect(await device.sdkMajorVersion, 11);
@@ -204,7 +205,7 @@ void main() {
         'x',
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
 
       expect(await device.sdkMajorVersion, 11);
@@ -215,7 +216,7 @@ void main() {
         'x',
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
 
       expect(device.category, Category.mobile);
@@ -223,17 +224,17 @@ void main() {
   });
 
   group('IOSSimulator.isSupported', () {
-    MockSimControl mockSimControl;
+    FakeSimControl simControl;
 
     setUp(() {
-      mockSimControl = MockSimControl();
+      simControl = FakeSimControl();
     });
 
     testUsingContext('Apple TV is unsupported', () {
       final IOSSimulator simulator = IOSSimulator(
         'x',
         name: 'Apple TV',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
       expect(simulator.isSupported(), false);
     }, overrides: <Type, Generator>{
@@ -246,7 +247,7 @@ void main() {
       expect(IOSSimulator(
         'x',
         name: 'Apple Watch',
-        simControl: mockSimControl,
+        simControl: simControl,
       ).isSupported(), false);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
@@ -258,7 +259,7 @@ void main() {
       expect(IOSSimulator(
         'x',
         name: 'iPad 2',
-        simControl: mockSimControl,
+        simControl: simControl,
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
@@ -270,7 +271,7 @@ void main() {
       expect(IOSSimulator(
         'x',
         name: 'iPad Retina',
-        simControl: mockSimControl,
+        simControl: simControl,
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
@@ -282,7 +283,7 @@ void main() {
       expect(IOSSimulator(
         'x',
         name: 'iPhone 5',
-        simControl: mockSimControl,
+        simControl: simControl,
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
@@ -294,7 +295,7 @@ void main() {
       expect(IOSSimulator(
         'x',
         name: 'iPhone 5s',
-        simControl: mockSimControl,
+        simControl: simControl,
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
@@ -306,7 +307,7 @@ void main() {
       expect(IOSSimulator(
         'x',
         name: 'iPhone SE',
-        simControl: mockSimControl,
+        simControl: simControl,
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
@@ -318,7 +319,7 @@ void main() {
       expect(IOSSimulator(
         'x',
         name: 'iPhone 7 Plus',
-        simControl: mockSimControl,
+        simControl: simControl,
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
@@ -330,7 +331,7 @@ void main() {
       expect(IOSSimulator(
         'x',
         name: 'iPhone X',
-        simControl: mockSimControl,
+        simControl: simControl,
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
@@ -377,11 +378,11 @@ void main() {
 
   group('device log tool', () {
     FakeProcessManager fakeProcessManager;
-    MockSimControl mockSimControl;
+    FakeSimControl simControl;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
-      mockSimControl = MockSimControl();
+      fakeProcessManager = FakeProcessManager.empty();
+      simControl = FakeSimControl();
     });
 
     testUsingContext('syslog uses tail', () async {
@@ -389,7 +390,7 @@ void main() {
         'x',
         name: 'iPhone SE',
         simulatorCategory: 'iOS 9.3',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
       fakeProcessManager.addCommand(const FakeCommand(command: <String>[
         'tail',
@@ -416,7 +417,7 @@ void main() {
         'x',
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.0',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
       const String expectedPredicate = 'eventType = logEvent AND '
           'processImagePath ENDSWITH "My Super Awesome App" AND '
@@ -450,7 +451,7 @@ void main() {
         'x',
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.0',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
       const String expectedPredicate = 'eventType = logEvent AND '
           '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
@@ -482,13 +483,13 @@ void main() {
   group('log reader', () {
     FakeProcessManager fakeProcessManager;
     FakeIosProject mockIosProject;
-    MockSimControl mockSimControl;
+    FakeSimControl simControl;
     Xcode xcode;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       mockIosProject = FakeIosProject();
-      mockSimControl = MockSimControl();
+      simControl = FakeSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
 
@@ -513,7 +514,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         final IOSSimulator device = IOSSimulator(
           '123456',
           simulatorCategory: 'iOS 10.0',
-          simControl: mockSimControl,
+          simControl: simControl,
         );
         final DeviceLogReader logReader = device.getLogReader(
           app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -547,7 +548,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         final IOSSimulator device = IOSSimulator(
           '123456',
           simulatorCategory: 'iOS 10.3',
-          simControl: mockSimControl,
+          simControl: simControl,
         );
         final DeviceLogReader logReader = device.getLogReader(
           app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -594,7 +595,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         final IOSSimulator device = IOSSimulator(
           '123456',
           simulatorCategory: 'iOS 10.3',
-          simControl: mockSimControl,
+          simControl: simControl,
         );
         final DeviceLogReader logReader = device.getLogReader(
           app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -659,7 +660,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         final IOSSimulator device = IOSSimulator(
           '123456',
           simulatorCategory: 'iOS 11.0',
-          simControl: mockSimControl,
+          simControl: simControl,
         );
         final DeviceLogReader logReader = device.getLogReader(
           app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -717,7 +718,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     const String appId = 'flutterApp';
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
       simControl = SimControl(
         logger: BufferLogger.test(),
@@ -852,11 +853,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
   group('startApp', () {
     FakePlistParser testPlistParser;
-    SimControl simControl;
+    FakeSimControl simControl;
     Xcode xcode;
 
     setUp(() {
-      simControl = MockSimControl();
+      simControl = FakeSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
       testPlistParser = FakePlistParser();
     });
@@ -877,7 +878,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
       await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
-      verify(simControl.launch(any, 'correct', any));
+      expect(simControl.requests.single.appIdentifier, 'correct');
     }, overrides: <Type, Generator>{
       PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,
@@ -900,7 +901,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       final DebuggingOptions mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
       await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
-      verify(simControl.launch(any, any, captureAny)).captured.contains('--enable-software-rendering');
+      expect(simControl.requests.single.launchArgs, contains('--enable-software-rendering'));
     }, overrides: <Type, Generator>{
       PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,
@@ -910,11 +911,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
   });
 
   group('IOSDevice.isSupportedForProject', () {
-    MockSimControl mockSimControl;
+    FakeSimControl simControl;
     Xcode xcode;
 
     setUp(() {
-      mockSimControl = MockSimControl();
+      simControl = FakeSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
 
@@ -932,7 +933,7 @@ flutter:
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
       expect(simulator.isSupportedForProject(flutterProject), true);
     }, overrides: <Type, Generator>{
@@ -950,7 +951,7 @@ flutter:
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
       expect(simulator.isSupportedForProject(flutterProject), true);
     }, overrides: <Type, Generator>{
@@ -966,7 +967,7 @@ flutter:
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
       expect(simulator.isSupportedForProject(flutterProject), false);
     }, overrides: <Type, Generator>{
@@ -978,7 +979,7 @@ flutter:
     testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
       final IOSSimulator simulator = IOSSimulator(
         'test',
-        simControl: mockSimControl,
+        simControl: simControl,
       );
 
       expect(simulator.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
@@ -992,4 +993,27 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   Future<String> hostAppBundleName(BuildInfo buildInfo) async => 'My Super Awesome App.app';
+}
+
+class FakeSimControl extends Fake implements SimControl {
+  final List<LaunchRequest> requests = <LaunchRequest>[];
+
+  @override
+  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) async {
+    requests.add(LaunchRequest(deviceId, appIdentifier, launchArgs));
+    return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
+  }
+
+  @override
+  Future<RunResult> install(String deviceId, String appPath) async {
+    return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
+  }
+}
+
+class LaunchRequest {
+  const LaunchRequest(this.deviceId, this.appIdentifier, this.launchArgs);
+
+  final String deviceId;
+  final String appIdentifier;
+  final List<String> launchArgs;
 }

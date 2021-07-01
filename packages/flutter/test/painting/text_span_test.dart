@@ -72,7 +72,7 @@ void main() {
       '    TextSpan:\n'
       '      (empty)\n'
       '  TextSpan:\n'
-      '    "c"\n'
+      '    "c"\n',
     ));
   });
 
@@ -82,7 +82,7 @@ void main() {
     );
     expect(test1.toStringDeep(), equals(
       'TextSpan:\n'
-      '  "a"\n'
+      '  "a"\n',
     ));
 
     final TextSpan test2 = TextSpan(
@@ -95,7 +95,7 @@ void main() {
       'TextSpan:\n'
       '  "a"\n'
       '  callbacks: enter, exit\n'
-      '  mouseCursor: SystemMouseCursor(forbidden)\n'
+      '  mouseCursor: SystemMouseCursor(forbidden)\n',
     ));
   });
 
@@ -335,7 +335,7 @@ void main() {
                   },
                   onExit: (PointerExitEvent event) {
                     logEvents.add(event);
-                  }
+                  },
                 ),
                 const TextSpan(
                   text: 'xxxxx',

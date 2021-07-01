@@ -14,7 +14,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart';
@@ -59,7 +59,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   bool get shouldCodesign => boolArg('codesign');
 
   @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput);
+  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
 }
 
 /// Builds an .xcarchive and optionally .ipa for an iOS app to be generated for
@@ -146,6 +146,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           ...globals.xcode.xcrunCommand(),
           'xcodebuild',
           '-exportArchive',
+          if (shouldCodesign) ...<String>[
+            '-allowProvisioningDeviceRegistration',
+            '-allowProvisioningUpdates',
+          ],
           '-archivePath',
           globals.fs.path.absolute(app.archiveBundleOutputPath),
           '-exportPath',

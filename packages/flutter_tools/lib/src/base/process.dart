@@ -11,7 +11,7 @@ import 'common.dart';
 import 'io.dart';
 import 'logger.dart';
 
-typedef StringConverter = String Function(String string);
+typedef StringConverter = String? Function(String string);
 
 /// A function that will be run before the VM exits.
 typedef ShutdownHook = FutureOr<dynamic> Function();
@@ -452,12 +452,13 @@ class _DefaultProcessUtils implements ProcessUtils {
       .transform<String>(const LineSplitter())
       .where((String line) => filter == null || filter.hasMatch(line))
       .listen((String line) {
+        String? mappedLine = line;
         if (mapFunction != null) {
-          line = mapFunction(line);
+          mappedLine = mapFunction(line);
         }
-        if (line != null) {
-          final String message = '$prefix$line';
-          if (stdoutErrorMatcher?.hasMatch(line) == true) {
+        if (mappedLine != null) {
+          final String message = '$prefix$mappedLine';
+          if (stdoutErrorMatcher?.hasMatch(mappedLine) == true) {
             _logger.printError(message, wrap: false);
           } else if (trace) {
             _logger.printTrace(message);
@@ -471,11 +472,12 @@ class _DefaultProcessUtils implements ProcessUtils {
       .transform<String>(const LineSplitter())
       .where((String line) => filter == null || filter.hasMatch(line))
       .listen((String line) {
+        String? mappedLine = line;
         if (mapFunction != null) {
-          line = mapFunction(line);
+          mappedLine = mapFunction(line);
         }
-        if (line != null) {
-          _logger.printError('$prefix$line', wrap: false);
+        if (mappedLine != null) {
+          _logger.printError('$prefix$mappedLine', wrap: false);
         }
       });
 

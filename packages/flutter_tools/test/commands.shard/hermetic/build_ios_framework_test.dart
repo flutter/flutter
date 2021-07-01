@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/version.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 
 void main() {
   group('build ios-framework', () {

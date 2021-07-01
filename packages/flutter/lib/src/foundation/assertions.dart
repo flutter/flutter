@@ -15,6 +15,7 @@ import 'stack_frame.dart';
 // late bool draconisAlive;
 // late bool draconisAmulet;
 // late Diagnosticable draconis;
+// void methodThatMayThrow() { }
 
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
@@ -876,9 +877,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// Do not call [onError] directly, instead, call [reportError], which
   /// forwards to [onError] if it is not null.
-  static FlutterExceptionHandler? onError = _defaultErrorHandler;
-
-  static void _defaultErrorHandler(FlutterErrorDetails details) => presentError(details);
+  static FlutterExceptionHandler? onError = presentError;
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].
   ///
@@ -1101,6 +1100,31 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   }
 
   /// Calls [onError] with the given details, unless it is null.
+  ///
+  /// {@tool snippet}
+  /// When calling this from a `catch` block consider annotating the method
+  /// containing the `catch` block with
+  /// `@pragma('vm:notify-debugger-on-exception')` to allow an attached debugger
+  /// to treat the exception as unhandled. This means instead of executing the
+  /// `catch` block, the debugger can break at the original source location from
+  /// which the exception was thrown.
+  ///
+  /// ```dart
+  /// @pragma('vm:notify-debugger-on-exception')
+  /// void doSomething() {
+  ///   try {
+  ///     methodThatMayThrow();
+  ///   } catch (exception, stack) {
+  ///     FlutterError.reportError(FlutterErrorDetails(
+  ///       exception: exception,
+  ///       stack: stack,
+  ///       library: 'example library',
+  ///       context: ErrorDescription('while doing something'),
+  ///     ));
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   static void reportError(FlutterErrorDetails details) {
     assert(details != null);
     assert(details.exception != null);
@@ -1194,6 +1218,9 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
   static DiagnosticsNode _createStackFrame(String frame) {
     return DiagnosticsNode.message(frame, allowWrap: false);
   }
+
+  @override
+  bool get allowTruncate => false;
 }
 
 class _FlutterErrorDetailsNode extends DiagnosticableNode<FlutterErrorDetails> {

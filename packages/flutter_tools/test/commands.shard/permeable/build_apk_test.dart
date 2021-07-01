@@ -4,25 +4,22 @@
 
 // @dart = 2.8
 
-import 'dart:io' hide Directory;
-
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' hide MockAndroidSdk;
+import '../../src/fake_process_manager.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -46,8 +43,7 @@ void main() {
           arguments: <String>['--no-pub', '--template=app']);
       final BuildApkCommand command = await runBuildApkCommand(projectPath);
 
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildApkTargetPlatform, 'android-arm,android-arm64,android-x64'));
+      expect((await command.usageValues).commandBuildApkTargetPlatform, 'android-arm,android-arm64,android-x64');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -59,12 +55,10 @@ void main() {
 
       final BuildApkCommand commandWithFlag = await runBuildApkCommand(projectPath,
           arguments: <String>['--split-per-abi']);
-      expect(await commandWithFlag.usageValues,
-          containsPair(CustomDimensions.commandBuildApkSplitPerAbi, 'true'));
+      expect((await commandWithFlag.usageValues).commandBuildApkSplitPerAbi, true);
 
       final BuildApkCommand commandWithoutFlag = await runBuildApkCommand(projectPath);
-      expect(await commandWithoutFlag.usageValues,
-          containsPair(CustomDimensions.commandBuildApkSplitPerAbi, 'false'));
+      expect((await commandWithoutFlag.usageValues).commandBuildApkSplitPerAbi, false);
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -75,23 +69,19 @@ void main() {
           arguments: <String>['--no-pub', '--template=app']);
 
       final BuildApkCommand commandDefault = await runBuildApkCommand(projectPath);
-      expect(await commandDefault.usageValues,
-          containsPair(CustomDimensions.commandBuildApkBuildMode, 'release'));
+      expect((await commandDefault.usageValues).commandBuildApkBuildMode, 'release');
 
       final BuildApkCommand commandInRelease = await runBuildApkCommand(projectPath,
           arguments: <String>['--release']);
-      expect(await commandInRelease.usageValues,
-          containsPair(CustomDimensions.commandBuildApkBuildMode, 'release'));
+      expect((await commandInRelease.usageValues).commandBuildApkBuildMode, 'release');
 
       final BuildApkCommand commandInDebug = await runBuildApkCommand(projectPath,
           arguments: <String>['--debug']);
-      expect(await commandInDebug.usageValues,
-          containsPair(CustomDimensions.commandBuildApkBuildMode, 'debug'));
+      expect((await commandInDebug.usageValues).commandBuildApkBuildMode, 'debug');
 
       final BuildApkCommand commandInProfile = await runBuildApkCommand(projectPath,
           arguments: <String>['--profile']);
-      expect(await commandInProfile.usageValues,
-          containsPair(CustomDimensions.commandBuildApkBuildMode, 'profile'));
+      expect((await commandInProfile.usageValues).commandBuildApkBuildMode, 'profile');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -119,60 +109,17 @@ void main() {
 
   group('Gradle', () {
     Directory tempDir;
-    ProcessManager mockProcessManager;
+    FakeProcessManager processManager;
     String gradlew;
     AndroidSdk mockAndroidSdk;
     TestUsage testUsage;
 
     setUp(() {
       testUsage = TestUsage();
-
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', 'android',
           globals.platform.isWindows ? 'gradlew.bat' : 'gradlew');
-
-      mockProcessManager = MockProcessManager();
-      when(mockProcessManager.run(<String>[gradlew, '-v'],
-          environment: anyNamed('environment')))
-        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, '', '')));
-
-      when(mockProcessManager.run(<String>[gradlew, 'app:properties'],
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')))
-        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, 'buildDir: irrelevant', '')));
-
-      when(mockProcessManager.run(<String>[gradlew, 'app:tasks', '--all', '--console=auto'],
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')))
-        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, 'assembleRelease', '')));
-      // Fallback with error.
-      final Process process = createMockProcess(exitCode: 1);
-      when(mockProcessManager.start(any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')))
-        .thenAnswer((_) => Future<Process>.value(process));
-      when(mockProcessManager.canRun(any)).thenReturn(false);
-
-      when(mockProcessManager.runSync(
-        argThat(contains(contains('gen_snapshot'))),
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(0, 255, '', ''));
-
-      when(mockProcessManager.runSync(
-        <String>['/usr/bin/xcode-select', '--print-path'],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(0, 0, '', ''));
-
-      when(mockProcessManager.run(
-        <String>['which', 'pod'],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenAnswer((_) {
-        return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
-      });
-
+      processManager = FakeProcessManager.empty();
       mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
     });
 
@@ -182,35 +129,30 @@ void main() {
 
     group('AndroidSdk', () {
       testUsingContext('throws throwsToolExit if AndroidSdk is null', () async {
-        final String projectPath = await createProject(tempDir,
-            arguments: <String>['--no-pub', '--template=app']);
+        final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
 
-        await expectLater(() async {
-          await runBuildApkCommand(
+        await expectLater(
+          () => runBuildApkCommand(
             projectPath,
             arguments: <String>['--no-pub'],
-          );
-        }, throwsToolExit(
-          message: 'No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable',
-        ));
+          ),
+          throwsToolExit(
+            message: 'No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable',
+          ),
+        );
       },
       overrides: <Type, Generator>{
         AndroidSdk: () => null,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => processManager,
+        AndroidStudio: () => FakeAndroidStudio(),
       });
     });
 
     testUsingContext('shrinking is enabled by default on release mode', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=app']);
-
-      await expectLater(() async {
-        await runBuildApkCommand(projectPath);
-      }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
-
-      verify(mockProcessManager.start(
-        <String>[
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      processManager.addCommand(FakeCommand(
+        command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -220,26 +162,26 @@ void main() {
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).called(1);
+        exitCode: 1,
+      ));
+
+      await expectLater(
+        () => runBuildApkCommand(projectPath),
+        throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => processManager,
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('--split-debug-info is enabled when an output directory is provided', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=app']);
-
-      await expectLater(() async {
-        await runBuildApkCommand(projectPath, arguments: <String>['--split-debug-info=${tempDir.path}']);
-      }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
-
-      verify(mockProcessManager.start(
-        <String>[
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      processManager.addCommand(FakeCommand(
+        command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -250,29 +192,26 @@ void main() {
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).called(1);
+        exitCode: 1,
+      ));
+
+      await expectLater(
+        () => runBuildApkCommand(projectPath, arguments: <String>['--split-debug-info=${tempDir.path}']),
+        throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => processManager,
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('--extra-front-end-options are provided to gradle project', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=app']);
-
-      await expectLater(() async {
-        await runBuildApkCommand(projectPath, arguments: <String>[
-          '--extra-front-end-options=foo',
-          '--extra-front-end-options=bar',
-        ]);
-      }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
-
-      verify(mockProcessManager.start(
-        <String>[
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      processManager.addCommand(FakeCommand(
+        command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -283,29 +222,26 @@ void main() {
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).called(1);
+        exitCode: 1,
+      ));
+
+      await expectLater(() => runBuildApkCommand(projectPath, arguments: <String>[
+        '--extra-front-end-options=foo',
+        '--extra-front-end-options=bar',
+      ]), throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
+       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => processManager,
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('shrinking is disabled when --no-shrink is passed', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=app']);
-
-      await expectLater(() async {
-        await runBuildApkCommand(
-          projectPath,
-          arguments: <String>['--no-shrink'],
-        );
-      }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
-
-      verify(mockProcessManager.start(
-        <String>[
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      processManager.addCommand(FakeCommand(
+        command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -315,22 +251,32 @@ void main() {
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).called(1);
+        exitCode: 1,
+      ));
+
+      await expectLater(
+        () => runBuildApkCommand(
+          projectPath,
+          arguments: <String>['--no-shrink'],
+        ),
+        throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => processManager,
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('guides the user when the shrinker fails', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=app']);
-
-      when(mockProcessManager.start(
-        <String>[
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      const String r8StdoutWarning =
+        "Execution failed for task ':app:transformClassesAndResourcesWithR8ForStageInternal'.\n"
+        '> com.android.tools.r8.CompilationFailedException: Compilation failed to complete';
+      processManager.addCommand(FakeCommand(
+        command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -340,67 +286,51 @@ void main() {
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenAnswer((_) {
-        const String r8StdoutWarning =
-            "Execution failed for task ':app:transformClassesAndResourcesWithR8ForStageInternal'.\n"
-            '> com.android.tools.r8.CompilationFailedException: Compilation failed to complete';
-        return Future<Process>.value(
-          createMockProcess(
-            exitCode: 1,
-            stdout: r8StdoutWarning,
-          ),
-        );
-      });
+        exitCode: 1,
+        stdout: r8StdoutWarning,
+      ));
 
-      await expectLater(() async {
-        await runBuildApkCommand(
+      await expectLater(
+        () => runBuildApkCommand(
           projectPath,
-        );
-      }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
-
-      expect(
-        testLogger.statusText,
-        containsIgnoringWhitespace('The shrinker may have failed to optimize the Java bytecode.'),
+        ),
+        throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'),
       );
       expect(
-        testLogger.statusText,
-        containsIgnoringWhitespace('To disable the shrinker, pass the `--no-shrink` flag to this command.'),
+        testLogger.statusText, allOf(
+          containsIgnoringWhitespace('The shrinker may have failed to optimize the Java bytecode.'),
+          containsIgnoringWhitespace('To disable the shrinker, pass the `--no-shrink` flag to this command.'),
+          containsIgnoringWhitespace('To learn more, see: https://developer.android.com/studio/build/shrink-code'),
+        )
       );
-      expect(
-        testLogger.statusText,
-        containsIgnoringWhitespace('To learn more, see: https://developer.android.com/studio/build/shrink-code'),
-      );
-
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'gradle-r8-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
+      expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => processManager,
       Usage: () => testUsage,
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext("reports when the app isn't using AndroidX", () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
       // Simulate a non-androidx project.
       tempDir
         .childDirectory('flutter_project')
         .childDirectory('android')
         .childFile('gradle.properties')
         .writeAsStringSync('android.useAndroidX=false');
-
-      when(mockProcessManager.start(
-        <String>[
+      processManager.addCommand(FakeCommand(
+        command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -410,57 +340,44 @@ void main() {
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenAnswer((_) {
-        return Future<Process>.value(
-          createMockProcess(
-            exitCode: 0,
-            stdout: '',
-          ),
-        );
-      });
+        exitCode: 0,
+      ));
+
       // The command throws a [ToolExit] because it expects an APK in the file system.
-      await expectLater(() async {
-        await runBuildApkCommand(
-          projectPath,
-        );
-      }, throwsToolExit());
+      await expectLater(() =>  runBuildApkCommand(projectPath), throwsToolExit());
 
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace("Your app isn't using AndroidX"),
-      );
-      expect(
-        testLogger.statusText,
-        containsIgnoringWhitespace(
-        'To avoid potential build failures, you can quickly migrate your app by '
-        'following the steps on https://goo.gl/CP92wY'
+        allOf(
+          containsIgnoringWhitespace("Your app isn't using AndroidX"),
+          containsIgnoringWhitespace(
+            'To avoid potential build failures, you can quickly migrate your app by '
+            'following the steps on https://goo.gl/CP92wY'
+          ),
         ),
       );
-
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'app-not-using-android-x',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
+      expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => processManager,
       Usage: () => testUsage,
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('reports when the app is using AndroidX', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=app']);
-
-      when(mockProcessManager.start(
-        <String>[
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      processManager.addCommand(FakeCommand(
+        command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -470,46 +387,37 @@ void main() {
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenAnswer((_) {
-        return Future<Process>.value(
-          createMockProcess(
-            exitCode: 0,
-            stdout: '',
-          ),
-        );
-      });
+        exitCode: 0,
+      ));
+
       // The command throws a [ToolExit] because it expects an APK in the file system.
-      await expectLater(() async {
-        await runBuildApkCommand(
-          projectPath,
-        );
-      }, throwsToolExit());
+      await expectLater(() => runBuildApkCommand(projectPath), throwsToolExit());
 
-      expect(testLogger.statusText.contains("[!] Your app isn't using AndroidX"), isFalse);
       expect(
-        testLogger.statusText.contains(
-          'To avoid potential build failures, you can quickly migrate your app by '
-          'following the steps on https://goo.gl/CP92wY'
+        testLogger.statusText, allOf(
+          isNot(contains("[!] Your app isn't using AndroidX")),
+          isNot(contains(
+            'To avoid potential build failures, you can quickly migrate your app by '
+            'following the steps on https://goo.gl/CP92wY'
+          ))
         ),
-        isFalse,
       );
-
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'app-using-android-x',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
+      expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => processManager,
       Usage: () => testUsage,
+      AndroidStudio: () => FakeAndroidStudio(),
     });
   });
 }
@@ -536,4 +444,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   final Directory directory;
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => 'java';
+}

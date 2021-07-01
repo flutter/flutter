@@ -5,15 +5,14 @@
 import 'package:flutter/material.dart';
 
 class MultiWidgetConstructTable extends StatefulWidget {
-  const MultiWidgetConstructTable(this.columnCount, this.rowCount, {Key key})
+  const MultiWidgetConstructTable(this.columnCount, this.rowCount, {Key? key})
       : super(key: key);
 
   final int columnCount;
   final int rowCount;
 
   @override
-  _MultiWidgetConstructTableState createState() =>
-      _MultiWidgetConstructTableState();
+  State<MultiWidgetConstructTable> createState() => _MultiWidgetConstructTableState();
 }
 
 class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
@@ -25,7 +24,7 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
   ];
   int counter = 0;
 
-  AnimationController _controller;
+  late AnimationController _controller;
 
   @override
   void initState() {
@@ -54,9 +53,9 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
         final double height = MediaQuery.of(context).size.height / widget.rowCount;
         final double colorPosition = _controller.value;
         final int c1Position = colorPosition.floor();
-        final Color c1 = colorList[c1Position % colorList.length][900];
-        final Color c2 = colorList[(c1Position + 1) % colorList.length][900];
-        final Color baseColor = Color.lerp(c1, c2, colorPosition - c1Position);
+        final Color c1 = colorList[c1Position % colorList.length][900]!;
+        final Color c2 = colorList[(c1Position + 1) % colorList.length][900]!;
+        final Color baseColor = Color.lerp(c1, c2, colorPosition - c1Position)!;
         counter++;
         return Scaffold(
           body: Table(
@@ -76,16 +75,16 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
                             key: ValueKey<int>(widgetCounter + label),
                             color: Color.lerp(
                                 Colors.white, baseColor, label / totalLength),
-                            child: Text('${widgetCounter + label}'),
                             constraints: BoxConstraints.expand(height: height),
+                            child: Text('${widgetCounter + label}'),
                           )
                         : MyContainer(
                             // This key forces rebuilding the element
                             key: ValueKey<int>(widgetCounter + label),
                             color: Color.lerp(
-                                Colors.white, baseColor, label / totalLength),
-                            child: Text('${widgetCounter + label}'),
+                                Colors.white, baseColor, label / totalLength)!,
                             constraints: BoxConstraints.expand(height: height),
+                            child: Text('${widgetCounter + label}'),
                           );
                   },
                 ),
@@ -100,7 +99,7 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
 
 // This class is intended to break the original Widget tree
 class MyContainer extends StatelessWidget {
-  const MyContainer({this.color, this.child, this.constraints, Key key})
+  const MyContainer({required this.color, required this.child, required this.constraints, Key? key})
       : super(key: key);
   final Color color;
   final Widget child;
@@ -110,8 +109,8 @@ class MyContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: color,
-      child: child,
       constraints: constraints,
+      child: child,
     );
   }
 }

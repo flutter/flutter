@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/apk_utils.dart';
@@ -48,7 +50,7 @@ Future<void> main() async {
         );
       });
 
-      section('Create plugin that doesn\'t support android project');
+      section("Create plugin that doesn't support android project");
 
       await inDirectory(tempDir, () async {
         await flutter(
@@ -262,7 +264,7 @@ Future<void> main() async {
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      rmTree(tempDir);
+      // rmTree(tempDir);
     }
   });
 }

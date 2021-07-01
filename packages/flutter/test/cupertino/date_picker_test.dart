@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependency have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -211,9 +217,7 @@ void main() {
       );
 
       // Distance between the first column and the last column.
-      final double distance = tester.getCenter(
-        find.text('sec.')).dx - tester.getCenter(find.text('12'),
-      ).dx;
+      final double distance = tester.getCenter(find.text('sec.')).dx - tester.getCenter(find.text('12')).dx;
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -693,7 +697,8 @@ void main() {
           tester.widget<Text>(find.text('29')).style!.color,
           isSameColorAs(CupertinoColors.inactiveGray.color),
         );
-    });
+      },
+    );
 
     testWidgets(
       'dateTime picker automatically scrolls away from invalid date, '
@@ -770,7 +775,8 @@ void main() {
           date,
           DateTime(2019, 11, 11, 3, 30),
         );
-    });
+      },
+    );
 
     testWidgets(
       'time picker automatically scrolls away from invalid date, '
@@ -847,7 +853,8 @@ void main() {
           date,
           DateTime(2019, 11, 11, 3, 30),
         );
-    });
+      },
+    );
 
     testWidgets('picker automatically scrolls away from invalid date on day change', (WidgetTester tester) async {
       late DateTime date;
@@ -933,7 +940,8 @@ void main() {
         expect(date.year, minDate.year);
         expect(date.month, minDate.month);
         expect(date.day, minDate.day);
-    });
+      },
+    );
 
     testWidgets('date picker does not display previous day of minimumDate if it is set at midnight', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/72932

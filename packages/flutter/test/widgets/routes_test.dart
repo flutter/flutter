@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependency have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -417,10 +423,10 @@ void main() {
   testWidgets('Route localHistory - popUntil', (WidgetTester tester) async {
     final TestRoute routeA = TestRoute('A');
     routeA.addLocalHistoryEntry(LocalHistoryEntry(
-      onRemove: () { routeA.log('onRemove 0'); }
+      onRemove: () { routeA.log('onRemove 0'); },
     ));
     routeA.addLocalHistoryEntry(LocalHistoryEntry(
-      onRemove: () { routeA.log('onRemove 1'); }
+      onRemove: () { routeA.log('onRemove 1'); },
     ));
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
@@ -566,7 +572,7 @@ void main() {
                         pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
                           return const Text('Page Two');
                         },
-                      )
+                      ),
                     );
                   },
                   child: const Text('Open page'),
@@ -574,7 +580,7 @@ void main() {
               },
             );
           },
-        )
+        ),
       );
 
       // Open the new route.
@@ -617,15 +623,15 @@ void main() {
                       },
                       // modified value, default PageRouteBuilder reverse transition duration should be 300ms.
                       reverseTransitionDuration: const Duration(milliseconds: 150),
-                    )
+                    ),
                   );
                 },
                 child: const Text('Open page'),
               );
             },
           );
-        })
-      );
+        },
+      ));
 
       // Open the new route.
       await tester.tap(find.byType(ElevatedButton));
@@ -660,7 +666,7 @@ void main() {
         MaterialApp(
           navigatorKey: navigator,
           home: const Text('home'),
-        )
+        ),
       );
 
       // Push page one, its secondary animation is kAlwaysDismissedAnimation.
@@ -715,10 +721,10 @@ void main() {
     testWidgets('secondary animation is kDismissed when next route is removed', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
-          MaterialApp(
-            navigatorKey: navigator,
-            home: const Text('home'),
-          )
+        MaterialApp(
+          navigatorKey: navigator,
+          home: const Text('home'),
+        ),
       );
 
       // Push page one, its secondary animation is kAlwaysDismissedAnimation.
@@ -770,10 +776,10 @@ void main() {
     testWidgets('secondary animation is kDismissed after train hopping finishes and pop', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
-          MaterialApp(
-            navigatorKey: navigator,
-            home: const Text('home'),
-          )
+        MaterialApp(
+          navigatorKey: navigator,
+          home: const Text('home'),
+        ),
       );
 
       // Push page one, its secondary animation is kAlwaysDismissedAnimation.
@@ -842,10 +848,10 @@ void main() {
     testWidgets('secondary animation is kDismissed when train hopping is interrupted', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
-          MaterialApp(
-            navigatorKey: navigator,
-            home: const Text('home'),
-          )
+        MaterialApp(
+          navigatorKey: navigator,
+          home: const Text('home'),
+        ),
       );
 
       // Push page one, its secondary animation is kAlwaysDismissedAnimation.
@@ -928,7 +934,7 @@ void main() {
             );
           },
           initialRoute: '/a',
-        )
+        ),
       );
       // The secondary animation of the bottom route should be chained with the
       // primary animation of top most route.
@@ -979,7 +985,7 @@ void main() {
       expect(find.byType(ModalBarrier), findsNWidgets(1));
     });
 
-    testWidgets('showGeneralDialog adds non-dismissable barrier when barrierDismissable is false', (WidgetTester tester) async {
+    testWidgets('showGeneralDialog adds non-dismissible barrier when barrierDismissible is false', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
@@ -1344,12 +1350,12 @@ void main() {
                     Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
-                      )
+                      ),
                     );
                   },
                 ),
               );
-            }
+            },
           ),
         ),
       ));
@@ -1461,21 +1467,21 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: Builder(
-              builder: (BuildContext context) {
-                return Center(
-                  child: ElevatedButton(
-                    child: const Text('X'),
-                    onPressed: () {
-                      Navigator.of(context).push<void>(
-                          _TestDialogRouteWithCustomBarrierCurve<void>(
-                            child: const Text('Hello World'),
-                            barrierColor: Colors.white,
-                          )
-                      );
-                    },
-                  ),
-                );
-              }
+            builder: (BuildContext context) {
+              return Center(
+                child: ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    Navigator.of(context).push<void>(
+                      _TestDialogRouteWithCustomBarrierCurve<void>(
+                        child: const Text('Hello World'),
+                        barrierColor: Colors.white,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
           ),
         ),
       ));
@@ -1608,7 +1614,7 @@ void main() {
       navigatorKey.currentState!.push<void>(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('dummy2'),
-        )
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -1622,7 +1628,7 @@ void main() {
       navigatorKey.currentState!.push<void>(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('dummy3'),
-        )
+        ),
       );
       await tester.pumpAndSettle();
       final Element textOnPageThree = tester.element(find.text('dummy3'));
@@ -1652,9 +1658,9 @@ void main() {
 
       // Pushes one page.
       navigatorKey.currentState!.push<void>(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) => const Material(child: TextField()),
-          )
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => const Material(child: TextField()),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -1672,9 +1678,9 @@ void main() {
 
       // Pushes another page.
       navigatorKey.currentState!.push<void>(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) => const Text('dummy3'),
-          )
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => const Text('dummy3'),
+        ),
       );
       await tester.pumpAndSettle();
       final Element textOnPageThree = tester.element(find.text('dummy3'));
@@ -1770,7 +1776,7 @@ void main() {
     navigatorKey.currentState!.push<void>(MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return const Text('page2');
-      }
+      },
     ));
 
     await tester.pumpAndSettle();
@@ -1937,9 +1943,9 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return Semantics(
-      child: _child,
       scopesRoute: true,
       explicitChildNodes: true,
+      child: _child,
     );
   }
 }
@@ -1978,13 +1984,13 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
   Iterable<RouteTransitionRecord> resolve({
     required List<RouteTransitionRecord> newPageRouteHistory,
     required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
-    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes
+    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
   }) {
     hasTransition = true;
     return super.resolve(
       newPageRouteHistory: newPageRouteHistory,
       locationToExitingPageRoute: locationToExitingPageRoute,
-      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes
+      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes,
     );
   }
 }
@@ -1993,7 +1999,7 @@ Widget buildNavigator({
   required List<Page<dynamic>> pages,
   required PopPageCallback onPopPage,
   GlobalKey<NavigatorState>? key,
-  TransitionDelegate<dynamic>? transitionDelegate
+  TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
     data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
@@ -2001,7 +2007,7 @@ Widget buildNavigator({
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate
+        DefaultWidgetsLocalizations.delegate,
       ],
       child: Directionality(
         textDirection: TextDirection.ltr,

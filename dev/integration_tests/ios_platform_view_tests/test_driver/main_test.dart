@@ -8,7 +8,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('FlutterDriver', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
@@ -40,7 +40,7 @@ void main() {
 
       final Health driverHealth = await driver.checkHealth();
       expect(driverHealth.status, HealthStatus.ok);
-    });
+    }, timeout: Timeout.none);
 
     test('Merge thread to create and remove platform views should not crash',
         () async {
@@ -65,6 +65,6 @@ void main() {
 
       final Health driverHealth = await driver.checkHealth();
       expect(driverHealth.status, HealthStatus.ok);
-    });
+    }, timeout: Timeout.none);
   });
 }

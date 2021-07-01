@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/src/foundation/assertions.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const List<Widget> children = <Widget>[
   SizedBox(width: 200.0, height: 150.0),
@@ -137,7 +137,7 @@ void main() {
       '   RenderListBody does not clip or resize its children, so it must\n'
       '   be placed in a parent that does not constrain the main axis.\n'
       '   You probably want to put the RenderListBody inside a\n'
-      '   RenderViewport with a matching main axis.\n'
+      '   RenderViewport with a matching main axis.\n',
     ));
   });
 
@@ -190,7 +190,7 @@ void main() {
       '   inside one of another direction, you will want to wrap the inner\n'
       '   one inside a box that fixes the dimension in that direction, for\n'
       '   example, a RenderIntrinsicWidth or RenderIntrinsicHeight object.\n'
-      '   This is relatively expensive, however.\n'
+      '   This is relatively expensive, however.\n',
     ));
   });
 }

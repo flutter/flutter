@@ -335,13 +335,13 @@ void main() {
     final DeactivateLogger logger = DeactivateLogger(key: key, log: log);
 
     await tester.pumpWidget(
-      Container(key: UniqueKey(), child: logger)
+      Container(key: UniqueKey(), child: logger),
     );
 
     expect(log, equals(<String>['build']));
 
     await tester.pumpWidget(
-      Container(key: UniqueKey(), child: logger)
+      Container(key: UniqueKey(), child: logger),
     );
 
     expect(log, equals(<String>['build', 'deactivate', 'build']));

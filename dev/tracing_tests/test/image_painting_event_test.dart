@@ -42,7 +42,10 @@ void main() {
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
-    vmService.onExtensionEvent.first.then(completer.complete);
+    vmService
+        .onExtensionEvent
+        .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
+        .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();
@@ -75,7 +78,10 @@ void main() {
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
-    vmService.onExtensionEvent.first.then(completer.complete);
+    vmService
+        .onExtensionEvent
+        .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
+        .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// Tracks how often feedback has been requested since its instantiation.
 ///
@@ -10,13 +11,7 @@ import 'package:flutter/services.dart';
 /// cannot be used in combination with other classes that do the same.
 class FeedbackTester {
   FeedbackTester() {
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'HapticFeedback.vibrate')
-        _hapticCount++;
-      if (methodCall.method == 'SystemSound.play' &&
-          methodCall.arguments == SystemSoundType.click.toString())
-        _clickSoundCount++;
-    });
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, _handler);
   }
 
   /// Number of times haptic feedback was requested (vibration).
@@ -27,8 +22,17 @@ class FeedbackTester {
   int get clickSoundCount => _clickSoundCount;
   int _clickSoundCount = 0;
 
+  Future<void> _handler(MethodCall methodCall) async {
+    if (methodCall.method == 'HapticFeedback.vibrate')
+      _hapticCount++;
+    if (methodCall.method == 'SystemSound.play' &&
+        methodCall.arguments == SystemSoundType.click.toString())
+      _clickSoundCount++;
+  }
+
   /// Stops tracking.
   void dispose() {
-    SystemChannels.platform.setMockMethodCallHandler(null);
+    assert(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.checkMockMessageHandler(SystemChannels.platform.name, _handler));
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   }
 }

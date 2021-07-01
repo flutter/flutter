@@ -8,7 +8,12 @@ and native Android instrumentation testing.
 
 Add a dependency on the `integration_test` and `flutter_test` package in the
 `dev_dependencies` section of `pubspec.yaml`. For plugins, do this in the
-`pubspec.yaml` of the example app.
+`pubspec.yaml` of the example app:
+
+```yaml
+integration_test:
+  sdk: flutter
+```
 
 Create a `integration_test/` directory for your package. In this directory,
 create a `<name>_test.dart`, using the following as a starting point to make
@@ -42,7 +47,7 @@ Future<void> main() => integrationDriver();
 You can also use different driver scripts to customize the behavior of the app
 under test. For example, `FlutterDriver` can also be parameterized with
 different [options](https://api.flutter.dev/flutter/flutter_driver/FlutterDriver/connect.html).
-See the [extended driver](https://github.com/flutter/plugins/tree/master/packages/integration_test/example/test_driver/integration_test_extended_driver.dart) for an example.
+See the [extended driver](https://github.com/flutter/flutter/blob/master/packages/integration_test/example/test_driver/extended_integration_test.dart) for an example.
 
 ### Package Structure
 
@@ -60,7 +65,7 @@ test_driver/
   integration_test.dart
 ```
 
-[Example](https://github.com/flutter/plugins/tree/master/packages/integration_test/example)
+[Example](https://github.com/flutter/flutter/tree/master/packages/integration_test/example)
 
 ## Using Flutter Driver to Run Tests
 
@@ -184,12 +189,11 @@ Open `ios/Runner.xcworkspace` in Xcode. Create a test target if you
 do not already have one via `File > New > Target...` and select `Unit Testing Bundle`.
 Change the `Product Name` to `RunnerTests`. Make sure `Target to be Tested` is set to `Runner` and language is set to `Objective-C`.
 Select `Finish`.
-Under **Runner** > **Info** > **Configurations** section, make sure, that `Runner` and `RunnerTests` have the same value under each configuration.
 Make sure that the **iOS Deployment Target** of `RunnerTests` within the **Build Settings** section is the same as `Runner`.
 
 Add the new test target to `ios/Podfile` by embedding in the existing `Runner` target.
 
-```
+```ruby
 target 'Runner' do
   # Do not change existing lines.
   ...
@@ -199,7 +203,11 @@ target 'Runner' do
   end
 end
 ```
-Run `flutter build ios` from your project file to hook up the new settings.
+
+To build `integration_test/foo_test.dart` from the command line, run:
+```sh
+flutter build ios --config-only integration_test/foo_test.dart
+```
 
 In Xcode, add a test file called `RunnerTests.m` (or any name of your choice) to the new target and
 replace the file:
@@ -211,14 +219,7 @@ replace the file:
 INTEGRATION_TEST_IOS_RUNNER(RunnerTests)
 ```
 
-Run `Product > Tests` to run the integration tests on your selected device.
-
-To build `integration_test/foo_test.dart` from the command line, run:
-
-```sh
-# Pass --simulator if building for the simulator.
-flutter build ios integration_test/foo_test.dart
-```
+Run `Product > Test` to run the integration tests on your selected device.
 
 To deploy it to Firebase Test Lab you can follow these steps:
 
@@ -230,7 +231,7 @@ product="build/ios_integ/Build/Products"
 dev_target="14.3"
 
 # Pass --simulator if building for the simulator.
-flutter build ios integration_test/foo_test.dart -release
+flutter build ios integration_test/foo_test.dart --release
 
 pushd ios
 xcodebuild -workspace Runner.xcworkspace -scheme Runner -config Flutter/Release.xcconfig -derivedDataPath $output -sdk iphoneos build-for-testing

@@ -11,9 +11,9 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
@@ -55,8 +55,7 @@ void main() {
           arguments: <String>['--no-pub', '--template=module']);
 
       final BuildAarCommand command = await runCommandIn(projectPath);
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAarProjectType, 'module'));
+      expect((await command.usageValues).commandBuildAarProjectType, 'module');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -67,8 +66,7 @@ void main() {
           arguments: <String>['--no-pub', '--template=plugin', '--project-name=aar_test']);
 
       final BuildAarCommand command = await runCommandIn(projectPath);
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAarProjectType, 'plugin'));
+      expect((await command.usageValues).commandBuildAarProjectType, 'plugin');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -80,8 +78,7 @@ void main() {
 
       final BuildAarCommand command = await runCommandIn(projectPath,
           arguments: <String>['--target-platform=android-arm']);
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAarTargetPlatform, 'android-arm'));
+      expect((await command.usageValues).commandBuildAarTargetPlatform, 'android-arm');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -185,6 +182,7 @@ void main() {
       expect(buildInfo.splitDebugInfoPath, '/project-name/v1.2.3/');
       expect(buildInfo.dartObfuscation, isTrue);
       expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
+      expect(buildInfo.nullSafetyMode, NullSafetyMode.sound);
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => fakeAndroidBuilder,
     });

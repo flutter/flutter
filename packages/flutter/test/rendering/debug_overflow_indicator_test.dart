@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -35,7 +35,9 @@ void main() {
 
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.toString(), startsWith('A RenderConstraintsTransformBox overflowed by '));
     expect(find.byType(UnconstrainedBox), paints..rect());
 

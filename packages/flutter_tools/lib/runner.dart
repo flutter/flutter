@@ -20,7 +20,7 @@ import 'src/base/process.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;
-import 'src/reporting/reporting.dart';
+import 'src/reporting/crash_reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 

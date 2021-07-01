@@ -23,7 +23,7 @@ void main() {
     ]);
 
     expect(result.exitCode, 1);
-    expect(result.stderr, 'PROJECT_DIR environment variable must be set to the location of Flutter project to be built.');
+    expect(result.stderr, contains('PROJECT_DIR environment variable must be set to the location of Flutter project to be built.'));
   });
 
   testWithoutContext('tool_backend.dart exits if FLUTTER_ROOT is not set', () async {
@@ -40,7 +40,7 @@ void main() {
     }, includeParentEnvironment: false); // Prevent FLUTTER_ROOT set by test environment from leaking
 
     expect(result.exitCode, 1);
-    expect(result.stderr, 'FLUTTER_ROOT environment variable must be set to the location of the Flutter SDK.');
+    expect(result.stderr, contains('FLUTTER_ROOT environment variable must be set to the location of the Flutter SDK.'));
   });
 
   testWithoutContext('tool_backend.dart exits if local engine does not match build mode', () async {
@@ -55,6 +55,6 @@ void main() {
     });
 
     expect(result.exitCode, 1);
-    expect(result.stderr, contains('ERROR: Requested build with Flutter local engine at \'release_foo_bar\''));
+    expect(result.stderr, contains("ERROR: Requested build with Flutter local engine at 'release_foo_bar'"));
   });
 }

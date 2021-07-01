@@ -4,9 +4,9 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -37,7 +37,7 @@ void main() {
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
-              child: const SizedBox(width: 4000.0, height: 4000.0)
+              child: const SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
@@ -130,7 +130,7 @@ void main() {
           controller: scrollController,
           child: SingleChildScrollView(
             controller: scrollController,
-            child: const SizedBox(width: 4000.0, height: 4000.0)
+            child: const SizedBox(width: 4000.0, height: 4000.0),
           ),
         ),
       ),
@@ -217,7 +217,7 @@ void main() {
         controller: scrollController,
         child: SingleChildScrollView(
           controller: scrollController,
-          child: const SizedBox(width: 4000.0, height: 4000.0)
+          child: const SizedBox(width: 4000.0, height: 4000.0),
         ),
       ),
     ));
@@ -265,7 +265,7 @@ void main() {
         controller: scrollController,
         child: SingleChildScrollView(
           controller: scrollController,
-          child: const SizedBox(width: 4000.0, height: 4000.0)
+          child: const SizedBox(width: 4000.0, height: 4000.0),
         ),
       ),
     ));
@@ -326,7 +326,7 @@ void main() {
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
-              child: const SizedBox(width: 4000.0, height: 4000.0)
+              child: const SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
@@ -419,10 +419,10 @@ void main() {
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
-              child: const SizedBox(width: 4000.0, height: 4000.0)
+              child: const SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
-        )
+        ),
       );
     }
 
@@ -607,16 +607,16 @@ void main() {
       .toList();
 
     expect(description, <String>[
-      'thickness: Instance of \'_MaterialStatePropertyWith<double?>\'',
+      "thickness: Instance of '_MaterialStatePropertyWith<double?>'",
       'showTrackOnHover: true',
       'isAlwaysShown: true',
       'radius: Radius.circular(3.0)',
-      'thumbColor: Instance of \'_MaterialStatePropertyWith<Color?>\'',
-      'trackColor: Instance of \'_MaterialStatePropertyWith<Color?>\'',
-      'trackBorderColor: Instance of \'_MaterialStatePropertyWith<Color?>\'',
+      "thumbColor: Instance of '_MaterialStatePropertyWith<Color?>'",
+      "trackColor: Instance of '_MaterialStatePropertyWith<Color?>'",
+      "trackBorderColor: Instance of '_MaterialStatePropertyWith<Color?>'",
       'crossAxisMargin: 3.0',
       'mainAxisMargin: 6.0',
-      'minThumbLength: 120.0'
+      'minThumbLength: 120.0',
     ]);
 
     // On the web, Dart doubles and ints are backed by the same kind of object because

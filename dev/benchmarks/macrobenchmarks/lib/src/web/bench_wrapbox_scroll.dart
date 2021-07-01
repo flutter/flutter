@@ -29,16 +29,14 @@ class BenchWrapBoxScroll extends WidgetRecorder {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  ScrollController scrollController;
+  late ScrollController scrollController;
   int block = 0;
   static const Duration stepDuration = Duration(milliseconds: 500);
   static const double stepDistance = 400;
@@ -61,8 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    super.dispose();
     scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -84,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class ProductPreview extends StatelessWidget {
-  const ProductPreview(this.previewIndex, {Key key}) : super(key: key);
+  const ProductPreview(this.previewIndex, {Key? key}) : super(key: key);
 
   final int previewIndex;
 
@@ -143,8 +141,8 @@ class ProductPreview extends StatelessWidget {
 
 class ProductOption extends StatelessWidget {
   const ProductOption({
-    Key key,
-    @required this.optionText,
+    Key? key,
+    required this.optionText,
   }) : super(key: key);
 
   final String optionText;

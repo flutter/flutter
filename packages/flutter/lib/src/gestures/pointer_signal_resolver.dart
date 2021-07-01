@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';
@@ -24,7 +23,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 /// these signal events were to handle them directly, it would cause issues
 /// such as multiple [Scrollable] widgets in the widget hierarchy responding
 /// to the same mouse wheel event. Using this class, these events will only
-/// be dispatched to the the first registered handler, which will in turn
+/// be dispatched to the first registered handler, which will in turn
 /// correspond to the widget that's deepest in the widget hierarchy.
 ///
 /// To use this class, objects should register their event handler like so:
@@ -69,7 +68,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///   final Widget? child;
 ///
 ///   @override
-///   _ColorChangerState createState() => _ColorChangerState();
+///   State<ColorChanger> createState() => _ColorChangerState();
 /// }
 ///
 /// class _ColorChangerState extends State<ColorChanger> {
@@ -189,6 +188,7 @@ class PointerSignalResolver {
   ///
   /// This is called by the [GestureBinding] after the framework has finished
   /// dispatching the pointer signal event.
+  @pragma('vm:notify-debugger-on-exception')
   void resolve(PointerSignalEvent event) {
     if (_firstRegisteredCallback == null) {
       assert(_currentEvent == null);

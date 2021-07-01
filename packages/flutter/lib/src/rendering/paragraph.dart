@@ -16,27 +16,9 @@ import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
 
-/// How overflowing text should be handled.
-///
-/// A [TextOverflow] can be passed to [Text] and [RichText] via their
-/// [Text.overflow] and [RichText.overflow] properties respectively.
-enum TextOverflow {
-  /// Clip the overflowing text to fix its container.
-  clip,
-
-  /// Fade the overflowing text to transparent.
-  fade,
-
-  /// Use an ellipsis to indicate that the text has overflowed.
-  ellipsis,
-
-  /// Render overflowing text outside of its container.
-  visible,
-}
-
 const String _kEllipsis = '\u2026';
 
-/// Parent data for use with [RenderParagraph].
+/// Parent data for use with [RenderParagraph] and [RenderEditable].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
   /// The scaling of the text.
   double? scale;
@@ -452,14 +434,12 @@ class RenderParagraph extends RenderBox
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     // Hit test text spans.
-    late final bool hitText;
+    bool hitText = false;
     final TextPosition textPosition = _textPainter.getPositionForOffset(position);
     final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
     if (span != null && span is HitTestTarget) {
       result.add(HitTestEntry(span as HitTestTarget));
       hitText = true;
-    } else {
-      hitText = false;
     }
 
     // Hit test render object children
@@ -563,16 +543,14 @@ class RenderParagraph extends RenderBox
         );
         childSize = child.size;
         switch (_placeholderSpans[childIndex].alignment) {
-          case ui.PlaceholderAlignment.baseline: {
+          case ui.PlaceholderAlignment.baseline:
             baselineOffset = child.getDistanceToBaseline(
               _placeholderSpans[childIndex].baseline!,
             );
             break;
-          }
-          default: {
+          default:
             baselineOffset = null;
             break;
-          }
         }
       } else {
         assert(_placeholderSpans[childIndex].alignment != ui.PlaceholderAlignment.baseline);
@@ -615,14 +593,12 @@ class RenderParagraph extends RenderBox
       switch (span.alignment) {
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline: {
+        case ui.PlaceholderAlignment.belowBaseline:
           return false;
-        }
         case ui.PlaceholderAlignment.top:
         case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom: {
+        case ui.PlaceholderAlignment.bottom:
           continue;
-        }
       }
     }
     return true;

@@ -108,7 +108,7 @@ class _Resampler {
 
     // Schedule periodic resampling if `_timer` is not already active.
     if (_timer?.isActive != true) {
-       _timer = Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
+      _timer = Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
     }
 
     // Calculate the effective frame time by taking the number
@@ -185,7 +185,7 @@ class _Resampler {
     assert(() {
       if (debugPrintResamplingMargin) {
         final Duration resamplingMargin = _lastEventTime - _lastSampleTime;
-          debugPrint('$resamplingMargin');
+        debugPrint('$resamplingMargin');
       }
       return true;
     }());
@@ -390,6 +390,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// The `hitTestResult` argument may only be null for [PointerAddedEvent]s or
   /// [PointerRemovedEvent]s.
   @override // from HitTestDispatcher
+  @pragma('vm:notify-debugger-on-exception')
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     assert(!locked);
     // No hit test information implies that this is a [PointerHoverEvent],

@@ -2,15 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
-import 'package:meta/meta.dart';
 
 Future<void> main() async {
   await task(() async {
@@ -19,7 +21,7 @@ Future<void> main() async {
     String watchDeviceID;
     String phoneDeviceID;
     final Directory tempDir = Directory.systemTemp
-        .createTempSync('ios_app_with_extensions_test');
+        .createTempSync('flutter_ios_app_with_extensions_test.');
     final Directory projectDir =
         Directory(path.join(tempDir.path, 'app_with_extensions'));
     try {
@@ -29,10 +31,6 @@ Future<void> main() async {
             'ios_app_with_extensions')),
         projectDir,
       );
-
-      // For some reason devicelab machines have really old spec snapshots.
-      // TODO(jmagman): Remove this if this test is moved to a machine that installs CocoaPods on every run.
-      await eval('pod', <String>['repo', 'update', '--verbose']);
 
       section('Create release build');
 
@@ -65,8 +63,8 @@ Future<void> main() async {
       );
 
       checkDirectoryExists(appBundle);
-      await _checkFlutterFrameworkArchs(appFrameworkPath, isSimulator: false);
-      await _checkFlutterFrameworkArchs(flutterFrameworkPath, isSimulator: false);
+      await _checkFlutterFrameworkArchs(appFrameworkPath);
+      await _checkFlutterFrameworkArchs(flutterFrameworkPath);
 
       // Check the watch extension framework added in the Podfile
       // is in place with the expected watch archs.
@@ -80,7 +78,7 @@ Future<void> main() async {
         'EFQRCode.framework',
         'EFQRCode',
       );
-      _checkWatchExtensionFrameworkArchs(watchExtensionFrameworkPath);
+      unawaited(_checkWatchExtensionFrameworkArchs(watchExtensionFrameworkPath));
 
       section('Clean build');
 
@@ -98,9 +96,9 @@ Future<void> main() async {
       });
 
       checkDirectoryExists(appBundle);
-      await _checkFlutterFrameworkArchs(appFrameworkPath, isSimulator: false);
-      await _checkFlutterFrameworkArchs(flutterFrameworkPath, isSimulator: false);
-      _checkWatchExtensionFrameworkArchs(watchExtensionFrameworkPath);
+      await _checkFlutterFrameworkArchs(appFrameworkPath);
+      await _checkFlutterFrameworkArchs(flutterFrameworkPath);
+      unawaited(_checkWatchExtensionFrameworkArchs(watchExtensionFrameworkPath));
 
       section('Clean build');
 
@@ -249,22 +247,18 @@ Future<void> main() async {
       )).path;
 
       checkDirectoryExists(simulatorAppBundle);
-
-      final String simulatorAppFrameworkPath = path.join(
+      checkFileExists(path.join(
         simulatorAppBundle,
         'Frameworks',
         'App.framework',
         'App',
-      );
-      final String simulatorFlutterFrameworkPath = path.join(
+      ));
+      checkFileExists(path.join(
         simulatorAppBundle,
         'Frameworks',
         'Flutter.framework',
         'Flutter',
-      );
-
-      await _checkFlutterFrameworkArchs(simulatorAppFrameworkPath, isSimulator: true);
-      await _checkFlutterFrameworkArchs(simulatorFlutterFrameworkPath, isSimulator: true);
+      ));
 
       return TaskResult.success(null);
     } catch (e) {
@@ -304,23 +298,16 @@ Future<void> main() async {
   });
 }
 
-Future<void> _checkFlutterFrameworkArchs(String frameworkPath, {
-  @required bool isSimulator
-}) async {
+Future<void> _checkFlutterFrameworkArchs(String frameworkPath) async {
   checkFileExists(frameworkPath);
 
   final String archs = await fileType(frameworkPath);
-  if (isSimulator == archs.contains('armv7')) {
-    throw TaskResult.failure('$frameworkPath armv7 architecture unexpected');
+  if (!archs.contains('arm64')) {
+    throw TaskResult.failure('$frameworkPath arm64 architecture missing');
   }
 
-  if (isSimulator == archs.contains('arm64')) {
-    throw TaskResult.failure('$frameworkPath arm64 architecture unexpected');
-  }
-
-  if (isSimulator != archs.contains('x86_64')) {
-    throw TaskResult.failure(
-        '$frameworkPath x86_64 architecture unexpected');
+  if (archs.contains('x86_64')) {
+    throw TaskResult.failure('$frameworkPath x86_64 architecture unexpectedly present');
   }
 }
 

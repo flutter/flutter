@@ -82,8 +82,8 @@ void main() {
     layout(
       root = RenderIntrinsicSize(
         child: RenderParentSize(
-          child: inner = RenderFixedSize()
-        )
+          child: inner = RenderFixedSize(),
+        ),
       ),
       constraints: const BoxConstraints(
         minWidth: 0.0,
@@ -106,8 +106,8 @@ void main() {
     layout(
       RenderIntrinsicSize(
         child: parent = RenderParentSize(
-          child: inner = RenderFixedSize()
-        )
+          child: inner = RenderFixedSize(),
+        ),
       ),
       constraints: const BoxConstraints(
         minWidth: 0.0,
@@ -127,15 +127,18 @@ void main() {
 
   test('Intrinsic checks are turned on', () async {
     final List<FlutterErrorDetails> errorDetails = <FlutterErrorDetails>[];
-    layout(RenderInvalidIntrinsics(),
-        constraints: const BoxConstraints(
-          minWidth: 0.0,
-          minHeight: 0.0,
-          maxWidth: 1000.0,
-          maxHeight: 1000.0,
-        ), onErrors: () {
+    layout(
+      RenderInvalidIntrinsics(),
+      constraints: const BoxConstraints(
+        minWidth: 0.0,
+        minHeight: 0.0,
+        maxWidth: 1000.0,
+        maxHeight: 1000.0,
+      ),
+      onErrors: () {
         errorDetails.addAll(renderer.takeAllFlutterErrorDetails());
-    });
+      },
+    );
 
     expect(errorDetails, isNotEmpty);
     expect(

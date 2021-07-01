@@ -51,7 +51,7 @@ class ButtonsDemo extends StatefulWidget {
   static const String routeName = '/material/buttons';
 
   @override
-  _ButtonsDemoState createState() => _ButtonsDemoState();
+  State<ButtonsDemo> createState() => _ButtonsDemoState();
 }
 
 class _ButtonsDemoState extends State<ButtonsDemo> {
@@ -127,8 +127,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 2),
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               ElevatedButton(
                 style: style,
@@ -138,13 +139,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 },
               ),
               const ElevatedButton(
-                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 1'),
                 onPressed: null,
+                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 1'),
               ),
             ],
           ),
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 16),
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               ElevatedButton.icon(
                 style: style,
@@ -174,8 +176,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 2),
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               TextButton(
                 style: style,
@@ -185,13 +188,13 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 },
               ),
               const TextButton(
-                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3',),
                 onPressed: null,
+                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3',),
               ),
             ],
           ),
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               TextButton.icon(
                 style: style,
@@ -221,8 +224,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 2),
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               OutlinedButton(
                 style: style,
@@ -233,13 +237,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               ),
               OutlinedButton(
                 style: style,
-                child: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 5'),
                 onPressed: null,
+                child: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 5'),
               ),
             ],
           ),
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 16),
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               OutlinedButton.icon(
                 style: style,
@@ -376,11 +381,11 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     return Align(
       alignment: const Alignment(0.0, -0.2),
       child: FloatingActionButton(
+        tooltip: 'floating action button',
         child: const Icon(Icons.add),
         onPressed: () {
           // Perform some action
         },
-        tooltip: 'floating action button',
       ),
     );
   }

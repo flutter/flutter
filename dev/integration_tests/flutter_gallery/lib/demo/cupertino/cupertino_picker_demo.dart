@@ -17,7 +17,7 @@ class CupertinoPickerDemo extends StatefulWidget {
   static const String routeName = '/cupertino/picker';
 
   @override
-  _CupertinoPickerDemoState createState() => _CupertinoPickerDemoState();
+  State<CupertinoPickerDemo> createState() => _CupertinoPickerDemoState();
 }
 
 class _BottomPicker extends StatelessWidget {

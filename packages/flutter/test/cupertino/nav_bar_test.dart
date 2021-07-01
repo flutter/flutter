@@ -18,8 +18,8 @@ void main() {
       const CupertinoApp(
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
-            child: Text('Something'),
             onPressed: null,
+            child: Text('Something'),
           ),
           middle: Text('Title'),
         ),
@@ -107,11 +107,11 @@ void main() {
       ),
     );
     navigator.currentState!.push<void>(CupertinoPageRoute<void>(
-        builder: (BuildContext context) {
-          return const CupertinoNavigationBar(
-            middle: Text('Page 2'),
-          );
-        }
+      builder: (BuildContext context) {
+        return const CupertinoNavigationBar(
+          middle: Text('Page 2'),
+        );
+      },
     ));
     await tester.pumpAndSettle();
     expect(find.byType(CupertinoNavigationBarBackButton), findsOneWidget);
@@ -133,7 +133,7 @@ void main() {
         home: Align(
           alignment: Alignment.topCenter,
           child: CupertinoNavigationBar(
-            leading: const CupertinoButton(child: Text('Cheetah'), onPressed: null),
+            leading: const CupertinoButton(onPressed: null, child: Text('Cheetah')),
             // Let the box take all the vertical space to test vertical padding but let
             // the nav bar position it horizontally.
             middle: Align(
@@ -142,7 +142,7 @@ void main() {
               widthFactor: 1.0,
               child: const Text('Title'),
             ),
-            trailing: const CupertinoButton(child: Text('Puma'), onPressed: null),
+            trailing: const CupertinoButton(onPressed: null, child: Text('Puma')),
             padding: const EdgeInsetsDirectional.only(
               start: 10.0,
               end: 20.0,
@@ -206,7 +206,7 @@ void main() {
               largeTitle: Text('Title'),
               backgroundColor: Color(0xF0F9F9F9),
               brightness: Brightness.dark,
-            )
+            ),
           ],
         ),
       ),
@@ -225,7 +225,7 @@ void main() {
               largeTitle: Text('Title'),
               backgroundColor: Color(0xF01D1D1D),
               brightness: Brightness.light,
-            )
+            ),
           ],
         ),
       ),
@@ -245,11 +245,11 @@ void main() {
           child: Align(
             alignment: Alignment.topCenter,
             child: CupertinoNavigationBar(
-              leading: CupertinoButton(child: Text('Cheetah'), onPressed: null),
+              leading: CupertinoButton(onPressed: null, child: Text('Cheetah')),
               // Let the box take all the vertical space to test vertical padding but let
               // the nav bar position it horizontally.
               middle: Text('Title'),
-              trailing: CupertinoButton(child: Text('Puma'), onPressed: null),
+              trailing: CupertinoButton(onPressed: null, child: Text('Puma')),
               padding: EdgeInsetsDirectional.only(
                 start: 10.0,
                 end: 20.0,
@@ -524,9 +524,7 @@ void main() {
     expect(tester.getCenter(find.byKey(segmentedControlsKey)).dx, 400.0);
     // The large title is invisible now.
     expect(
-      tester.renderObject<RenderAnimatedOpacity>(
-        find.widgetWithText(AnimatedOpacity, 'Title')
-      ).opacity.value,
+      tester.renderObject<RenderAnimatedOpacity>(find.widgetWithText(AnimatedOpacity, 'Title')).opacity.value,
       0.0,
     );
   });
@@ -666,8 +664,8 @@ void main() {
             ),
             child: Placeholder(),
           );
-        }
-      )
+        },
+      ),
     );
 
     await tester.pump();
@@ -684,8 +682,8 @@ void main() {
             ),
             child: Placeholder(),
           );
-        }
-      )
+        },
+      ),
     );
 
     await tester.pump();
@@ -997,9 +995,7 @@ void main() {
   });
 
   testWidgets('CupertinoNavigationBarBackButton shows an error when manually added outside a route', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const CupertinoNavigationBarBackButton()
-    );
+    await tester.pumpWidget(const CupertinoNavigationBarBackButton());
 
     final dynamic exception = tester.takeException();
     expect(exception, isAssertionError);
@@ -1217,110 +1213,112 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar stretches upon over-scroll and bounces back once over-scroll ends',
     (WidgetTester tester) async {
-    const Text trailingText = Text('Bar Button');
-    const Text titleText = Text('Large Title');
+      const Text trailingText = Text('Bar Button');
+      const Text titleText = Text('Large Title');
 
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: CupertinoPageScaffold(
-          child: CustomScrollView(
-            slivers: <Widget>[
-              const CupertinoSliverNavigationBar(
-                trailing: trailingText,
-                largeTitle: titleText,
-                stretch: true,
-              ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 1200.0,
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  trailing: trailingText,
+                  largeTitle: titleText,
+                  stretch: true,
                 ),
-              ),
-            ],
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    final Finder trailingTextFinder = find.byWidget(trailingText).first;
-    final Finder titleTextFinder = find.byWidget(titleText).first;
+      final Finder trailingTextFinder = find.byWidget(trailingText).first;
+      final Finder titleTextFinder = find.byWidget(titleText).first;
 
-    final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
-    // Drag for overscroll
-    await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
-    await tester.pump();
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+      await tester.pump();
 
-    final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
-    expect(
-      stretchedTrailingTextToLargeTitleOffset.dy.abs(),
-      greaterThan(initialTrailingTextToLargeTitleOffset.dy.abs())
-    );
+      expect(
+        stretchedTrailingTextToLargeTitleOffset.dy.abs(),
+        greaterThan(initialTrailingTextToLargeTitleOffset.dy.abs()),
+      );
 
-    // Ensure overscroll retracts to original size after releasing gesture
-    await tester.pumpAndSettle();
+      // Ensure overscroll retracts to original size after releasing gesture
+      await tester.pumpAndSettle();
 
-    final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
-    expect(
-      finalTrailingTextToLargeTitleOffset.dy.abs(),
-      initialTrailingTextToLargeTitleOffset.dy.abs(),
-    );
-  });
+      expect(
+        finalTrailingTextToLargeTitleOffset.dy.abs(),
+        initialTrailingTextToLargeTitleOffset.dy.abs(),
+      );
+    },
+  );
 
   testWidgets(
     'CupertinoSliverNavigationBar does not stretch upon over-scroll if stretch parameter is false',
     (WidgetTester tester) async {
-    const Text trailingText = Text('Bar Button');
-    const Text titleText = Text('Large Title');
+      const Text trailingText = Text('Bar Button');
+      const Text titleText = Text('Large Title');
 
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: CupertinoPageScaffold(
-          child: CustomScrollView(
-            slivers: <Widget>[
-              const CupertinoSliverNavigationBar(
-                trailing: trailingText,
-                largeTitle: titleText,
-                stretch: false,
-              ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 1200.0,
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  trailing: trailingText,
+                  largeTitle: titleText,
+                  stretch: false,
                 ),
-              ),
-            ],
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    final Finder trailingTextFinder = find.byWidget(trailingText).first;
-    final Finder titleTextFinder = find.byWidget(titleText).first;
+      final Finder trailingTextFinder = find.byWidget(trailingText).first;
+      final Finder titleTextFinder = find.byWidget(titleText).first;
 
-    final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
-    // Drag for overscroll
-    await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
-    await tester.pump();
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+      await tester.pump();
 
-    final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
-    expect(
-      stretchedTrailingTextToLargeTitleOffset.dy.abs(),
-      initialTrailingTextToLargeTitleOffset.dy.abs(),
-    );
+      expect(
+        stretchedTrailingTextToLargeTitleOffset.dy.abs(),
+        initialTrailingTextToLargeTitleOffset.dy.abs(),
+      );
 
-    // Ensure overscroll is zero after releasing gesture
-    await tester.pumpAndSettle();
+      // Ensure overscroll is zero after releasing gesture
+      await tester.pumpAndSettle();
 
-    final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
-    expect(
-      finalTrailingTextToLargeTitleOffset.dy.abs(),
-      initialTrailingTextToLargeTitleOffset.dy.abs(),
-    );
-  });
+      expect(
+        finalTrailingTextToLargeTitleOffset.dy.abs(),
+        initialTrailingTextToLargeTitleOffset.dy.abs(),
+      );
+    },
+  );
 
   testWidgets('Null NavigationBar border transition', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/71389
@@ -1366,7 +1364,7 @@ void main() {
 class _ExpectStyles extends StatelessWidget {
   const _ExpectStyles({
     required this.color,
-    required this.index
+    required this.index,
   });
 
   final Color color;

@@ -13,7 +13,7 @@ import '../base/process.dart';
 import '../base/time.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -246,15 +246,15 @@ class UpgradeCommandRunner {
       if (errorString.contains('fatal: HEAD does not point to a branch')) {
         throwToolExit(
           'You are not currently on a release branch. Use git to '
-          'check out an official branch (\'stable\', \'beta\', \'dev\', or \'master\') '
+          "check out an official branch ('stable', 'beta', 'dev', or 'master') "
           'and retry, for example:\n'
           '  git checkout stable'
         );
       } else if (errorString.contains('fatal: no upstream configured for branch')) {
         throwToolExit(
           'Unable to upgrade Flutter: no origin repository configured. '
-          'Run \'git remote add origin '
-          'https://github.com/flutter/flutter\' in $workingDirectory');
+          "Run 'git remote add origin "
+          "https://github.com/flutter/flutter' in $workingDirectory");
       } else {
         throwToolExit(errorString);
       }

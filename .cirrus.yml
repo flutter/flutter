@@ -1,10 +1,6 @@
 # CIRRUS CONFIGURATION FILE
 # https://cirrus-ci.org/guide/writing-tasks/
 
-# YAML anchors used to share fields between tasks.
-# See  https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
-
-
 environment:
   # For details about environment variables used in Cirrus, including how encrypted variables work,
   # see https://cirrus-ci.org/guide/writing-tasks/#environment-variables
@@ -15,14 +11,8 @@ environment:
   # We force BOT to true so that all our tools know we're in a CI environment. This avoids any
   # dependency on precisely how Cirrus is detected by our tools.
   BOT: "true"
-  # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they might include non-ASCII
-  # characters which makes Gradle crash. See: https://github.com/flutter/flutter/issues/24935
-  # TODO(amirha): remove once we've migrated to newer Gradle
-  CIRRUS_CHANGE_MESSAGE: ""
-  CIRRUS_COMMIT_MESSAGE: ""
 
-
-gcp_credentials: ENCRYPTED[1917385f09764ac58515f6fee14ed58688afc808849b244969d41d0b082061eecd0a4c8ba801f00833877a12b51f8bb5]
+gcp_credentials: ENCRYPTED[!0e63b52bd7e4fda1cd7b7bf2b4fe515a27fadbeaced01f5ad8b699b81d3611ed64c5d3271bcd8426dd914ef41cba48a0!]
 
 # LINUX SHARDS
 task:
@@ -145,24 +135,10 @@ task:
         - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: web_integration_tests
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/**', 'packages/flutter_web_plugins/**', 'bin/**') && $CIRRUS_PR != ''"
-      environment:
-        # As of October 2019, the Web shards needed more than 6G of RAM.
-        CPU: 2
-        MEMORY: 8G
-        CHROME_NO_SANDBOX: true
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
     - name: docs-linux # linux-only
       environment:
         CPU: 4
         MEMORY: 8G
-        # For uploading master docs to Firebase master branch staging site
-        FIREBASE_MASTER_TOKEN: ENCRYPTED[eb768d18798fdc5abfe09b224e1724c4d82831d715ccf90df2c79d618c317216cbd99493278361f6fe7948b409b603f0]
-        # For uploading stable docs to Firebase public live site
-        FIREBASE_PUBLIC_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
       only_if: "$CIRRUS_PR != ''"
       script:
         - ./dev/bots/docs.sh

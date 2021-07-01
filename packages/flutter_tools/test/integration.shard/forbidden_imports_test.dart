@@ -66,6 +66,7 @@ void main() {
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'platform.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_io.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'multi_root_file_system.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 
@@ -90,7 +91,7 @@ void main() {
   test('no unauthorized imports of package:http', () {
     final List<String> allowedPaths = <String>[
       // Used only for multi-part file uploads, which are non-trivial to reimplement.
-      fileSystem.path.join(flutterTools, 'lib', 'src', 'reporting', 'reporting.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'reporting', 'crash_reporting.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 

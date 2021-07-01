@@ -8,8 +8,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const Map<String, String> kDyLdLibEntry = <String, String>{
   'DYLD_LIBRARY_PATH': '/path/to/libs',

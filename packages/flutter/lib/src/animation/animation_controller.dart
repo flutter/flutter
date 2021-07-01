@@ -141,7 +141,7 @@ enum AnimationBehavior {
 ///   final Duration duration;
 ///
 ///   @override
-///   _FooState createState() => _FooState();
+///   State<Foo> createState() => _FooState();
 /// }
 ///
 /// class _FooState extends State<Foo> with SingleTickerProviderStateMixin {
@@ -801,6 +801,8 @@ class AnimationController extends Animation<double>
     }());
     _ticker!.dispose();
     _ticker = null;
+    clearStatusListeners();
+    clearListeners();
     super.dispose();
   }
 

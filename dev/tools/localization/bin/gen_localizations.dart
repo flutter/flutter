@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // This program generates a getMaterialTranslation() and a
 // getCupertinoTranslation() function that look up the translations provided by
 // the arb files. The returned value is a generated instance of a
@@ -42,14 +44,13 @@
 
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 
 import '../gen_cupertino_localizations.dart';
 import '../gen_material_localizations.dart';
 import '../localizations_utils.dart';
 import '../localizations_validator.dart';
-
 import 'encode_kn_arb_files.dart';
 
 /// This is the core of this script; it generates the code used for translations.
@@ -94,7 +95,7 @@ String generateArbBasedLocalizationSubclasses({
       languageToScriptCodes[locale.languageCode].add(locale.scriptCode);
     }
     if (locale.countryCode != null && locale.scriptCode != null) {
-      final LocaleInfo key = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
+      final LocaleInfo key = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
       languageAndScriptToCountryCodes[key] ??= <String>{};
       languageAndScriptToCountryCodes[key].add(locale.countryCode);
     }
@@ -149,7 +150,7 @@ String generateArbBasedLocalizationSubclasses({
       // Language has scriptCodes, so we need to properly fallback countries to corresponding
       // script default values before language default values.
       for (final String scriptCode in languageToScriptCodes[languageName]) {
-        final LocaleInfo scriptBaseLocale = LocaleInfo.fromString(languageName + '_' + scriptCode);
+        final LocaleInfo scriptBaseLocale = LocaleInfo.fromString('${languageName}_$scriptCode');
         output.writeln(generateClassDeclaration(
           scriptBaseLocale,
           generatedClassPrefix,
@@ -169,7 +170,7 @@ String generateArbBasedLocalizationSubclasses({
         for (final LocaleInfo locale in localeCodes) {
           if (locale.originalString == languageName)
             continue;
-          if (locale.originalString == languageName + '_' + scriptCode)
+          if (locale.originalString == '${languageName}_$scriptCode')
             continue;
           if (locale.scriptCode != scriptCode)
             continue;
@@ -216,12 +217,12 @@ String generateArbBasedLocalizationSubclasses({
       }
     }
 
-    final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's');
+    final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'}';
     if (countryCodeCount == 0) {
       if (scriptCodeCount == 0)
         supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}');
       else
-        supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's') + ')');
+        supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'})');
 
     } else if (countryCodeCount == 1) {
       supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus one country variation$scriptCodeMessage)');
@@ -270,7 +271,7 @@ $factoryDeclaration
     if (languageToLocales[language].length == 1) {
       output.writeln('''
     case '$language':
-      return $generatedClassPrefix${(languageToLocales[language][0]).camelCase()}($factoryArguments);''');
+      return $generatedClassPrefix${languageToLocales[language][0].camelCase()}($factoryArguments);''');
     } else if (!languageToScriptCodes.containsKey(language)) { // Does not distinguish between scripts. Switch on countryCode directly.
       output.writeln('''
     case '$language': {
@@ -294,7 +295,7 @@ $factoryDeclaration
     case '$language': {
       switch (locale.scriptCode) {''');
       for (final String scriptCode in languageToScriptCodes[language]) {
-        final LocaleInfo scriptLocale = LocaleInfo.fromString(language + '_' + scriptCode);
+        final LocaleInfo scriptLocale = LocaleInfo.fromString('${language}_$scriptCode');
         output.writeln('''
         case '$scriptCode': {''');
         if (languageAndScriptToCountryCodes.containsKey(scriptLocale)) {
@@ -457,7 +458,7 @@ String generateValue(String value, Map<String, dynamic> attributes, LocaleInfo l
           throw Exception(
             '"$value" is not one of the ICU short time patterns supported '
             'by the material library. Here is the list of supported '
-            'patterns:\n  ' + _icuTimeOfDayToEnum.keys.join('\n  ')
+            'patterns:\n  ${_icuTimeOfDayToEnum.keys.join('\n  ')}'
           );
         }
         return _icuTimeOfDayToEnum[value];
@@ -466,7 +467,7 @@ String generateValue(String value, Map<String, dynamic> attributes, LocaleInfo l
           throw Exception(
             '"$value" is not one of the scriptCategory values supported '
             'by the material library. Here is the list of supported '
-            'values:\n  ' + _scriptCategoryToEnum.keys.join('\n  ')
+            'values:\n  ${_scriptCategoryToEnum.keys.join('\n  ')}'
           );
         }
         return _scriptCategoryToEnum[value];

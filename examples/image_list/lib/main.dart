@@ -83,7 +83,7 @@ class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(
-        (context ?? SecurityContext())..setTrustedCertificatesBytes(certificate.codeUnits)
+        (context ?? SecurityContext())..setTrustedCertificatesBytes(certificate.codeUnits),
     );
   }
 }
@@ -146,7 +146,7 @@ class MyHomePage extends StatefulWidget {
   final int port;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
@@ -189,11 +189,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         Completer<bool>(),
     ];
     final List<Future<bool>> futures = completers.map(
-        (Completer<bool> completer) => completer.future).toList();
+      (Completer<bool> completer) => completer.future,
+    ).toList();
     final DateTime started = DateTime.now();
     Future.wait(futures).then((_) {
       print(
-          '===image_list=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.');
+        '===image_list=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.',
+      );
     });
     return Scaffold(
       appBar: AppBar(
@@ -222,16 +224,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 
-  List<Widget> createImageList(int count, List<Completer<bool>> completers,
-      List<AnimationController> controllers) {
+  List<Widget> createImageList(
+    int count,
+    List<Completer<bool>> completers,
+    List<AnimationController> controllers,
+  ) {
     final List<Widget> list = <Widget>[];
     for (int i = 0; i < count; i++) {
       list.add(Flexible(
-          fit: FlexFit.tight,
-          flex: i + 1,
-          child: RotationTransition(
-              turns: controllers[i],
-              child: createImage(i + 1, completers[i]))));
+        fit: FlexFit.tight,
+        flex: i + 1,
+        child: RotationTransition(
+          turns: controllers[i],
+          child: createImage(i + 1, completers[i]),
+        ),
+      ));
     }
     return list;
   }

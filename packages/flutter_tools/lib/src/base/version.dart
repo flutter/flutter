@@ -21,6 +21,9 @@ class Version implements Comparable<Version> {
     return Version._(major ?? 0, minor ?? 0, patch ?? 0, text);
   }
 
+  /// Public constant constructor when all fields are non-null, without default value fallbacks.
+  const Version.withText(this.major, this.minor, this.patch, this._text);
+
   Version._(this.major, this.minor, this.patch, this._text) {
     if (major < 0) {
       throw ArgumentError('Major version must be non-negative.');
@@ -95,7 +98,7 @@ class Version implements Comparable<Version> {
   }
 
   @override
-  int get hashCode => major ^ minor ^ patch;
+  int get hashCode => Object.hash(major, minor, patch);
 
   bool operator <(Version other) => compareTo(other) < 0;
   bool operator >(Version other) => compareTo(other) > 0;

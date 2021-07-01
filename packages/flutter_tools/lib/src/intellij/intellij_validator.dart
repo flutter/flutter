@@ -3,14 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart' hide userMessages;
 import '../base/version.dart';
+import '../convert.dart';
 import '../doctor_validator.dart';
 import '../ios/plist_parser.dart';
 import 'intellij.dart';
+
+const String _ultimateEditionTitle = 'IntelliJ IDEA Ultimate Edition';
+const String _ultimateEditionId = 'IntelliJIdea';
+const String _communityEditionTitle = 'IntelliJ IDEA Community Edition';
+const String _communityEditionId = 'IdeaIC';
 
 /// A doctor validator for both Intellij and Android Studio.
 abstract class IntelliJValidator extends DoctorValidator {
@@ -30,8 +38,8 @@ abstract class IntelliJValidator extends DoctorValidator {
   String? get pluginsPath;
 
   static const Map<String, String> _idToTitle = <String, String>{
-    'IntelliJIdea': 'IntelliJ IDEA Ultimate Edition',
-    'IdeaIC': 'IntelliJ IDEA Community Edition',
+    _ultimateEditionId: _ultimateEditionTitle,
+    _communityEditionId: _communityEditionTitle,
   };
 
   static final Version kMinIdeaVersion = Version(2017, 1, 0);
@@ -45,6 +53,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     required Platform platform,
     required UserMessages userMessages,
     required PlistParser plistParser,
+    required ProcessManager processManager,
   }) {
     final FileSystemUtils fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
     if (platform.isWindows) {
@@ -68,6 +77,7 @@ abstract class IntelliJValidator extends DoctorValidator {
         fileSystemUtils: fileSystemUtils,
         userMessages: userMessages,
         plistParser: plistParser,
+        processManager: processManager,
       );
     }
     return <DoctorValidator>[];
@@ -219,9 +229,9 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
           }
           if (installPath != null && fileSystem.isDirectorySync(installPath)) {
             String pluginsPath;
-            if (fileSystem.isDirectorySync(installPath + '.plugins')) {
+            if (fileSystem.isDirectorySync('$installPath.plugins')) {
               // IntelliJ 2020.3
-              pluginsPath = installPath + '.plugins';
+              pluginsPath = '$installPath.plugins';
               addValidator(title, version, installPath, pluginsPath);
             } else if (platform.environment.containsKey('APPDATA')) {
               final String pluginsPathInAppData = fileSystem.path.join(
@@ -330,7 +340,7 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
                 name);
             if (installPath.contains(fileSystem.path.join('JetBrains','Toolbox','apps'))) {
               // via JetBrains ToolBox app
-              final String pluginsPathInInstallDir = installPath + '.plugins';
+              final String pluginsPathInInstallDir = '$installPath.plugins';
               if (fileSystem.isDirectorySync(pluginsPathInUserHomeDir)) {
                 // after 2020.2.x
                 final String pluginsPath = pluginsPathInUserHomeDir;
@@ -369,9 +379,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   final String? _homeDirPath;
 
   static const Map<String, String> _dirNameToId = <String, String>{
-    'IntelliJ IDEA.app': 'IntelliJIdea',
-    'IntelliJ IDEA Ultimate.app': 'IntelliJIdea',
-    'IntelliJ IDEA CE.app': 'IdeaIC',
+    'IntelliJ IDEA.app': _ultimateEditionId,
+    'IntelliJ IDEA Ultimate.app': _ultimateEditionId,
+    'IntelliJ IDEA CE.app': _communityEditionId,
   };
 
   static Iterable<DoctorValidator> installed({
@@ -379,6 +389,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     required FileSystemUtils fileSystemUtils,
     required UserMessages userMessages,
     required PlistParser plistParser,
+    required ProcessManager processManager,
   }) {
     final List<DoctorValidator> validators = <DoctorValidator>[];
     final String? homeDirPath = fileSystemUtils.homeDirPath;
@@ -423,6 +434,52 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
           }
         }
       }
+
+      // Query Spotlight for unexpected installation locations.
+      String ceSpotlightResult = '';
+      String ultimateSpotlightResult = '';
+      try {
+        final ProcessResult ceQueryResult = processManager.runSync(<String>[
+          'mdfind',
+          'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
+        ]);
+        ceSpotlightResult = ceQueryResult.stdout as String;
+        final ProcessResult ultimateQueryResult = processManager.runSync(<String>[
+          'mdfind',
+          'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
+        ]);
+        ultimateSpotlightResult = ultimateQueryResult.stdout as String;
+      } on ProcessException {
+        // The Spotlight query is a nice-to-have, continue checking known installation locations.
+      }
+
+      for (final String installPath in LineSplitter.split(ceSpotlightResult)) {
+        if (!validators.whereType<IntelliJValidatorOnMac>().any((IntelliJValidatorOnMac e) => e.installPath == installPath)) {
+          validators.add(IntelliJValidatorOnMac(
+            _communityEditionTitle,
+            _communityEditionId,
+            installPath,
+            fileSystem: fileSystem,
+            userMessages: userMessages,
+            plistParser: plistParser,
+            homeDirPath: homeDirPath,
+          ));
+        }
+      }
+
+      for (final String installPath in LineSplitter.split(ultimateSpotlightResult)) {
+        if (!validators.whereType<IntelliJValidatorOnMac>().any((IntelliJValidatorOnMac e) => e.installPath == installPath)) {
+          validators.add(IntelliJValidatorOnMac(
+            _ultimateEditionTitle,
+            _ultimateEditionId,
+            installPath,
+            fileSystem: fileSystem,
+            userMessages: userMessages,
+            plistParser: plistParser,
+            homeDirPath: homeDirPath,
+          ));
+        }
+      }
     } on FileSystemException catch (e) {
       validators.add(ValidatorWithResult(
           userMessages.intellijMacUnknownResult,
@@ -460,7 +517,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       .getValueFromFile(plistFile, 'JetBrainsToolboxApp');
 
     if (altLocation != null) {
-      _pluginsPath = altLocation + '.plugins';
+      _pluginsPath = '$altLocation.plugins';
       return _pluginsPath!;
     }
 

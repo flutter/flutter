@@ -433,7 +433,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   late FixedExtentScrollController _controller;
   set controller(FixedExtentScrollController value) => _updateController(_controller, value);
 
-  // This method exists to allow controller to be non-null. It is only called with a null oldValue from construtor.
+  // This method exists to allow controller to be non-null. It is only called with a null oldValue from constructor.
   void _updateController(FixedExtentScrollController? oldValue, FixedExtentScrollController value) {
     if (value == oldValue)
       return;

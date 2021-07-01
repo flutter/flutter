@@ -4,8 +4,8 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -154,9 +154,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: ElevatedButton(
-              child: const Text('ElevatedButton'),
               onPressed: () { },
               focusNode: focusNode,
+              child: const Text('ElevatedButton'),
             ),
           ),
         ),
@@ -221,9 +221,9 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return ElevatedButton(
-                    child: const Text('ElevatedButton'),
                     onPressed: () {},
                     focusNode: focusNode,
+                    child: const Text('ElevatedButton'),
                   );
                 },
               ),
@@ -348,9 +348,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ElevatedButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -649,7 +649,7 @@ void main() {
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(108, 100)));
+    expect(box.size, equals(const Size(132, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(VisualDensity.standard, useText: true);
@@ -667,7 +667,7 @@ void main() {
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(76, 36)));
+    expect(box.size, equals(const Size(88, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
@@ -951,7 +951,7 @@ void main() {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(22)),
                     onPressed: () {},
-                    child: const Text('ElevatedButton')
+                    child: const Text('ElevatedButton'),
                   ),
                 ),
               ),
@@ -1142,7 +1142,7 @@ void main() {
     final Key labelKey = UniqueKey();
     final ButtonStyle style = ElevatedButton.styleFrom(
       padding: EdgeInsets.zero,
-      visualDensity: const VisualDensity(), // dx=0, dy=0
+      visualDensity: VisualDensity.standard, // dx=0, dy=0
     );
 
     await tester.pumpWidget(
@@ -1171,6 +1171,77 @@ void main() {
     expect(tester.getRect(find.byKey(buttonKey)), const Rect.fromLTRB(0.0, 0.0, 200.0, 100.0));
     expect(tester.getRect(find.byKey(iconKey)), const Rect.fromLTRB(46.0, 0.0, 96.0, 100.0));
     expect(tester.getRect(find.byKey(labelKey)), const Rect.fromLTRB(104.0, 0.0, 154.0, 100.0));
+  });
+
+  testWidgets('ElevatedButton maximumSize', (WidgetTester tester) async {
+    final Key key0 = UniqueKey();
+    final Key key1 = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ElevatedButton(
+                  key: key0,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(24, 36),
+                    maximumSize: const Size.fromWidth(64),
+                  ),
+                  onPressed: () { },
+                  child: const Text('A B C D E F G H I J K L M N O P'),
+                ),
+                ElevatedButton.icon(
+                  key: key1,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(24, 36),
+                    maximumSize: const Size.fromWidth(104),
+                  ),
+                  onPressed: () {},
+                  icon: Container(color: Colors.red, width: 32, height: 32),
+                  label: const Text('A B C D E F G H I J K L M N O P'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key0)), const Size(64.0, 224.0));
+    expect(tester.getSize(find.byKey(key1)), const Size(104.0, 224.0));
+  });
+
+  testWidgets('Fixed size ElevatedButton, same as minimumSize == maximumSize', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(fixedSize: const Size(200, 200)),
+                onPressed: () { },
+                child: const Text('200x200'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(200, 200),
+                  maximumSize: const Size(200, 200),
+                ),
+                onPressed: () { },
+                child: const Text('200,200'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, '200x200')), const Size(200, 200));
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, '200,200')), const Size(200, 200));
   });
 }
 

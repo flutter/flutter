@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_devicelab/tasks/perf_tests.dart';
+// @dart = 2.8
+
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<void> main() async {
   // It's intended to use the Gallery startup test as a smoke test on macOS

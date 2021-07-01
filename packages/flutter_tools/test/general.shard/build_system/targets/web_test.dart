@@ -11,12 +11,11 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
-import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/testbed.dart';
 
 const List<String> kDart2jsLinuxArgs = <String>[
@@ -46,7 +45,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('foo:foo/lib/\n');
       globals.fs.currentDirectory.childDirectory('bar').createSync();
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
 
       environment = Environment.test(
         globals.fs.currentDirectory,
@@ -100,6 +99,33 @@ void main() {
     await const WebReleaseBundle().build(environment);
 
     expect(environment.outputDir.childFile('version.json'), exists);
+  }));
+
+  test('Base href is created in index.html with given base-href after release build', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kBaseHref] = '/basehreftest/';
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('index.html').createSync(recursive: true);
+    webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><base href="$kBaseHrefPlaceholder"><head></head></html>
+    ''');
+    environment.buildDir.childFile('main.dart.js').createSync();
+    await const WebReleaseBundle().build(environment);
+
+    expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
+  }));
+
+  test('null base href does not override existing base href in index.html', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('index.html').createSync(recursive: true);
+    webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><head><base href='/basehreftest/'></head></html>
+    ''');
+    environment.buildDir.childFile('main.dart.js').createSync();
+    await const WebReleaseBundle().build(environment);
+
+    expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
   }));
 
   test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
