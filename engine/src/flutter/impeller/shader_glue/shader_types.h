@@ -50,6 +50,8 @@ struct ShaderUniformSlot {
 struct ShaderStageIOSlot {
   const char* name;
   size_t location;
+  size_t set;
+  size_t binding;
   ShaderType type;
   size_t bit_width;
   size_t vec_size;
