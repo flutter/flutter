@@ -15,7 +15,7 @@ import 'package:macrobenchmarks/src/animated_image.dart';
 /// set number of image frames to render.
 Future<void> main() async {
   final Completer<void> waiter = Completer<void>();
-  enableFlutterDriverExtension(handler: (String request) async {
+  enableFlutterDriverExtension(handler: (String? request) async {
     if (request != 'waitForAnimation') {
       throw UnsupportedError('Unrecognized request $request');
     }

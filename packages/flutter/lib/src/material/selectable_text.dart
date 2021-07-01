@@ -221,7 +221,7 @@ class SelectableText extends StatefulWidget {
   /// Creates a selectable text widget with a [TextSpan].
   ///
   /// The [textSpan] parameter must not be null and only contain [TextSpan] in
-  /// [textSpan.children]. Other type of [InlineSpan] is not allowed.
+  /// [textSpan].children. Other type of [InlineSpan] is not allowed.
   ///
   /// The [autofocus] and [dragStartBehavior] arguments must not be null.
   const SelectableText.rich(

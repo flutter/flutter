@@ -41,7 +41,10 @@ class CreateCommand extends CreateBase {
       valueHelp: 'type',
       allowedHelp: <String, String>{
         flutterProjectTypeToString(FlutterProjectType.app): '(default) Generate a Flutter application.',
-        flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing only Dart code.',
+        flutterProjectTypeToString(FlutterProjectType.skeleton): 'Generate a List View / Detail View Flutter '
+            'application that follows community best practices.',
+        flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
+            'Dart code.',
         flutterProjectTypeToString(FlutterProjectType.plugin): 'Generate a shareable Flutter project containing an API '
             'in Dart code with a platform-specific implementation for Android, for iOS code, or '
             'for both.',
@@ -243,7 +246,8 @@ class CreateCommand extends CreateBase {
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
       windowsUwp: featureFlags.isWindowsUwpEnabled && platforms.contains('winuwp'),
       // Enable null safety everywhere.
-      dartSdkVersionBounds: '">=2.12.0 <3.0.0"'
+      dartSdkVersionBounds: '">=2.12.0 <3.0.0"',
+      implementationTests: boolArg('implementation-tests'),
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
@@ -262,7 +266,10 @@ class CreateCommand extends CreateBase {
     int generatedFileCount = 0;
     switch (template) {
       case FlutterProjectType.app:
-        generatedFileCount += await generateApp(relativeDir, templateContext, overwrite: overwrite);
+        generatedFileCount += await generateApp('app', relativeDir, templateContext, overwrite: overwrite);
+        break;
+      case FlutterProjectType.skeleton:
+        generatedFileCount += await generateApp('skeleton', relativeDir, templateContext, overwrite: overwrite);
         break;
       case FlutterProjectType.module:
         generatedFileCount += await _generateModule(relativeDir, templateContext, overwrite: overwrite);
@@ -431,7 +438,7 @@ Your $application code is in $relativeAppMain.
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
-    generatedCount += await generateApp(project.example.directory, templateContext, overwrite: overwrite, pluginExampleApp: true);
+    generatedCount += await generateApp('app', project.example.directory, templateContext, overwrite: overwrite, pluginExampleApp: true);
     return generatedCount;
   }
 
