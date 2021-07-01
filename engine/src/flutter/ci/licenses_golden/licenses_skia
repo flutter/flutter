@@ -1,4 +1,4 @@
-Signature: 1e8fb553a50b60cc32567f81bfdab322
+Signature: da1ad3a117c2a1e8299970e2d905b407
 
 UNUSED LICENSES:
 
@@ -1641,6 +1641,7 @@ ORIGIN: ../../../third_party/skia/bench/AndroidCodecBench.cpp + ../../../third_p
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/AndroidCodecBench.cpp
 FILE: ../../../third_party/skia/bench/AndroidCodecBench.h
+FILE: ../../../third_party/skia/bench/DecodeBench.cpp
 FILE: ../../../third_party/skia/bench/EncodeBench.cpp
 FILE: ../../../third_party/skia/bench/GrMipmapBench.cpp
 FILE: ../../../third_party/skia/bench/HardStopGradientBench_ScaleNumColors.cpp
@@ -5699,15 +5700,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/experimental/ngatoy/Cmds.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/experimental/sorttoy/Cmds.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/experimental/ngatoy/Cmds.cpp
-FILE: ../../../third_party/skia/experimental/ngatoy/Cmds.h
-FILE: ../../../third_party/skia/experimental/ngatoy/Fake.cpp
-FILE: ../../../third_party/skia/experimental/ngatoy/Fake.h
-FILE: ../../../third_party/skia/experimental/ngatoy/SortKey.h
-FILE: ../../../third_party/skia/experimental/ngatoy/ngatoy.cpp
-FILE: ../../../third_party/skia/experimental/ngatoy/ngatypes.h
+FILE: ../../../third_party/skia/experimental/sorttoy/Cmds.cpp
+FILE: ../../../third_party/skia/experimental/sorttoy/Cmds.h
+FILE: ../../../third_party/skia/experimental/sorttoy/Fake.cpp
+FILE: ../../../third_party/skia/experimental/sorttoy/Fake.h
+FILE: ../../../third_party/skia/experimental/sorttoy/SortKey.h
+FILE: ../../../third_party/skia/experimental/sorttoy/sorttoy.cpp
+FILE: ../../../third_party/skia/experimental/sorttoy/sorttypes.h
 FILE: ../../../third_party/skia/gm/destcolor.cpp
 FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
 FILE: ../../../third_party/skia/include/core/SkStringView.h
