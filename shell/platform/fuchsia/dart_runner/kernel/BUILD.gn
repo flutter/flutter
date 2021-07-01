@@ -20,7 +20,6 @@ compile_platform("kernel_platform_files") {
   ]
 
   args = [
-    "--enable-experiment=non-nullable",
     "--nnbd-agnostic",
     "--target=dart_runner",
     "dart:core",
