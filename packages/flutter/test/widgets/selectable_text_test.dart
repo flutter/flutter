@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -4799,4 +4801,108 @@ void main() {
     expect(selection!.baseOffset, 6);
     expect(selection!.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+
+  testWidgets('text selection style 1', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: const <Widget>[
+                SelectableText.rich(
+                  TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'Atwater Peel ',
+                        style: TextStyle(
+                          fontSize: 30.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Sherbrooke Bonaventure ',
+                        style: TextStyle(
+                          fontSize: 15.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'hi wassup!',
+                        style: TextStyle(
+                          fontSize: 10.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  key: Key('field0'),
+                  selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+                  selectionWidthStyle: ui.BoxWidthStyle.max,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+    final TextEditingController controller = editableTextWidget.controller;
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 46);
+    await tester.pump();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('selectable_text_golden.TextSelectionStyle.1.png'),
+    );
+  });
+
+  testWidgets('text selection style 2', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: const <Widget>[
+                SelectableText.rich(
+                  TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'Atwater Peel ',
+                        style: TextStyle(
+                          fontSize: 30.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Sherbrooke Bonaventure ',
+                        style: TextStyle(
+                          fontSize: 15.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'hi wassup!',
+                        style: TextStyle(
+                          fontSize: 10.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  key: Key('field0'),
+                  selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+                  selectionWidthStyle: ui.BoxWidthStyle.tight,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+    final TextEditingController controller = editableTextWidget.controller;
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 46);
+    await tester.pump();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('selectable_text_golden.TextSelectionStyle.2.png'),
+    );
+  });
 }
