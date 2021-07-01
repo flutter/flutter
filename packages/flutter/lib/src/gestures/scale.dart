@@ -94,8 +94,8 @@ class ScaleUpdateDetails {
        assert(rotation != null),
        localFocalPoint = localFocalPoint ?? focalPoint;
 
-  /// The amount the pointer has moved in the coordinate space of the event
-  /// receiver since the previous update.
+  /// The amount the gesture's focal point has moved in the coordinate space of
+  /// the event receiver since the previous update.
   ///
   /// Defaults to zero if not specified in the constructor.
   final Offset delta;
@@ -174,7 +174,8 @@ class ScaleUpdateDetails {
     ' horizontalScale: $horizontalScale,'
     ' verticalScale: $verticalScale,'
     ' rotation: $rotation,'
-    ' pointerCount: $pointerCount)';
+    ' pointerCount: $pointerCount,'
+    ' delta: $delta)';
 }
 
 /// Details for [GestureScaleEndCallback].
@@ -330,6 +331,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   late Map<int, Offset> _pointerLocations;
   late List<int> _pointerQueue; // A queue to sort pointers in order of entrance
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
+  late Offset _delta;
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
@@ -410,11 +412,25 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void _update() {
     final int count = _pointerLocations.keys.length;
 
+    final Offset? previousFocalPoint = _state != _ScaleState.started ? null : _currentFocalPoint;
+
     // Compute the focal point
     Offset focalPoint = Offset.zero;
     for (final int pointer in _pointerLocations.keys)
       focalPoint += _pointerLocations[pointer]!;
     _currentFocalPoint = count > 0 ? focalPoint / count.toDouble() : Offset.zero;
+
+    final Offset localFocalPoint = PointerEvent.transformPosition(
+      _lastTransform,
+      _currentFocalPoint,
+    );
+    final Offset localPreviousFocalPoint = _state != _ScaleState.started
+        ? localFocalPoint
+        : PointerEvent.transformPosition(
+            _lastTransform,
+            previousFocalPoint!,
+          );
+    _delta = localFocalPoint - localPreviousFocalPoint;
 
     // Span is the average deviation from focal point. Horizontal and vertical
     // spans are the average deviations from the focal point's horizontal and
@@ -516,7 +532,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
           rotation: _computeRotationFactor(),
           pointerCount: _pointerQueue.length,
-          delta: _currentFocalPoint - _initialFocalPoint,
+          delta: _delta,
         ));
       });
   }
