@@ -454,7 +454,6 @@ end
         simulatorConfiguration,
         'SYMROOT=${simulatorBuildOutput.path}',
         'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
-        'ARCHS=x86_64',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
       ];

@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependency have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -1224,6 +1218,35 @@ void main() {
       await expectLater(
         find.byType(CupertinoDatePicker),
         matchesGoldenFile('date_picker_test.datetime.drag.png'),
+      );
+    });
+
+    testWidgets('DatePicker displays the date in correct order', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                dateOrder: DatePickerDateOrder.ydm,
+                mode: CupertinoDatePickerMode.date,
+                onDateTimeChanged: (DateTime newDate) {},
+                initialDateTime: DateTime(2018, 1, 14, 10, 30),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getTopLeft(find.text('2018')).dx,
+        lessThan(tester.getTopLeft(find.text('14')).dx),
+      );
+
+      expect(
+        tester.getTopLeft(find.text('14')).dx,
+        lessThan(tester.getTopLeft(find.text('January')).dx),
       );
     });
 
