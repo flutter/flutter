@@ -58,7 +58,7 @@ Dart_Handle Picture::toImage(uint32_t width,
                              Dart_Handle raw_image_callback) {
   if (display_list_) {
     return RasterizeToImage(
-        [display_list = display_list_.get()](SkCanvas* canvas) {
+        [display_list = display_list_](SkCanvas* canvas) {
           display_list->RenderTo(canvas);
         },
         width, height, raw_image_callback);
@@ -91,10 +91,8 @@ Dart_Handle Picture::RasterizeToImage(sk_sp<SkPicture> picture,
                                       uint32_t height,
                                       Dart_Handle raw_image_callback) {
   return RasterizeToImage(
-      [sk_picture = picture.get()](SkCanvas* canvas) {
-        canvas->drawPicture(sk_picture);
-      },
-      width, height, raw_image_callback);
+      [picture](SkCanvas* canvas) { canvas->drawPicture(picture); }, width,
+      height, raw_image_callback);
 }
 
 Dart_Handle Picture::RasterizeToImage(
