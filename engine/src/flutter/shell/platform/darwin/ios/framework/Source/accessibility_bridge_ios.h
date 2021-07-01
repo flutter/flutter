@@ -21,6 +21,7 @@ class AccessibilityBridgeIos {
  public:
   virtual ~AccessibilityBridgeIos() = default;
   virtual UIView* view() const = 0;
+  virtual bool isVoiceOverRunning() const = 0;
   virtual UIView<UITextInput>* textInputView() = 0;
   virtual void DispatchSemanticsAction(int32_t id, flutter::SemanticsAction action) = 0;
   virtual void DispatchSemanticsAction(int32_t id,
