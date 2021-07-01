@@ -18,6 +18,9 @@ template("_compile_cml") {
     script = "//flutter/tools/fuchsia/compile_cml.py"
 
     sources = [ invoker.manifest ]
+    if (defined(invoker.cml_includes)) {
+      sources += invoker.cml_includes
+    }
 
     inputs = [ "//fuchsia/sdk/$host_os/tools/cmc" ]
 
@@ -30,6 +33,8 @@ template("_compile_cml") {
       rebase_path(invoker.output, root_build_dir),
       "--includepath",
       get_path_info(invoker.manifest, "dir"),
+      "--includepath",
+      rebase_path("//"),
     ]
     outputs = [ invoker.output ]
   }
@@ -114,6 +119,8 @@ template("fuchsia_archive") {
 
   if (defined(invoker.cml_file)) {
     _compile_cml(target_name + "_compile_cml") {
+      forward_variables_from(invoker, [ "cml_includes" ])
+
       manifest = invoker.cml_file
       output = "$far_base_dir/meta/${pkg_target_name}.cm"
     }
@@ -181,6 +188,18 @@ template("fuchsia_test_archive") {
       libraries += invoker.libraries
     }
 
-    cmx_file = rebase_path("//flutter/testing/fuchsia/meta/fuchsia_test.cmx")
+    # TODO(fxbug.dev/79873): Only cfv2 components should be allowed after
+    # FakeScenic is available.
+    if (defined(invoker.cmx_file)) {
+      cmx_file = invoker.cmx_file
+    } else {
+      # TODO(fxbug.dev/79691): Default to cml after soft transition.
+      # cml_file =
+      #     rebase_path("//flutter/testing/fuchsia/meta/fuchsia_test.cml")
+      # if (defined(invoker.cml_file)) {
+      #   cml_file = invoker.cml_file
+      # }
+      cmx_file = rebase_path("//flutter/testing/fuchsia/meta/fuchsia_test.cmx")
+    }
   }
 }

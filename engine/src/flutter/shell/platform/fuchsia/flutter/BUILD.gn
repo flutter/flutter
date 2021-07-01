@@ -513,9 +513,7 @@ executable("flutter_runner_scenic_unittests") {
          ] + flutter_deps
 }
 
-fuchsia_archive("flutter_runner_tests") {
-  testonly = true
-
+fuchsia_test_archive("flutter_runner_tests") {
   deps = [ ":flutter_runner_unittests" ]
 
   binary = "$target_name"
@@ -543,32 +541,9 @@ fuchsia_archive("flutter_runner_tests") {
   ]
 
   cmx_file = rebase_path("meta/$target_name.cmx")
-
-  libraries = common_libs
 }
 
-fuchsia_archive("flutter_runner_tzdata_tests") {
-  testonly = true
-
-  deps = [ ":flutter_runner_tzdata_unittests" ]
-
-  binary = "$target_name"
-
-  resources = [
-    {
-      path = rebase_path("//third_party/icu/common/icudtl.dat")
-      dest = "icudtl.dat"
-    },
-  ]
-
-  cmx_file = rebase_path("meta/$target_name.cmx")
-
-  libraries = common_libs
-}
-
-fuchsia_archive("flutter_runner_scenic_tests") {
-  testonly = true
-
+fuchsia_test_archive("flutter_runner_scenic_tests") {
   deps = [ ":flutter_runner_scenic_unittests" ]
 
   binary = "$target_name"
@@ -581,8 +556,19 @@ fuchsia_archive("flutter_runner_scenic_tests") {
   ]
 
   cmx_file = rebase_path("meta/$target_name.cmx")
+}
 
-  libraries = common_libs
+fuchsia_test_archive("flutter_runner_tzdata_tests") {
+  deps = [ ":flutter_runner_tzdata_unittests" ]
+
+  binary = "$target_name"
+
+  resources = [
+    {
+      path = rebase_path("//third_party/icu/common/icudtl.dat")
+      dest = "icudtl.dat"
+    },
+  ]
 }
 
 fuchsia_test_archive("fml_tests") {
