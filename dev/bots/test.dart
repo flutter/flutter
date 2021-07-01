@@ -620,7 +620,6 @@ Future<void> _runFrameworkTests() async {
         path.join(flutterRoot, 'packages', 'flutter'),
         options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
         tests: <String>[ path.join('test', 'widgets') + path.separator ],
-        shuffleOrder: true,
       );
     }
     // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
@@ -628,7 +627,6 @@ Future<void> _runFrameworkTests() async {
       await _runFlutterTest(
         path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'),
         options: <String>[trackWidgetCreationOption],
-        shuffleOrder: true,
       );
     }
     // Run release mode tests (see packages/flutter/test_release/README.md)
@@ -636,7 +634,6 @@ Future<void> _runFrameworkTests() async {
       path.join(flutterRoot, 'packages', 'flutter'),
       options: <String>['--dart-define=dart.vm.product=true', ...soundNullSafetyOptions],
       tests: <String>['test_release${path.separator}'],
-      shuffleOrder: true,
     );
   }
 
@@ -653,7 +650,6 @@ Future<void> _runFrameworkTests() async {
         path.join(flutterRoot, 'packages', 'flutter'),
         options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
         tests: tests,
-        shuffleOrder: true,
       );
     }
   }
@@ -1380,18 +1376,6 @@ Future<void> _pubRunTest(String workingDirectory, {
   }
 }
 
-// Used as an argument to the runTests internal function in the _runFlutterTest
-// function.
-enum _ShuffleMode {
-  // Runs only the tests not tagged with "no-shuffle" in a shuffled order.
-  shuffled,
-  // Runs only the tests that would fail if shuffled (those tagged with
-  // "no-shuffle").
-  unshuffled,
-  // Runs all tests without shuffling.
-  sequential,
-}
-
 Future<void> _runFlutterTest(String workingDirectory, {
   String script,
   bool expectFailure = false,
@@ -1399,20 +1383,20 @@ Future<void> _runFlutterTest(String workingDirectory, {
   OutputChecker outputChecker,
   List<String> options = const <String>[],
   bool skip = false,
-  bool shuffleOrder = false,
   Map<String, String> environment,
   List<String> tests = const <String>[],
 }) async {
   assert(!printOutput || outputChecker == null, 'Output either can be printed or checked but not both');
 
-  final List<String> testArgs = <String>[
+  final List<String> args = <String>[
+    'test',
     ...options,
     ...?flutterTestArgs,
   ];
 
   final bool shouldProcessOutput = useFlutterTestFormatter && !expectFailure && !options.contains('--coverage');
   if (shouldProcessOutput)
-    testArgs.add('--machine');
+    args.add('--machine');
 
   if (script != null) {
     final String fullScriptPath = path.join(workingDirectory, script);
@@ -1426,98 +1410,56 @@ Future<void> _runFlutterTest(String workingDirectory, {
         print('This is one of the tests that is normally skipped in this configuration.');
       exit(1);
     }
-    testArgs.add(script);
+    args.add(script);
   }
 
-  testArgs.addAll(tests);
+  args.addAll(tests);
 
-  Future<void> runTests(_ShuffleMode shuffleMode) async {
-    int seed = 0;
-    final List<String> shuffleArgs = <String>[];
-    switch (shuffleMode) {
-      case _ShuffleMode.shuffled:
-        final DateTime now = DateTime.now();
-        // Generates YYYYMMDD as the seed, so that testing continues to fail on the
-        // day it was originally run, and on other days the seed can be used to
-        // replicate failures.
-        seed = now.year * 10000 + now.month * 100 + now.day;
-        print('Shuffling test order using arbitrary daily seed $seed.');
-        print('To run locally, run "flutter test -x no-shuffle --test-randomize-ordering-seed=$seed '
-            '&& flutter test -t no-shuffle" to run all tests (the latter part runs all the tests that '
-            "currently don't work when shuffled, the former skips those tests and shuffles the order "
-            'of the remaining tests).');
-        shuffleArgs.addAll(<String>['-x', 'no-shuffle', '--test-randomize-ordering-seed=$seed']);
-        break;
-      case _ShuffleMode.unshuffled:
-        shuffleArgs.addAll(<String>['-t', 'no-shuffle']);
-        break;
-      case _ShuffleMode.sequential:
-        break;
+  if (!shouldProcessOutput) {
+    final OutputMode outputMode = outputChecker == null && printOutput
+      ? OutputMode.print
+      : OutputMode.capture;
+
+    final CommandResult result = await runCommand(
+      flutter,
+      args,
+      workingDirectory: workingDirectory,
+      expectNonZeroExit: expectFailure,
+      outputMode: outputMode,
+      skip: skip,
+      environment: environment,
+    );
+
+    if (outputChecker != null) {
+      final String message = outputChecker(result);
+      if (message != null)
+        exitWithError(<String>[message]);
     }
-    final List<String> args = <String>[
-      'test',
-      ...shuffleArgs,
-      ...testArgs,
-    ];
-    if (!shouldProcessOutput) {
-      final OutputMode outputMode = outputChecker == null && printOutput
-        ? OutputMode.print
-        : OutputMode.capture;
+    return;
+  }
 
-      final CommandResult result = await runCommand(
+  if (useFlutterTestFormatter) {
+    final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+    Stream<String> testOutput;
+    try {
+      testOutput = runAndGetStdout(
         flutter,
         args,
         workingDirectory: workingDirectory,
         expectNonZeroExit: expectFailure,
-        expectNoTests: shuffleMode == _ShuffleMode.unshuffled,
-        outputMode: outputMode,
-        skip: skip,
         environment: environment,
       );
-      if (outputChecker != null) {
-        final String message = outputChecker(result);
-        if (message != null)
-          exitWithError(<String>[message]);
-      }
-      return;
+    } finally {
+      formatter.finish();
     }
-
-    if (useFlutterTestFormatter) {
-      final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-      Stream<String> testOutput;
-      try {
-        testOutput = runAndGetStdout(
-          flutter,
-          args,
-          workingDirectory: workingDirectory,
-          expectNonZeroExit: expectFailure,
-          expectNoTests: shuffleMode == _ShuffleMode.unshuffled,
-          environment: environment,
-        );
-      } finally {
-        formatter.finish();
-      }
-      await _processTestOutput(formatter, testOutput);
-    } else {
-      await runCommand(
-        flutter,
-        args,
-        workingDirectory: workingDirectory,
-        expectNonZeroExit: expectFailure,
-        expectNoTests: shuffleMode == _ShuffleMode.unshuffled,
-      );
-    }
-  }
-
-  if (shuffleOrder) {
-    // Runs only the tests not tagged with "no-shuffle" in a shuffled order.
-    await runTests(_ShuffleMode.shuffled);
-    // Runs only the tests that would fail if shuffled (those tagged with
-    // "no-shuffle").
-    await runTests(_ShuffleMode.unshuffled);
+    await _processTestOutput(formatter, testOutput);
   } else {
-    // Runs all tests without shuffling.
-    await runTests(_ShuffleMode.sequential);
+    await runCommand(
+      flutter,
+      args,
+      workingDirectory: workingDirectory,
+      expectNonZeroExit: expectFailure,
+    );
   }
 }
 

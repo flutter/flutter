@@ -7,12 +7,6 @@
 // initialize a binding, which rendering_tester will attempt to re-initialize
 // (or vice versa).
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependency have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
