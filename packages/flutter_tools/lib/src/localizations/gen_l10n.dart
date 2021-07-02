@@ -1214,8 +1214,11 @@ class LocalizationsGenerator {
       .replaceAll('\n\n\n', '\n\n');
   }
 
-  bool _requiresIntlImport() => _allMessages.any(
-          (Message message) => message.isPlural || message.isSelect || message.placeholdersRequireFormatting);
+  bool _requiresIntlImport() => _allMessages.any((Message message) {
+    return message.isPlural 
+        || message.isSelect 
+        || message.placeholdersRequireFormatting;
+  });
 
   void writeOutputFiles(Logger logger, { bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
