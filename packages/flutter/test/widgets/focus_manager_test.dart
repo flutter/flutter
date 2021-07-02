@@ -1160,6 +1160,39 @@ void main() {
         expect(node1.hasPrimaryFocus, isFalse);
         expect(scopeNode.hasPrimaryFocus, isTrue);
     });
+
+    testWidgets('autofocus the first candidate', (WidgetTester tester) async {
+      final FocusNode node1 = FocusNode();
+      final FocusNode node2 = FocusNode();
+      final FocusNode node3 = FocusNode();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Focus>[
+              Focus(
+                autofocus: true,
+                focusNode: node1,
+                child: const SizedBox(),
+              ),
+              Focus(
+                autofocus: true,
+                focusNode: node2,
+                child: const SizedBox(),
+              ),
+              Focus(
+                autofocus: true,
+                focusNode: node3,
+                child: const SizedBox(),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(node1.hasPrimaryFocus, isTrue);
+    });
   });
 
   testWidgets("Doesn't lose focused child when reparenting if the nearestScope doesn't change.", (WidgetTester tester) async {

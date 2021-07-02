@@ -69,6 +69,8 @@ class _Autofocus {
   final FocusScopeNode scope;
   final FocusNode autofocusNode;
 
+  // Applies the autofocus request, if the node is still attached to the
+  // original scope and the scope has no focused child.
   void apply() {
     if (scope.focusedChild == null && autofocusNode.ancestors.contains(scope)) {
       assert(_focusDebug('Applying autofocus: $autofocusNode'));
@@ -1759,8 +1761,13 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   void _applyFocusChange() {
     _haveScheduledUpdate = false;
     final FocusNode? previousFocus = _primaryFocus;
+
+    // The widget tree is responsible for calling reparent/detach on attached
+    // nodes to keep their parent/manager information up-to-date, so here we can
+    // safely check if the scope/node involved in each autofocus request is
+    // still attached, and discard the invalid ones.
     for (final _Autofocus autofocus in _pendingAutofocuses) {
-      if (identical(autofocus.scope._manager, this)) {
+      if (autofocus.scope.parent != null && identical(autofocus.scope._manager, this)) {
         autofocus.apply();
       }
     }
