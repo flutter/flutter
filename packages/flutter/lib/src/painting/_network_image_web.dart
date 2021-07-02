@@ -4,7 +4,9 @@
 
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'dart:html';
 
 import 'package:flutter/foundation.dart';
 
@@ -78,18 +80,24 @@ class NetworkImage
     NetworkImage key,
     image_provider.DecoderCallback decode,
     StreamController<ImageChunkEvent> chunkEvents,
-  ) {
+  ) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
-    // This API only exists in the web engine implementation and is not
-    // contained in the analyzer summary for Flutter.
-    return ui.webOnlyInstantiateImageCodecFromUrl(// ignore: undefined_function, avoid_dynamic_calls
-      resolved,
-      chunkCallback: (int bytes, int total) {
-        chunkEvents.add(ImageChunkEvent(cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
-      },
-    ) as Future<ui.Codec>;
+
+    final HttpRequest response = await HttpRequest.request(key.url, method: 'GET', requestHeaders: key.headers, responseType: 'arraybuffer');
+    
+    if(response.status != HttpStatus.ok) {
+      response.abort();
+      throw image_provider.NetworkImageLoadException(statusCode: response.status ?? 400, uri: resolved);
+    }
+
+    final Uint8List bytes = (response.response as ByteBuffer).asUint8List();
+
+    if (bytes.lengthInBytes == 0)
+        throw Exception('NetworkImage is an empty file: $resolved');
+    
+    return decode(bytes);
   }
 
   @override
