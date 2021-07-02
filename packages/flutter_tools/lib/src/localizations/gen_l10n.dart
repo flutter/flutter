@@ -1216,8 +1216,8 @@ class LocalizationsGenerator {
   }
 
   bool _requiresIntlImport() => _allMessages.any((Message message) {
-    return message.isPlural 
-        || message.isSelect 
+    return message.isPlural
+        || message.isSelect
         || message.placeholdersRequireFormatting;
   });
 
