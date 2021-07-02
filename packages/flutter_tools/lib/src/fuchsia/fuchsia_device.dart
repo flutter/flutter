@@ -667,65 +667,24 @@ class FuchsiaDevice extends Device {
     //  https://github.com/flutter/flutter/issues/83609#issuecomment-871114230,
     //  https://bugs.fuchsia.dev/p/fuchsia/issues/detail?id=79924,
     //  https://fuchsia.dev/fuchsia-src/concepts/components/v2/hub
-    const String findCommand = 'find /hub -name vmservice-port';
-    final RunResult findResult = await shell(findCommand);
-    if (findResult.exitCode != 0) {
-      throwToolExit("'$findCommand' on device $name failed. stderr: '${findResult.stderr}'");
-    }
-    final String findOutput = findResult.stdout;
-    if (findOutput.trim() == '') {
-      throwToolExit(
-          'No Dart Observatories found. Are you running a debug build?');
-    }
+
+    final Iterable<String> servicePaths = await vmServicePaths();
+
     final Map<int, List<String>> portUrlMap = <int, List<String>>{};
 
     // In practice it should be safe to assume that there are only one port
     // for each vmservice-port, but to play safe we duplicates entries if there
     // are multiple ports for the path.
-    for (final String path in findOutput.split('\n')) {
-      final List<int> ports = <int>[];
-      if (path == '') {
-        continue;
-      }
+    for (final String path in servicePaths) {
 
       // Get ports
-      final String lsCommand = 'ls $path';
-      final RunResult lsResult = await shell(lsCommand);
-      if (lsResult.exitCode != 0) {
-        throwToolExit("'$lsCommand' on device $name failed");
-      }
-      final String lsOutput = lsResult.stdout;
-      for (final String line in lsOutput.trim().split('\n')) {
-        if (line == '') {
-          continue;
-        }
-        final int port = int.tryParse(line);
-        if (port != null) {
-          ports.add(port);
-        }
-      }
+      final Iterable<int> ports = (await listDirectory(path)).map(int.tryParse);
 
       // Get component urls
-      final String findUrlPathCommand = 'find $path/../../../c -name url';
-      final RunResult findUrlPathResult = await shell(findUrlPathCommand);
-      if (findUrlPathResult.exitCode != 0) {
-        throwToolExit("'$findUrlPathCommand' on device $name failed");
-      }
-      final String findUrlPathOutput = findUrlPathResult.stdout;
+      final List<String> urls = await
+          Stream<String>.fromIterable(await findByName('$path/../../../c', 'url'))
+          .asyncMap(readFile).toList();
 
-      final List<String> urls = <String>[];
-      for (final String urlPath in findUrlPathOutput.trim().split('\n')){
-        if (urlPath == '') {
-          continue;
-        }
-        final String catUrlCommand = 'cat $urlPath';
-        final RunResult catUrlResult = await shell(catUrlCommand);
-        if (catUrlResult.exitCode != 0){
-          throwToolExit("'$catUrlCommand' on device $name failed");
-        }
-        final String catUrlOutput = catUrlResult.stdout;
-        urls.add(catUrlOutput.trim());
-      }
       for (final int port in ports){
         portUrlMap[port] = urls;
       }
@@ -733,6 +692,51 @@ class FuchsiaDevice extends Device {
     return portUrlMap;
   }
 
+  @visibleForTesting
+  Future<Iterable<String>> vmServicePaths() async {
+    final Iterable<String> paths = await findByName('/hub', 'vmservice-port');
+    if (paths.isEmpty) {
+      throwToolExit(
+          'No Dart Observatories found. Are you running a debug build?');
+    }
+    return paths;
+  }
+
+  @visibleForTesting
+  Future<Iterable<String>> listDirectory(String path) async {
+    final String lsCommand = 'ls "$path"';
+    final RunResult lsResult = await shell(lsCommand);
+    if (lsResult.exitCode != 0) {
+      throwToolExit("'$lsCommand' on device $name failed, stderr: '${lsResult.stderr}");
+    }
+    final String lsOutput = lsResult.stdout;
+    return lsOutput.trim().split('\n').where((String s) => s != '');
+  }
+
+  @visibleForTesting
+  Future<Iterable<String>> findByName(String path, String name) async {
+    final String findCommand = 'find "$path" -name "$name"';
+    final RunResult findResult = await shell(findCommand);
+    if (findResult.exitCode != 0) {
+      throwToolExit("'$findCommand' on device $name failed. stderr: '${findResult.stderr}'");
+    }
+    final String findOutput = findResult.stdout;
+    return findOutput.trim().split('\n').where((String s) => s != '');
+  }
+
+  @visibleForTesting
+  Future<String> readFile(String path, { bool trim = true }) async {
+    final String readCommand = 'cat "$path"';
+    final RunResult readResult = await shell(readCommand);
+    if (readResult.exitCode != 0){
+      throwToolExit("'$readCommand' on device $name failed, stderr: '${readResult.stderr}");
+    }
+    final String readOutput = readResult.stdout;
+    if (trim){
+      return readOutput.trim();
+    }
+    return readOutput;
+  }
 
   /// Run `command` on the Fuchsia device shell.
   Future<RunResult> shell(String command) async {
