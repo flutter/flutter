@@ -339,7 +339,7 @@ void main() {
 
     testUsingContext('No vmservices found', () async {
       processManager.addCommand(const FakeCommand(
-        command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+        command: <String>['ssh', '-F', '/artifact', 'id', 'find "/hub" -name "vmservice-port"'],
       ));
       final FuchsiaDevice device = FuchsiaDevice('id');
 
@@ -755,13 +755,13 @@ void main() {
       testUsingContext('can find multiple servicePorts', () async {
         processManager.addCommands(<FakeCommand>[
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find "/hub" -name "vmservice-port"'],
             stdout:
               '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port\n'
               '/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'ls /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'ls "/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port"'],
             // Practically this should be impossible, we should only get one port.
             // But let's tests it anyway. Also tests handing of trailing newline.
             stdout:
@@ -769,29 +769,29 @@ void main() {
               '19643\n',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c -name url'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find "/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c" -name "url"'],
             stdout:
               '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/abc.cmx/1/url\n'
               '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/ermine.cmx/2/url',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'cat /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/abc.cmx/1/url'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'cat "/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/abc.cmx/1/url"'],
             stdout: 'fuchsia-pkg://fuchsia.com/abc#meta/abc.cmx',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'cat /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/ermine.cmx/2/url'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'cat "/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/ermine.cmx/2/url"'],
             stdout: 'fuchsia-pkg://fuchsia.com/ermine#meta/ermine.cmx',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'ls /hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'ls "/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port"'],
             stdout: '23125',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port/../../../c -name url'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find "/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port/../../../c" -name "url"'],
             stdout: '/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port/../../../c/gallery.cmx/2/url',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'cat /hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port/../../../c/gallery.cmx/2/url'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'cat "/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port/../../../c/gallery.cmx/2/url"'],
             stdout: 'fuchsia-pkg://flutter_tool/gallery#meta/gallery.cmx',
           ),
         ]);
@@ -817,7 +817,7 @@ void main() {
 
       testUsingContext('No vmservices found', () async {
         processManager.addCommand(const FakeCommand(
-          command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+          command: <String>['ssh', '-F', '/artifact', 'id', 'find "/hub" -name "vmservice-port"'],
         ));
         final FuchsiaDevice device = FuchsiaDevice('id');
 
@@ -835,10 +835,10 @@ void main() {
         ),
       });
 
-      testUsingContext('can hendle failed to find vmservice-port', () async {
+      testUsingContext('can handle failed to find vmservice-port', () async {
         processManager.addCommands(<FakeCommand>[
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find "/hub" -name "vmservice-port"'],
             exitCode: 1,
           ),
         ]);
@@ -858,16 +858,16 @@ void main() {
         ),
       });
 
-      testUsingContext('can hendle failed to list ports', () async {
+      testUsingContext('can handle failed to list ports', () async {
         processManager.addCommands(<FakeCommand>[
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find "/hub" -name "vmservice-port"'],
             stdout:
             '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port\n'
                 '/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'ls /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'ls "/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port"'],
             exitCode: 1,
           ),
         ]);
@@ -887,16 +887,16 @@ void main() {
         ),
       });
 
-      testUsingContext('can hendle failed to find paths to component url', () async {
+      testUsingContext('can handle failed to find paths to component url', () async {
         processManager.addCommands(<FakeCommand>[
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find "/hub" -name "vmservice-port"'],
             stdout:
             '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port\n'
                 '/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'ls /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'ls "/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port"'],
             // Practically this should be impossible, we should only get one port.
             // But let's tests it anyway. Also tests handing of trailing newline.
             stdout:
@@ -904,7 +904,7 @@ void main() {
                 '19643\n',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c -name url'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find "/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c" -name "url"'],
             exitCode: 1,
           ),
         ]);
@@ -927,13 +927,13 @@ void main() {
       testUsingContext('can handle failed to read component url', () async {
         processManager.addCommands(<FakeCommand>[
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find "/hub" -name "vmservice-port"'],
             stdout:
               '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port\n'
               '/hub/c/flutter_jit_runner.cmx/301596/out/debug/vmservice-port',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'ls /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'ls "/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port"'],
             // Practically this should be impossible, we should only get one port.
             // But let's tests it anyway. Also tests handing of trailing newline.
             stdout:
@@ -941,13 +941,13 @@ void main() {
               '19643\n',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c -name url'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'find "/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c" -name "url"'],
             stdout:
               '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/abc.cmx/1/url\n'
               '/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/ermine.cmx/2/url',
           ),
           const FakeCommand(
-            command: <String>['ssh', '-F', '/artifact', 'id', 'cat /hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/abc.cmx/1/url'],
+            command: <String>['ssh', '-F', '/artifact', 'id', 'cat "/hub/c/flutter_aot_runner.cmx/35411/out/debug/vmservice-port/../../../c/abc.cmx/1/url"'],
             exitCode: 1,
           ),
         ]);
