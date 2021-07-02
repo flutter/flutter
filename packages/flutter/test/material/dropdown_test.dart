@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependency have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1408669812"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -1563,7 +1557,7 @@ void main() {
     (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
 
-      Widget build({ List<String>? items }){
+      Widget build({ List<String>? items }) {
         return buildFrame(
           items: items,
           buttonKey: buttonKey,
@@ -1585,7 +1579,7 @@ void main() {
   testWidgets('DropdownButton disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items }){
+    Widget build({ List<String>? items }) {
       return buildFrame(
         items: items,
         buttonKey: buttonKey,

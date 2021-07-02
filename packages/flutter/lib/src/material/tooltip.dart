@@ -327,7 +327,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
     final bool mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
     if (mouseIsConnected != _mouseIsConnected) {
-      setState((){
+      setState(() {
         _mouseIsConnected = mouseIsConnected;
       });
     }

@@ -2325,7 +2325,7 @@ class VisualDensity with Diagnosticable {
   ///
   /// The resulting minWidth and minHeight values are clamped to not exceed the
   /// maxWidth and maxHeight values, respectively.
-  BoxConstraints effectiveConstraints(BoxConstraints constraints){
+  BoxConstraints effectiveConstraints(BoxConstraints constraints) {
     assert(constraints != null && constraints.debugAssertIsValid());
     return constraints.copyWith(
       minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, constraints.maxWidth),

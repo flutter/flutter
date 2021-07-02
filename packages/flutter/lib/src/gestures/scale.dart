@@ -85,12 +85,20 @@ class ScaleUpdateDetails {
     this.verticalScale = 1.0,
     this.rotation = 0.0,
     this.pointerCount = 0,
+    this.delta = Offset.zero,
   }) : assert(focalPoint != null),
+       assert(delta != null),
        assert(scale != null && scale >= 0.0),
        assert(horizontalScale != null && horizontalScale >= 0.0),
        assert(verticalScale != null && verticalScale >= 0.0),
        assert(rotation != null),
        localFocalPoint = localFocalPoint ?? focalPoint;
+
+  /// The amount the pointer has moved in the coordinate space of the event
+  /// receiver since the previous update.
+  ///
+  /// Defaults to zero if not specified in the constructor.
+  final Offset delta;
 
   /// The focal point of the pointers in contact with the screen.
   ///
@@ -508,6 +516,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
           rotation: _computeRotationFactor(),
           pointerCount: _pointerQueue.length,
+          delta: _currentFocalPoint - _initialFocalPoint,
         ));
       });
   }
