@@ -25,3 +25,7 @@ impeller_component("primitives") {
     "../compositor",
   ]
 }
+
+impeller_component("primitives_unittests") {
+  sources = [ "primitives_unittests.mm" ]
+}

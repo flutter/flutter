@@ -5,7 +5,6 @@
 #include "flutter/impeller/compiler/compiler.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
-#include "third_party/inja/include/inja/inja.hpp"
 
 namespace impeller {
 namespace compiler {

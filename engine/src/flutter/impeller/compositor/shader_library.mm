@@ -13,6 +13,10 @@ ShaderLibrary::~ShaderLibrary() = default;
 std::shared_ptr<const ShaderFunction> ShaderLibrary::GetFunction(
     const std::string_view& name,
     ShaderStage stage) {
+  if (!library_) {
+    return nullptr;
+  }
+
   ShaderKey key(name, stage);
 
   if (auto found = functions_.find(key); found != functions_.end()) {
