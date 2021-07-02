@@ -253,13 +253,15 @@ class FuchsiaDevice extends Device {
 
   String get strippedId => id.split('%').first;
 
-  bool _isSession = false;
+  bool _isSession;
+
+  Future<bool> get isSession async => _isSession ??= await _initIsSession();
 
   /// Determine if the Fuchsia device is running a workstation build.
   ///
   /// If the device is running a workstation build, `session_control` should be
   /// used to launch apps, otherwise `tiles_ctl` should be used.
-  Future<bool> isSession() async {
+  Future<bool> _initIsSession() async {
     final RunResult result = await shell('which session_control');
     if (result.exitCode != 0) {
       return false;
@@ -305,10 +307,7 @@ class FuchsiaDevice extends Device {
     bool ipv6 = false,
     String userIdentifier,
   }) async {
-    // Populate isSession first
-    _isSession = await isSession();
-
-    if (_isSession) {
+    if (await isSession) {
       globals.printTrace('Running on a workstation build.');
     } else {
       globals.printTrace('Running on a non-workstation build.');
@@ -353,7 +352,7 @@ class FuchsiaDevice extends Device {
     bool serverRegistered = false;
     String fuchsiaUrl;
     try {
-      if (_isSession) {
+      if (await isSession) {
         // Prefetch session_control
         if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'session_control')) {
           globals.printError('Failed to get amber to prefetch session_control');
@@ -438,7 +437,7 @@ class FuchsiaDevice extends Device {
 
       fuchsiaUrl = 'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
 
-      if (_isSession) {
+      if (await isSession) {
         // Instruct session_control to start the app
         if (!await fuchsiaDeviceTools.sessionControl.add(this, fuchsiaUrl)) {
           globals.printError('Failed to add the app to session_control');
@@ -498,7 +497,7 @@ class FuchsiaDevice extends Device {
     covariant FuchsiaApp app, {
     String userIdentifier,
   }) async {
-    if (_isSession) {
+    if (await isSession) {
       // Currently there are no way to close a running app in ermine afaik.
       // so we just restart the launcher to ensure that it is no longer running.
       if (!await fuchsiaDeviceTools.sessionControl.restart(this)) {
