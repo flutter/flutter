@@ -1,4 +1,4 @@
-Signature: 25a898c0d945bf21f3832f3c95ae20dd
+Signature: 1da1fa48cd2954d64503d3386817085c
 
 UNUSED LICENSES:
 
@@ -3102,10 +3102,13 @@ FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConfigConversionEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConfigConversionEffect.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuad.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.h
