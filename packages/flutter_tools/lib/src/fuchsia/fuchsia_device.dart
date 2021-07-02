@@ -32,6 +32,7 @@ import 'fuchsia_build.dart';
 import 'fuchsia_pm.dart';
 import 'fuchsia_sdk.dart';
 import 'fuchsia_workflow.dart';
+import 'session_control.dart';
 import 'tiles_ctl.dart';
 
 /// The [FuchsiaDeviceTools] instance.
@@ -44,29 +45,14 @@ class FuchsiaDeviceTools {
 
   FuchsiaTilesCtl _tilesCtl;
   FuchsiaTilesCtl get tilesCtl => _tilesCtl ??= FuchsiaTilesCtl();
+
+
+  FuchsiaSessionControl _sessionControl;
+  FuchsiaSessionControl get sessionControl => _sessionControl ??= FuchsiaSessionControl();
 }
 
 final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
-
-// Enables testing the fuchsia isolate discovery
-Future<FlutterVmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
-  return connectToVmService(uri, logger: globals.logger);
-}
-
-Future<void> _kDefaultDartDevelopmentServiceStarter(
-  Device device,
-  Uri observatoryUri,
-  bool disableServiceAuthCodes,
-) async {
-  await device.dds.startDartDevelopmentService(
-    observatoryUri,
-    0,
-    true,
-    disableServiceAuthCodes,
-    logger: globals.logger,
-  );
-}
 
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
@@ -271,22 +257,6 @@ class FuchsiaDevice extends Device {
 
   Future<bool> get isSession async => _isSession ??= await _initIsSession();
 
-  /// Determine if the Fuchsia device is running a workstation build.
-  ///
-  /// If the device is running a workstation build, `session_control` should be
-  /// used to launch apps, otherwise `tiles_ctl` should be used.
-  Future<bool> _initIsSession() async {
-    final RunResult result = await shell('which session_control');
-    if (result.exitCode != 0) {
-      return false;
-    }
-    return true;
-  }
-
-  bool _isSession;
-
-  Future<bool> get isSession async => _isSession ??= await _initIsSession();
-
   /// Determine if the Fuchsia device is running a session based build.
   ///
   /// If the device is running a session based build, `session_control` should be
@@ -337,6 +307,12 @@ class FuchsiaDevice extends Device {
     bool ipv6 = false,
     String userIdentifier,
   }) async {
+    if (await isSession) {
+      globals.printTrace('Running on a workstation build.');
+    } else {
+      globals.printTrace('Running on a non-workstation build.');
+    }
+
     if (!prebuiltApplication) {
       await buildFuchsia(fuchsiaProject: FlutterProject.current().fuchsia,
                          targetPlatform: await targetPlatform,
@@ -374,17 +350,26 @@ class FuchsiaDevice extends Device {
     );
     FuchsiaPackageServer fuchsiaPackageServer;
     bool serverRegistered = false;
+    String fuchsiaUrl;
     try {
-      // Ask amber to pre-fetch some things we'll need before setting up our own
-      // package server. This is to avoid relying on amber correctly using
-      // multiple package servers, support for which is in flux.
-      if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles')) {
-        globals.printError('Failed to get amber to prefetch tiles');
-        return LaunchResult.failed();
-      }
-      if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles_ctl')) {
-        globals.printError('Failed to get amber to prefetch tiles_ctl');
-        return LaunchResult.failed();
+      if (await isSession) {
+        // Prefetch session_control
+        if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'session_control')) {
+          globals.printError('Failed to get amber to prefetch session_control');
+          return LaunchResult.failed();
+        }
+      } else {
+        // Ask amber to pre-fetch some things we'll need before setting up our own
+        // package server. This is to avoid relying on amber correctly using
+        // multiple package servers, support for which is in flux.
+        if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles')) {
+          globals.printError('Failed to get amber to prefetch tiles');
+          return LaunchResult.failed();
+        }
+        if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles_ctl')) {
+          globals.printError('Failed to get amber to prefetch tiles_ctl');
+          return LaunchResult.failed();
+        }
       }
 
       // Start up a package server.
@@ -450,17 +435,26 @@ class FuchsiaDevice extends Device {
         return LaunchResult.failed();
       }
 
-      // Ensure tiles_ctl is started, and start the app.
-      if (!await FuchsiaTilesCtl.ensureStarted(this)) {
-        globals.printError('Failed to ensure that tiles is started on the device');
-        return LaunchResult.failed();
-      }
+      fuchsiaUrl = 'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
 
-      // Instruct tiles_ctl to start the app.
-      final String fuchsiaUrl = 'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
-      if (!await fuchsiaDeviceTools.tilesCtl.add(this, fuchsiaUrl, <String>[])) {
-        globals.printError('Failed to add the app to tiles');
-        return LaunchResult.failed();
+      if (await isSession) {
+        // Instruct session_control to start the app
+        if (!await fuchsiaDeviceTools.sessionControl.add(this, fuchsiaUrl)) {
+          globals.printError('Failed to add the app to session_control');
+          return LaunchResult.failed();
+        }
+      } else {
+        // Ensure tiles_ctl is started, and start the app.
+        if (!await FuchsiaTilesCtl.ensureStarted(this)) {
+          globals.printError('Failed to ensure that tiles is started on the device');
+          return LaunchResult.failed();
+        }
+
+        // Instruct tiles_ctl to start the app.
+        if (!await fuchsiaDeviceTools.tilesCtl.add(this, fuchsiaUrl, <String>[])) {
+          globals.printError('Failed to add the app to tiles');
+          return LaunchResult.failed();
+        }
       }
     } finally {
       // Try to un-teach the package controller about the package server if
@@ -489,7 +483,7 @@ class FuchsiaDevice extends Device {
 
     // In a debug or profile build, try to find the observatory uri.
     final FuchsiaIsolateDiscoveryProtocol discovery =
-      getIsolateDiscoveryProtocol(appName);
+      getIsolateDiscoveryProtocol(fuchsiaUrl);
     try {
       final Uri observatoryUri = await discovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
@@ -503,6 +497,15 @@ class FuchsiaDevice extends Device {
     covariant FuchsiaApp app, {
     String userIdentifier,
   }) async {
+    if (await isSession) {
+      // Currently there are no way to close a running app in ermine afaik.
+      // so we just restart the launcher to ensure that it is no longer running.
+      if (!await fuchsiaDeviceTools.sessionControl.restart(this)) {
+        globals.printError('session_control unable to restart');
+        return false;
+      }
+      return true;
+    }
     final int appKey = await FuchsiaTilesCtl.findAppKey(this, app.id);
     if (appKey != -1) {
       if (!await fuchsiaDeviceTools.tilesCtl.remove(this, appKey)) {
@@ -555,7 +558,7 @@ class FuchsiaDevice extends Device {
       throw 'Could not take a screenshot on device $name:\n$screencapResult';
     }
     try {
-      final RunResult scpResult =  await scp('/tmp/screenshot.ppm', outputFile.path);
+      final RunResult scpResult = await scp('/tmp/screenshot.ppm', outputFile.path);
       if (scpResult.exitCode != 0) {
         throw 'Failed to copy screenshot from device:\n$scpResult';
       }
@@ -626,7 +629,10 @@ class FuchsiaDevice extends Device {
   bool _ipv6;
 
   /// [true] if the current host address is IPv6.
-  bool get ipv6 => _ipv6 ??= isIPv6Address(id);
+  //  Strip interface name to avoid issues in Dart's ipv6 parsing logic as it
+  //  currently does not allow an ipv6 address suffixed by an interface name
+  //  like [::1%qemu].
+  bool get ipv6 => _ipv6 ??= isIPv6Address(strippedId);
 
   /// Return the address that the device should use to communicate with the
   /// host.
@@ -654,40 +660,82 @@ class FuchsiaDevice extends Device {
 
   String _cachedHostAddress;
 
-  /// List the ports currently running a dart observatory.
-  Future<List<int>> servicePorts() async {
-    const String findCommand = 'find /hub -name vmservice-port';
+  /// List the ports currently running a dart observatory and the component url
+  /// of flutter views that such dart observatory provides
+  Future<Map<int, List<String>>> servicePorts() async {
+    // TODO(michaellee8): Use the v2 /hub protocol,
+    //  https://github.com/flutter/flutter/issues/83609#issuecomment-871114230,
+    //  https://bugs.fuchsia.dev/p/fuchsia/issues/detail?id=79924,
+    //  https://fuchsia.dev/fuchsia-src/concepts/components/v2/hub
+
+    final Iterable<String> servicePaths = await vmServicePaths();
+
+    final Map<int, List<String>> portUrlMap = <int, List<String>>{};
+
+    // In practice it should be safe to assume that there are only one port
+    // for each vmservice-port, but to play safe we duplicates entries if there
+    // are multiple ports for the path.
+    for (final String path in servicePaths) {
+
+      // Get ports
+      final Iterable<int> ports = (await listDirectory(path)).map(int.tryParse);
+
+      // Get component urls
+      final List<String> urls = await
+          Stream<String>.fromIterable(await findByName('$path/../../../c', 'url'))
+          .asyncMap(readFile).toList();
+
+      for (final int port in ports){
+        portUrlMap[port] = urls;
+      }
+    }
+    return portUrlMap;
+  }
+
+  @visibleForTesting
+  Future<Iterable<String>> vmServicePaths() async {
+    final Iterable<String> paths = await findByName('/hub', 'vmservice-port');
+    if (paths.isEmpty) {
+      throwToolExit(
+          'No Dart Observatories found. Are you running a debug build?');
+    }
+    return paths;
+  }
+
+  @visibleForTesting
+  Future<Iterable<String>> listDirectory(String path) async {
+    final String lsCommand = 'ls "$path"';
+    final RunResult lsResult = await shell(lsCommand);
+    if (lsResult.exitCode != 0) {
+      throwToolExit("'$lsCommand' on device $name failed, stderr: '${lsResult.stderr}");
+    }
+    final String lsOutput = lsResult.stdout;
+    return lsOutput.trim().split('\n').where((String s) => s != '');
+  }
+
+  @visibleForTesting
+  Future<Iterable<String>> findByName(String path, String name) async {
+    final String findCommand = 'find "$path" -name "$name"';
     final RunResult findResult = await shell(findCommand);
     if (findResult.exitCode != 0) {
       throwToolExit("'$findCommand' on device $name failed. stderr: '${findResult.stderr}'");
     }
     final String findOutput = findResult.stdout;
-    if (findOutput.trim() == '') {
-      throwToolExit(
-          'No Dart Observatories found. Are you running a debug build?');
+    return findOutput.trim().split('\n').where((String s) => s != '');
+  }
+
+  @visibleForTesting
+  Future<String> readFile(String path, { bool trim = true }) async {
+    final String readCommand = 'cat "$path"';
+    final RunResult readResult = await shell(readCommand);
+    if (readResult.exitCode != 0){
+      throwToolExit("'$readCommand' on device $name failed, stderr: '${readResult.stderr}");
     }
-    final List<int> ports = <int>[];
-    for (final String path in findOutput.split('\n')) {
-      if (path == '') {
-        continue;
-      }
-      final String lsCommand = 'ls $path';
-      final RunResult lsResult = await shell(lsCommand);
-      if (lsResult.exitCode != 0) {
-        throwToolExit("'$lsCommand' on device $name failed");
-      }
-      final String lsOutput = lsResult.stdout;
-      for (final String line in lsOutput.split('\n')) {
-        if (line == '') {
-          continue;
-        }
-        final int port = int.tryParse(line);
-        if (port != null) {
-          ports.add(port);
-        }
-      }
+    final String readOutput = readResult.stdout;
+    if (trim){
+      return readOutput.trim();
     }
-    return ports;
+    return readOutput;
   }
 
   /// Run `command` on the Fuchsia device shell.
@@ -752,8 +800,8 @@ class FuchsiaDevice extends Device {
     throwToolExit('No ports found running $isolateName');
   }
 
-  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String isolateName) {
-    return FuchsiaIsolateDiscoveryProtocol(this, isolateName);
+  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String fuchsiaUrl) {
+    return FuchsiaIsolateDiscoveryProtocol(this, fuchsiaUrl);
   }
 
   @override
@@ -770,19 +818,14 @@ class FuchsiaDevice extends Device {
 class FuchsiaIsolateDiscoveryProtocol {
   FuchsiaIsolateDiscoveryProtocol(
     this._device,
-    this._isolateName, [
-    this._vmServiceConnector = _kDefaultFuchsiaIsolateDiscoveryConnector,
-    this._ddsStarter = _kDefaultDartDevelopmentServiceStarter,
+    this._fuchsiaUrl, [
     this._pollOnce = false,
   ]);
 
   static const Duration _pollDuration = Duration(seconds: 10);
-  final Map<int, FlutterVmService> _ports = <int, FlutterVmService>{};
   final FuchsiaDevice _device;
-  final String _isolateName;
+  final String _fuchsiaUrl;
   final Completer<Uri> _foundUri = Completer<Uri>();
-  final Future<FlutterVmService> Function(Uri) _vmServiceConnector;
-  final Future<void> Function(Device, Uri, bool) _ddsStarter;
   // whether to only poll once.
   final bool _pollOnce;
   Timer _pollingTimer;
@@ -793,7 +836,7 @@ class FuchsiaIsolateDiscoveryProtocol {
       return _uri;
     }
     _status ??= globals.logger.startProgress(
-      'Waiting for a connection from $_isolateName on ${_device.name}...',
+      'Waiting for a connection from $_fuchsiaUrl on ${_device.name}...',
     );
     unawaited(_findIsolate());  // Completes the _foundUri Future.
     return _foundUri.future.then((Uri uri) {
@@ -815,37 +858,17 @@ class FuchsiaIsolateDiscoveryProtocol {
   }
 
   Future<void> _findIsolate() async {
-    final List<int> ports = await _device.servicePorts();
-    for (final int port in ports) {
-      FlutterVmService service;
-      if (_ports.containsKey(port)) {
-        service = _ports[port];
-      } else {
+    final Map<int, List<String>> portUrlsMap = await _device.servicePorts();
+    for (final int port in portUrlsMap.keys) {
+      if (portUrlsMap[port].contains(_fuchsiaUrl)){
         final int localPort = await _device.portForwarder.forward(port);
-        try {
-          final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
-          await _ddsStarter(_device, uri, true);
-          service = await _vmServiceConnector(_device.dds.uri);
-          _ports[port] = service;
-        } on SocketException catch (err) {
-          globals.printTrace('Failed to connect to $localPort: $err');
-          continue;
-        }
-      }
-      final List<FlutterView> flutterViews = await service.getFlutterViews();
-      for (final FlutterView flutterView in flutterViews) {
-        if (flutterView.uiIsolate == null) {
-          continue;
-        }
-        if (flutterView.uiIsolate.name.contains(_isolateName)) {
-          _foundUri.complete(_device.ipv6
-              ? Uri.parse('http://[$_ipv6Loopback]:${service.httpAddress.port}/')
-              : Uri.parse('http://$_ipv4Loopback:${service.httpAddress.port}/'));
-          _status.stop();
-          return;
-        }
+        final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
+        _foundUri.complete(uri);
+        _status.stop();
+        return;
       }
     }
+    globals.printTrace('No observatory with correct app component found yet.');
     if (_pollOnce) {
       _foundUri.completeError(Exception('Max iterations exceeded'));
       _status.stop();
