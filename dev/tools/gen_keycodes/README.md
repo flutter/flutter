@@ -78,24 +78,24 @@ The planes are planned as follows:
 
 - **Plane 0x01**: The unprintable plane. This plane contains keys that are defined
   by the [Chromium key list](https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_key_data.inc)
-  and do not generate Unicode characters.  The value is defined as the macro
+  and do not generate Unicode characters. The value is defined as the macro
   value defined by the Chromium key list. Examples are CapsLock (0x105),
   ArrowUp (0x304), F1 (0x801), Hiragata (0x716), and TVPower (0xD4B).
-  Some keys in the Chromium key list are not present in this plane, most notably
-  modifiers keys (such as Shift).  See the Flutter plane below for more
+  Some keys that exist in the Chromium key list are not present in Flutter in this plane, most notably
+  modifiers keys (such as Shift). See the Flutter plane below for more
   information.
 
 - **Plane 0x02**: The Flutter plane. This plane contains keys that are
-  defined by Flutter.  The values are also manually assigned by Flutter.
+  defined by Flutter. The values are also manually assigned by Flutter.
   Modifier keys are placed in this plane, because Flutter distinguishes
   between sided modifier keys (for example "ShiftLeft" and "ShiftRight"),
-  while Web doesn't (only has "Shift").
+  while the web doesn't (only has "Shift").
   Other examples are numpad keys and gamepad keys.
 
 - **Plane 0x03-0x0F**: Reserved.
 
-- **Plane 0x10-0x1F**: Platform planes managed by Flutter.  Each platform plane
-  corresponds to a Flutter embedding officially supported by Flutter.  The
+- **Plane 0x10-0x1F**: Platform planes managed by Flutter. Each platform plane
+  corresponds to a Flutter embedding officially supported by Flutter. The
   platforms are listed as follows:
 
   | Code | Platform |

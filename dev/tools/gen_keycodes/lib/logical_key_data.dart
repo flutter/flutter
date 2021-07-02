@@ -120,7 +120,7 @@ class LogicalKeyData {
   ///                Key        Enum       Value
   /// DOM_KEY_MAP("Accel",      ACCEL,    0x0101),
   ///
-  /// Flutter's supplemental_key_data.inc also has some new format.
+  /// Flutter's supplemental_key_data.inc also has some new formats.
   /// The following format uses a character as the 3rd argument.
   ///                Key        Enum       Character
   /// DOM_KEY_UNI("KeyB",      KEY_B,      'b'),
