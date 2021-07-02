@@ -2,89 +2,86 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io' as io;
-import 'dart:convert';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
-    as wip;
+import 'package:test_api/src/backend/runtime.dart';
 import 'package:yaml/yaml.dart';
 
+import 'browser.dart';
 import 'common.dart';
 import 'environment.dart';
 import 'safari_installation.dart';
 import 'utils.dart';
 
-/// [ScreenshotManager] implementation for Chrome.
-///
-/// This manager can be used for both macOS and Linux.
-// TODO: https://github.com/flutter/flutter/issues/65673
-class ChromeScreenshotManager extends ScreenshotManager {
-  String get filenameSuffix => '';
-
-  /// Capture a screenshot of the web content.
-  ///
-  /// Uses Webkit Inspection Protocol server's `captureScreenshot` API.
-  ///
-  /// [region] is used to decide which part of the web content will be used in
-  /// test image. It includes starting coordinate x,y as well as height and
-  /// width of the area to capture.
-  Future<Image> capture(Rectangle? region) async {
-    final wip.ChromeConnection chromeConnection =
-        wip.ChromeConnection('localhost', kDevtoolsPort);
-    final wip.ChromeTab? chromeTab = await chromeConnection.getTab(
-        (wip.ChromeTab chromeTab) => chromeTab.url.contains('localhost'));
-    if (chromeTab == null) {
-      throw StateError(
-        'Failed locate Chrome tab with the test page',
-      );
-    }
-    final wip.WipConnection wipConnection = await chromeTab.connect();
-
-    Map<String, dynamic>? captureScreenshotParameters = null;
-    if (region != null) {
-      captureScreenshotParameters = <String, dynamic>{
-        'format': 'png',
-        'clip': <String, dynamic>{
-          'x': region.left,
-          'y': region.top,
-          'width': region.width,
-          'height': region.height,
-          'scale':
-              // This is NOT the DPI of the page, instead it's the "zoom level".
-              1,
-        },
-      };
-    }
-
-    // Setting hardware-independent screen parameters:
-    // https://chromedevtools.github.io/devtools-protocol/tot/Emulation
-    await wipConnection
-        .sendCommand('Emulation.setDeviceMetricsOverride', <String, dynamic>{
-      'width': kMaxScreenshotWidth,
-      'height': kMaxScreenshotHeight,
-      'deviceScaleFactor': 1,
-      'mobile': false,
-    });
-    final wip.WipResponse response = await wipConnection.sendCommand(
-        'Page.captureScreenshot', captureScreenshotParameters);
-
-    final Image screenshot =
-        decodePng(base64.decode(response.result!['data'] as String))!;
-
-    return screenshot;
+/// Provides an environment for the mobile variant of Safari running in an iOS
+/// simulator.
+class SafariIosEnvironment implements BrowserEnvironment {
+  @override
+  Browser launchBrowserInstance(Uri url, {bool debug = false}) {
+    return SafariIos(url);
   }
+
+  @override
+  Runtime get packageTestRuntime => Runtime.safari;
+
+  @override
+  Future<void> prepareEnvironment() async {
+    await IosSafariArgParser.instance.initIosSimulator();
+  }
+
+  @override
+  ScreenshotManager? getScreenshotManager() {
+    return SafariIosScreenshotManager();
+  }
+
+  @override
+  String get packageTestConfigurationYamlFile => 'dart_test_safari.yaml';
+}
+
+/// Runs an instance of Safari for iOS (i.e. mobile Safari).
+///
+/// Most of the communication with the browser is expected to happen via HTTP,
+/// so this exposes a bare-bones API. The browser starts as soon as the class is
+/// constructed, and is killed when [close] is called.
+///
+/// Any errors starting or running the process are reported through [onExit].
+class SafariIos extends Browser {
+  @override
+  final name = 'Safari iOS';
+
+  /// Starts a new instance of Safari open to the given [url], which may be a
+  /// [Uri].
+  factory SafariIos(Uri url) {
+    return SafariIos._(() async {
+      // iOS-Safari
+      // Uses `xcrun simctl`. It is a command line utility to control the
+      // Simulator. For more details on interacting with the simulator:
+      // https://developer.apple.com/library/archive/documentation/IDEs/Conceptual/iOS_Simulator_Guide/InteractingwiththeiOSSimulator/InteractingwiththeiOSSimulator.html
+      var process = await io.Process.start('xcrun', [
+        'simctl',
+        'openurl', // Opens the url on Safari installed on the simulator.
+        'booted', // The simulator is already booted.
+        '${url.toString()}',
+      ]);
+
+      return process;
+    });
+  }
+
+  SafariIos._(Future<io.Process> startBrowser()) : super(startBrowser);
 }
 
 /// [ScreenshotManager] implementation for Safari.
 ///
 /// This manager will only be created/used for macOS.
-class IosSafariScreenshotManager extends ScreenshotManager {
+class SafariIosScreenshotManager extends ScreenshotManager {
   String get filenameSuffix => '.iOS_Safari';
 
-  IosSafariScreenshotManager() {
+  SafariIosScreenshotManager() {
     final YamlMap browserLock = BrowserLock.instance.configuration;
     _heightOfHeader = browserLock['ios-safari']['heightOfHeader'] as int;
     _heightOfFooter = browserLock['ios-safari']['heightOfFooter'] as int;
@@ -157,7 +154,7 @@ class IosSafariScreenshotManager extends ScreenshotManager {
   /// width of the area to capture.
   ///
   /// Uses simulator tool `xcrun simctl`'s 'screenshot' command.
-  Future<Image> capture(Rectangle? region) async {
+  Future<Image> capture(math.Rectangle? region) async {
     final String filename = 'screenshot${_fileNameCounter}.png';
     _fileNameCounter++;
 
@@ -189,7 +186,7 @@ class IosSafariScreenshotManager extends ScreenshotManager {
     if (region == null) {
       return content;
     } else {
-      final Rectangle scaledRegion = _scaleScreenshotRegion(region);
+      final math.Rectangle scaledRegion = _scaleScreenshotRegion(region);
       return copyCrop(
         content,
         scaledRegion.left.toInt(),
@@ -203,49 +200,12 @@ class IosSafariScreenshotManager extends ScreenshotManager {
   /// Perform a linear transform on the screenshot region to convert its
   /// dimensions from linear coordinated to coordinated on the phone screen.
   /// This uniform/isotropic scaling is done using [_scaleFactor].
-  Rectangle _scaleScreenshotRegion(Rectangle region) {
-    return Rectangle(
+  math.Rectangle _scaleScreenshotRegion(math.Rectangle region) {
+    return math.Rectangle(
       region.left * _scaleFactor,
       region.top * _scaleFactor,
       region.width * _scaleFactor,
       region.height * _scaleFactor,
     );
   }
-}
-
-const String _kBrowserChrome = 'chrome';
-const String _kBrowserIOSSafari = 'ios-safari';
-
-typedef ScreenshotManagerFactory = ScreenshotManager Function();
-
-/// Abstract class for taking screenshots in one of the browsers.
-abstract class ScreenshotManager {
-  static final Map<String, ScreenshotManagerFactory> _browserFactories =
-      <String, ScreenshotManagerFactory>{
-    _kBrowserChrome: () => ChromeScreenshotManager(),
-    _kBrowserIOSSafari: () => IosSafariScreenshotManager(),
-  };
-
-  static bool isBrowserSupported(String browser) =>
-      _browserFactories.containsKey(browser);
-
-  static ScreenshotManager choose(String browser) {
-    if (isBrowserSupported(browser)) {
-      return _browserFactories[browser]!();
-    }
-    throw StateError('Screenshot tests are only supported on Chrome and on '
-        'iOS Safari');
-  }
-
-  /// Capture a screenshot.
-  ///
-  /// Please read the details for the implementing classes.
-  Future<Image> capture(Rectangle region);
-
-  /// Suffix to be added to the end of the filename.
-  ///
-  /// Example file names:
-  /// - Chrome, no-suffix: backdrop_filter_clip_moved.actual.png
-  /// - iOS Safari: backdrop_filter_clip_moved.actual.iOS_Safari.png
-  String get filenameSuffix;
 }

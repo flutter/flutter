@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:pedantic/pedantic.dart';
 
 import 'package:path/path.dart' as path;
+import 'package:test_api/src/backend/runtime.dart';
 import 'package:test_core/src/util/io.dart';
 
 import 'browser.dart';
@@ -15,7 +16,29 @@ import 'common.dart';
 import 'environment.dart';
 import 'firefox_installer.dart';
 
-/// A class for running an instance of Firefox.
+/// Provides an environment for the desktop Firefox.
+class FirefoxEnvironment implements BrowserEnvironment {
+  @override
+  Browser launchBrowserInstance(Uri url, {bool debug = false}) {
+    return Firefox(url, debug: debug);
+  }
+
+  @override
+  Runtime get packageTestRuntime => Runtime.firefox;
+
+  @override
+  Future<void> prepareEnvironment() async {
+    // Firefox doesn't need any special prep.
+  }
+
+  @override
+  String get packageTestConfigurationYamlFile => 'dart_test_firefox.yaml';
+
+  @override
+  ScreenshotManager? getScreenshotManager() => null;
+}
+
+/// Runs desktop Firefox.
 ///
 /// Most of the communication with the browser is expected to happen via HTTP,
 /// so this exposes a bare-bones API. The browser starts as soon as the class is
