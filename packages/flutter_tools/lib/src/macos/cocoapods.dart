@@ -17,8 +17,8 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../ios/xcodeproj.dart';
-import '../project.dart';
 import '../reporting/reporting.dart';
+import '../xcode_project.dart';
 
 const String noCocoaPodsConsequence = '''
   CocoaPods is used to retrieve the iOS and macOS platform side's plugin code that responds to your plugin usage on the Dart side.

@@ -268,6 +268,115 @@ void main() {
     expect(getItemFadeTransition(), findsNothing);
   });
 
+  testWidgets('ReorderableList supports items with nested list views without throwing layout exception.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            // Ensure there is always a top padding to simulate a phone with
+            // safe area at the top. If the nested list doesn't have the
+            // padding removed before it is put into the overlay it will
+            // overflow the layout by the top padding.
+            data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 50)),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Nested Lists')),
+          body: ReorderableList(
+            itemCount: 10,
+            itemBuilder: (BuildContext context, int index) {
+              return ReorderableDragStartListener(
+                index: index,
+                key: ValueKey<int>(index),
+                child: Column(
+                  children: <Widget>[
+                    ListView(
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      children: const <Widget>[
+                        Text('Other data'),
+                        Text('Other data'),
+                        Text('Other data'),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+            onReorder: (int oldIndex, int newIndex) {},
+          ),
+        ),
+      ),
+    );
+
+    // Start gesture on first item
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const ValueKey<int>(0))));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough for move to start
+    await drag.moveBy(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // There shouldn't be a layout overflow exception.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('ReorderableList supports items with nested list views without throwing layout exception.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83224.
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            // Ensure there is always a top padding to simulate a phone with
+            // safe area at the top. If the nested list doesn't have the
+            // padding removed before it is put into the overlay it will
+            // overflow the layout by the top padding.
+            data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 50)),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Nested Lists')),
+          body: ReorderableList(
+            itemCount: 10,
+            itemBuilder: (BuildContext context, int index) {
+              return ReorderableDragStartListener(
+                index: index,
+                key: ValueKey<int>(index),
+                child: Column(
+                  children: <Widget>[
+                    ListView(
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      children: const <Widget>[
+                        Text('Other data'),
+                        Text('Other data'),
+                        Text('Other data'),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+            onReorder: (int oldIndex, int newIndex) {},
+          ),
+        ),
+      ),
+    );
+
+    // Start gesture on first item.
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const ValueKey<int>(0))));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // There shouldn't be a layout overflow exception.
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('SliverReorderableList - properly animates the drop at starting position in a reversed list', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84625
     final List<int> items = List<int>.generate(8, (int index) => index);

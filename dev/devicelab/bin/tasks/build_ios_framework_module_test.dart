@@ -132,13 +132,22 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   );
   checkFileExists(debugAppFrameworkPath);
 
+  checkFileExists(path.join(
+    outputPath,
+    'Debug',
+    'App.xcframework',
+    'ios-arm64_armv7',
+    'App.framework',
+    'Info.plist',
+  ));
+
   section('Check debug build has Dart snapshot as asset');
 
   checkFileExists(path.join(
     outputPath,
     'Debug',
     'App.xcframework',
-    'ios-x86_64-simulator',
+    'ios-arm64_x86_64-simulator',
     'App.framework',
     'flutter_assets',
     'vm_snapshot_data',
@@ -201,9 +210,18 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'App.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'App.framework',
       'App',
+    ));
+
+    checkFileExists(path.join(
+      outputPath,
+      mode,
+      'App.xcframework',
+      'ios-arm64_x86_64-simulator',
+      'App.framework',
+      'Info.plist',
     ));
   }
 
@@ -221,36 +239,24 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
     await _checkBitcode(engineFrameworkPath, mode);
 
-    // TODO(jmagman): Remove ios-x86_64-simulator checks when the ARM simulator engine artifacts rolls.
-    final String x86SimulatorFramework = path.join(
-      outputPath,
-      mode,
-      'Flutter.xcframework',
-      'ios-x86_64-simulator',
-      'Flutter.framework',
-    );
-
-    final String x86ArmSimulatorFramework = path.join(
+    checkFileExists(path.join(
       outputPath,
       mode,
       'Flutter.xcframework',
       'ios-arm64_x86_64-simulator',
       'Flutter.framework',
-    );
+      'Flutter',
+    ));
 
-    final bool x86SimulatorBinaryExists = exists(File(path.join(x86SimulatorFramework, 'Flutter')));
-    final bool x86ArmSimulatorBinaryExists = exists(File(path.join(x86ArmSimulatorFramework, 'Flutter')));
-
-    if (!x86SimulatorBinaryExists && !x86ArmSimulatorBinaryExists) {
-      throw TaskResult.failure('Expected Flutter engine artifact binary to exist');
-    }
-
-    final bool x86SimulatorHeaderExists = exists(File(path.join(x86SimulatorFramework, 'Headers', 'Flutter.h')));
-    final bool x86ArmSimulatorHeaderExists = exists(File(path.join(x86ArmSimulatorFramework, 'Headers', 'Flutter.h')));
-
-    if (!x86SimulatorHeaderExists && !x86ArmSimulatorHeaderExists) {
-      throw TaskResult.failure('Expected Flutter.h engine artifact to exist');
-    }
+    checkFileExists(path.join(
+      outputPath,
+      mode,
+      'Flutter.xcframework',
+      'ios-arm64_x86_64-simulator',
+      'Flutter.framework',
+      'Headers',
+      'Flutter.h',
+    ));
   }
 
   section('Check all modes have plugins');
@@ -306,7 +312,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'device_info.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'device_info.framework',
       'device_info',
     );
@@ -315,7 +321,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'device_info.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'device_info.framework',
       'Headers',
       'DeviceInfoPlugin.h',
@@ -362,7 +368,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'FlutterPluginRegistrant.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'FlutterPluginRegistrant.framework',
       'Headers',
       'GeneratedPluginRegistrant.h',

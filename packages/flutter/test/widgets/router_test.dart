@@ -1080,7 +1080,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     ));
 
     // Only update BackButtonListener widget.
-    setState((){
+    setState(() {
       location = 'second callback';
     });
 

@@ -12,6 +12,7 @@ import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
+import 'media_query.dart';
 import 'overlay.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
@@ -243,7 +244,7 @@ class ReorderableList extends StatefulWidget {
   static ReorderableListState of(BuildContext context) {
     assert(context != null);
     final ReorderableListState? result = context.findAncestorStateOfType<ReorderableListState>();
-    assert((){
+    assert(() {
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('ReorderableList.of() called with a context that does not contain a ReorderableList.'),
@@ -449,7 +450,7 @@ class SliverReorderableList extends StatefulWidget {
   static SliverReorderableListState of(BuildContext context) {
     assert(context != null);
     final SliverReorderableListState? result = context.findAncestorStateOfType<SliverReorderableListState>();
-    assert((){
+    assert(() {
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
@@ -1283,7 +1284,11 @@ class _DragItemProxy extends StatelessWidget {
     final Widget proxyChild = proxyDecorator?.call(child, index, animation.view) ?? child;
     final Offset overlayOrigin = _overlayOrigin(context);
 
-    return AnimatedBuilder(
+    return MediaQuery(
+      // Remove the top padding so that any nested list views in the item
+      // won't pick up the scaffold's padding in the overlay.
+      data: MediaQuery.of(context).removePadding(removeTop: true),
+      child: AnimatedBuilder(
         animation: animation,
         builder: (BuildContext context, Widget? child) {
           Offset effectivePosition = position;
@@ -1302,6 +1307,7 @@ class _DragItemProxy extends StatelessWidget {
           );
         },
         child: proxyChild,
+      ),
     );
   }
 }
