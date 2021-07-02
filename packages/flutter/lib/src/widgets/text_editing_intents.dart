@@ -274,3 +274,27 @@ class SelectAllTextIntent extends Intent{
   /// Creates an instance of SelectAllTextIntent.
   const SelectAllTextIntent();
 }
+
+/// An [Intent] to copy selection in the field.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class CopySelectionTextIntent extends Intent{
+  /// Creates an instance of CopyTextIntent.
+  const CopySelectionTextIntent();
+}
+
+/// An [Intent] to cut selection in the field.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class CutSelectionTextIntent extends Intent{
+  /// Creates an instance of CutTextIntent.
+  const CutSelectionTextIntent();
+}
+
+/// An [Intent] to paste text from [Clipboard] to the field.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class PasteTextIntent extends Intent{
+  /// Creates an instance of PasteTextIntent.
+  const PasteTextIntent();
+}

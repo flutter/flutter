@@ -119,7 +119,7 @@ import 'constants.dart';
 ///             ),
 ///           ),
 ///           body: TabBarView(
-///             children: tabs.map((Tab tab){
+///             children: tabs.map((Tab tab) {
 ///               return Center(
 ///                 child: Text(
 ///                   '${tab.text!} Tab',

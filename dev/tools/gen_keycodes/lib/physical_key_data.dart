@@ -364,7 +364,7 @@ class PhysicalKeyEntry {
   /// the name from the various different names available, making sure that the
   /// name isn't a Dart reserved word (if it is, then it adds the word "Key" to
   /// the end of the name).
-  late final String constantName = ((){
+  late final String constantName = (() {
     String? result;
     if (name.isEmpty) {
       // If it doesn't have a DomKey name then use the Chromium symbol name.
