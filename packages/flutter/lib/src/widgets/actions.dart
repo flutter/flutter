@@ -93,7 +93,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///
   /// If the enabled state changes, overriding subclasses must call
   /// [notifyActionListeners] to notify any listeners of the change.
-  bool isEnabled(covariant T intent) => true;
+  bool isEnabled(T intent) => true;
 
   /// Indicates whether this action should treat key events mapped to this
   /// action as being "handled" when it is invoked via the key event.
@@ -106,7 +106,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// widgets to receive the key event.
   ///
   /// The default implementation returns true.
-  bool consumesKey(covariant T intent) => true;
+  bool consumesKey(T intent) => true;
 
   /// Called when the action is to be performed.
   ///
@@ -143,8 +143,26 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// [Actions.invoke], or by invoking it using an [ActionDispatcher]. An action
   /// invoked via a [Shortcuts] widget will have its return value ignored.
   @protected
-  Object? invoke(covariant T intent);
+  Object? invoke(T intent);
 
+  /// Called when the action is invoked as the override of another [Action].
+  ///
+  /// An [Action] can "override" a different [Action] if they both handled the
+  /// same type of [Intent]. An overriding [Action] may wish to invoke the
+  /// [Action] it overrides at some point, similar to calling the super
+  /// implementation in a method override.
+  ///
+  /// The [fromAction] parameter represents the overridden [Action]. To invoke
+  /// the "super" implementation in this method, call `fromAction.invoke`.
+  ///
+  /// This method is typically invoked in the overridden action's [invoke] or
+  /// [invokeAsOverride] method, rather than directly by an [ActionDispatcher].
+  ///
+  /// See also the [makeOverridableAction] method, which can be used to create
+  /// an overridable [Action] that calls it override's [invokeAsOverride]
+  /// method.
+  @protected
+  Object? invokeAsOverride(T intent, Action<T> fromAction) => invoke(intent);
   /// Register a callback to listen for changes to the state of this action.
   ///
   /// If you call this, you must call [removeActionListener] a matching number
@@ -233,6 +251,23 @@ abstract class Action<T extends Intent> with Diagnosticable {
         ));
       }
     }
+  }
+
+  /// Creates an overridable [Action] that allows itself to be overridden by the
+  /// closest ancestor [Action] in the given [context], if it exists.
+  ///
+  /// When invoked, the resulting [Action] tries to find the closest enabled
+  /// [Action] in [context] that handles the same type of [Intent] as this
+  /// [Action], then calls its [Action.invokeAsOverride] method. When no
+  /// enabled override [Action]s can be found, the resulting action has the same
+  /// behavior as this [Action].
+  ///
+  /// This is useful for providing a set of default [Action]s in a leaf widget
+  /// that allows further overriding,
+  /// It can also be used to allow the [Intent] to propagate to parent widgets
+  /// that also support this [Intent].
+  Action<T> makeOverridableAction(BuildContext context) {
+    return _OverridableAction<T>(defaultAction: this, lookupContext: context);
   }
 }
 
@@ -447,7 +482,16 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// ```
   @protected
   @override
-  Object? invoke(covariant T intent, [BuildContext? context]);
+  Object? invoke(T intent, [BuildContext? context]);
+
+  @override
+  @protected
+  Object? invokeAsOverride(T intent, Action<T> fromAction, [BuildContext? context]) => invoke(intent, context);
+
+  @override
+  ContextAction<T> makeOverridableAction(BuildContext context) {
+    return _OverridableContextAction<T>(defaultAction: this, lookupContext: context);
+  }
 }
 
 /// The signature of a callback accepted by [CallbackAction].
@@ -870,6 +914,23 @@ class Actions extends StatefulWidget {
         context.dependOnInheritedElement(element);
         action = result;
         return true;
+      }
+      return false;
+    });
+
+    return action;
+  }
+
+  static Action<T>? _maybeFindEnabled<T extends Intent>(BuildContext context, T intent) {
+    Action<T>? action;
+    _visitActionsAncestors(context, (InheritedElement element) {
+      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
+      if (result != null) {
+        if (result.isEnabled(intent)) {
+          action = result;
+          return true;
+        }
       }
       return false;
     });
@@ -1680,5 +1741,138 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
     assert(_selectedAction != null);
     assert(_selectedIntent != null);
     _selectedAction.invoke(_selectedIntent);
+  }
+}
+
+mixin _OverridableActionMixin<T extends Intent> on Action<T> {
+  bool debugAssertMutuallyRecursive = false;
+
+  /// The default action to invoke if an enabled override Action can't be found
+  /// using [lookupContext];
+  Action<T> get defaultAction;
+
+  /// The [BuildContext] used to find the override of this [Action].
+  BuildContext get lookupContext;
+
+  // How to invoke [defaultAction], given the caller [fromAction].
+  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context);
+
+  Action<T>? overrideAction(T intent) {
+    final Action<T>? override = Actions._maybeFindEnabled(lookupContext, intent);
+    assert(!identical(override, this));
+    return override;
+  }
+
+  @override
+  Object? invoke(T intent, [BuildContext? context]) {
+    assert(!debugAssertMutuallyRecursive);
+    assert(() {
+      debugAssertMutuallyRecursive = true;
+      return true;
+    }());
+
+    final Action<T>? overrideAction = this.overrideAction(intent);
+    final Object? returnValue = overrideAction != null
+      ? overrideAction.invokeAsOverride(intent, CallbackAction<T>(
+          onInvoke: (T intent) => invokeDefaultAction(intent, null, context),
+        ))
+      : invokeDefaultAction(intent, null, context);
+
+    assert(() {
+      debugAssertMutuallyRecursive = false;
+      return true;
+    }());
+    return returnValue;
+  }
+
+  @override
+  Object? invokeAsOverride(T intent, Action<T> fromAction, [BuildContext? context]) {
+    assert(!debugAssertMutuallyRecursive);
+    assert(() {
+      debugAssertMutuallyRecursive = true;
+      return true;
+    }());
+
+    final Action<T>? overrideAction = this.overrideAction(intent);
+    final Object? returnValue = overrideAction != null
+      ? overrideAction.invokeAsOverride(intent, CallbackAction<T>(
+          onInvoke: (T intent) => invokeDefaultAction(intent, fromAction, context),
+        ))
+      : invokeDefaultAction(intent, fromAction, context);
+
+    assert(() {
+      debugAssertMutuallyRecursive = false;
+      return true;
+    }());
+    return returnValue;
+  }
+
+  @override
+  bool isEnabled(T intent) => defaultAction.isEnabled(intent);
+
+  @override
+  bool consumesKey(T intent) => defaultAction.isEnabled(intent);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Action<T>>('defaultAction', defaultAction));
+  }
+}
+
+class _OverridableAction<T extends Intent> extends Action<T> with _OverridableActionMixin<T> {
+  _OverridableAction({ required this.defaultAction, required this.lookupContext }) ;
+
+  @override
+  final Action<T> defaultAction;
+
+  @override
+  final BuildContext lookupContext;
+
+  @override
+  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context) {
+    final Action<T> defaultAction = this.defaultAction;
+    return fromAction == null
+      ? defaultAction.invoke(intent)
+      : defaultAction.invokeAsOverride(intent, fromAction);
+  }
+
+  @override
+  Action<T> makeOverridableAction(BuildContext context) {
+    assert((context as Element).depth < (lookupContext as Element).depth);
+    final Action<T> overridableAction = super.makeOverridableAction(context);
+    assert(!identical(defaultAction, overridableAction));
+    assert(!identical(this, overridableAction));
+    return overridableAction;
+  }
+}
+
+class _OverridableContextAction<T extends Intent> extends ContextAction<T> with _OverridableActionMixin<T> {
+  _OverridableContextAction({ required this.defaultAction, required this.lookupContext });
+
+  @override
+  final ContextAction<T> defaultAction;
+
+  @override
+  final BuildContext lookupContext;
+
+  @override
+  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context) {
+    assert(!debugAssertMutuallyRecursive);
+    final ContextAction<T> defaultAction = this.defaultAction;
+    final Object? returnValue = fromAction == null
+      ? defaultAction.invoke(intent, context)
+      : defaultAction.invokeAsOverride(intent, fromAction, context);
+    return returnValue;
+  }
+
+  @override
+  ContextAction<T> makeOverridableAction(BuildContext context) {
+    assert(context != lookupContext);
+    assert((context as Element).depth < (lookupContext as Element).depth);
+    final ContextAction<T> overridableAction = super.makeOverridableAction(context);
+    assert(!identical(defaultAction, overridableAction));
+    assert(!identical(this, overridableAction));
+    return overridableAction;
   }
 }

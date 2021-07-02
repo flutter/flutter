@@ -1025,6 +1025,314 @@ void main() {
       expect(description[1], equalsIgnoringHashCodes('actions: {TestIntent: TestAction#00000}'));
     });
   });
+
+  group('Action overriding', () {
+    final List<String> invocations = <String>[];
+    BuildContext? invokingContext;
+
+    tearDown(() {
+      invocations.clear();
+      invokingContext = null;
+    });
+
+    testWidgets('Basic usage', (WidgetTester tester) async {
+      late BuildContext invokingContext2;
+      late BuildContext invokingContext3;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context1) {
+            return Actions(
+              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              child: Builder(
+                builder: (BuildContext context2) {
+                  invokingContext2 = context2;
+                  return Actions(
+                    actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action2').makeOverridableAction(context2) },
+                    child: Builder(
+                      builder: (BuildContext context3) {
+                        invokingContext3 = context3;
+                        return Actions(
+                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          child: Builder(
+                            builder: (BuildContext context4) {
+                              invokingContext = context4;
+                              return const SizedBox();
+                            }
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+        ),
+      );
+
+      Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      expect(invocations, <String>[
+        'action1.invokeAsOverride-pre-super',
+        'action2.invokeAsOverride-pre-super',
+        'action3.invoke',
+        'action2.invokeAsOverride-post-super',
+        'action1.invokeAsOverride-post-super',
+      ]);
+
+      invocations.clear();
+      // Invoke from a different (higher) context.
+      Actions.invoke(invokingContext3, LogIntent(log: invocations));
+      expect(invocations, <String>[
+        'action1.invokeAsOverride-pre-super',
+        'action2.invoke',
+        'action1.invokeAsOverride-post-super',
+      ]);
+
+      invocations.clear();
+      // Invoke from a different (higher) context.
+      Actions.invoke(invokingContext2, LogIntent(log: invocations));
+      expect(invocations, <String>['action1.invoke']);
+    });
+
+    testWidgets('Does not break after use', (WidgetTester tester) async {
+      late BuildContext invokingContext2;
+      late BuildContext invokingContext3;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context1) {
+            return Actions(
+              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              child: Builder(
+                builder: (BuildContext context2) {
+                  invokingContext2 = context2;
+                  return Actions(
+                    actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action2').makeOverridableAction(context2) },
+                    child: Builder(
+                      builder: (BuildContext context3) {
+                        invokingContext3 = context3;
+                        return Actions(
+                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          child: Builder(
+                            builder: (BuildContext context4) {
+                              invokingContext = context4;
+                              return const SizedBox();
+                            }
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+        ),
+      );
+
+      // Invoke a bunch of times and verify it still produces the same result.
+      final List<BuildContext> randomContexts = <BuildContext>[
+        invokingContext!,
+        invokingContext2,
+        invokingContext!,
+        invokingContext3,
+        invokingContext3,
+        invokingContext3,
+        invokingContext2,
+      ];
+
+      for (final BuildContext randomContext in randomContexts) {
+        Actions.invoke(randomContext, LogIntent(log: invocations));
+      }
+
+      invocations.clear();
+      Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      expect(invocations, <String>[
+        'action1.invokeAsOverride-pre-super',
+        'action2.invokeAsOverride-pre-super',
+        'action3.invoke',
+        'action2.invokeAsOverride-post-super',
+        'action1.invokeAsOverride-post-super',
+      ]);
+    });
+
+    testWidgets('Does not override if not overridable', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context1) {
+            return Actions(
+              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              child: Builder(
+                builder: (BuildContext context2) {
+                  return Actions(
+                    actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action2') },
+                    child: Builder(
+                      builder: (BuildContext context3) {
+                        return Actions(
+                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          child: Builder(
+                            builder: (BuildContext context4) {
+                              invokingContext = context4;
+                              return const SizedBox();
+                            }
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+        ),
+      );
+
+      Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      expect(invocations, <String>[
+        'action2.invokeAsOverride-pre-super',
+        'action3.invoke',
+        'action2.invokeAsOverride-post-super',
+      ]);
+    });
+
+    testWidgets('Does not override if not enabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context1) {
+            return Actions(
+              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              child: Builder(
+                builder: (BuildContext context2) {
+                  return Actions(
+                    actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action2', enabled: false).makeOverridableAction(context2) },
+                    child: Builder(
+                      builder: (BuildContext context3) {
+                        return Actions(
+                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          child: Builder(
+                            builder: (BuildContext context4) {
+                              invokingContext = context4;
+                              return const SizedBox();
+                            }
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+        ),
+      );
+
+      Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      expect(invocations, <String>[
+        'action1.invokeAsOverride-pre-super',
+        // No action2 here.
+        'action3.invoke',
+        'action1.invokeAsOverride-post-super',
+      ]);
+    });
+
+    testWidgets('Throws on infinite recursions', (WidgetTester tester) async {
+      late StateSetter setState;
+      BuildContext? action2LookupContext;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context1) {
+            return Actions(
+              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              child: StatefulBuilder(
+                builder: (BuildContext context2, StateSetter stateSetter) {
+                  setState = stateSetter;
+                  return Actions(
+                    actions: <Type, Action<Intent>> {
+                      if (action2LookupContext != null) LogIntent : LogInvocationAction(actionName: 'action2').makeOverridableAction(action2LookupContext!)
+                    },
+                    child: Builder(
+                      builder: (BuildContext context3) {
+                        return Actions(
+                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          child: Builder(
+                            builder: (BuildContext context4) {
+                              invokingContext = context4;
+                              return const SizedBox();
+                            }
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+        ),
+      );
+
+      // Let action2 look up its override using a context below itself, so it
+      // will find action3 as its override.
+      expect(tester.takeException(), isNull);
+      setState(() {
+        action2LookupContext = invokingContext;
+      });
+
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      Object? exception;
+      try {
+        Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception?.toString(), contains('debugAssertMutuallyRecursive'));
+    });
+
+    testWidgets('Overriding Actions can change the intent', (WidgetTester tester) async {
+      final List<String> newLogChannel = <String>[];
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context1) {
+            return Actions(
+              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              child: Builder(
+                builder: (BuildContext context2) {
+                  return Actions(
+                    actions: <Type, Action<Intent>> { LogIntent : RedirectOutputAction(actionName: 'action2', newLog: newLogChannel).makeOverridableAction(context2) },
+                    child: Builder(
+                      builder: (BuildContext context3) {
+                        return Actions(
+                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          child: Builder(
+                            builder: (BuildContext context4) {
+                              invokingContext = context4;
+                              return const SizedBox();
+                            }
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+        ),
+      );
+
+      Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      expect(invocations, <String>[
+        'action1.invokeAsOverride-pre-super',
+        'action1.invokeAsOverride-post-super',
+      ]);
+      expect(newLogChannel, <String>[
+        'action2.invokeAsOverride-pre-super',
+        'action3.invoke',
+        'action2.invokeAsOverride-post-super',
+      ]);
+    });
+  });
 }
 
 class TestContextAction extends ContextAction<TestIntent> {
@@ -1034,5 +1342,58 @@ class TestContextAction extends ContextAction<TestIntent> {
   Object? invoke(covariant TestIntent intent, [BuildContext? context]) {
     capturedContexts.add(context);
     return null;
+  }
+}
+
+class LogIntent extends Intent {
+  const LogIntent({ required this.log });
+
+  final List<String> log;
+}
+
+class LogInvocationAction extends Action<LogIntent> {
+  LogInvocationAction({ required this.actionName, this.enabled = true });
+
+  final String actionName;
+
+  final bool enabled;
+
+  @override
+  bool isEnabled(LogIntent intent) => enabled;
+
+  @override
+  Object? invoke(LogIntent intent) {
+    intent.log.add('$actionName.invoke');
+  }
+
+  @override
+  Object? invokeAsOverride(LogIntent intent, Action<LogIntent> fromAction) {
+    intent.log.add('$actionName.invokeAsOverride-pre-super');
+    fromAction.invoke(intent);
+    intent.log.add('$actionName.invokeAsOverride-post-super');
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('actionName', actionName));
+  }
+}
+
+class RedirectOutputAction extends LogInvocationAction {
+  RedirectOutputAction({
+      required String actionName,
+      bool enabled = true,
+      required this.newLog,
+  }) : super(actionName: actionName, enabled: enabled);
+
+  final List<String> newLog;
+
+  @override
+  Object? invoke(LogIntent intent) => super.invoke(LogIntent(log: newLog));
+
+  @override
+  Object? invokeAsOverride(LogIntent intent, Action<LogIntent> fromAction) {
+    return super.invokeAsOverride(LogIntent(log: newLog), fromAction);
   }
 }
