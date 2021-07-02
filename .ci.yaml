@@ -281,6 +281,13 @@ targets:
   - name: Linux skp_generator
     builder: Linux skp_generator
     scheduler: luci
+    tags:
+      - key: shard
+        value: true
+      - key: hostonly
+        value: true
+      - key: framework
+        value: true
     runIf:
       - dev/
       - packages/flutter/
@@ -1611,6 +1618,9 @@ targets:
     builder: Linux animated_image_gc_perf
     presubmit: false
     scheduler: luci
+    tags:
+      - key: devicelab
+        value: true
 
   - name: Linux linux_chrome_dev_mode
     builder: Linux linux_chrome_dev_mode
@@ -2186,6 +2196,9 @@ targets:
     builder: Mac_ios integration_ui_ios_screenshot
     presubmit: false
     scheduler: luci
+    tags:
+      - key: devicelab
+        value: true
 
   - name: Mac_ios integration_ui_ios_textfield
     builder: Mac_ios integration_ui_ios_textfield
