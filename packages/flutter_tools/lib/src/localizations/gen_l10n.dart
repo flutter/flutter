@@ -251,13 +251,13 @@ String _generateSelectMethod(Message message, String translationForMessage) {
 
   final List<String> cases = <String>[];
 
-  final RegExp re = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\{.*\})+\}');
+  final RegExp selectRE = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\{.*\})+\}');
 
-  final RegExpMatch? match = re.firstMatch(translationForMessage);
+  final RegExpMatch? selectMatch = selectRE.firstMatch(translationForMessage);
   String? choice;
-  if (match != null && match.groupCount == 2) {
-    choice = match.group(1);
-    final String pattern = match.group(2)!;
+  if (selectMatch != null && selectMatch.groupCount == 2) {
+    choice = selectMatch.group(1);
+    final String pattern = selectMatch.group(2)!;
     final RegExp patternRE = RegExp(r'\s*([\w\d]+)\{(.*?)\}');
     for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
       if (patternMatch.groupCount == 2) {
