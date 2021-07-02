@@ -1911,6 +1911,73 @@ void main() {
     expect(controller.selection.extentOffset, 5);
   });
 
+  testWidgets("dragging caret within a word doesn't affect composing region", (WidgetTester tester) async {
+    const String testValue = 'abc def ghi';
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(
+        text: testValue,
+        selection: TextSelection(
+          baseOffset: 4,
+          extentOffset: 4,
+          affinity: TextAffinity.upstream,
+        ),
+        composing: TextRange(
+          start: 4,
+          end: 7,
+        ),
+      ),
+    );
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
+          controller: controller,
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.value.composing.start, 4);
+    expect(controller.value.composing.end, 7);
+
+    // Tap the caret to show the handle.
+    final Offset ePos = textOffsetToPosition(tester, 4);
+    await tester.tapAt(ePos);
+    await tester.pumpAndSettle();
+
+    final TextSelection selection = controller.selection;
+    expect(controller.selection.isCollapsed, true);
+    expect(selection.baseOffset, 4);
+    expect(controller.value.composing.start, 4);
+    expect(controller.value.composing.end, 7);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 1);
+
+    // Drag the right handle 2 letters to the right.
+    // We use a small offset because the endpoint is on the very corner
+    // of the handle.
+    final Offset handlePos = endpoints[0].point + const Offset(1.0, 1.0);
+    final Offset newHandlePos = textOffsetToPosition(tester, 7);
+    final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.value.composing.start, 4);
+    expect(controller.value.composing.end, 7);
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
   testWidgets('Can use selection toolbar', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
