@@ -56,6 +56,7 @@
 		6816DBA42318358200A51400 /* GoldenTestManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6816DBA32318358200A51400 /* GoldenTestManager.m */; };
 		68A5B63423EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 68A5B63323EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m */; };
 		68D4017D2564859300ECD91A /* ContinuousTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 68D4017C2564859300ECD91A /* ContinuousTexture.m */; };
+		F26F15B8268B6B5600EC54D3 /* iPadGestureTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F26F15B7268B6B5500EC54D3 /* iPadGestureTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -172,6 +173,7 @@
 		68A5B63323EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PlatformViewGestureRecognizerTests.m; sourceTree = "<group>"; };
 		68D4017B2564859300ECD91A /* ContinuousTexture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContinuousTexture.h; sourceTree = "<group>"; };
 		68D4017C2564859300ECD91A /* ContinuousTexture.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ContinuousTexture.m; sourceTree = "<group>"; };
+		F26F15B7268B6B5500EC54D3 /* iPadGestureTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = iPadGestureTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -295,6 +297,7 @@
 				246A6610252E693A00EAB0F3 /* RenderingSelectionTest.m */,
 				0DDEBC87258830B40065D0E8 /* SpawnEngineTest.h */,
 				0DDEBC88258830B40065D0E8 /* SpawnEngineTest.m */,
+				F26F15B7268B6B5500EC54D3 /* iPadGestureTests.m */,
 			);
 			path = ScenariosUITests;
 			sourceTree = "<group>";
@@ -490,6 +493,7 @@
 				6816DBA42318358200A51400 /* GoldenTestManager.m in Sources */,
 				248D76EF22E388380012F0C1 /* PlatformViewUITests.m in Sources */,
 				0D8470A4240F0B1F0030B565 /* StatusBarTest.m in Sources */,
+				F26F15B8268B6B5600EC54D3 /* iPadGestureTests.m in Sources */,
 				246A6611252E693A00EAB0F3 /* RenderingSelectionTest.m in Sources */,
 				4F06F1B32473296E000AF246 /* LocalizationInitializationTest.m in Sources */,
 				0A42BFB42447E179007E212E /* TextSemanticsFocusTest.m in Sources */,

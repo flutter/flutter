@@ -48,6 +48,7 @@ Map<String, ScenarioFactory> _scenarios = <String, ScenarioFactory>{
   'platform_view_with_continuous_texture': () => PlatformViewWithContinuousTexture(PlatformDispatcher.instance, 'Platform View', id: _viewId++),
   'bogus_font_text': () => BogusFontText(PlatformDispatcher.instance),
   'spawn_engine_works' : () => BogusFontText(PlatformDispatcher.instance),
+  'pointer_events': () => TouchesScenario(PlatformDispatcher.instance),
 };
 
 Map<String, dynamic> _currentScenarioParams = <String, dynamic>{};

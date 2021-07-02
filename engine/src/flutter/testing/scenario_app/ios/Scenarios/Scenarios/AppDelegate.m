@@ -57,6 +57,7 @@
     @"--platform-view-with-continuous-texture" : @"platform_view_with_continuous_texture",
     @"--bogus-font-text" : @"bogus_font_text",
     @"--spawn-engine-works" : @"spawn_engine_works",
+    @"--pointer-events" : @"pointer_events",
   };
   __block NSString* flutterViewControllerTestName = nil;
   [launchArgsMap
@@ -109,6 +110,7 @@
   FlutterEngine* engine = [self engineForTest:scenarioIdentifier];
   FlutterViewController* flutterViewController =
       [self flutterViewControllerForTest:scenarioIdentifier withEngine:engine];
+  flutterViewController.view.accessibilityIdentifier = @"flutter_view";
 
   [engine.binaryMessenger
       setMessageHandlerOnChannel:@"waiting_for_status"
