@@ -629,7 +629,9 @@ class FuchsiaDevice extends Device {
   bool _ipv6;
 
   /// [true] if the current host address is IPv6.
-  //  Strip interface name to avoid issues
+  //  Strip interface name to avoid issues in Dart's ipv6 parsing logic as it
+  //  currently does not allow an ipv6 address suffixed by an interface name
+  //  like [::1%qemu].
   bool get ipv6 => _ipv6 ??= isIPv6Address(strippedId);
 
   /// Return the address that the device should use to communicate with the
