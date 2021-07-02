@@ -22,6 +22,16 @@ Playground::Playground() = default;
 
 Playground::~Playground() = default;
 
+static void PlaygroundKeyCallback(GLFWwindow* window,
+                                  int key,
+                                  int scancode,
+                                  int action,
+                                  int mods) {
+  if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_RELEASE) {
+    ::glfwSetWindowShouldClose(window, GLFW_TRUE);
+  }
+}
+
 bool Playground::OpenPlaygroundHere(std::function<bool()> closure) {
   if (!closure) {
     return true;
@@ -44,6 +54,9 @@ bool Playground::OpenPlaygroundHere(std::function<bool()> closure) {
   if (!window) {
     return false;
   }
+
+  ::glfwSetWindowUserPointer(window, this);
+  ::glfwSetKeyCallback(window, &PlaygroundKeyCallback);
 
   fml::ScopedCleanupClosure close_window(
       [window]() { ::glfwDestroyWindow(window); });
