@@ -30,10 +30,13 @@
     [[self.application.statusBars firstMatch] tap];
   }
 
-  XCUIElement* addTextField = self.application.textFields[@"PointerChange.add"];
+  XCUIElement* addTextField = self.application.textFields[@"PointerChange.add:0"];
   BOOL exists = [addTextField waitForExistenceWithTimeout:1];
   XCTAssertTrue(exists, @"");
-  XCUIElement* upTextField = self.application.textFields[@"PointerChange.up"];
+  XCUIElement* downTextField = self.application.textFields[@"PointerChange.down:0"];
+  exists = [downTextField waitForExistenceWithTimeout:1];
+  XCTAssertTrue(exists, @"");
+  XCUIElement* upTextField = self.application.textFields[@"PointerChange.up:0"];
   exists = [upTextField waitForExistenceWithTimeout:1];
   XCTAssertTrue(exists, @"");
 }

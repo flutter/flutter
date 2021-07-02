@@ -814,7 +814,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 // in the status bar area are available to framework code. The change type (optional) of the faked
 // touch is specified in the second argument.
 - (void)dispatchTouches:(NSSet*)touches
-    pointerDataChangeOverride:(flutter::PointerData::Change*)overridden_change {
+    pointerDataChangeOverride:(flutter::PointerData::Change*)overridden_change
+                        event:(UIEvent*)event {
   if (!_engine) {
     return;
   }
@@ -925,6 +926,17 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       pointer_data.orientation = [touch azimuthAngleInView:nil] - M_PI_2;
     }
 
+    if (@available(iOS 13.4, *)) {
+      if (event != nullptr) {
+        pointer_data.buttons = (((event.buttonMask & UIEventButtonMaskPrimary) > 0)
+                                    ? flutter::PointerButtonMouse::kPointerButtonMousePrimary
+                                    : 0) |
+                               (((event.buttonMask & UIEventButtonMaskSecondary) > 0)
+                                    ? flutter::PointerButtonMouse::kPointerButtonMouseSecondary
+                                    : 0);
+      }
+    }
+
     packet->SetPointerData(pointer_index++, pointer_data);
   }
 
@@ -932,24 +944,24 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-  [self dispatchTouches:touches pointerDataChangeOverride:nullptr];
+  [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
-  [self dispatchTouches:touches pointerDataChangeOverride:nullptr];
+  [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-  [self dispatchTouches:touches pointerDataChangeOverride:nullptr];
+  [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-  [self dispatchTouches:touches pointerDataChangeOverride:nullptr];
+  [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)forceTouchesCancelled:(NSSet*)touches {
   flutter::PointerData::Change cancel = flutter::PointerData::Change::kCancel;
-  [self dispatchTouches:touches pointerDataChangeOverride:&cancel];
+  [self dispatchTouches:touches pointerDataChangeOverride:&cancel event:nullptr];
 }
 
 #pragma mark - Handle view resizing
