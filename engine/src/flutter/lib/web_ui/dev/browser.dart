@@ -5,10 +5,49 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
+import 'package:image/image.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:stack_trace/stack_trace.dart';
+import 'package:test_api/src/backend/runtime.dart';
 import 'package:typed_data/typed_buffers.dart';
+
+/// Provides the environment for a specific web browser.
+abstract class BrowserEnvironment {
+  /// The [Runtime] used by `package:test` to identify this browser type.
+  Runtime get packageTestRuntime;
+
+  /// The name of the configuration YAML file used to configure `package:test`.
+  ///
+  /// The configuration file is expected to be a direct child of the `web_ui`
+  /// directory.
+  String get packageTestConfigurationYamlFile;
+
+  /// Prepares the OS environment to run tests for this browser.
+  ///
+  /// This may include things like staring web drivers, iOS Simulators, and/or
+  /// Android emulators.
+  ///
+  /// Typically the browser environment is prepared once and supports multiple
+  /// browser instances.
+  Future<void> prepareEnvironment();
+
+  /// Launches a browser instance.
+  ///
+  /// The browser will be directed to open the provided [url].
+  ///
+  /// If [debug] is true and the browser supports debugging, launches the
+  /// browser in debug mode by pausing test execution after the code is loaded
+  /// but before calling the `main()` function of the test, giving the
+  /// developer a chance to set breakpoints.
+  Browser launchBrowserInstance(Uri url, {bool debug = false});
+
+  /// Returns the screenshot manager used by this browser.
+  ///
+  /// If the browser does not support screenshots, returns null.
+  ScreenshotManager? getScreenshotManager();
+}
 
 /// An interface for running browser instances.
 ///
@@ -146,4 +185,19 @@ abstract class Browser {
     // Swallow exceptions. The user should explicitly use [onExit] for these.
     return onExit.catchError((dynamic _) {});
   }
+}
+
+/// Interface for capturing screenshots from a browser.
+abstract class ScreenshotManager {
+  /// Capture a screenshot.
+  ///
+  /// Please read the details for the implementing classes.
+  Future<Image> capture(math.Rectangle region);
+
+  /// Suffix to be added to the end of the filename.
+  ///
+  /// Example file names:
+  /// - Chrome, no-suffix: backdrop_filter_clip_moved.actual.png
+  /// - iOS Safari: backdrop_filter_clip_moved.iOS_Safari.actual.png
+  String get filenameSuffix;
 }

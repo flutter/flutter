@@ -5,15 +5,44 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
+import 'package:image/image.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:test_api/src/backend/runtime.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
+    as wip;
 
 import 'browser.dart';
 import 'chrome_installer.dart';
 import 'common.dart';
 import 'environment.dart';
 
-/// A class for running an instance of Chrome.
+/// Provides an environment for desktop Chrome.
+class ChromeEnvironment implements BrowserEnvironment {
+  @override
+  Browser launchBrowserInstance(Uri url, {bool debug = false}) {
+    return Chrome(url, debug: debug);
+  }
+
+  @override
+  Runtime get packageTestRuntime => Runtime.chrome;
+
+  @override
+  Future<void> prepareEnvironment() async {
+    // Chrome doesn't need any special prep.
+  }
+
+  @override
+  ScreenshotManager? getScreenshotManager() {
+    return ChromeScreenshotManager();
+  }
+
+  @override
+  String get packageTestConfigurationYamlFile => 'dart_test_chrome.yaml';
+}
+
+/// Runs desktop Chrome.
 ///
 /// Most of the communication with the browser is expected to happen via HTTP,
 /// so this exposes a bare-bones API. The browser starts as soon as the class is
@@ -172,5 +201,66 @@ Future<Uri> getRemoteDebuggerUrl(Uri base) async {
     // If we fail to talk to the remote debugger protocol, give up and return
     // the raw URL rather than crashing.
     return base;
+  }
+}
+
+/// [ScreenshotManager] implementation for Chrome.
+///
+/// This manager can be used for both macOS and Linux.
+// TODO: https://github.com/flutter/flutter/issues/65673
+class ChromeScreenshotManager extends ScreenshotManager {
+  String get filenameSuffix => '';
+
+  /// Capture a screenshot of the web content.
+  ///
+  /// Uses Webkit Inspection Protocol server's `captureScreenshot` API.
+  ///
+  /// [region] is used to decide which part of the web content will be used in
+  /// test image. It includes starting coordinate x,y as well as height and
+  /// width of the area to capture.
+  Future<Image> capture(math.Rectangle? region) async {
+    final wip.ChromeConnection chromeConnection =
+        wip.ChromeConnection('localhost', kDevtoolsPort);
+    final wip.ChromeTab? chromeTab = await chromeConnection.getTab(
+        (wip.ChromeTab chromeTab) => chromeTab.url.contains('localhost'));
+    if (chromeTab == null) {
+      throw StateError(
+        'Failed locate Chrome tab with the test page',
+      );
+    }
+    final wip.WipConnection wipConnection = await chromeTab.connect();
+
+    Map<String, dynamic>? captureScreenshotParameters = null;
+    if (region != null) {
+      captureScreenshotParameters = <String, dynamic>{
+        'format': 'png',
+        'clip': <String, dynamic>{
+          'x': region.left,
+          'y': region.top,
+          'width': region.width,
+          'height': region.height,
+          'scale':
+              // This is NOT the DPI of the page, instead it's the "zoom level".
+              1,
+        },
+      };
+    }
+
+    // Setting hardware-independent screen parameters:
+    // https://chromedevtools.github.io/devtools-protocol/tot/Emulation
+    await wipConnection
+        .sendCommand('Emulation.setDeviceMetricsOverride', <String, dynamic>{
+      'width': kMaxScreenshotWidth,
+      'height': kMaxScreenshotHeight,
+      'deviceScaleFactor': 1,
+      'mobile': false,
+    });
+    final wip.WipResponse response = await wipConnection.sendCommand(
+        'Page.captureScreenshot', captureScreenshotParameters);
+
+    final Image screenshot =
+        decodePng(base64.decode(response.result!['data'] as String))!;
+
+    return screenshot;
   }
 }

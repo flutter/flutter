@@ -28,13 +28,21 @@ import 'package:test_core/src/executable.dart'
     as test;
 import 'package:web_test_utils/goldens.dart';
 
+import 'browser.dart';
+import 'chrome.dart';
+import 'chrome_installer.dart';
 import 'common.dart';
+import 'edge.dart';
+import 'edge_installation.dart';
 import 'environment.dart';
 import 'exceptions.dart';
+import 'firefox.dart';
+import 'firefox_installer.dart';
 import 'integration_tests_manager.dart';
 import 'macos_info.dart';
 import 'safari_installation.dart';
-import 'supported_browsers.dart';
+import 'safari_ios.dart';
+import 'safari_macos.dart';
 import 'test_platform.dart';
 import 'utils.dart';
 import 'watcher.dart';
@@ -62,6 +70,29 @@ enum TestTypesRequested {
   all,
 }
 
+/// Command-line argument parsers that parse browser-specific options.
+final List<BrowserArgParser> _browserArgParsers  = <BrowserArgParser>[
+  ChromeArgParser.instance,
+  EdgeArgParser.instance,
+  FirefoxArgParser.instance,
+  SafariArgParser.instance,
+];
+
+/// Creates an environment for a browser.
+///
+/// The [browserName] matches the browser name passed as the `--browser` option.
+BrowserEnvironment _createBrowserEnvironment(String browserName) {
+  switch (browserName) {
+    case 'chrome': return ChromeEnvironment();
+    case 'edge': return EdgeEnvironment();
+    case 'firefox': return FirefoxEnvironment();
+    case 'safari': return SafariMacOsEnvironment();
+    case 'ios-safari': return SafariIosEnvironment();
+  }
+  throw UnsupportedError('Browser $browserName is not supported.');
+}
+
+/// Runs tests.
 class TestCommand extends Command<bool> with ArgUtils {
   TestCommand() {
     argParser
@@ -113,12 +144,11 @@ class TestCommand extends Command<bool> with ArgUtils {
             'for example, when a new browser version affects pixels.',
       )
       ..addFlag(
-        'fetch-goldens-repo',
-        defaultsTo: true,
-        negatable: true,
-        help: 'Whether to fetch the goldens repo. Set this to false to iterate '
-            'on golden tests without fearing that the fetcher will overwrite '
-            'your local changes.',
+        'skip-goldens-repo-fetch',
+        defaultsTo: false,
+        help: 'If set reuses the existig flutter/goldens repo clone. Use this '
+            'to avoid overwriting local changes when iterating on golden '
+            'tests. This is off by default.',
       )
       ..addOption(
         'browser',
@@ -136,8 +166,9 @@ class TestCommand extends Command<bool> with ArgUtils {
               'finish.',
       );
 
-    SupportedBrowsers.instance.argParsers
-        .forEach((t) => t.populateOptions(argParser));
+    for (BrowserArgParser browserArgParser in _browserArgParsers) {
+      browserArgParser.populateOptions(argParser);
+    }
     GeneralTestsArgumentParser.instance.populateOptions(argParser);
     IntegrationTestsArgumentParser.instance.populateOptions(argParser);
   }
@@ -183,8 +214,9 @@ class TestCommand extends Command<bool> with ArgUtils {
 
   @override
   Future<bool> run() async {
-    SupportedBrowsers.instance
-      ..argParsers.forEach((t) => t.parseOptions(argResults!));
+    for (BrowserArgParser browserArgParser in _browserArgParsers) {
+      browserArgParser.parseOptions(argResults!);
+    }
     GeneralTestsArgumentParser.instance.parseOptions(argResults!);
 
     /// Collect information on the bot.
@@ -310,7 +342,7 @@ class TestCommand extends Command<bool> with ArgUtils {
     environment.webUiTestResultsDirectory.createSync(recursive: true);
 
     // If screenshot tests are available, fetch the screenshot goldens.
-    if (isScreenshotTestsAvailable && doFetchGoldensRepo) {
+    if (isScreenshotTestsAvailable && !skipGoldensRepoFetch) {
       if (isVerboseLoggingEnabled) {
         print('INFO: Fetching goldens repo');
       }
@@ -320,11 +352,7 @@ class TestCommand extends Command<bool> with ArgUtils {
       await goldensRepoFetcher.fetch();
     }
 
-    // In order to run iOS Safari unit tests we need to make sure iOS Simulator
-    // is booted.
-    if (isSafariIOS) {
-      await IosSafariArgParser.instance.initIosSimulator();
-    }
+    await browserEnvironment.prepareEnvironment();
     _testPreparationReady = true;
   }
 
@@ -391,6 +419,10 @@ class TestCommand extends Command<bool> with ArgUtils {
   /// The name of the browser to run tests in.
   String get browser => stringArg('browser')!;
 
+  /// The browser environment for the [browser].
+  BrowserEnvironment get browserEnvironment => (_browserEnvironment ??= _createBrowserEnvironment(browser));
+  BrowserEnvironment? _browserEnvironment;
+
   /// Whether [browser] is set to "chrome".
   bool get isChrome => browser == 'chrome';
 
@@ -455,7 +487,7 @@ class TestCommand extends Command<bool> with ArgUtils {
   bool get doUpdateScreenshotGoldens => boolArg('update-screenshot-goldens')!;
 
   /// Whether to fetch the goldens repo prior to running tests.
-  bool get doFetchGoldensRepo => boolArg('fetch-goldens-repo')!;
+  bool get skipGoldensRepoFetch => boolArg('skip-goldens-repo-fetch')!;
 
   /// Runs all tests specified in [targets].
   ///
@@ -692,6 +724,10 @@ class TestCommand extends Command<bool> with ArgUtils {
     required int concurrency,
     required bool expectFailure,
   }) async {
+    final String configurationFilePath = path.join(
+      environment.webUiRootDir.path,
+      browserEnvironment.packageTestConfigurationYamlFile,
+    );
     final List<String> testArgs = <String>[
       ...<String>['-r', 'compact'],
       '--concurrency=$concurrency',
@@ -699,9 +735,9 @@ class TestCommand extends Command<bool> with ArgUtils {
       // Don't pollute logs with output from tests that are expected to fail.
       if (expectFailure)
         '--reporter=name-only',
-      '--platform=${SupportedBrowsers.instance.supportedBrowserToPlatform[browser]}',
+      '--platform=${browserEnvironment.packageTestRuntime.identifier}',
       '--precompiled=${environment.webUiBuildDir.path}',
-      SupportedBrowsers.instance.browserToConfiguration[browser]!,
+      '--configuration=$configurationFilePath',
       '--',
       ...testFiles.map((f) => f.relativeToWebUi).toList(),
     ];
@@ -716,10 +752,10 @@ class TestCommand extends Command<bool> with ArgUtils {
     }
 
     hack.registerPlatformPlugin(<Runtime>[
-      SupportedBrowsers.instance.supportedBrowsersToRuntimes[browser]!
+      browserEnvironment.packageTestRuntime,
     ], () {
       return BrowserPlatform.start(
-        browserName: browser,
+        browserEnvironment: browserEnvironment,
         // It doesn't make sense to update a screenshot for a test that is
         // expected to fail.
         doUpdateScreenshotGoldens: !expectFailure && doUpdateScreenshotGoldens,

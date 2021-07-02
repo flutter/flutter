@@ -39,26 +39,22 @@ import 'package:test_core/src/runner/configuration.dart';
 import 'browser.dart';
 import 'common.dart';
 import 'environment.dart' as env;
-import 'screenshot_manager.dart';
-import 'supported_browsers.dart';
 
 /// Custom test platform that serves web engine unit tests.
 class BrowserPlatform extends PlatformPlugin {
   /// Starts the server.
   ///
-  /// [browserName] is the name of the browser that's used to run the test. It
-  /// must be supported by [SupportedBrowsers].
+  /// [browserEnvironment] provides the browser environment to run the test.
   ///
   /// If [doUpdateScreenshotGoldens] is true updates screenshot golden files
   /// instead of failing the test on screenshot mismatches.
   static Future<BrowserPlatform> start({
-    required String browserName,
+    required BrowserEnvironment browserEnvironment,
     required bool doUpdateScreenshotGoldens,
   }) async {
-    assert(SupportedBrowsers.instance.supportedBrowserNames.contains(browserName));
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     return BrowserPlatform._(
-      browserName: browserName,
+      browserEnvironment: browserEnvironment,
       server: server,
       isDebug: Configuration.current.pauseAfterLoad,
       faviconPath: p.fromUri(await Isolate.resolvePackageUri(
@@ -76,8 +72,8 @@ class BrowserPlatform extends PlatformPlugin {
   /// The underlying server.
   final shelf.Server server;
 
-  /// Name for the running browser. Not final on purpose can be mutated later.
-  String browserName;
+  /// Provides the environment for the browser running tests.
+  final BrowserEnvironment browserEnvironment;
 
   /// The URL for this server.
   Uri get url => server.url.resolve('/');
@@ -105,7 +101,7 @@ class BrowserPlatform extends PlatformPlugin {
   final PackageConfig packageConfig;
 
   BrowserPlatform._({
-    required this.browserName,
+    required this.browserEnvironment,
     required this.server,
     required this.isDebug,
     required String faviconPath,
@@ -154,10 +150,9 @@ class BrowserPlatform extends PlatformPlugin {
         // This handler goes last, after all more specific handlers failed to handle the request.
         .add(_createAbsolutePackageUrlHandler());
 
-    // Screenshot tests are only enabled in Chrome and Safari iOS for now.
-    if (browserName == 'chrome' || browserName == 'ios-safari') {
+    _screenshotManager = browserEnvironment.getScreenshotManager();
+    if (_screenshotManager != null) {
       cascade = cascade.add(_screeshotHandler);
-      _screenshotManager = ScreenshotManager.choose(browserName);
     }
 
     server.mount(cascade.handler);
@@ -238,11 +233,6 @@ class BrowserPlatform extends PlatformPlugin {
   }
 
   Future<shelf.Response> _screeshotHandler(shelf.Request request) async {
-    if (browserName != 'chrome' && browserName != 'ios-safari') {
-      throw Exception('Screenshots tests are only available in Chrome '
-          'and in Safari-iOS.');
-    }
-
     if (!request.requestedUri.path.endsWith('/screenshot')) {
       return shelf.Response.notFound(
           'This request is not handled by the screenshot handler');
@@ -370,7 +360,7 @@ class BrowserPlatform extends PlatformPlugin {
         p.toUri(p.withoutExtension(p.relative(path, from: env.environment.webUiBuildDir.path)) + '.html'));
     _checkNotClosed();
 
-    final BrowserManager? browserManager = await _browserManagerFor(browser);
+    final BrowserManager? browserManager = await _startBrowserManager();
     if (browserManager == null) {
       throw StateError('Failed to initialize browser manager for ${browser.name}');
     }
@@ -386,10 +376,10 @@ class BrowserPlatform extends PlatformPlugin {
 
   Future<BrowserManager?>? _browserManager;
 
-  /// Returns the [BrowserManager] for [runtime], which should be a browser.
+  /// Starts a browser manager for the browser provided by [browserEnvironment];
   ///
   /// If no browser manager is running yet, starts one.
-  Future<BrowserManager?> _browserManagerFor(Runtime browser) {
+  Future<BrowserManager?> _startBrowserManager() {
     if (_browserManager != null) {
       return _browserManager!;
     }
@@ -405,7 +395,7 @@ class BrowserPlatform extends PlatformPlugin {
     });
 
     final Future<BrowserManager?> future = BrowserManager.start(
-      runtime: browser,
+      browserEnvironment: browserEnvironment,
       url: hostUrl,
       future: completer.future,
       packageConfig: packageConfig,
@@ -495,7 +485,7 @@ class OneOffHandler {
   }
 }
 
-/// A class that manages the connection to a single running browser.
+/// Manages the connection to a single running browser.
 ///
 /// This is in charge of telling the browser which test suites to load and
 /// converting its responses into [Suite] objects.
@@ -505,8 +495,8 @@ class BrowserManager {
   /// The browser instance that this is connected to via [_channel].
   final Browser _browser;
 
-  /// The [Runtime] for [_browser].
-  final Runtime _runtime;
+  /// The browser environment for this test.
+  final BrowserEnvironment _browserEnvironment;
 
   /// The channel used to communicate with the browser.
   ///
@@ -567,13 +557,13 @@ class BrowserManager {
   /// Returns the browser manager, or throws an [Exception] if a
   /// connection fails to be established.
   static Future<BrowserManager?> start({
-    required Runtime runtime,
+    required BrowserEnvironment browserEnvironment,
     required Uri url,
     required Future<WebSocketChannel> future,
     required PackageConfig packageConfig,
     bool debug = false,
   }) {
-    var browser = _newBrowser(url, runtime, debug: debug);
+    var browser = _newBrowser(url, browserEnvironment, debug: debug);
 
     var completer = Completer<BrowserManager>();
 
@@ -593,7 +583,7 @@ class BrowserManager {
       if (completer.isCompleted) {
         return;
       }
-      completer.complete(BrowserManager._(packageConfig, browser, runtime, webSocket));
+      completer.complete(BrowserManager._(packageConfig, browser, browserEnvironment, webSocket));
     }).catchError((Object error, StackTrace stackTrace) {
       browser.close();
       if (completer.isCompleted) {
@@ -605,16 +595,16 @@ class BrowserManager {
     return completer.future;
   }
 
-  /// Starts the browser identified by [browser] using [settings] and has it load [url].
+  /// Starts the browser and requests that it load the test page at [url].
   ///
   /// If [debug] is true, starts the browser in debug mode.
-  static Browser _newBrowser(Uri url, Runtime browser, {bool debug = false}) {
-    return SupportedBrowsers.instance.getBrowser(browser, url, debug: debug);
+  static Browser _newBrowser(Uri url, BrowserEnvironment browserEnvironment, {bool debug = false}) {
+    return browserEnvironment.launchBrowserInstance(url, debug: debug);
   }
 
-  /// Creates a new BrowserManager that communicates with [browser] over
+  /// Creates a new BrowserManager that communicates with the browser over
   /// [webSocket].
-  BrowserManager._(this.packageConfig, this._browser, this._runtime, WebSocketChannel webSocket) {
+  BrowserManager._(this.packageConfig, this._browser, this._browserEnvironment, WebSocketChannel webSocket) {
     // The duration should be short enough that the debugging console is open as
     // soon as the user is done setting breakpoints, but long enough that a test
     // doing a lot of synchronous work doesn't trigger a false positive.
@@ -665,7 +655,7 @@ class BrowserManager {
     url = url.replace(
         fragment: Uri.encodeFull(jsonEncode(<String, dynamic>{
       'metadata': suiteConfig.metadata.serialize(),
-      'browser': _runtime.identifier
+      'browser': _browserEnvironment.packageTestRuntime.identifier
     })));
 
     var suiteID = _suiteID++;
@@ -697,7 +687,7 @@ class BrowserManager {
       });
 
       try {
-        controller = deserializeSuite(path, currentPlatform(_runtime),
+        controller = deserializeSuite(path, currentPlatform(_browserEnvironment.packageTestRuntime),
             suiteConfig, await _environment, suiteChannel, message);
 
         final String sourceMapFileName =
