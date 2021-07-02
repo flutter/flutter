@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/fuchsia/amber_ctl.dart';
@@ -361,6 +362,9 @@ void main() {
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       OperatingSystemUtils: () => osUtils,
+      Platform: () => FakePlatform(
+        operatingSystem: 'linux',
+      ),
     });
 
     testUsingContext('fail with correct LaunchResult when pm fails', () async {
