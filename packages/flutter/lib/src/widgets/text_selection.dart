@@ -835,7 +835,7 @@ class _TextSelectionHandleOverlayState
     );
 
     final Size handleSize = widget.selectionControls.getHandleSize(
-      rightHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+      widget.renderObject.preferredLineHeight,
     );
 
     final Rect handleRect = Rect.fromLTWH(
