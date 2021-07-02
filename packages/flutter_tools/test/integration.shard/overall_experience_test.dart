@@ -442,21 +442,10 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: Platform.isWindows); // TODO(jonahwilliams): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81556
+  });
 
   testWithoutContext('flutter error messages include a DevTools link', () async {
     final String testDirectory = fileSystem.path.join(flutterRoot, 'dev', 'integration_tests', 'ui');
-
-    // Ensure that DevTools is activated.
-    final ProcessResult pubResult = await processManager.run(<String>[
-      fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
-      'pub', 'global', 'activate', 'devtools', '2.4.0',
-    ], workingDirectory: testDirectory).timeout(const Duration(seconds: 20));
-    if (pubResult.exitCode != 0) {
-      print('Unable to activate devtools:\n${pubResult.stderr}');
-    }
-    expect(pubResult.exitCode, 0);
-
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String testScript = fileSystem.path.join('lib', 'overflow.dart');
     try {
@@ -520,16 +509,16 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: Platform.isWindows); // TODO(goderbauer): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81486
+  });
 
   testWithoutContext('flutter run help output', () async {
     // This test enables all logging so that it checks the exact text of starting up an application.
     // The idea is to verify that we're not outputting spurious messages.
     // WHEN EDITING THIS TEST PLEASE CAREFULLY CONSIDER WHETHER THE NEW OUTPUT IS AN IMPROVEMENT.
     final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
-    final RegExp finalLine = RegExp(r'^An Observatory'); /* RegExp(r'^The Flutter DevTools'); */ // TODO(ianh): use this when enabling devtools
+    final RegExp finalLine = RegExp(r'^The Flutter DevTools');
     final ProcessTestResult result = await runFlutter(
-      <String>['run', '-dflutter-tester', '--no-devtools'], // TODO(ianh): enable devtools
+      <String>['run', '-dflutter-tester'],
       testDirectory,
       <Transition>[
         Barrier(finalLine, handler: (String line) {
@@ -558,7 +547,7 @@ void main() {
       contains('Running with sound null safety'),
       '',
       startsWith('An Observatory debugger and profiler on Flutter test device is available at: http://'),
-      /* startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'), */ // TODO(ianh): enable devtools
+      startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
       '',
       'Flutter run key commands.',
       startsWith('r Hot reload.'),
@@ -587,7 +576,7 @@ void main() {
       contains('Running with sound null safety'),
       '',
       startsWith('An Observatory debugger and profiler on Flutter test device is available at: http://'),
-      /* startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'), */ // TODO(ianh): enable devtools
+      startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
       '',
       'Application finished.',
     ]);

@@ -302,6 +302,20 @@ Future<void> _runIntegrationToolTests() async {
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
 
+  // Make sure devtools is ready first, because that might take a while and we don't
+  // want any of the tests to time out while they themselves try to activate devtools.
+  final Map<String, String> pubEnvironment = <String, String>{
+    'FLUTTER_ROOT': flutterRoot,
+  };
+  if (Directory(pubCache).existsSync()) {
+    pubEnvironment['PUB_CACHE'] = pubCache;
+  }
+  await runCommand(
+    pub,
+    <String>['global', 'activate', 'devtools'],
+    environment: pubEnvironment,
+  );
+
   await _pubRunTest(
     toolsPath,
     forceSingleCore: true,
@@ -1472,6 +1486,10 @@ Future<void> _pubRunTest(String workingDirectory, {
     // We need to force it to be regenerated with them enabled.
     deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
     deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
+    // We rerun the `flutter` tool here just to make sure that it is compiled
+    // before tests run, because the tests might time out if they have to rebuild
+    // the tool themselves.
+    await runCommand(flutter, <String>['--version'], environment: pubEnvironment);
   }
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
