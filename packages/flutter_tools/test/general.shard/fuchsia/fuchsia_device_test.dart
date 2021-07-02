@@ -810,6 +810,9 @@ void main() {
           ffx: artifactFile,
         ),
         FuchsiaSdk: () => FakeFuchsiaSdk(),
+        Platform: () => FakePlatform(
+          operatingSystem: 'linux',
+        ),
       });
 
       testUsingContext('No vmservices found', () async {
@@ -827,6 +830,9 @@ void main() {
           ffx: artifactFile,
         ),
         FuchsiaSdk: () => FakeFuchsiaSdk(),
+        Platform: () => FakePlatform(
+          operatingSystem: 'linux',
+        ),
       });
 
       testUsingContext('can hendle failed to find vmservice-port', () async {
@@ -847,6 +853,9 @@ void main() {
           ffx: artifactFile,
         ),
         FuchsiaSdk: () => FakeFuchsiaSdk(),
+        Platform: () => FakePlatform(
+          operatingSystem: 'linux',
+        ),
       });
 
       testUsingContext('can hendle failed to list ports', () async {
@@ -873,6 +882,9 @@ void main() {
           ffx: artifactFile,
         ),
         FuchsiaSdk: () => FakeFuchsiaSdk(),
+        Platform: () => FakePlatform(
+          operatingSystem: 'linux',
+        ),
       });
 
       testUsingContext('can hendle failed to find paths to component url', () async {
@@ -907,9 +919,12 @@ void main() {
           ffx: artifactFile,
         ),
         FuchsiaSdk: () => FakeFuchsiaSdk(),
+        Platform: () => FakePlatform(
+          operatingSystem: 'linux',
+        ),
       });
 
-      testUsingContext('can hendle failed to read component url', () async {
+      testUsingContext('can handle failed to read component url', () async {
         processManager.addCommands(<FakeCommand>[
           const FakeCommand(
             command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
@@ -947,6 +962,9 @@ void main() {
           ffx: artifactFile,
         ),
         FuchsiaSdk: () => FakeFuchsiaSdk(),
+        Platform: () => FakePlatform(
+          operatingSystem: 'linux',
+        ),
       });
     });
   });
