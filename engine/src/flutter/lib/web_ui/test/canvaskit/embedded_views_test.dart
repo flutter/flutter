@@ -312,7 +312,8 @@ void testMain() {
       //   Expect: success. Just checking the system is not left in a corrupted state.
       await _createPlatformView(0, 'test-platform-view');
       renderTestScene(viewCount: 0);
-    });
+    // TODO(yjbanov): skipped due to https://github.com/flutter/flutter/issues/73867
+    }, skip: isSafari);
 
     test('embeds and disposes of a platform view', () async {
       ui.platformViewRegistry.registerViewFactory(
