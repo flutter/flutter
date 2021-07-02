@@ -224,7 +224,8 @@ void runNext({
       final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {
         final bool response = prompt(
-          'Are you ready to tag commit $headRevision as ${state.releaseVersion} and push to remote ${state.framework.upstream.url}?',
+          'Are you ready to tag commit $headRevision as ${state.releaseVersion}\n'
+          'and push to remote ${state.framework.upstream.url}?',
           stdio,
         );
         if (!response) {

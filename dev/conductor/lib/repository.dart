@@ -67,6 +67,11 @@ abstract class Repository {
       }
       if (initialRef != null) {
         git.run(
+          <String>['fetch', upstreamRemote.name],
+          'Fetch ${upstreamRemote.name} to ensure we have latest refs',
+          workingDirectory: _checkoutDirectory!.path,
+        );
+        git.run(
           <String>['checkout', '${upstreamRemote.name}/$initialRef'],
           'Checking out initialRef $initialRef',
           workingDirectory: _checkoutDirectory!.path,

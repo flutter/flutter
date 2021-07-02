@@ -159,7 +159,7 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.PUBLISH_CHANNEL:
       return 'Issue `conductor next` to publish your release to the release branch.';
     case ReleasePhase.VERIFY_RELEASE:
-      return 'Release archive packages must be verified on cloud storage.';
+      return 'Release archive packages must be verified on cloud storage.'; // TODO show link
     case ReleasePhase.RELEASE_COMPLETED:
       return 'This release has been completed.';
   }

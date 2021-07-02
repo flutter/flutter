@@ -415,6 +415,9 @@ void main() {
         final FakeProcessManager processManager = FakeProcessManager.list(
           <FakeCommand>[
             const FakeCommand(
+              command: <String>['git', 'fetch', 'upstream'],
+            ),
+            const FakeCommand(
               command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
             ),
             const FakeCommand(
@@ -446,16 +449,19 @@ void main() {
           fileSystem.file(stateFile),
         );
 
+        expect(processManager, hasNoRemainingExpectations);
         expect(stdio.stdout, contains('Are you ready to tag commit $revision1 as $releaseVersion'));
         expect(stdio.error, contains('Aborting command.'));
         expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
         expect(finalState.logs, stdio.logs);
-        expect(processManager.hasRemainingExpectations, false);
       });
 
       test('updates state.currentPhase if user responds yes', () async {
         stdio.stdin.add('y');
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['git', 'fetch', 'upstream'],
+          ),
           const FakeCommand(
             command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
           ),
@@ -500,10 +506,10 @@ void main() {
           fileSystem.file(stateFile),
         );
 
+        expect(processManager, hasNoRemainingExpectations);
         expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
         expect(stdio.stdout, contains('Are you ready to tag commit $revision1 as $releaseVersion'));
         expect(finalState.logs, stdio.logs);
-        expect(processManager.hasRemainingExpectations, false);
       });
     });
 
@@ -537,6 +543,9 @@ void main() {
         stdio.stdin.add('n');
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
+            command: <String>['git', 'fetch', 'upstream'],
+          ),
+          const FakeCommand(
             command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
           ),
           const FakeCommand(
@@ -557,7 +566,7 @@ void main() {
           stdio: stdio,
         );
         final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-        runner.run(<String>[
+        await runner.run(<String>[
           'next',
           '--$kStateOption',
           stateFile,
@@ -567,6 +576,7 @@ void main() {
           fileSystem.file(stateFile),
         );
 
+        expect(processManager, hasNoRemainingExpectations);
         expect(stdio.error, contains('Aborting command.'));
         expect(
           stdio.stdout,
