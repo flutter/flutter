@@ -85,6 +85,13 @@ void main() {
           stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
         ),
       ]);
+      fakeFailedProcessManagerForHostAddress = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>['ssh', '-F', sshConfig.absolute.path, '123', r'echo $SSH_CONNECTION'],
+          stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
+          exitCode: 1,
+        ),
+      ]);
       fakeSuccessfulProcessManagerWithSession = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['ssh', '-F', '/ssh_config', '123', 'which session_control'],
