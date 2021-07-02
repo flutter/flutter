@@ -18,3 +18,11 @@ impeller_component("entity") {
     "../primitives",
   ]
 }
+
+impeller_component("entity_unittests") {
+  testonly = true
+
+  sources = [ "entity_unittests.mm" ]
+
+  deps = [ "../playground" ]
+}

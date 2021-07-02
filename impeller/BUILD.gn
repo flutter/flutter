@@ -26,7 +26,10 @@ executable("impeller_unittests") {
   deps = [
     "compiler:compiler_unittests",
     "compositor:compositor_unittests",
+    "entity:entity_unittests",
     "fixtures",
+    "playground",
+    "primitives:primitives_unittests",
     "//flutter/testing",
   ]
 }

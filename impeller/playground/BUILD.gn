@@ -1,0 +1,27 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/testing/testing.gni")
+
+impeller_component("playground") {
+  testonly = true
+
+  sources = [
+    "playground.h",
+    "playground.mm",
+  ]
+
+  public_deps = [
+    "//flutter/testing",
+    "//third_party/glfw",
+  ]
+
+  if (is_mac) {
+    libs = [
+      "AppKit.framework",
+      "QuartzCore.framework",
+    ]
+  }
+}

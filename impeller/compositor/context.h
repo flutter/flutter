@@ -46,6 +46,8 @@ class Context {
 
   std::shared_ptr<CommandBuffer> CreateRenderCommandBuffer() const;
 
+  id<MTLDevice> GetMTLDevice() const;
+
  private:
   id<MTLDevice> device_ = nullptr;
   id<MTLCommandQueue> render_queue_ = nullptr;
