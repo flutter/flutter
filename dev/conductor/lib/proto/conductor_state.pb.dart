@@ -204,6 +204,8 @@ class Repository extends $pb.GeneratedMessage {
         subBuilder: Cherrypick.create)
     ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dartRevision',
         protoName: 'dartRevision')
+    ..aOS(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'workingBranch',
+        protoName: 'workingBranch')
     ..hasRequiredFields = false;
 
   Repository._() : super();
@@ -216,6 +218,7 @@ class Repository extends $pb.GeneratedMessage {
     Remote mirror,
     $core.Iterable<Cherrypick> cherrypicks,
     $core.String dartRevision,
+    $core.String workingBranch,
   }) {
     final _result = create();
     if (candidateBranch != null) {
@@ -241,6 +244,9 @@ class Repository extends $pb.GeneratedMessage {
     }
     if (dartRevision != null) {
       _result.dartRevision = dartRevision;
+    }
+    if (workingBranch != null) {
+      _result.workingBranch = workingBranch;
     }
     return _result;
   }
@@ -356,6 +362,18 @@ class Repository extends $pb.GeneratedMessage {
   $core.bool hasDartRevision() => $_has(7);
   @$pb.TagNumber(8)
   void clearDartRevision() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.String get workingBranch => $_getSZ(8);
+  @$pb.TagNumber(9)
+  set workingBranch($core.String v) {
+    $_setString(8, v);
+  }
+
+  @$pb.TagNumber(9)
+  $core.bool hasWorkingBranch() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearWorkingBranch() => clearField(9);
 }
 
 class ConductorState extends $pb.GeneratedMessage {

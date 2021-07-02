@@ -172,41 +172,47 @@ void runNext({
 
       if (state.framework.cherrypicks.isEmpty) {
         stdio.printStatus('This release has no framework cherrypicks.');
-        break;
       } else if (unappliedCherrypicks.isEmpty) {
         stdio.printStatus('All framework cherrypicks have been auto-applied by '
             'the conductor.\n');
-        if (autoAccept == false) {
-          final bool response = prompt(
-            'Are you ready to push your changes to the repository '
-            '${state.framework.mirror.url}?',
-            stdio,
-          );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
-            return;
-          }
-        }
       } else {
         stdio.printStatus(
           'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
         stdio.printStatus('These must be applied manually in the directory '
           '${state.framework.checkoutPath} before proceeding.\n');
-        if (autoAccept == false) {
-          final bool response = prompt(
-              'Are you ready to push your framework branch to the repository '
-              '${state.framework.mirror.url}?',
-            stdio,
-          );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
-            return;
-          }
+      }
+
+      if (autoAccept == false) {
+        final bool response = prompt(
+            'Are you ready to push your framework branch to the repository '
+            '${state.framework.mirror.url}?',
+          stdio,
+        );
+        if (!response) {
+          stdio.printError('Aborting command.');
+          writeStateToFile(stateFile, state, stdio.logs);
+          return;
         }
       }
+
       // TODO push branch to mirror
+      final Remote upstream = Remote(
+        name: RemoteName.upstream,
+        url: state.framework.upstream.url,
+      );
+      final FrameworkRepository framework = FrameworkRepository(
+        checkouts,
+        initialRef: state.framework.workingBranch,
+        upstreamRemote: upstream,
+        previousCheckoutLocation: state.framework.checkoutPath,
+      );
+      final String headRevision = framework.reverseParse('HEAD');
+
+      framework.pushRef(
+        fromRef: headRevision,
+        toRef: state.framework.workingBranch,
+        remote: state.framework.mirror.name,
+      );
       break;
     case pb.ReleasePhase.PUBLISH_VERSION:
       stdio.printStatus('Please ensure that you have merged your framework PR and that');

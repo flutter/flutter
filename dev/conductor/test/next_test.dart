@@ -22,6 +22,7 @@ void main() {
     const String flutterRoot = '/flutter';
     const String checkoutsParentDirectory = '$flutterRoot/dev/tools/';
     const String candidateBranch = 'flutter-1.2-candidate.3';
+    const String workingBranch = 'cherrypicks-$candidateBranch';
     final String localPathSeparator = const LocalPlatform().pathSeparator;
     final String localOperatingSystem = const LocalPlatform().pathSeparator;
     const String revision1 = 'abc123';
@@ -288,13 +289,16 @@ void main() {
                 state: pb.CherrypickState.PENDING,
               ),
             ],
-            mirror: pb.Remote(url: remoteUrl),
+            mirror: pb.Remote(name: 'mirror', url: remoteUrl),
+            upstream: pb.Remote(name: 'upstream', url: remoteUrl),
+            workingBranch: workingBranch,
           ),
           currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
         );
       });
 
-      test('does not prompt user and updates state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION if there are no framework cherrypicks', () async {
+      test('informs the user if there are no framework cherrypicks', () async {
+        stdio.stdin.add('n');
         final pb.ConductorState state = pb.ConductorState(
           currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
         );
@@ -317,16 +321,11 @@ void main() {
           stateFile,
         ]);
 
-        final pb.ConductorState finalState = readStateFromFile(
-          fileSystem.file(stateFile),
-        );
-
-        expect(stdio.stdout, isNot(contains('Did you apply all framework cherrypicks? (y/n) ')));
-        expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
-        expect(stdio.error, isEmpty);
+        expect(processManager, hasNoRemainingExpectations);
+        expect(stdio.stdout, contains('This release has no framework cherrypicks'));
       });
 
-      test('does not update state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS if user responds no', () async {
+      test('does not update state.currentPhase if user responds no', () async {
         stdio.stdin.add('n');
         writeStateToFile(
           fileSystem.file(stateFile),
@@ -356,8 +355,23 @@ void main() {
         expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
       });
 
-      test('updates state.currentPhase from APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION if user responds yes', () async {
+      test('updates state.currentPhase if user responds yes', () async {
         stdio.stdin.add('y');
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['git', 'fetch', 'upstream'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'checkout', 'upstream/$workingBranch'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision1,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'push', 'mirror', '$revision1:$workingBranch'],
+          ),
+        ]);
         writeStateToFile(
           fileSystem.file(stateFile),
           state,
@@ -513,7 +527,7 @@ void main() {
       });
     });
 
-    group('PUBLISH_CHANNEL to RELEASE_COMPLETED', () {
+    group('PUBLISH_CHANNEL to VERIFY_RELEASE', () {
       const String remoteName = 'upstream';
       const String releaseVersion = '1.2.0-3.0.pre';
       const String releaseChannel = 'beta';
@@ -583,6 +597,59 @@ void main() {
           contains('About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
         );
         expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
+      });
+
+      test('updates currentPhase if user responds yes', () async {
+        stdio.stdin.add('y');
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['git', 'fetch', 'upstream'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision1,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'push', FrameworkRepository.defaultUpstream, '$revision1:$releaseChannel'],
+          ),
+        ]);
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        await runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
+
+        final pb.ConductorState finalState = readStateFromFile(
+          fileSystem.file(stateFile),
+        );
+
+        expect(processManager, hasNoRemainingExpectations);
+        expect(stdio.error, isEmpty);
+        expect(
+          stdio.stdout,
+          contains('About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
+        );
+        expect(
+          stdio.stdout,
+          contains('Release archive packages must be verified on cloud storage: https://ci.chromium.org/p/flutter/g/beta_packaging/console'),
+        );
+        expect(finalState.currentPhase, ReleasePhase.VERIFY_RELEASE);
       });
     });
 

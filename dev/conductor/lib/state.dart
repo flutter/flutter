@@ -21,7 +21,7 @@ String luciConsoleLink(String channel, String groupName) {
     'channel $channel not recognized',
   );
   assert(
-    <String>['framework', 'engine', 'devicelab'].contains(groupName),
+    <String>['framework', 'engine', 'devicelab', 'packaging'].contains(groupName),
     'group named $groupName not recognized',
   );
   final String consoleName = channel == 'master' ? groupName : '${channel}_$groupName';
@@ -115,7 +115,6 @@ String presentPhases(ReleasePhase currentPhase) {
   return buffer.toString();
 }
 
-// TODO
 String phaseInstructions(pb.ConductorState state) {
   switch (state.currentPhase) {
     case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
@@ -159,7 +158,7 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.PUBLISH_CHANNEL:
       return 'Issue `conductor next` to publish your release to the release branch.';
     case ReleasePhase.VERIFY_RELEASE:
-      return 'Release archive packages must be verified on cloud storage.'; // TODO show link
+      return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}';
     case ReleasePhase.RELEASE_COMPLETED:
       return 'This release has been completed.';
   }
