@@ -825,39 +825,17 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
-    // final min_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.end));
-    // final text_val = widget.renderObject.text!.toPlainText();
-    // // print(text_val);
-    // // print(widget.selection.textInside(text_val));
-    // late Rect? left_rect;
-    // late Rect? right_rect;
-    //
-    // if(widget.renderObject.selectionHeightStyle == ui.BoxHeightStyle.tight){
-    //   //Left handle, smallest rec that can surround the first word after the handle
-    //   left_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
-    //
-    //   //Right handle, smallest rec that can surround the first word before the handle
-    //   right_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
-    // }else{
-    //   //Left handle, smallest rec that fits entire selection
-    //   left_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
-    //
-    //   //Right handle, smallest rec that fits the range containing the last line
-    //   right_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
-    // }
-
-    final left_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
-    final right_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
+    final leftHandleRect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
+    final rightHandleRect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
-      left_rect?.height ?? widget.renderObject.preferredLineHeight,
-      defaultTargetPlatform == TargetPlatform.iOS? right_rect?.height: null
-      // widget.renderObject.preferredLineHeight,
+      leftHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+      defaultTargetPlatform == TargetPlatform.iOS? rightHandleRect?.height: null
     );
+
     final Size handleSize = widget.selectionControls.getHandleSize(
-      right_rect?.height ?? widget.renderObject.preferredLineHeight,
-      // widget.renderObject.preferredLineHeight,
+      rightHandleRect?.height ?? widget.renderObject.preferredLineHeight,
     );
 
     final Rect handleRect = Rect.fromLTWH(
@@ -903,10 +881,9 @@ class _TextSelectionHandleOverlayState
               child: widget.selectionControls.buildHandle(
                 context,
                 type,
-                left_rect?.height ?? widget.renderObject.preferredLineHeight,
-                // widget.renderObject.preferredLineHeight,
+                leftHandleRect?.height ?? widget.renderObject.preferredLineHeight,
                 widget.onSelectionHandleTapped,
-                defaultTargetPlatform == TargetPlatform.iOS? right_rect?.height: null,
+                defaultTargetPlatform == TargetPlatform.iOS? rightHandleRect?.height: null,
               ),
             ),
           ),

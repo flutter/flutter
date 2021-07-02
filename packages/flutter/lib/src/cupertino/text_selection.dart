@@ -252,11 +252,11 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
     // We want a size that's a vertical line the height of the text plus a 18.0
     // padding in every direction that will constitute the selection drag area.
-    print(secondaryLineHeight);
     if(secondaryLineHeight == null)
       secondaryLineHeight = textLineHeight;
 
     final Size desiredSize = getHandleSize(textLineHeight);
+    final Size desiredSizeRight = getHandleSize(secondaryLineHeight);
 
     final Widget customPaint = CustomPaint(
       painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
@@ -266,8 +266,6 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
       size: desiredSize,
       child: customPaint,
     );
-
-    final Size desiredSizeRight = getHandleSize(secondaryLineHeight);
 
     final Widget rightHandle = SizedBox.fromSize(
       size: desiredSizeRight,
@@ -279,15 +277,8 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     // on top of the text selection endpoints.
     switch (type) {
       case TextSelectionHandleType.left:
-        print('left ' + desiredSize.height.toString());
-        print('left textline' + textLineHeight.toString());
         return leftHandle;
       case TextSelectionHandleType.right:
-        // Right handle is a vertical mirror of the left.
-        // Right handle is a vertical mirror of the left.
-        print('right secondary ' + secondaryLineHeight.toString());
-        print('right ' + desiredSizeRight.height.toString());
-        // return rightHandle;
         return Transform(
           transform: Matrix4.identity()
             ..translate(desiredSizeRight.width / 2, desiredSizeRight.height / 2)
