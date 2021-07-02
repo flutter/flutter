@@ -71,6 +71,12 @@ enum TimePickerEntryMode {
 
   /// Text input.
   input,
+
+  /// Only clock dial.
+  dialOnly,
+
+  /// Only text input.
+  inputOnly
 }
 
 /// Provides properties for rendering time picker header fragments.
@@ -2015,6 +2021,10 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
           _autofocusMinute.value = false;
           _entryMode.value = TimePickerEntryMode.dial;
           break;
+        case TimePickerEntryMode.dialOnly:
+        case TimePickerEntryMode.inputOnly:
+          FlutterError('Can not change entry mode from $_entryMode');
+          break;
       }
     });
   }
@@ -2100,6 +2110,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     final double timePickerHeight;
     switch (_entryMode.value) {
       case TimePickerEntryMode.dial:
+      case TimePickerEntryMode.dialOnly:
         switch (orientation) {
           case Orientation.portrait:
             timePickerWidth = _kTimePickerWidthPortrait;
@@ -2116,6 +2127,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         }
         break;
       case TimePickerEntryMode.input:
+      case TimePickerEntryMode.inputOnly:
         timePickerWidth = _kTimePickerWidthPortrait;
         timePickerHeight = _kTimePickerHeightInput;
         break;
@@ -2136,6 +2148,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     final Widget actions = Row(
       children: <Widget>[
         const SizedBox(width: 10.0),
+        if (_entryMode.value == TimePickerEntryMode.dial || _entryMode.value == TimePickerEntryMode.input)
         IconButton(
           color: TimePickerTheme.of(context).entryModeIconColor ?? theme.colorScheme.onSurface.withOpacity(
             theme.colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
@@ -2173,6 +2186,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     final Widget picker;
     switch (_entryMode.value) {
       case TimePickerEntryMode.dial:
+      case TimePickerEntryMode.dialOnly:
         final Widget dial = Padding(
           padding: orientation == Orientation.portrait ? const EdgeInsets.symmetric(horizontal: 36, vertical: 24) : const EdgeInsets.all(24),
           child: ExcludeSemantics(
@@ -2239,6 +2253,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         }
         break;
       case TimePickerEntryMode.input:
+      case TimePickerEntryMode.inputOnly:
         picker = Form(
           key: _formKey,
           autovalidate: _autoValidate.value,
