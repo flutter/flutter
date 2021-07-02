@@ -742,7 +742,8 @@ abstract class FlutterDriver {
 class CommonFinders {
   const CommonFinders._();
 
-  /// Finds [Text] and [EditableText] widgets containing string equal to [text].
+  /// Finds [widgets.Text] and [widgets.EditableText] widgets containing string
+  /// equal to [text].
   SerializableFinder text(String text) => ByText(text);
 
   /// Finds widgets by [key]. Only [String] and [int] values can be used.

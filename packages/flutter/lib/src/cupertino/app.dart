@@ -242,8 +242,9 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [WidgetBuilder] is used to construct a [CupertinoPageRoute] that performs
-  /// an appropriate transition, including [Hero] animations, to the new route.
+  /// [widgets.WidgetBuilder] is used to construct a [CupertinoPageRoute] that
+  /// performs an appropriate transition, including [Hero] animations, to the
+  /// new route.
   ///
   /// {@macro flutter.widgets.widgetsApp.routes}
   final Map<String, WidgetBuilder>? routes;

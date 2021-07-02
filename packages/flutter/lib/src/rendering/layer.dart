@@ -2527,7 +2527,7 @@ class FollowerLayer extends ContainerLayer {
     if (a.depth < b.depth) {
       ancestorsB.add(b.parent);
       return _pathsToCommonAncestor(a, b.parent, ancestorsA, ancestorsB);
-    } else if (a.depth > b.depth){
+    } else if (a.depth > b.depth) {
       ancestorsA.add(a.parent);
       return _pathsToCommonAncestor(a.parent, b, ancestorsA, ancestorsB);
     }
