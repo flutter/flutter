@@ -774,7 +774,7 @@ class ThemeData with Diagnosticable {
   ///
   /// The [colorScheme] can not be null.
   ///
-  /// If [colorScheme.brightness] is [Brightness.dark] then
+  /// If [colorScheme].brightness is [Brightness.dark] then
   /// [ThemeData.applyElevationOverlayColor] will be set to true to support
   /// the Material dark theme method for indicating elevation by applying
   /// a semi-transparent onSurface color on top of the surface color.
@@ -2325,7 +2325,7 @@ class VisualDensity with Diagnosticable {
   ///
   /// The resulting minWidth and minHeight values are clamped to not exceed the
   /// maxWidth and maxHeight values, respectively.
-  BoxConstraints effectiveConstraints(BoxConstraints constraints){
+  BoxConstraints effectiveConstraints(BoxConstraints constraints) {
     assert(constraints != null && constraints.debugAssertIsValid());
     return constraints.copyWith(
       minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, constraints.maxWidth),

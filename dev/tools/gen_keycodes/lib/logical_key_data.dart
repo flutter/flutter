@@ -344,7 +344,7 @@ class LogicalKeyData {
   }();
 
   /// Returns the static map of printable representations.
-  static late final Map<String, String> printable = ((){
+  static late final Map<String, String> printable = (() {
     final String printableKeys = File(path.join(dataRoot, 'printable.json',)).readAsStringSync();
     return (json.decode(printableKeys) as Map<String, dynamic>)
       .cast<String, String>();
@@ -355,7 +355,7 @@ class LogicalKeyData {
   /// These include synonyms for keys which don't have printable
   /// representations, and appear in more than one place on the keyboard (e.g.
   /// SHIFT, ALT, etc.).
-  static late final Map<String, List<String>> synonyms = ((){
+  static late final Map<String, List<String>> synonyms = (() {
     final String synonymKeys = File(path.join(dataRoot, 'synonyms.json',)).readAsStringSync();
     final Map<String, dynamic> dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
     return dynamicSynonym.map((String name, dynamic values) {

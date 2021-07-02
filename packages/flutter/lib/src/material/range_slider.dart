@@ -150,8 +150,8 @@ class RangeSlider extends StatefulWidget {
   /// appearance is achieved using a [SliderThemeData].
   ///
   /// The [values], [min], [max] must not be null. The [min] must be less than
-  /// or equal to the [max]. [values.start] must be less than or equal to
-  /// [values.end]. [values.start] and [values.end] must be greater than or
+  /// or equal to the [max]. [values].start must be less than or equal to
+  /// [values].end. [values].start and [values].end must be greater than or
   /// equal to the [min] and less than or equal to the [max]. The [divisions]
   /// must be null or greater than 0.
   RangeSlider({
