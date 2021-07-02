@@ -30,8 +30,8 @@ def main():
 
   classpath = [
     args.android_source_root,
-    os.path.join(args.third_party, 'android_embedding_dependencies', 'lib', '*'),
     os.path.join(args.third_party, 'android_tools/sdk//platforms/android-30/android.jar'),
+    os.path.join(args.third_party, 'android_embedding_dependencies', 'lib', '*'),
   ]
   if args.build_config_path:
     classpath.append(args.build_config_path)
