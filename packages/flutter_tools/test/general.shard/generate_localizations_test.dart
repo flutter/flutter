@@ -1812,6 +1812,149 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       });
     });
 
+    group('select messages', () {
+      testWithoutContext('should throw attempting to generate a select message without placeholders', () {
+        const String selectMessageWithoutPlaceholdersAttribute = '''
+{
+  "genderSelect": "{gender, select, female {She} male {He} other {they} }",
+  "@genderSelect": {
+    "description": "Improperly formatted since it has no placeholder attribute."
+  }
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(selectMessageWithoutPlaceholdersAttribute);
+
+        expect(
+              () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+                (L10nException e) => e.message,
+            'message',
+            contains('Check to see if the select message is in the proper ICU syntax format'),
+          )),
+        );
+      });
+
+      testWithoutContext('should throw attempting to generate a select message with an empty placeholders map', () {
+        const String selectMessageWithEmptyPlaceholdersMap = '''
+{
+  "genderSelect": "{gender, select, female {She} male {He} other {they} }",
+  "@genderSelect": {
+    "description": "Improperly formatted since it has no placeholder attribute.",
+    "placeholders": {}
+  }
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(selectMessageWithEmptyPlaceholdersMap);
+
+        expect(
+              () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+                (L10nException e) => e.message,
+            'message',
+            contains('Check to see if the select message is in the proper ICU syntax format'),
+          )),
+        );
+      });
+
+      testWithoutContext('should throw attempting to generate a select message with no resource attributes', () {
+        const String selectMessageWithoutResourceAttributes = '''
+{
+  "genderSelect": "{gender, select, female {She} male {He} other {they} }"
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(selectMessageWithoutResourceAttributes);
+
+        expect(
+              () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+                (L10nException e) => e.message,
+            'message',
+            contains('Resource attribute "@genderSelect" was not found'),
+          )),
+        );
+      });
+
+      testWithoutContext('should throw attempting to generate a select message with incorrect format for placeholders', () {
+        const String selectMessageWithIncorrectPlaceholderFormat = '''
+{
+  "genderSelect": "{gender, select, female {She} male {He} other {they} }",
+  "@genderSelect": {
+    "placeholders": "Incorrectly a string, should be a map."
+  }
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(selectMessageWithIncorrectPlaceholderFormat);
+
+        expect(
+              () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+                (L10nException e) => e.message,
+            'message',
+            allOf(
+              contains('is not properly formatted'),
+              contains('Ensure that it is a map with string valued keys'),
+            ),
+          )),
+        );
+      });
+    });
+
     testWithoutContext('intl package import should be omitted in subclass files when no plurals are included', () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
