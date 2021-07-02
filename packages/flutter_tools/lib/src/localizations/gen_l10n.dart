@@ -251,7 +251,7 @@ String _generateSelectMethod(Message message, String translationForMessage) {
 
   final List<String> cases = <String>[];
 
-  final RegExp selectRE = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\{.*\})+\}');
+  final RegExp selectRE = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\s*\{.*\})+\s*\}');
 
   final RegExpMatch? selectMatch = selectRE.firstMatch(translationForMessage);
   String? choice;

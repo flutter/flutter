@@ -2025,6 +2025,50 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(intlImportDartCode));
     });
 
+    testWithoutContext('intl package import should be kept in subclass files when select is included', () {
+      const String selectMessageArb = '''
+{
+  "genderSelect": "{gender, select, female {She} male {He} other {they} }",
+  "@genderSelect": {
+    "description": "A select message",
+    "placeholders": {
+      "gender": {}
+    }
+  }
+}
+''';
+
+      const String selectMessageEsArb = '''
+{
+  "genderSelect": "{gender, select, female {ES - She} male {ES - He} other {ES - they} }"
+}
+''';
+
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(selectMessageArb)
+        ..childFile('app_es.arb').writeAsStringSync(selectMessageEsArb);
+
+      try {
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
+      ).readAsStringSync();
+      expect(localizationsFile, contains(intlImportDartCode));
+    });
+
     testWithoutContext('check indentation on generated files', () {
       _standardFlutterDirectoryL10nSetup(fs);
 
