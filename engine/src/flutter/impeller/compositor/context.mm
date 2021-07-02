@@ -4,6 +4,7 @@
 
 #include "context.h"
 
+#include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "impeller/compositor/allocator.h"
@@ -36,10 +37,20 @@ Context::Context(std::string shaders_directory)
     NSError* shader_library_error = nil;
     auto shader_library_path =
         fml::paths::JoinPaths({shaders_directory, "impeller.metallib"});
-    id<MTLLibrary> library =
-        [device_ newLibraryWithFile:@(shader_library_path.c_str())
-                              error:&shader_library_error];
-    if (!library) {
+
+    auto library_exists = fml::IsFile(shader_library_path);
+
+    if (!library_exists) {
+      FML_LOG(ERROR) << "Shader library does not exist at path '"
+                     << shader_library_path
+                     << "'. No piplines can be created in this context.";
+    }
+    auto library =
+        library_exists
+            ? [device_ newLibraryWithFile:@(shader_library_path.c_str())
+                                    error:&shader_library_error]
+            : [device_ newDefaultLibrary];
+    if (!library && shader_library_error) {
       FML_LOG(ERROR) << "Could not create shader library: "
                      << shader_library_error.localizedDescription.UTF8String;
       return;
@@ -116,6 +127,10 @@ std::shared_ptr<Allocator> Context::GetPermanentsAllocator() const {
 
 std::shared_ptr<Allocator> Context::GetTransientsAllocator() const {
   return transients_allocator_;
+}
+
+id<MTLDevice> Context::GetMTLDevice() const {
+  return device_;
 }
 
 }  // namespace impeller

@@ -30,7 +30,7 @@ bool Surface::Present() const {
   auto callback = present_callback_;
 
   if (!callback) {
-    return true;
+    return false;
   }
 
   return callback();
