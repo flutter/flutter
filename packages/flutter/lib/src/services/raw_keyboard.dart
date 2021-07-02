@@ -170,7 +170,7 @@ abstract class RawKeyEventData {
         if (side != null) {
           result[key] = side;
         }
-        assert((){
+        assert(() {
           if (side == null) {
             debugPrint(
               'Raw key data is returning inconsistent information for '
@@ -767,7 +767,7 @@ class RawKeyboard {
         }
       }
       final Set<PhysicalKeyboardKey>? mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
-      assert((){
+      assert(() {
         if (mappedKeys == null) {
           debugPrint(
             'Platform key support for ${Platform.operatingSystem} is '

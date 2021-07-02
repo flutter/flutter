@@ -402,7 +402,7 @@ class AnimatedList extends StatefulWidget {
   static AnimatedListState of(BuildContext context) {
     assert(context != null);
     final AnimatedListState? result = context.findAncestorStateOfType<AnimatedListState>();
-    assert((){
+    assert(() {
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('AnimatedList.of() called with a context that does not contain an AnimatedList.'),
@@ -822,7 +822,7 @@ class SliverAnimatedList extends StatefulWidget {
   static SliverAnimatedListState of(BuildContext context) {
     assert(context != null);
     final SliverAnimatedListState? result = context.findAncestorStateOfType<SliverAnimatedListState>();
-    assert((){
+    assert(() {
       if (result == null) {
         throw FlutterError(
           'SliverAnimatedList.of() called with a context that does not contain a SliverAnimatedList.\n'

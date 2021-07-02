@@ -74,7 +74,7 @@ void main() {
       frameCount = 0;
       delays = await tester.handlePointerEventRecord(records);
       await tester.pumpAndSettle();
-      binding.reportData['fullyLive'] = _summarizeResult(frameCount, delays);
+      binding.reportData!['fullyLive'] = _summarizeResult(frameCount, delays);
       await tester.idle();
     },
   );

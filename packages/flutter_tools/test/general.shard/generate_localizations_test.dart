@@ -2449,4 +2449,30 @@ String orderNumber(int number) {
 '''));
     expect(localizationsFile, isNot(contains(intlImportDartCode)));
   });
+
+  testWithoutContext('app localizations lookup is a public method', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleMessageArbFileString);
+
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+    )
+      ..loadResources()
+      ..writeOutputFiles(BufferLogger.test());
+
+    final String localizationsFile = fs.file(
+      fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart'),
+    ).readAsStringSync();
+    print(localizationsFile);
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+AppLocalizations lookupAppLocalizations(Locale locale) {
+'''));
+  });
 }

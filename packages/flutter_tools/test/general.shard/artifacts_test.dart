@@ -84,7 +84,7 @@ void main() {
 
       fileSystem
           .directory(xcframeworkPath)
-          .childDirectory('ios-x86_64-simulator')
+          .childDirectory('ios-arm64_x86_64-simulator')
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
       fileSystem
@@ -98,7 +98,7 @@ void main() {
             mode: BuildMode.release,
             environmentType: EnvironmentType.simulator),
         fileSystem.path
-            .join(xcframeworkPath, 'ios-x86_64-simulator', 'Flutter.framework'),
+            .join(xcframeworkPath, 'ios-arm64_x86_64-simulator', 'Flutter.framework'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterFramework,
@@ -249,7 +249,7 @@ void main() {
 
       fileSystem
           .directory(xcframeworkPath)
-          .childDirectory('ios-x86_64-simulator')
+          .childDirectory('ios-arm64_x86_64-simulator')
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
       fileSystem
@@ -265,7 +265,7 @@ void main() {
           environmentType: EnvironmentType.simulator,
         ),
         fileSystem.path
-            .join(xcframeworkPath, 'ios-x86_64-simulator', 'Flutter.framework'),
+            .join(xcframeworkPath, 'ios-arm64_x86_64-simulator', 'Flutter.framework'),
       );
       expect(
         artifacts.getArtifactPath(
