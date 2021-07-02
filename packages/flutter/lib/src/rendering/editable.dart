@@ -4097,7 +4097,6 @@ class _TextHighlightPainter extends RenderEditablePainter {
 
   Color? get highlightColor => _highlightColor;
   Color? _highlightColor;
-
   set highlightColor(Color? newValue) {
     if (newValue == _highlightColor)
       return;
