@@ -262,7 +262,8 @@ String _generateSelectMethod(Message message, String translationForMessage) {
     for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
       if (patternMatch.groupCount == 2) {
         cases.add(
-            "        '${patternMatch.group(1)}': '${patternMatch.group(2)}'");
+          "        '${patternMatch.group(1)}': '${patternMatch.group(2)}'",
+        );
       }
     }
   }
