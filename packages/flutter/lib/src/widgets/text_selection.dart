@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -825,8 +824,8 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
-    final leftHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
-    final rightHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
+    final Rect? leftHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
+    final Rect? rightHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,

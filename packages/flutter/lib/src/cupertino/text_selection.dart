@@ -252,8 +252,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
     // We want a size that's a vertical line the height of the text plus a 18.0
     // padding in every direction that will constitute the selection drag area.
-    if(secondaryLineHeight == null)
-      secondaryLineHeight = textLineHeight;
+    secondaryLineHeight = secondaryLineHeight?? textLineHeight;
 
     final Size desiredSize = getHandleSize(textLineHeight);
     final Size desiredSizeRight = getHandleSize(secondaryLineHeight);
@@ -297,8 +296,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   /// See [TextSelectionControls.getHandleAnchor].
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? secondaryLineHeight]) {
-    if(secondaryLineHeight == null)
-      secondaryLineHeight = textLineHeight;
+    secondaryLineHeight = secondaryLineHeight?? textLineHeight;
 
     final Size leftHandleSize = getHandleSize(textLineHeight);
     final Size rightHandleSize = getHandleSize(secondaryLineHeight);
