@@ -1249,7 +1249,7 @@ void main() {
 }
 
 class RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight extends RoundedRectSliderTrackShape {
-  const RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight({this.additionalActiveTrackHeight = 2.0});
+  const RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight({required this.additionalActiveTrackHeight});
   final double additionalActiveTrackHeight;
   @override
   void paint(
