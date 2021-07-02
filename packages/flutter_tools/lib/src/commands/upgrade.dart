@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -233,17 +235,19 @@ class UpgradeCommandRunner {
         <String>['git', 'remote', '-v'],
         workingDirectory: workingDirectory,
       );
-      if (!result.stdout.contains('origin\thttps://github.com/flutter/flutter')) {
-        if (result.stdout.contains('origin\t')) {
-          throwToolExit(
-              'Unable to upgrade Flutter: origin repository does not point to '
-              'https://github.com/flutter/flutter in $workingDirectory');
-        } else {
-          throwToolExit(
-              'Unable to upgrade Flutter: no origin repository configured. '
-              "Run 'git remote add origin "
-              "https://github.com/flutter/flutter' in $workingDirectory");
-        }
+      final List<String> lines = const LineSplitter().convert(result.stdout);
+      final Iterable<String> originIterable =
+        lines.where((String element) => element.startsWith('origin\t'));
+      if (originIterable.isEmpty) {
+        throwToolExit(
+            'Unable to upgrade Flutter: no origin repository configured. '
+            "Run 'git remote add origin "
+            "https://github.com/flutter/flutter' in $workingDirectory");
+      }
+      if (!originIterable.first.contains('github.com/flutter/flutter')) {
+        throwToolExit(
+            'Unable to upgrade Flutter: origin repository does not point to '
+            'https://github.com/flutter/flutter in $workingDirectory');
       }
       // Fetch upstream branch's commits and tags
       await globals.processUtils.run(

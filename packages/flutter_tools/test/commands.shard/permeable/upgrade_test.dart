@@ -242,7 +242,7 @@ void main() {
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('fetchRemoteRevision throws toolExit if no incorrect origin configured', () async {
+    testUsingContext('fetchRemoteRevision throws toolExit if non-standard origin configured', () async {
       processManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>[
           'git', 'remote', '-v'
