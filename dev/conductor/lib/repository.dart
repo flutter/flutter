@@ -361,10 +361,10 @@ abstract class Repository {
   }
 
   /// Push [commit] to the release channel [branch].
-  void updateChannel(
-    String commit,
-    String remote,
-    String branch, {
+  void pushRef({
+    required String fromRef,
+    required String remote,
+    required String toRef,
     bool force = false,
     bool dryRun = false,
   }) {
@@ -372,7 +372,7 @@ abstract class Repository {
       'push',
       if (force) '--force',
       remote,
-      '$commit:$branch',
+      '$fromRef:$toRef',
     ];
     final String command = <String>[
       'git',

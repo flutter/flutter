@@ -250,10 +250,10 @@ void runNext({
       final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {
         // dryRun: true means print out git command
-        framework.updateChannel(
-          headRevision,
-          state.framework.upstream.url,
-          state.releaseChannel,
+        framework.pushRef(
+          fromRef: headRevision,
+          toRef: state.releaseChannel,
+          remote: state.framework.upstream.url,
           force: force,
           dryRun: true,
         );
@@ -269,10 +269,10 @@ void runNext({
         }
       }
       // TODO catch exception and give helpful message about branch protection
-      framework.updateChannel(
-        headRevision,
-        state.framework.upstream.url,
-        state.releaseChannel,
+      framework.pushRef(
+        fromRef: headRevision,
+        toRef: state.releaseChannel,
+        remote: state.framework.upstream.url,
         force: force,
       );
       break;
