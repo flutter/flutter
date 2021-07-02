@@ -148,8 +148,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     }());
     return disposed;
   }
-  // TODO(dnfield): https://github.com/flutter/flutter/issues/85066
-  final bool _debugDisposed = false;
+  bool _debugDisposed = false;
 
   /// Set when this layer is appended to a [ContainerLayer], and
   /// unset when it is removed.
@@ -220,8 +219,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
         'Do not directly call dispose on a $runtimeType. Instead, '
         'use createHandle and LayerHandle.dispose.',
       );
-      // TODO(dnfield): enable this. https://github.com/flutter/flutter/issues/85066
-      // _debugDisposed = true;
+      _debugDisposed = true;
       return true;
     }());
     _engineLayer?.dispose();
