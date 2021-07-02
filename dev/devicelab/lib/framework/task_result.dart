@@ -53,10 +53,10 @@ class TaskResult {
     if (success) {
       final List<String> benchmarkScoreKeys = (json['benchmarkScoreKeys'] as List<dynamic>? ?? <String>[]).cast<String>();
       final List<String> detailFiles = (json['detailFiles'] as List<dynamic>? ?? <String>[]).cast<String>();
-      return TaskResult.success(json['data'] as Map<String, dynamic>,
+      return TaskResult.success(json['data'] as Map<String, dynamic>?,
         benchmarkScoreKeys: benchmarkScoreKeys,
         detailFiles: detailFiles,
-        message: json['reason'] as String,
+        message: json['reason'] as String?,
       );
     }
 
@@ -88,7 +88,7 @@ class TaskResult {
   bool get failed => !succeeded;
 
   /// Explains the result in a human-readable format.
-  final String message;
+  final String? message;
 
   /// Serializes this task result to JSON format.
   ///
@@ -124,7 +124,7 @@ class TaskResult {
   }
 
   @override
-  String toString() => message;
+  String toString() => message ?? '';
 }
 
 class TaskResultCheckProcesses extends TaskResult {
