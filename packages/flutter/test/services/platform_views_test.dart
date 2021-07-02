@@ -219,9 +219,9 @@ void main() {
       );
     });
 
-    test('disableConvertingRenderSurfaceOnAndroid', () async {
-      await PlatformViewsService.disableConvertingRenderSurfaceOnAndroid(true);
-      expect(viewsController.disableConvertingRenderSurface, true);
+    test('synchronizeToNativeViewHierarchy', () async {
+      await PlatformViewsService.synchronizeToNativeViewHierarchy(false);
+      expect(viewsController.synchronizeToNativeViewHierarchy, false);
     });
   });
 

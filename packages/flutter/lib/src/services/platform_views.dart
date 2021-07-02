@@ -187,12 +187,12 @@ class PlatformViewsService {
   /// synchronization on Android. On Android versions < 10, this can have some
   /// performance consequences. This flag allows disabling this conversion.
   ///
-  /// Defaults to false.
-  static Future<void> disableConvertingRenderSurfaceOnAndroid(bool disabled) {
+  /// Defaults to true.
+  static Future<void> synchronizeToNativeViewHierarchy(bool yes) {
     assert(defaultTargetPlatform == TargetPlatform.android);
     return SystemChannels.platform_views.invokeMethod<void>(
-      'disableConvertingRenderSurface',
-      disabled,
+      'synchronizeToNativeViewHierarchy',
+      yes,
     );
   }
 
