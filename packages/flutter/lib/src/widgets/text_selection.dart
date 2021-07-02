@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -119,12 +120,12 @@ abstract class TextSelectionControls {
   /// interaction is allowed. As a counterexample, the default selection handle
   /// on iOS [cupertinoTextSelectionControls] does not call [onTap] at all,
   /// since its handles are not meant to be tapped.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? secondaryLineHeight]);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? secondaryLineHeight]);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -824,9 +825,32 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
+    final min_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.end));
+    final text_val = widget.renderObject.text!.toPlainText();
+    // print(text_val);
+    print(widget.selection.textInside(text_val));
+    late Rect? left_rect;
+    late Rect? right_rect;
+
+    if(widget.renderObject.selectionHeightStyle == ui.BoxHeightStyle.tight){
+      //Left handle, smallest rec that can surround the first word after the handle
+      left_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
+
+      //Right handle, smallest rec that can surround the first word before the handle
+      right_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
+    }else{
+      //Left handle, smallest rec that fits entire selection
+      left_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.end));
+
+      //Right handle, smallest rec that fits the range containing the last line
+      right_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
+    }
+
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
-      widget.renderObject.preferredLineHeight,
+      left_rect?.height ?? widget.renderObject.preferredLineHeight,
+      defaultTargetPlatform == TargetPlatform.iOS? right_rect?.height: null
+      // widget.renderObject.preferredLineHeight,
     );
     final Size handleSize = widget.selectionControls.getHandleSize(
       widget.renderObject.preferredLineHeight,
@@ -875,8 +899,10 @@ class _TextSelectionHandleOverlayState
               child: widget.selectionControls.buildHandle(
                 context,
                 type,
-                widget.renderObject.preferredLineHeight,
+                left_rect?.height ?? widget.renderObject.preferredLineHeight,
+                // widget.renderObject.preferredLineHeight,
                 widget.onSelectionHandleTapped,
+                defaultTargetPlatform == TargetPlatform.iOS? right_rect?.height: null,
               ),
             ),
           ),

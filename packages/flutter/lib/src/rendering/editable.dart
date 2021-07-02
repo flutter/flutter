@@ -3127,6 +3127,23 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     )?.shift(_paintOffset);
   }
 
+  Rect? getRectForRange(TextRange range) {
+    if (!range.isValid || range.isCollapsed)
+      return null;
+    _computeTextMetricsIfNeeded();
+
+    final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(
+      TextSelection(baseOffset: range.start, extentOffset: range.end),
+      boxHeightStyle: selectionHeightStyle,
+      boxWidthStyle: selectionWidthStyle,
+    );
+
+    return boxes.fold(
+      null,
+          (Rect? accum, TextBox incoming) => accum?.expandToInclude(incoming.toRect()) ?? incoming.toRect(),
+    )?.shift(_paintOffset);
+  }
+
   /// Returns the position in the text for the given global coordinate.
   ///
   /// See also:

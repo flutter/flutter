@@ -247,15 +247,28 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS text selection edges.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? secondaryLineHeight]) {
     // iOS selection handles do not respond to taps.
 
     // We want a size that's a vertical line the height of the text plus a 18.0
     // padding in every direction that will constitute the selection drag area.
+    print(secondaryLineHeight);
+    if(secondaryLineHeight == null)
+      secondaryLineHeight = textLineHeight;
+
     final Size desiredSize = getHandleSize(textLineHeight);
 
-    final Widget handle = SizedBox.fromSize(
+    final Widget leftHandle = SizedBox.fromSize(
       size: desiredSize,
+      child: CustomPaint(
+        painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
+      ),
+    );
+
+    final Size desiredSizeRight = getHandleSize(secondaryLineHeight);
+
+    final Widget rightHandle = SizedBox.fromSize(
+      size: desiredSizeRight,
       child: CustomPaint(
         painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
       ),
@@ -266,15 +279,15 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     // on top of the text selection endpoints.
     switch (type) {
       case TextSelectionHandleType.left:
-        return handle;
+        return leftHandle;
       case TextSelectionHandleType.right:
         // Right handle is a vertical mirror of the left.
         return Transform(
           transform: Matrix4.identity()
-            ..translate(desiredSize.width / 2, desiredSize.height / 2)
+            ..translate(desiredSizeRight.width / 2, desiredSizeRight.height / 2)
             ..rotateZ(math.pi)
-            ..translate(-desiredSize.width / 2, -desiredSize.height / 2),
-          child: handle,
+            ..translate(-desiredSizeRight.width / 2, -desiredSizeRight.height / 2),
+          child: rightHandle,
         );
       // iOS doesn't draw anything for collapsed selections.
       case TextSelectionHandleType.collapsed:
@@ -286,28 +299,33 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   ///
   /// See [TextSelectionControls.getHandleAnchor].
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    final Size handleSize = getHandleSize(textLineHeight);
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? secondaryLineHeight]) {
+    if(secondaryLineHeight == null)
+      secondaryLineHeight = textLineHeight;
+
+    final Size leftHandleSize = getHandleSize(textLineHeight);
+    final Size rightHandleSize = getHandleSize(secondaryLineHeight);
+
     switch (type) {
       // The circle is at the top for the left handle, and the anchor point is
       // all the way at the bottom of the line.
       case TextSelectionHandleType.left:
         return Offset(
-          handleSize.width / 2,
-          handleSize.height,
+          leftHandleSize.width / 2,
+          leftHandleSize.height,
         );
       // The right handle is vertically flipped, and the anchor point is near
       // the top of the circle to give slight overlap.
       case TextSelectionHandleType.right:
         return Offset(
-          handleSize.width / 2,
-          handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
+          rightHandleSize.width / 2,
+          rightHandleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
         );
       // A collapsed handle anchors itself so that it's centered.
       case TextSelectionHandleType.collapsed:
         return Offset(
-          handleSize.width / 2,
-          textLineHeight + (handleSize.height - textLineHeight) / 2,
+          leftHandleSize.width / 2,
+          textLineHeight + (leftHandleSize.height - textLineHeight) / 2,
         );
     }
   }
