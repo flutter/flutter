@@ -258,20 +258,20 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
     final Size desiredSize = getHandleSize(textLineHeight);
 
+    final Widget customPaint = CustomPaint(
+      painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
+    );
+
     final Widget leftHandle = SizedBox.fromSize(
       size: desiredSize,
-      child: CustomPaint(
-        painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
-      ),
+      child: customPaint,
     );
 
     final Size desiredSizeRight = getHandleSize(secondaryLineHeight);
 
     final Widget rightHandle = SizedBox.fromSize(
       size: desiredSizeRight,
-      child: CustomPaint(
-        painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
-      ),
+      child: customPaint,
     );
 
     // [buildHandle]'s widget is positioned at the selection cursor's bottom
@@ -279,9 +279,15 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     // on top of the text selection endpoints.
     switch (type) {
       case TextSelectionHandleType.left:
+        print('left ' + desiredSize.height.toString());
+        print('left textline' + textLineHeight.toString());
         return leftHandle;
       case TextSelectionHandleType.right:
         // Right handle is a vertical mirror of the left.
+        // Right handle is a vertical mirror of the left.
+        print('right secondary ' + secondaryLineHeight.toString());
+        print('right ' + desiredSizeRight.height.toString());
+        // return rightHandle;
         return Transform(
           transform: Matrix4.identity()
             ..translate(desiredSizeRight.width / 2, desiredSizeRight.height / 2)

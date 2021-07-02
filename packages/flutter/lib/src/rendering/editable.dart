@@ -4112,6 +4112,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
 
   Color? get highlightColor => _highlightColor;
   Color? _highlightColor;
+
   set highlightColor(Color? newValue) {
     if (newValue == _highlightColor)
       return;
@@ -4169,8 +4170,11 @@ class _TextHighlightPainter extends RenderEditablePainter {
       boxWidthStyle: selectionWidthStyle,
     );
 
-    for (final TextBox box in boxes)
-      canvas.drawRect(box.toRect().shift(renderEditable._paintOffset), highlightPaint);
+    for (final TextBox box in boxes) {
+      print('highlight height ' + box.toRect().height.toString());
+      canvas.drawRect(
+          box.toRect().shift(renderEditable._paintOffset), highlightPaint);
+    }
   }
 
   @override

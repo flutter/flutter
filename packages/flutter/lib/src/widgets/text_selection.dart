@@ -825,26 +825,29 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
-    final min_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.end));
-    final text_val = widget.renderObject.text!.toPlainText();
-    // print(text_val);
-    print(widget.selection.textInside(text_val));
-    late Rect? left_rect;
-    late Rect? right_rect;
+    // final min_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.end));
+    // final text_val = widget.renderObject.text!.toPlainText();
+    // // print(text_val);
+    // // print(widget.selection.textInside(text_val));
+    // late Rect? left_rect;
+    // late Rect? right_rect;
+    //
+    // if(widget.renderObject.selectionHeightStyle == ui.BoxHeightStyle.tight){
+    //   //Left handle, smallest rec that can surround the first word after the handle
+    //   left_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
+    //
+    //   //Right handle, smallest rec that can surround the first word before the handle
+    //   right_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
+    // }else{
+    //   //Left handle, smallest rec that fits entire selection
+    //   left_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
+    //
+    //   //Right handle, smallest rec that fits the range containing the last line
+    //   right_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
+    // }
 
-    if(widget.renderObject.selectionHeightStyle == ui.BoxHeightStyle.tight){
-      //Left handle, smallest rec that can surround the first word after the handle
-      left_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
-
-      //Right handle, smallest rec that can surround the first word before the handle
-      right_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
-    }else{
-      //Left handle, smallest rec that fits entire selection
-      left_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.end));
-
-      //Right handle, smallest rec that fits the range containing the last line
-      right_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
-    }
+    final left_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
+    final right_rect = widget.renderObject.getRectForRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
@@ -853,7 +856,8 @@ class _TextSelectionHandleOverlayState
       // widget.renderObject.preferredLineHeight,
     );
     final Size handleSize = widget.selectionControls.getHandleSize(
-      widget.renderObject.preferredLineHeight,
+      right_rect?.height ?? widget.renderObject.preferredLineHeight,
+      // widget.renderObject.preferredLineHeight,
     );
 
     final Rect handleRect = Rect.fromLTWH(
