@@ -25,5 +25,10 @@ impeller_component("primitives") {
 }
 
 impeller_component("primitives_unittests") {
+  testonly = true
   sources = [ "primitives_unittests.mm" ]
+  deps = [
+    ":primitives",
+    "../playground",
+  ]
 }

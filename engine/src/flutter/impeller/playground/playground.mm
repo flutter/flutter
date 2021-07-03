@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 #include "impeller/playground/playground.h"
+#include "flutter/fml/paths.h"
 #include "flutter/testing/testing.h"
 #include "impeller/compositor/context.h"
 #include "impeller/compositor/render_pass.h"
+#include "impeller/compositor/renderer.h"
 #include "impeller/compositor/surface.h"
 
 #define GLFW_INCLUDE_NONE
@@ -18,9 +20,21 @@
 
 namespace impeller {
 
-Playground::Playground() = default;
+static std::string ShaderLibraryDirectory() {
+  auto path_result = fml::paths::GetExecutableDirectoryPath();
+  if (!path_result.first) {
+    return {};
+  }
+  return fml::paths::JoinPaths({path_result.second, "shaders"});
+}
+
+Playground::Playground() : renderer_(ShaderLibraryDirectory()) {}
 
 Playground::~Playground() = default;
+
+std::shared_ptr<Context> Playground::GetContext() const {
+  return renderer_.IsValid() ? renderer_.GetContext() : nullptr;
+}
 
 static void PlaygroundKeyCallback(GLFWwindow* window,
                                   int key,
@@ -32,14 +46,12 @@ static void PlaygroundKeyCallback(GLFWwindow* window,
   }
 }
 
-bool Playground::OpenPlaygroundHere(std::function<bool()> closure) {
-  if (!closure) {
+bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
+  if (!render_callback) {
     return true;
   }
 
-  Context context(flutter::testing::GetFixturesPath());
-
-  if (!context.IsValid()) {
+  if (!renderer_.IsValid()) {
     return false;
   }
 
@@ -50,7 +62,8 @@ bool Playground::OpenPlaygroundHere(std::function<bool()> closure) {
 
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-  auto window = ::glfwCreateWindow(800, 600, "Impeller Playground", NULL, NULL);
+  auto window = ::glfwCreateWindow(
+      800, 600, "Impeller Playground (Press ESC or 'q' to quit)", NULL, NULL);
   if (!window) {
     return false;
   }
@@ -63,7 +76,7 @@ bool Playground::OpenPlaygroundHere(std::function<bool()> closure) {
 
   NSWindow* cocoa_window = ::glfwGetCocoaWindow(window);
   CAMetalLayer* layer = [CAMetalLayer layer];
-  layer.device = context.GetMTLDevice();
+  layer.device = renderer_.GetContext()->GetMTLDevice();
   layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
   cocoa_window.contentView.layer = layer;
   cocoa_window.contentView.wantsLayer = YES;
@@ -91,23 +104,14 @@ bool Playground::OpenPlaygroundHere(std::function<bool()> closure) {
     RenderPassDescriptor desc;
     desc.SetColorAttachment(color0, 0u);
 
-    Surface surface(desc, [current_drawable, closure]() {
-      if (!closure()) {
-        return false;
-      }
-      [current_drawable present];
-      return true;
-    });
+    Surface surface(desc);
 
-    if (!surface.IsValid()) {
-      FML_LOG(ERROR) << "Could not wrap surface to render to into.";
+    if (!renderer_.Render(surface, render_callback)) {
+      FML_LOG(ERROR) << "Could not render into the surface.";
       return false;
     }
 
-    if (!surface.Present()) {
-      FML_LOG(ERROR) << "Could not render into playground surface.";
-      return false;
-    }
+    [current_drawable present];
   }
 
   return true;

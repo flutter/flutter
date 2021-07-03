@@ -6,6 +6,7 @@
 
 #include <dispatch/dispatch.h>
 
+#include <functional>
 #include <memory>
 
 #include "flutter/fml/macros.h"
@@ -19,20 +20,18 @@ class RenderPass;
 
 class Renderer {
  public:
-  virtual ~Renderer();
+  using RenderCallback =
+      std::function<bool(const Surface& surface, RenderPass& pass)>;
+
+  Renderer(std::string shaders_directory);
+
+  ~Renderer();
 
   bool IsValid() const;
 
-  bool Render(const Surface& surface);
+  bool Render(const Surface& surface, RenderCallback callback) const;
 
   std::shared_ptr<Context> GetContext() const;
-
- protected:
-  Renderer(std::string shaders_directory);
-
-  virtual bool OnIsValid() const = 0;
-
-  virtual bool OnRender(const Surface& surface, RenderPass& pass) = 0;
 
  private:
   dispatch_semaphore_t frames_in_flight_sema_ = nullptr;
