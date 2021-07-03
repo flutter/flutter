@@ -24,5 +24,8 @@ impeller_component("entity_unittests") {
 
   sources = [ "entity_unittests.mm" ]
 
-  deps = [ "../playground" ]
+  deps = [
+    ":entity",
+    "../playground",
+  ]
 }

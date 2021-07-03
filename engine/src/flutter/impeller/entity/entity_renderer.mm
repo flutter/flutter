@@ -30,7 +30,7 @@ EntityRenderer::EntityRenderer(std::string shaders_directory)
     return;
   }
 
-  VertexBufferBuilder<shader::BoxVertexInfo::PerVertexData> vertex_builder;
+  VertexBufferBuilder<BoxVertexShader::PerVertexData> vertex_builder;
   vertex_builder.SetLabel("Box");
   vertex_builder.AddVertices({
       {{100, 100, 0.0}, {Color::Red()}, {0.0, 0.0}},    // 1
@@ -61,30 +61,23 @@ bool EntityRenderer::OnIsValid() const {
 bool EntityRenderer::OnRender(const Surface& surface, RenderPass& pass) {
   pass.SetLabel("EntityRenderer Render Pass");
 
-  shader::BoxVertexInfo::UniformBuffer uniforms;
+  BoxVertexShader::UniformBuffer uniforms;
 
   uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
 
   Command cmd;
   cmd.label = "Box";
   cmd.pipeline = box_primitive_->GetPipeline();
-
   cmd.vertex_bindings.buffers[box_primitive_->GetVertexBufferIndex()] =
       vertex_buffer_.vertex_buffer;
-  cmd.vertex_bindings
-      .buffers[shader::BoxVertexInfo::kUniformUniformBuffer.binding] =
+  cmd.vertex_bindings.buffers[BoxVertexShader::kUniformUniformBuffer.binding] =
       pass.GetTransientsBuffer().EmplaceUniform(uniforms);
-
-  cmd.fragment_bindings
-      .samplers[shader::BoxFragmentInfo::kInputContents1.binding] =
+  cmd.fragment_bindings.samplers[BoxFragmentShader::kInputContents1.binding] =
       GetContext()->GetSamplerLibrary()->GetSampler({});
-  cmd.fragment_bindings
-      .samplers[shader::BoxFragmentInfo::kInputContents2.binding] =
+  cmd.fragment_bindings.samplers[BoxFragmentShader::kInputContents2.binding] =
       GetContext()->GetSamplerLibrary()->GetSampler({});
-  cmd.fragment_bindings
-      .samplers[shader::BoxFragmentInfo::kInputContents3.binding] =
+  cmd.fragment_bindings.samplers[BoxFragmentShader::kInputContents3.binding] =
       GetContext()->GetSamplerLibrary()->GetSampler({});
-
   cmd.index_buffer = vertex_buffer_.index_buffer;
   cmd.index_count = vertex_buffer_.index_count;
   cmd.primitive_type = PrimitiveType::kTriange;

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <MetalKit/MetalKit.h>
+#include "impeller/compositor/pipeline_builder.h"
 
-@interface ImpellerRenderer : NSObject <MTKViewDelegate>
+namespace impeller {
 
-- (nonnull instancetype)initWithMetalKitView:(nonnull MTKView*)view;
+//
 
-@end
+}  // namespace impeller

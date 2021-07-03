@@ -30,6 +30,8 @@ impeller_component("compositor") {
     "host_buffer.mm",
     "pipeline.h",
     "pipeline.mm",
+    "pipeline_builder.h",
+    "pipeline_builder.mm",
     "pipeline_descriptor.h",
     "pipeline_descriptor.mm",
     "pipeline_library.h",

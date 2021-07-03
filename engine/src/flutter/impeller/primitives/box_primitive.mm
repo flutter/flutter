@@ -8,6 +8,7 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/base/base.h"
+#include "impeller/compositor/pipeline_builder.h"
 #include "impeller/compositor/pipeline_descriptor.h"
 #include "impeller/compositor/shader_library.h"
 #include "impeller/compositor/vertex_descriptor.h"
@@ -16,55 +17,17 @@ namespace impeller {
 
 BoxPrimitive::BoxPrimitive(std::shared_ptr<Context> context)
     : Primitive(context) {
-  PipelineDescriptor desc;
-  desc.SetLabel(SPrintF("%s Pipeline", shader::BoxVertexInfo::kLabel.data()));
-
-  {
-    auto fragment_function = context->GetShaderLibrary()->GetFunction(
-        shader::BoxFragmentInfo::kEntrypointName, ShaderStage::kFragment);
-    auto vertex_function = context->GetShaderLibrary()->GetFunction(
-        shader::BoxVertexInfo::kEntrypointName, ShaderStage::kVertex);
-
-    desc.AddStageEntrypoint(vertex_function);
-    desc.AddStageEntrypoint(fragment_function);
-  }
-
-  {
-    auto vertex_descriptor = std::make_shared<VertexDescriptor>();
-    vertex_buffer_index_ = vertex_descriptor->GetVertexBufferIndex();
-    if (!vertex_descriptor->SetStageInputs(
-            shader::BoxVertexInfo::kAllShaderStageInputs)) {
-      FML_LOG(ERROR) << "Could not configure vertex descriptor.";
-      return;
-    }
-    desc.SetVertexDescriptor(std::move(vertex_descriptor));
-  }
-
-  {
-    // Configure the sole color attachments pixel format.
-    ColorAttachmentDescriptor color0;
-    color0.format = PixelFormat::kPixelFormat_B8G8R8A8_UNormInt_SRGB;
-
-    desc.SetColorAttachmentDescriptor(0u, std::move(color0));
-  }
-
-  {
-    // Configure the stencil attachment.
-    // TODO(wip): Make this configurable if possible as the D32 component is
-    // wasted.
-    const auto combined_depth_stencil_format =
-        PixelFormat::kPixelFormat_D32_Float_S8_UNormInt;
-    desc.SetDepthPixelFormat(combined_depth_stencil_format);
-    desc.SetStencilPixelFormat(combined_depth_stencil_format);
-  }
-
-  pipeline_ =
-      context->GetPipelineLibrary()->GetRenderPipeline(std::move(desc)).get();
-  if (!pipeline_) {
-    FML_LOG(ERROR) << "Could not create the render pipeline.";
+  using Builder = PipelineBuilder<BoxVertexShader, BoxFragmentShader>;
+  auto pipeline_descriptor = Builder::MakeDefaultPipelineDescriptor(*context);
+  if (!pipeline_descriptor.has_value()) {
     return;
   }
-
+  pipeline_ = context->GetPipelineLibrary()
+                  ->GetRenderPipeline(pipeline_descriptor.value())
+                  .get();
+  if (!pipeline_) {
+    return;
+  }
   is_valid_ = true;
 }
 

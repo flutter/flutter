@@ -24,7 +24,7 @@ namespace impeller {
 class ShaderFunction;
 class VertexDescriptor;
 
-class PipelineDescriptor : public Comparable<PipelineDescriptor> {
+class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
  public:
   PipelineDescriptor();
 
