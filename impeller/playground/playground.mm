@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/playground/playground.h"
+#include <sstream>
+
 #include "flutter/fml/paths.h"
 #include "flutter/testing/testing.h"
 #include "impeller/compositor/context.h"
 #include "impeller/compositor/render_pass.h"
 #include "impeller/compositor/renderer.h"
 #include "impeller/compositor/surface.h"
+#include "impeller/playground/playground.h"
 
 #define GLFW_INCLUDE_NONE
 #import "third_party/glfw/include/GLFW/glfw3.h"
@@ -46,6 +48,13 @@ static void PlaygroundKeyCallback(GLFWwindow* window,
   }
 }
 
+static std::string GetWindowTitle(const std::string& test_name) {
+  std::stringstream stream;
+  stream << "Impeller Playground for '" << test_name
+         << "' (Press ESC or 'q' to quit)";
+  return stream.str();
+}
+
 bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   if (!render_callback) {
     return true;
@@ -66,8 +75,9 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   // wrong.
   ::glfwWindowHint(GLFW_RESIZABLE, false);
 
-  auto window = ::glfwCreateWindow(
-      800, 600, "Impeller Playground (Press ESC or 'q' to quit)", NULL, NULL);
+  auto window_title = GetWindowTitle(flutter::testing::GetCurrentTestName());
+  auto window =
+      ::glfwCreateWindow(1920, 1080, window_title.c_str(), NULL, NULL);
   if (!window) {
     return false;
   }
