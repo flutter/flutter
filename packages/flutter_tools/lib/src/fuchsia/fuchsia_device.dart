@@ -308,9 +308,9 @@ class FuchsiaDevice extends Device {
     String userIdentifier,
   }) async {
     if (await isSession) {
-      globals.printTrace('Running on a workstation build.');
+      globals.printTrace('Running on a session framework based build.');
     } else {
-      globals.printTrace('Running on a non-workstation build.');
+      globals.printTrace('Running on a non session framework based build.');
     }
 
     if (!prebuiltApplication) {
@@ -498,12 +498,8 @@ class FuchsiaDevice extends Device {
     String userIdentifier,
   }) async {
     if (await isSession) {
-      // Currently there are no way to close a running app in ermine afaik.
-      // so we just restart the launcher to ensure that it is no longer running.
-      if (!await fuchsiaDeviceTools.sessionControl.restart(this)) {
-        globals.printError('session_control unable to restart');
-        return false;
-      }
+      // Currently there are no way to close a running app programmatically
+      // using the session framework afaik. So this is a no-op.
       return true;
     }
     final int appKey = await FuchsiaTilesCtl.findAppKey(this, app.id);
