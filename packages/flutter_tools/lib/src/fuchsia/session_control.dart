@@ -53,23 +53,4 @@ class FuchsiaSessionControl {
     final RunResult result = await device.shell('session_control add $url');
     return result.exitCode == 0;
   }
-
-  /// Instructs session_control on the device to launch the session at [url] as
-  /// an session.
-  ///
-  /// [url] should be formatted as a Fuchsia-style package URL, e.g.:
-  ///     fuchsia-pkg://fuchsia.com/flutter_gallery#meta/flutter_gallery.cmx
-  /// Returns true on success and false on failure.
-  Future<bool> launch(FuchsiaDevice device, String url) async {
-    final RunResult result = await device.shell('session_control launch $url');
-    return result.exitCode == 0;
-  }
-
-  /// Instructs session_control on the device to restart.
-  ///
-  /// Returns true on success and false on failure.
-  Future<bool> restart(FuchsiaDevice device) async {
-    final RunResult result = await device.shell('session_control restart');
-    return result.exitCode == 0;
-  }
 }
