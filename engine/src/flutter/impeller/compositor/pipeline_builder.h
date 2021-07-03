@@ -14,8 +14,8 @@
 namespace impeller {
 
 //------------------------------------------------------------------------------
-/// @brief      A utility for creating pipelines from reflected shader
-///             information.
+/// @brief      An optional (but highly recommended) utility for creating
+///             pipelines from reflected shader information.
 ///
 /// @tparam     VertexShader_    The reflected vertex shader information. Found
 ///                              in a generated header file called

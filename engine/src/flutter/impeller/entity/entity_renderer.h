@@ -8,7 +8,6 @@
 #include "impeller/compositor/renderer.h"
 #include "impeller/compositor/vertex_buffer.h"
 #include "impeller/entity/entity.h"
-#include "impeller/primitives/box_primitive.h"
 
 namespace impeller {
 
@@ -20,7 +19,7 @@ class EntityRenderer final : public Renderer {
 
  private:
   std::shared_ptr<Entity> root_;
-  std::shared_ptr<BoxPrimitive> box_primitive_;
+  std::shared_ptr<Pipeline> box_pipeline_;
   VertexBuffer vertex_buffer_;
   bool is_valid_ = false;
 
