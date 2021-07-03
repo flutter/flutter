@@ -16,6 +16,9 @@ namespace impeller {
 
 class VertexDescriptor final : public Comparable<VertexDescriptor> {
  public:
+  static constexpr size_t kReservedVertexBufferIndex =
+      30u;  // The final slot available. Regular buffer indices go up from 0.
+
   VertexDescriptor();
 
   virtual ~VertexDescriptor();
@@ -30,8 +33,6 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
                       size_t count);
 
   MTLVertexDescriptor* GetMTLVertexDescriptor() const;
-
-  size_t GetVertexBufferIndex() const;
 
   //| Comparable<VertexDescriptor>|
   std::size_t GetHash() const override;

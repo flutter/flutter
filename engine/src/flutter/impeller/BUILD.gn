@@ -13,7 +13,6 @@ group("impeller") {
     "compositor",
     "entity",
     "geometry",
-    "host",
     "image",
     "primitives",
     "shader_glue",

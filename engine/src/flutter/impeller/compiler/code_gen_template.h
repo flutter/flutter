@@ -16,9 +16,8 @@ constexpr std::string_view kReflectionHeaderTemplate =
 #include "shader_types.h"
 
 namespace impeller {
-namespace shader {
 
-struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
+struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
   // ===========================================================================
   // Stage Info ================================================================
   // ===========================================================================
@@ -116,10 +115,9 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   };
 {% endif %}
 
-}; // struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info
+};  // struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader
 
-} // namespace shader
-} // namespace impeller
+}  // namespace impeller
 )~~";
 
 constexpr std::string_view kReflectionCCTemplate =
@@ -131,22 +129,19 @@ constexpr std::string_view kReflectionCCTemplate =
 #include <type_traits>
 
 namespace impeller {
-namespace shader {
 
-using Info = {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info;
+using Shader = {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader;
 
 {% for def in struct_definitions %}
 // Sanity checks for {{def.name}}
-static_assert(std::is_standard_layout_v<Info::{{def.name}}>);
-static_assert(sizeof(Info::{{def.name}}) == {{def.byte_length}});
+static_assert(std::is_standard_layout_v<Shader::{{def.name}}>);
+static_assert(sizeof(Shader::{{def.name}}) == {{def.byte_length}});
 {% for member in def.members %}
-static_assert(offsetof(Info::{{def.name}}, {{member.name}}) == {{member.offset}});
+static_assert(offsetof(Shader::{{def.name}}, {{member.name}}) == {{member.offset}});
 {% endfor %}
 {% endfor %}
 
-
-} // namespace shader
-} // namespace impeller
+}  // namespace impeller
 )~~";
 
 }  // namespace compiler

@@ -188,16 +188,10 @@ bool VertexDescriptor::SetStageInputs(
   return true;
 }
 
-size_t VertexDescriptor::GetVertexBufferIndex() const {
-  static constexpr size_t kReservedVertexBufferIndex =
-      30u;  // The final slot available.
-  return kReservedVertexBufferIndex;
-}
-
 MTLVertexDescriptor* VertexDescriptor::GetMTLVertexDescriptor() const {
   auto descriptor = [MTLVertexDescriptor vertexDescriptor];
 
-  const size_t vertex_buffer_index = GetVertexBufferIndex();
+  const size_t vertex_buffer_index = kReservedVertexBufferIndex;
 
   size_t stride = 0u;
   for (const auto& input : stage_inputs_) {
