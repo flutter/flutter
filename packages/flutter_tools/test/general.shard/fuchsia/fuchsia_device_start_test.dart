@@ -622,17 +622,6 @@ class FakeFuchsiaSessionControl implements FuchsiaSessionControl {
   Future<bool> add(FuchsiaDevice device, String url) async {
     return true;
   }
-
-  @override
-  Future<bool> launch(FuchsiaDevice device, String url) async {
-    return true;
-  }
-
-  @override
-  Future<bool> restart(FuchsiaDevice device) async {
-    return true;
-  }
-
 }
 
 class FailingFuchsiaSessionControl implements FuchsiaSessionControl {
@@ -640,17 +629,6 @@ class FailingFuchsiaSessionControl implements FuchsiaSessionControl {
   Future<bool> add(FuchsiaDevice device, String url) async {
     return false;
   }
-
-  @override
-  Future<bool> launch(FuchsiaDevice device, String url) async {
-    return true;
-  }
-
-  @override
-  Future<bool> restart(FuchsiaDevice device) async {
-    return true;
-  }
-
 }
 
 class FakeFuchsiaDeviceTools implements FuchsiaDeviceTools {
