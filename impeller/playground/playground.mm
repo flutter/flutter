@@ -61,6 +61,10 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   fml::ScopedCleanupClosure terminate([]() { ::glfwTerminate(); });
 
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+  // Recreation of the target render buffer is not setup in the playground yet.
+  // So prevent users from resizing and getting confused that their math is
+  // wrong.
+  ::glfwWindowHint(GLFW_RESIZABLE, false);
 
   auto window = ::glfwCreateWindow(
       800, 600, "Impeller Playground (Press ESC or 'q' to quit)", NULL, NULL);
@@ -106,7 +110,13 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
 
     Surface surface(desc);
 
-    if (!renderer_.Render(surface, render_callback)) {
+    Renderer::RenderCallback wrapped_callback =
+        [render_callback](const auto& surface, auto& pass) {
+          pass.SetLabel("Playground Main Render Pass");
+          return render_callback(surface, pass);
+        };
+
+    if (!renderer_.Render(surface, wrapped_callback)) {
       FML_LOG(ERROR) << "Could not render into the surface.";
       return false;
     }
