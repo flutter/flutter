@@ -15,6 +15,16 @@ PipelineLibrary::PipelineLibrary(id<MTLDevice> device) : device_(device) {}
 PipelineLibrary::~PipelineLibrary() = default;
 
 std::future<std::shared_ptr<Pipeline>> PipelineLibrary::GetRenderPipeline(
+    std::optional<PipelineDescriptor> descriptor) {
+  if (descriptor.has_value()) {
+    return GetRenderPipeline(std::move(descriptor.value()));
+  }
+  auto promise = std::make_shared<std::promise<std::shared_ptr<Pipeline>>>();
+  promise->set_value(nullptr);
+  return promise->get_future();
+}
+
+std::future<std::shared_ptr<Pipeline>> PipelineLibrary::GetRenderPipeline(
     PipelineDescriptor descriptor) {
   auto promise = std::make_shared<std::promise<std::shared_ptr<Pipeline>>>();
   auto future = promise->get_future();

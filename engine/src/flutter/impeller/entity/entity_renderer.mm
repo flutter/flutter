@@ -6,6 +6,7 @@
 
 #include "flutter/fml/time/time_point.h"
 #include "impeller/compositor/command.h"
+#include "impeller/compositor/pipeline_builder.h"
 #include "impeller/compositor/sampler_descriptor.h"
 #include "impeller/compositor/surface.h"
 #include "impeller/compositor/vertex_buffer_builder.h"
@@ -25,8 +26,13 @@ EntityRenderer::EntityRenderer(std::string shaders_directory)
     return;
   }
 
-  box_primitive_ = std::make_shared<BoxPrimitive>(context);
-  if (!box_primitive_) {
+  using BoxPipelineBuilder =
+      PipelineBuilder<BoxVertexShader, BoxFragmentShader>;
+  auto desc = BoxPipelineBuilder::MakeDefaultPipelineDescriptor(*context);
+  box_pipeline_ =
+      context->GetPipelineLibrary()->GetRenderPipeline(std::move(desc)).get();
+
+  if (!box_pipeline_) {
     return;
   }
 
@@ -67,8 +73,8 @@ bool EntityRenderer::OnRender(const Surface& surface, RenderPass& pass) {
 
   Command cmd;
   cmd.label = "Box";
-  cmd.pipeline = box_primitive_->GetPipeline();
-  cmd.vertex_bindings.buffers[box_primitive_->GetVertexBufferIndex()] =
+  cmd.pipeline = box_pipeline_;
+  cmd.vertex_bindings.buffers[VertexDescriptor::kReservedVertexBufferIndex] =
       vertex_buffer_.vertex_buffer;
   cmd.vertex_bindings.buffers[BoxVertexShader::kUniformUniformBuffer.binding] =
       pass.GetTransientsBuffer().EmplaceUniform(uniforms);
