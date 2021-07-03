@@ -104,9 +104,14 @@ void runNext({
         }
       }
 
-      if (state.engine.cherrypicks.isEmpty) {
-        stdio.printStatus('This release has no engine cherrypicks.');
-      } else if (unappliedCherrypicks.isEmpty) {
+      if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
+        stdio.printStatus(
+          'This release has no engine cherrypicks. No Engine PR is necessary.\n',
+        );
+        break;
+      }
+
+      if (unappliedCherrypicks.isEmpty) {
         stdio.printStatus('All engine cherrypicks have been auto-applied by '
             'the conductor.\n');
       } else {
@@ -150,7 +155,8 @@ void runNext({
       // TODO read final engine hash, either from remote or from user and store
       // in state
       stdio.printStatus(<String>[
-        'You must have validated pre-submit CI for your engine PR, ',
+        'You must validate pre-submit CI for your engine PR, merge it, and codesign',
+        'binaries before proceeding.\n',
       ].join('\n'));
       if (autoAccept == false) {
         // TODO(fujino): actually test if binaries have been codesigned on macOS
@@ -166,7 +172,6 @@ void runNext({
       }
       break;
     case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-      // TODO roll engine hash, read from state
       final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
       for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
         if (!finishedStates.contains(cherrypick.state)) {
@@ -174,30 +179,31 @@ void runNext({
         }
       }
 
-      if (state.framework.cherrypicks.isEmpty) {
-        stdio.printStatus('This release has no framework cherrypicks.');
-      } else if (unappliedCherrypicks.isEmpty) {
-        stdio.printStatus('All framework cherrypicks have been auto-applied by '
-            'the conductor.\n');
-      } else {
+      if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
         stdio.printStatus(
-          'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
-        stdio.printStatus('These must be applied manually in the directory '
-          '${state.framework.checkoutPath} before proceeding.\n');
-      }
-
-      if (autoAccept == false) {
-        final bool response = prompt(
-            'Are you ready to push your framework branch to the repository '
-            '${state.framework.mirror.url}?',
-          stdio,
+          'This release has no engine cherrypicks, and thus the engine.version file\n'
+          'in the framework does not need to be updated.',
         );
-        if (!response) {
-          stdio.printError('Aborting command.');
-          writeStateToFile(stateFile, state, stdio.logs);
-          return;
+
+        if (state.framework.cherrypicks.isEmpty) {
+          stdio.printStatus(
+            'This release also has no framework cherrypicks. Therefore, a framework\n'
+            'pull request is not required.',
+          );
+          break;
         }
       }
+      final EngineRepository engine = EngineRepository(
+        checkouts,
+        initialRef: state.engine.candidateBranch,
+        upstreamRemote: Remote(
+          name: RemoteName.upstream,
+          url: state.engine.upstream.url,
+        ),
+        previousCheckoutLocation: state.engine.checkoutPath,
+      );
+
+      final String engineRevision = engine.reverseParse('HEAD');
 
       final Remote upstream = Remote(
         name: RemoteName.upstream,
@@ -210,6 +216,39 @@ void runNext({
         previousCheckoutLocation: state.framework.checkoutPath,
       );
       final String headRevision = framework.reverseParse('HEAD');
+
+      stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
+      framework.updateEngineRevision(engineRevision);
+      framework.commit('Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}', addFirst: true);
+
+      if (state.framework.cherrypicks.isEmpty) {
+        stdio.printStatus(
+          'This release has no framework cherrypicks. However, a framework PR is still\n'
+          'required to roll engine cherrypicks.',
+        );
+      } else {
+        if (unappliedCherrypicks.isEmpty) {
+          stdio.printStatus('All framework cherrypicks were auto-applied by the conductor.');
+        } else {
+          stdio.printStatus(
+            'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
+          stdio.printStatus('These must be applied manually in the directory '
+            '${state.framework.checkoutPath} before proceeding.\n');
+        }
+      }
+
+      if (autoAccept == false) {
+        final bool response = prompt(
+          'Are you ready to push your framework branch to the repository '
+          '${state.framework.mirror.url}?',
+          stdio,
+        );
+        if (!response) {
+          stdio.printError('Aborting command.');
+          writeStateToFile(stateFile, state, stdio.logs);
+          return;
+        }
+      }
 
       framework.pushRef(
         fromRef: headRevision,
