@@ -14,8 +14,6 @@ impeller_shaders("impeller_shaders") {
 
 impeller_component("primitives") {
   sources = [
-    "box_primitive.h",
-    "box_primitive.mm",
     "primitive.h",
     "primitive.mm",
   ]

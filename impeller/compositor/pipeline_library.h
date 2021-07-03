@@ -23,6 +23,9 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
   ~PipelineLibrary();
 
   std::future<std::shared_ptr<Pipeline>> GetRenderPipeline(
+      std::optional<PipelineDescriptor> descriptor);
+
+  std::future<std::shared_ptr<Pipeline>> GetRenderPipeline(
       PipelineDescriptor descriptor);
 
  private:
