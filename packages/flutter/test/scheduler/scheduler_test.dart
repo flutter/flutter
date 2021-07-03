@@ -143,6 +143,7 @@ void main() {
       buildFinish: 15000,
       rasterStart: 16000,
       rasterFinish: 20000,
+      rasterFinishWallTime: 20010,
       frameNumber: 1991
     )]);
 

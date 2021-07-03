@@ -835,7 +835,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56308
 
   group('TextPainter line-height', () {
-    test('half-leading', (){
+    test('half-leading', () {
       const TextStyle style = TextStyle(
         height: 20,
         fontSize: 1,
@@ -858,7 +858,7 @@ void main() {
       expect(insets.top, (20 - 1) / 2);
     });
 
-    test('half-leading with small height', (){
+    test('half-leading with small height', () {
       const TextStyle style = TextStyle(
         height: 0.1,
         fontSize: 10,
@@ -882,7 +882,7 @@ void main() {
       expect(insets.top, (1 - 10) / 2);
     });
 
-    test('half-leading with leading trim', (){
+    test('half-leading with leading trim', () {
       const TextStyle style = TextStyle(
         height: 0.1,
         fontSize: 10,
@@ -908,7 +908,7 @@ void main() {
       expect(glyphBox.topLeft, Offset.zero);
     });
 
-    test('TextLeadingDistribution falls back to paragraph style', (){
+    test('TextLeadingDistribution falls back to paragraph style', () {
       const TextStyle style = TextStyle(height: 20, fontSize: 1);
       final TextPainter painter = TextPainter()
         ..textDirection = TextDirection.ltr
@@ -928,7 +928,7 @@ void main() {
       expect(insets.top, (20 - 1) / 2);
     });
 
-    test('TextLeadingDistribution does nothing if height multiplier is null', (){
+    test('TextLeadingDistribution does nothing if height multiplier is null', () {
       const TextStyle style = TextStyle(fontSize: 1);
       final TextPainter painter = TextPainter()
         ..textDirection = TextDirection.ltr

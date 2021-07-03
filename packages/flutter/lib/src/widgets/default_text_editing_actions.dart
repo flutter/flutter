@@ -67,6 +67,9 @@ class DefaultTextEditingActions extends Actions{
     MoveSelectionToStartTextIntent: _MoveSelectionToStartTextAction(),
     MoveSelectionUpTextIntent: _MoveSelectionUpTextAction(),
     SelectAllTextIntent: _SelectAllTextAction(),
+    CopySelectionTextIntent: _CopySelectionTextAction(),
+    CutSelectionTextIntent: _CutSelectionTextAction(),
+    PasteTextIntent: _PasteTextAction(),
   };
 }
 
@@ -293,9 +296,31 @@ class _MoveSelectionToStartTextAction extends TextEditingAction<MoveSelectionToS
   }
 }
 
+
 class _SelectAllTextAction extends TextEditingAction<SelectAllTextIntent> {
   @override
   Object? invoke(SelectAllTextIntent intent, [BuildContext? context]) {
     textEditingActionTarget!.renderEditable.selectAll(SelectionChangedCause.keyboard);
+  }
+}
+
+class _CopySelectionTextAction extends TextEditingAction<CopySelectionTextIntent> {
+  @override
+  Object? invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.copySelection();
+  }
+}
+
+class _CutSelectionTextAction extends TextEditingAction<CutSelectionTextIntent> {
+  @override
+  Object? invoke(CutSelectionTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.cutSelection(SelectionChangedCause.keyboard);
+  }
+}
+
+class _PasteTextAction extends TextEditingAction<PasteTextIntent> {
+  @override
+  Object? invoke(PasteTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.pasteText(SelectionChangedCause.keyboard);
   }
 }
