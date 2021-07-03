@@ -5,6 +5,7 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "gtest/gtest.h"
+#include "impeller/compositor/renderer.h"
 
 namespace impeller {
 
@@ -14,9 +15,13 @@ class Playground : public ::testing::Test {
 
   ~Playground();
 
-  bool OpenPlaygroundHere(std::function<bool()> closure);
+  std::shared_ptr<Context> GetContext() const;
+
+  bool OpenPlaygroundHere(Renderer::RenderCallback render_callback);
 
  private:
+  Renderer renderer_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(Playground);
 };
 

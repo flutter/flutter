@@ -3,14 +3,11 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
-#include "impeller/playground/playground.h"
 
 namespace impeller {
 namespace testing {
 
-TEST_F(Playground, CanCreateEntity) {
-  OpenPlaygroundHere([]() { return true; });
-}
+//
 
 }  // namespace testing
 }  // namespace impeller
