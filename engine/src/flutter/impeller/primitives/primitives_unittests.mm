@@ -45,8 +45,6 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
   ASSERT_TRUE(vertex_buffer);
   Renderer::RenderCallback callback = [&](const Surface& surface,
                                           RenderPass& pass) {
-    pass.SetLabel("EntityRenderer Render Pass");
-
     BoxVertexShader::UniformBuffer uniforms;
 
     uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
