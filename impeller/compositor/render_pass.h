@@ -24,7 +24,7 @@ class CommandBuffer;
 struct RenderPassAttachment {
   std::shared_ptr<Texture> texture;
   LoadAction load_action = LoadAction::kDontCare;
-  StoreAction store_action = StoreAction::kDontCare;
+  StoreAction store_action = StoreAction::kStore;
 
   constexpr operator bool() const { return static_cast<bool>(texture); }
 };
