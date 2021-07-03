@@ -8,9 +8,8 @@
 
 namespace impeller {
 
-Surface::Surface(RenderPassDescriptor desc,
-                 std::function<bool(void)> present_callback)
-    : desc_(std::move(desc)), present_callback_(present_callback) {
+Surface::Surface(RenderPassDescriptor target_desc)
+    : desc_(std::move(target_desc)) {
   if (auto size = desc_.GetColorAttachmentSize(0u); size.has_value()) {
     size_ = size.value();
   } else {
@@ -26,21 +25,11 @@ const Size& Surface::GetSize() const {
   return size_;
 }
 
-bool Surface::Present() const {
-  auto callback = present_callback_;
-
-  if (!callback) {
-    return false;
-  }
-
-  return callback();
-}
-
 bool Surface::IsValid() const {
   return is_valid_;
 }
 
-const RenderPassDescriptor& Surface::GetRenderPassDescriptor() const {
+const RenderPassDescriptor& Surface::GetTargetRenderPassDescriptor() const {
   return desc_;
 }
 

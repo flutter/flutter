@@ -25,10 +25,11 @@ Renderer::Renderer(std::string shaders_directory)
 Renderer::~Renderer() = default;
 
 bool Renderer::IsValid() const {
-  return is_valid_ && OnIsValid();
+  return is_valid_;
 }
 
-bool Renderer::Render(const Surface& surface) {
+bool Renderer::Render(const Surface& surface,
+                      RenderCallback render_callback) const {
   if (!IsValid()) {
     return false;
   }
@@ -44,16 +45,12 @@ bool Renderer::Render(const Surface& surface) {
   }
 
   auto render_pass =
-      command_buffer->CreateRenderPass(surface.GetRenderPassDescriptor());
+      command_buffer->CreateRenderPass(surface.GetTargetRenderPassDescriptor());
   if (!render_pass) {
     return false;
   }
 
-  if (!OnRender(surface, *render_pass)) {
-    return false;
-  }
-
-  if (!surface.Present()) {
+  if (render_callback && !render_callback(surface, *render_pass)) {
     return false;
   }
 

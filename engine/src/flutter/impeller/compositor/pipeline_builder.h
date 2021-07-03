@@ -6,6 +6,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
+#include "impeller/base/base.h"
 #include "impeller/compositor/context.h"
 #include "impeller/compositor/pipeline_descriptor.h"
 #include "impeller/compositor/shader_library.h"
@@ -84,7 +85,7 @@ struct PipelineBuilder {
       // TODO(csg): This can be easily reflected but we are sticking to the
       // convention that the first stage output is the color output.
       ColorAttachmentDescriptor color0;
-      color0.format = PixelFormat::kPixelFormat_B8G8R8A8_UNormInt_SRGB;
+      color0.format = PixelFormat::kPixelFormat_B8G8R8A8_UNormInt;
       desc.SetColorAttachmentDescriptor(0u, std::move(color0));
     }
 
@@ -94,10 +95,10 @@ struct PipelineBuilder {
       // TODO(csg): Make this configurable if possible as the D32 component is
       // wasted. This can even be moved out of the "default" descriptor
       // construction as a case can be made that this is caller responsibility.
-      const auto combined_depth_stencil_format =
-          PixelFormat::kPixelFormat_D32_Float_S8_UNormInt;
-      desc.SetDepthPixelFormat(combined_depth_stencil_format);
-      desc.SetStencilPixelFormat(combined_depth_stencil_format);
+      // const auto combined_depth_stencil_format =
+      //     PixelFormat::kPixelFormat_D32_Float_S8_UNormInt;
+      // desc.SetDepthPixelFormat(combined_depth_stencil_format);
+      // desc.SetStencilPixelFormat(combined_depth_stencil_format);
     }
 
     return desc;
