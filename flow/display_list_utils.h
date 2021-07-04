@@ -53,6 +53,7 @@ class IngoreAttributeDispatchHelper : public virtual Dispatcher {
   void setShader(sk_sp<SkShader> shader) override {}
   void setImageFilter(sk_sp<SkImageFilter> filter) override {}
   void setColorFilter(sk_sp<SkColorFilter> filter) override {}
+  void setPathEffect(sk_sp<SkPathEffect> effect) override {}
   void setMaskFilter(sk_sp<SkMaskFilter> filter) override {}
   void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override {}
 };
@@ -109,6 +110,7 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
   void setShader(sk_sp<SkShader> shader) override;
   void setImageFilter(sk_sp<SkImageFilter> filter) override;
   void setColorFilter(sk_sp<SkColorFilter> filter) override;
+  void setPathEffect(sk_sp<SkPathEffect> effect) override;
   void setMaskFilter(sk_sp<SkMaskFilter> filter) override;
   void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override;
 

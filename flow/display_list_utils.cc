@@ -70,6 +70,9 @@ void SkPaintDispatchHelper::setColorFilter(sk_sp<SkColorFilter> filter) {
   color_filter_ = filter;
   paint_.setColorFilter(makeColorFilter());
 }
+void SkPaintDispatchHelper::setPathEffect(sk_sp<SkPathEffect> effect) {
+  paint_.setPathEffect(effect);
+}
 void SkPaintDispatchHelper::setMaskFilter(sk_sp<SkMaskFilter> filter) {
   paint_.setMaskFilter(filter);
 }
