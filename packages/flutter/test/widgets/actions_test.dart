@@ -1057,7 +1057,7 @@ void main() {
                             builder: (BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
-                            }
+                            },
                           ),
                         );
                       },
@@ -1066,7 +1066,7 @@ void main() {
                 },
               ),
             );
-          }
+          },
         ),
       );
 
@@ -1116,7 +1116,7 @@ void main() {
                             builder: (BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
-                            }
+                            },
                           ),
                         );
                       },
@@ -1125,7 +1125,7 @@ void main() {
                 },
               ),
             );
-          }
+          },
         ),
       );
 
@@ -1173,7 +1173,7 @@ void main() {
                             builder: (BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
-                            }
+                            },
                           ),
                         );
                       },
@@ -1182,7 +1182,7 @@ void main() {
                 },
               ),
             );
-          }
+          },
         ),
       );
 
@@ -1212,7 +1212,7 @@ void main() {
                             builder: (BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
-                            }
+                            },
                           ),
                         );
                       },
@@ -1221,7 +1221,7 @@ void main() {
                 },
               ),
             );
-          }
+          },
         ),
       );
 
@@ -1257,7 +1257,7 @@ void main() {
                             builder: (BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
-                            }
+                            },
                           ),
                         );
                       },
@@ -1266,7 +1266,7 @@ void main() {
                 },
               ),
             );
-          }
+          },
         ),
       );
 
@@ -1289,6 +1289,85 @@ void main() {
       expect(exception?.toString(), contains('debugAssertMutuallyRecursive'));
     });
 
+    testWidgets('Throws on invoking invalid override', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            return Actions(
+              actions: <Type, Action<Intent>> { LogIntent : TestContextAction() },
+              child: Builder(
+                builder: (BuildContext context) {
+                  return Actions(
+                    actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action1').makeOverridableAction(context) },
+                    child: Builder(
+                      builder: (BuildContext context1) {
+                        invokingContext = context1;
+                        return const SizedBox();
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      Object? exception;
+      try {
+        Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      } catch (e) {
+        exception = e;
+      }
+      expect(
+        exception?.toString(),
+        contains('cannot be handled by an Action of runtime type TestContextAction.'),
+      );
+    });
+
+    testWidgets('Make an overridable action overridable', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context1) {
+            return Actions(
+              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              child: Builder(
+                builder: (BuildContext context2) {
+                  return Actions(
+                    actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action2').makeOverridableAction(context2) },
+                    child: Builder(
+                      builder: (BuildContext context3) {
+                        return Actions(
+                          actions: <Type, Action<Intent>> {
+                            LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context1).makeOverridableAction(context2).makeOverridableAction(context3),
+                          },
+                          child: Builder(
+                            builder: (BuildContext context4) {
+                              invokingContext = context4;
+                              return const SizedBox();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      expect(invocations, <String>[
+        'action1.invokeAsOverride-pre-super',
+        'action2.invokeAsOverride-pre-super',
+        'action3.invoke',
+        'action2.invokeAsOverride-post-super',
+        'action1.invokeAsOverride-post-super',
+      ]);
+    });
+
     testWidgets('Overriding Actions can change the intent', (WidgetTester tester) async {
       final List<String> newLogChannel = <String>[];
       await tester.pumpWidget(
@@ -1308,7 +1387,7 @@ void main() {
                             builder: (BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
-                            }
+                            },
                           ),
                         );
                       },
@@ -1317,7 +1396,7 @@ void main() {
                 },
               ),
             );
-          }
+          },
         ),
       );
 

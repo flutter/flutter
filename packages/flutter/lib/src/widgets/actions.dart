@@ -82,7 +82,12 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 ///    a given [Intent].
 abstract class Action<T extends Intent> with Diagnosticable {
   Action();
-  factory Action.overrideableAction(Action<T> defaultAction, BuildContext lookupContext) => defaultAction.makeOverridableAction(lookupContext);
+  factory Action.overrideableAction({
+    required Action<T> defaultAction,
+    required BuildContext lookupContext,
+  }) {
+    return defaultAction.makeOverridableAction(lookupContext);
+  }
 
   final ObserverList<ActionListenerCallback> _listeners = ObserverList<ActionListenerCallback>();
 
@@ -930,12 +935,12 @@ class Actions extends StatefulWidget {
   // `_ActionsMarker`, and verify it has the right type parameter.
   static Action<T>? _castAction<T extends Intent>(_ActionsMarker actionsMarker, T intent) {
     final Action<Intent>? mappedAction = actionsMarker.actions[intent.runtimeType];
-    if (mappedAction is Action<T>) {
+    if (mappedAction is Action<T>?) {
       return mappedAction;
     } else {
       assert(
         false,
-        '$intent cannot be handled by an Action of runtiem type ${mappedAction.runtimeType}.'
+        '$intent cannot be handled by an Action of runtime type ${mappedAction.runtimeType}.'
       );
       return null;
     }
@@ -1857,11 +1862,7 @@ class _OverridableAction<T extends Intent> extends Action<T> with _OverridableAc
 
   @override
   Action<T> makeOverridableAction(BuildContext context) {
-    assert((context as Element).depth < (lookupContext as Element).depth);
-    final Action<T> overridableAction = super.makeOverridableAction(context);
-    assert(!identical(defaultAction, overridableAction));
-    assert(!identical(this, overridableAction));
-    return overridableAction;
+    return _OverridableAction<T>(defaultAction: defaultAction, lookupContext: context);
   }
 }
 
@@ -1886,11 +1887,6 @@ class _OverridableContextAction<T extends Intent> extends ContextAction<T> with 
 
   @override
   ContextAction<T> makeOverridableAction(BuildContext context) {
-    assert(context != lookupContext);
-    assert((context as Element).depth < (lookupContext as Element).depth);
-    final ContextAction<T> overridableAction = super.makeOverridableAction(context);
-    assert(!identical(defaultAction, overridableAction));
-    assert(!identical(this, overridableAction));
-    return overridableAction;
+    return _OverridableContextAction<T>(defaultAction: defaultAction, lookupContext: context);
   }
 }
