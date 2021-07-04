@@ -205,6 +205,7 @@ DEFINE_SET_CLEAR_SKREF_OP(Shader, shader)
 DEFINE_SET_CLEAR_SKREF_OP(ImageFilter, filter)
 DEFINE_SET_CLEAR_SKREF_OP(ColorFilter, filter)
 DEFINE_SET_CLEAR_SKREF_OP(MaskFilter, filter)
+DEFINE_SET_CLEAR_SKREF_OP(PathEffect, effect)
 #undef DEFINE_SET_CLEAR_SKREF_OP
 
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
@@ -1088,6 +1089,11 @@ void DisplayListBuilder::setColorFilter(sk_sp<SkColorFilter> filter) {
   filter  //
       ? Push<SetColorFilterOp>(0, std::move(filter))
       : Push<ClearColorFilterOp>(0);
+}
+void DisplayListBuilder::setPathEffect(sk_sp<SkPathEffect> effect) {
+  effect  //
+      ? Push<SetPathEffectOp>(0, std::move(effect))
+      : Push<ClearPathEffectOp>(0);
 }
 void DisplayListBuilder::setMaskFilter(sk_sp<SkMaskFilter> filter) {
   Push<SetMaskFilterOp>(0, std::move(filter));

@@ -265,8 +265,9 @@ class DisplayListCanvasRecorder
   static constexpr int kShaderNeeded_        = 1 << 7;
   static constexpr int kColorFilterNeeded_   = 1 << 8;
   static constexpr int kImageFilterNeeded_   = 1 << 9;
-  static constexpr int kMaskFilterNeeded_    = 1 << 10;
-  static constexpr int kDitherNeeded_        = 1 << 11;
+  static constexpr int kPathEffectNeeded_    = 1 << 10;
+  static constexpr int kMaskFilterNeeded_    = 1 << 11;
+  static constexpr int kDitherNeeded_        = 1 << 12;
   // clang-format on
 
   // Combinations of the above mask bits that are common to typical "draw"
@@ -278,10 +279,10 @@ class DisplayListCanvasRecorder
                                      kBlendNeeded_ | kInvertColorsNeeded_ |
                                      kColorFilterNeeded_ | kShaderNeeded_ |
                                      kDitherNeeded_ | kImageFilterNeeded_;
-  static constexpr int kDrawMask_ =
-      kPaintMask_ | kPaintStyleNeeded_ | kMaskFilterNeeded_;
-  static constexpr int kStrokeMask_ =
-      kPaintMask_ | kStrokeStyleNeeded_ | kMaskFilterNeeded_;
+  static constexpr int kDrawMask_ = kPaintMask_ | kPaintStyleNeeded_ |
+                                    kMaskFilterNeeded_ | kPathEffectNeeded_;
+  static constexpr int kStrokeMask_ = kPaintMask_ | kStrokeStyleNeeded_ |
+                                      kMaskFilterNeeded_ | kPathEffectNeeded_;
   static constexpr int kImageMask_ =
       kColorNeeded_ | kBlendNeeded_ | kInvertColorsNeeded_ |
       kColorFilterNeeded_ | kDitherNeeded_ | kImageFilterNeeded_ |
@@ -304,6 +305,7 @@ class DisplayListCanvasRecorder
   sk_sp<SkShader> current_shader_;
   sk_sp<SkColorFilter> current_color_filter_;
   sk_sp<SkImageFilter> current_image_filter_;
+  sk_sp<SkPathEffect> current_path_effect_;
   sk_sp<SkMaskFilter> current_mask_filter_;
 };
 

@@ -14,6 +14,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 #include "third_party/skia/include/core/SkVertices.h"
+#include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 
@@ -38,12 +39,24 @@ constexpr float stops[] = {
     0.5,
     1.0,
 };
+
+// clang-format off
 constexpr float rotate_color_matrix[20] = {
-    0, 1, 0, 0, 0,  //
-    0, 0, 1, 0, 0,  //
-    1, 0, 0, 0, 0,  //
-    0, 0, 0, 1, 0,  //
+    0, 1, 0, 0, 0,
+    0, 0, 1, 0, 0,
+    1, 0, 0, 0, 0,
+    0, 0, 0, 1, 0,
 };
+constexpr float invert_color_matrix[20] = {
+    -1.0,    0,    0, 1.0,   0,
+       0, -1.0,    0, 1.0,   0,
+       0,    0, -1.0, 1.0,   0,
+     1.0,  1.0,  1.0, 1.0,   0,
+};
+// clang-format on
+
+const SkScalar TestDashes1[] = {4.0, 2.0};
+const SkScalar TestDashes2[] = {1.0, 1.5};
 
 constexpr SkPoint TestPoints[] = {
     {10, 10},
@@ -80,10 +93,18 @@ static const sk_sp<SkShader> TestShader3 =
                                  SkTileMode::kDecal,
                                  0,
                                  nullptr);
-static const sk_sp<SkImageFilter> TestImageFilter =
+static const sk_sp<SkImageFilter> TestImageFilter1 =
     SkImageFilters::Blur(5.0, 5.0, SkTileMode::kDecal, nullptr, nullptr);
-static const sk_sp<SkColorFilter> TestColorFilter =
+static const sk_sp<SkImageFilter> TestImageFilter2 =
+    SkImageFilters::Blur(5.0, 5.0, SkTileMode::kClamp, nullptr, nullptr);
+static const sk_sp<SkColorFilter> TestColorFilter1 =
     SkColorFilters::Matrix(rotate_color_matrix);
+static const sk_sp<SkColorFilter> TestColorFilter2 =
+    SkColorFilters::Matrix(invert_color_matrix);
+static const sk_sp<SkPathEffect> TestPathEffect1 =
+    SkDashPathEffect::Make(TestDashes1, 2, 0.0f);
+static const sk_sp<SkPathEffect> TestPathEffect2 =
+    SkDashPathEffect::Make(TestDashes2, 2, 0.0f);
 static const sk_sp<SkMaskFilter> TestMaskFilter =
     SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, 5.0);
 constexpr SkRect TestBounds = SkRect::MakeLTRB(10, 10, 50, 60);
@@ -290,12 +311,20 @@ std::vector<DisplayListInvocationGroup> allGroups = {
   },
   { "SetImageFilter", {
       {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(nullptr);}},
-      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(TestImageFilter);}},
+      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(TestImageFilter1);}},
+      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(TestImageFilter2);}},
     }
   },
   { "SetColorFilter", {
       {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setColorFilter(nullptr);}},
-      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setColorFilter(TestColorFilter);}},
+      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setColorFilter(TestColorFilter1);}},
+      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setColorFilter(TestColorFilter2);}},
+    }
+  },
+  { "SetPathEffect", {
+      {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setPathEffect(nullptr);}},
+      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setPathEffect(TestPathEffect1);}},
+      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setPathEffect(TestPathEffect2);}},
     }
   },
   { "SetMaskFilter", {

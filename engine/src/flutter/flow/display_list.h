@@ -10,6 +10,7 @@
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
+#include "third_party/skia/include/core/SkPathEffect.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkVertices.h"
@@ -84,6 +85,8 @@ namespace flutter {
   V(ClearColorFilter)               \
   V(SetImageFilter)                 \
   V(ClearImageFilter)               \
+  V(SetPathEffect)                  \
+  V(ClearPathEffect)                \
                                     \
   V(ClearMaskFilter)                \
   V(SetMaskFilter)                  \
@@ -230,10 +233,11 @@ class Dispatcher {
   virtual void setColor(SkColor color) = 0;
   virtual void setBlendMode(SkBlendMode mode) = 0;
   virtual void setFilterQuality(SkFilterQuality quality) = 0;
-  virtual void setShader(const sk_sp<SkShader> shader) = 0;
-  virtual void setImageFilter(const sk_sp<SkImageFilter> filter) = 0;
-  virtual void setColorFilter(const sk_sp<SkColorFilter> filter) = 0;
-  virtual void setMaskFilter(const sk_sp<SkMaskFilter> filter) = 0;
+  virtual void setShader(sk_sp<SkShader> shader) = 0;
+  virtual void setImageFilter(sk_sp<SkImageFilter> filter) = 0;
+  virtual void setColorFilter(sk_sp<SkColorFilter> filter) = 0;
+  virtual void setPathEffect(sk_sp<SkPathEffect> effect) = 0;
+  virtual void setMaskFilter(sk_sp<SkMaskFilter> filter) = 0;
   virtual void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) = 0;
 
   virtual void save() = 0;
@@ -344,6 +348,7 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
   void setShader(sk_sp<SkShader> shader) override;
   void setImageFilter(sk_sp<SkImageFilter> filter) override;
   void setColorFilter(sk_sp<SkColorFilter> filter) override;
+  void setPathEffect(sk_sp<SkPathEffect> effect) override;
   void setMaskFilter(sk_sp<SkMaskFilter> filter) override;
   void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override;
 
