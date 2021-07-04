@@ -81,6 +81,9 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 ///  * [ActionDispatcher], a class that takes an [Action] and invokes it, passing
 ///    a given [Intent].
 abstract class Action<T extends Intent> with Diagnosticable {
+  Action();
+  factory Action.overrideableAction(Action<T> defaultAction, BuildContext lookupContext) => defaultAction.makeOverridableAction(lookupContext);
+
   final ObserverList<ActionListenerCallback> _listeners = ObserverList<ActionListenerCallback>();
 
   /// Gets the type of intent this action responds to.
@@ -155,12 +158,15 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// The [fromAction] parameter represents the overridden [Action]. To invoke
   /// the "super" implementation in this method, call `fromAction.invoke`.
   ///
-  /// This method is typically invoked in the overridden action's [invoke] or
-  /// [invokeAsOverride] method, rather than directly by an [ActionDispatcher].
+  /// The [invokeAsOverride] method is typically invoked in the overridden
+  /// action's [invoke] or [invokeAsOverride] method, rather than directly by an
+  /// [ActionDispatcher].
   ///
-  /// See also the [makeOverridableAction] method, which can be used to create
-  /// an overridable [Action] that calls it override's [invokeAsOverride]
-  /// method.
+  /// See also:
+  ///
+  ///  * The [makeOverridableAction] method, which can be used to create an
+  ///    overridable [Action] that calls it override's [invokeAsOverride]
+  ///    method.
   @protected
   Object? invokeAsOverride(T intent, Action<T> fromAction) => invoke(intent);
   /// Register a callback to listen for changes to the state of this action.
@@ -253,14 +259,13 @@ abstract class Action<T extends Intent> with Diagnosticable {
     }
   }
 
-  /// Creates an overridable [Action] that allows itself to be overridden by the
-  /// closest ancestor [Action] in the given [context], if it exists.
+  /// Creates an [Action] that allows itself to be overridden by the closest
+  /// ancestor [Action] in the given [context], if one exists.
   ///
   /// When invoked, the resulting [Action] tries to find the closest enabled
   /// [Action] in [context] that handles the same type of [Intent] as this
   /// [Action], then calls its [Action.invokeAsOverride] method. When no
-  /// enabled override [Action]s can be found, the resulting action has the same
-  /// behavior as this [Action].
+  /// enabled override [Action]s can be found, it invokes this [Action].
   ///
   /// This is useful for providing a set of default [Action]s in a leaf widget
   /// that allows further overriding,
@@ -921,16 +926,29 @@ class Actions extends StatefulWidget {
     return action;
   }
 
+  // Find the [Action] that handles the given [intent] in the given
+  // `_ActionsMarker`, and verify it has the right type parameter.
+  static Action<T>? _castAction<T extends Intent>(_ActionsMarker actionsMarker, T intent) {
+    final Action<Intent>? mappedAction = actionsMarker.actions[intent.runtimeType];
+    if (mappedAction is Action<T>) {
+      return mappedAction;
+    } else {
+      assert(
+        false,
+        '$intent cannot be handled by an Action of runtiem type ${mappedAction.runtimeType}.'
+      );
+      return null;
+    }
+  }
+
   static Action<T>? _maybeFindEnabled<T extends Intent>(BuildContext context, T intent) {
     Action<T>? action;
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
-      final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
-      if (result != null) {
-        if (result.isEnabled(intent)) {
-          action = result;
-          return true;
-        }
+      final Action<T>? result = _castAction(actions, intent);
+      if (result != null && result.isEnabled(intent)) {
+        action = result;
+        return true;
       }
       return false;
     });
@@ -976,7 +994,7 @@ class Actions extends StatefulWidget {
 
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
-      final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
+      final Action<T>? result = _castAction(actions, intent);
       if (result != null) {
         actionElement = element;
         if (result.isEnabled(intent)) {
