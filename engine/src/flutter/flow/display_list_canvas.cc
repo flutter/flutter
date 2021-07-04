@@ -471,6 +471,11 @@ void DisplayListCanvasRecorder::RecordPaintAttributes(const SkPaint* paint,
     builder_->setImageFilter(current_image_filter_ =
                                  sk_ref_sp(paint->getImageFilter()));
   }
+  if ((dataNeeded & kPathEffectNeeded_) != 0 &&
+      current_path_effect_.get() != paint->getPathEffect()) {
+    builder_->setPathEffect(current_path_effect_ =
+                                sk_ref_sp(paint->getPathEffect()));
+  }
   if ((dataNeeded & kMaskFilterNeeded_) != 0 &&
       current_mask_filter_.get() != paint->getMaskFilter()) {
     builder_->setMaskFilter(current_mask_filter_ =
