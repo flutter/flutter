@@ -23,12 +23,15 @@ executable("impeller_unittests") {
   testonly = true
 
   deps = [
+    "base:base_unittests",
     "compiler:compiler_unittests",
     "compositor:compositor_unittests",
     "entity:entity_unittests",
     "fixtures",
     "geometry:geometry_unittests",
+    "image:image_unittests",
     "playground",
     "primitives:primitives_unittests",
+    "shader_glue:shader_glue_unittests",
   ]
 }

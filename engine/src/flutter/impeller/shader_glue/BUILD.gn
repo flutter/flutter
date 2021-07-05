@@ -20,3 +20,12 @@ impeller_component("shader_glue") {
 
   deps = [ "../geometry" ]
 }
+
+impeller_component("shader_glue_unittests") {
+  testonly = true
+  sources = []
+  deps = [
+    ":shader_glue",
+    "//flutter/testing",
+  ]
+}

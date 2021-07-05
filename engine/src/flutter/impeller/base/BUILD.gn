@@ -5,13 +5,19 @@
 import("../tools/impeller.gni")
 
 impeller_component("base") {
-  # Only the umbrella header may be imported.
-  public = [ "base.h" ]
-
   sources = [
     "base.h",
     "config.h",
     "strings.cc",
     "strings.h",
+  ]
+}
+
+impeller_component("base_unittests") {
+  testonly = true
+  sources = []
+  deps = [
+    ":base",
+    "//flutter/testing",
   ]
 }
