@@ -4,6 +4,7 @@
 
 #include "impeller/compositor/allocator.h"
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "impeller/compositor/buffer.h"
 #include "impeller/compositor/device_buffer.h"
@@ -27,17 +28,41 @@ bool Allocator::IsValid() const {
 
 static MTLResourceOptions ResourceOptionsFromStorageType(StorageMode type) {
   switch (type) {
-    case StorageMode::kHostCoherent:
+    case StorageMode::kHostVisible:
+#if OS_IOS
+      return MTLStorageModeShared;
+#else
       return MTLResourceStorageModeManaged;
+#endif
     case StorageMode::kDevicePrivate:
       return MTLResourceStorageModePrivate;
+    case StorageMode::kDeviceTransient:
+#if OS_IOS
+      return MTLStorageModeMemoryless;
+#else
+      return MTLResourceStorageModePrivate;
+#endif
   }
+}
+
+bool Allocator::RequiresExplicitHostSynchronization(StorageMode mode) {
+  if (mode != StorageMode::kHostVisible) {
+    return false;
+  }
+
+#if OS_IOS
+  // StorageMode::kHostVisible is MTLStorageModeShared already.
+  return false;
+#else
+  // StorageMode::kHostVisible is MTLResourceStorageModeManaged.
+  return true;
+#endif
 }
 
 std::shared_ptr<DeviceBuffer> Allocator::CreateBufferWithCopy(
     const uint8_t* buffer,
     size_t length) {
-  auto new_buffer = CreateBuffer(StorageMode::kHostCoherent, length);
+  auto new_buffer = CreateBuffer(StorageMode::kHostVisible, length);
 
   if (!new_buffer) {
     return nullptr;
