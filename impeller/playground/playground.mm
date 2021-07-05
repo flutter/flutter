@@ -76,8 +76,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   ::glfwWindowHint(GLFW_RESIZABLE, false);
 
   auto window_title = GetWindowTitle(flutter::testing::GetCurrentTestName());
-  auto window =
-      ::glfwCreateWindow(1920, 1080, window_title.c_str(), NULL, NULL);
+  auto window = ::glfwCreateWindow(1024, 768, window_title.c_str(), NULL, NULL);
   if (!window) {
     return false;
   }

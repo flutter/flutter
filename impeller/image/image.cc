@@ -22,19 +22,19 @@ ImageResult Image::Decode() const {
   int comps = 0;
 
   stbi_uc* decoded =
-      stbi_load_from_memory(source_->GetMapping(),  // Source Data
-                            source_->GetSize(),     // Source Data Size
-                            &width,                 // Out: Width
-                            &height,                // Out: Height
-                            &comps,                 // Out: Components
-                            STBI_default);
+      ::stbi_load_from_memory(source_->GetMapping(),  // Source Data
+                              source_->GetSize(),     // Source Data Size
+                              &width,                 // Out: Width
+                              &height,                // Out: Height
+                              &comps,                 // Out: Components
+                              STBI_default);
 
   if (decoded == nullptr) {
     FML_LOG(ERROR) << "Could not decode image from host memory.";
     return {};
   }
 
-  auto destinationAllocation = std::make_shared<const fml::NonOwnedMapping>(
+  auto dest_allocation = std::make_shared<const fml::NonOwnedMapping>(
       decoded,                                   // bytes
       width * height * comps * sizeof(stbi_uc),  // byte size
       [](const uint8_t* data, size_t size) {
@@ -71,9 +71,9 @@ ImageResult Image::Decode() const {
   }
 
   return ImageResult{
-      Size{static_cast<Scalar>(width), static_cast<Scalar>(height)},  // size
-      components,                       // components
-      std::move(destinationAllocation)  // allocation
+      ISize{width, height},       // size
+      components,                 // components
+      std::move(dest_allocation)  // allocation
   };
 }
 

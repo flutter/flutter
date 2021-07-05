@@ -27,6 +27,18 @@ class DeviceBuffer final : public Buffer,
                                     Range source_range,
                                     size_t offset = 0u);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Create a texture whose contents are the same as that of this
+  ///             buffer. Changes to either the contents of the texture or the
+  ///             buffer will be shared. When using buffer backed textures,
+  ///             implementations may have to disable certain optimizations.
+  ///
+  /// @param[in]  desc    The description of the texture.
+  /// @param[in]  offset  The offset of the texture data within buffer.
+  ///
+  /// @return     The texture whose contents are backed by (a part of) this
+  ///             buffer.
+  ///
   std::shared_ptr<Texture> MakeTexture(TextureDescriptor desc,
                                        size_t offset = 0u) const;
 

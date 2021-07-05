@@ -9,6 +9,7 @@
 #include <string>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/mapping.h"
 
 namespace impeller {
 
@@ -56,6 +57,9 @@ class Allocator {
 
   std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(const uint8_t* buffer,
                                                      size_t length);
+
+  std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(
+      const fml::Mapping& mapping);
 
   static bool RequiresExplicitHostSynchronization(StorageMode mode);
 

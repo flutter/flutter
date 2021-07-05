@@ -8,21 +8,23 @@ namespace impeller {
 
 ImageResult::ImageResult() = default;
 
-ImageResult::ImageResult(Size size,
+ImageResult::ImageResult(ISize size,
                          Components components,
                          std::shared_ptr<const fml::Mapping> allocation)
-    : success_(true),
-      size_(size),
-      components_(components),
-      allocation_(std::move(allocation)) {}
+    : size_(size), components_(components), allocation_(std::move(allocation)) {
+  if (!allocation_ || !size.IsPositive()) {
+    return;
+  }
+  is_valid_ = true;
+}
 
 ImageResult::~ImageResult() = default;
 
-bool ImageResult::WasSuccessful() const {
-  return success_;
+bool ImageResult::IsValid() const {
+  return is_valid_;
 }
 
-const Size& ImageResult::GetSize() const {
+const ISize& ImageResult::GetSize() const {
   return size_;
 }
 
@@ -30,7 +32,7 @@ ImageResult::Components ImageResult::GetComponents() const {
   return components_;
 }
 
-const std::shared_ptr<const fml::Mapping>& ImageResult::Allocation() const {
+const std::shared_ptr<const fml::Mapping>& ImageResult::GetAllocation() const {
   return allocation_;
 }
 
