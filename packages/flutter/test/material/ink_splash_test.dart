@@ -12,14 +12,15 @@ void main() {
   testWidgets('InkSplash receives textDirection', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-      appBar: AppBar(title: const Text('Button Border Test')),
-      body: Center(
-        child: ElevatedButton(
-          child: const Text('Test'),
-          onPressed: () { },
+        appBar: AppBar(title: const Text('Button Border Test')),
+        body: Center(
+          child: ElevatedButton(
+            child: const Text('Test'),
+            onPressed: () { },
+          ),
         ),
       ),
-    )));
+    ));
     await tester.tap(find.text('Test'));
     // start ink animation which asserts for a textDirection.
     await tester.pumpAndSettle(const Duration(milliseconds: 30));

@@ -147,7 +147,12 @@ abstract class FlutterDriver {
     Map<String, dynamic>? headers,
   }) async {
     if (Platform.environment['FLUTTER_WEB_TEST'] != null) {
-      return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
+      return WebFlutterDriver.connectWeb(
+        hostUrl: dartVmServiceUrl,
+        timeout: timeout,
+        printCommunication: printCommunication,
+        logCommunicationToFile: logCommunicationToFile,
+      );
     }
     return VMServiceFlutterDriver.connect(
       dartVmServiceUrl: dartVmServiceUrl,
@@ -169,8 +174,12 @@ abstract class FlutterDriver {
   async_io.WebDriver get webDriver => throw UnimplementedError();
 
   /// Enables accessibility feature.
+  @Deprecated(
+    'Call setSemantics(true) instead. '
+    'This feature was deprecated after v2.3.0-12.1.pre.'
+  )
   Future<void> enableAccessibility() async {
-    throw UnimplementedError();
+    await setSemantics(true);
   }
 
   /// Sends [command] to the Flutter Driver extensions.
@@ -218,6 +227,11 @@ abstract class FlutterDriver {
   /// Waits until [finder] can no longer locate the target.
   Future<void> waitForAbsent(SerializableFinder finder, { Duration? timeout }) async {
     await sendCommand(WaitForAbsent(finder, timeout: timeout));
+  }
+
+  /// Waits until [finder] is tappable.
+  Future<void> waitForTappable(SerializableFinder finder, { Duration? timeout }) async {
+    await sendCommand(WaitForTappable(finder, timeout: timeout));
   }
 
   /// Waits until the given [waitCondition] is satisfied.
@@ -512,6 +526,13 @@ abstract class FlutterDriver {
   ///
   /// Returns true when the call actually changed the state from on to off or
   /// vice versa.
+  ///
+  /// Does not enable or disable the assistive technology installed on the
+  /// device. For example, this does not enable VoiceOver on iOS, TalkBack on
+  /// Android, or NVDA on Windows.
+  ///
+  /// Enabling semantics on the web causes the engine to render ARIA-annotated
+  /// HTML.
   Future<bool> setSemantics(bool enabled, { Duration? timeout }) async {
     final SetSemanticsResult result = SetSemanticsResult.fromJson(await sendCommand(SetSemantics(enabled, timeout: timeout)));
     return result.changedState;
@@ -721,7 +742,8 @@ abstract class FlutterDriver {
 class CommonFinders {
   const CommonFinders._();
 
-  /// Finds [Text] and [EditableText] widgets containing string equal to [text].
+  /// Finds [widgets.Text] and [widgets.EditableText] widgets containing string
+  /// equal to [text].
   SerializableFinder text(String text) => ByText(text);
 
   /// Finds widgets by [key]. Only [String] and [int] values can be used.
@@ -793,5 +815,5 @@ class DriverOffset {
   }
 
   @override
-  int get hashCode => dx.hashCode ^ dy.hashCode;
+  int get hashCode => Object.hash(dx, dy);
 }

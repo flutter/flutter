@@ -4,10 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
-
 
 export 'package:flutter/services.dart' show TextEditingValue, TextInputAction;
 
@@ -23,9 +22,9 @@ export 'package:flutter/services.dart' show TextEditingValue, TextInputAction;
 ///
 /// See [register], [unregister], and [isRegistered] for details.
 ///
-/// The [updateEditingValue], [enterText], and [receiveAction] methods can be
-/// used even when the [TestTextInput] is not registered. All other methods
-/// will assert if [isRegistered] is false.
+/// The [enterText], [updateEditingValue], [receiveAction], and
+/// [closeConnection] methods can be used even when the [TestTextInput] is not
+/// registered. All other methods will assert if [isRegistered] is false.
 ///
 /// See also:
 ///
@@ -46,26 +45,11 @@ class TestTextInput {
   /// first be requested, e.g. using [WidgetTester.showKeyboard].
   final VoidCallback? onCleared;
 
-  /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get _binaryMessenger => ServicesBinding.instance!.defaultBinaryMessenger;
-
   /// Log for method calls.
   ///
   /// For all registered channels, handled calls are added to the list. Can
   /// be cleaned using `log.clear()`.
   final List<MethodCall> log = <MethodCall>[];
-
-  /// Resets any internal state of this object.
-  ///
-  /// This method is invoked by the testing framework between tests. It should
-  /// not ordinarily be called by tests directly.
-  void reset() {
-    log.clear();
-    editingState = null;
-    setClientArgs = null;
-    _client = 0;
-    _isVisible = false;
-  }
 
   /// Installs this object as a mock handler for [SystemChannels.textInput].
   ///
@@ -88,13 +72,13 @@ class TestTextInput {
   /// value when [TestWidgetsFlutterBinding.registerTestTextInput] is true.
   bool get isRegistered => SystemChannels.textInput.checkMockMethodCallHandler(_handleTextInputCall);
 
+  int? _client;
+
   /// Whether there are any active clients listening to text input.
   bool get hasAnyClients {
     assert(isRegistered);
-    return _client > 0;
+    return _client != null && _client! > 0;
   }
-
-  int _client = 0;
 
   /// The last set of arguments supplied to the `TextInput.setClient` and
   /// `TextInput.updateConfig` methods of this stub implementation.
@@ -109,21 +93,43 @@ class TestTextInput {
   /// [TextEditingValue.text] that was sent to the embedder.
   Map<String, dynamic>? editingState;
 
+  /// Whether the onscreen keyboard is visible to the user.
+  ///
+  /// Specifically, this reflects the last call to `TextInput.show` or
+  /// `TextInput.hide` received by the stub implementation.
+  bool get isVisible {
+    assert(isRegistered);
+    return _isVisible;
+  }
+  bool _isVisible = false;
+
+  /// Resets any internal state of this object.
+  ///
+  /// This method is invoked by the testing framework between tests. It should
+  /// not ordinarily be called by tests directly.
+  void reset() {
+    log.clear();
+    _client = null;
+    setClientArgs = null;
+    editingState = null;
+    _isVisible = false;
+  }
+
   Future<dynamic> _handleTextInputCall(MethodCall methodCall) async {
     log.add(methodCall);
     switch (methodCall.method) {
       case 'TextInput.setClient':
-        _client = methodCall.arguments[0] as int;
-        setClientArgs = methodCall.arguments[1] as Map<String, dynamic>;
+        final List<dynamic> arguments = methodCall.arguments as List<dynamic>;
+        _client = arguments[0] as int;
+        setClientArgs = arguments[1] as Map<String, dynamic>;
         break;
       case 'TextInput.updateConfig':
         setClientArgs = methodCall.arguments as Map<String, dynamic>;
         break;
       case 'TextInput.clearClient':
-        _client = 0;
+        _client = null;
         _isVisible = false;
-        if (onCleared != null)
-          onCleared!();
+        onCleared?.call();
         break;
       case 'TextInput.setEditingState':
         editingState = methodCall.arguments as Map<String, dynamic>;
@@ -137,16 +143,6 @@ class TestTextInput {
     }
   }
 
-  /// Whether the onscreen keyboard is visible to the user.
-  ///
-  /// Specifically, this reflects the last call to `TextInput.show` or
-  /// `TextInput.hide` received by the stub implementation.
-  bool get isVisible {
-    assert(isRegistered);
-    return _isVisible;
-  }
-  bool _isVisible = false;
-
   /// Simulates the user hiding the onscreen keyboard.
   ///
   /// This does nothing but set the internal flag.
@@ -155,57 +151,58 @@ class TestTextInput {
     _isVisible = false;
   }
 
-  /// Simulates the user changing the [TextEditingValue] to the given value.
+  /// Simulates the user changing the text of the focused text field, and resets
+  /// the selection.
+  ///
+  /// Calling this method replaces the content of the connected input field with
+  /// `text`, and places the caret at the end of the text.
+  ///
+  /// To update the UI under test after this method is invoked, use
+  /// [WidgetTester.pump].
   ///
   /// This can be called even if the [TestTextInput] has not been [register]ed.
+  ///
+  /// If this is used to inject text when there is a real IME connection, for
+  /// example when using the [integration_test] library, there is a risk that
+  /// the real IME will become confused as to the current state of input.
+  ///
+  /// See also:
+  ///
+  ///  * [updateEditingValue], which takes a [TextEditingValue] so that one can
+  ///    also change the selection.
+  void enterText(String text) {
+    updateEditingValue(TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    ));
+  }
+
+  /// Simulates the user changing the [TextEditingValue] to the given value.
+  ///
+  /// To update the UI under test after this method is invoked, use
+  /// [WidgetTester.pump].
+  ///
+  /// This can be called even if the [TestTextInput] has not been [register]ed.
+  ///
+  /// If this is used to inject text when there is a real IME connection, for
+  /// example when using the [integration_test] library, there is a risk that
+  /// the real IME will become confused as to the current state of input.
+  ///
+  /// See also:
+  ///
+  ///  * [enterText], which is similar but takes only a String and resets the
+  ///    selection.
   void updateEditingValue(TextEditingValue value) {
-    // Not using the `expect` function because in the case of a FlutterDriver
-    // test this code does not run in a package:test test zone.
-    if (_client == 0)
-      throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
-    _binaryMessenger.handlePlatformMessage(
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
           'TextInputClient.updateEditingState',
-          <dynamic>[_client, value.toJSON()],
+          <dynamic>[_client ?? -1, value.toJSON()],
         ),
       ),
-      (ByteData? data) { /* response from framework is discarded */ },
+      (ByteData? data) { /* ignored */ },
     );
-  }
-
-  /// Simulates the user closing the text input connection.
-  ///
-  /// For example:
-  ///
-  /// - User pressed the home button and sent the application to background.
-  /// - User closed the virtual keyboard.
-  void closeConnection() {
-    assert(isRegistered);
-    // Not using the `expect` function because in the case of a FlutterDriver
-    // test this code does not run in a package:test test zone.
-    if (_client == 0)
-      throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
-    _binaryMessenger.handlePlatformMessage(
-      SystemChannels.textInput.name,
-      SystemChannels.textInput.codec.encodeMethodCall(
-        MethodCall(
-          'TextInputClient.onConnectionClosed',
-           <dynamic>[_client,]
-        ),
-      ),
-      (ByteData? data) { /* response from framework is discarded */ },
-    );
-  }
-
-  /// Simulates the user typing the given text.
-  ///
-  /// This can be called even if the [TestTextInput] has not been [register]ed.
-  void enterText(String text) {
-    updateEditingValue(TextEditingValue(
-      text: text,
-    ));
   }
 
   /// Simulates the user pressing one of the [TextInputAction] buttons.
@@ -213,22 +210,19 @@ class TestTextInput {
   /// based on the `inputAction` [setClientArgs].
   ///
   /// This can be called even if the [TestTextInput] has not been [register]ed.
+  ///
+  /// If this is used to inject an action when there is a real IME connection,
+  /// for example when using the [integration_test] library, there is a risk
+  /// that the real IME will become confused as to the current state of input.
   Future<void> receiveAction(TextInputAction action) async {
     return TestAsyncUtils.guard(() {
-      // Not using the `expect` function because in the case of a FlutterDriver
-      // test this code does not run in a package:test test zone.
-      if (_client == 0) {
-        throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
-      }
-
       final Completer<void> completer = Completer<void>();
-
-      _binaryMessenger.handlePlatformMessage(
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.textInput.name,
         SystemChannels.textInput.codec.encodeMethodCall(
           MethodCall(
             'TextInputClient.performAction',
-            <dynamic>[_client, action.toString()],
+            <dynamic>[_client ?? -1, action.toString()],
           ),
         ),
         (ByteData? data) {
@@ -237,8 +231,7 @@ class TestTextInput {
             // Decoding throws a PlatformException if the data represents an
             // error, and that's all we care about here.
             SystemChannels.textInput.codec.decodeEnvelope(data!);
-
-            // No error was found. Complete without issue.
+            // If we reach here then no error was found. Complete without issue.
             completer.complete();
           } catch (error) {
             // An exception occurred as a result of receiveAction()'ing. Report
@@ -247,8 +240,32 @@ class TestTextInput {
           }
         },
       );
-
       return completer.future;
     });
+  }
+
+  /// Simulates the user closing the text input connection.
+  ///
+  /// For example:
+  ///
+  ///  * User pressed the home button and sent the application to background.
+  ///  * User closed the virtual keyboard.
+  ///
+  /// This can be called even if the [TestTextInput] has not been [register]ed.
+  ///
+  /// If this is used to inject text when there is a real IME connection, for
+  /// example when using the [integration_test] library, there is a risk that
+  /// the real IME will become confused as to the current state of input.
+  void closeConnection() {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.onConnectionClosed',
+           <dynamic>[_client ?? -1],
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
   }
 }

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
@@ -198,6 +198,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// See the discussion at [removeActionListener].
   @protected
   @visibleForTesting
+  @pragma('vm:notify-debugger-on-exception')
   void notifyActionListeners() {
     if (_listeners.isEmpty) {
       return;
@@ -256,7 +257,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///   const ActionListenerExample({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _ActionListenerExampleState createState() => _ActionListenerExampleState();
+///   State<ActionListenerExample> createState() => _ActionListenerExampleState();
 /// }
 ///
 /// class _ActionListenerExampleState extends State<ActionListenerExample> {
@@ -374,7 +375,7 @@ class ActionListener extends StatefulWidget {
   final Widget child;
 
   @override
-  _ActionListenerState createState() => _ActionListenerState();
+  State<ActionListener> createState() => _ActionListenerState();
 }
 
 class _ActionListenerState extends State<ActionListener> {
@@ -604,7 +605,7 @@ class ActionDispatcher with Diagnosticable {
 ///   final ValueNotifier<bool> valueNotifier;
 ///
 ///   @override
-///   _SaveButtonState createState() => _SaveButtonState();
+///   State<SaveButton> createState() => _SaveButtonState();
 /// }
 ///
 /// class _SaveButtonState extends State<SaveButton> {
@@ -814,14 +815,16 @@ class Actions extends StatefulWidget {
     assert(() {
       if (action == null) {
         final Type type = intent?.runtimeType ?? T;
-        throw FlutterError('Unable to find an action for a $type in an $Actions widget '
-            'in the given context.\n'
-            "$Actions.find() was called on a context that doesn't contain an "
-            '$Actions widget with a mapping for the given intent type.\n'
-            'The context used was:\n'
-            '  $context\n'
-            'The intent type requested was:\n'
-            '  $type');
+        throw FlutterError(
+          'Unable to find an action for a $type in an $Actions widget '
+          'in the given context.\n'
+          "$Actions.find() was called on a context that doesn't contain an "
+          '$Actions widget with a mapping for the given intent type.\n'
+          'The context used was:\n'
+          '  $context\n'
+          'The intent type requested was:\n'
+          '  $type',
+        );
       }
       return true;
     }());
@@ -857,7 +860,7 @@ class Actions extends StatefulWidget {
       'The type passed to "find" resolved to "Intent": either a non-Intent '
       'generic type argument or an example intent derived from Intent must be '
       'specified. Intent may be used as the generic type as long as the optional '
-      '"intent" argument is passed.'
+      '"intent" argument is passed.',
     );
 
     _visitActionsAncestors(context, (InheritedElement element) {
@@ -925,16 +928,18 @@ class Actions extends StatefulWidget {
 
     assert(() {
       if (actionElement == null) {
-        throw FlutterError('Unable to find an action for an Intent with type '
-            '${intent.runtimeType} in an $Actions widget in the given context.\n'
-            '$Actions.invoke() was unable to find an $Actions widget that '
-            "contained a mapping for the given intent, or the intent type isn't the "
-            'same as the type argument to invoke (which is $T - try supplying a '
-            'type argument to invoke if one was not given)\n'
-            'The context used was:\n'
-            '  $context\n'
-            'The intent type requested was:\n'
-            '  ${intent.runtimeType}');
+        throw FlutterError(
+          'Unable to find an action for an Intent with type '
+          '${intent.runtimeType} in an $Actions widget in the given context.\n'
+          '$Actions.invoke() was unable to find an $Actions widget that '
+          "contained a mapping for the given intent, or the intent type isn't the "
+          'same as the type argument to invoke (which is $T - try supplying a '
+          'type argument to invoke if one was not given)\n'
+          'The context used was:\n'
+          '  $context\n'
+          'The intent type requested was:\n'
+          '  ${intent.runtimeType}',
+        );
       }
       return true;
     }());
@@ -1124,15 +1129,17 @@ class _ActionsMarker extends InheritedWidget {
 ///   final Widget child;
 ///
 ///   @override
-///   _FadButtonState createState() => _FadButtonState();
+///   State<FadButton> createState() => _FadButtonState();
 /// }
 ///
 /// class _FadButtonState extends State<FadButton> {
 ///   bool _focused = false;
 ///   bool _hovering = false;
 ///   bool _on = false;
-///   late Map<Type, Action<Intent>> _actionMap;
-///   late Map<LogicalKeySet, Intent> _shortcutMap;
+///   late final Map<Type, Action<Intent>> _actionMap;
+///   final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
+///     SingleActivator(LogicalKeyboardKey.keyX): ActivateIntent(),
+///   };
 ///
 ///   @override
 ///   void initState() {
@@ -1141,9 +1148,6 @@ class _ActionsMarker extends InheritedWidget {
 ///       ActivateIntent: CallbackAction<Intent>(
 ///         onInvoke: (Intent intent) => _toggleState(),
 ///       ),
-///     };
-///     _shortcutMap = <LogicalKeySet, Intent>{
-///       LogicalKeySet(LogicalKeyboardKey.keyX): const ActivateIntent(),
 ///     };
 ///   }
 ///
@@ -1246,6 +1250,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.enabled = true,
     this.focusNode,
     this.autofocus = false,
+    this.descendantsAreFocusable = true,
     this.shortcuts,
     this.actions,
     this.onShowFocusHighlight,
@@ -1274,11 +1279,14 @@ class FocusableActionDetector extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
+  final bool descendantsAreFocusable;
+
   /// {@macro flutter.widgets.actions.actions}
   final Map<Type, Action<Intent>>? actions;
 
   /// {@macro flutter.widgets.shortcuts.shortcuts}
-  final Map<LogicalKeySet, Intent>? shortcuts;
+  final Map<ShortcutActivator, Intent>? shortcuts;
 
   /// A function that will be called when the focus highlight should be shown or
   /// hidden.
@@ -1309,7 +1317,7 @@ class FocusableActionDetector extends StatefulWidget {
   final Widget child;
 
   @override
-  _FocusableActionDetectorState createState() => _FocusableActionDetectorState();
+  State<FocusableActionDetector> createState() => _FocusableActionDetectorState();
 }
 
 class _FocusableActionDetectorState extends State<FocusableActionDetector> {
@@ -1459,6 +1467,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       child: Focus(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
+        descendantsAreFocusable: widget.descendantsAreFocusable,
         canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
         child: widget.child,

@@ -24,6 +24,7 @@ void main() {
     expect(style.padding, null);
     expect(style.minimumSize, null);
     expect(style.fixedSize, null);
+    expect(style.maximumSize, null);
     expect(style.side, null);
     expect(style.shape, null);
     expect(style.mouseCursor, null);
@@ -56,6 +57,7 @@ void main() {
       padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(1.0)),
       minimumSize: MaterialStateProperty.all<Size>(const Size(1.0, 2.0)),
       side: MaterialStateProperty.all<BorderSide>(const BorderSide(width: 4.0, color: Color(0xfffffff4))),
+      maximumSize: MaterialStateProperty.all<Size>(const Size(100.0, 200.0)),
       shape: MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder()),
       mouseCursor: MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden),
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -76,6 +78,7 @@ void main() {
       'elevation: MaterialStateProperty.all(1.5)',
       'padding: MaterialStateProperty.all(EdgeInsets.all(1.0))',
       'minimumSize: MaterialStateProperty.all(Size(1.0, 2.0))',
+      'maximumSize: MaterialStateProperty.all(Size(100.0, 200.0))',
       'side: MaterialStateProperty.all(BorderSide(Color(0xfffffff4), 4.0, BorderStyle.solid))',
       'shape: MaterialStateProperty.all(StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none)))',
       'mouseCursor: MaterialStateProperty.all(SystemMouseCursor(forbidden))',
@@ -94,6 +97,7 @@ void main() {
     final MaterialStateProperty<EdgeInsets> padding = MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(1));
     final MaterialStateProperty<Size> minimumSize = MaterialStateProperty.all<Size>(const Size(1, 2));
     final MaterialStateProperty<Size> fixedSize = MaterialStateProperty.all<Size>(const Size(3, 4));
+    final MaterialStateProperty<Size> maximumSize = MaterialStateProperty.all<Size>(const Size(5, 6));
     final MaterialStateProperty<BorderSide> side = MaterialStateProperty.all<BorderSide>(const BorderSide());
     final MaterialStateProperty<OutlinedBorder> shape  = MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder());
     final MaterialStateProperty<MouseCursor> mouseCursor = MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden);
@@ -111,6 +115,7 @@ void main() {
       padding: padding,
       minimumSize: minimumSize,
       fixedSize: fixedSize,
+      maximumSize: maximumSize,
       side: side,
       shape: shape,
       mouseCursor: mouseCursor,
@@ -131,6 +136,7 @@ void main() {
         padding: padding,
         minimumSize: minimumSize,
         fixedSize: fixedSize,
+        maximumSize: maximumSize,
         side: side,
         shape: shape,
         mouseCursor: mouseCursor,
@@ -148,7 +154,7 @@ void main() {
 
     expect(
       style.copyWith(),
-      style.merge(const ButtonStyle())
+      style.merge(const ButtonStyle()),
     );
   });
 

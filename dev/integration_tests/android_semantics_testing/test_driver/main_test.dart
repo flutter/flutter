@@ -133,6 +133,7 @@ void main() {
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
+              AndroidSemanticsAction.setText,
             ],
           ),
         );
@@ -155,10 +156,12 @@ void main() {
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
+              AndroidSemanticsAction.setText,
+              AndroidSemanticsAction.previousAtMovementGranularity,
             ],
           ),
         );
-      });
+      }, timeout: Timeout.none);
 
       test('password TextField has correct Android semantics', () async {
         final SerializableFinder passwordTextField = find.descendant(
@@ -198,6 +201,7 @@ void main() {
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
+              AndroidSemanticsAction.setText,
             ],
           ),
         );
@@ -220,10 +224,12 @@ void main() {
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
+              AndroidSemanticsAction.setText,
+              AndroidSemanticsAction.previousAtMovementGranularity,
             ],
           ),
         );
-      });
+      }, timeout: Timeout.none);
 
       tearDownAll(() async {
         await driver.tap(find.byValueKey('back'));
@@ -281,7 +287,7 @@ void main() {
             ],
           ),
         );
-      });
+      }, timeout: Timeout.none);
       test('Radio has correct Android semantics', () async {
         Future<AndroidSemanticsNode> getRadioSemantics(String key) async {
           return getSemantics(find.byValueKey(key));
@@ -317,7 +323,7 @@ void main() {
             ],
           ),
         );
-      });
+      }, timeout: Timeout.none);
       test('Switch has correct Android semantics', () async {
         Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
           return getSemantics(find.byValueKey(key));
@@ -353,7 +359,7 @@ void main() {
             ],
           ),
         );
-      });
+      }, timeout: Timeout.none);
 
       // Regression test for https://github.com/flutter/flutter/issues/20820.
       test('Switch can be labeled', () async {
@@ -375,7 +381,7 @@ void main() {
             ],
           ),
         );
-      });
+      }, timeout: Timeout.none);
 
       tearDownAll(() async {
         await driver.tap(find.byValueKey('back'));
@@ -455,7 +461,7 @@ void main() {
         } finally {
           await driver.tap(find.byValueKey('$popupKeyValue.${popupItems.first}'));
         }
-      });
+      }, timeout: Timeout.none);
 
       test('Dropdown Menu has correct Android semantics', () async {
         expect(
@@ -545,7 +551,7 @@ void main() {
             ),
           );
         }
-      });
+      }, timeout: Timeout.none);
 
       test('Modal alert dialog has correct Android semantics', () async {
         expect(
@@ -641,7 +647,7 @@ void main() {
         } finally {
           await driver.tap(find.byValueKey('$alertKeyValue.OK'));
         }
-      });
+      }, timeout: Timeout.none);
 
       tearDownAll(() async {
         await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -659,14 +665,14 @@ void main() {
           await getSemantics(find.byValueKey(appBarTitleKeyValue)),
           hasAndroidSemantics(isHeading: true),
         );
-      });
+      }, timeout: Timeout.none);
 
       test('body text does not have Android heading semantics', () async {
         expect(
           await getSemantics(find.byValueKey(bodyTextKeyValue)),
           hasAndroidSemantics(isHeading: false),
         );
-      });
+      }, timeout: Timeout.none);
 
       tearDownAll(() async {
         await driver.tap(find.byValueKey('back'));

@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../base/context.dart';
 import '../base/platform.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import '../features.dart';
 import 'fuchsia_sdk.dart';
 

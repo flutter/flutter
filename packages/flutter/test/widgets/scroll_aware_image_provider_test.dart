@@ -4,8 +4,8 @@
 
 import 'dart:ui' as ui show Image;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/image_test_utils.dart';
 
@@ -417,7 +417,7 @@ class RecordingPhysics extends ScrollPhysics {
 
   @override
   RecordingPhysics applyTo(ScrollPhysics? ancestor) {
-    return RecordingPhysics(parent: buildParent(ancestor)!);
+    return RecordingPhysics(parent: buildParent(ancestor));
   }
 
   @override
@@ -437,7 +437,7 @@ class ControllablePhysics extends ScrollPhysics {
 
   @override
   ControllablePhysics applyTo(ScrollPhysics? ancestor) {
-    return ControllablePhysics(parent: buildParent(ancestor)!);
+    return ControllablePhysics(parent: buildParent(ancestor));
   }
 
   @override

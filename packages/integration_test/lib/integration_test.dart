@@ -6,11 +6,11 @@ import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui';
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 import 'package:vm_service/vm_service_io.dart' as vm_io;
 
@@ -20,24 +20,37 @@ import 'common.dart';
 
 const String _success = 'success';
 
+/// Whether results should be reported to the native side over the method
+/// channel.
+///
+/// This is enabled by default for use by native test frameworks like Android
+/// instrumentation or XCTest. When running with the Flutter Tool through
+/// `flutter test integration_test` though, it will be disabled as the Flutter
+/// tool will be responsible for collection of test results.
+const bool _shouldReportResultsToNative = bool.fromEnvironment(
+  'INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE',
+  defaultValue: true,
+);
+
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
 class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding implements IntegrationTestResults {
   /// Sets up a listener to report that the tests are finished when everything is
   /// torn down.
   IntegrationTestWidgetsFlutterBinding() {
-    // TODO(jackson): Report test results as they arrive
     tearDownAll(() async {
+      if (!_allTestsPassed.isCompleted) {
+        _allTestsPassed.complete(failureMethodsDetails.isEmpty);
+      }
+      callbackManager.cleanup();
+
+      // TODO(jiahaog): Print the message directing users to run with
+      // `flutter test` when Web is supported.
+      if (!_shouldReportResultsToNative || kIsWeb) {
+        return;
+      }
+
       try {
-        // For web integration tests we are not using the
-        // `plugins.flutter.io/integration_test`. Mark the tests as complete
-        // before invoking the channel.
-        if (kIsWeb) {
-          if (!_allTestsPassed.isCompleted) {
-            _allTestsPassed.complete(true);
-          }
-        }
-        callbackManager.cleanup();
         await _channel.invokeMethod<void>(
           'allTestsFinished',
           <String, dynamic>{
@@ -50,22 +63,26 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
           },
         );
       } on MissingPluginException {
-        print('Warning: integration_test test plugin was not detected.');
-      }
-      if (!_allTestsPassed.isCompleted) {
-        _allTestsPassed.complete(true);
+        print(r'''
+Warning: integration_test plugin was not detected.
+
+If you're running the tests with `flutter drive`, please make sure your tests
+are in the `integration_test/` directory of your package and use
+`flutter test $path_to_test` to run it instead.
+
+If you're running the tests with Android instrumentation or XCTest, this means
+that you are not capturing test results properly! See the following link for
+how to set up the integration_test plugin:
+
+https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
+''');
       }
     });
 
-    // TODO(jackson): Report the results individually instead of all at once
-    // See https://github.com/flutter/flutter/issues/38985
     final TestExceptionReporter oldTestExceptionReporter = reportTestException;
     reportTestException =
         (FlutterErrorDetails details, String testDescription) {
       results[testDescription] = Failure(testDescription, details.toString());
-      if (!_allTestsPassed.isCompleted) {
-        _allTestsPassed.complete(false);
-      }
       oldTestExceptionReporter(details, testDescription);
     };
   }
@@ -113,7 +130,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   final Completer<bool> _allTestsPassed = Completer<bool>();
 
   @override
-  List<Failure> get failureMethodsDetails => _failures;
+  List<Failure> get failureMethodsDetails => results.values.whereType<Failure>().toList();
 
   /// Similar to [WidgetsFlutterBinding.ensureInitialized].
   ///
@@ -136,8 +153,6 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// a [Failure].
   @visibleForTesting
   Map<String, Object> results = <String, Object>{};
-
-  List<Failure> get _failures => results.values.whereType<Failure>().toList();
 
   /// The extra data for the reported result.
   ///
@@ -202,14 +217,13 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     List<String> streams = const <String>['all'],
     @visibleForTesting vm.VmService? vmService,
   }) async {
-    assert(streams != null); // ignore: unnecessary_null_comparison
+    assert(streams != null);
     assert(streams.isNotEmpty);
     if (vmService != null) {
       _vmService = vmService;
     }
     if (_vmService == null) {
-      final developer.ServiceProtocolInfo info =
-          await developer.Service.getInfo();
+      final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
       assert(info.serverUri != null);
       _vmService = await vm_io.vmServiceConnectUri(
         'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
@@ -282,6 +296,29 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     reportData![reportKey] = timeline.toJson();
   }
 
+  Future<_GarbageCollectionInfo> _runAndGetGCInfo(Future<void> Function() action) async {
+    if (kIsWeb) {
+      await action();
+      return const _GarbageCollectionInfo();
+    }
+
+    final vm.Timeline timeline = await traceTimeline(
+      action,
+      streams: <String>['GC'],
+    );
+
+    final int oldGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
+      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectOldGeneration';
+    }).length;
+    final int newGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
+      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectNewGeneration';
+    }).length;
+    return _GarbageCollectionInfo(
+      oldCount: oldGenGCCount,
+      newCount: newGenGCCount,
+    );
+  }
+
   /// Watches the [FrameTiming] during `action` and report it to the binding
   /// with key `reportKey`.
   ///
@@ -320,11 +357,16 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     await Future<void>.delayed(const Duration(seconds: 2)); // flush old FrameTimings
     final TimingsCallback watcher = frameTimings.addAll;
     addTimingsCallback(watcher);
-    await action();
+    final _GarbageCollectionInfo gcInfo = await _runAndGetGCInfo(action);
+
     await delayForFrameTimings(); // make sure all FrameTimings are reported
     removeTimingsCallback(watcher);
-    final FrameTimingSummarizer frameTimes =
-        FrameTimingSummarizer(frameTimings);
+
+    final FrameTimingSummarizer frameTimes = FrameTimingSummarizer(
+      frameTimings,
+      newGenGCCount: gcInfo.newCount,
+      oldGenGCCount: gcInfo.oldCount,
+    );
     reportData ??= <String, dynamic>{};
     reportData![reportKey] = frameTimes.summary;
   }
@@ -345,4 +387,27 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
     super.attachRootWidget(RepaintBoundary(child: rootWidget));
   }
+
+  @override
+  void reportExceptionNoticed(FlutterErrorDetails exception) {
+    // This method is called to log errors as they happen, and they will also
+    // be eventually logged again at the end of the tests. The superclass
+    // behavior is specific to the "live" execution semantics of
+    // [LiveTestWidgetsFlutterBinding] so users don't have to wait until tests
+    // finish to see the stack traces.
+    //
+    // Disable this because Integration Tests follow the semantics of
+    // [AutomatedTestWidgetsFlutterBinding] that does not log the stack traces
+    // live, and avoids the doubly logged stack trace.
+    // TODO(jiahaog): Integration test binding should not inherit from
+    // `LiveTestWidgetsFlutterBinding` https://github.com/flutter/flutter/issues/81534
+  }
+}
+
+@immutable
+class _GarbageCollectionInfo {
+  const _GarbageCollectionInfo({this.oldCount = -1, this.newCount = -1});
+
+  final int oldCount;
+  final int newCount;
 }

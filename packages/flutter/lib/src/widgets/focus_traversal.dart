@@ -352,7 +352,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     assert(
       sortedDescendants.length <= scope.traversalDescendants.length && sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
       'Sorted descendants contains different nodes than FocusScopeNode.traversalDescendants would. '
-      'These are the different nodes: ${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())}'
+      'These are the different nodes: ${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())}',
     );
     return sortedDescendants;
   }
@@ -1161,9 +1161,10 @@ abstract class FocusOrder with Diagnosticable implements Comparable<FocusOrder> 
   @nonVirtual
   int compareTo(FocusOrder other) {
     assert(
-        runtimeType == other.runtimeType,
-        "The sorting algorithm must not compare incomparable keys, since they don't "
-        'know how to order themselves relative to each other. Comparing $this with $other');
+      runtimeType == other.runtimeType,
+      "The sorting algorithm must not compare incomparable keys, since they don't "
+      'know how to order themselves relative to each other. Comparing $this with $other',
+    );
     return doCompare(other);
   }
 
@@ -1424,7 +1425,7 @@ class FocusTraversalOrder extends InheritedWidget {
   static FocusOrder of(BuildContext context) {
     assert(context != null);
     final FocusTraversalOrder? marker = context.getElementForInheritedWidgetOfExactType<FocusTraversalOrder>()?.widget as FocusTraversalOrder?;
-    assert((){
+    assert(() {
       if (marker == null) {
         throw FlutterError(
           'FocusTraversalOrder.of() was called with a context that '
@@ -1507,7 +1508,7 @@ class FocusTraversalOrder extends InheritedWidget {
 ///   final T order;
 ///
 ///   @override
-///   _OrderedButtonState<T> createState() => _OrderedButtonState<T>();
+///   State<OrderedButton<T>> createState() => _OrderedButtonState<T>();
 /// }
 ///
 /// class _OrderedButtonState<T> extends State<OrderedButton<T>> {
@@ -1753,7 +1754,7 @@ class FocusTraversalGroup extends StatefulWidget {
   }
 
   @override
-  _FocusTraversalGroupState createState() => _FocusTraversalGroupState();
+  State<FocusTraversalGroup> createState() => _FocusTraversalGroupState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

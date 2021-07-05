@@ -8,7 +8,13 @@ import 'stock_data.dart';
 import 'stock_row.dart';
 
 class StockList extends StatelessWidget {
-  const StockList({ Key key, this.stocks, this.onOpen, this.onShow, this.onAction }) : super(key: key);
+  const StockList({
+    Key? key,
+    required this.stocks,
+    required this.onOpen,
+    required this.onShow,
+    required this.onAction,
+  }) : super(key: key);
 
   final List<Stock> stocks;
   final StockRowActionCallback onOpen;

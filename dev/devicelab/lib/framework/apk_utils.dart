@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -13,7 +15,7 @@ final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
 
 final List<String> flutterAssets = <String>[
   'assets/flutter_assets/AssetManifest.json',
-  'assets/flutter_assets/NOTICES',
+  'assets/flutter_assets/NOTICES.Z',
   'assets/flutter_assets/fonts/MaterialIcons-Regular.otf',
   'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
 ];
@@ -220,7 +222,7 @@ Future<String> getAndroidManifest(String apk) async {
   );
 }
 
- /// Checks that the classes are contained in the APK, throws otherwise.
+/// Checks that the classes are contained in the APK, throws otherwise.
 Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
   final ApkExtractor extractor = ApkExtractor(apk);
   for (final String className in classes) {
@@ -297,14 +299,14 @@ subprojects {
   /// Adds a plugin to the pubspec.
   /// In pubspec, each dependency is expressed as key, value pair joined by a colon `:`.
   /// such as `plugin_a`:`^0.0.1` or `plugin_a`:`\npath: /some/path`.
-  Future<void> addPlugin(String plugin, { String value = '' }) async {
+  void addPlugin(String plugin, { String value = '' }) {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
-    String content = await pubspec.readAsString();
+    String content = pubspec.readAsStringSync();
     content = content.replaceFirst(
       '${platformLineSep}dependencies:$platformLineSep',
       '${platformLineSep}dependencies:$platformLineSep  $plugin: $value$platformLineSep',
     );
-    await pubspec.writeAsString(content, flush: true);
+    pubspec.writeAsStringSync(content, flush: true);
   }
 
   Future<void> getPackages() async {
@@ -445,7 +447,7 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
   ];
   final String gradle = path.join(workingDirectory, Platform.isWindows ? 'gradlew.bat' : './gradlew');
   print('┌── $gradle');
-  print('│ ' + File(path.join(workingDirectory, gradle)).readAsLinesSync().join('\n│ '));
+  print(File(path.join(workingDirectory, gradle)).readAsLinesSync().map((String line) => '| $line').join('\n'));
   print('└─────────────────────────────────────────────────────────────────────────────────────');
   print(
     'Running Gradle:\n'
@@ -453,7 +455,6 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
     '  Arguments: ${args.join(' ')}\n'
     '  Working directory: $workingDirectory\n'
     '  JAVA_HOME: $javaHome\n'
-    ''
   );
   return Process.run(
     gradle,

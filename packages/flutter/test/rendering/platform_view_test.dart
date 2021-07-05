@@ -4,9 +4,11 @@
 
 import 'dart:ui' as ui;
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
@@ -38,7 +40,7 @@ void main() {
       expect(platformViewRenderBox.size, const Size(100, 100));
     });
 
-    test('send semantics update if id is changed', (){
+    test('send semantics update if id is changed', () {
       final RenderConstrainedBox tree = RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
         child: platformViewRenderBox,
@@ -47,7 +49,7 @@ void main() {
       final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
           listener: () {
             ++semanticsUpdateCount;
-          }
+          },
       );
       layout(tree, phase: EnginePhase.flushSemantics);
       // Initial semantics update
@@ -98,6 +100,56 @@ void main() {
     });
 
   }, skip: isBrowser); // TODO(yjbanov): fails on Web with obscured stack trace: https://github.com/flutter/flutter/issues/42770
+
+  // Regression test for https://github.com/flutter/flutter/issues/69431
+  test('multi-finger touch test', () {
+    renderer; // Initialize bindings.
+    final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+    viewsController.registerViewType('webview');
+    final AndroidViewController viewController =
+      PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
+    final PlatformViewRenderBox platformViewRenderBox = PlatformViewRenderBox(
+      controller: viewController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<VerticalDragGestureRecognizer>(
+          () => VerticalDragGestureRecognizer(),
+        ),
+      },
+    );
+    layout(platformViewRenderBox);
+    pumpFrame(phase: EnginePhase.flushSemantics);
+
+    viewController.pointTransformer = (Offset offset) => platformViewRenderBox.globalToLocal(offset);
+
+    FakeAsync().run((FakeAsync async) {
+      // Put one pointer down.
+      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.down, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.remove, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
+      ]));
+      async.flushMicrotasks();
+
+      // Put another pointer down and then cancel it.
+      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(ui.PointerChange.add, Offset.zero, pointer: 2, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.down, const Offset(20, 10), pointer: 2, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.cancel, const Offset(20, 10), pointer: 2, kind: PointerDeviceKind.touch),
+      ]));
+      async.flushMicrotasks();
+
+      // The first pointer can still moving without crashing.
+      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.move, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.remove, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
+      ]));
+      async.flushMicrotasks();
+    });
+
+    // Passes if no crashes.
+  });
 }
 
 ui.PointerData _pointerData(
@@ -105,8 +157,11 @@ ui.PointerData _pointerData(
   Offset logicalPosition, {
   int device = 0,
   PointerDeviceKind kind = PointerDeviceKind.mouse,
+  int pointer = 0,
 }) {
   return ui.PointerData(
+    pointerIdentifier: pointer,
+    embedderId: pointer,
     change: change,
     physicalX: logicalPosition.dx * ui.window.devicePixelRatio,
     physicalY: logicalPosition.dy * ui.window.devicePixelRatio,

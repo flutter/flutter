@@ -86,7 +86,7 @@ class BouncingScrollSimulation extends Simulation {
   /// model to a spring model which causes [x] to "spring" back to [trailingExtent].
   final double trailingExtent;
 
-  /// The spring used used to return [x] to either [leadingExtent] or [trailingExtent].
+  /// The spring used to return [x] to either [leadingExtent] or [trailingExtent].
   final SpringDescription spring;
 
   late FrictionSimulation _frictionSimulation;
@@ -183,9 +183,7 @@ class ClampingScrollSimulation extends Simulation {
 
   // See getSplineDeceleration().
   double _splineDeceleration(double velocity) {
-    return math.log(_inflexion *
-        velocity.abs() /
-        (friction * _decelerationForFriction(0.84)));
+    return math.log(_inflexion * velocity.abs() / (friction * _decelerationForFriction(0.84)));
   }
 
   // See getSplineFlingDuration().
@@ -354,6 +352,6 @@ class _NBSample {
     0.999638729860106,
     0.9998403888004533,
     0.9999602810470701,
-    1.0
+    1.0,
   ];
 }

@@ -5,8 +5,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
 
@@ -44,18 +45,18 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Container(height: 600.0,)
-        )
-      )
+          child: Container(height: 600.0),
+        ),
+      ),
     );
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first; // ignore: unnecessary_nullable_for_final_variable_declarations
-    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge)); // ignore: avoid_dynamic_calls
 
     // 2nd, height == widow.height test: check that the painting context does not call pushClipRect .
     TestClipPaintingContext context = TestClipPaintingContext();
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.none));
 
     // 3rd, height overflow test: check that the painting context call pushClipRect.
@@ -64,11 +65,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Container(height: 600.1,)
-        )
-      )
+          child: Container(height: 600.1),
+        ),
+      ),
     );
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
     // 4th, width == widow.width test: check that the painting context do not call pushClipRect.
@@ -79,11 +80,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Container(width: 800.0,)
-        )
-      )
+          child: Container(width: 800.0),
+        ),
+      ),
     );
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.none));
 
     // 5th, width overflow test: check that the painting context call pushClipRect.
@@ -92,11 +93,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Container(width: 800.1,)
-        )
-      )
+          child: Container(width: 800.1),
+        ),
+      ),
     );
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.hardEdge));
   });
 
@@ -104,20 +105,20 @@ void main() {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first; // ignore: unnecessary_nullable_for_final_variable_declarations
-    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge)); // ignore: avoid_dynamic_calls
 
     // 2nd, check that the painting context has received the default clip behavior.
     final TestClipPaintingContext context = TestClipPaintingContext();
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
     // 3rd, pump a new widget to check that the render object can update its clip behavior.
     await tester.pumpWidget(SingleChildScrollView(clipBehavior: Clip.antiAlias, child: Container(height: 2000.0)));
-    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias)); // ignore: avoid_dynamic_calls
 
     // 4th, check that a non-default clip behavior can be sent to the painting context.
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 

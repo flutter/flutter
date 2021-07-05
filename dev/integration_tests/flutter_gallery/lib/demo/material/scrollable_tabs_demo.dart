@@ -123,7 +123,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
 
   @override
   Widget build(BuildContext context) {
-    final Color iconColor = Theme.of(context).accentColor;
+    final Color iconColor = Theme.of(context).colorScheme.secondary;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Scrollable tabs'),

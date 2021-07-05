@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -25,7 +24,7 @@ import 'theme_data.dart';
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
 @Deprecated(
   'Use TextButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
-  'This feature was deprecated after v1.26.0-18.0.pre.'
+  'This feature was deprecated after v1.26.0-18.0.pre.',
 )
 class FlatButton extends MaterialButton {
   /// Create a simple text button.
@@ -33,7 +32,7 @@ class FlatButton extends MaterialButton {
   /// The [autofocus] and [clipBehavior] arguments must not be null.
   @Deprecated(
     'Use TextButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   const FlatButton({
     Key? key,
@@ -100,7 +99,7 @@ class FlatButton extends MaterialButton {
   /// The [icon], [label], and [clipBehavior] arguments must not be null.
   @Deprecated(
     'Use TextButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   factory FlatButton.icon({
     Key? key,

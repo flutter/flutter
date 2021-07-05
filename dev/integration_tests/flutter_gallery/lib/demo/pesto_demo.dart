@@ -25,7 +25,6 @@ final Set<Recipe?> _favoriteRecipes = <Recipe?>{};
 final ThemeData _kTheme = ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.teal,
-  accentColor: Colors.redAccent,
 );
 
 class PestoHome extends StatelessWidget {
@@ -72,7 +71,7 @@ class RecipeGridPage extends StatefulWidget {
   final List<Recipe?>? recipes;
 
   @override
-  _RecipeGridPageState createState() => _RecipeGridPageState();
+  State<RecipeGridPage> createState() => _RecipeGridPageState();
 }
 
 class _RecipeGridPageState extends State<RecipeGridPage> {
@@ -84,12 +83,13 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
       data: _kTheme.copyWith(platform: Theme.of(context).platform),
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.edit),
+          backgroundColor: Colors.redAccent,
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Not supported.'),
             ));
           },
+          child: const Icon(Icons.edit),
         ),
         body: CustomScrollView(
           semanticChildCount: widget.recipes!.length,
@@ -195,7 +195,7 @@ class PestoLogo extends StatefulWidget {
   final double? t;
 
   @override
-  _PestoLogoState createState() => _PestoLogoState();
+  State<PestoLogo> createState() => _PestoLogoState();
 }
 
 class _PestoLogoState extends State<PestoLogo> {
@@ -319,7 +319,7 @@ class RecipePage extends StatefulWidget {
   final Recipe? recipe;
 
   @override
-  _RecipePageState createState() => _RecipePageState();
+  State<RecipePage> createState() => _RecipePageState();
 }
 
 class _RecipePageState extends State<RecipePage> {
@@ -392,8 +392,9 @@ class _RecipePageState extends State<RecipePage> {
                     Positioned(
                       right: 16.0,
                       child: FloatingActionButton(
-                        child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+                        backgroundColor: Colors.redAccent,
                         onPressed: _toggleFavorite,
+                        child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
                       ),
                     ),
                   ],

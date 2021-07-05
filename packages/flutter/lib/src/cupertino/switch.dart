@@ -7,8 +7,8 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'thumb_painter.dart';
@@ -110,9 +110,9 @@ class CupertinoSwitch extends StatefulWidget {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag behavior used to move the
-  /// switch from on to off will begin upon the detection of a drag gesture. If
-  /// set to [DragStartBehavior.down] it will begin when a down event is first
-  /// detected.
+  /// switch from on to off will begin at the position where the drag gesture won
+  /// the arena. If set to [DragStartBehavior.down] it will begin at the position
+  /// where a down event was first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -129,7 +129,7 @@ class CupertinoSwitch extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  _CupertinoSwitchState createState() => _CupertinoSwitchState();
+  State<CupertinoSwitch> createState() => _CupertinoSwitchState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -524,12 +524,18 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       thumbCenterY + CupertinoThumbPainter.radius,
     );
 
-    _clipRRectLayer = context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
+    _clipRRectLayer.layer = context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
       const CupertinoThumbPainter.switchThumb().paint(innerContext.canvas, thumbBounds);
-    }, oldLayer: _clipRRectLayer);
+    }, oldLayer: _clipRRectLayer.layer);
   }
 
-  ClipRRectLayer? _clipRRectLayer;
+  final LayerHandle<ClipRRectLayer> _clipRRectLayer = LayerHandle<ClipRRectLayer>();
+
+  @override
+  void dispose() {
+    _clipRRectLayer.layer = null;
+    super.dispose();
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {

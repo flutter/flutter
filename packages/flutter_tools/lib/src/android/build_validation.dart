@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../base/common.dart';
 import '../build_info.dart';
 
@@ -27,7 +25,7 @@ void validateBuild(AndroidBuildInfo androidBuildInfo) {
     );
   }
   if (buildInfo.buildNumber != null) {
-    final int result = int.tryParse(buildInfo.buildNumber);
+    final int? result = int.tryParse(buildInfo.buildNumber!);
     if (result == null) {
       throwToolExit(
         'buildNumber: ${buildInfo.buildNumber} was not a valid integer value.\n'

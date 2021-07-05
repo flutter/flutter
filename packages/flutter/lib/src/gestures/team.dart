@@ -141,7 +141,9 @@ class GestureArenaTeam {
   /// [OneSequenceGestureRecognizer.team].
   GestureArenaEntry add(int pointer, GestureArenaMember member) {
     final _CombiningGestureArenaMember combiner = _combiners.putIfAbsent(
-        pointer, () => _CombiningGestureArenaMember(this, pointer));
+      pointer,
+      () => _CombiningGestureArenaMember(this, pointer),
+    );
     return combiner._add(pointer, member);
   }
 }

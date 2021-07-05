@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_devicelab/tasks/gallery.dart';
-import 'package:flutter_devicelab/framework/adb.dart';
+// @dart = 2.8
+
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
+import 'package:flutter_devicelab/tasks/gallery.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -29,7 +31,7 @@ Future<void> main() async {
     final Map<String, dynamic> data = <String, dynamic>{};
     for (final String key in withSemantics.benchmarkScoreKeys) {
       final String deltaKey = 'delta_$key';
-      data[deltaKey] = withSemantics.data[key] - withoutSemantics.data[key];
+      data[deltaKey] = (withSemantics.data[key] as num) - (withoutSemantics.data[key] as num);
       data['semantics_$key'] = withSemantics.data[key];
       data[key] = withoutSemantics.data[key];
       benchmarkScoreKeys.add(deltaKey);

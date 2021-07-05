@@ -11,6 +11,7 @@ import 'package:args/args.dart';
 import 'package:crypto/crypto.dart';
 import 'package:crypto/src/digest_sink.dart';
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart' show required;
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
 import 'package:process/process.dart';
@@ -19,13 +20,11 @@ const String chromiumRepo = 'https://chromium.googlesource.com/external/github.c
 const String githubRepo = 'https://github.com/flutter/flutter.git';
 const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra_release/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
-const String oldGsBase = 'gs://flutter_infra';
 const String releaseFolder = '/releases';
-const String oldGsReleaseFolder = '$oldGsBase$releaseFolder';
-const String oldBaseUrl = 'https://storage.googleapis.com/flutter_infra';
-const String newGsBase = 'gs://flutter_infra_release';
-const String newGsReleaseFolder = '$newGsBase$releaseFolder';
-const String newBaseUrl = 'https://storage.googleapis.com/flutter_infra_release';
+const String gsBase = 'gs://flutter_infra_release';
+const String gsReleaseFolder = '$gsBase$releaseFolder';
+const String baseUrl = 'https://storage.googleapis.com/flutter_infra_release';
+const int shortCacheSeconds = 60;
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
@@ -290,8 +289,45 @@ class ArchiveCreator {
     _outputFile = File(path.join(outputDir.absolute.path, _archiveName));
     await _installMinGitIfNeeded();
     await _populateCaches();
+    await _validate();
     await _archiveFiles(_outputFile);
     return _outputFile;
+  }
+
+  /// Validates the integrity of the release package.
+  ///
+  /// Currently only checks that macOS binaries are codesigned. Will throw a
+  /// [PreparePackageException] if the test failes.
+  Future<void> _validate() async {
+    // Only validate in strict mode, which means `--publish`
+    if (!strict || !platform.isMacOS) {
+      return;
+    }
+    // Validate that the dart binary is codesigned
+    final String dartPath = path.join(
+      flutterRoot.absolute.path,
+      'bin',
+      'cache',
+      'dart-sdk',
+      'bin',
+      'dart',
+    );
+    try {
+      // TODO(fujino): Use the conductor https://github.com/flutter/flutter/issues/81701
+      await _processRunner.runProcess(
+        <String>[
+          'codesign',
+          '-vvvv',
+          '--check-notarization',
+          dartPath,
+        ],
+        workingDirectory: flutterRoot,
+      );
+    } on PreparePackageException catch (e) {
+      throw PreparePackageException(
+        'The binary $dartPath was not codesigned!\n${e.message}',
+      );
+    }
   }
 
   /// Returns the version number of this release, according the to tags in the
@@ -501,7 +537,7 @@ class ArchivePublisher {
     this.platform = const LocalPlatform(),
   })  : assert(revision.length == 40),
         platformName = platform.operatingSystem.toLowerCase(),
-        metadataGsPath = '$newGsReleaseFolder/${getMetadataFilename(platform)}',
+        metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
         _processRunner = ProcessRunner(
           processManager: processManager,
           subprocessOutput: subprocessOutput,
@@ -538,28 +574,28 @@ class ArchivePublisher {
   /// This method will throw if the target archive already exists on cloud
   /// storage.
   Future<void> publishArchive([bool forceUpload = false]) async {
-    for (final String releaseFolder in <String>[oldGsReleaseFolder, newGsReleaseFolder]) {
-      final String destGsPath = '$releaseFolder/$destinationArchivePath';
-      if (!forceUpload) {
-        if (await _cloudPathExists(destGsPath) && !dryRun) {
-          throw PreparePackageException(
-            'File $destGsPath already exists on cloud storage!',
-          );
-        }
+    final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
+    if (!forceUpload) {
+      if (await _cloudPathExists(destGsPath) && !dryRun) {
+        throw PreparePackageException(
+          'File $destGsPath already exists on cloud storage!',
+        );
       }
-      await _cloudCopy(outputFile.absolute.path, destGsPath);
-      assert(tempDir.existsSync());
-      await _updateMetadata('$releaseFolder/${getMetadataFilename(platform)}', newBucket: false);
     }
+    await _cloudCopy(
+      src: outputFile.absolute.path,
+      dest: destGsPath,
+    );
+    assert(tempDir.existsSync());
+    await _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
   }
 
-  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData, {bool newBucket=true}) async {
-    final String tmpBaseUrl = newBucket ? newBaseUrl : oldBaseUrl;
-    jsonData['base_url'] = '$tmpBaseUrl$releaseFolder';
+  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
+    jsonData['base_url'] = '$baseUrl$releaseFolder';
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
     }
-    jsonData['current_release'][branchName] = revision;
+    (jsonData['current_release'] as Map<String, dynamic>)[branchName] = revision;
     if (!jsonData.containsKey('releases')) {
       jsonData['releases'] = <Map<String, dynamic>>[];
     }
@@ -587,7 +623,7 @@ class ArchivePublisher {
     return jsonData;
   }
 
-  Future<void> _updateMetadata(String gsPath, {bool newBucket=true}) async {
+  Future<void> _updateMetadata(String gsPath) async {
     // We can't just cat the metadata from the server with 'gsutil cat', because
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
@@ -609,12 +645,19 @@ class ArchivePublisher {
         throw PreparePackageException('Unable to parse JSON metadata received from cloud: $e');
       }
 
-      jsonData = await _addRelease(jsonData, newBucket: newBucket);
+      jsonData = await _addRelease(jsonData);
 
       const JsonEncoder encoder = JsonEncoder.withIndent('  ');
       metadataFile.writeAsStringSync(encoder.convert(jsonData));
     }
-    await _cloudCopy(metadataFile.absolute.path, gsPath);
+    await _cloudCopy(
+      src: metadataFile.absolute.path,
+      dest: gsPath,
+      // This metadata file is used by the website, so we don't want a long
+      // latency between publishing a release and it being available on the
+      // site.
+      cacheSeconds: shortCacheSeconds,
+    );
   }
 
   Future<String> _runGsUtil(
@@ -655,7 +698,11 @@ class ArchivePublisher {
     return true;
   }
 
-  Future<String> _cloudCopy(String src, String dest) async {
+  Future<String> _cloudCopy({
+    @required String src,
+    @required String dest,
+    int cacheSeconds,
+  }) async {
     // We often don't have permission to overwrite, but
     // we have permission to remove, so that's what we do.
     await _runGsUtil(<String>['rm', dest], failOk: true);
@@ -673,6 +720,7 @@ class ArchivePublisher {
       // Use our preferred MIME type for the files we care about
       // and let gsutil figure it out for anything else.
       if (mimeType != null) ...<String>['-h', 'Content-Type:$mimeType'],
+      if (cacheSeconds != null) ...<String>['-h', 'Cache-Control:max-age=$cacheSeconds'],
       'cp',
       src,
       dest,
@@ -721,7 +769,7 @@ Future<void> main(List<String> rawArguments) async {
     defaultsTo: false,
     help: 'If set, will publish the archive to Google Cloud Storage upon '
         'successful creation of the archive. Will publish under this '
-        'directory: $newBaseUrl$releaseFolder',
+        'directory: $baseUrl$releaseFolder',
   );
   argParser.addFlag(
     'force',
@@ -804,7 +852,7 @@ Future<void> main(List<String> rawArguments) async {
         branch,
         version,
         outputFile,
-	parsedArguments['dry_run'] as bool,
+        parsedArguments['dry_run'] as bool,
       );
       await publisher.publishArchive(parsedArguments['force'] as bool);
     }

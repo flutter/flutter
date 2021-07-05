@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -357,7 +356,7 @@ class Radio<T> extends StatefulWidget {
   bool get _selected => value == groupValue;
 
   @override
-  _RadioState<T> createState() => _RadioState<T>();
+  State<Radio<T>> createState() => _RadioState<T>();
 }
 
 class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, ToggleableStateMixin {
@@ -505,7 +504,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
           ..isFocused = states.contains(MaterialState.focused)
           ..isHovered = states.contains(MaterialState.hovered)
           ..activeColor = effectiveActiveColor
-          ..inactiveColor = effectiveInactiveColor
+          ..inactiveColor = effectiveInactiveColor,
       ),
     );
   }

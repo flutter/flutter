@@ -85,11 +85,7 @@ abstract class GoldenFileComparator {
       return key;
     final String keyString = key.toString();
     final String extension = path.extension(keyString);
-    return Uri.parse(
-      keyString
-        .split(extension)
-        .join() + '.' + version.toString() + extension
-    );
+    return Uri.parse('${keyString.split(extension).join()}.$version$extension');
   }
 
   /// Returns a [ComparisonResult] to describe the pixel differential of the
@@ -143,7 +139,7 @@ set goldenFileComparator(GoldenFileComparator value) {
 /// fake async constraints that are normally imposed on widget tests (i.e. the
 /// need or the ability to call [WidgetTester.pump] to advance the microtask
 /// queue). Prior to the invocation, the test framework will render only the
-/// [Element] to be compared on the screen.
+/// [widgets.Element] to be compared on the screen.
 ///
 /// See also:
 ///
@@ -196,11 +192,7 @@ abstract class WebGoldenComparator {
       return key;
     final String keyString = key.toString();
     final String extension = path.extension(keyString);
-    return Uri.parse(
-      keyString
-        .split(extension)
-        .join() + '.' + version.toString() + extension
-    );
+    return Uri.parse('${keyString.split(extension).join()}.$version$extension');
   }
 }
 
@@ -212,7 +204,7 @@ abstract class WebGoldenComparator {
 /// When using `flutter test --platform=chrome`, a comparator implemented by
 /// [DefaultWebGoldenComparator] is used if no other comparator is specified. It
 /// will send a request to the test server, which uses [goldenFileComparator]
-/// for golden file compatison.
+/// for golden file comparison.
 ///
 /// When using `flutter test --update-goldens`, the [DefaultWebGoldenComparator]
 /// updates the files on disk to match the rendering.

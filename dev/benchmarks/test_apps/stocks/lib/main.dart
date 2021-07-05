@@ -20,14 +20,14 @@ import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
 class StocksApp extends StatefulWidget {
-  const StocksApp({Key key}) : super(key: key);
+  const StocksApp({Key? key}) : super(key: key);
 
   @override
   StocksAppState createState() => StocksAppState();
 }
 
 class StocksAppState extends State<StocksApp> {
-  StockData stocks;
+  late StockData stocks = StockData();
 
   StockConfiguration _configuration = StockConfiguration(
     stockMode: StockMode.optimistic,
@@ -41,12 +41,6 @@ class StocksAppState extends State<StocksApp> {
     showPerformanceOverlay: false,
     showSemanticsDebugger: false,
   );
-
-  @override
-  void initState() {
-    super.initState();
-    stocks = StockData();
-  }
 
   void configurationUpdater(StockConfiguration value) {
     setState(() {
@@ -67,16 +61,14 @@ class StocksAppState extends State<StocksApp> {
           primarySwatch: Colors.purple,
         );
     }
-    assert(_configuration.stockMode != null);
-    return null;
   }
 
-  Route<dynamic> _getRoute(RouteSettings settings) {
+  Route<dynamic>? _getRoute(RouteSettings settings) {
     if (settings.name == '/stock') {
-      final String symbol = settings.arguments as String;
+      final String? symbol = settings.arguments as String?;
       return MaterialPageRoute<void>(
         settings: settings,
-        builder: (BuildContext context) => StockSymbolPage(symbol: symbol, stocks: stocks),
+        builder: (BuildContext context) => StockSymbolPage(symbol: symbol!, stocks: stocks),
       );
     }
     // The other paths we support are in the routes table.

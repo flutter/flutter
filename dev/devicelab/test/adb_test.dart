@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:collection/collection.dart' show ListEquality, MapEquality;
 
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:meta/meta.dart';
 
 import 'common.dart';
@@ -164,15 +166,14 @@ class CommandArgs {
   }
 
   @override
-  int get hashCode => 17 * (17 * command.hashCode + _hashArguments) + _hashEnvironment;
-
-  int get _hashArguments => arguments != null
-    ? const ListEquality<String>().hash(arguments)
-    : null.hashCode;
-
-  int get _hashEnvironment => environment != null
-    ? const MapEquality<String, String>().hash(environment)
-    : null.hashCode;
+  int get hashCode {
+    return Object.hash(
+      command,
+      Object.hashAll(arguments ?? const <String>[]),
+      Object.hashAllUnordered(environment?.keys ?? const <String>[]),
+      Object.hashAllUnordered(environment?.values ?? const <String>[]),
+    );
+  }
 }
 
 class FakeDevice extends AndroidDevice {

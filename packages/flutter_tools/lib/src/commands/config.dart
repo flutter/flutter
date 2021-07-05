@@ -4,11 +4,10 @@
 
 // @dart = 2.8
 
-import '../android/android_studio.dart';
 import '../base/common.dart';
 import '../convert.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
@@ -176,8 +175,8 @@ class ConfigCommand extends FlutterCommand {
     }
 
     // Ensure we send any calculated ones, if overrides don't exist.
-    if (results['android-studio-dir'] == null && androidStudio != null) {
-      results['android-studio-dir'] = androidStudio.directory;
+    if (results['android-studio-dir'] == null && globals.androidStudio != null) {
+      results['android-studio-dir'] = globals.androidStudio.directory;
     }
     if (results['android-sdk'] == null && globals.androidSdk != null) {
       results['android-sdk'] = globals.androidSdk.directory.path;

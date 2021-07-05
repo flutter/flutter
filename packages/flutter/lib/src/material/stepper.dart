@@ -185,6 +185,7 @@ class Stepper extends StatefulWidget {
     this.onStepContinue,
     this.onStepCancel,
     this.controlsBuilder,
+    this.elevation,
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
@@ -280,8 +281,11 @@ class Stepper extends StatefulWidget {
   /// {@end-tool}
   final ControlsWidgetBuilder? controlsBuilder;
 
+  /// The elevation of this stepper's [Material] when [type] is [StepperType.horizontal].
+  final double? elevation;
+
   @override
-  _StepperState createState() => _StepperState();
+  State<Stepper> createState() => _StepperState();
 }
 
 class _StepperState extends State<Stepper> with TickerProviderStateMixin {
@@ -505,11 +509,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         return textTheme.bodyText1!;
       case StepState.disabled:
         return textTheme.bodyText1!.copyWith(
-          color: _isDark() ? _kDisabledDark : _kDisabledLight
+          color: _isDark() ? _kDisabledDark : _kDisabledLight,
         );
       case StepState.error:
         return textTheme.bodyText1!.copyWith(
-          color: _isDark() ? _kErrorDark : _kErrorLight
+          color: _isDark() ? _kErrorDark : _kErrorLight,
         );
     }
   }
@@ -526,11 +530,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         return textTheme.caption!;
       case StepState.disabled:
         return textTheme.caption!.copyWith(
-          color: _isDark() ? _kDisabledDark : _kDisabledLight
+          color: _isDark() ? _kDisabledDark : _kDisabledLight,
         );
       case StepState.error:
         return textTheme.caption!.copyWith(
-          color: _isDark() ? _kErrorDark : _kErrorLight
+          color: _isDark() ? _kErrorDark : _kErrorLight,
         );
     }
   }
@@ -578,7 +582,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             child: Container(
               margin: const EdgeInsetsDirectional.only(start: 12.0),
               child: _buildHeaderText(index),
-            )
+            ),
           ),
         ],
       ),
@@ -648,8 +652,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                     duration: kThemeAnimationDuration,
                   );
 
-                  if (widget.onStepTapped != null)
-                    widget.onStepTapped!(i);
+                  widget.onStepTapped?.call(i);
                 } : null,
                 canRequestFocus: widget.steps[i].state != StepState.disabled,
                 child: _buildVerticalHeader(i),
@@ -666,8 +669,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
         InkResponse(
           onTap: widget.steps[i].state != StepState.disabled ? () {
-            if (widget.onStepTapped != null)
-              widget.onStepTapped!(i);
+            widget.onStepTapped?.call(i);
           } : null,
           canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
@@ -699,7 +701,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return Column(
       children: <Widget>[
         Material(
-          elevation: 2.0,
+          elevation: widget.elevation ?? 2,
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Row(
@@ -715,7 +717,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               AnimatedSize(
                 curve: Curves.fastOutSlowIn,
                 duration: kThemeAnimationDuration,
-                vsync: this,
                 child: widget.steps[widget.currentStep].content,
               ),
               _buildVerticalControls(),
@@ -736,7 +737,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           'Steppers must not be nested.\n'
           'The material specification advises that one should avoid embedding '
           'steppers within steppers. '
-          'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
+          'https://material.io/archive/guidelines/components/steppers.html#steppers-usage',
         );
       return true;
     }());

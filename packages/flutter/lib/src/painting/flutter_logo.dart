@@ -79,14 +79,16 @@ class FlutterLogoDecoration extends Decoration {
 
   @override
   bool debugAssertIsValid() {
-    assert(textColor != null
+    assert(
+      textColor != null
         && style != null
         && margin != null
         && _position != null
         && _position.isFinite
         && _opacity != null
         && _opacity >= 0.0
-        && _opacity <= 1.0);
+        && _opacity <= 1.0,
+    );
     return true;
   }
 

@@ -60,7 +60,7 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// to the notification, listeners must stop using the old bucket and restore
 /// their state from the information in the new [rootBucket].
 ///
-/// Same platforms restrict the size of the restoration data. Therefore, the
+/// Some platforms restrict the size of the restoration data. Therefore, the
 /// data stored in the buckets should be as small as possible while still
 /// allowing the app to restore its current state from it. Data that can be
 /// retrieved from other services (e.g. a database or a web server) should not
@@ -166,7 +166,6 @@ class RestorationManager extends ChangeNotifier {
   /// that communications channel, or to set it up differently, as necessary.
   @protected
   void initChannels() {
-    assert(!SystemChannels.restoration.checkMethodCallHandler(_methodHandler));
     SystemChannels.restoration.setMethodCallHandler(_methodHandler);
   }
 
@@ -858,7 +857,7 @@ class RestorationBucket {
       }
       final List<DiagnosticsNode> error = <DiagnosticsNode>[
         ErrorSummary('Multiple owners claimed child RestorationBuckets with the same IDs.'),
-        ErrorDescription('The following IDs were claimed multiple times from the parent $this:')
+        ErrorDescription('The following IDs were claimed multiple times from the parent $this:'),
       ];
       for (final MapEntry<String, List<RestorationBucket>> child in _childrenToAdd.entries) {
         final String id = child.key;
@@ -986,7 +985,7 @@ class RestorationBucket {
       if (_debugDisposed) {
         throw FlutterError(
             'A $runtimeType was used after being disposed.\n'
-            'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+            'Once you have called dispose() on a $runtimeType, it can no longer be used.',
         );
       }
       return true;

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 
 import 'file_system.dart';
@@ -23,7 +21,7 @@ abstract class ProjectMigrator {
 
   /// Return null if the line should be deleted.
   @protected
-  String migrateLine(String line) {
+  String? migrateLine(String line) {
     return line;
   }
 
@@ -31,6 +29,10 @@ abstract class ProjectMigrator {
   String migrateFileContents(String fileContents) {
     return fileContents;
   }
+
+  @protected
+  bool get migrationRequired => _migrationRequired;
+  bool _migrationRequired = false;
 
   @protected
   /// Calls [migrateLine] per line, then [migrateFileContents]
@@ -41,13 +43,12 @@ abstract class ProjectMigrator {
     final StringBuffer newProjectContents = StringBuffer();
     final String basename = file.basename;
 
-    bool migrationRequired = false;
     for (final String line in lines) {
-      final String newProjectLine = migrateLine(line);
+      final String? newProjectLine = migrateLine(line);
       if (newProjectLine == null) {
         logger.printTrace('Migrating $basename, removing:');
         logger.printTrace('    $line');
-        migrationRequired = true;
+        _migrationRequired = true;
         continue;
       }
       if (newProjectLine != line) {
@@ -55,7 +56,7 @@ abstract class ProjectMigrator {
         logger.printTrace('    $line');
         logger.printTrace('with:');
         logger.printTrace('    $newProjectLine');
-        migrationRequired = true;
+        _migrationRequired = true;
       }
       newProjectContents.writeln(newProjectLine);
     }
@@ -64,7 +65,7 @@ abstract class ProjectMigrator {
     final String projectContentsWithMigratedContents = migrateFileContents(projectContentsWithMigratedLines);
     if (projectContentsWithMigratedLines != projectContentsWithMigratedContents) {
       logger.printTrace('Migrating $basename contents');
-      migrationRequired = true;
+      _migrationRequired = true;
     }
 
     if (migrationRequired) {

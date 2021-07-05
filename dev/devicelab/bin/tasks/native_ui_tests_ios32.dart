@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -44,7 +46,7 @@ Future<void> main() async {
     final String codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
     final String provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
 
-    final String resultBundleTemp = Directory.systemTemp.createTempSync('native_ui_tests_ios32_xcresult.').path;
+    final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_native_ui_tests_ios32_xcresult.').path;
     final String resultBundlePath = path.join(resultBundleTemp, 'result');
     final int testResultExit = await exec(
       'xcodebuild',
@@ -72,20 +74,23 @@ Future<void> main() async {
     );
 
     if (testResultExit != 0) {
-      // Zip the test results to the artifacts directory for upload.
-      final String zipPath = path.join(hostAgent.dumpDirectory.path,
-          'native_ui_tests_ios32-${DateTime.now().toLocal().toIso8601String()}.zip');
-      await exec(
-        'zip',
-        <String>[
-          '-r',
-          '-9',
-          zipPath,
-          'result.xcresult',
-        ],
-        workingDirectory: resultBundleTemp,
-        canFail: true, // Best effort to get the logs.
-      );
+      final Directory dumpDirectory = hostAgent.dumpDirectory;
+      if (dumpDirectory != null) {
+        // Zip the test results to the artifacts directory for upload.
+        final String zipPath = path.join(dumpDirectory.path,
+            'native_ui_tests_ios32-${DateTime.now().toLocal().toIso8601String()}.zip');
+        await exec(
+          'zip',
+          <String>[
+            '-r',
+            '-9',
+            zipPath,
+            'result.xcresult',
+          ],
+          workingDirectory: resultBundleTemp,
+          canFail: true, // Best effort to get the logs.
+        );
+      }
 
       return TaskResult.failure('Platform unit tests failed');
     }

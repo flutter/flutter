@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
@@ -19,11 +16,29 @@ const String kDartPluginClass = 'dartPluginClass';
 // Constant for 'defaultPackage' key in plugin maps.
 const String kDefaultPackage = 'default_package';
 
+/// Constant for 'supportedVariants' key in plugin maps.
+const String kSupportedVariants = 'supportedVariants';
+
+/// Platform variants that a Windows plugin can support.
+enum PluginPlatformVariant {
+  /// Win32 variant of Windows.
+  win32,
+
+  // UWP variant of Windows.
+  winuwp,
+}
+
 /// Marker interface for all platform specific plugin config implementations.
 abstract class PluginPlatform {
   const PluginPlatform();
 
   Map<String, dynamic> toMap();
+}
+
+/// A plugin that has platform variants.
+abstract class VariantPlatformPlugin {
+  /// The platform variants supported by the plugin.
+  Set<PluginPlatformVariant> get supportedVariants;
 }
 
 abstract class NativeOrDartPlugin {
@@ -38,11 +53,11 @@ abstract class NativeOrDartPlugin {
 /// the [pluginClass] that will be the entry point to the plugin's native code.
 class AndroidPlugin extends PluginPlatform {
   AndroidPlugin({
-    @required this.name,
-    @required this.package,
-    @required this.pluginClass,
-    @required this.pluginPath,
-    @required FileSystem fileSystem,
+    required this.name,
+    required this.package,
+    required this.pluginClass,
+    required this.pluginPath,
+    required FileSystem fileSystem,
   }) : _fileSystem = fileSystem;
 
   factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath, FileSystem fileSystem) {
@@ -86,15 +101,15 @@ class AndroidPlugin extends PluginPlatform {
       'package': package,
       'class': pluginClass,
       // Mustache doesn't support complex types.
-      'supportsEmbeddingV1': _supportedEmbedings.contains('1'),
-      'supportsEmbeddingV2': _supportedEmbedings.contains('2'),
+      'supportsEmbeddingV1': _supportedEmbeddings.contains('1'),
+      'supportsEmbeddingV2': _supportedEmbeddings.contains('2'),
     };
   }
 
-  Set<String> _cachedEmbeddingVersion;
+  Set<String>? _cachedEmbeddingVersion;
 
   /// Returns the version of the Android embedding.
-  Set<String> get _supportedEmbedings => _cachedEmbeddingVersion ??= _getSupportedEmbeddings();
+  Set<String> get _supportedEmbeddings => _cachedEmbeddingVersion ??= _getSupportedEmbeddings();
 
   Set<String> _getSupportedEmbeddings() {
     assert(pluginPath != null);
@@ -121,7 +136,7 @@ class AndroidPlugin extends PluginPlatform {
       )
     ];
 
-    File mainPluginClass;
+    File? mainPluginClass;
     bool mainClassFound = false;
     for (final String mainClassCandidate in mainClassCandidates) {
       mainPluginClass = _fileSystem.file(mainClassCandidate);
@@ -130,7 +145,7 @@ class AndroidPlugin extends PluginPlatform {
         break;
       }
     }
-    if (!mainClassFound) {
+    if (mainPluginClass == null || !mainClassFound) {
       assert(mainClassCandidates.length <= 2);
       throwToolExit(
         "The plugin `$name` doesn't have a main class defined in ${mainClassCandidates.join(' or ')}. "
@@ -161,9 +176,9 @@ class AndroidPlugin extends PluginPlatform {
 /// will be the entry point to the plugin's native code.
 class IOSPlugin extends PluginPlatform {
   const IOSPlugin({
-    @required this.name,
-    this.classPrefix,
-    @required this.pluginClass,
+    required this.name,
+    required this.classPrefix,
+    required this.pluginClass,
   });
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
@@ -207,7 +222,7 @@ class IOSPlugin extends PluginPlatform {
 /// [pluginClass] will be the entry point to the plugin's native code.
 class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   const MacOSPlugin({
-    @required this.name,
+    required this.name,
     this.pluginClass,
     this.dartPluginClass,
     this.defaultPackage,
@@ -216,15 +231,15 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String?;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
     return MacOSPlugin(
       name: name,
       pluginClass: pluginClass,
-      dartPluginClass: yaml[kDartPluginClass] as String,
-      defaultPackage: yaml[kDefaultPackage] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String?,
+      defaultPackage: yaml[kDefaultPackage] as String?,
     );
   }
 
@@ -240,9 +255,9 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   static const String kConfigKey = 'macos';
 
   final String name;
-  final String pluginClass;
-  final String dartPluginClass;
-  final String defaultPackage;
+  final String? pluginClass;
+  final String? dartPluginClass;
+  final String? defaultPackage;
 
   @override
   bool isNative() => pluginClass != null;
@@ -262,26 +277,47 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
 ///
 /// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
 /// [pluginClass] will be the entry point to the plugin's native code.
-class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
+class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, VariantPlatformPlugin {
   const WindowsPlugin({
-    @required this.name,
+    required this.name,
     this.pluginClass,
     this.dartPluginClass,
     this.defaultPackage,
+    this.variants = const <PluginPlatformVariant>{},
   }) : assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String?;
     if (pluginClass == 'none') {
       pluginClass = null;
+    }
+    final Set<PluginPlatformVariant> variants = <PluginPlatformVariant>{};
+    final YamlList? variantList = yaml[kSupportedVariants] as YamlList?;
+    if (variantList == null) {
+      // If no variant list is provided assume Win32 for backward compatibility.
+      variants.add(PluginPlatformVariant.win32);
+    } else {
+      const Map<String, PluginPlatformVariant> variantByName = <String, PluginPlatformVariant>{
+        'win32': PluginPlatformVariant.win32,
+        'uwp': PluginPlatformVariant.winuwp,
+      };
+      for (final String variantName in variantList.cast<String>()) {
+        final PluginPlatformVariant? variant = variantByName[variantName];
+        if (variant != null) {
+          variants.add(variant);
+        }
+        // Ignore unrecognized variants to make adding new variants in the
+        // future non-breaking.
+      }
     }
     return WindowsPlugin(
       name: name,
       pluginClass: pluginClass,
-      dartPluginClass: yaml[kDartPluginClass] as String,
-      defaultPackage: yaml[kDefaultPackage] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String?,
+      defaultPackage: yaml[kDefaultPackage] as String?,
+      variants: variants,
     );
   }
 
@@ -289,6 +325,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
     if (yaml == null) {
       return false;
     }
+
     return yaml[kPluginClass] is String ||
            yaml[kDartPluginClass] is String ||
            yaml[kDefaultPackage] is String;
@@ -297,9 +334,13 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   static const String kConfigKey = 'windows';
 
   final String name;
-  final String pluginClass;
-  final String dartPluginClass;
-  final String defaultPackage;
+  final String? pluginClass;
+  final String? dartPluginClass;
+  final String? defaultPackage;
+  final Set<PluginPlatformVariant> variants;
+
+  @override
+  Set<PluginPlatformVariant> get supportedVariants => variants;
 
   @override
   bool isNative() => pluginClass != null;
@@ -308,10 +349,10 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (pluginClass != null) 'class': pluginClass,
-      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass),
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage,
+      if (pluginClass != null) 'class': pluginClass!,
+      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage!,
     };
   }
 }
@@ -322,7 +363,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
 /// [pluginClass] will be the entry point to the plugin's native code.
 class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   const LinuxPlugin({
-    @required this.name,
+    required this.name,
     this.pluginClass,
     this.dartPluginClass,
     this.defaultPackage,
@@ -331,15 +372,15 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String?;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
     return LinuxPlugin(
       name: name,
       pluginClass: pluginClass,
-      dartPluginClass: yaml[kDartPluginClass] as String,
-      defaultPackage: yaml[kDefaultPackage] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String?,
+      defaultPackage: yaml[kDefaultPackage] as String?,
     );
   }
 
@@ -355,9 +396,9 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   static const String kConfigKey = 'linux';
 
   final String name;
-  final String pluginClass;
-  final String dartPluginClass;
-  final String defaultPackage;
+  final String? pluginClass;
+  final String? dartPluginClass;
+  final String? defaultPackage;
 
   @override
   bool isNative() => pluginClass != null;
@@ -366,10 +407,10 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (pluginClass != null) 'class': pluginClass,
-      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass),
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage,
+      if (pluginClass != null) 'class': pluginClass!,
+      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage!,
     };
   }
 }
@@ -381,9 +422,9 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
 /// containing the code.
 class WebPlugin extends PluginPlatform {
   const WebPlugin({
-    @required this.name,
-    @required this.pluginClass,
-    @required this.fileName,
+    required this.name,
+    required this.pluginClass,
+    required this.fileName,
   });
 
   factory WebPlugin.fromYaml(String name, YamlMap yaml) {

@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../base/common.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/terminal.dart';
-import '../globals.dart' as globals;
 
 /// A class to configure and run deferred component setup verification checks
 /// and tasks.
@@ -21,9 +19,9 @@ import '../globals.dart' as globals;
 /// The results of each check are handled internally as they are not meant to
 /// be run isolated.
 abstract class DeferredComponentsValidator {
-  DeferredComponentsValidator(this.projectDir, this.logger, {
+  DeferredComponentsValidator(this.projectDir, this.logger, this.platform, {
     this.exitOnFail = true,
-    String title,
+    String? title,
   }) : outputDir = projectDir
         .childDirectory('build')
         .childDirectory(kDeferredComponentsTempDirectory),
@@ -37,6 +35,8 @@ abstract class DeferredComponentsValidator {
 
   /// Logger to use for [displayResults] output.
   final Logger logger;
+
+  final Platform platform;
 
   /// When true, failed checks and tasks will result in [attemptToolExit]
   /// triggering [throwToolExit].
@@ -74,7 +74,7 @@ abstract class DeferredComponentsValidator {
   final List<String> diffLines;
 
   /// Tracks the new and missing loading units.
-  Map<String, dynamic> loadingUnitComparisonResults;
+  Map<String, dynamic>? loadingUnitComparisonResults;
 
   /// All files read by the validator.
   final List<File> inputs;
@@ -84,14 +84,14 @@ abstract class DeferredComponentsValidator {
   /// Returns true if there were any recommended changes that should
   /// be applied.
   ///
-  /// Retuns false if no problems or recommendations were detected.
+  /// Returns false if no problems or recommendations were detected.
   ///
   /// If no checks are run, then this will default to false and will remain so
   /// until a failing check finishes running.
   bool get changesNeeded => generatedFiles.isNotEmpty
     || modifiedFiles.isNotEmpty
     || invalidFiles.isNotEmpty
-    || (loadingUnitComparisonResults != null && !(loadingUnitComparisonResults['match'] as bool));
+    || (loadingUnitComparisonResults != null && !(loadingUnitComparisonResults!['match'] as bool));
 
   /// Handles the results of all executed checks by calling [displayResults] and
   /// [attemptToolExit].
@@ -163,7 +163,7 @@ abstract class DeferredComponentsValidator {
 The above files have been placed into `build/$kDeferredComponentsTempDirectory`,
 a temporary directory. The files should be reviewed and moved into the project's
 `android` directory.''');
-        if (diffLines != null && diffLines.isNotEmpty && !globals.platform.isWindows) {
+        if (diffLines != null && diffLines.isNotEmpty && !platform.isWindows) {
           logger.printStatus(r'''
 
 The recommended changes can be quickly applied by running:
@@ -175,21 +175,21 @@ The recommended changes can be quickly applied by running:
       }
       // Log loading unit golden changes, if any.
       if (loadingUnitComparisonResults != null) {
-        if ((loadingUnitComparisonResults['new'] as List<LoadingUnit>).isNotEmpty) {
+        if ((loadingUnitComparisonResults!['new'] as List<LoadingUnit>).isNotEmpty) {
           logger.printStatus('New loading units were found:', emphasis: true);
-          for (final LoadingUnit unit in loadingUnitComparisonResults['new'] as List<LoadingUnit>) {
+          for (final LoadingUnit unit in loadingUnitComparisonResults!['new'] as List<LoadingUnit>) {
             logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
           }
           logger.printStatus('');
         }
-        if ((loadingUnitComparisonResults['missing'] as Set<LoadingUnit>).isNotEmpty) {
+        if ((loadingUnitComparisonResults!['missing'] as Set<LoadingUnit>).isNotEmpty) {
           logger.printStatus('Previously existing loading units no longer exist:', emphasis: true);
-          for (final LoadingUnit unit in loadingUnitComparisonResults['missing'] as Set<LoadingUnit>) {
+          for (final LoadingUnit unit in loadingUnitComparisonResults!['missing'] as Set<LoadingUnit>) {
             logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
           }
           logger.printStatus('');
         }
-        if (loadingUnitComparisonResults['match'] as bool) {
+        if (loadingUnitComparisonResults!['match'] as bool) {
           logger.printStatus('No change in generated loading units.\n');
         } else {
           logger.printStatus('''

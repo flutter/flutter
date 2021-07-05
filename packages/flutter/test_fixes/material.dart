@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 void main() {
   // Generic reference variables.
   BuildContext context;
+  RenderObjectWidget renderObjectWidget;
+  RenderObject renderObject;
+  Object object;
 
   // Changes made in https://github.com/flutter/flutter/pull/26259
   const Scaffold scaffold = Scaffold(resizeToAvoidBottomPadding: true);
@@ -178,4 +181,153 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/59127
   const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
   bottomNavigationBarItem.title;
+
+  // Changes made in https://github.com/flutter/flutter/pull/65246
+  RectangularSliderTrackShape(disabledThumbGapWidth: 2.0);
+
+  // Changes made in https://github.com/flutter/flutter/pull/46115
+  const InputDecoration inputDecoration = InputDecoration(hasFloatingPlaceholder: true);
+  InputDecoration(hasFloatingPlaceholder: false);
+  InputDecoration();
+  InputDecoration.collapsed(hasFloatingPlaceholder: true);
+  InputDecoration.collapsed(hasFloatingPlaceholder: false);
+  InputDecoration.collapsed();
+  inputDecoration.hasFloatingPlaceholder;
+  const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(hasFloatingPlaceholder: true);
+  InputDecorationTheme(hasFloatingPlaceholder: false);
+  InputDecorationTheme();
+  inputDecorationTheme.hasFloatingPlaceholder;
+  inputDecorationTheme.copyWith(hasFloatingPlaceholder: false);
+  inputDecorationTheme.copyWith(hasFloatingPlaceholder: true);
+  inputDecorationTheme.copyWith();
+
+  // Changes made in https://github.com/flutter/flutter/pull/66482
+  ThemeData(textSelectionColor: Colors.red);
+  ThemeData(cursorColor: Colors.blue);
+  ThemeData(textSelectionHandleColor: Colors.yellow);
+  ThemeData(useTextSelectionTheme: false);
+  ThemeData(textSelectionColor: Colors.red, useTextSelectionTheme: false);
+  ThemeData(cursorColor: Colors.blue, useTextSelectionTheme: false);
+  ThemeData(textSelectionHandleColor: Colors.yellow, useTextSelectionTheme: false);
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+  );
+  ThemeData(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: false,
+  );
+  ThemeData(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: true,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(textSelectionColor: Colors.red);
+  ThemeData.raw(cursorColor: Colors.blue);
+  ThemeData.raw(textSelectionHandleColor: Colors.yellow);
+  ThemeData.raw(useTextSelectionTheme: false);
+  ThemeData.raw(textSelectionColor: Colors.red, useTextSelectionTheme: false);
+  ThemeData.raw(cursorColor: Colors.blue, useTextSelectionTheme: false);
+  ThemeData.raw(textSelectionHandleColor: Colors.yellow, useTextSelectionTheme: false);
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+  );
+  ThemeData.raw(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: true,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  Draggable draggable = Draggable();
+  draggable = Draggable(dragAnchor: DragAnchor.child);
+  draggable = Draggable(dragAnchor: DragAnchor.pointer);
+  draggable.dragAnchor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  LongPressDraggable longPressDraggable = LongPressDraggable();
+  longPressDraggable = LongPressDraggable(dragAnchor: DragAnchor.child);
+  longPressDraggable = LongPressDraggable(dragAnchor: DragAnchor.pointer);
+  longPressDraggable.dragAnchor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/64254
+  final LeafRenderObjectElement leafElement = LeafRenderObjectElement();
+  leafElement.insertChildRenderObject(renderObject, object);
+  leafElement.moveChildRenderObject(renderObject, object);
+  leafElement.removeChildRenderObject(renderObject);
+  final ListWheelElement listWheelElement = ListWheelElement();
+  listWheelElement.insertChildRenderObject(renderObject, object);
+  listWheelElement.moveChildRenderObject(renderObject, object);
+  listWheelElement.removeChildRenderObject(renderObject);
+  final MultiChildRenderObjectElement multiChildRenderObjectElement = MultiChildRenderObjectElement();
+  multiChildRenderObjectElement.insertChildRenderObject(renderObject, object);
+  multiChildRenderObjectElement.moveChildRenderObject(renderObject, object);
+  multiChildRenderObjectElement.removeChildRenderObject(renderObject);
+  final SingleChildRenderObjectElement singleChildRenderObjectElement = SingleChildRenderObjectElement();
+  singleChildRenderObjectElement.insertChildRenderObject(renderObject, object);
+  singleChildRenderObjectElement.moveChildRenderObject(renderObject, object);
+  singleChildRenderObjectElement.removeChildRenderObject(renderObject);
+  final SliverMultiBoxAdaptorElement sliverMultiBoxAdaptorElement = SliverMultiBoxAdaptorElement();
+  sliverMultiBoxAdaptorElement.insertChildRenderObject(renderObject, object);
+  sliverMultiBoxAdaptorElement.moveChildRenderObject(renderObject, object);
+  sliverMultiBoxAdaptorElement.removeChildRenderObject(renderObject);
+  final RenderObjectToWidgetElement renderObjectToWidgetElement = RenderObjectToWidgetElement(widget);
+  renderObjectToWidgetElement.insertChildRenderObject(renderObject, object);
+  renderObjectToWidgetElement.moveChildRenderObject(renderObject, object);
+  renderObjectToWidgetElement.removeChildRenderObject(renderObject);
 }

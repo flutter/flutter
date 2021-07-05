@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   tearDown(() {
@@ -110,8 +110,11 @@ void main() {
             color: Colors.yellow[200],
             child: PhysicalShape(
               color: Colors.green[900]!,
-              clipper: ShapeBorderClipper(shape: BeveledRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0))),
+              clipper: ShapeBorderClipper(
+                shape: BeveledRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+              ),
               elevation: elevation,
               child: const SizedBox(
                 height: 100.0,

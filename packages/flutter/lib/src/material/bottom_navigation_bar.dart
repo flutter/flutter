@@ -6,7 +6,6 @@ import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'bottom_navigation_bar_theme.dart';
@@ -232,7 +231,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// The [iconSize], [selectedFontSize], [unselectedFontSize], and [elevation]
   /// arguments must be non-null and non-negative.
   ///
-  /// If [selectedLabelStyle.color] and [unselectedLabelStyle.color] values
+  /// If [selectedLabelStyle].color and [unselectedLabelStyle].color values
   /// are non-null, they will be used instead of [selectedItemColor] and
   /// [unselectedItemColor].
   ///
@@ -240,8 +239,8 @@ class BottomNavigationBar extends StatefulWidget {
   /// [selectedIconTheme] and [unselectedIconTheme], and both
   /// [IconThemeData.color] and [IconThemeData.size] must be set.
   ///
-  /// If both [selectedLabelStyle.fontSize] and [selectedFontSize] are set,
-  /// [selectedLabelStyle.fontSize] will be used.
+  /// If both [selectedLabelStyle].fontSize and [selectedFontSize] are set,
+  /// [selectedLabelStyle].fontSize will be used.
   ///
   /// Only one of [selectedItemColor] and [fixedColor] can be specified. The
   /// former is preferred, [fixedColor] only exists for the sake of
@@ -290,7 +289,7 @@ class BottomNavigationBar extends StatefulWidget {
        assert(iconSize != null && iconSize >= 0.0),
        assert(
          selectedItemColor == null || fixedColor == null,
-         'Either selectedItemColor or fixedColor can be specified, but not both'
+         'Either selectedItemColor or fixedColor can be specified, but not both',
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
@@ -424,7 +423,7 @@ class BottomNavigationBar extends StatefulWidget {
   final bool? enableFeedback;
 
   @override
-  _BottomNavigationBarState createState() => _BottomNavigationBarState();
+  State<BottomNavigationBar> createState() => _BottomNavigationBarState();
 }
 
 // This represents a single tile in the bottom navigation bar. It is intended
@@ -985,8 +984,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         unselectedLabelStyle: effectiveUnselectedLabelStyle,
         enableFeedback: widget.enableFeedback ?? bottomTheme.enableFeedback ?? true,
         onTap: () {
-          if (widget.onTap != null)
-            widget.onTap!(i);
+          widget.onTap?.call(i);
         },
         colorTween: colorTween,
         flex: _evaluateFlex(_animations[i]),

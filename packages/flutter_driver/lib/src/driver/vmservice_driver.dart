@@ -101,7 +101,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       future: _waitForRootIsolate(),
       timeout: kUnusuallyLongTimeout,
       message: isolateNumber == null
-        ? 'The root isolate is taking an unuusally long time to start.'
+        ? 'The root isolate is taking an unusually long time to start.'
         : 'Isolate $isolateNumber is taking an unusually long time to start.',
     ))!;
     _log('Isolate found with number: ${isolateRef.number}');
@@ -225,9 +225,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
     final Health health = await driver.checkHealth();
     if (health.status != HealthStatus.ok) {
-      // TODO(dnfield): Remove ignore once internal repo is up to date
-      // https://github.com/flutter/flutter/issues/74518
-      // ignore: await_only_futures
       await client.dispose();
       await client.onDone;
       throw DriverError('Flutter application health check failed.');
@@ -290,10 +287,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
   /// Whether to log communication between host and app to `flutter_driver_commands.log`.
   final bool _logCommunicationToFile;
 
-  @override
-  Future<void> enableAccessibility() async {
-    throw UnsupportedError('VMServiceFlutterDriver does not support enableAccessibility');
-  }
 
   @override
   Future<Map<String, dynamic>> sendCommand(Command command) async {
@@ -519,9 +512,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   @override
   Future<void> close() async {
-    // TODO(dnfield): Remove ignore once internal repo is up to date
-    // https://github.com/flutter/flutter/issues/74518
-    await _serviceClient.dispose(); // ignore: await_only_futures
+    await _serviceClient.dispose();
     await _serviceClient.onDone;
   }
 }

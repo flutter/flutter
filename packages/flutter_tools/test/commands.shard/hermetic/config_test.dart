@@ -9,18 +9,18 @@ import 'dart:convert';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   FakeAndroidStudio fakeAndroidStudio;
@@ -52,13 +52,14 @@ void main() {
 
       expect(testLogger.statusText, isNotEmpty);
       final dynamic jsonObject = json.decode(testLogger.statusText);
-      expect(jsonObject, isMap);
+      expect(jsonObject, const TypeMatcher<Map<String, dynamic>>());
+      if (jsonObject is Map<String, dynamic>) {
+        expect(jsonObject.containsKey('android-studio-dir'), true);
+        expect(jsonObject['android-studio-dir'], isNotNull);
 
-      expect(jsonObject.containsKey('android-studio-dir'), true);
-      expect(jsonObject['android-studio-dir'], isNotNull);
-
-      expect(jsonObject.containsKey('android-sdk'), true);
-      expect(jsonObject['android-sdk'], isNotNull);
+        expect(jsonObject.containsKey('android-sdk'), true);
+        expect(jsonObject['android-sdk'], isNotNull);
+      }
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       AndroidStudio: () => fakeAndroidStudio,
@@ -100,12 +101,16 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
+        '--enable-android',
+        '--enable-ios',
         '--enable-web',
         '--enable-linux-desktop',
         '--enable-windows-desktop',
         '--enable-macos-desktop',
       ]);
 
+      expect(globals.config.getValue('enable-android'), true);
+      expect(globals.config.getValue('enable-ios'), true);
       expect(globals.config.getValue('enable-web'), true);
       expect(globals.config.getValue('enable-linux-desktop'), true);
       expect(globals.config.getValue('enable-windows-desktop'), true);
@@ -115,6 +120,8 @@ void main() {
         'config', '--clear-features',
       ]);
 
+      expect(globals.config.getValue('enable-android'), null);
+      expect(globals.config.getValue('enable-ios'), null);
       expect(globals.config.getValue('enable-web'), null);
       expect(globals.config.getValue('enable-linux-desktop'), null);
       expect(globals.config.getValue('enable-windows-desktop'), null);
@@ -122,12 +129,16 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
+        '--no-enable-android',
+        '--no-enable-ios',
         '--no-enable-web',
         '--no-enable-linux-desktop',
         '--no-enable-windows-desktop',
         '--no-enable-macos-desktop',
       ]);
 
+      expect(globals.config.getValue('enable-android'), false);
+      expect(globals.config.getValue('enable-ios'), false);
       expect(globals.config.getValue('enable-web'), false);
       expect(globals.config.getValue('enable-linux-desktop'), false);
       expect(globals.config.getValue('enable-windows-desktop'), false);

@@ -32,7 +32,7 @@ import 'theme.dart';
 /// Adaptive layouts can build different instances of the [Scaffold] in order to
 /// have a navigation rail for more horizontal layouts and a bottom navigation
 /// bar for more vertical layouts. See
-/// [https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart]
+/// [the adaptive_scaffold.dart sample](https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
 /// for an example.
 ///
 /// {@tool dartpad --template=stateful_widget_material}
@@ -98,7 +98,7 @@ import 'theme.dart';
 ///    destinations in the navigation rail.
 ///  * [BottomNavigationBar], which is a similar navigation widget that's laid
 ///     out horizontally.
-///  * [https://material.io/components/navigation-rail/]
+///  * https://material.io/components/navigation-rail/
 class NavigationRail extends StatefulWidget {
   /// Creates a material design navigation rail.
   ///
@@ -112,7 +112,7 @@ class NavigationRail extends StatefulWidget {
   /// [minWidth].
   ///
   /// The argument [extended] must not be null. [extended] can only be set to
-  /// true when when the [labelType] is null or [NavigationRailLabelType.none].
+  /// true when the [labelType] is null or [NavigationRailLabelType.none].
   ///
   /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
   /// [unselectedLabelTextStyle], [selectedLabelTextStyle],
@@ -215,8 +215,9 @@ class NavigationRail extends StatefulWidget {
 
   /// The rail's elevation or z-coordinate.
   ///
-  /// If [Directionality] is [TextDirection.LTR], the inner side is the right
-  /// side, and if [Directionality] is [TextDirection.RTL], it is the left side.
+  /// If [Directionality] is [intl.TextDirection.LTR], the inner side is the
+  /// right side, and if [Directionality] is [intl.TextDirection.RTL], it is
+  /// the left side.
   ///
   /// The default value is 0.
   final double? elevation;
@@ -287,7 +288,7 @@ class NavigationRail extends StatefulWidget {
   /// a copy of the [IconThemeData.fallback] with a custom [NavigationRail]
   /// specific color will be used.
   ///
-  /// The default value is Is the [Theme]'s [ThemeData.iconTheme] with a color
+  /// The default value is the [Theme]'s [ThemeData.iconTheme] with a color
   /// of the [Theme]'s [ColorScheme.onSurface] with an opacity of 0.64.
   /// Properties from this icon theme, or
   /// [NavigationRailThemeData.unselectedIconTheme] if this is null, are
@@ -299,7 +300,7 @@ class NavigationRail extends StatefulWidget {
   /// When a [NavigationRailDestination] is not selected,
   /// [unselectedIconTheme] will be used.
   ///
-  /// The default value is Is the [Theme]'s [ThemeData.iconTheme] with a color
+  /// The default value is the [Theme]'s [ThemeData.iconTheme] with a color
   /// of the [Theme]'s [ColorScheme.primary]. Properties from this icon theme,
   /// or [NavigationRailThemeData.selectedIconTheme] if this is null, are
   /// merged into the defaults.
@@ -383,7 +384,7 @@ class NavigationRail extends StatefulWidget {
   }
 
   @override
-  _NavigationRailState createState() => _NavigationRailState();
+  State<NavigationRail> createState() => _NavigationRailState();
 }
 
 class _NavigationRailState extends State<NavigationRail> with TickerProviderStateMixin {
@@ -498,7 +499,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                           padding: widget.destinations[i].padding,
                           onTap: () {
-                            widget.onDestinationSelected!(i);
+                            if (widget.onDestinationSelected != null)
+                              widget.onDestinationSelected!(i);
                           },
                           indexLabel: localizations.tabLabel(
                             tabIndex: i + 1,
@@ -652,7 +654,7 @@ class _RailDestination extends StatelessWidget {
                     child: label,
                   ),
                 ),
-              ]
+              ],
             ),
           );
         } else {
@@ -758,7 +760,7 @@ class _RailDestination extends StatelessWidget {
           Semantics(
             label: indexLabel,
           ),
-        ]
+        ],
       ),
     );
   }

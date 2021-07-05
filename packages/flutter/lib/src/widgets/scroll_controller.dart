@@ -321,9 +321,11 @@ class TrackingScrollController extends ScrollController {
     double initialScrollOffset = 0.0,
     bool keepScrollOffset = true,
     String? debugLabel,
-  }) : super(initialScrollOffset: initialScrollOffset,
-             keepScrollOffset: keepScrollOffset,
-             debugLabel: debugLabel);
+  }) : super(
+         initialScrollOffset: initialScrollOffset,
+         keepScrollOffset: keepScrollOffset,
+         debugLabel: debugLabel,
+       );
 
   final Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};
   ScrollPosition? _lastUpdated;

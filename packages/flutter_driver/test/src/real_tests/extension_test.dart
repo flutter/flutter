@@ -258,7 +258,7 @@ void main() {
     });
 
     testWidgets(
-        "waiting for NoPendingPlatformMessages returns immediately when there're no platform messages", (WidgetTester tester) async {
+        'waiting for NoPendingPlatformMessages returns immediately when there are no platform messages', (WidgetTester tester) async {
       driverExtension
           .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
@@ -279,7 +279,7 @@ void main() {
         'waiting for NoPendingPlatformMessages returns until a single method channel call returns', (WidgetTester tester) async {
       const MethodChannel channel = MethodChannel('helloChannel', JSONMethodCodec());
       const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
-      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
+      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),
@@ -313,7 +313,7 @@ void main() {
       const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
       // Configures channel 1
       const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
-      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
+      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel1', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),
@@ -322,7 +322,7 @@ void main() {
 
       // Configures channel 2
       const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
-      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
+      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel2', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 20),
@@ -362,7 +362,7 @@ void main() {
       const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
       // Configures channel 1
       const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
-      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
+      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel1', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),
@@ -371,7 +371,7 @@ void main() {
 
       // Configures channel 2
       const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
-      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
+      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel2', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 20),
@@ -413,7 +413,7 @@ void main() {
       const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
       // Configures channel 1
       const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
-      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
+      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel1', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 20),
@@ -422,7 +422,7 @@ void main() {
 
       // Configures channel 2
       const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
-      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
+      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel2', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),
@@ -937,9 +937,9 @@ void main() {
             const Text('Foo', key: ValueKey<String>('Text1')),
             const Text('Bar', key: ValueKey<String>('Text2')),
             TextButton(
-              child: const Text('Whatever'),
               key: const ValueKey<String>('Button'),
               onPressed: () {},
+              child: const Text('Whatever'),
             ),
           ],
         ),
@@ -1043,9 +1043,9 @@ void main() {
         child: Column(
           children: <Widget>[
             TextButton(
-              child: const Text('Whatever'),
               key: const ValueKey<String>('Button'),
               onPressed: stubCallback,
+              child: const Text('Whatever'),
             ),
           ],
         ),
@@ -1127,6 +1127,41 @@ void main() {
       final StubCommandResult result = await invokeCommand(ByValueKey('Button'), times);
       expect(result.resultParam, 'stub response');
       expect(invokes, times);
+    });
+  });
+
+  group('waitForTappable', () {
+    late FlutterDriverExtension driverExtension;
+
+    Future<Map<String, dynamic>> waitForTappable() async {
+      final SerializableFinder finder = ByValueKey('widgetOne');
+      final Map<String, String> arguments = WaitForTappable(finder).serialize();
+      final Map<String, dynamic> result = await driverExtension.call(arguments);
+      return result;
+    }
+
+    final Widget testWidget = MaterialApp(
+      home: Material(
+        child: Column(children: const<Widget> [
+          Text('Hello ', key: Key('widgetOne')),
+          SizedBox(
+            height: 0,
+            width: 0,
+            child: Text('World!', key: Key('widgetTwo')),
+            )
+          ],
+        ),
+      ),
+    );
+
+    testWidgets('returns true when widget is tappable', (
+        WidgetTester tester) async {
+      driverExtension = FlutterDriverExtension((String? arg) async => '', true, false);
+
+      await tester.pumpWidget(testWidget);
+
+      final Map<String, dynamic> waitForTappableResult = await waitForTappable();
+      expect(waitForTappableResult['isError'], isFalse);
     });
   });
 

@@ -2,14 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:intl/intl.dart';
 import 'package:file/file.dart';
+import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 import '../convert.dart';
+
+/// A path jointer for URL paths.
+final path.Context urlContext = path.url;
 
 /// Convert `foo_bar` to `fooBar`.
 String camelCase(String str) {
@@ -39,7 +42,7 @@ String toTitleCase(String str) {
 }
 
 /// Return the plural of the given word (`cat(s)`).
-String pluralize(String word, int count) => count == 1 ? word : word + 's';
+String pluralize(String word, int count) => count == 1 ? word : '${word}s';
 
 /// Return the name of an enum item.
 String getEnumName(dynamic enumItem) {
@@ -49,7 +52,8 @@ String getEnumName(dynamic enumItem) {
 }
 
 String toPrettyJson(Object jsonable) {
-  return const JsonEncoder.withIndent('  ').convert(jsonable) + '\n';
+  final String value = const JsonEncoder.withIndent('  ').convert(jsonable);
+  return '$value\n';
 }
 
 final NumberFormat kSecondsFormat = NumberFormat('0.0');
@@ -179,9 +183,6 @@ const int kMinColumnWidth = 10;
 ///   Usage: app main_command <subcommand>
 ///          [arguments]
 /// ```
-///
-/// If [columnWidth] is not specified, then the column width will be the
-/// [outputPreferences.wrapColumn], which is set with the --wrap-column option.
 ///
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// unchanged. If [shouldWrap] is specified, then it overrides the
@@ -344,7 +345,7 @@ List<String> _wrapTextAsLines(String text, {
     int? lastWhitespace;
     // Find the start of the current line.
     for (int index = 0; index < splitLine.length; ++index) {
-      if (splitLine[index].character.isNotEmpty && isWhitespace(splitLine[index])) {
+      if (splitLine[index].character.isNotEmpty && _isWhitespace(splitLine[index])) {
         lastWhitespace = index;
       }
 
@@ -358,7 +359,7 @@ List<String> _wrapTextAsLines(String text, {
         result.add(joinRun(splitLine, currentLineStart, index));
 
         // Skip any intervening whitespace.
-        while (index < splitLine.length && isWhitespace(splitLine[index])) {
+        while (index < splitLine.length && _isWhitespace(splitLine[index])) {
           index++;
         }
 
@@ -375,7 +376,7 @@ List<String> _wrapTextAsLines(String text, {
 /// character.
 ///
 /// Based on: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
-bool isWhitespace(_AnsiRun run) {
+bool _isWhitespace(_AnsiRun run) {
   final int rune = run.character.isNotEmpty ? run.character.codeUnitAt(0) : 0x0;
   return rune >= 0x0009 && rune <= 0x000D ||
       rune == 0x0020 ||
@@ -389,4 +390,72 @@ bool isWhitespace(_AnsiRun run) {
       rune == 0x205F ||
       rune == 0x3000 ||
       rune == 0xFEFF;
+}
+
+final RegExp _interpolationRegex = RegExp(r'\$\{([^}]*)\}');
+
+/// Given a string that possibly contains string interpolation sequences
+/// (so for example, something like `ping -n 1 ${host}`), replace all those
+/// interpolation sequences with the matching value given in [replacementValues].
+///
+/// If the value could not be found inside [replacementValues], an empty
+/// string will be substituted instead.
+///
+/// However, if the dollar sign inside the string is preceded with a backslash,
+/// the sequences won't be substituted at all.
+///
+/// Example:
+/// ```dart
+/// final interpolated = _interpolateString(r'ping -n 1 ${host}', {'host': 'raspberrypi'});
+/// print(interpolated);  // will print 'ping -n 1 raspberrypi'
+///
+/// final interpolated2 = _interpolateString(r'ping -n 1 ${_host}', {'host': 'raspberrypi'});
+/// print(interpolated2); // will print 'ping -n 1 '
+/// ```
+String interpolateString(String toInterpolate, Map<String, String> replacementValues) {
+  return toInterpolate.replaceAllMapped(_interpolationRegex, (Match match) {
+    /// The name of the variable to be inserted into the string.
+    /// Example: If the source string is 'ping -n 1 ${host}',
+    ///   `name` would be 'host'
+    final String name = match.group(1)!;
+    return replacementValues.containsKey(name) ? replacementValues[name]! : '';
+  });
+}
+
+/// Given a list of strings possibly containing string interpolation sequences
+/// (so for example, something like `['ping', '-n', '1', '${host}']`), replace
+/// all those interpolation sequences with the matching value given in [replacementValues].
+///
+/// If the value could not be found inside [replacementValues], an empty
+/// string will be substituted instead.
+///
+/// However, if the dollar sign inside the string is preceded with a backslash,
+/// the sequences won't be substituted at all.
+///
+/// Example:
+/// ```dart
+/// final interpolated = _interpolateString(['ping', '-n', '1', r'${host}'], {'host': 'raspberrypi'});
+/// print(interpolated);  // will print '[ping, -n, 1, raspberrypi]'
+///
+/// final interpolated2 = _interpolateString(['ping', '-n', '1', r'${_host}'], {'host': 'raspberrypi'});
+/// print(interpolated2); // will print '[ping, -n, 1, ]'
+/// ```
+List<String> interpolateStringList(List<String> toInterpolate, Map<String, String> replacementValues) {
+  return toInterpolate.map((String s) => interpolateString(s, replacementValues)).toList();
+}
+
+/// Returns the first line-based match for [regExp] in [file].
+///
+/// Assumes UTF8 encoding.
+Match? firstMatchInFile(File file, RegExp regExp) {
+  if (!file.existsSync()) {
+    return null;
+  }
+  for (final String line in file.readAsLinesSync()) {
+    final Match? match = regExp.firstMatch(line);
+    if (match != null) {
+      return match;
+    }
+  }
+  return null;
 }

@@ -27,7 +27,7 @@ import '_platform_io.dart'
 /// Tests can also create specific platform tests by and adding a `variant:`
 /// argument to the test and using a [TargetPlatformVariant].
 //
-// When adding support for a new platform (e.g. Windows Phone, Rasberry Pi),
+// When adding support for a new platform (e.g. Windows Phone, Raspberry Pi),
 // first create a new value on the [TargetPlatform] enum, then add a rule for
 // selecting that platform here.
 //

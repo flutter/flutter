@@ -7,16 +7,16 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class BackdropFilterPage extends StatefulWidget {
-  const BackdropFilterPage({Key key}) : super(key: key);
+  const BackdropFilterPage({Key? key}) : super(key: key);
 
   @override
-  _BackdropFilterPageState createState() => _BackdropFilterPageState();
+  State<BackdropFilterPage> createState() => _BackdropFilterPageState();
 }
 
 class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProviderStateMixin {
   bool _blurGroup = false;
   bool _blurTexts = true;
-  AnimationController animation;
+  late AnimationController animation;
 
   @override
   void initState() {
@@ -77,7 +77,7 @@ class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProv
                     child: Center(
                       child: AnimatedBuilder(
                           animation: animation,
-                          builder: (BuildContext c, Widget w) {
+                          builder: (BuildContext c, Widget? w) {
                             final int val = (animation.value * 255).round();
                             return Container(
                                 width: 50,
@@ -99,13 +99,13 @@ class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProv
                     const Text('Backdrop per txt:'),
                     Checkbox(
                       value: _blurTexts,
-                      onChanged: (bool v) => setState(() { _blurTexts = v; }),
+                      onChanged: (bool? v) => setState(() { _blurTexts = v ?? false; }),
                     ),
                     const SizedBox(width: 10),
                     const Text('Backdrop grid:'),
                     Checkbox(
                       value: _blurGroup,
-                      onChanged: (bool v) => setState(() { _blurGroup = v; }),
+                      onChanged: (bool? v) => setState(() { _blurGroup = v ?? false; }),
                     ),
                   ],
                 ),

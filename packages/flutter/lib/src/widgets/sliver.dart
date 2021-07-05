@@ -446,6 +446,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   }
 
   @override
+  @pragma('vm:notify-debugger-on-exception')
   Widget? build(BuildContext context, int index) {
     assert(builder != null);
     if (index < 0 || (childCount != null && index >= childCount!))
@@ -469,7 +470,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
-    return KeyedSubtree(child: child, key: key);
+    return KeyedSubtree(key: key, child: child);
   }
 
   @override
@@ -722,7 +723,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     final Key? key = child.key != null? _SaltedValueKey(child.key!) : null;
     assert(
       child != null,
-      "The sliver's children must not contain null values, but a null value was found at index $index"
+      "The sliver's children must not contain null values, but a null value was found at index $index",
     );
     if (addRepaintBoundaries)
       child = RepaintBoundary(child: child);
@@ -733,7 +734,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
-    return KeyedSubtree(child: child, key: key);
+    return KeyedSubtree(key: key, child: child);
   }
 
   @override
@@ -749,7 +750,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
 ///
 /// See also:
 ///
-/// * [KeepAlive], which marks whether its chlild widget should be kept alive.
+/// * [KeepAlive], which marks whether its child widget should be kept alive.
 /// * [SliverChildBuilderDelegate] and [SliverChildListDelegate], slivers
 ///    which make usr of the keep alive functionality through the
 ///    `addAutomaticKeepAlives` property.
@@ -1236,7 +1237,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  Element? updateChild(Element? child, Widget? newWidget, dynamic newSlot) {
+  Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
     final SliverMultiBoxAdaptorParentData? oldParentData = child?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
     final Element? newChild = super.updateChild(child, newWidget, newSlot);
     final SliverMultiBoxAdaptorParentData? newParentData = newChild?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
@@ -1351,10 +1352,10 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         } else {
           throw FlutterError(
             'Could not find the number of children in ${widget.delegate}.\n'
-            'The childCount getter was called (implying that the delegate\'s builder returned null '
+            "The childCount getter was called (implying that the delegate's builder returned null "
             'for a positive index), but even building the child with index $hi (the maximum '
             'possible integer) did not return null. Consider implementing childCount to avoid '
-            'the cost of searching for the final child.'
+            'the cost of searching for the final child.',
           );
         }
       }
@@ -1557,7 +1558,11 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<double>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics',));
+    properties.add(FlagProperty(
+      'alwaysIncludeSemantics',
+      value: alwaysIncludeSemantics,
+      ifTrue: 'alwaysIncludeSemantics',
+    ));
   }
 }
 
@@ -1665,7 +1670,7 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  _SliverOffstageElement createElement() => _SliverOffstageElement(this);
+  SingleChildRenderObjectElement createElement() => _SliverOffstageElement(this);
 }
 
 class _SliverOffstageElement extends SingleChildRenderObjectElement {

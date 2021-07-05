@@ -4,9 +4,9 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 Finder findKey(int i) => find.byKey(ValueKey<int>(i));
 
@@ -232,7 +232,7 @@ void main() {
         (int y) => Row(
           children: List<SizedBox>.generate(
             7,
-            (int x) => SizedBox(key: ValueKey<String>('$x, $y'), width: 200.0, height: 200.0,),
+            (int x) => SizedBox(key: ValueKey<String>('$x, $y'), width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -729,7 +729,7 @@ void main() {
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(-3), width: 200.0, height: 200.0)),
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(-2), width: 200.0, height: 200.0)),
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(-1), width: 200.0, height: 200.0)),
-                      SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(0), width: 200.0, height: 200.0), key: ValueKey<String>('center')),
+                      SliverToBoxAdapter(key: ValueKey<String>('center'), child: SizedBox(key: ValueKey<int>(0), width: 200.0, height: 200.0)),
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(1), width: 200.0, height: 200.0)),
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(2), width: 200.0, height: 200.0)),
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(3), width: 200.0, height: 200.0)),

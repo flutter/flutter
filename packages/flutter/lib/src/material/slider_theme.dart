@@ -1493,9 +1493,9 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   const RectangularSliderTrackShape({
     @Deprecated(
       'It no longer has any effect because the thumb does not shrink when the slider is disabled now. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
-    this.disabledThumbGapWidth = 2.0
+    this.disabledThumbGapWidth = 2.0,
   });
 
   /// Horizontal spacing, or gap, between the disabled thumb and the track.
@@ -1506,7 +1506,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   /// thumb radius.
   @Deprecated(
     'It no longer has any effect because the thumb does not shrink when the slider is disabled now. '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   final double disabledThumbGapWidth;
 
@@ -1667,7 +1667,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       isDiscrete: isDiscrete,
     );
     final Radius trackRadius = Radius.circular(trackRect.height / 2);
-    final Radius activeTrackRadius = Radius.circular(trackRect.height / 2 + 1);
+    final Radius activeTrackRadius = Radius.circular((trackRect.height + additionalActiveTrackHeight) / 2);
 
     context.canvas.drawRRect(
       RRect.fromLTRBAndCorners(
@@ -1920,10 +1920,12 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
     // but reversed for right to left text.
     final ColorTween activeTrackColorTween = ColorTween(
       begin: sliderTheme.disabledActiveTrackColor,
-      end: sliderTheme.activeTrackColor);
+      end: sliderTheme.activeTrackColor,
+    );
     final ColorTween inactiveTrackColorTween = ColorTween(
       begin: sliderTheme.disabledInactiveTrackColor,
-      end: sliderTheme.inactiveTrackColor);
+      end: sliderTheme.inactiveTrackColor,
+    );
     final Paint activePaint = Paint()
       ..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()
@@ -2002,7 +2004,7 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
 ///   [SliderThemeData.disabledActiveTrackColor],
 ///   [SliderThemeData.disabledInactiveTrackColor].
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the round slider slider tick mark shape.]
+/// ![A slider widget, consisting of 5 divisions and showing the round slider tick mark shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/rounded_slider_tick_mark_shape.png)
 ///
 /// See also:
@@ -2547,14 +2549,14 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(
-     bool isEnabled,
-     bool isDiscrete, {
-     TextPainter? labelPainter,
-     double? textScaleFactor,
+    bool isEnabled,
+    bool isDiscrete, {
+    TextPainter? labelPainter,
+    double? textScaleFactor,
   }) {
-     assert(labelPainter != null);
-     assert(textScaleFactor != null && textScaleFactor >= 0);
-     return _pathPainter.getPreferredSize(labelPainter!, textScaleFactor!);
+    assert(labelPainter != null);
+    assert(textScaleFactor != null && textScaleFactor >= 0);
+    return _pathPainter.getPreferredSize(labelPainter!, textScaleFactor!);
   }
 
   @override
@@ -2582,7 +2584,8 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
       labelPainter: labelPainter,
       textScaleFactor: textScaleFactor,
       sizeWithOverflow: sizeWithOverflow,
-      backgroundPaintColor: sliderTheme.valueIndicatorColor!);
+      backgroundPaintColor: sliderTheme.valueIndicatorColor!,
+    );
   }
 }
 

@@ -57,26 +57,6 @@ void main() {
         File outputAppFrameworkBinary;
 
         setUpAll(() {
-          flutterRoot = getFlutterRoot();
-          tempDir = createResolvedTempDirectorySync('ios_content_validation.');
-          flutterBin = fileSystem.path.join(
-            flutterRoot,
-            'bin',
-            'flutter',
-          );
-
-          processManager.runSync(<String>[
-            flutterBin,
-            ...getLocalEngineArguments(),
-            'create',
-            '--platforms=ios',
-            '-i',
-            'objc',
-            'hello',
-          ], workingDirectory: tempDir.path);
-
-          projectRoot = tempDir.childDirectory('hello').path;
-
           processManager.runSync(<String>[
             flutterBin,
             ...getLocalEngineArguments(),
@@ -109,7 +89,8 @@ void main() {
         testWithoutContext('flutter build ios builds a valid app', () {
           // Should only contain Flutter.framework and App.framework.
           expect(frameworkDirectory.listSync().length, 2);
-          expect(outputAppFramework.childFile('App'), exists);
+          expect(outputAppFrameworkBinary, exists);
+          expect(outputAppFramework.childFile('Info.plist'), exists);
 
           final File vmSnapshot = fileSystem.file(fileSystem.path.join(
             outputAppFramework.path,

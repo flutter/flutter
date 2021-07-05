@@ -6,107 +6,177 @@ import 'package:flutter/foundation.dart';
 
 import '../common.dart';
 
-const int _kNumIterations = 1000;
-const double _scale = 1000.0 / _kNumIterations;
+const int _kNumIterations = 65536;
 const int _kNumWarmUp = 100;
+const int _kScale = 1000;
 
 void main() {
   assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
 
-  void listener() {}
-  void listener2() {}
-  void listener3() {}
-  void listener4() {}
-  void listener5() {}
+  // In the following benchmarks, we won't remove the listeners when we don't
+  // want to measure removeListener because we know that everything will be
+  // GC'ed in the end.
+  // Not removing listeners would cause memory leaks in a real application.
 
-  // Warm up lap
-  for (int i = 0; i < _kNumWarmUp; i += 1) {
-    _Notifier()
-      ..addListener(listener)
-      ..addListener(listener2)
-      ..addListener(listener3)
-      ..addListener(listener4)
-      ..addListener(listener5)
-      ..notify()
-      ..removeListener(listener)
-      ..removeListener(listener2)
-      ..removeListener(listener3)
-      ..removeListener(listener4)
-      ..removeListener(listener5);
-  }
-
-  final Stopwatch addListenerWatch = Stopwatch();
-  final Stopwatch removeListenerWatch = Stopwatch();
-  final Stopwatch notifyListenersWatch = Stopwatch();
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 
-  for (int listenersCount = 0; listenersCount <= 5; listenersCount++) {
+  void runAddListenerBenchmark(int iteration, {bool addResult = true}) {
+    const String name = 'add';
+    for (int listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
+      final List<_Notifier> notifiers = List<_Notifier>.generate(
+        iteration,
+        (_) => _Notifier(),
+        growable: false,
+      );
 
-    for (int j = 0; j < _kNumIterations; j += 1) {
-      final _Notifier notifier = _Notifier();
-      addListenerWatch.start();
-
-      notifier.addListener(listener);
-      if (listenersCount > 1)
-        notifier.addListener(listener2);
-      if (listenersCount > 2)
-        notifier.addListener(listener3);
-      if (listenersCount > 3)
-        notifier.addListener(listener4);
-      if (listenersCount > 4)
-        notifier.addListener(listener5);
-
-      addListenerWatch.stop();
-      notifyListenersWatch.start();
-
-      notifier.notify();
-
-      notifyListenersWatch.stop();
-      removeListenerWatch.start();
-
-      // Remove listeners in reverse order to evaluate the worse-case scenario:
-      // the listener removed is the last listener
-      if (listenersCount > 4)
-        notifier.removeListener(listener5);
-      if (listenersCount > 3)
-        notifier.removeListener(listener4);
-      if (listenersCount > 2)
-        notifier.removeListener(listener3);
-      if (listenersCount > 1)
-        notifier.removeListener(listener2);
-      notifier.removeListener(listener);
-
-      removeListenerWatch.stop();
+      final Stopwatch watch = Stopwatch();
+      watch.start();
+      for (int i = 0; i < iteration; i += 1) {
+        for (int l = 0; l < listenerCount; l += 1) {
+          notifiers[i].addListener(() {});
+        }
+      }
+      watch.stop();
+      final int elapsed = watch.elapsedMicroseconds;
+      final double averagePerIteration = elapsed / iteration;
+      if (addResult)
+        printer.addResult(
+          description: '$name ($listenerCount listeners)',
+          value: averagePerIteration * _kScale,
+          unit: 'ns per iteration',
+          name: '$name$listenerCount',
+        );
     }
-
-    final int notifyListener = notifyListenersWatch.elapsedMicroseconds;
-    notifyListenersWatch.reset();
-    final int addListenerElapsed = addListenerWatch.elapsedMicroseconds;
-    addListenerWatch.reset();
-    final int removeListenerElapsed = removeListenerWatch.elapsedMicroseconds;
-    removeListenerWatch.reset();
-
-    printer.addResult(
-      description: 'addListener ($listenersCount listeners)',
-      value: addListenerElapsed * _scale,
-      unit: 'ns per iteration',
-      name: 'addListener${listenersCount}_iteration',
-    );
-
-    printer.addResult(
-      description: 'removeListener ($listenersCount listeners)',
-      value: removeListenerElapsed * _scale,
-      unit: 'ns per iteration',
-      name: 'removeListener${listenersCount}_iteration',
-    );
-
-    printer.addResult(
-      description: 'notifyListener ($listenersCount listeners)',
-      value: notifyListener * _scale,
-      unit: 'ns per iteration',
-      name: 'notifyListener${listenersCount}_iteration',
-    );
   }
+
+  void runNotifyListenerBenchmark(int iteration, {bool addResult = true}) {
+    const String name = 'notify';
+
+    for (int listenerCount = 0; listenerCount <= 5; listenerCount += 1) {
+      final _Notifier notifier = _Notifier();
+      for (int i = 1; i <= listenerCount; i += 1) {
+        notifier.addListener(() {});
+      }
+      final Stopwatch watch = Stopwatch();
+      watch.start();
+      for (int i = 0; i < iteration; i += 1) {
+        notifier.notify();
+      }
+      watch.stop();
+      final int elapsed = watch.elapsedMicroseconds;
+      final double averagePerIteration = elapsed / iteration;
+      if (addResult)
+        printer.addResult(
+          description: '$name ($listenerCount listeners)',
+          value: averagePerIteration * _kScale,
+          unit: 'ns per iteration',
+          name: '$name$listenerCount',
+        );
+    }
+  }
+
+  void runRemoveListenerBenchmark(int iteration, {bool addResult = true}) {
+    const String name = 'remove';
+    final List<VoidCallback> listeners = <VoidCallback>[
+      () {},
+      () {},
+      () {},
+      () {},
+      () {},
+    ];
+    for (int listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
+      final List<_Notifier> notifiers = List<_Notifier>.generate(
+        iteration,
+        (_) {
+          final _Notifier notifier = _Notifier();
+          for (int l = 0; l < listenerCount; l += 1) {
+            notifier.addListener(listeners[l]);
+          }
+          return notifier;
+        },
+        growable: false,
+      );
+
+      final Stopwatch watch = Stopwatch();
+      watch.start();
+      for (int i = 0; i < iteration; i += 1) {
+        for (int l = 0; l < listenerCount; l += 1) {
+          notifiers[i].removeListener(listeners[l]);
+        }
+      }
+      watch.stop();
+      final int elapsed = watch.elapsedMicroseconds;
+      final double averagePerIteration = elapsed / iteration;
+      if (addResult)
+        printer.addResult(
+          description: '$name ($listenerCount listeners)',
+          value: averagePerIteration * _kScale,
+          unit: 'ns per iteration',
+          name: '$name$listenerCount',
+        );
+    }
+  }
+
+  void runRemoveListenerWhileNotifyingBenchmark(int iteration,
+      {bool addResult = true}) {
+    const String name = 'removeWhileNotify';
+
+    final List<VoidCallback> listeners = <VoidCallback>[
+      () {},
+      () {},
+      () {},
+      () {},
+      () {},
+    ];
+    for (int listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
+      final List<_Notifier> notifiers = List<_Notifier>.generate(
+        iteration,
+        (_) {
+          final _Notifier notifier = _Notifier();
+          notifier.addListener(() {
+            // This listener will remove all other listeners. So that only this
+            // one is called and measured.
+            for (int l = 0; l < listenerCount; l += 1) {
+              notifier.removeListener(listeners[l]);
+            }
+          });
+          for (int l = 0; l < listenerCount; l += 1) {
+            notifier.addListener(listeners[l]);
+          }
+          return notifier;
+        },
+        growable: false,
+      );
+
+      final Stopwatch watch = Stopwatch();
+      watch.start();
+      for (int i = 0; i < iteration; i += 1) {
+        notifiers[i].notify();
+      }
+      watch.stop();
+      final int elapsed = watch.elapsedMicroseconds;
+      final double averagePerIteration = elapsed / iteration;
+      if (addResult)
+        printer.addResult(
+          description: '$name ($listenerCount listeners)',
+          value: averagePerIteration * _kScale,
+          unit: 'ns per iteration',
+          name: '$name$listenerCount',
+        );
+    }
+  }
+
+  runAddListenerBenchmark(_kNumWarmUp, addResult: false);
+  runAddListenerBenchmark(_kNumIterations, addResult: true);
+
+  runNotifyListenerBenchmark(_kNumWarmUp, addResult: false);
+  runNotifyListenerBenchmark(_kNumIterations, addResult: true);
+
+  runRemoveListenerBenchmark(_kNumWarmUp, addResult: false);
+  runRemoveListenerBenchmark(_kNumIterations, addResult: true);
+
+  runRemoveListenerWhileNotifyingBenchmark(_kNumWarmUp, addResult: false);
+  runRemoveListenerWhileNotifyingBenchmark(_kNumIterations, addResult: true);
 
   printer.printToStdout();
 }

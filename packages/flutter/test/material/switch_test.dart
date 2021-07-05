@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -87,6 +90,57 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
+  });
+
+  testWidgets('Switch does not get distorted upon changing constraints with parent', (WidgetTester tester) async {
+    const double maxWidth = 300;
+    const double maxHeight = 100;
+
+    const ValueKey<String> boundaryKey = ValueKey<String>('switch container');
+
+    Widget buildSwitch({required double width, required double height}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.ltr,
+            child: SizedBox(
+              width: maxWidth,
+              height: maxHeight,
+              child: RepaintBoundary(
+                key: boundaryKey,
+                child: SizedBox(
+                  width: width,
+                  height: height,
+                  child: Switch(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: true,
+                    onChanged: (_) {},
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(
+      width: maxWidth,
+      height: maxHeight,
+    ));
+    await expectLater(
+      find.byKey(boundaryKey),
+      matchesGoldenFile('switch_test.big.on.png'),
+    );
+
+    await tester.pumpWidget(buildSwitch(
+      width: 20,
+      height: 10,
+    ));
+    await expectLater(
+      find.byKey(boundaryKey),
+      matchesGoldenFile('switch_test.small.on.png'),
+    );
   });
 
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
@@ -297,30 +351,32 @@ void main() {
     );
 
     expect(
-        Material.of(tester.element(find.byType(Switch))),
-        paints
-          ..rrect(
-              color: const Color(0x52000000), // Black with 32% opacity
-              rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
-          ..circle(color: const Color(0x33000000))
-          ..circle(color: const Color(0x24000000))
-          ..circle(color: const Color(0x1f000000))
-          ..circle(color: Colors.grey.shade50),
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: const Color(0x52000000), // Black with 32% opacity
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: Colors.grey.shade50),
       reason: 'Inactive enabled switch should match these colors',
     );
     await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
     await tester.pump();
 
     expect(
-        Material.of(tester.element(find.byType(Switch))),
-        paints
-          ..rrect(
-              color: Colors.blue[600]!.withAlpha(0x80),
-              rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
-          ..circle(color: const Color(0x33000000))
-          ..circle(color: const Color(0x24000000))
-          ..circle(color: const Color(0x1f000000))
-          ..circle(color: Colors.blue[600]),
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.blue[600]!.withAlpha(0x80),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: Colors.blue[600]),
       reason: 'Active enabled switch should match these colors',
     );
   });
@@ -349,7 +405,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -380,7 +437,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -423,7 +481,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.blue[500],
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -437,7 +496,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.green[500],
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -568,7 +628,7 @@ void main() {
   testWidgets('switch has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -606,13 +666,13 @@ void main() {
     expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semanticsTester.dispose();
-    SystemChannels.accessibility.setMockMessageHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
   testWidgets('switch sends semantic events from parent if fully merged', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -656,7 +716,7 @@ void main() {
     expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semanticsTester.dispose();
-    SystemChannels.accessibility.setMockMessageHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
   testWidgets('Switch.adaptive', (WidgetTester tester) async {
@@ -744,7 +804,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -762,7 +823,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x52000000),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -780,7 +842,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x1f000000),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -812,7 +875,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..circle(color: Colors.orange[500], radius: splashRadius)
+      paints..circle(color: Colors.orange[500], radius: splashRadius),
     );
   });
 
@@ -845,7 +908,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -865,7 +929,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -881,7 +946,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x1f000000),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1122,7 +1188,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1138,7 +1205,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1154,7 +1222,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x52000000), // Black with 32% opacity,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1170,7 +1239,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1227,7 +1297,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x1f000000))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -1248,7 +1319,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x1f000000))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -1306,7 +1378,8 @@ void main() {
       paints
         ..rrect(
             color: inactiveDisabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Inactive disabled switch track should use this value',
     );
 
@@ -1318,7 +1391,8 @@ void main() {
       paints
         ..rrect(
             color: activeDisabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Active disabled switch should match these colors',
     );
 
@@ -1330,7 +1404,8 @@ void main() {
       paints
         ..rrect(
             color: inactiveEnabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Inactive enabled switch should match these colors',
     );
 
@@ -1342,7 +1417,8 @@ void main() {
       paints
         ..rrect(
             color: inactiveDisabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Inactive disabled switch should match these colors',
     );
   });
@@ -1395,7 +1471,8 @@ void main() {
       paints
         ..rrect(
             color: focusedTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Inactive enabled switch should match these colors',
     );
 
@@ -1411,7 +1488,8 @@ void main() {
       paints
         ..rrect(
             color: hoveredTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Inactive enabled switch should match these colors',
     );
   });
@@ -1461,7 +1539,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1633,4 +1712,102 @@ void main() {
     // Release pointer after widget disappeared.
     await gesture.up();
   });
+
+  group('with image', () {
+    late ui.Image image;
+
+    setUp(() async {
+      image = await createTestImage(width: 100, height: 100);
+    });
+
+    testWidgets('do not crash when imageProvider completes after Switch is disposed', (WidgetTester tester) async {
+      final DelayedImageProvider imageProvider = DelayedImageProvider(image);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Switch(
+                value: true,
+                onChanged: null,
+                inactiveThumbImage: imageProvider,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(Switch), findsOneWidget);
+
+      // Dispose the switch by taking down the tree.
+      await tester.pumpWidget(Container());
+      expect(find.byType(Switch), findsNothing);
+
+      imageProvider.complete();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('do not crash when previous imageProvider completes after Switch is disposed', (WidgetTester tester) async {
+      final DelayedImageProvider imageProvider1 = DelayedImageProvider(image);
+      final DelayedImageProvider imageProvider2 = DelayedImageProvider(image);
+
+      Future<void> buildSwitch(ImageProvider imageProvider) {
+        return tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: Switch(
+                  value: true,
+                  onChanged: null,
+                  inactiveThumbImage: imageProvider,
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await buildSwitch(imageProvider1);
+      expect(find.byType(Switch), findsOneWidget);
+      // Replace the ImageProvider.
+      await buildSwitch(imageProvider2);
+      expect(find.byType(Switch), findsOneWidget);
+
+      // Dispose the switch by taking down the tree.
+      await tester.pumpWidget(Container());
+      expect(find.byType(Switch), findsNothing);
+
+      // Completing the replaced ImageProvider shouldn't crash.
+      imageProvider1.complete();
+      expect(tester.takeException(), isNull);
+
+      imageProvider2.complete();
+      expect(tester.takeException(), isNull);
+    });
+  });
+}
+
+class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
+  DelayedImageProvider(this.image);
+
+  final ui.Image image;
+
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
+
+  @override
+  Future<DelayedImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<DelayedImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
+    return OneFrameImageStreamCompleter(_completer.future);
+  }
+
+  Future<void> complete() async {
+    _completer.complete(ImageInfo(image: image));
+  }
+
+  @override
+  String toString() => '${describeIdentity(this)}()';
 }
