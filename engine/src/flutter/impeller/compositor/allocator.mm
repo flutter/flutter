@@ -77,6 +77,11 @@ std::shared_ptr<DeviceBuffer> Allocator::CreateBufferWithCopy(
   return new_buffer;
 }
 
+std::shared_ptr<DeviceBuffer> Allocator::CreateBufferWithCopy(
+    const fml::Mapping& mapping) {
+  return CreateBufferWithCopy(mapping.GetMapping(), mapping.GetSize());
+}
+
 std::shared_ptr<DeviceBuffer> Allocator::CreateBuffer(StorageMode mode,
                                                       size_t length) {
   auto buffer =

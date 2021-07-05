@@ -19,7 +19,7 @@ class Image {
 
   ~Image();
 
-  ImageResult Decode() const;
+  [[nodiscard]] ImageResult Decode() const;
 
   bool IsValid() const;
 

@@ -8,36 +8,10 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/formats.h"
+#include "impeller/compositor/texture_descriptor.h"
 #include "impeller/geometry/size.h"
 
 namespace impeller {
-
-struct TextureDescriptor {
-  PixelFormat format = PixelFormat::kUnknown;
-  ISize size;
-  size_t mip_count = 1u;  // Size::MipCount is usually appropriate.
-
-  constexpr size_t GetSizeOfBaseMipLevel() const {
-    if (!IsValid()) {
-      return 0u;
-    }
-    return size.Area() * BytesPerPixelForPixelFormat(format);
-  }
-
-  constexpr size_t GetBytesPerRow() const {
-    if (!IsValid()) {
-      return 0u;
-    }
-    return size.width * BytesPerPixelForPixelFormat(format);
-  }
-
-  bool IsValid() const {
-    return format != PixelFormat::kUnknown &&  //
-           size.IsPositive() &&                //
-           mip_count >= 1u                     //
-        ;
-  }
-};
 
 class Texture {
  public:
