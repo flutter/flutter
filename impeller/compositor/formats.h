@@ -93,6 +93,23 @@ enum class ColorWriteMask : uint64_t {
   kAll = kRed | kGreen | kBlue,
 };
 
+constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kUnknown:
+      return 0u;
+    case PixelFormat::kPixelFormat_B8G8R8A8_UNormInt:
+      return 4u;
+    case PixelFormat::kPixelFormat_B8G8R8A8_UNormInt_SRGB:
+      return 4u;
+    case PixelFormat::kPixelFormat_D32_Float_S8_UNormInt:
+      // This is an esoteric format and implementations may use 64 bits.
+      // Impeller doesn't work with these natively and this return is only here
+      // for completeness. The 40 bits is as documented.
+      return 5u;
+  }
+  return 0u;
+}
+
 struct ColorAttachmentDescriptor {
   PixelFormat format = PixelFormat::kUnknown;
   bool blending_enabled = false;
