@@ -49,6 +49,11 @@ std::shared_ptr<Texture> DeviceBuffer::MakeTexture(TextureDescriptor desc,
 [[nodiscard]] bool DeviceBuffer::CopyHostBuffer(const uint8_t* source,
                                                 Range source_range,
                                                 size_t offset) {
+  if (mode_ != StorageMode::kHostVisible) {
+    // One of the storage modes where a transfer queue must be used.
+    return false;
+  }
+
   if (offset + source_range.length > size_) {
     // Out of bounds of this buffer.
     return false;
@@ -57,13 +62,14 @@ std::shared_ptr<Texture> DeviceBuffer::MakeTexture(TextureDescriptor desc,
   auto dest = static_cast<uint8_t*>(buffer_.contents);
 
   if (!dest) {
-    // Probably StorageMode::kDevicePrivate.
     return false;
   }
 
   ::memmove(dest + offset, source + source_range.offset, source_range.length);
 
-  [buffer_ didModifyRange:NSMakeRange(offset, source_range.length)];
+  if (Allocator::RequiresExplicitHostSynchronization(mode_)) {
+    [buffer_ didModifyRange:NSMakeRange(offset, source_range.length)];
+  }
 
   return true;
 }
