@@ -16,3 +16,12 @@ impeller_component("image") {
 
   public_deps = [ "../geometry" ]
 }
+
+impeller_component("image_unittests") {
+  testonly = true
+  sources = []
+  deps = [
+    ":image",
+    "//flutter/testing",
+  ]
+}
