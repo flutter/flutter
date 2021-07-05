@@ -65,7 +65,9 @@ std::shared_ptr<Texture> DeviceBuffer::MakeTexture(TextureDescriptor desc,
     return false;
   }
 
-  ::memmove(dest + offset, source + source_range.offset, source_range.length);
+  if (source) {
+    ::memmove(dest + offset, source + source_range.offset, source_range.length);
+  }
 
   if (Allocator::RequiresExplicitHostSynchronization(mode_)) {
     [buffer_ didModifyRange:NSMakeRange(offset, source_range.length)];
