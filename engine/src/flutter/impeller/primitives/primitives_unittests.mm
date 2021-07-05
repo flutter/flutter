@@ -65,7 +65,7 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
     }
     return true;
   };
-  OpenPlaygroundHere(callback);
+  // OpenPlaygroundHere(callback);
 }
 
 }  // namespace testing

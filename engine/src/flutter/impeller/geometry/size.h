@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <limits>
 #include <string>
 
@@ -11,59 +12,74 @@
 
 namespace impeller {
 
-struct Size {
-  Scalar width = 0.0;
-  Scalar height = 0.0;
+template <class T>
+struct TSize {
+  using Type = T;
 
-  constexpr Size() {}
+  Type width = {};
+  Type height = {};
 
-  constexpr Size(Scalar width, Scalar height) : width(width), height(height) {}
+  constexpr TSize() {}
 
-  static constexpr Size Infinite() {
-    return Size{std::numeric_limits<Scalar>::max(),
-                std::numeric_limits<Scalar>::max()};
+  constexpr TSize(Type width, Type height) : width(width), height(height) {}
+
+  static constexpr TSize Infinite() {
+    return TSize{std::numeric_limits<Type>::max(),
+                 std::numeric_limits<Type>::max()};
   }
 
-  constexpr Size operator*(Scalar scale) const {
+  constexpr TSize operator*(Type scale) const {
     return {width * scale, height * scale};
   }
 
-  constexpr bool operator==(const Size& s) const {
+  constexpr bool operator==(const TSize& s) const {
     return s.width == width && s.height == height;
   }
 
-  constexpr bool operator!=(const Size& s) const {
+  constexpr bool operator!=(const TSize& s) const {
     return s.width != width || s.height != height;
   }
 
-  constexpr Size operator+(const Size& s) const {
+  constexpr TSize operator+(const TSize& s) const {
     return {width + s.width, height + s.height};
   }
 
-  constexpr Size operator-(const Size& s) const {
+  constexpr TSize operator-(const TSize& s) const {
     return {width - s.width, height - s.height};
   }
 
-  constexpr Size Union(const Size& o) const {
+  constexpr TSize Union(const TSize& o) const {
     return {
         std::max(width, o.width),
         std::max(height, o.height),
     };
   }
 
-  constexpr Size Intersection(const Size& o) const {
+  constexpr TSize Intersection(const TSize& o) const {
     return {
         std::min(width, o.width),
         std::min(height, o.height),
     };
   }
 
+  constexpr Type Area() const { return width * height; }
+
   constexpr bool IsZero() const { return width * height == 0.0; }
 
   constexpr bool IsPositive() const { return width * height > 0.0; }
 
   constexpr bool IsEmpty() { return !IsPositive(); }
+
+  constexpr size_t MipCount() const {
+    if (!IsPositive()) {
+      return 1u;
+    }
+    return std::max(ceil(log2(width)), ceil(log2(height)));
+  }
 };
+
+using Size = TSize<Scalar>;
+using ISize = TSize<int64_t>;
 
 static_assert(sizeof(Size) == 2 * sizeof(Scalar));
 

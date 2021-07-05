@@ -27,8 +27,8 @@ executable("impeller_unittests") {
     "compositor:compositor_unittests",
     "entity:entity_unittests",
     "fixtures",
+    "geometry:geometry_unittests",
     "playground",
     "primitives:primitives_unittests",
-    "//flutter/testing",
   ]
 }

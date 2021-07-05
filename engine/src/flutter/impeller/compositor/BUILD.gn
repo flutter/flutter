@@ -76,10 +76,14 @@ impeller_component("compositor") {
 source_set("compositor_unittests") {
   testonly = true
 
-  sources = [ "host_buffer_unittests.mm" ]
+  sources = [
+    "device_buffer_unittests.mm",
+    "host_buffer_unittests.mm",
+  ]
 
   deps = [
     ":compositor",
+    "../playground",
     "//flutter/testing:testing_lib",
   ]
 }
