@@ -55,6 +55,7 @@ class TwoPane extends StatelessWidget {
     this.verticalDirection = VerticalDirection.down,
     this.direction = Axis.horizontal,
     this.panePriority = TwoPanePriority.both,
+    this.padding,
   }) : super(key: key);
 
   /// First pane, which can sit on the left for left to right layouts,
@@ -97,21 +98,35 @@ class TwoPane extends StatelessWidget {
   /// Defaults to [TwoPanePriority.both]
   final TwoPanePriority panePriority;
 
+  /// The distance from the edge of the screen, used to determine how [TwoPane]
+  /// intersects [MediaQueryData.displayFeatures].
+  ///
+  /// When [TwoPane] is not the root layout and the distance from the screen
+  /// edge increases, the [padding] needs to take into account the extra space.
+  ///
+  /// For example, when TwoPane is the body of a Scaffold, the appbar adds extra
+  /// spacing between TwoPane and the edge of the screen. If TwoPane is used
+  /// with a [Axis.vertical] [direction], the separation between the two panes
+  /// will not align with [DisplayFeature]s unless the [padding] also includes
+  /// the height of the appbar.
+  ///
+  /// Defaults to [MediaQueryData.padding].
+  final EdgeInsets? padding;
+
   TextDirection _textDirection(BuildContext context) =>
       textDirection ?? Directionality.maybeOf(context) ?? TextDirection.ltr;
 
   @override
   Widget build(BuildContext context) {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
-    final Size size = mediaQuery.size;
-    DisplayFeature? displayFeature;
-    for (final DisplayFeature e in mediaQuery.displayFeatures) {
-      if (e.bounds.width >= size.width || e.bounds.height >= size.height) {
-        displayFeature = e;
-        break;
-      }
-    }
-    final Rect? seam = displayFeature?.bounds;
+    final DisplayFeature? displayFeature = _separatingDisplayFeature(mediaQuery);
+
+    final EdgeInsets padding = this.padding ?? mediaQuery.padding;
+    final Size size = Size(mediaQuery.size.width - padding.horizontal,
+        mediaQuery.size.height - padding.vertical);
+    final Rect? seam = displayFeature?.bounds.translate(
+        -padding.left, -padding.top);
+
 
     late Axis _direction;
     late double _paneProportion;
@@ -179,18 +194,19 @@ class TwoPane extends StatelessWidget {
       );
     }
 
+    const int fractionBase = 1000000;
     return Flex(
       children: <Widget>[
         if (panePriority != TwoPanePriority.pane2)
           Expanded(
-            flex: (100 * _paneProportion).toInt(),
+            flex: (fractionBase * _paneProportion).toInt(),
             child: _pane1,
           ),
         if (panePriority == TwoPanePriority.both)
           _delimiter,
         if (panePriority != TwoPanePriority.pane1)
           Expanded(
-            flex: (100 * (1 - _paneProportion)).toInt(),
+            flex: (fractionBase * (1 - _paneProportion)).toInt(),
             child: _pane2,
           ),
       ],
@@ -200,14 +216,33 @@ class TwoPane extends StatelessWidget {
       verticalDirection: verticalDirection,
     );
   }
+
+  DisplayFeature? _separatingDisplayFeature(MediaQueryData mediaQuery) {
+    for (final DisplayFeature displayFeature in mediaQuery.displayFeatures) {
+      final bool largeEnough = displayFeature.bounds.width >=
+          mediaQuery.size.width ||
+          displayFeature.bounds.height >= mediaQuery.size.height;
+      final bool makesTwoVerticalAreas = displayFeature.bounds.top > 0 &&
+          displayFeature.bounds.bottom < mediaQuery.size.height;
+      final bool makesTwoHorizontalAreas = displayFeature.bounds.left > 0 &&
+          displayFeature.bounds.right < mediaQuery.size.width;
+      final bool makesTwoAreas = makesTwoHorizontalAreas || makesTwoVerticalAreas;
+      if (largeEnough && makesTwoAreas) {
+        return displayFeature;
+      }
+    }
+    return null;
+  }
 }
 
 /// Describes which pane to show or if both should be shown.
-enum TwoPanePriority{
+enum TwoPanePriority {
   /// Show both panes
   both,
+
   /// Show only the first pane
   pane1,
+
   /// Show only the second pane
   pane2,
 }

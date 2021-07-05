@@ -367,22 +367,7 @@ class MediaQueryData {
   /// a widget subtree for those widgets sensitive to it.
   final NavigationMode navigationMode;
 
-  /// Areas of the display that are obstructed by hardware features. This list is
-  /// populated only on Android. If the device has no display features, this list
-  /// is empty.
-  ///
-  /// The space in which the [dart:ui.DisplayFeature.bounds] are defined includes all screens
-  /// and the space between them. For a dual-screen device, this means that the space
-  /// between the screens is virtually part of the Flutter view space, with the
-  /// [dart:ui.DisplayFeature.bounds] of the display feature as an obstructed area. The
-  /// [dart:ui.DisplayFeature.type] can be used to determine if this display feature
-  /// obstructs the screen or not. For example, [dart:ui.DisplayFeatureType.hinge] and
-  /// [dart:ui.DisplayFeatureType.cutout] both obstruct the display, while
-  /// [dart:ui.DisplayFeatureType.fold] is more like a crease in the display.
-  ///
-  /// Folding [dart:ui.DisplayFeature]s like the [dart:ui.DisplayFeatureType.hinge] and
-  /// [dart:ui.DisplayFeatureType.fold] also have a [dart:ui.DisplayFeature.state] which can be
-  /// used to determine the posture the device is in.
+  /// {@macro dart.ui.ViewConfiguration.displayFeatures}
   ///
   /// See also:
   ///

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show DisplayFeature;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -667,11 +668,16 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       }
     }
     final Offset wantedPosition = Offset(x,y);
-    final Iterable<Offset> correctedPositions =  _screens(size).map((Rect screen) => _fitInsideScreen(screen, childSize, wantedPosition));
-    Offset closest = correctedPositions.first;
-    for (final Offset corrected in correctedPositions) {
-      if ((corrected - wantedPosition).distance < (closest - wantedPosition).distance) {
-        closest = corrected;
+    final Offset originCenter = position.toRect(Offset.zero & size).center;
+    final Rect screen = _closestScreen(_screens(size), originCenter);
+    return _fitInsideScreen(screen, childSize, wantedPosition);
+  }
+
+  Rect _closestScreen(List<Rect> screens, Offset point) {
+    Rect closest = screens.first;
+    for (final Rect screen in screens) {
+      if ((screen.center - point).distance < (closest.center - point).distance) {
+        closest = screen;
       }
     }
     return closest;
