@@ -14,6 +14,7 @@
 #include "impeller/compositor/buffer.h"
 #include "impeller/compositor/buffer_view.h"
 #include "impeller/compositor/range.h"
+#include "impeller/compositor/texture.h"
 
 namespace impeller {
 
@@ -25,6 +26,9 @@ class DeviceBuffer final : public Buffer,
   [[nodiscard]] bool CopyHostBuffer(const uint8_t* source,
                                     Range source_range,
                                     size_t offset = 0u);
+
+  std::shared_ptr<Texture> MakeTexture(TextureDescriptor desc,
+                                       size_t offset = 0u) const;
 
   id<MTLBuffer> GetMTLBuffer() const;
 
