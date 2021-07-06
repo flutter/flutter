@@ -38,7 +38,7 @@ class TooltipThemeData with Diagnosticable {
     this.waitDuration,
     this.showDuration,
     this.triggerMode,
-    this.provideTriggerFeedback,
+    this.enableFeedback,
   });
 
   /// The height of [Tooltip.child].
@@ -93,11 +93,15 @@ class TooltipThemeData with Diagnosticable {
   /// [Tooltip.DefaultTooltipTriggerMode] logical pixels on all sides.
   final TooltipTriggerMode? triggerMode;
 
-  /// Whether the tooltip will provide [Feedback] when triggered.
+  /// Whether the tooltip should provide acoustic and/or haptic feedback.
   ///
-  /// Defaults to true. Will call the appropriate method on `Feedback`
-  /// depending on the trigger mode, such as `Feedback.forLongPress`.
-  final bool? provideTriggerFeedback;
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -113,7 +117,7 @@ class TooltipThemeData with Diagnosticable {
     Duration? waitDuration,
     Duration? showDuration,
     TooltipTriggerMode? triggerMode,
-    bool? provideTriggerFeedback,
+    bool? enableFeedback,
   }) {
     return TooltipThemeData(
       height: height ?? this.height,
@@ -127,7 +131,7 @@ class TooltipThemeData with Diagnosticable {
       waitDuration: waitDuration ?? this.waitDuration,
       showDuration: showDuration ?? this.showDuration,
       triggerMode: triggerMode ?? this.triggerMode,
-      provideTriggerFeedback: provideTriggerFeedback ?? this.provideTriggerFeedback,
+      enableFeedback: enableFeedback ?? this.enableFeedback,
     );
   }
 
@@ -166,7 +170,7 @@ class TooltipThemeData with Diagnosticable {
       waitDuration,
       showDuration,
       triggerMode,
-      provideTriggerFeedback
+      enableFeedback
     );
   }
 
@@ -188,7 +192,7 @@ class TooltipThemeData with Diagnosticable {
         && other.waitDuration == waitDuration
         && other.showDuration == showDuration
         && other.triggerMode == triggerMode
-        && other.provideTriggerFeedback == provideTriggerFeedback;
+        && other.enableFeedback == enableFeedback;
   }
 
   @override
@@ -205,7 +209,7 @@ class TooltipThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
-    properties.add(FlagProperty('provideTriggerFeedback', value: provideTriggerFeedback, ifTrue: 'true', showName: true, defaultValue: null));
+    properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true, defaultValue: null));
   }
 }
 

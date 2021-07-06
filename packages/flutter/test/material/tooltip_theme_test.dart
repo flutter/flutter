@@ -49,7 +49,7 @@ void main() {
     expect(theme.waitDuration, null);
     expect(theme.showDuration, null);
     expect(theme.triggerMode, null);
-    expect(theme.provideTriggerFeedback, null);
+    expect(theme.enableFeedback, null);
   });
 
   testWidgets('Default TooltipThemeData debugFillProperties', (WidgetTester tester) async {
@@ -69,7 +69,7 @@ void main() {
     const Duration wait = Duration(milliseconds: 100);
     const Duration show = Duration(milliseconds: 200);
     const TooltipTriggerMode triggerMode = TooltipTriggerMode.longPress;
-    const bool provideTriggerFeedback = true;
+    const bool enableFeedback = true;
     const TooltipThemeData(
       height: 15.0,
       padding: EdgeInsets.all(20.0),
@@ -81,7 +81,7 @@ void main() {
       waitDuration: wait,
       showDuration: show,
       triggerMode: triggerMode,
-      provideTriggerFeedback: provideTriggerFeedback,
+      enableFeedback: enableFeedback,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -100,7 +100,7 @@ void main() {
       'wait duration: ${wait.toString()}',
       'show duration: ${show.toString()}',
       'triggerMode: $triggerMode',
-      'provideTriggerFeedback: true',
+      'enableFeedback: true',
     ]);
   });
 

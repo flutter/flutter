@@ -1430,7 +1430,7 @@ void main() {
       preferBelow: false,
       verticalOffset: 50.0,
       triggerMode: TooltipTriggerMode.manual,
-      provideTriggerFeedback: true,
+      enableFeedback: true,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -1448,7 +1448,7 @@ void main() {
       'wait duration: 0:00:01.000000',
       'show duration: 0:00:02.000000',
       'triggerMode: TooltipTriggerMode.manual',
-      'provideTriggerFeedback: true',
+      'enableFeedback: true',
     ]);
   });
 
