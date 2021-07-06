@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/formats.h"
+#include "impeller/compositor/texture_descriptor.h"
 #include "impeller/geometry/color.h"
 
 namespace impeller {
@@ -244,8 +245,6 @@ constexpr MTLClearColor ToMTLClearColor(const Color& color) {
   return MTLClearColorMake(color.red, color.green, color.blue, color.alpha);
 }
 
-RenderPassDescriptor FromMTLRenderPassDescriptor(MTLRenderPassDescriptor*);
-
 MTLRenderPipelineColorAttachmentDescriptor*
 ToMTLRenderPipelineColorAttachmentDescriptor(
     ColorAttachmentDescriptor descriptor);
@@ -254,5 +253,7 @@ MTLDepthStencilDescriptor* ToMTLDepthStencilDescriptor(
     std::optional<DepthAttachmentDescriptor> depth,
     std::optional<StencilAttachmentDescriptor> front,
     std::optional<StencilAttachmentDescriptor> back);
+
+MTLTextureDescriptor* ToMTLTextureDescriptor(const TextureDescriptor& desc);
 
 }  // namespace impeller

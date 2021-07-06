@@ -21,7 +21,7 @@ Surface::Surface(RenderPassDescriptor target_desc)
 
 Surface::~Surface() = default;
 
-const Size& Surface::GetSize() const {
+const ISize& Surface::GetSize() const {
   return size_;
 }
 

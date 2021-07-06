@@ -8,6 +8,7 @@
 #include "flutter/fml/logging.h"
 #include "impeller/compositor/buffer.h"
 #include "impeller/compositor/device_buffer.h"
+#include "impeller/compositor/formats_metal.h"
 
 namespace impeller {
 
@@ -26,11 +27,11 @@ bool Allocator::IsValid() const {
   return is_valid_;
 }
 
-static MTLResourceOptions ResourceOptionsFromStorageType(StorageMode type) {
+static MTLResourceOptions ToMTLResourceOptions(StorageMode type) {
   switch (type) {
     case StorageMode::kHostVisible:
 #if OS_IOS
-      return MTLStorageModeShared;
+      return MTLResourceStorageModeShared;
 #else
       return MTLResourceStorageModeManaged;
 #endif
@@ -38,11 +39,33 @@ static MTLResourceOptions ResourceOptionsFromStorageType(StorageMode type) {
       return MTLResourceStorageModePrivate;
     case StorageMode::kDeviceTransient:
 #if OS_IOS
-      return MTLStorageModeMemoryless;
+      return MTLResourceStorageModeMemoryless;
 #else
       return MTLResourceStorageModePrivate;
 #endif
   }
+
+  return MTLResourceStorageModePrivate;
+}
+
+static MTLStorageMode ToMTLStorageMode(StorageMode mode) {
+  switch (mode) {
+    case StorageMode::kHostVisible:
+#if OS_IOS
+      return MTLStorageModeShared;
+#else
+      return MTLStorageModeManaged;
+#endif
+    case StorageMode::kDevicePrivate:
+      return MTLStorageModePrivate;
+    case StorageMode::kDeviceTransient:
+#if OS_IOS
+      return MTLStorageModeMemoryless;
+#else
+      return MTLStorageModePrivate;
+#endif
+  }
+  return MTLStorageModeShared;
 }
 
 bool Allocator::RequiresExplicitHostSynchronization(StorageMode mode) {
@@ -57,6 +80,16 @@ bool Allocator::RequiresExplicitHostSynchronization(StorageMode mode) {
   // StorageMode::kHostVisible is MTLResourceStorageModeManaged.
   return true;
 #endif
+}
+
+std::shared_ptr<DeviceBuffer> Allocator::CreateBuffer(StorageMode mode,
+                                                      size_t length) {
+  auto buffer = [device_ newBufferWithLength:length
+                                     options:ToMTLResourceOptions(mode)];
+  if (!buffer) {
+    return nullptr;
+  }
+  return std::shared_ptr<DeviceBuffer>(new DeviceBuffer(buffer, length, mode));
 }
 
 std::shared_ptr<DeviceBuffer> Allocator::CreateBufferWithCopy(
@@ -82,15 +115,20 @@ std::shared_ptr<DeviceBuffer> Allocator::CreateBufferWithCopy(
   return CreateBufferWithCopy(mapping.GetMapping(), mapping.GetSize());
 }
 
-std::shared_ptr<DeviceBuffer> Allocator::CreateBuffer(StorageMode mode,
-                                                      size_t length) {
-  auto buffer =
-      [device_ newBufferWithLength:length
-                           options:ResourceOptionsFromStorageType(mode)];
-  if (!buffer) {
+std::shared_ptr<Texture> Allocator::CreateTexture(
+    StorageMode mode,
+    const TextureDescriptor& desc) {
+  if (!IsValid()) {
     return nullptr;
   }
-  return std::shared_ptr<DeviceBuffer>(new DeviceBuffer(buffer, length, mode));
+
+  auto mtl_texture_desc = ToMTLTextureDescriptor(desc);
+  mtl_texture_desc.storageMode = ToMTLStorageMode(mode);
+  auto texture = [device_ newTextureWithDescriptor:mtl_texture_desc];
+  if (!texture) {
+    return nullptr;
+  }
+  return std::make_shared<Texture>(desc, texture);
 }
 
 }  // namespace impeller

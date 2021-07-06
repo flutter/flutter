@@ -7,6 +7,7 @@
 #include "flutter/fml/paths.h"
 #include "flutter/testing/testing.h"
 #include "impeller/compositor/context.h"
+#include "impeller/compositor/formats_metal.h"
 #include "impeller/compositor/render_pass.h"
 #include "impeller/compositor/renderer.h"
 #include "impeller/compositor/surface.h"
@@ -108,8 +109,15 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
       return false;
     }
 
+    TextureDescriptor color0_desc;
+    color0_desc.format = PixelFormat::kPixelFormat_B8G8R8A8_UNormInt;
+    color0_desc.size = {
+        static_cast<ISize::Type>(current_drawable.texture.width),
+        static_cast<ISize::Type>(current_drawable.texture.height)};
+
     ColorRenderPassAttachment color0;
-    color0.texture = std::make_shared<Texture>(current_drawable.texture);
+    color0.texture =
+        std::make_shared<Texture>(color0_desc, current_drawable.texture);
     color0.clear_color = Color::SkyBlue();
     color0.load_action = LoadAction::kClear;
     color0.store_action = StoreAction::kStore;
