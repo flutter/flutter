@@ -25,9 +25,9 @@ void main() {
     expect(BorderSide.lerp(side1, side2, 1.0), equals(side2));
     expect(BorderSide.lerp(side1, side2, 0.5), equals(BorderSide(
       color: Color.lerp(const Color(0xFF000000), const Color(0xFF00FFFF), 0.5)!,
-          width: 1.5,
-          style: BorderStyle.solid,
-        )));
+        width: 1.5,
+        style: BorderStyle.solid,
+      )));
 
     final BorderSide side3 = side2.copyWith(style: BorderStyle.none);
     BorderSide interpolated = BorderSide.lerp(side2, side3, 0.2);
