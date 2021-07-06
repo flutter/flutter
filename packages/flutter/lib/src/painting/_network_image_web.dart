@@ -86,7 +86,7 @@ class NetworkImage
     final Uri resolved = Uri.base.resolve(key.url);
 
     final HttpRequest response = await HttpRequest.request(key.url, method: 'GET', requestHeaders: key.headers, responseType: 'arraybuffer');
-    
+
     if(response.status != HttpStatus.ok) {
       response.abort();
       throw image_provider.NetworkImageLoadException(statusCode: response.status ?? 400, uri: resolved);
@@ -96,7 +96,7 @@ class NetworkImage
 
     if (bytes.lengthInBytes == 0)
         throw Exception('NetworkImage is an empty file: $resolved');
-    
+
     return decode(bytes);
   }
 
