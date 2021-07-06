@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <string_view>
+
 #include <Metal/Metal.h>
 
 #include "flutter/fml/macros.h"
@@ -15,18 +17,26 @@ namespace impeller {
 
 class Texture {
  public:
-  Texture(id<MTLTexture> texture);
+  Texture(TextureDescriptor desc, id<MTLTexture> texture);
 
   ~Texture();
 
+  void SetLabel(const std::string_view& label);
+
+  [[nodiscard]] bool SetContents(const uint8_t* contents,
+                                 size_t length,
+                                 size_t mip_level = 0u);
+
   bool IsValid() const;
 
-  Size GetSize() const;
+  ISize GetSize() const;
 
   id<MTLTexture> GetMTLTexture() const;
 
  private:
-  id<MTLTexture> texture_;
+  const TextureDescriptor desc_;
+  id<MTLTexture> texture_ = nullptr;
+  bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Texture);
 };

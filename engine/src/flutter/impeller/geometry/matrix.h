@@ -269,9 +269,9 @@ struct Matrix {
 
   Matrix operator+(const Matrix& m) const;
 
-  static constexpr Matrix MakeOrthographic(const Size& size) {
+  static constexpr Matrix MakeOrthographic(Scalar width, Scalar height) {
     // Per assumptions about NDC documented above.
-    const auto scale = MakeScale({1.0f / size.width, -1.0f / size.height, 1.0});
+    const auto scale = MakeScale({1.0f / width, -1.0f / height, 1.0});
     const auto translate = MakeTranslation({-1.0, 1.0, 0.5});
     return translate * scale;
   }

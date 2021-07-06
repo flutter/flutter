@@ -25,7 +25,7 @@ bool RenderPassDescriptor::HasColorAttachment(size_t index) const {
   return false;
 }
 
-std::optional<Size> RenderPassDescriptor::GetColorAttachmentSize(
+std::optional<ISize> RenderPassDescriptor::GetColorAttachmentSize(
     size_t index) const {
   auto found = colors_.find(index);
 
