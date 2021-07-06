@@ -12,62 +12,96 @@
 
 namespace impeller {
 
-struct Rect {
-  Point origin;
-  Size size;
+template <class T>
+struct TRect {
+  using Type = T;
 
-  constexpr Rect() : origin({0.0, 0.0}), size({0.0, 0.0}) {}
+  TPoint<Type> origin;
+  TSize<Type> size;
 
-  constexpr Rect(Size size) : origin({0.0, 0.0}), size(size) {}
+  constexpr TRect() : origin({0.0, 0.0}), size({0.0, 0.0}) {}
 
-  constexpr Rect(Point origin, Size size) : origin(origin), size(size) {}
+  constexpr TRect(TSize<Type> size) : origin({0.0, 0.0}), size(size) {}
 
-  constexpr Rect(const Scalar components[4])
+  constexpr TRect(TPoint<Type> origin, TSize<Type> size)
+      : origin(origin), size(size) {}
+
+  constexpr TRect(const Type components[4])
       : origin(components[0], components[1]),
         size(components[2], components[3]) {}
 
-  constexpr Rect(Scalar x, Scalar y, Scalar width, Scalar height)
+  constexpr TRect(Type x, Type y, Type width, Type height)
       : origin(x, y), size(width, height) {}
 
-  /*
-   *  Operator overloads
-   */
-  constexpr Rect operator+(const Rect& r) const {
-    return Rect({origin.x + r.origin.x, origin.y + r.origin.y},
-                {size.width + r.size.width, size.height + r.size.height});
+  template <class U>
+  constexpr explicit TRect(const TRect<U>& other)
+      : origin(static_cast<TPoint<Type>>(other.origin)),
+        size(static_cast<TSize<Type>>(other.size)) {}
+
+  constexpr TRect operator+(const TRect& r) const {
+    return TRect({origin.x + r.origin.x, origin.y + r.origin.y},
+                 {size.width + r.size.width, size.height + r.size.height});
   }
 
-  constexpr Rect operator-(const Rect& r) const {
-    return Rect({origin.x - r.origin.x, origin.y - r.origin.y},
-                {size.width - r.size.width, size.height - r.size.height});
+  constexpr TRect operator-(const TRect& r) const {
+    return TRect({origin.x - r.origin.x, origin.y - r.origin.y},
+                 {size.width - r.size.width, size.height - r.size.height});
   }
 
-  constexpr Rect operator*(Scalar scale) const {
-    return Rect({origin.x * scale, origin.y * scale},
-                {size.width * scale, size.height * scale});
+  constexpr TRect operator*(Type scale) const {
+    return TRect({origin.x * scale, origin.y * scale},
+                 {size.width * scale, size.height * scale});
   }
 
-  constexpr Rect operator*(const Rect& r) const {
-    return Rect({origin.x * r.origin.x, origin.y * r.origin.y},
-                {size.width * r.size.width, size.height * r.size.height});
+  constexpr TRect operator*(const TRect& r) const {
+    return TRect({origin.x * r.origin.x, origin.y * r.origin.y},
+                 {size.width * r.size.width, size.height * r.size.height});
   }
 
-  constexpr bool operator==(const Rect& r) const {
+  constexpr bool operator==(const TRect& r) const {
     return origin == r.origin && size == r.size;
   }
 
-  constexpr bool Contains(const Point& p) const {
+  constexpr bool Contains(const TPoint<Type>& p) const {
     return p.x >= origin.x && p.x <= size.width && p.y >= origin.y &&
            p.y <= size.height;
   }
 
   constexpr bool IsZero() const { return size.IsZero(); }
 
-  Rect WithPoint(const Point& p) const;
+  constexpr TRect WithPoint(const TPoint<Type>& p) const {
+    TRect copy = *this;
+    if (p.x < origin.x) {
+      copy.origin.x = p.x;
+      copy.size.width += (origin.x - p.x);
+    }
 
-  Rect WithPoints(const std::vector<Point>& points) const;
+    if (p.y < origin.y) {
+      copy.origin.y = p.y;
+      copy.size.height += (origin.y - p.y);
+    }
+
+    if (p.x > (size.width + origin.x)) {
+      copy.size.width += p.x - (size.width + origin.x);
+    }
+
+    if (p.y > (size.height + origin.y)) {
+      copy.size.height += p.y - (size.height + origin.y);
+    }
+
+    return copy;
+  }
+
+  constexpr TRect WithPoints(const std::vector<TPoint<Type>>& points) const {
+    TRect box = *this;
+    for (const auto& point : points) {
+      box = box.WithPoint(point);
+    }
+    return box;
+  }
 };
 
-static_assert(sizeof(Rect) == 4 * sizeof(Scalar));
+using Rect = TRect<Scalar>;
+using IRect = TRect<int64_t>;
 
 }  // namespace impeller
