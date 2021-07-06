@@ -425,10 +425,6 @@ const Set<String> _genericFontFamilies = <String>{
 final String _fallbackFontFamily =
     isMacOrIOS ? '-apple-system, BlinkMacSystemFont' : 'Arial';
 
-bool get isMacOrIOS =>
-    operatingSystem == OperatingSystem.iOs ||
-    operatingSystem == OperatingSystem.macOs;
-
 /// Create a font-family string appropriate for CSS.
 ///
 /// If the given [fontFamily] is a generic font-family, then just return it.

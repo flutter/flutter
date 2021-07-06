@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+
+import 'package:ui/ui.dart' as ui;
+
+import 'semantics.dart';
 
 /// Renders [_label] and [_value] to the semantics DOM.
 ///
@@ -96,7 +100,7 @@ class LabelAndValue extends RoleManager {
       // Normally use a small font size so that text doesn't leave the scope
       // of the semantics node. When debugging semantics, use a font size
       // that's reasonably visible.
-      _auxiliaryValueElement!.style.fontSize = _debugShowSemanticsNodes ? '12px' : '6px';
+      _auxiliaryValueElement!.style.fontSize = debugShowSemanticsNodes ? '12px' : '6px';
       semanticsObject.element.append(_auxiliaryValueElement!);
     }
     _auxiliaryValueElement!.text = combinedValue.toString();

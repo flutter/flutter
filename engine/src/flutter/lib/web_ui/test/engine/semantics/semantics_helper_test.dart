@@ -6,7 +6,9 @@ import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/pointer_binding.dart';
+import 'package:ui/src/engine/semantics.dart';
 
 const PointerSupportDetector _defaultSupportDetector = PointerSupportDetector();
 

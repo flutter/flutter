@@ -207,6 +207,14 @@ bool get isDesktop => _desktopOperatingSystems.contains(operatingSystem);
 /// See [isDesktop].
 bool get isMobile => !isDesktop;
 
+/// Whether the browser is running on macOS or iOS.
+///
+/// - See [operatingSystem].
+/// - See [OperatingSystem].
+bool get isMacOrIOS =>
+    operatingSystem == OperatingSystem.iOs ||
+    operatingSystem == OperatingSystem.macOs;
+
 int? _cachedWebGLVersion;
 
 /// The highest WebGL version supported by the current browser, or -1 if WebGL

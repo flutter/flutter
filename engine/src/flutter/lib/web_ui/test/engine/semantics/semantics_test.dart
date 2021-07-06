@@ -12,7 +12,10 @@ import 'package:quiver/testing/async.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine.dart' show domRenderer;
+import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/semantics.dart';
+import 'package:ui/src/engine/vector_math.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'semantics_tester.dart';

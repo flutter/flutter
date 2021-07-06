@@ -7,7 +7,8 @@ import 'dart:html';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/semantics.dart';
+import 'package:ui/src/engine/services.dart';
 
 const StandardMessageCodec codec = StandardMessageCodec();
 const String testMessage = 'This is an tooltip.';

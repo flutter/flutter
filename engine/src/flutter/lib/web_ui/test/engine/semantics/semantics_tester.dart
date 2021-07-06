@@ -7,7 +7,12 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine.dart' show domRenderer, toMatrix32;
+import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/host_node.dart';
+import 'package:ui/src/engine/semantics.dart';
+import 'package:ui/src/engine/util.dart';
+import 'package:ui/src/engine/vector_math.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../../matchers.dart';

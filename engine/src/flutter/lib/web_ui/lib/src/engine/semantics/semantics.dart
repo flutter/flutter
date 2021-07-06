@@ -2,7 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:ui/src/engine.dart' show domRenderer, EnginePlatformDispatcher, registerHotRestartListener;
+import 'package:ui/ui.dart' as ui;
+
+import '../alarm_clock.dart';
+import '../browser_detection.dart';
+import '../util.dart';
+import '../vector_math.dart';
+import 'checkable.dart';
+import 'image.dart';
+import 'incrementable.dart';
+import 'label_and_value.dart';
+import 'live_region.dart';
+import 'scrollable.dart';
+import 'semantics_helper.dart';
+import 'tappable.dart';
+import 'text_field.dart';
 
 /// Set this flag to `true` to cause the engine to visualize the semantics tree
 /// on the screen for debugging.
@@ -15,7 +34,7 @@ part of engine;
 /// ```
 /// flutter run -d chrome --profile --dart-define=FLUTTER_WEB_DEBUG_SHOW_SEMANTICS=true
 /// ```
-const bool _debugShowSemanticsNodes = bool.fromEnvironment(
+const bool debugShowSemanticsNodes = bool.fromEnvironment(
   'FLUTTER_WEB_DEBUG_SHOW_SEMANTICS',
   defaultValue: false,
 );
@@ -266,7 +285,7 @@ class SemanticsObject {
     element.style.position = 'absolute';
 
     // The root node has some properties that other nodes do not.
-    if (id == 0 && !_debugShowSemanticsNodes) {
+    if (id == 0 && !debugShowSemanticsNodes) {
       // Make all semantics transparent. We use `filter` instead of `opacity`
       // attribute because `filter` is stronger. `opacity` does not apply to
       // some elements, particularly on iOS, such as the slider thumb and track.
@@ -283,7 +302,7 @@ class SemanticsObject {
     // Make semantic elements visible for debugging by outlining them using a
     // green border. We do not use `border` attribute because it affects layout
     // (`outline` does not).
-    if (_debugShowSemanticsNodes) {
+    if (debugShowSemanticsNodes) {
       element.style.outline = '1px solid green';
     }
   }
@@ -1353,13 +1372,7 @@ class EngineSemanticsOwner {
       _rootSemanticsElement = null;
       _gestureModeClock?.datetime = null;
     }
-    if (_semanticsEnabled != EnginePlatformDispatcher.instance.semanticsEnabled) {
-      EnginePlatformDispatcher.instance._configuration =
-        EnginePlatformDispatcher.instance._configuration.copyWith(semanticsEnabled: _semanticsEnabled);
-      if (EnginePlatformDispatcher.instance._onSemanticsEnabledChanged != null) {
-        EnginePlatformDispatcher.instance.invokeOnSemanticsEnabledChanged();
-      }
-    }
+    EnginePlatformDispatcher.instance.updateSemanticsEnabled(_semanticsEnabled);
   }
 
   /// Controls how pointer events and browser-detected gestures are treated by
