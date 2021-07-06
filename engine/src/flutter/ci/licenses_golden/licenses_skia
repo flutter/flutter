@@ -1,4 +1,4 @@
-Signature: dfa0c56baa4098e4ac1b9d6b90a94b8b
+Signature: 8fdf8c495f97219358bea01687fd918b
 
 UNUSED LICENSES:
 
@@ -1306,7 +1306,6 @@ FILE: ../../../third_party/skia/src/gpu/GrRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/GrStencilSettings.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTexture.h
-FILE: ../../../third_party/skia/src/gpu/SkGpuDevice.cpp
 FILE: ../../../third_party/skia/src/gpu/geometry/GrPathUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/geometry/GrPathUtils.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAttachment.cpp
@@ -1334,6 +1333,7 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/v1/Device.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFDocument.cpp
@@ -2477,7 +2477,6 @@ FILE: ../../../third_party/skia/src/gpu/GrTestUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrTriangulator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/GrXferProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/SkGpuDevice_drawTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrBlendFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrBlendFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrCustomXfermode.cpp
@@ -2527,6 +2526,7 @@ FILE: ../../../third_party/skia/src/gpu/text/GrTextBlob.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlob.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.h
+FILE: ../../../third_party/skia/src/gpu/v1/Device_drawTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkAttachment.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCaps.cpp
@@ -5191,6 +5191,8 @@ FILE: ../../../third_party/skia/src/core/SkMatrixInvert.h
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkRuntimeImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkRuntimeImageFilter.h
+FILE: ../../../third_party/skia/src/gpu/BaseDevice.cpp
+FILE: ../../../third_party/skia/src/gpu/BaseDevice.h
 FILE: ../../../third_party/skia/src/gpu/GrDstProxyView.h
 FILE: ../../../third_party/skia/src/gpu/GrEagerVertexAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrInnerFanTriangulator.h
@@ -5203,12 +5205,10 @@ FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.h
-FILE: ../../../third_party/skia/src/gpu/SkBaseGpuDevice.cpp
-FILE: ../../../third_party/skia/src/gpu/SkBaseGpuDevice.h
-FILE: ../../../third_party/skia/src/gpu/SkGpuDevice_nga.cpp
-FILE: ../../../third_party/skia/src/gpu/SkGpuDevice_nga.h
 FILE: ../../../third_party/skia/src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp
+FILE: ../../../third_party/skia/src/gpu/v2/Device.cpp
+FILE: ../../../third_party/skia/src/gpu/v2/Device_v2.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.cpp
@@ -6508,9 +6508,9 @@ FILE: ../../../third_party/skia/src/gpu/GrRectanizer.h
 FILE: ../../../third_party/skia/src/gpu/GrRectanizerPow2.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTBlockList.h
 FILE: ../../../third_party/skia/src/gpu/GrVertexWriter.h
-FILE: ../../../third_party/skia/src/gpu/SkGpuDevice.h
 FILE: ../../../third_party/skia/src/gpu/SkGr.cpp
 FILE: ../../../third_party/skia/src/gpu/geometry/GrRect.h
+FILE: ../../../third_party/skia/src/gpu/v1/Device_v1.h
 FILE: ../../../third_party/skia/src/ports/SkDebug_win.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2010 Google Inc.
