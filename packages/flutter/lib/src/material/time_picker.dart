@@ -9,6 +9,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart' as intl;
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -1350,12 +1351,23 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     registerForRestoration(minuteHasError, 'minute_has_error');
   }
 
-  int? _parseHour(String? value) {
+  int? _toLocalizedNumber(String? value) {
     if (value == null) {
       return null;
     }
 
-    int? newHour = int.tryParse(value);
+    try {
+      final String locale = Localizations.localeOf(context).toString();
+      final intl.NumberFormat format = intl.NumberFormat('#0', locale);
+      return format.parse(value).toInt();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  int? _parseHour(String? value) {
+    int? newHour = _toLocalizedNumber(value);
+
     if (newHour == null) {
       return null;
     }
@@ -1377,11 +1389,8 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   }
 
   int? _parseMinute(String? value) {
-    if (value == null) {
-      return null;
-    }
+    final int? newMinute = _toLocalizedNumber(value);
 
-    final int? newMinute = int.tryParse(value);
     if (newMinute == null) {
       return null;
     }
@@ -1411,7 +1420,10 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   void _handleMinuteSavedSubmitted(String? value) {
     final int? newMinute = _parseMinute(value);
     if (newMinute != null) {
-      _selectedTime.value = TimeOfDay(hour: _selectedTime.value.hour, minute: int.parse(value!));
+      _selectedTime.value = TimeOfDay(
+          hour: _selectedTime.value.hour,
+          minute: _toLocalizedNumber(value)!
+      );
       widget.onChanged(_selectedTime.value);
     }
   }
