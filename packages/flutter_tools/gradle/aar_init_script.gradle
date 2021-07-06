@@ -45,7 +45,7 @@ void configureProject(Project project, String outputDir) {
         return
     }
 
-    if (project.hasProperty('localEngineOut')) {
+    if (project.hasProperty('local-engine-out')) {
         // TODO(egarciad): Support local engine.
         // This most likely requires refactoring `flutter.gradle`, so the logic can be reused.
         throw new GradleException(
