@@ -70,20 +70,14 @@ template("runner_sources") {
       "keyboard.cc",
       "keyboard.h",
       "logging.h",
-      "loop.cc",
-      "loop.h",
       "platform_view.cc",
       "platform_view.h",
       "runner.cc",
       "runner.h",
       "surface.cc",
       "surface.h",
-      "task_observers.cc",
-      "task_observers.h",
       "task_runner_adapter.cc",
       "task_runner_adapter.h",
-      "thread.cc",
-      "thread.h",
       "unique_fdio_ns.h",
       "vsync_waiter.cc",
       "vsync_waiter.h",
@@ -205,10 +199,17 @@ template("flutter_runner") {
     # C++ stack.
     cflags = [ "-fno-omit-frame-pointer" ]
 
-    if (!invoker.product) {
+    if (invoker.product) {
+      # Fuchsia's default stack size was resulting in test failures in a
+      # downstream project. Provide some extra room.
+      ldflags = [ "-Wl,-z,stack-size=0x100000" ]
+    } else {
       # This flag is needed so that the call to dladdr() in Dart's native symbol
       # resolver can report good symbol information for the CPU profiler.
-      ldflags = [ "-rdynamic" ]
+      ldflags = [
+        "-Wl,-z,stack-size=0x100000",
+        "-rdynamic",
+      ]
     }
   }
 }
