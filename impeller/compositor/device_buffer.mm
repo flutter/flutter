@@ -30,20 +30,14 @@ std::shared_ptr<Texture> DeviceBuffer::MakeTexture(TextureDescriptor desc,
     return nullptr;
   }
 
-  auto mtl_desc = [[MTLTextureDescriptor alloc] init];
-  mtl_desc.pixelFormat = ToMTLPixelFormat(desc.format);
-  mtl_desc.width = desc.size.width;
-  mtl_desc.height = desc.size.height;
-  mtl_desc.mipmapLevelCount = desc.mip_count;
-
-  auto texture = [buffer_ newTextureWithDescriptor:mtl_desc
+  auto texture = [buffer_ newTextureWithDescriptor:ToMTLTextureDescriptor(desc)
                                             offset:offset
                                        bytesPerRow:desc.GetBytesPerRow()];
   if (!texture) {
     return nullptr;
   }
 
-  return std::make_shared<Texture>(texture);
+  return std::make_shared<Texture>(desc, texture);
 }
 
 [[nodiscard]] bool DeviceBuffer::CopyHostBuffer(const uint8_t* source,

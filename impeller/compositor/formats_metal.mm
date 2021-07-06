@@ -77,61 +77,13 @@ MTLDepthStencilDescriptor* ToMTLDepthStencilDescriptor(
   return des;
 }
 
-static bool ConfigureRenderPassAttachment(
-    RenderPassAttachment& attachment,
-    MTLRenderPassAttachmentDescriptor* desc) {
-  attachment.texture = std::make_shared<Texture>(desc.texture);
-  attachment.load_action = FromMTLLoadAction(desc.loadAction);
-  attachment.store_action = FromMTLStoreAction(desc.storeAction);
-  return attachment;
-}
-
-static ColorRenderPassAttachment FromMTLRenderPassColorAttachmentDescriptor(
-    MTLRenderPassColorAttachmentDescriptor* desc) {
-  ColorRenderPassAttachment attachment;
-  ConfigureRenderPassAttachment(attachment, desc);
-  auto clear = desc.clearColor;
-  attachment.clear_color =
-      Color{static_cast<Scalar>(clear.red), static_cast<Scalar>(clear.green),
-            static_cast<Scalar>(clear.blue), static_cast<Scalar>(clear.alpha)};
-  return attachment;
-}
-
-static DepthRenderPassAttachment FromMTLRenderPassDepthAttachmentDescriptor(
-    MTLRenderPassDepthAttachmentDescriptor* desc) {
-  DepthRenderPassAttachment attachment;
-  ConfigureRenderPassAttachment(attachment, desc);
-  attachment.clear_depth = desc.clearDepth;
-  return attachment;
-}
-
-static StencilRenderPassAttachment FromMTLRenderPassStencilAttachmentDescriptor(
-    MTLRenderPassStencilAttachmentDescriptor* desc) {
-  StencilRenderPassAttachment attachment;
-  ConfigureRenderPassAttachment(attachment, desc);
-  attachment.clear_stencil = desc.clearStencil;
-  return attachment;
-}
-
-RenderPassDescriptor FromMTLRenderPassDescriptor(
-    MTLRenderPassDescriptor* desc) {
-  RenderPassDescriptor result;
-  if (!desc) {
-    return result;
-  }
-
-  // From https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
-  constexpr size_t kMaxPossibleColorAttachments = 8u;
-  for (size_t i = 0; i < kMaxPossibleColorAttachments; i++) {
-    result.SetColorAttachment(
-        FromMTLRenderPassColorAttachmentDescriptor(desc.colorAttachments[i]),
-        i);
-  }
-  result.SetDepthAttachment(
-      FromMTLRenderPassDepthAttachmentDescriptor(desc.depthAttachment));
-  result.SetStencilAttachment(
-      FromMTLRenderPassStencilAttachmentDescriptor(desc.stencilAttachment));
-  return result;
+MTLTextureDescriptor* ToMTLTextureDescriptor(const TextureDescriptor& desc) {
+  auto mtl_desc = [[MTLTextureDescriptor alloc] init];
+  mtl_desc.pixelFormat = ToMTLPixelFormat(desc.format);
+  mtl_desc.width = desc.size.width;
+  mtl_desc.height = desc.size.height;
+  mtl_desc.mipmapLevelCount = desc.mip_count;
+  return mtl_desc;
 }
 
 }  // namespace impeller

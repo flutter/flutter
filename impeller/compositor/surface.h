@@ -21,7 +21,7 @@ class Surface {
 
   ~Surface();
 
-  const Size& GetSize() const;
+  const ISize& GetSize() const;
 
   bool IsValid() const;
 
@@ -29,7 +29,7 @@ class Surface {
 
  private:
   RenderPassDescriptor desc_;
-  Size size_;
+  ISize size_;
 
   bool is_valid_ = false;
 

@@ -6,13 +6,39 @@
 
 namespace impeller {
 
-Texture::Texture(id<MTLTexture> texture) : texture_(texture) {}
+Texture::Texture(TextureDescriptor desc, id<MTLTexture> texture)
+    : desc_(std::move(desc)), texture_(texture) {
+  if (!desc_.IsValid() || !texture_) {
+    return;
+  }
+
+  is_valid_ = true;
+}
 
 Texture::~Texture() = default;
 
-Size Texture::GetSize() const {
-  return {static_cast<Scalar>(texture_.width),
-          static_cast<Scalar>(texture_.height)};
+bool Texture::SetContents(const uint8_t* contents,
+                          size_t length,
+                          size_t mip_level) {
+  if (!IsValid() || !contents) {
+    return false;
+  }
+
+  FML_CHECK(false);
+  return false;
+
+  // MTLRegionMake2D(NSUInteger x, NSUInteger y, NSUInteger width,
+  //                 NSUInteger height)
+
+  // [texture_ replaceRegion:(MTLRegion)
+  //             mipmapLevel:(NSUInteger)withBytes:(nonnull const
+  //             void*)bytesPerRow
+  //                        :(NSUInteger)];
+}
+
+ISize Texture::GetSize() const {
+  return {static_cast<ISize::Type>(texture_.width),
+          static_cast<ISize::Type>(texture_.height)};
 }
 
 id<MTLTexture> Texture::GetMTLTexture() const {
@@ -20,7 +46,7 @@ id<MTLTexture> Texture::GetMTLTexture() const {
 }
 
 bool Texture::IsValid() const {
-  return texture_;
+  return is_valid_;
 }
 
 }  // namespace impeller

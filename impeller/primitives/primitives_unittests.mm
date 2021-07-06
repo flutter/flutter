@@ -50,23 +50,20 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
   Image image(flutter::testing::OpenFixtureAsMapping("image.png"));
   auto result = image.Decode();
   ASSERT_TRUE(result.IsValid());
-  auto device_image_allocation =
-      context->GetPermanentsAllocator()->CreateBufferWithCopy(
-          *result.GetAllocation());
-  device_image_allocation->SetLabel("Bay Bridge");
-  ASSERT_TRUE(device_image_allocation);
   auto texture_descriptor = TextureDescriptor::MakeFromImageResult(result);
   ASSERT_TRUE(texture_descriptor.has_value());
-  auto texture =
-      device_image_allocation->MakeTexture(texture_descriptor.value());
+  auto texture = context->GetPermanentsAllocator()->CreateTexture(
+      StorageMode::kHostVisible, texture_descriptor.value());
   ASSERT_TRUE(texture);
+  auto uploaded = texture->SetContents(result.GetAllocation()->GetMapping(),
+                                       result.GetAllocation()->GetSize());
+  ASSERT_TRUE(uploaded);
 
   Renderer::RenderCallback callback = [&](const Surface& surface,
                                           RenderPass& pass) {
     BoxVertexShader::UniformBuffer uniforms;
-
-    uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
-
+    uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize().width,
+                                            surface.GetSize().height);
     Command cmd;
     cmd.label = "Box";
     cmd.pipeline = box_pipeline;

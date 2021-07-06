@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "impeller/compositor/texture_descriptor.h"
 
 namespace impeller {
 
@@ -46,6 +47,7 @@ enum class StorageMode {
 
 class Context;
 class DeviceBuffer;
+class Texture;
 
 class Allocator {
  public:
@@ -54,6 +56,9 @@ class Allocator {
   bool IsValid() const;
 
   std::shared_ptr<DeviceBuffer> CreateBuffer(StorageMode mode, size_t length);
+
+  std::shared_ptr<Texture> CreateTexture(StorageMode mode,
+                                         const TextureDescriptor& desc);
 
   std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(const uint8_t* buffer,
                                                      size_t length);
