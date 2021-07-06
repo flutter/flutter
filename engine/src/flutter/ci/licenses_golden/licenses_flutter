@@ -231,6 +231,8 @@ FILE: ../../../flutter/fml/platform/darwin/string_range_sanitization_unittests.m
 FILE: ../../../flutter/fml/platform/fuchsia/message_loop_fuchsia.cc
 FILE: ../../../flutter/fml/platform/fuchsia/message_loop_fuchsia.h
 FILE: ../../../flutter/fml/platform/fuchsia/paths_fuchsia.cc
+FILE: ../../../flutter/fml/platform/fuchsia/task_observers.cc
+FILE: ../../../flutter/fml/platform/fuchsia/task_observers.h
 FILE: ../../../flutter/fml/platform/linux/message_loop_linux.cc
 FILE: ../../../flutter/fml/platform/linux/message_loop_linux.h
 FILE: ../../../flutter/fml/platform/linux/paths_linux.cc
@@ -1369,8 +1371,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/keyboard.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/keyboard.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/keyboard_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/logging.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/loop.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/loop.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/main.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/aot_product_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/aot_runtime
@@ -1392,12 +1392,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_tzdata_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_observers.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_observers.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_runner_adapter.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_runner_adapter.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/thread.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/thread.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/unique_fdio_ns.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vsync_waiter.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vsync_waiter.h

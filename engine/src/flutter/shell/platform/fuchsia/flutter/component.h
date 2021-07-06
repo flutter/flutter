@@ -26,7 +26,6 @@
 
 #include "engine.h"
 #include "flutter_runner_product_configuration.h"
-#include "thread.h"
 #include "unique_fdio_ns.h"
 
 namespace flutter_runner {
@@ -34,12 +33,12 @@ namespace flutter_runner {
 class Application;
 
 struct ActiveApplication {
-  std::unique_ptr<Thread> thread;
+  std::unique_ptr<fml::Thread> platform_thread;
   std::unique_ptr<Application> application;
 
   ActiveApplication& operator=(ActiveApplication&& other) noexcept {
     if (this != &other) {
-      this->thread.reset(other.thread.release());
+      this->platform_thread.reset(other.platform_thread.release());
       this->application.reset(other.application.release());
     }
     return *this;
