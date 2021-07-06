@@ -8,11 +8,12 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart' show domRenderer, EnginePlatformDispatcher, EngineSemanticsOwner, SemanticsTextEditingStrategy;
+import 'package:ui/src/engine.dart' show domRenderer, EnginePlatformDispatcher;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../host_node.dart';
+import '../semantics.dart';
 import '../services.dart';
 import '../text/paragraph.dart';
 import '../util.dart';

@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:async';
+import 'dart:html' as html;
+
+import 'package:meta/meta.dart';
+
+import '../browser_detection.dart';
+import 'semantics.dart';
 
 /// The maximum [semanticsActivationAttempts] before we give up waiting for
 /// the user to enable semantics.
