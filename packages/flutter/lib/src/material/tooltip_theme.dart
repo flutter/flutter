@@ -86,10 +86,14 @@ class TooltipThemeData with Diagnosticable {
   /// The length of time that the tooltip will be shown once it has appeared.
   final Duration? showDuration;
 
-  /// The mode that will decide when the tooltip will trigger
+  /// The [TooltipTriggerMode] that will show the tooltip.
+  ///
+  /// If this property is null, then [TooltipThemeData.triggerMode] is used.
+  /// If [TooltipThemeData.triggerMode] is also null, the default mode is
+  /// [Tooltip.DefaultTooltipTriggerMode] logical pixels on all sides.
   final TooltipTriggerMode? triggerMode;
 
-  /// Whether the tooltip will provide feedback when triggered.
+  /// Whether the tooltip will provide [Feedback] when triggered.
   ///
   /// Defaults to true. Will call the appropriate method on `Feedback`
   /// depending on the trigger mode, such as `Feedback.forLongPress`.
@@ -272,17 +276,18 @@ class TooltipTheme extends InheritedTheme {
   bool updateShouldNotify(TooltipTheme oldWidget) => data != oldWidget.data;
 }
 
-/// The mode that will decide when the tooltip will trigger
+/// The method of interaction that will trigger a tooltip.
+/// Used in [Tooltip.triggerMode] and [TooltipThemeData.triggerMode]
 enum TooltipTriggerMode {
   /// Tooltip will not be shown automatically, but can be done manually
   /// by calling `ensureTooltipVisible`
-  Manual,
+  manual,
 
   /// Tooltip will be shown automatically after a long press.
   /// See `GestureDetector.onLongPress` for more details.
-  LongHold,
+  longPress,
 
   /// Tooltip will be shown automatically after a single tap
   /// See `GestureDetector.onTap` for more details
-  Tap,
+  tap,
 }

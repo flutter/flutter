@@ -117,6 +117,10 @@ class Tooltip extends StatefulWidget {
   }) : assert(message != null),
        super(key: key);
 
+  /// The default value used when a value is not provided anywhere.
+  /// Read documentation for specific properties to determine all sources.
+  static const TooltipTriggerMode DefaultTooltipTriggerMode = TooltipTriggerMode.longPress;
+
   /// The text to display in the tooltip.
   final String message;
 
@@ -203,7 +207,11 @@ class Tooltip extends StatefulWidget {
   /// pointer exits the widget.
   final Duration? showDuration;
 
-  /// The mode that will decide when the tooltip will trigger
+  /// The [TooltipTriggerMode] that will show the tooltip.
+  ///
+  /// If this property is null, then [TooltipThemeData.triggerMode] is used.
+  /// If [TooltipThemeData.triggerMode] is also null, the default mode is
+  /// [DefaultTooltipTriggerMode] logical pixels on all sides.
   final TooltipTriggerMode? triggerMode;
 
   /// Whether the tooltip will provide feedback when triggered.
@@ -260,7 +268,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const Duration _defaultHoverShowDuration = Duration(milliseconds: 100);
   static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
-  static const TooltipTriggerMode _defaultTriggerMode = TooltipTriggerMode.LongHold;
+  static const TooltipTriggerMode _defaultTriggerMode = Tooltip.DefaultTooltipTriggerMode;
   static const bool _defaultProvideTriggerFeedback = true;
 
   late double height;
@@ -484,7 +492,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _pressActivated = true;
     final bool tooltipCreated = ensureTooltipVisible();
     if (tooltipCreated && provideTriggerFeedback) {
-      if (triggerMode == TooltipTriggerMode.LongHold)
+      if (triggerMode == TooltipTriggerMode.longPress)
         Feedback.forLongPress(context);
       else
         Feedback.forTap(context);
@@ -534,9 +542,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
     Widget result = GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onLongPress: (triggerMode == TooltipTriggerMode.LongHold) ?
+      onLongPress: (triggerMode == TooltipTriggerMode.longPress) ?
         _handlePress : null,
-      onTap: (triggerMode == TooltipTriggerMode.Tap) ? _handlePress : null,
+      onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
       excludeFromSemantics: true,
       child: Semantics(
         label: excludeFromSemantics ? null : widget.message,

@@ -68,7 +68,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Duration wait = Duration(milliseconds: 100);
     const Duration show = Duration(milliseconds: 200);
-    const TooltipTriggerMode triggerMode = TooltipTriggerMode.LongHold;
+    const TooltipTriggerMode triggerMode = TooltipTriggerMode.longPress;
     const bool provideTriggerFeedback = true;
     const TooltipThemeData(
       height: 15.0,
@@ -994,7 +994,7 @@ void main() {
   });
 
   testWidgets('Tooltip triggerMode - ThemeData.triggerMode', (WidgetTester tester) async {
-    const TooltipTriggerMode triggerMode = TooltipTriggerMode.Tap;
+    const TooltipTriggerMode triggerMode = TooltipTriggerMode.tap;
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
@@ -1019,7 +1019,7 @@ void main() {
   });
 
   testWidgets('Tooltip triggerMode - TooltipTheme', (WidgetTester tester) async {
-    const TooltipTriggerMode triggerMode = TooltipTriggerMode.Tap;
+    const TooltipTriggerMode triggerMode = TooltipTriggerMode.tap;
     await tester.pumpWidget(
       const MaterialApp(
         home: TooltipTheme(
