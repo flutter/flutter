@@ -2312,11 +2312,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         (userInteraction &&
         (cause == SelectionChangedCause.longPress ||
          cause == SelectionChangedCause.keyboard))) {
-      _handleSelectionChanged(value.selection, cause);
+      _handleSelectionChanged(_value.selection, cause);
     }
     if (textChanged) {
       try {
-        widget.onChanged?.call(value.text);
+        widget.onChanged?.call(_value.text);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
