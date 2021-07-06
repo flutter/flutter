@@ -191,7 +191,6 @@ Future<T> runInContext<T>(
         artifacts: globals.artifacts,
         flutterVersion: globals.flutterVersion,
         androidWorkflow: androidWorkflow,
-        config: globals.config,
         fuchsiaWorkflow: fuchsiaWorkflow,
         xcDevice: globals.xcdevice,
         userMessages: globals.userMessages,

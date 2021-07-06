@@ -208,7 +208,7 @@ void main() {
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
-      data['modifiers'] |= RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
+      data['modifiers'] = (data['modifiers'] as int) | RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
       // dispatch the modified data.
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
@@ -233,7 +233,7 @@ void main() {
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
-      data['modifiers'] |= RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
+      data['modifiers'] = (data['modifiers'] as int) | RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
       // dispatch the modified data.
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
@@ -258,7 +258,7 @@ void main() {
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
-      data['modifiers'] |= RawKeyEventDataWindows.modifierLeftShift | RawKeyEventDataWindows.modifierShift;
+      data['modifiers'] = (data['modifiers'] as int) | RawKeyEventDataWindows.modifierLeftShift | RawKeyEventDataWindows.modifierShift;
       // dispatch the modified data.
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
@@ -283,7 +283,7 @@ void main() {
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
-      data['metaState'] |= RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift;
+      data['metaState'] = (data['metaState'] as int) | RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift;
       // dispatch the modified data.
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
@@ -308,7 +308,7 @@ void main() {
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
-      data['modifiers'] |= RawKeyEventDataFuchsia.modifierLeftShift;
+      data['modifiers'] = (data['modifiers'] as int) | RawKeyEventDataFuchsia.modifierLeftShift;
       // dispatch the modified data.
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
@@ -333,7 +333,7 @@ void main() {
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
-      data['modifiers'] |= GLFWKeyHelper.modifierShift;
+      data['modifiers'] = (data['modifiers'] as int) | GLFWKeyHelper.modifierShift;
       // dispatch the modified data.
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
@@ -363,7 +363,8 @@ void main() {
         LogicalKeyboardKey.keyA,
         platform: 'web',
         isDown: true,
-      )..['metaState'] |= RawKeyEventDataWeb.modifierShift;
+      );
+      data['metaState'] = (data['metaState'] as int) | RawKeyEventDataWeb.modifierShift;
       // Dispatch the modified data.
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
@@ -406,7 +407,8 @@ void main() {
         LogicalKeyboardKey.shiftRight,
         platform: 'web',
         isDown: true,
-      )..['metaState'] |= RawKeyEventDataWeb.modifierShift;
+      );
+      data['metaState'] = (data['metaState'] as int) | RawKeyEventDataWeb.modifierShift;
       // Dispatch the modified data.
       await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
@@ -451,7 +453,7 @@ void main() {
         isDown: true,
       );
       // Set only the generic "down" modifier, without setting a side.
-      data['metaState'] |=
+      data['metaState'] = (data['metaState'] as int) |
         RawKeyEventDataAndroid.modifierShift |
         RawKeyEventDataAndroid.modifierAlt |
         RawKeyEventDataAndroid.modifierControl |
@@ -489,7 +491,7 @@ void main() {
         isDown: true,
       );
       // Set only the generic "shift down" modifier, without setting a side.
-      data['modifiers'] |=
+      data['modifiers'] = (data['modifiers'] as int) |
           RawKeyEventDataMacOs.modifierShift |
           RawKeyEventDataMacOs.modifierOption |
           RawKeyEventDataMacOs.modifierCommand |
@@ -527,7 +529,7 @@ void main() {
         isDown: true,
       );
       // Set only the generic "shift down" modifier, without setting a side.
-      data['modifiers'] |=
+      data['modifiers'] = (data['modifiers'] as int) |
           RawKeyEventDataIos.modifierShift |
           RawKeyEventDataIos.modifierOption |
           RawKeyEventDataIos.modifierCommand |
@@ -566,7 +568,7 @@ void main() {
       );
       // Set only the generic "shift down" modifier, without setting a side.
       // Windows doesn't have a concept of "either" for the Windows (meta) key.
-      data['modifiers'] |=
+      data['modifiers'] = (data['modifiers'] as int) |
           RawKeyEventDataWindows.modifierShift |
           RawKeyEventDataWindows.modifierAlt |
           RawKeyEventDataWindows.modifierControl;
@@ -602,7 +604,7 @@ void main() {
       );
       // Set only the generic "shift down" modifier, without setting a side.
       // Windows doesn't have a concept of "either" for the Windows (meta) key.
-      data['modifiers'] |=
+      data['modifiers'] = (data['modifiers'] as int) |
         GLFWKeyHelper.modifierShift |
         GLFWKeyHelper.modifierAlt |
         GLFWKeyHelper.modifierControl |
@@ -640,7 +642,7 @@ void main() {
         isDown: true,
       );
       // Set only the generic "shift down" modifier, without setting a side.
-      data['metaState'] |=
+      data['metaState'] = (data['metaState'] as int) |
         RawKeyEventDataWeb.modifierShift |
         RawKeyEventDataWeb.modifierAlt |
         RawKeyEventDataWeb.modifierControl |

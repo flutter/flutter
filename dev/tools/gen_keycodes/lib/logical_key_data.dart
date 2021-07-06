@@ -370,7 +370,7 @@ class LogicalKeyData {
   }();
 
   /// Returns the static map of printable representations.
-  static late final Map<String, String> printable = ((){
+  static late final Map<String, String> printable = (() {
     final String printableKeys = File(path.join(dataRoot, 'printable.json',)).readAsStringSync();
     return (json.decode(printableKeys) as Map<String, dynamic>)
       .cast<String, String>();
@@ -389,7 +389,7 @@ class LogicalKeyData {
   /// These include synonyms for keys which don't have printable
   /// representations, and appear in more than one place on the keyboard (e.g.
   /// SHIFT, ALT, etc.).
-  static late final Map<String, List<String>> synonyms = ((){
+  static late final Map<String, List<String>> synonyms = (() {
     final String synonymKeys = File(path.join(dataRoot, 'synonyms.json',)).readAsStringSync();
     final Map<String, dynamic> dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
     return dynamicSynonym.map((String name, dynamic values) {
@@ -440,18 +440,18 @@ class LogicalKeyEntry {
   LogicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map)
     : value = map['value'] as int,
       name = map['name'] as String,
-      webNames = _toNonEmptyArray<String>(map['names']['web']),
-      macOSKeyCodeNames = _toNonEmptyArray<String>(map['names']['macos']),
-      macOSKeyCodeValues = _toNonEmptyArray<int>(map['values']?['macos']),
-      iOSKeyCodeNames = _toNonEmptyArray<String>(map['names']['ios']),
-      iOSKeyCodeValues = _toNonEmptyArray<int>(map['values']?['ios']),
-      gtkNames = _toNonEmptyArray<String>(map['names']['gtk']),
-      gtkValues = _toNonEmptyArray<int>(map['values']?['gtk']),
-      windowsNames = _toNonEmptyArray<String>(map['names']['windows']),
-      windowsValues = _toNonEmptyArray<int>(map['values']?['windows']),
-      androidNames = _toNonEmptyArray<String>(map['names']['android']),
-      androidValues = _toNonEmptyArray<int>(map['values']?['android']),
-      fuchsiaValues = _toNonEmptyArray<int>(map['values']?['fuchsia']),
+      webNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['web']),
+      macOSKeyCodeNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['macos']),
+      macOSKeyCodeValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['macos']),
+      iOSKeyCodeNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['ios']),
+      iOSKeyCodeValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['ios']),
+      gtkNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['gtk']),
+      gtkValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['gtk']),
+      windowsNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['windows']),
+      windowsValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['windows']),
+      androidNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['android']),
+      androidValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['android']),
+      fuchsiaValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['fuchsia']),
       keyLabel = map['keyLabel'] as String?;
 
   final int value;
