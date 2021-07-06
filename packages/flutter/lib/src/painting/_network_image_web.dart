@@ -87,7 +87,7 @@ class NetworkImage
 
     final HttpRequest response = await HttpRequest.request(key.url, method: 'GET', requestHeaders: key.headers, responseType: 'arraybuffer');
 
-    if(response.status != HttpStatus.ok) {
+    if (response.status != HttpStatus.ok) {
       response.abort();
       throw image_provider.NetworkImageLoadException(statusCode: response.status ?? 400, uri: resolved);
     }
