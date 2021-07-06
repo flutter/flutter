@@ -248,7 +248,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// Verify that the child list index is in strictly increasing order.
   ///
   /// This has no effect in release builds.
-  bool _debugVerifyChildOrder(){
+  bool _debugVerifyChildOrder() {
     if (_debugChildIntegrityEnabled) {
       RenderBox? child = firstChild;
       int index;

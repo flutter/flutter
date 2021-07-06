@@ -229,14 +229,13 @@ void main() {
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: null),
       OperatingSystemUtils: () => osUtils,
     });
 
     testUsingContext('fail when cant get host address', () async {
       expect(() async =>
-        setupAndStartApp(prebuilt: true, mode: BuildMode.release),
+          FuchsiaDeviceWithFakeDiscovery('123').hostAddress,
           throwsToolExit(message: 'Failed to get local address, aborting.'));
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -25,13 +23,13 @@ class TaskResult {
       : succeeded = true {
     const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
-      for (final String key in benchmarkScoreKeys) {
-        if (!data.containsKey(key)) {
+      for (final String key in benchmarkScoreKeys!) {
+        if (!data!.containsKey(key)) {
           throw 'Invalid benchmark score key "$key". It does not exist in task '
               'result data ${prettyJson.convert(data)}';
-        } else if (data[key] is! num) {
+        } else if (data![key] is! num) {
           throw 'Invalid benchmark score for key "$key". It is expected to be a num '
-              'but was ${(data[key] as Object).runtimeType}: ${prettyJson.convert(data[key])}';
+              'but was ${(data![key] as Object).runtimeType}: ${prettyJson.convert(data![key])}';
         }
       }
     }
@@ -53,8 +51,8 @@ class TaskResult {
   factory TaskResult.fromJson(Map<String, dynamic> json) {
     final bool success = json['success'] as bool;
     if (success) {
-      final List<String> benchmarkScoreKeys = (json['benchmarkScoreKeys'] as List<dynamic> ?? <String>[]).cast<String>();
-      final List<String> detailFiles = (json['detailFiles'] as List<dynamic> ?? <String>[]).cast<String>();
+      final List<String> benchmarkScoreKeys = (json['benchmarkScoreKeys'] as List<dynamic>? ?? <String>[]).cast<String>();
+      final List<String> detailFiles = (json['detailFiles'] as List<dynamic>? ?? <String>[]).cast<String>();
       return TaskResult.success(json['data'] as Map<String, dynamic>,
         benchmarkScoreKeys: benchmarkScoreKeys,
         detailFiles: detailFiles,
@@ -76,15 +74,15 @@ class TaskResult {
   final bool succeeded;
 
   /// Task-specific JSON data
-  final Map<String, dynamic> data;
+  final Map<String, dynamic>? data;
 
   /// Files containing detail on the run (e.g. timeline trace files)
-  final List<String> detailFiles;
+  final List<String>? detailFiles;
 
   /// Keys in [data] that store scores that will be submitted to Cocoon.
   ///
   /// Each key is also part of a benchmark's name tracked by Cocoon.
-  final List<String> benchmarkScoreKeys;
+  final List<String>? benchmarkScoreKeys;
 
   /// Whether the task failed.
   bool get failed => !succeeded;

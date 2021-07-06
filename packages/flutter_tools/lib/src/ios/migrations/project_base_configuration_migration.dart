@@ -5,7 +5,7 @@
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
-import '../../project.dart';
+import '../../xcode_project.dart';
 
 // The Runner target should inherit its build configuration from Generated.xcconfig.
 // However the top-level Runner project should not inherit any build configuration so

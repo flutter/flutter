@@ -22,6 +22,6 @@ void main() {
       // This only makes sense if you ran the test as described
       // in the test file. It's normally run from devicelab.
       expect(await driver.requestData('route'), '/smuggle-it');
-    });
+    }, timeout: Timeout.none);
   });
 }

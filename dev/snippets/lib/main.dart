@@ -21,17 +21,44 @@ const String _kTemplateOption = 'template';
 const String _kTypeOption = 'type';
 const String _kShowDartPad = 'dartpad';
 
+class GitStatusFailed implements Exception {
+  GitStatusFailed(this.gitResult);
+
+  final ProcessResult gitResult;
+
+  @override
+  String toString() => 'git status exited with a non-zero exit code: ${gitResult.exitCode}:\n${gitResult.stderr}\n${gitResult.stdout}';
+}
+
 String getChannelName() {
   final RegExp gitBranchRegexp = RegExp(r'^## (?<branch>.*)');
-  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain'], environment: <String, String>{
-    'GIT_TRACE': '2',
-    'GIT_TRACE_SETUP': '2',
-  }, includeParentEnvironment: true);
-  if (gitResult.exitCode != 0)
-    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}: ${gitResult.stderr}';
-  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(
-      (gitResult.stdout as String).trim().split('\n').first);
+  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain'],
+    environment: <String, String>{
+      'GIT_TRACE': '2',
+      'GIT_TRACE_SETUP': '2'
+    },
+    includeParentEnvironment: true
+  );
+  if (gitResult.exitCode != 0) {
+    throw GitStatusFailed(gitResult);
+  }
+  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch((gitResult.stdout as String).trim().split('\n').first);
   return gitBranchMatch == null ? '<unknown>' : gitBranchMatch.namedGroup('branch')!.split('...').first;
+}
+
+// This is a hack to workaround the fact that git status inexplicably fails
+// (random non-zero error code) about 2% of the time.
+String getChannelNameWithRetries() {
+  int retryCount = 0;
+  while(retryCount < 2) {
+    try {
+      return getChannelName();
+    } on GitStatusFailed catch (e) {
+      retryCount += 1;
+      stderr.write('git status failed, retrying ($retryCount)\nError report:\n$e');
+    }
+  }
+  return getChannelName();
 }
 
 /// Generates snippet dartdoc output for a given input, and creates any sample
@@ -185,7 +212,7 @@ void main(List<String> argList) {
           ? int.tryParse(environment['SOURCE_LINE']!)
           : null,
       'id': id.join('.'),
-      'channel': getChannelName(),
+      'channel': getChannelNameWithRetries(),
       'serial': serial,
       'package': packageName,
       'library': libraryName,

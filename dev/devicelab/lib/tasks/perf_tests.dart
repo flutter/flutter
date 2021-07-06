@@ -314,8 +314,6 @@ TaskFunction createStackSizeTest() {
         '--driver', testDriver,
         '-d',
         deviceId,
-        '--screenshot',
-        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/stack_size.json').readAsStringSync(),
@@ -411,8 +409,6 @@ TaskFunction createsScrollSmoothnessPerfTest() {
         '-t', testTarget,
         '-d',
         deviceId,
-        '--screenshot',
-        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/scroll_smoothness_test.json').readAsStringSync(),
@@ -464,8 +460,6 @@ TaskFunction createFramePolicyIntegrationTest() {
         '-t', testTarget,
         '-d',
         deviceId,
-        '--screenshot',
-        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/frame_policy_event_delay.json').readAsStringSync(),
@@ -585,16 +579,20 @@ class StartupTest {
           results.add(data);
         } else {
           currentFailures += 1;
-          await flutter(
-            'screenshot',
-            options: <String>[
-              '-d',
-              device.deviceId,
-              '--out',
-              hostAgent.dumpDirectory.childFile('screenshot_startup_failure_$currentFailures.png').path,
-            ],
-            canFail: true,
-          );
+          if (hostAgent.dumpDirectory != null) {
+            await flutter(
+              'screenshot',
+              options: <String>[
+                '-d',
+                device.deviceId,
+                '--out',
+                hostAgent.dumpDirectory
+                    .childFile('screenshot_startup_failure_$currentFailures.png')
+                    .path,
+              ],
+              canFail: true,
+            );
+          }
           i -= 1;
           if (currentFailures == maxFailures) {
             return TaskResult.failure('Application failed to start $maxFailures times');
@@ -830,8 +828,6 @@ class PerfTest {
           ...<String>['--dart-define', dartDefine],
         '-d',
         deviceId,
-        '--screenshot',
-        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
@@ -1461,8 +1457,6 @@ class DevToolsMemoryTest {
         'drive',
         options: <String>[
           '-d', _device.deviceId,
-          '--screenshot',
-          hostAgent.dumpDirectory.path,
           '--profile',
           '--profile-memory', _kJsonFileName,
           '--no-publish-port',
