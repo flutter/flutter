@@ -106,8 +106,7 @@ void main() {
     shadowList = BoxShadow.lerpList(<BoxShadow>[shadow2], <BoxShadow>[shadow3, shadow1], 0.5)!;
     expect(shadowList, equals(<BoxShadow>[shadow4, shadow1.scale(0.5)]));
   });
-  
-  
+
   test('BoxShadow BlurStyle test', () {
     const BoxShadow shadow1 = BoxShadow(blurRadius: 4.0);
     const BoxShadow shadow2 = BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.outer);
