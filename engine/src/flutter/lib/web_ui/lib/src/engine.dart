@@ -32,7 +32,6 @@ import 'package:meta/meta.dart';
 
 import '../ui.dart' as ui;
 
-import 'engine/alarm_clock.dart';
 export 'engine/alarm_clock.dart';
 
 export 'engine/assets.dart';
@@ -131,8 +130,30 @@ export 'engine/pointer_converter.dart';
 import 'engine/profiler.dart';
 export 'engine/profiler.dart';
 
-// This import is intentionally commented out because the analyzer says it's unused.
-// import 'engine/services/buffers.dart';
+import 'engine/semantics/accessibility.dart';
+export 'engine/semantics/accessibility.dart';
+
+export 'engine/semantics/checkable.dart';
+
+export 'engine/semantics/image.dart';
+
+export 'engine/semantics/incrementable.dart';
+
+export 'engine/semantics/label_and_value.dart';
+
+export 'engine/semantics/live_region.dart';
+
+export 'engine/semantics/scrollable.dart';
+
+import 'engine/semantics/semantics.dart';
+export 'engine/semantics/semantics.dart';
+
+export 'engine/semantics/semantics_helper.dart';
+
+export 'engine/semantics/tappable.dart';
+
+export 'engine/semantics/text_field.dart';
+
 export 'engine/services/buffers.dart';
 
 import 'engine/services/message_codec.dart';
@@ -302,17 +323,6 @@ part 'engine/platform_views/content_manager.dart';
 part 'engine/platform_views/message_handler.dart';
 part 'engine/platform_views/slots.dart';
 part 'engine/rrect_renderer.dart';
-part 'engine/semantics/accessibility.dart';
-part 'engine/semantics/checkable.dart';
-part 'engine/semantics/image.dart';
-part 'engine/semantics/incrementable.dart';
-part 'engine/semantics/label_and_value.dart';
-part 'engine/semantics/live_region.dart';
-part 'engine/semantics/scrollable.dart';
-part 'engine/semantics/semantics.dart';
-part 'engine/semantics/semantics_helper.dart';
-part 'engine/semantics/tappable.dart';
-part 'engine/semantics/text_field.dart';
 part 'engine/window.dart';
 
 // The mode the app is running in.

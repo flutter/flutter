@@ -387,7 +387,7 @@ class DomRenderer {
 
     // When debugging semantics, make the scene semi-transparent so that the
     // semantics tree is visible.
-    if (_debugShowSemanticsNodes) {
+    if (debugShowSemanticsNodes) {
       _sceneHostElement!.style.opacity = '0.3';
     }
 

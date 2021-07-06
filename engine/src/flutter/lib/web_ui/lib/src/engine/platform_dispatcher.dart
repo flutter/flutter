@@ -760,6 +760,15 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     invoke(_onTextScaleFactorChanged, _onTextScaleFactorChangedZone);
   }
 
+  void updateSemanticsEnabled(bool semanticsEnabled) {
+    if (semanticsEnabled != this.semanticsEnabled) {
+      _configuration = _configuration.copyWith(semanticsEnabled: semanticsEnabled);
+      if (_onSemanticsEnabledChanged != null) {
+        invokeOnSemanticsEnabledChanged();
+      }
+    }
+  }
+
   /// The setting indicating the current brightness mode of the host platform.
   /// If the platform has no preference, [platformBrightness] defaults to [Brightness.light].
   ui.Brightness get platformBrightness => configuration.platformBrightness;

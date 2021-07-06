@@ -11,7 +11,11 @@
 //                framework. Currently the framework does not report the
 //                grouping of radio buttons.
 
-part of engine;
+import 'dart:html' as html;
+
+import 'package:ui/ui.dart' as ui;
+
+import 'semantics.dart';
 
 /// The specific type of checkable control.
 enum _CheckableKind {
