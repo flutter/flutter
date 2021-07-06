@@ -181,6 +181,8 @@ source_set("fml") {
       "platform/fuchsia/message_loop_fuchsia.cc",
       "platform/fuchsia/message_loop_fuchsia.h",
       "platform/fuchsia/paths_fuchsia.cc",
+      "platform/fuchsia/task_observers.cc",
+      "platform/fuchsia/task_observers.h",
     ]
 
     public_deps += [
