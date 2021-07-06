@@ -23,39 +23,84 @@ constexpr float kScenicZElevationBetweenLayers = 0.0001f;
 constexpr float kScenicZElevationForPlatformView = 100.f;
 constexpr float kScenicElevationForInputInterceptor = 500.f;
 
-SkScalar OpacityFromMutatorStack(const flutter::MutatorsStack& mutatorsStack) {
-  SkScalar mutatorsOpacity = 1.f;
-  for (auto i = mutatorsStack.Bottom(); i != mutatorsStack.Top(); ++i) {
+ViewMutators ParseMutatorStack(const flutter::MutatorsStack& mutators_stack) {
+  ViewMutators mutators;
+  SkMatrix total_transform = SkMatrix::I();
+  SkMatrix transform_accumulator = SkMatrix::I();
+
+  for (auto i = mutators_stack.Begin(); i != mutators_stack.End(); ++i) {
     const auto& mutator = *i;
     switch (mutator->GetType()) {
       case flutter::MutatorType::opacity: {
-        mutatorsOpacity *= std::clamp(mutator->GetAlphaFloat(), 0.f, 1.f);
+        mutators.opacity *= std::clamp(mutator->GetAlphaFloat(), 0.f, 1.f);
+      } break;
+      case flutter::MutatorType::transform: {
+        total_transform.preConcat(mutator->GetMatrix());
+        transform_accumulator.preConcat(mutator->GetMatrix());
+      } break;
+      case flutter::MutatorType::clip_rect: {
+        mutators.clips.emplace_back(TransformedClip{
+            .transform = transform_accumulator,
+            .rect = mutator->GetRect(),
+        });
+        transform_accumulator = SkMatrix::I();
+      } break;
+      case flutter::MutatorType::clip_rrect: {
+        mutators.clips.emplace_back(TransformedClip{
+            .transform = transform_accumulator,
+            .rect = mutator->GetRRect().getBounds(),
+        });
+        transform_accumulator = SkMatrix::I();
+      } break;
+      case flutter::MutatorType::clip_path: {
+        mutators.clips.emplace_back(TransformedClip{
+            .transform = transform_accumulator,
+            .rect = mutator->GetPath().getBounds(),
+        });
+        transform_accumulator = SkMatrix::I();
       } break;
       default: {
         break;
       }
     }
   }
+  mutators.total_transform = total_transform;
+  mutators.transform = transform_accumulator;
+  mutators.opacity = std::clamp(mutators.opacity, 0.f, 1.f);
 
-  return mutatorsOpacity;
+  return mutators;
 }
 
-SkMatrix TransformFromMutatorStack(
-    const flutter::MutatorsStack& mutatorsStack) {
-  SkMatrix mutatorsTransform;
-  for (auto i = mutatorsStack.Bottom(); i != mutatorsStack.Top(); ++i) {
-    const auto& mutator = *i;
-    switch (mutator->GetType()) {
-      case flutter::MutatorType::transform: {
-        mutatorsTransform.preConcat(mutator->GetMatrix());
-      } break;
-      default: {
-        break;
-      }
-    }
-  }
+std::vector<fuchsia::ui::gfx::Plane3> ClipPlanesFromRect(SkRect rect) {
+  // We will generate 4 oriented planes, one for each edge of the bounding rect.
+  std::vector<fuchsia::ui::gfx::Plane3> clip_planes;
+  clip_planes.resize(4);
 
-  return mutatorsTransform;
+  // Top plane.
+  clip_planes[0].dist = rect.top();
+  clip_planes[0].dir.x = 0.f;
+  clip_planes[0].dir.y = 1.f;
+  clip_planes[0].dir.z = 0.f;
+
+  // Bottom plane.
+  clip_planes[1].dist = -rect.bottom();
+  clip_planes[1].dir.x = 0.f;
+  clip_planes[1].dir.y = -1.f;
+  clip_planes[1].dir.z = 0.f;
+
+  // Left plane.
+  clip_planes[2].dist = rect.left();
+  clip_planes[2].dir.x = 1.f;
+  clip_planes[2].dir.y = 0.f;
+  clip_planes[2].dir.z = 0.f;
+
+  // Right plane.
+  clip_planes[3].dist = -rect.right();
+  clip_planes[3].dir.x = -1.f;
+  clip_planes[3].dir.y = 0.f;
+  clip_planes[3].dir.z = 0.f;
+
+  return clip_planes;
 }
 
 }  // namespace
@@ -255,90 +300,121 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
         FML_CHECK(layer->second.embedded_view_params.has_value());
         auto& view_params = layer->second.embedded_view_params.value();
 
-        // Validate the MutatorsStack encodes the same transform as the
-        // transform matrix.
-        FML_DCHECK(TransformFromMutatorStack(view_params.mutatorsStack()) ==
-                   view_params.transformMatrix());
-
         // Get the ScenicView structure corresponding to the platform view.
         auto found = scenic_views_.find(layer_id.value());
         FML_CHECK(found != scenic_views_.end());
         auto& view_holder = found->second;
 
-        // Compute offset and size for the platform view.
-        const SkMatrix& view_transform = view_params.transformMatrix();
-        const SkPoint view_offset = SkPoint::Make(
-            view_transform.getTranslateX(), view_transform.getTranslateY());
+        // Compute mutators, size, and elevation for the platform view.
+        const ViewMutators view_mutators =
+            ParseMutatorStack(view_params.mutatorsStack());
         const SkSize view_size = view_params.sizePoints();
-        const SkSize view_scale = SkSize::Make(view_transform.getScaleX(),
-                                               view_transform.getScaleY());
-        FML_DCHECK(!view_size.isEmpty() && !view_scale.isEmpty());
-
-        // Compute opacity for the platform view.
-        const float view_opacity =
-            OpacityFromMutatorStack(view_params.mutatorsStack());
-
-        // Set opacity.
-        if (view_opacity != view_holder.opacity) {
-          view_holder.opacity_node.SetOpacity(view_opacity);
-          view_holder.opacity = view_opacity;
-        }
-
-        // Set transform and elevation.
         const float view_elevation =
             kScenicZElevationBetweenLayers * scenic_layer_index +
             embedded_views_height;
-        if (view_offset != view_holder.offset ||
-            view_scale != view_holder.scale ||
+        FML_CHECK(view_mutators.total_transform ==
+                  view_params.transformMatrix());
+
+        // Set clips for the platform view.
+        if (view_mutators.clips != view_holder.mutators.clips) {
+          // Expand the clip_nodes array to fit any new nodes.
+          while (view_holder.clip_nodes.size() < view_mutators.clips.size()) {
+            view_holder.clip_nodes.emplace_back(
+                scenic::EntityNode(session_.get()));
+          }
+          FML_CHECK(view_holder.clip_nodes.size() >=
+                    view_mutators.clips.size());
+
+          // Adjust and re-parent all clip rects.
+          for (auto& clip_node : view_holder.clip_nodes) {
+            clip_node.DetachChildren();
+          }
+          for (size_t c = 0; c < view_mutators.clips.size(); c++) {
+            const SkMatrix& clip_transform = view_mutators.clips[c].transform;
+            const SkRect& clip_rect = view_mutators.clips[c].rect;
+
+            view_holder.clip_nodes[c].SetTranslation(
+                clip_transform.getTranslateX(), clip_transform.getTranslateY(),
+                0.f);
+            view_holder.clip_nodes[c].SetScale(clip_transform.getScaleX(),
+                                               clip_transform.getScaleY(), 1.f);
+            view_holder.clip_nodes[c].SetClipPlanes(
+                ClipPlanesFromRect(clip_rect));
+
+            if (c != (view_mutators.clips.size() - 1)) {
+              view_holder.clip_nodes[c].AddChild(view_holder.clip_nodes[c + 1]);
+            } else {
+              view_holder.clip_nodes[c].AddChild(view_holder.opacity_node);
+            }
+          }
+
+          view_holder.mutators.clips = view_mutators.clips;
+        }
+
+        // Set transform and elevation for the platform view.
+        if (view_mutators.transform != view_holder.mutators.transform ||
             view_elevation != view_holder.elevation) {
-          view_holder.entity_node.SetTranslation(view_offset.fX, view_offset.fY,
-                                                 -view_elevation);
-          view_holder.entity_node.SetScale(view_scale.fWidth,
-                                           view_scale.fHeight, 1.f);
-          view_holder.offset = view_offset;
-          view_holder.scale = view_scale;
+          view_holder.transform_node.SetTranslation(
+              view_mutators.transform.getTranslateX(),
+              view_mutators.transform.getTranslateY(), -view_elevation);
+          view_holder.transform_node.SetScale(
+              view_mutators.transform.getScaleX(),
+              view_mutators.transform.getScaleY(), 1.f);
+
+          view_holder.mutators.transform = view_mutators.transform;
           view_holder.elevation = view_elevation;
         }
 
-        // Set HitTestBehavior.
+        // Set HitTestBehavior for the platform view.
         if (view_holder.pending_hit_testable != view_holder.hit_testable) {
-          view_holder.entity_node.SetHitTestBehavior(
+          view_holder.transform_node.SetHitTestBehavior(
               view_holder.pending_hit_testable
                   ? fuchsia::ui::gfx::HitTestBehavior::kDefault
                   : fuchsia::ui::gfx::HitTestBehavior::kSuppress);
+
           view_holder.hit_testable = view_holder.pending_hit_testable;
         }
 
+        // Set opacity for the platform view.
+        if (view_mutators.opacity != view_holder.mutators.opacity) {
+          view_holder.opacity_node.SetOpacity(view_mutators.opacity);
+
+          view_holder.mutators.opacity = view_mutators.opacity;
+        }
+
         // Set size, occlusion hint, and focusable.
-        //
-        // Scenic rejects `SetViewProperties` calls with a zero size.
-        if (!view_size.isEmpty() &&
-            (view_size != view_holder.size ||
-             view_holder.pending_occlusion_hint != view_holder.occlusion_hint ||
-             view_holder.pending_focusable != view_holder.focusable)) {
-          view_holder.size = view_size;
-          view_holder.occlusion_hint = view_holder.pending_occlusion_hint;
-          view_holder.focusable = view_holder.pending_focusable;
+        if (view_size != view_holder.size ||
+            view_holder.pending_occlusion_hint != view_holder.occlusion_hint ||
+            view_holder.pending_focusable != view_holder.focusable) {
           view_holder.view_holder.SetViewProperties({
               .bounding_box =
                   {
                       .min = {.x = 0.f, .y = 0.f, .z = -1000.f},
-                      .max = {.x = view_holder.size.fWidth,
-                              .y = view_holder.size.fHeight,
+                      .max = {.x = view_size.fWidth,
+                              .y = view_size.fHeight,
                               .z = 0.f},
                   },
-              .inset_from_min = {.x = view_holder.occlusion_hint.fLeft,
-                                 .y = view_holder.occlusion_hint.fTop,
+              .inset_from_min = {.x = view_holder.pending_occlusion_hint.fLeft,
+                                 .y = view_holder.pending_occlusion_hint.fTop,
                                  .z = 0.f},
-              .inset_from_max = {.x = view_holder.occlusion_hint.fRight,
-                                 .y = view_holder.occlusion_hint.fBottom,
+              .inset_from_max = {.x = view_holder.pending_occlusion_hint.fRight,
+                                 .y =
+                                     view_holder.pending_occlusion_hint.fBottom,
                                  .z = 0.f},
-              .focus_change = view_holder.focusable,
+              .focus_change = view_holder.pending_focusable,
           });
+
+          view_holder.size = view_size;
+          view_holder.occlusion_hint = view_holder.pending_occlusion_hint;
+          view_holder.focusable = view_holder.pending_focusable;
         }
 
         // Attach the ScenicView to the main scene graph.
-        layer_tree_node_.AddChild(view_holder.opacity_node);
+        if (view_holder.mutators.clips.empty()) {
+          layer_tree_node_.AddChild(view_holder.opacity_node);
+        } else {
+          layer_tree_node_.AddChild(view_holder.clip_nodes[0]);
+        }
 
         // Account for the ScenicView's height when positioning the next layer.
         embedded_views_height += kScenicZElevationForPlatformView;
@@ -514,7 +590,7 @@ void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id,
 
   ScenicView new_view = {
       .opacity_node = scenic::OpacityNodeHACK(session_.get()),
-      .entity_node = scenic::EntityNode(session_.get()),
+      .transform_node = scenic::EntityNode(session_.get()),
       .view_holder = scenic::ViewHolder(
           session_.get(),
           scenic::ToViewHolderToken(zx::eventpair((zx_handle_t)view_id)),
@@ -523,12 +599,12 @@ void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id,
   on_view_created();
   on_view_bound(new_view.view_holder.id());
 
-  new_view.opacity_node.SetLabel("flutter::PlatformView::OpacityMutator");
-  new_view.entity_node.SetLabel("flutter::PlatformView::TransformMutator");
-  new_view.opacity_node.AddChild(new_view.entity_node);
-  new_view.entity_node.Attach(new_view.view_holder);
-  new_view.entity_node.SetTranslation(0.f, 0.f,
-                                      -kScenicZElevationBetweenLayers);
+  new_view.opacity_node.SetLabel("Flutter::PlatformView::OpacityMutator");
+  new_view.opacity_node.AddChild(new_view.transform_node);
+  new_view.transform_node.SetLabel("Flutter::PlatformView::TransformMutator");
+  new_view.transform_node.SetTranslation(0.f, 0.f,
+                                         -kScenicZElevationBetweenLayers);
+  new_view.transform_node.Attach(new_view.view_holder);
 
   scenic_views_.emplace(std::make_pair(view_id, std::move(new_view)));
 }
