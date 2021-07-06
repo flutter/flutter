@@ -23,6 +23,11 @@ struct TSize {
 
   constexpr TSize(Type width, Type height) : width(width), height(height) {}
 
+  template <class U>
+  explicit constexpr TSize(const TSize<U>& other)
+      : TSize(static_cast<Type>(other.width), static_cast<Type>(other.height)) {
+  }
+
   static constexpr TSize Infinite() {
     return TSize{std::numeric_limits<Type>::max(),
                  std::numeric_limits<Type>::max()};

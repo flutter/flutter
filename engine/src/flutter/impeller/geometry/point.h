@@ -12,65 +12,81 @@
 
 namespace impeller {
 
-struct Point {
-  Scalar x = 0.0;
-  Scalar y = 0.0;
+template <class T>
+struct TPoint {
+  using Type = T;
 
-  constexpr Point() = default;
+  Type x = {};
+  Type y = {};
 
-  constexpr Point(Scalar x, Scalar y) : x(x), y(y) {}
+  constexpr TPoint() = default;
 
-  constexpr bool operator==(const Point& p) const {
+  template <class U>
+  explicit constexpr TPoint(const TPoint<U>& other)
+      : TPoint(static_cast<Type>(other.x), static_cast<Type>(other.y)) {}
+
+  constexpr TPoint(Type x, Type y) : x(x), y(y) {}
+
+  constexpr bool operator==(const TPoint& p) const {
     return p.x == x && p.y == y;
   }
 
-  constexpr bool operator!=(const Point& p) const {
+  constexpr bool operator!=(const TPoint& p) const {
     return p.x != x || p.y != y;
   }
 
-  constexpr Point operator-() const { return {-x, -y}; }
+  constexpr TPoint operator-() const { return {-x, -y}; }
 
-  constexpr Point operator+(const Point& p) const { return {x + p.x, y + p.y}; }
+  constexpr TPoint operator+(const TPoint& p) const {
+    return {x + p.x, y + p.y};
+  }
 
-  constexpr Point operator+(const Size& s) const {
+  constexpr TPoint operator+(const TSize<Type>& s) const {
     return {x + s.width, y + s.height};
   }
 
-  constexpr Point operator-(const Point& p) const { return {x - p.x, y - p.y}; }
+  constexpr TPoint operator-(const TPoint& p) const {
+    return {x - p.x, y - p.y};
+  }
 
-  constexpr Point operator-(const Size& s) const {
+  constexpr TPoint operator-(const TSize<Type>& s) const {
     return {x - s.width, y - s.height};
   }
 
-  constexpr Point operator*(Scalar scale) const {
+  constexpr TPoint operator*(Type scale) const {
     return {x * scale, y * scale};
   }
 
-  constexpr Point operator*(const Point& p) const { return {x * p.x, y * p.y}; }
+  constexpr TPoint operator*(const TPoint& p) const {
+    return {x * p.x, y * p.y};
+  }
 
-  constexpr Point operator*(const Size& s) const {
+  constexpr TPoint operator*(const TSize<Type>& s) const {
     return {x * s.width, y * s.height};
   }
 
-  constexpr Point operator/(Scalar d) const { return {x / d, y / d}; }
+  constexpr TPoint operator/(Type d) const { return {x / d, y / d}; }
 
-  constexpr Point operator/(const Point& p) const { return {x / p.x, y / p.y}; }
+  constexpr TPoint operator/(const TPoint& p) const {
+    return {x / p.x, y / p.y};
+  }
 
-  constexpr Point operator/(const Size& s) const {
+  constexpr TPoint operator/(const TSize<Type>& s) const {
     return {x / s.width, y / s.height};
   }
 
-  constexpr Scalar GetDistanceSquared(const Point& p) const {
+  constexpr Type GetDistanceSquared(const TPoint& p) const {
     double dx = p.x - x;
     double dy = p.y - y;
     return dx * dx + dy * dy;
   }
 
-  constexpr Scalar GetDistance(const Point& p) const {
+  constexpr Type GetDistance(const TPoint& p) const {
     return sqrt(GetDistanceSquared(p));
   }
 };
 
-static_assert(sizeof(Point) == 2 * sizeof(Scalar));
+using Point = TPoint<Scalar>;
+using IPoint = TPoint<int64_t>;
 
 }  // namespace impeller
