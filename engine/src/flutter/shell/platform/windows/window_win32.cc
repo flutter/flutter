@@ -371,11 +371,18 @@ WindowWin32::HandleMessage(UINT const message,
       // Check if this key produces a character. If so, the key press should
       // be sent with the character produced at WM_CHAR. Store the produced
       // keycode (it's not accessible from WM_CHAR) to be used in WM_CHAR.
-      const unsigned int character = MapVirtualKey(wparam, MAPVK_VK_TO_CHAR);
-      if (character > 0 && is_keydown_message) {
+      //
+      // Messages with Control or Win modifiers down are never considered as
+      // character messages. This allows key combinations such as "CTRL + Digit"
+      // to properly produce key down events even though `MapVirtualKey` returns
+      // a valid character. See https://github.com/flutter/flutter/issues/85587.
+      unsigned int character = MapVirtualKey(wparam, MAPVK_VK_TO_CHAR);
+      if (character > 0 && is_keydown_message && GetKeyState(VK_CONTROL) == 0 &&
+          GetKeyState(VK_LWIN) == 0 && GetKeyState(VK_RWIN) == 0) {
         keycode_for_char_message_ = wparam;
         break;
       }
+      character = 0;
       unsigned int keyCode(wparam);
       const unsigned int scancode = (lparam >> 16) & 0xff;
       const bool extended = ((lparam >> 24) & 0x01) == 0x01;
