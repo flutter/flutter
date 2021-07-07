@@ -15,6 +15,8 @@ namespace impeller {
 
 enum class PixelFormat {
   kUnknown,
+  kPixelFormat_R8G8B8A8_UNormInt,
+  kPixelFormat_R8G8B8A8_UNormInt_SRGB,
   kPixelFormat_B8G8R8A8_UNormInt,
   kPixelFormat_B8G8R8A8_UNormInt_SRGB,
   kPixelFormat_D32_Float_S8_UNormInt,
@@ -97,8 +99,9 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
       return 0u;
+    case PixelFormat::kPixelFormat_R8G8B8A8_UNormInt:
+    case PixelFormat::kPixelFormat_R8G8B8A8_UNormInt_SRGB:
     case PixelFormat::kPixelFormat_B8G8R8A8_UNormInt:
-      return 4u;
     case PixelFormat::kPixelFormat_B8G8R8A8_UNormInt_SRGB:
       return 4u;
     case PixelFormat::kPixelFormat_D32_Float_S8_UNormInt:

@@ -18,7 +18,7 @@ std::optional<PixelFormat> FormatForImageResultComponents(
     case ImageResult::Components::RGB:
       return std::nullopt;
     case ImageResult::Components::RGBA:
-      return PixelFormat::kPixelFormat_B8G8R8A8_UNormInt;
+      return PixelFormat::kPixelFormat_R8G8B8A8_UNormInt;
   }
   return std::nullopt;
 }
