@@ -652,7 +652,6 @@ class HostFrameworkRepository extends FrameworkRepository {
     throw ConductorException('tag not implemented for the host repository');
   }
 
-  @override
   void updateChannel(
     String commit,
     String remote,

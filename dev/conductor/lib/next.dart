@@ -314,7 +314,6 @@ void runNext({
           return;
         }
       }
-      // TODO catch exception and give helpful message about branch protection
       framework.pushRef(
         fromRef: headRevision,
         toRef: state.releaseChannel,
@@ -337,7 +336,7 @@ void runNext({
           writeStateToFile(stateFile, state, stdio.logs);
           return;
         }
-      } // TODO let internal rollers know to increment y if this was beta
+      }
       break;
     case pb.ReleasePhase.RELEASE_COMPLETED:
       throw ConductorException('This release is finished.');

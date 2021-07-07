@@ -318,8 +318,6 @@ class StartCommand extends Command<void> {
       nextVersion = Version.increment(lastVersion, incrementLetter);
     }
     state.releaseVersion = nextVersion.toString();
-    // TODO calculate and store previous version on release channel, in case we
-    // need to increment y
 
     final String frameworkHead = framework.reverseParse('HEAD');
     state.framework = pb.Repository(
