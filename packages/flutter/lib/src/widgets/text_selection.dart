@@ -824,9 +824,10 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
+    // On iOS we want to calculate the start and end handles separately so they
+    // scale for the selected content.
     late final Rect? startHandleRect;
     late final Rect? endHandleRect;
-
     startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
     endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
 
