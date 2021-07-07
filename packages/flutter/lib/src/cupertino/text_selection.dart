@@ -256,7 +256,9 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
     final Widget handle = SizedBox.fromSize(
       size: desiredSize,
-      child: CustomPaint(painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor)),
+      child: CustomPaint(
+        painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
+      ),
     );
 
     // [buildHandle]'s widget is positioned at the selection cursor's bottom
@@ -285,7 +287,6 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     final Size handleSize = getHandleSize(textLineHeight);
-
     switch (type) {
       // The circle is at the top for the left handle, and the anchor point is
       // all the way at the bottom of the line.
