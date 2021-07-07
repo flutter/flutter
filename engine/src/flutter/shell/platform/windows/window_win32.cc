@@ -382,7 +382,6 @@ WindowWin32::HandleMessage(UINT const message,
         keycode_for_char_message_ = wparam;
         break;
       }
-      character = 0;
       unsigned int keyCode(wparam);
       const unsigned int scancode = (lparam >> 16) & 0xff;
       const bool extended = ((lparam >> 24) & 0x01) == 0x01;
