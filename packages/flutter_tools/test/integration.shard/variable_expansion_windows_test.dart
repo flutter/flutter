@@ -17,5 +17,5 @@ void main() {
       '"^(?!Golden).+"',
     ]);
     expect(result.stdout, contains('args: ["(?!Golden).+"]'));
-  }, skip: !platform.isWindows);
+  }, skip: 'Reverted in https://github.com/flutter/flutter/pull/86000');
 }

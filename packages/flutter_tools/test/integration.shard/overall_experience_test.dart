@@ -33,7 +33,7 @@ import 'package:pedantic/pedantic.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
-import 'test_utils.dart' show fileSystem;
+import 'test_utils.dart' show fileSystem, platform;
 
 const ProcessManager processManager = LocalProcessManager();
 final String flutterRoot = getFlutterRoot();
@@ -315,7 +315,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  });
+  }, skip: platform.isWindows);
 
   testWithoutContext('flutter run handle SIGUSR1/2', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
