@@ -116,6 +116,7 @@ void main() {
           fileSystem.file(stateFile),
         );
 
+        expect(processManager, hasNoRemainingExpectations);
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
         expect(stdio.error, isEmpty);
       });
