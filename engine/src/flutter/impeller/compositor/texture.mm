@@ -12,28 +12,40 @@ Texture::Texture(TextureDescriptor desc, id<MTLTexture> texture)
     return;
   }
 
+  if (desc_.size != GetSize()) {
+    FML_DLOG(ERROR)
+        << "The texture and its descriptor disagree about its size.";
+    return;
+  }
+
   is_valid_ = true;
 }
 
 Texture::~Texture() = default;
 
-bool Texture::SetContents(const uint8_t* contents,
-                          size_t length,
-                          size_t mip_level) {
+bool Texture::SetContents(const uint8_t* contents, size_t length) {
   if (!IsValid() || !contents) {
     return false;
   }
 
-  FML_CHECK(false);
-  return false;
+  // Out of bounds access.
+  if (length != desc_.GetSizeOfBaseMipLevel()) {
+    return false;
+  }
 
-  // MTLRegionMake2D(NSUInteger x, NSUInteger y, NSUInteger width,
-  //                 NSUInteger height)
+  // TODO(csg): Perhaps the storage mode should be added to the texture
+  // descriptor so that invalid region replacements on potentially non-host
+  // visible textures are disallowed. The annoying bit about the API below is
+  // that there seems to be no error handling guidance.
+  const auto region =
+      MTLRegionMake2D(0u, 0u, desc_.size.width, desc_.size.height);
+  [texture_ replaceRegion:region                  //
+              mipmapLevel:0u                      //
+                withBytes:contents                //
+              bytesPerRow:desc_.GetBytesPerRow()  //
+  ];
 
-  // [texture_ replaceRegion:(MTLRegion)
-  //             mipmapLevel:(NSUInteger)withBytes:(nonnull const
-  //             void*)bytesPerRow
-  //                        :(NSUInteger)];
+  return true;
 }
 
 ISize Texture::GetSize() const {

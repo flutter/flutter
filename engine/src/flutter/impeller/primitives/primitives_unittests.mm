@@ -58,7 +58,8 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
   auto uploaded = texture->SetContents(result.GetAllocation()->GetMapping(),
                                        result.GetAllocation()->GetSize());
   ASSERT_TRUE(uploaded);
-
+  auto sampler = context->GetSamplerLibrary()->GetSampler({});
+  ASSERT_TRUE(sampler);
   Renderer::RenderCallback callback = [&](const Surface& surface,
                                           RenderPass& pass) {
     BoxVertexShader::UniformBuffer uniforms;
@@ -67,11 +68,18 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
     Command cmd;
     cmd.label = "Box";
     cmd.pipeline = box_pipeline;
+
     cmd.vertex_bindings.buffers[VertexDescriptor::kReservedVertexBufferIndex] =
         vertex_buffer.vertex_buffer;
     cmd.vertex_bindings
         .buffers[BoxVertexShader::kUniformUniformBuffer.binding] =
         pass.GetTransientsBuffer().EmplaceUniform(uniforms);
+
+    cmd.fragment_bindings
+        .textures[BoxFragmentShader::kInputContentsTexture.location] = texture;
+    cmd.fragment_bindings
+        .samplers[BoxFragmentShader::kInputContentsTexture.location] = sampler;
+
     cmd.index_buffer = vertex_buffer.index_buffer;
     cmd.index_count = vertex_buffer.index_count;
     cmd.primitive_type = PrimitiveType::kTriange;
@@ -80,7 +88,7 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
     }
     return true;
   };
-  // OpenPlaygroundHere(callback);
+  OpenPlaygroundHere(callback);
 }
 
 }  // namespace testing
