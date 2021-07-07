@@ -1042,17 +1042,23 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              actions: <Type, Action<Intent>> {
+                LogIntent : Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              },
               child: Builder(
                 builder: (BuildContext context2) {
                   invokingContext2 = context2;
                   return Actions(
-                    actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action2').makeOverridableAction(context2) },
+                    actions: <Type, Action<Intent>> {
+                      LogIntent : Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
+                    },
                     child: Builder(
                       builder: (BuildContext context3) {
                         invokingContext3 = context3;
                         return Actions(
-                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          actions: <Type, Action<Intent>> {
+                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          },
                           child: Builder(
                             builder: (BuildContext context4) {
                               invokingContext = context4;
@@ -1101,17 +1107,23 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              actions: <Type, Action<Intent>> {
+                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              },
               child: Builder(
                 builder: (BuildContext context2) {
                   invokingContext2 = context2;
                   return Actions(
-                    actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action2').makeOverridableAction(context2) },
+                    actions: <Type, Action<Intent>> {
+                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
+                    },
                     child: Builder(
                       builder: (BuildContext context3) {
                         invokingContext3 = context3;
                         return Actions(
-                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          actions: <Type, Action<Intent>> {
+                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          },
                           child: Builder(
                             builder: (BuildContext context4) {
                               invokingContext = context4;
@@ -1160,7 +1172,9 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              actions: <Type, Action<Intent>> {
+                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
@@ -1168,7 +1182,9 @@ void main() {
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          actions: <Type, Action<Intent>> {
+                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          },
                           child: Builder(
                             builder: (BuildContext context4) {
                               invokingContext = context4;
@@ -1199,15 +1215,21 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              actions: <Type, Action<Intent>> {
+                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action2', enabled: false).makeOverridableAction(context2) },
+                    actions: <Type, Action<Intent>> {
+                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
+                    },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          actions: <Type, Action<Intent>> {
+                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          },
                           child: Builder(
                             builder: (BuildContext context4) {
                               invokingContext = context4;
@@ -1241,18 +1263,22 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              actions: <Type, Action<Intent>> {
+                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              },
               child: StatefulBuilder(
                 builder: (BuildContext context2, StateSetter stateSetter) {
                   setState = stateSetter;
                   return Actions(
                     actions: <Type, Action<Intent>> {
-                      if (action2LookupContext != null) LogIntent : LogInvocationAction(actionName: 'action2').makeOverridableAction(action2LookupContext!)
+                      if (action2LookupContext != null) LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: action2LookupContext!)
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          actions: <Type, Action<Intent>> {
+                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          },
                           child: Builder(
                             builder: (BuildContext context4) {
                               invokingContext = context4;
@@ -1298,7 +1324,9 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return Actions(
-                    actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action1').makeOverridableAction(context) },
+                    actions: <Type, Action<Intent>> {
+                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context),
+                    },
                     child: Builder(
                       builder: (BuildContext context1) {
                         invokingContext = context1;
@@ -1330,16 +1358,29 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              actions: <Type, Action<Intent>> {
+                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action2').makeOverridableAction(context2) },
+                    actions: <Type, Action<Intent>> {
+                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
+                    },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
-                            LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context1).makeOverridableAction(context2).makeOverridableAction(context3),
+                            LogIntent: Action<LogIntent>.overridable(
+                              defaultAction: Action<LogIntent>.overridable(
+                                defaultAction: Action<LogIntent>.overridable(
+                                  defaultAction: LogInvocationAction(actionName: 'action3'),
+                                  context: context1,
+                                ),
+                                context: context2,
+                              ),
+                              context: context3,
+                            )
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1374,15 +1415,21 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action1').makeOverridableAction(context1) },
+              actions: <Type, Action<Intent>> {
+                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> { LogIntent : RedirectOutputAction(actionName: 'action2', newLog: newLogChannel).makeOverridableAction(context2) },
+                    actions: <Type, Action<Intent>> {
+                      LogIntent: Action<LogIntent>.overridable(defaultAction: RedirectOutputAction(actionName: 'action2', newLog: newLogChannel), context: context2),
+                    },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> { LogIntent: LogInvocationAction(actionName: 'action3').makeOverridableAction(context3) },
+                          actions: <Type, Action<Intent>> {
+                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          },
                           child: Builder(
                             builder: (BuildContext context4) {
                               invokingContext = context4;

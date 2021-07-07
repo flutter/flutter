@@ -81,12 +81,31 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 ///  * [ActionDispatcher], a class that takes an [Action] and invokes it, passing
 ///    a given [Intent].
 abstract class Action<T extends Intent> with Diagnosticable {
+  /// Creates an [Action].
   Action();
-  factory Action.overrideableAction({
+
+  /// Creates an [Action] that allows itself to be overridden by the closest
+  /// ancestor [Action] in the given [context], if one exists.
+  ///
+  /// When invoked, the resulting [Action] tries to find the closest enabled
+  /// [Action] in [context] that handles the same type of [Intent] as this
+  /// [Action], then calls its [Action.invokeAsOverride] method. When no
+  /// enabled override [Action]s can be found, it invokes this [Action].
+  ///
+  /// The `context` argument is the [BuildContext] to find the override with.
+  ///
+  /// The `defaultAction` argument is the [Action] to be invoked when a suitable
+  /// override [Action] can't be found in `context`.
+  ///
+  /// This is useful for providing a set of default [Action]s in a leaf widget
+  /// that allows further overriding,
+  /// It can also be used to allow the [Intent] to propagate to parent widgets
+  /// that also support this [Intent].
+  factory Action.overridable({
     required Action<T> defaultAction,
-    required BuildContext lookupContext,
+    required BuildContext context,
   }) {
-    return defaultAction.makeOverridableAction(lookupContext);
+    return defaultAction._makeOverridableAction(context);
   }
 
   final ObserverList<ActionListenerCallback> _listeners = ObserverList<ActionListenerCallback>();
@@ -169,9 +188,9 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * The [makeOverridableAction] method, which can be used to create an
+  ///  * The [Action.overridable] constructor, which can be used to create an
   ///    overridable [Action] that calls it override's [invokeAsOverride]
-  ///    method.
+  ///    method when invoked.
   @protected
   Object? invokeAsOverride(T intent, Action<T> fromAction) => invoke(intent);
   /// Register a callback to listen for changes to the state of this action.
@@ -264,19 +283,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
     }
   }
 
-  /// Creates an [Action] that allows itself to be overridden by the closest
-  /// ancestor [Action] in the given [context], if one exists.
-  ///
-  /// When invoked, the resulting [Action] tries to find the closest enabled
-  /// [Action] in [context] that handles the same type of [Intent] as this
-  /// [Action], then calls its [Action.invokeAsOverride] method. When no
-  /// enabled override [Action]s can be found, it invokes this [Action].
-  ///
-  /// This is useful for providing a set of default [Action]s in a leaf widget
-  /// that allows further overriding,
-  /// It can also be used to allow the [Intent] to propagate to parent widgets
-  /// that also support this [Intent].
-  Action<T> makeOverridableAction(BuildContext context) {
+  Action<T> _makeOverridableAction(BuildContext context) {
     return _OverridableAction<T>(defaultAction: this, lookupContext: context);
   }
 }
@@ -499,7 +506,7 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   Object? invokeAsOverride(T intent, Action<T> fromAction, [BuildContext? context]) => invoke(intent, context);
 
   @override
-  ContextAction<T> makeOverridableAction(BuildContext context) {
+  ContextAction<T> _makeOverridableAction(BuildContext context) {
     return _OverridableContextAction<T>(defaultAction: this, lookupContext: context);
   }
 }
@@ -1861,7 +1868,7 @@ class _OverridableAction<T extends Intent> extends Action<T> with _OverridableAc
   }
 
   @override
-  Action<T> makeOverridableAction(BuildContext context) {
+  Action<T> _makeOverridableAction(BuildContext context) {
     return _OverridableAction<T>(defaultAction: defaultAction, lookupContext: context);
   }
 }
@@ -1886,7 +1893,7 @@ class _OverridableContextAction<T extends Intent> extends ContextAction<T> with 
   }
 
   @override
-  ContextAction<T> makeOverridableAction(BuildContext context) {
+  ContextAction<T> _makeOverridableAction(BuildContext context) {
     return _OverridableContextAction<T>(defaultAction: defaultAction, lookupContext: context);
   }
 }
