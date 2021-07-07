@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -162,7 +163,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'ios', '--no-pub']
-    ), throwsToolExit());
+    ), throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,
