@@ -5,7 +5,7 @@
 #import <objc/message.h>
 
 #import "FlutterEmbedderKeyResponder.h"
-#import "KeyCodeMap_internal.h"
+#import "KeyCodeMap_Internal.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/embedder/embedder.h"
@@ -251,7 +251,7 @@ const char* getEventString(NSString* characters) {
  * throughout |FlutterEmbedderKeyResponder.handleEvent|.
  *
  * A callback can either be handled with |pendTo:withId:|, or with |resolveTo:|.
- * Either way, the callback can not be handled again, or an assertion will be
+ * Either way, the callback cannot be handled again, or an assertion will be
  * thrown.
  */
 @interface FlutterKeyCallbackGuard : NSObject
@@ -609,7 +609,6 @@ const char* getEventString(NSString* characters) {
     [callback resolveTo:TRUE];
     return;
   }
-  bool isSynthesized = false;
 
   if (pressedLogicalKey == nil) {
     [self updateKey:physicalKey asPressed:logicalKey];
@@ -622,7 +621,7 @@ const char* getEventString(NSString* characters) {
       .physical = physicalKey,
       .logical = pressedLogicalKey == nil ? logicalKey : [pressedLogicalKey unsignedLongLongValue],
       .character = getEventString(event.characters),
-      .synthesized = isSynthesized,
+      .synthesized = false,
   };
   [self sendPrimaryFlutterEvent:flutterEvent callback:callback];
 }
