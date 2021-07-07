@@ -55,6 +55,7 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
   auto texture = context->GetPermanentsAllocator()->CreateTexture(
       StorageMode::kHostVisible, texture_descriptor.value());
   ASSERT_TRUE(texture);
+  texture->SetLabel("Bay Bridge");
   auto uploaded = texture->SetContents(result.GetAllocation()->GetMapping(),
                                        result.GetAllocation()->GetSize());
   ASSERT_TRUE(uploaded);

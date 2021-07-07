@@ -23,6 +23,10 @@ Texture::Texture(TextureDescriptor desc, id<MTLTexture> texture)
 
 Texture::~Texture() = default;
 
+void Texture::SetLabel(const std::string_view& label) {
+  [texture_ setLabel:@(label.data())];
+}
+
 bool Texture::SetContents(const uint8_t* contents, size_t length) {
   if (!IsValid() || !contents) {
     return false;
