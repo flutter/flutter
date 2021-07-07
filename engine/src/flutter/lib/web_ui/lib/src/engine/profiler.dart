@@ -198,6 +198,7 @@ void frameTimingsOnRasterFinish() {
     buildFinish: _buildFinishMicros,
     rasterStart: _rasterStartMicros,
     rasterFinish: _rasterFinishMicros,
+    rasterFinishWallTime: _rasterFinishMicros,
   ));
   _vsyncStartMicros = -1;
   _buildStartMicros = -1;
