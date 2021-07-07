@@ -780,7 +780,7 @@ void main() {
       ),
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
-        onTap: (){
+        onTap: () {
           Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
           Navigator.of(context).pushReplacementNamed('/C');
         },
@@ -847,7 +847,7 @@ void main() {
       ),
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
-        onTap: (){
+        onTap: () {
           // Pops all routes with bad predicate.
           Navigator.of(context).popUntil((Route<dynamic> route) => false);
         },
@@ -2543,7 +2543,7 @@ void main() {
     );
   });
 
-  group('Page api', (){
+  group('Page api', () {
     Widget buildNavigator({
       required List<Page<dynamic>> pages,
       required PopPageCallback onPopPage,
@@ -2650,7 +2650,7 @@ void main() {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/' : (BuildContext context) => OnTapPage(
           id: action,
-          onTap: (){
+          onTap: () {
             if (action == 'push') {
               Navigator.of(context).push(myPage.createRoute(context));
             } else if (action == 'pushReplacement') {

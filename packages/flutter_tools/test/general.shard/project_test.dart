@@ -277,7 +277,7 @@ void main() {
         expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.m'));
       });
 
-      testUsingContext('Version.json info is correct', (){
+      testUsingContext('Version.json info is correct', () {
         final MemoryFileSystem fileSystem = MemoryFileSystem.test();
         final FlutterManifest manifest = FlutterManifest.createFromString('''
     name: test

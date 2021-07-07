@@ -40,7 +40,7 @@ void main() {
       expect(platformViewRenderBox.size, const Size(100, 100));
     });
 
-    test('send semantics update if id is changed', (){
+    test('send semantics update if id is changed', () {
       final RenderConstrainedBox tree = RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
         child: platformViewRenderBox,
