@@ -127,7 +127,34 @@ class PlatformViewManager {
   /// never been rendered before.
   void clearPlatformView(int viewId) {
     // Remove from our cache, and then from the DOM...
-    _contents.remove(viewId)?.remove();
+    final html.Element? element = _contents.remove(viewId);
+    _safelyRemoveSlottedElement(element);
+  }
+
+  // We need to remove slotted elements like this because of a Safari bug that
+  // gets triggered when a slotted element is removed in a JS event different
+  // than its slot (after the slot is removed).
+  //
+  // TODO(web): Cleanup https://github.com/flutter/flutter/issues/85816
+  void _safelyRemoveSlottedElement(html.Element? element) {
+    if (element == null) {
+      return;
+    }
+    if (browserEngine != BrowserEngine.webkit) {
+      element.remove();
+      return;
+    }
+    final String tombstoneName = "tombstone-${element.getAttribute('slot')}";
+    // Create and inject a new slot in the shadow root
+    final html.Element slot = html.document.createElement('slot')
+      ..style.display = 'none'
+      ..setAttribute('name', tombstoneName);
+    domRenderer._glassPaneShadow!.append(slot);
+    // Link the element to the new slot
+    element.setAttribute('slot', tombstoneName);
+    // Delete both the element, and the new slot
+    element.remove();
+    slot.remove();
   }
 
   /// Attempt to ensure that the contents of the user-supplied DOM element will
