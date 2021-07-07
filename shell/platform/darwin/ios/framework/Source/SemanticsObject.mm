@@ -153,6 +153,8 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   if (self) {
     _semanticsObject = [semanticsObject retain];
     [semanticsObject.bridge->view() addSubview:self];
+    [self setShowsHorizontalScrollIndicator:NO];
+    [self setShowsVerticalScrollIndicator:NO];
   }
   return self;
 }
