@@ -33,6 +33,8 @@ class PrePushCommand extends Command<bool> {
   }
 
   Future<bool> _runClangTidy(String flutterRoot, bool verbose) async {
+    io.stdout.writeln('Starting clang-tidy checks.');
+    final Stopwatch sw = Stopwatch()..start();
     // First ensure that out/host_debug/compile_commands.json exists by running
     // //flutter/tools/gn.
     final io.File compileCommands = io.File(path.join(
@@ -63,6 +65,8 @@ class PrePushCommand extends Command<bool> {
       errSink: errBuffer,
     );
     final int clangTidyResult = await clangTidy.run();
+    sw.stop();
+    io.stdout.writeln('clang-tidy checks finished in ${sw.elapsed}');
     if (clangTidyResult != 0) {
       io.stderr.write(errBuffer);
       return false;
@@ -70,15 +74,20 @@ class PrePushCommand extends Command<bool> {
     return true;
   }
 
-  Future<bool> _runFormatter(String flutterRoot, bool verbose) {
+  Future<bool> _runFormatter(String flutterRoot, bool verbose) async {
+    io.stdout.writeln('Starting formatting checks.');
+    final Stopwatch sw = Stopwatch()..start();
     final String ext = io.Platform.isWindows ? '.bat' : '.sh';
-    return _runCheck(
+    final bool result = await _runCheck(
       flutterRoot,
       path.join(flutterRoot, 'ci', 'format$ext'),
       <String>[],
       'Formatting check',
       verbose: verbose,
     );
+    sw.stop();
+    io.stdout.writeln('formatting checks finished in ${sw.elapsed}');
+    return result;
   }
 
   Future<bool> _runCheck(
