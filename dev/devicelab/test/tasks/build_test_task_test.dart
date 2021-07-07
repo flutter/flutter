@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_devicelab/framework/runner.dart';
@@ -24,7 +22,7 @@ void main() {
       deviceId: 'FAKE_SUCCESS',
       isolateParams: isolateParams,
     );
-    expect(result.data['benchmark'], 'data');
+    expect(result.data!['benchmark'], 'data');
   });
 
   test('runs build only when build arg is given', () async {
@@ -44,7 +42,7 @@ void main() {
       deviceId: 'FAKE_SUCCESS',
       isolateParams: isolateParams,
     );
-    expect(result.data['benchmark'], 'data');
+    expect(result.data!['benchmark'], 'data');
   });
 
   test('sets environment', () async {
