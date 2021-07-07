@@ -49,7 +49,7 @@ template("zip_bundle") {
       args += [
         "-i",
         rebase_path(input.source),
-        rebase_path(input.destination),
+        input.destination,
       ]
       sources += [ input.source ]
     }
