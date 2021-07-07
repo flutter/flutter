@@ -23,9 +23,7 @@ class Texture {
 
   void SetLabel(const std::string_view& label);
 
-  [[nodiscard]] bool SetContents(const uint8_t* contents,
-                                 size_t length,
-                                 size_t mip_level = 0u);
+  [[nodiscard]] bool SetContents(const uint8_t* contents, size_t length);
 
   bool IsValid() const;
 
