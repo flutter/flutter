@@ -120,6 +120,57 @@ void main() {
         expect(stdio.error, isEmpty);
       });
 
+      test('confirms to stdout when all engine cherrypicks were auto-applied', () async {
+        const String remoteUrl = 'https://githost.com/org/repo.git';
+        stdio.stdin.add('n');
+        final FakeProcessManager processManager = FakeProcessManager.empty();
+        final FakePlatform platform = FakePlatform(
+          environment: <String, String>{
+            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+          },
+          operatingSystem: localOperatingSystem,
+          pathSeparator: localPathSeparator,
+        );
+        final pb.ConductorState state = pb.ConductorState(
+          engine: pb.Repository(
+            cherrypicks: <pb.Cherrypick>[
+              pb.Cherrypick(
+                trunkRevision: 'abc123',
+                state: pb.CherrypickState.COMPLETED,
+              ),
+            ],
+            workingBranch: workingBranch,
+            upstream: pb.Remote(name: 'upstream', url: remoteUrl),
+            mirror: pb.Remote(name: 'mirror', url: remoteUrl),
+          ),
+          currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
+        );
+        writeStateToFile(
+          fileSystem.file(stateFile),
+          state,
+          <String>[],
+        );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
+        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+        await runner.run(<String>[
+          'next',
+          '--$kStateOption',
+          stateFile,
+        ]);
+
+        expect(processManager, hasNoRemainingExpectations);
+        expect(
+          stdio.stdout,
+          contains('All engine cherrypicks have been auto-applied by the conductor'),
+        );
+      });
+
       test('updates lastPhase if user responds yes', () async {
         const String remoteUrl = 'https://githost.com/org/repo.git';
         stdio.stdin.add('y');
@@ -178,6 +229,7 @@ void main() {
           fileSystem.file(stateFile),
         );
 
+        expect(processManager, hasNoRemainingExpectations);
         expect(stdio.stdout, contains(
                 'Are you ready to push your engine branch to the repository $remoteUrl? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);

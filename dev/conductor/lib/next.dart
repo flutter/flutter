@@ -152,8 +152,6 @@ void runNext({
 
       break;
     case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
-      // TODO read final engine hash, either from remote or from user and store
-      // in state
       stdio.printStatus(<String>[
         'You must validate pre-submit CI for your engine PR, merge it, and codesign',
         'binaries before proceeding.\n',
