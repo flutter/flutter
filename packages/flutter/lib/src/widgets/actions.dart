@@ -88,19 +88,48 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// ancestor [Action] in the given [context], if one exists.
   ///
   /// When invoked, the resulting [Action] tries to find the closest enabled
-  /// [Action] in [context] that handles the same type of [Intent] as this
-  /// [Action], then calls its [Action.invokeAsOverride] method. When no
-  /// enabled override [Action]s can be found, it invokes this [Action].
+  /// [Action] in `context` that handles the same type of [Intent] as the
+  /// `defaultAction`, then calls its [Action.invokeAsOverride] method. When no
+  /// enabled override [Action]s can be found, it invokes the `defaultAction`.
   ///
-  /// The `context` argument is the [BuildContext] to find the override with.
+  /// The `context` argument is the [BuildContext] to find the override with. It
+  /// is typically a [BuildContext] above the [Actions] widget that contains
+  /// overridable [Action].
   ///
   /// The `defaultAction` argument is the [Action] to be invoked when a suitable
   /// override [Action] can't be found in `context`.
   ///
   /// This is useful for providing a set of default [Action]s in a leaf widget
-  /// that allows further overriding,
-  /// It can also be used to allow the [Intent] to propagate to parent widgets
-  /// that also support this [Intent].
+  /// to allow further overriding, or to allow the [Intent] to propagate to
+  /// parent widgets that also support this [Intent].
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  /// This sample implements a custom text input field that handles the
+  /// [DeleteTextIntent] intent. The default implmentation is to remove all text
+  /// within the text field. If you're implementing a telephone number input
+  /// widget that uses separate text fields for area code, prefix and line
+  /// number, and wish to the focus to the preceding text field when the
+  /// currently focused field becomes empty, one option is to override the
+  /// default [Action] that handles [DeleteTextIntent].
+  ///
+  /// ```dart
+  /// final TextEditingController textEditingController = TextEditingController();
+  /// late final Action<DeleteTextIntent> deleteTextAction = CallbackAction<DeleteTextIntent>(
+  ///   onInvoke: (DeleteTextIntent intent) => textEditingController.clear(),
+  /// );
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Actions(
+  ///     actions: <Type, Action<Intent>>{
+  ///       // Make the default `DeleteTextIntent` handler overridable.
+  ///       DeleteTextIntent: Action<DeleteTextIntent>.overridable(defaultAction: deleteTextAction, context: context),
+  ///     },
+  ///     child: TextField(controller: textEditingController),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   factory Action.overridable({
     required Action<T> defaultAction,
     required BuildContext context,
