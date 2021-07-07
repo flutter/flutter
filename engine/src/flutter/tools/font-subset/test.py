@@ -12,6 +12,7 @@ import filecmp
 import os
 import subprocess
 import sys
+from zipfile import ZipFile
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, '..', '..', '..'))
@@ -20,8 +21,10 @@ IS_WINDOWS = sys.platform.startswith(('cygwin', 'win'))
 EXE = '.exe' if IS_WINDOWS else ''
 BAT = '.bat' if IS_WINDOWS else ''
 FONT_SUBSET = os.path.join(SRC_DIR, 'out', 'host_debug', 'font-subset' + EXE)
+FONT_SUBSET_ZIP = os.path.join(SRC_DIR, 'out', 'host_debug', 'zip_archives', 'font-subset.zip')
 if not os.path.isfile(FONT_SUBSET):
   FONT_SUBSET = os.path.join(SRC_DIR, 'out', 'host_debug_unopt', 'font-subset' + EXE)
+  FONT_SUBSET_ZIP = os.path.join(SRC_DIR, 'out', 'host_debug_unopt', 'zip_archives', 'font-subset.zip')
 if not os.path.isfile(FONT_SUBSET):
   raise Exception('Could not locate font-subset%s in host_debug or host_debug_unopt - build before running this script.' % EXE)
 
@@ -58,7 +61,7 @@ def RunCmd(cmd, codepoints, fail=False):
     stderr=subprocess.PIPE,
     cwd=SRC_DIR
   )
-  stdout_data, stderr_data = p.communicate(input=' '.join(codepoints))
+  stdout_data, stderr_data = p.communicate(input=' '.join(codepoints).encode())
   if p.returncode != 0 and fail == False:
     print('FAILURE: %s' % p.returncode)
     print('STDOUT:')
@@ -77,9 +80,21 @@ def RunCmd(cmd, codepoints, fail=False):
   return p.returncode
 
 
+def TestZip():
+  with ZipFile(FONT_SUBSET_ZIP, 'r') as zip:
+    files = zip.namelist()
+    if 'font-subset%s' % EXE not in files:
+      print('expected %s to contain font-subset%s' % (files, EXE))
+      return 1
+    return 0
+
+
 def main():
-  print('Using font subset binary at %s' % FONT_SUBSET)
+  print('Using font subset binary at %s (%s)' % (FONT_SUBSET, FONT_SUBSET_ZIP))
   failures = 0
+
+  failures += TestZip()
+
   for should_pass, golden_font, input_font, codepoints in COMPARE_TESTS:
     gen_ttf = os.path.join(SCRIPT_DIR, 'gen', golden_font)
     golden_ttf = os.path.join(SCRIPT_DIR, 'fixtures', golden_font)
