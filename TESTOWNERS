@@ -12,7 +12,7 @@
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_defines_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_obfuscate_test.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/android_stack_size_test.dart @chunhtai @flutter/framework
+/dev/devicelab/bin/tasks/android_stack_size_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/animated_image_gc_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/animated_placeholder_perf__e2e_summary.dart @zanderso @flutter/engine
