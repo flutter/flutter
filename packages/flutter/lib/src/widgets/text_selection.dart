@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -836,10 +835,10 @@ class _TextSelectionHandleOverlayState
     if(defaultTargetPlatform == TargetPlatform.iOS){
       switch(type){
         case TextSelectionHandleType.left:
-          preferredLineHeight = startHandleRect?.height ?? widget.renderObject.preferredLineHeight;
+          preferredLineHeight = widget.renderObject.preferredLineHeight;
           break;
         case TextSelectionHandleType.right:
-          preferredLineHeight = endHandleRect?.height ?? widget.renderObject.preferredLineHeight;
+          preferredLineHeight = widget.renderObject.preferredLineHeight;
           break;
         case TextSelectionHandleType.collapsed:
           preferredLineHeight = widget.renderObject.preferredLineHeight;
