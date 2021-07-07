@@ -836,10 +836,10 @@ class _TextSelectionHandleOverlayState
     if(defaultTargetPlatform == TargetPlatform.iOS){
       switch(type){
         case TextSelectionHandleType.left:
-          preferredLineHeight = widget.renderObject.preferredLineHeight;
+          preferredLineHeight = startHandleRect?.height ?? widget.renderObject.preferredLineHeight;
           break;
         case TextSelectionHandleType.right:
-          preferredLineHeight = widget.renderObject.preferredLineHeight;
+          preferredLineHeight = endHandleRect?.height ?? widget.renderObject.preferredLineHeight;
           break;
         case TextSelectionHandleType.collapsed:
           preferredLineHeight = widget.renderObject.preferredLineHeight;
