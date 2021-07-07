@@ -78,16 +78,15 @@
 }
 
 - (void)resizeSynchronizerFlush:(nonnull FlutterResizeSynchronizer*)synchronizer {
-  // no-op when using Metal rendering backend.
+  id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
+  [commandBuffer commit];
+  [commandBuffer waitUntilScheduled];
 }
 
 - (void)resizeSynchronizerCommit:(nonnull FlutterResizeSynchronizer*)synchronizer {
   [CATransaction begin];
   [CATransaction setDisableActions:YES];
 
-  id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
-  [commandBuffer commit];
-  [commandBuffer waitUntilScheduled];
   [_surfaceManager swapBuffers];
 
   [CATransaction commit];
