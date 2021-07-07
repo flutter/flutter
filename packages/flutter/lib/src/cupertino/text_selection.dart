@@ -254,7 +254,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     // padding in every direction that will constitute the selection drag area.
     final Size desiredSize = getHandleSize(textLineHeight);
 
-    final Widget leftHandle = SizedBox.fromSize(
+    final Widget handle = SizedBox.fromSize(
       size: desiredSize,
       child: CustomPaint(painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor)),
     );
@@ -264,14 +264,14 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     // on top of the text selection endpoints.
     switch (type) {
       case TextSelectionHandleType.left:
-        return leftHandle;
+        return handle;
       case TextSelectionHandleType.right:
         return Transform(
           transform: Matrix4.identity()
             ..translate(desiredSize.width / 2, desiredSize.height / 2)
             ..rotateZ(math.pi)
             ..translate(-desiredSize.width / 2, -desiredSize.height / 2),
-          child: leftHandle,
+          child: handle,
         );
       // iOS doesn't draw anything for collapsed selections.
       case TextSelectionHandleType.collapsed:

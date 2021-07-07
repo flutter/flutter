@@ -855,8 +855,8 @@ class _TextSelectionHandleOverlayState
     }
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
-        type,
-        preferredLineHeight,
+      type,
+      preferredLineHeight,
     );
 
     final Size handleSize = widget.selectionControls.getHandleSize(
@@ -876,7 +876,7 @@ class _TextSelectionHandleOverlayState
     );
     final RelativeRect padding = RelativeRect.fromLTRB(
       math.max((interactiveRect.width - handleRect.width) / 2, 0),
-      math.max((interactiveRect.height - handleRect.height) / 2, 0),//
+      math.max((interactiveRect.height - handleRect.height) / 2, 0),
       math.max((interactiveRect.width - handleRect.width) / 2, 0),
       math.max((interactiveRect.height - handleRect.height) / 2, 0),
     );
