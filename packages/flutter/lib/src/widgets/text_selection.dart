@@ -828,13 +828,8 @@ class _TextSelectionHandleOverlayState
     late final Rect? startHandleRect;
     late final Rect? endHandleRect;
 
-    if(widget.renderObject.selectionHeightStyle == ui.BoxHeightStyle.tight){
-      startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
-      endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
-    }else{
-      startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
-      endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
-    }
+    startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
+    endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
 
     late double preferredLineHeight;
 
@@ -859,7 +854,7 @@ class _TextSelectionHandleOverlayState
       preferredLineHeight,
     );
     final Size handleSize = widget.selectionControls.getHandleSize(
-      widget.renderObject.preferredLineHeight,
+      preferredLineHeight,
     );
 
     final Rect handleRect = Rect.fromLTWH(
