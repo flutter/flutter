@@ -88,7 +88,7 @@ class TaskResult {
   bool get failed => !succeeded;
 
   /// Explains the result in a human-readable format.
-  final String message;
+  final String? message;
 
   /// Serializes this task result to JSON format.
   ///
@@ -124,7 +124,7 @@ class TaskResult {
   }
 
   @override
-  String toString() => message;
+  String toString() => message ?? '';
 }
 
 class TaskResultCheckProcesses extends TaskResult {

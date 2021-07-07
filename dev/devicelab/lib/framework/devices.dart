@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter_devicelab/common.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'utils.dart';
@@ -37,8 +34,8 @@ String getArtifactPath() {
 }
 
 /// Return the item is in idList if find a match, otherwise return null
-String _findMatchId(List<String> idList, String idPattern) {
-  String candidate;
+String? _findMatchId(List<String> idList, String idPattern) {
+  String? candidate;
   idPattern = idPattern.toLowerCase();
   for(final String id in idList) {
     if (id.toLowerCase() == idPattern) {
@@ -184,47 +181,46 @@ enum AndroidCPU {
 }
 
 class AndroidDeviceDiscovery implements DeviceDiscovery {
-  factory AndroidDeviceDiscovery({AndroidCPU cpu}) {
+  factory AndroidDeviceDiscovery({AndroidCPU? cpu}) {
     return _instance ??= AndroidDeviceDiscovery._(cpu);
   }
 
   AndroidDeviceDiscovery._(this.cpu);
 
-  final AndroidCPU cpu;
+  final AndroidCPU? cpu;
 
   // Parses information about a device. Example:
   //
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
   static final RegExp _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)(.*)');
 
-  static AndroidDeviceDiscovery _instance;
+  static AndroidDeviceDiscovery? _instance;
 
-  AndroidDevice _workingDevice;
+  AndroidDevice? _workingDevice;
 
   @override
   Future<AndroidDevice> get workingDevice async {
     if (_workingDevice == null) {
       if (Platform.environment.containsKey(DeviceIdEnvName)) {
-        final String deviceId = Platform.environment[DeviceIdEnvName];
+        final String deviceId = Platform.environment[DeviceIdEnvName]!;
         await chooseWorkingDeviceById(deviceId);
-        return _workingDevice;
+        return _workingDevice!;
       }
       await chooseWorkingDevice();
     }
 
-    return _workingDevice;
+    return _workingDevice!;
   }
 
   Future<bool> _matchesCPURequirement(AndroidDevice device) async {
-    if (cpu == null)
-      return true;
     switch (cpu) {
+      case null:
+        return true;
       case AndroidCPU.arm64:
         return device.isArm64();
       case AndroidCPU.arm:
         return device.isArm();
     }
-    return true;
   }
 
   /// Picks a random Android device out of connected devices and sets it as
@@ -259,11 +255,11 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<void> chooseWorkingDeviceById(String deviceId) async {
-    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
+    final String? matchedId = _findMatchId(await discoverDevices(), deviceId);
     if (matchedId != null) {
       _workingDevice = AndroidDevice(deviceId: matchedId);
       if (cpu != null) {
-        if (!await _matchesCPURequirement(_workingDevice)) {
+        if (!await _matchesCPURequirement(_workingDevice!)) {
           throw DeviceException('The selected device $matchedId does not match the cpu requirement');
         }
       }
@@ -290,10 +286,10 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
         continue;
 
       if (_kDeviceRegex.hasMatch(line)) {
-        final Match match = _kDeviceRegex.firstMatch(line);
+        final Match match = _kDeviceRegex.firstMatch(line)!;
 
-        final String deviceID = match[1];
-        final String deviceState = match[2];
+        final String deviceID = match[1]!;
+        final String deviceState = match[2]!;
 
         if (!const <String>['unauthorized', 'offline'].contains(deviceState)) {
           results.add(deviceID);
@@ -342,9 +338,9 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   FuchsiaDeviceDiscovery._();
 
-  static FuchsiaDeviceDiscovery _instance;
+  static FuchsiaDeviceDiscovery? _instance;
 
-  FuchsiaDevice _workingDevice;
+  FuchsiaDevice? _workingDevice;
 
   String get _ffx {
     final String ffx = path.join(getArtifactPath(), 'fuchsia', 'tools','x64', 'ffx');
@@ -358,13 +354,13 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
   Future<FuchsiaDevice> get workingDevice async {
     if (_workingDevice == null) {
       if (Platform.environment.containsKey(DeviceIdEnvName)) {
-        final String deviceId = Platform.environment[DeviceIdEnvName];
+        final String deviceId = Platform.environment[DeviceIdEnvName]!;
         await chooseWorkingDeviceById(deviceId);
-        return _workingDevice;
+        return _workingDevice!;
       }
       await chooseWorkingDevice();
     }
-    return _workingDevice;
+    return _workingDevice!;
   }
 
   /// Picks the first connected Fuchsia device.
@@ -383,8 +379,8 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<void> chooseWorkingDeviceById(String deviceId) async {
-    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
-    if (deviceId != null) {
+    final String? matchedId = _findMatchId(await discoverDevices(), deviceId);
+    if (matchedId != null) {
       _workingDevice = FuchsiaDevice(deviceId: matchedId);
       print('Choose device by ID: $matchedId');
       return;
@@ -442,7 +438,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 }
 
 class AndroidDevice extends Device {
-  AndroidDevice({@required this.deviceId}) {
+  AndroidDevice({required this.deviceId}) {
     _updateDeviceInfo();
   }
 
@@ -540,19 +536,19 @@ class AndroidDevice extends Device {
   }
 
   /// Executes [command] on `adb shell` and returns its exit code.
-  Future<void> shellExec(String command, List<String> arguments, { Map<String, String> environment, bool silent = false }) async {
+  Future<void> shellExec(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
     await adb(<String>['shell', command, ...arguments], environment: environment, silent: silent);
   }
 
   /// Executes [command] on `adb shell` and returns its standard output as a [String].
-  Future<String> shellEval(String command, List<String> arguments, { Map<String, String> environment, bool silent = false }) {
+  Future<String> shellEval(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) {
     return adb(<String>['shell', command, ...arguments], environment: environment, silent: silent);
   }
 
   /// Runs `adb` with the given [arguments], selecting this device.
   Future<String> adb(
       List<String> arguments, {
-      Map<String, String> environment,
+      Map<String, String>? environment,
       bool silent = false,
     }) {
     return eval(
@@ -568,10 +564,10 @@ class AndroidDevice extends Device {
   @override
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
     final String meminfo = await shellEval('dumpsys', <String>['meminfo', packageName]);
-    final Match match = RegExp(r'TOTAL\s+(\d+)').firstMatch(meminfo);
+    final Match? match = RegExp(r'TOTAL\s+(\d+)').firstMatch(meminfo);
     assert(match != null, 'could not parse dumpsys meminfo output');
     return <String, dynamic>{
-      'total_kb': int.parse(match.group(1)),
+      'total_kb': int.parse(match!.group(1)!),
     };
   }
 
@@ -579,7 +575,7 @@ class AndroidDevice extends Device {
   bool get canStreamLogs => true;
 
   bool _abortedLogging/*!*/ = false;
-  Process/*?*/ _loggingProcess;
+  Process? _loggingProcess;
 
   @override
   Future<void> startLoggingToSink(IOSink sink, {bool clear = true}) async {
@@ -596,17 +592,17 @@ class AndroidDevice extends Device {
       // to view the whole log, or just run logcat alongside this.
       <String>['-s', deviceId, 'logcat', 'ActivityManager:I', 'flutter:V', '*:F'],
     );
-    _loggingProcess.stdout
+    _loggingProcess!.stdout
       .transform<String>(const Utf8Decoder(allowMalformed: true))
       .listen((String line) {
         sink.write(line);
       });
-    _loggingProcess.stderr
+    _loggingProcess!.stderr
       .transform<String>(const Utf8Decoder(allowMalformed: true))
       .listen((String line) {
         sink.write(line);
       });
-    unawaited(_loggingProcess.exitCode.then<void>((int exitCode) {
+    unawaited(_loggingProcess!.exitCode.then<void>((int exitCode) {
       if (!_abortedLogging) {
         sink.writeln('adb logcat failed with exit code $exitCode.\n');
       }
@@ -617,8 +613,8 @@ class AndroidDevice extends Device {
   Future<void> stopLoggingToSink() async {
     if (_loggingProcess != null) {
       _abortedLogging = true;
-      _loggingProcess.kill();
-      await _loggingProcess.exitCode;
+      _loggingProcess!.kill();
+      await _loggingProcess!.exitCode;
     }
   }
 
@@ -629,7 +625,7 @@ class AndroidDevice extends Device {
     final Completer<void> processDone = Completer<void>();
     final Completer<void> abort = Completer<void>();
     bool aborted = false;
-    StreamController<String> stream;
+    late final StreamController<String> stream;
     stream = StreamController<String>(
       onListen: () async {
         await adb(<String>['logcat', '--clear']);
@@ -713,22 +709,22 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   IosDeviceDiscovery._();
 
-  static IosDeviceDiscovery _instance;
+  static IosDeviceDiscovery? _instance;
 
-  IosDevice _workingDevice;
+  IosDevice? _workingDevice;
 
   @override
   Future<IosDevice> get workingDevice async {
     if (_workingDevice == null) {
       if (Platform.environment.containsKey(DeviceIdEnvName)) {
-        final String deviceId = Platform.environment[DeviceIdEnvName];
+        final String deviceId = Platform.environment[DeviceIdEnvName]!;
         await chooseWorkingDeviceById(deviceId);
-        return _workingDevice;
+        return _workingDevice!;
       }
       await chooseWorkingDevice();
     }
 
-    return _workingDevice;
+    return _workingDevice!;
   }
 
   /// Picks a random iOS device out of connected devices and sets it as
@@ -749,7 +745,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<void> chooseWorkingDeviceById(String deviceId) async {
-    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
+    final String? matchedId = _findMatchId(await discoverDevices(), deviceId);
     if (matchedId != null) {
       _workingDevice = IosDevice(deviceId: matchedId);
       print('Choose device by ID: $matchedId');
@@ -824,7 +820,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
 /// iOS device.
 class IosDevice extends Device {
-  IosDevice({ @required this.deviceId });
+  IosDevice({ required this.deviceId });
 
   @override
   final String deviceId;
@@ -846,8 +842,8 @@ class IosDevice extends Device {
   @override
   bool get canStreamLogs => true;
 
-  bool _abortedLogging/*!*/ = false;
-  Process/*?*/ _loggingProcess;
+  bool _abortedLogging = false;
+  Process? _loggingProcess;
 
   @override
   Future<void> startLoggingToSink(IOSink sink, {bool clear = true}) async {
@@ -859,17 +855,17 @@ class IosDevice extends Device {
         'DYLD_LIBRARY_PATH': dyldLibraryPath,
       },
     );
-    _loggingProcess.stdout
+    _loggingProcess!.stdout
       .transform<String>(const Utf8Decoder(allowMalformed: true))
       .listen((String line) {
         sink.write(line);
       });
-    _loggingProcess.stderr
+    _loggingProcess!.stderr
       .transform<String>(const Utf8Decoder(allowMalformed: true))
       .listen((String line) {
         sink.write(line);
       });
-    unawaited(_loggingProcess.exitCode.then<void>((int exitCode) {
+    unawaited(_loggingProcess!.exitCode.then<void>((int exitCode) {
       if (!_abortedLogging) {
         sink.writeln('idevicesyslog failed with exit code $exitCode.\n');
       }
@@ -880,8 +876,8 @@ class IosDevice extends Device {
   Future<void> stopLoggingToSink() async {
     if (_loggingProcess != null) {
       _abortedLogging = true;
-      _loggingProcess.kill();
-      await _loggingProcess.exitCode;
+      _loggingProcess!.kill();
+      await _loggingProcess!.exitCode;
     }
   }
 
@@ -934,7 +930,7 @@ class IosDevice extends Device {
 
 /// Fuchsia device.
 class FuchsiaDevice extends Device {
-  const FuchsiaDevice({ @required this.deviceId });
+  const FuchsiaDevice({ required this.deviceId });
 
   @override
   final String deviceId;
@@ -982,7 +978,7 @@ class FuchsiaDevice extends Device {
 
 /// Path to the `adb` executable.
 String get adbPath {
-  final String androidHome = Platform.environment['ANDROID_HOME'] ?? Platform.environment['ANDROID_SDK_ROOT'];
+  final String? androidHome = Platform.environment['ANDROID_HOME'] ?? Platform.environment['ANDROID_SDK_ROOT'];
 
   if (androidHome == null) {
     throw const DeviceException(
@@ -1001,7 +997,7 @@ String get adbPath {
 }
 
 class FakeDevice extends Device {
-  const FakeDevice({ @required this.deviceId });
+  const FakeDevice({ required this.deviceId });
 
   @override
   final String deviceId;
@@ -1055,22 +1051,22 @@ class FakeDeviceDiscovery implements DeviceDiscovery {
 
   FakeDeviceDiscovery._();
 
-  static FakeDeviceDiscovery _instance;
+  static FakeDeviceDiscovery? _instance;
 
-  FakeDevice _workingDevice;
+  FakeDevice? _workingDevice;
 
   @override
   Future<FakeDevice> get workingDevice async {
     if (_workingDevice == null) {
       if (Platform.environment.containsKey(DeviceIdEnvName)) {
-        final String deviceId = Platform.environment[DeviceIdEnvName];
+        final String deviceId = Platform.environment[DeviceIdEnvName]!;
         await chooseWorkingDeviceById(deviceId);
-        return _workingDevice;
+        return _workingDevice!;
       }
       await chooseWorkingDevice();
     }
 
-    return _workingDevice;
+    return _workingDevice!;
   }
 
   /// The Fake is only available for by ID device discovery.
@@ -1081,7 +1077,7 @@ class FakeDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<void> chooseWorkingDeviceById(String deviceId) async {
-    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
+    final String? matchedId = _findMatchId(await discoverDevices(), deviceId);
     if (matchedId != null) {
       _workingDevice = FakeDevice(deviceId: matchedId);
       print('Choose device by ID: $matchedId');
