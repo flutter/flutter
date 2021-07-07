@@ -13,11 +13,11 @@
  * A hub that manages how key events are dispatched to various Flutter key
  * responders, and whether the event is propagated to the next NSResponder.
  *
- * This class manage one or more primary responders, as well as zero or more
+ * This class manages one or more primary responders, as well as zero or more
  * secondary responders.
  *
  * An event that is received by |handleEvent| is first dispatched to *all*
- * primary responders. Each primary responder responds *ascynchronously* with a
+ * primary responders. Each primary responder responds *asynchronously* with a
  * boolean, indicating whether it handles the event.
  *
  * An event that is not handled by any primary responders is then passed to to

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERENGINE_INTERNAL_H_
-#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERENGINE_INTERNAL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTER_ENGINE_INTERNAL_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTER_ENGINE_INTERNAL_H_
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 
@@ -14,6 +14,11 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell.h"
+
+// Embedder header included as an implementation detail (See BUILD.gn), iOS
+// doesn't use the embedding API, just some structures from it.
+#include "flutter/shell/platform/embedder/embedder.h"
+
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
@@ -23,7 +28,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
-extern NSString* const FlutterEngineWillDealloc;
+extern NSString* _Nonnull const FlutterEngineWillDealloc;
 
 @interface FlutterEngine () <FlutterViewEngineDelegate>
 
@@ -40,19 +45,20 @@ extern NSString* const FlutterEngineWillDealloc;
 - (flutter::Rasterizer::Screenshot)screenshot:(flutter::Rasterizer::ScreenshotType)type
                                  base64Encode:(bool)base64Encode;
 
-- (FlutterPlatformPlugin*)platformPlugin;
+- (nonnull FlutterPlatformPlugin*)platformPlugin;
 - (std::shared_ptr<flutter::FlutterPlatformViewsController>&)platformViewsController;
-- (FlutterTextInputPlugin*)textInputPlugin;
-- (FlutterRestorationPlugin*)restorationPlugin;
-- (void)launchEngine:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil;
-- (BOOL)createShell:(NSString*)entrypoint
-         libraryURI:(NSString*)libraryOrNil
-       initialRoute:(NSString*)initialRoute;
+- (nonnull FlutterTextInputPlugin*)textInputPlugin;
+- (nonnull FlutterRestorationPlugin*)restorationPlugin;
+- (void)launchEngine:(nullable NSString*)entrypoint libraryURI:(nullable NSString*)libraryOrNil;
+- (BOOL)createShell:(nullable NSString*)entrypoint
+         libraryURI:(nullable NSString*)libraryOrNil
+       initialRoute:(nullable NSString*)initialRoute;
 - (void)attachView;
 - (void)notifyLowMemory;
-- (flutter::PlatformViewIOS*)iosPlatformView;
+- (nonnull flutter::PlatformViewIOS*)iosPlatformView;
 
-- (void)waitForFirstFrame:(NSTimeInterval)timeout callback:(void (^)(BOOL didTimeout))callback;
+- (void)waitForFirstFrame:(NSTimeInterval)timeout
+                 callback:(nonnull void (^)(BOOL didTimeout))callback;
 
 /**
  * Creates one running FlutterEngine from another, sharing components between them.
@@ -60,9 +66,16 @@ extern NSString* const FlutterEngineWillDealloc;
  * This results in a faster creation time and a smaller memory footprint engine.
  * This should only be called on a FlutterEngine that is running.
  */
-- (FlutterEngine*)spawnWithEntrypoint:(/*nullable*/ NSString*)entrypoint
-                           libraryURI:(/*nullable*/ NSString*)libraryURI;
+- (nonnull FlutterEngine*)spawnWithEntrypoint:(nullable NSString*)entrypoint
+                                   libraryURI:(nullable NSString*)libraryURI;
 
+/**
+ * Dispatches the given key event data to the framework through the engine.
+ * The callback is called once the response from the framework is received.
+ */
+- (void)sendKeyEvent:(const FlutterKeyEvent&)event
+            callback:(nullable FlutterKeyEventCallback)callback
+            userData:(nullable void*)userData;
 @end
 
-#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERENGINE_INTERNAL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTER_ENGINE_INTERNAL_H_

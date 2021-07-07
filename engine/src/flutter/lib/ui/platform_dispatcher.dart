@@ -32,6 +32,9 @@ typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 typedef _KeyDataResponseCallback = void Function(int responseId, bool handled);
 
 /// Signature for [PlatformDispatcher.onKeyData].
+///
+/// The callback should return true if the key event has been handled by the
+/// framework and should not be propagated further.
 typedef KeyDataCallback = bool Function(KeyData data);
 
 /// Signature for [PlatformDispatcher.onSemanticsAction].
@@ -346,6 +349,9 @@ class PlatformDispatcher {
   ///
   /// The framework invokes this callback in the same zone in which the callback
   /// was set.
+  ///
+  /// The callback should return true if the key event has been handled by the
+  /// framework and should not be propagated further.
   KeyDataCallback? get onKeyData => _onKeyData;
   KeyDataCallback? _onKeyData;
   Zone _onKeyDataZone = Zone.root;

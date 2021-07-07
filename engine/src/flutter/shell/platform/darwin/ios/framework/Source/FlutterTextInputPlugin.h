@@ -8,9 +8,10 @@
 #import <UIKit/UIKit.h>
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 
-@interface FlutterTextInputPlugin : NSObject
+@interface FlutterTextInputPlugin : NSObject <FlutterKeySecondaryResponder>
 
 @property(nonatomic, assign) id<FlutterTextInputDelegate> textInputDelegate;
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
