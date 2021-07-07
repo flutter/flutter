@@ -185,8 +185,8 @@ class PlatformViewsService {
   /// [Hybrid Composition](https://flutter.dev/docs/development/platform-integration/platform-views),
   /// the engine converts the render surface to a `FlutterImageView` to improve
   /// animation synchronization between Flutter widgets and the Android platform
-  /// views. On Android versions < 10, this can have some performance
-  /// consequences. This flag allows disabling this conversion.
+  /// views. On Android versions < 10, this can have some performance issues.
+  /// This flag allows disabling this conversion.
   ///
   /// Defaults to true.
   static Future<void> synchronizeToNativeViewHierarchy(bool yes) {
