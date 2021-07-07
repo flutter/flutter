@@ -630,6 +630,100 @@ public class PlatformViewsControllerTest {
     assertFalse(shouldProxying);
   }
 
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class})
+  public void convertPlatformViewRenderSurfaceAsDefault() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    final int platformViewId = 0;
+    assertNull(platformViewsController.getPlatformViewById(platformViewId));
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative(false);
+    final FlutterView flutterView = attach(jni, platformViewsController);
+
+    jni.onFirstFrame();
+
+    // Simulate create call from the framework.
+    createPlatformView(jni, platformViewsController, platformViewId, "testType");
+
+    // Produce a frame that displays a platform view and an overlay surface.
+    platformViewsController.onBeginFrame();
+    platformViewsController.onDisplayPlatformView(
+        platformViewId,
+        /* x=*/ 0,
+        /* y=*/ 0,
+        /* width=*/ 10,
+        /* height=*/ 10,
+        /* viewWidth=*/ 10,
+        /* viewHeight=*/ 10,
+        /* mutatorsStack=*/ new FlutterMutatorsStack());
+
+    assertEquals(flutterView.getChildCount(), 3);
+
+    final View view = flutterView.getChildAt(1);
+    assertTrue(view instanceof FlutterImageView);
+
+    // Simulate dispose call from the framework.
+    disposePlatformView(jni, platformViewsController, platformViewId);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class})
+  public void dontConverRenderSurfaceWhenFlagIsTrue() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    final int platformViewId = 0;
+    assertNull(platformViewsController.getPlatformViewById(platformViewId));
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative(false);
+    final FlutterView flutterView = attach(jni, platformViewsController);
+
+    jni.onFirstFrame();
+
+    // Simulate setting render surface conversion flag.
+    synchronizeToNativeViewHierarchy(jni, platformViewsController, false);
+
+    // Simulate create call from the framework.
+    createPlatformView(jni, platformViewsController, platformViewId, "testType");
+
+    // Produce a frame that displays a platform view and an overlay surface.
+    platformViewsController.onBeginFrame();
+    platformViewsController.onDisplayPlatformView(
+        platformViewId,
+        /* x=*/ 0,
+        /* y=*/ 0,
+        /* width=*/ 10,
+        /* height=*/ 10,
+        /* viewWidth=*/ 10,
+        /* viewHeight=*/ 10,
+        /* mutatorsStack=*/ new FlutterMutatorsStack());
+
+    assertEquals(flutterView.getChildCount(), 2);
+    assertTrue(!(flutterView.getChildAt(0) instanceof FlutterImageView));
+    assertTrue(flutterView.getChildAt(1) instanceof FlutterMutatorView);
+
+    // Simulate dispose call from the framework.
+    disposePlatformView(jni, platformViewsController, platformViewId);
+  }
+
   private static ByteBuffer encodeMethodCall(MethodCall call) {
     final ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
     buffer.rewind();
@@ -665,6 +759,15 @@ public class PlatformViewsControllerTest {
 
     jni.handlePlatformMessage(
         "flutter/platform_views", encodeMethodCall(platformDisposeMethodCall), /*replyId=*/ 0);
+  }
+
+  private static void synchronizeToNativeViewHierarchy(
+      FlutterJNI jni, PlatformViewsController platformViewsController, boolean yes) {
+
+    final MethodCall convertMethodCall = new MethodCall("synchronizeToNativeViewHierarchy", yes);
+
+    jni.handlePlatformMessage(
+        "flutter/platform_views", encodeMethodCall(convertMethodCall), /*replyId=*/ 0);
   }
 
   private static FlutterView attach(
