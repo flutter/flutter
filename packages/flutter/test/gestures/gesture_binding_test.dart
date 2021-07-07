@@ -183,7 +183,7 @@ void main() {
         ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
         ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
         ui.PointerData(change: ui.PointerChange.down, kind: kind, physicalX: location.dx, physicalY: location.dy),
-        ui.PointerData(change: ui.PointerChange.move, buttons: kSecondaryButton, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.move, kind: kind, physicalX: location.dx, physicalY: location.dy),
         ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
       ],
     );
@@ -197,6 +197,34 @@ void main() {
     expect(events[1].buttons, equals(0));
     expect(events[2], isA<PointerDownEvent>());
     expect(events[2].buttons, equals(kPrimaryButton));
+    expect(events[3], isA<PointerMoveEvent>());
+    expect(events[3].buttons, equals(kPrimaryButton));
+    expect(events[4], isA<PointerUpEvent>());
+    expect(events[4].buttons, equals(0));
+  });
+
+  test('Should not synthesize kPrimaryButton for touch when a button is set', () {
+    final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
+    const PointerDeviceKind kind = PointerDeviceKind.touch;
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.down, buttons: kSecondaryButton, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.move, buttons: kSecondaryButton, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
+      ],
+    );
+
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
+
+    expect(events.length, 5);
+    expect(events[0], isA<PointerAddedEvent>());
+    expect(events[0].buttons, equals(0));
+    expect(events[1], isA<PointerHoverEvent>());
+    expect(events[1].buttons, equals(0));
+    expect(events[2], isA<PointerDownEvent>());
+    expect(events[2].buttons, equals(kSecondaryButton));
     expect(events[3], isA<PointerMoveEvent>());
     expect(events[3].buttons, equals(kSecondaryButton));
     expect(events[4], isA<PointerUpEvent>());
