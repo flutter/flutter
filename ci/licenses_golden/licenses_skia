@@ -1,4 +1,4 @@
-Signature: 1bacbe1bb0ba6809fa4032358523dec1
+Signature: 19441d64b81e5bdeb215343bb85c1b57
 
 UNUSED LICENSES:
 
@@ -3102,13 +3102,10 @@ FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConfigConversionEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConfigConversionEffect.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuad.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.h
@@ -4129,7 +4126,6 @@ FILE: ../../../third_party/skia/docs/examples/Bitmap_tryAllocPixels_4.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_width.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_writePixels.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_writePixels_2.cpp
-FILE: ../../../third_party/skia/docs/examples/BlendMode_Name.cpp
 FILE: ../../../third_party/skia/docs/examples/Blend_Mode_Methods.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_129.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_MakeRasterDirect.cpp
@@ -4558,7 +4554,6 @@ FILE: ../../../third_party/skia/docs/examples/Paint_countText.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_empty_constructor.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_equal_operator.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getAlpha.cpp
-FILE: ../../../third_party/skia/docs/examples/Paint_getBlendMode.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getColor.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getColor4f.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getColorFilter.cpp
