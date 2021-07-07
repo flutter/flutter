@@ -105,6 +105,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Tracks whether the flutterView has been converted to use a FlutterImageView.
   private boolean flutterViewConvertedToImageView = false;
 
+  // When adding platform views using Hybrid Composition, the engine converts the render surface
+  // to a FlutterImageView to help improve animation synchronization on Android. This flag allows
+  // disabling this conversion through the PlatformView platform channel.
+  private boolean synchronizeToNativeViewHierarchy = true;
+
   // Overlay layer IDs that were displayed since the start of the current frame.
   private HashSet<Integer> currentFrameUsedOverlayLayerIds;
 
@@ -355,6 +360,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                     + ", required API level is: "
                     + minSdkVersion);
           }
+        }
+
+        @Override
+        public void synchronizeToNativeViewHierarchy(boolean yes) {
+          synchronizeToNativeViewHierarchy = yes;
         }
       };
 
@@ -704,7 +714,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   private void initializeRootImageViewIfNeeded() {
-    if (!flutterViewConvertedToImageView) {
+    if (synchronizeToNativeViewHierarchy && !flutterViewConvertedToImageView) {
       ((FlutterView) flutterView).convertToImageView();
       flutterViewConvertedToImageView = true;
     }
@@ -890,13 +900,17 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       final int viewId = platformViewParent.keyAt(i);
       final View parentView = platformViewParent.get(viewId);
 
-      // Show platform views only if the surfaces have images available in this frame,
-      // and if the platform view is rendered in this frame.
+      // This should only show platform views that are rendered in this frame and either:
+      //  1. Surface has images available in this frame or,
+      //  2. Surface does not have images available in this frame because the render surface should
+      // not be an ImageView.
+      //
       // The platform view is appended to a mutator view.
       //
       // Otherwise, hide the platform view, but don't remove it from the view hierarchy yet as
       // they are removed when the framework diposes the platform view widget.
-      if (isFrameRenderedUsingImageReaders && currentFrameUsedPlatformViewIds.contains(viewId)) {
+      if (currentFrameUsedPlatformViewIds.contains(viewId)
+          && (isFrameRenderedUsingImageReaders || !synchronizeToNativeViewHierarchy)) {
         parentView.setVisibility(View.VISIBLE);
       } else {
         parentView.setVisibility(View.GONE);

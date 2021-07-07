@@ -73,6 +73,9 @@ public class PlatformViewsChannel {
             case "clearFocus":
               clearFocus(call, result);
               break;
+            case "synchronizeToNativeViewHierarchy":
+              synchronizeToNativeViewHierarchy(call, result);
+              break;
             default:
               result.notImplemented();
           }
@@ -199,6 +202,17 @@ public class PlatformViewsChannel {
             result.error("error", detailedExceptionString(exception), null);
           }
         }
+
+        private void synchronizeToNativeViewHierarchy(
+            @NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+          boolean yes = call.arguments();
+          try {
+            handler.synchronizeToNativeViewHierarchy(yes);
+            result.success(null);
+          } catch (IllegalStateException exception) {
+            result.error("error", detailedExceptionString(exception), null);
+          }
+        }
       };
 
   /**
@@ -282,6 +296,15 @@ public class PlatformViewsChannel {
 
     /** Clears the focus from the platform view with a give id if it is currently focused. */
     void clearFocus(int viewId);
+
+    /**
+     * Whether the render surface of {@code FlutterView} should be converted to a {@code
+     * FlutterImageView} when a {@code PlatformView} is added.
+     *
+     * <p>This is done to syncronize the rendering of the PlatformView and the FlutterView. Defaults
+     * to true.
+     */
+    void synchronizeToNativeViewHierarchy(boolean yes);
   }
 
   /** Request sent from Flutter to create a new platform view. */
