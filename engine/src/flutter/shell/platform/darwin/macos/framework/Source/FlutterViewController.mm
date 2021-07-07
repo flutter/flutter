@@ -116,7 +116,9 @@ struct MouseState {
 @property(nonatomic) id keyUpMonitor;
 
 /**
- * TODO
+ * Pointer to a keyboard manager, a hub that manages how key events are
+ * dispatched to various Flutter key responders, and whether the event is
+ * propagated to the next NSResponder.
  */
 @property(nonatomic) FlutterKeyboardManager* keyboardManager;
 

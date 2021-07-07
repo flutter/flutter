@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "fml/task_runner.h"
 #define FML_USED_ON_EMBEDDER
 
 #include <string>
@@ -1419,21 +1420,35 @@ TEST_F(EmbedderTest, KeyDataIsCorrectlySerialized) {
 }
 
 TEST_F(EmbedderTest, KeyDataResponseIsCorrectlyInvoked) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
-  EmbedderConfigBuilder builder(context);
-  builder.SetSoftwareRendererConfig();
-  builder.SetDartEntrypoint("key_data_echo");
+  UniqueEngine engine;
+  fml::AutoResetWaitableEvent sync_latch;
   fml::AutoResetWaitableEvent ready;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready](Dart_NativeArguments args) { ready.Signal(); }));
 
-  context.AddNativeCallback(
-      "EchoKeyEvent", CREATE_NATIVE_ENTRY([](Dart_NativeArguments args) {}));
+  // One of the threads that the key data callback will be posted to is the
+  // platform thread. So we cannot wait for assertions to complete on the
+  // platform thread. Create a new thread to manage the engine instance and wait
+  // for assertions on the test thread.
+  auto platform_task_runner = CreateNewThread("platform_thread");
 
-  auto engine = builder.LaunchEngine();
-  ASSERT_TRUE(engine.is_valid());
+  platform_task_runner->PostTask([&]() {
+    auto& context =
+        GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+    EmbedderConfigBuilder builder(context);
+    builder.SetSoftwareRendererConfig();
+    builder.SetDartEntrypoint("key_data_echo");
+    context.AddNativeCallback(
+        "SignalNativeTest",
+        CREATE_NATIVE_ENTRY(
+            [&ready](Dart_NativeArguments args) { ready.Signal(); }));
+    context.AddNativeCallback(
+        "EchoKeyEvent", CREATE_NATIVE_ENTRY([](Dart_NativeArguments args) {}));
+
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+
+    sync_latch.Signal();
+  });
+  sync_latch.Wait();
   ready.Wait();
 
   // Dispatch a single event
@@ -1449,18 +1464,72 @@ TEST_F(EmbedderTest, KeyDataResponseIsCorrectlyInvoked) {
   KeyEventUserData user_data1{
       .latch = std::make_shared<fml::AutoResetWaitableEvent>(),
   };
-  // Entrypoint `key_data_echo` uses `event.synthesized` as `handled`.
+  // Entrypoint `key_data_echo` returns `event.synthesized` as `handled`.
   event.synthesized = true;
-  FlutterEngineSendKeyEvent(
-      engine.get(), &event,
-      [](bool handled, void* untyped_user_data) {
-        KeyEventUserData* user_data =
-            reinterpret_cast<KeyEventUserData*>(untyped_user_data);
-        EXPECT_EQ(handled, true);
-        user_data->latch->Signal();
-      },
-      &user_data1);
+  platform_task_runner->PostTask([&]() {
+    FlutterEngineSendKeyEvent(
+        engine.get(), &event,
+        [](bool handled, void* untyped_user_data) {
+          KeyEventUserData* user_data =
+              reinterpret_cast<KeyEventUserData*>(untyped_user_data);
+          EXPECT_EQ(handled, true);
+          user_data->latch->Signal();
+        },
+        &user_data1);
+  });
   user_data1.latch->Wait();
+  fml::AutoResetWaitableEvent shutdown_latch;
+  platform_task_runner->PostTask([&]() {
+    engine.reset();
+    shutdown_latch.Signal();
+  });
+  shutdown_latch.Wait();
+}
+
+TEST_F(EmbedderTest, BackToBackKeyEventResponsesCorrectlyInvoked) {
+  UniqueEngine engine;
+  fml::AutoResetWaitableEvent sync_latch;
+  fml::AutoResetWaitableEvent ready;
+
+  // One of the threads that the callback will be posted to is the platform
+  // thread. So we cannot wait for assertions to complete on the platform
+  // thread. Create a new thread to manage the engine instance and wait for
+  // assertions on the test thread.
+  auto platform_task_runner = CreateNewThread("platform_thread");
+
+  platform_task_runner->PostTask([&]() {
+    auto& context =
+        GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+
+    EmbedderConfigBuilder builder(context);
+    builder.SetSoftwareRendererConfig();
+    builder.SetDartEntrypoint("key_data_echo");
+    context.AddNativeCallback(
+        "SignalNativeTest",
+        CREATE_NATIVE_ENTRY(
+            [&ready](Dart_NativeArguments args) { ready.Signal(); }));
+
+    context.AddNativeCallback(
+        "EchoKeyEvent", CREATE_NATIVE_ENTRY([](Dart_NativeArguments args) {}));
+
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+
+    sync_latch.Signal();
+  });
+  sync_latch.Wait();
+  ready.Wait();
+
+  // Dispatch a single event
+  FlutterKeyEvent event{
+      .struct_size = sizeof(FlutterKeyEvent),
+      .timestamp = 1000,
+      .type = kFlutterKeyEventTypeDown,
+      .physical = 0x00070005,
+      .logical = 0x00000000062,
+      .character = nullptr,
+      .synthesized = false,
+  };
 
   // Dispatch two events back to back, using the same callback on different
   // user_data
@@ -1479,14 +1548,22 @@ TEST_F(EmbedderTest, KeyDataResponseIsCorrectlyInvoked) {
     user_data->returned = true;
     user_data->latch->Signal();
   };
-
-  event.synthesized = false;
-  FlutterEngineSendKeyEvent(engine.get(), &event, callback23, &user_data2);
-  FlutterEngineSendKeyEvent(engine.get(), &event, callback23, &user_data3);
+  platform_task_runner->PostTask([&]() {
+    FlutterEngineSendKeyEvent(engine.get(), &event, callback23, &user_data2);
+    FlutterEngineSendKeyEvent(engine.get(), &event, callback23, &user_data3);
+  });
   user_data2.latch->Wait();
   user_data3.latch->Wait();
+
   EXPECT_TRUE(user_data2.returned);
   EXPECT_TRUE(user_data3.returned);
+
+  fml::AutoResetWaitableEvent shutdown_latch;
+  platform_task_runner->PostTask([&]() {
+    engine.reset();
+    shutdown_latch.Signal();
+  });
+  shutdown_latch.Wait();
 }
 
 }  // namespace testing

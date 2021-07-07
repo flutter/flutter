@@ -126,10 +126,11 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(self);
 
-  if (project == nil)
+  if (project == nil) {
     _dartProject.reset([[FlutterDartProject alloc] init]);
-  else
+  } else {
     _dartProject.reset([project retain]);
+  }
 
   if (!EnableTracingIfNecessary([_dartProject.get() settings])) {
     NSLog(
@@ -141,7 +142,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     return nil;
   }
 
-  _pluginPublications = [NSMutableDictionary new];
+  _pluginPublications = [[NSMutableDictionary alloc] init];
   _registrars = [[NSMutableDictionary alloc] init];
   [self recreatePlatformViewController];
 
@@ -259,6 +260,46 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 - (fml::RefPtr<fml::TaskRunner>)RasterTaskRunner {
   FML_DCHECK(_shell);
   return _shell->GetTaskRunners().GetRasterTaskRunner();
+}
+
+- (void)sendKeyEvent:(const FlutterKeyEvent&)event
+            callback:(FlutterKeyEventCallback)callback
+            userData:(void*)userData API_AVAILABLE(ios(13.4)) {
+  if (@available(iOS 13.4, *)) {
+  } else {
+    return;
+  }
+  if (!self.platformView) {
+    return;
+  }
+  const char* character = event.character;
+
+  flutter::KeyData key_data;
+  key_data.Clear();
+  key_data.timestamp = (uint64_t)event.timestamp;
+  switch (event.type) {
+    case kFlutterKeyEventTypeUp:
+      key_data.type = flutter::KeyEventType::kUp;
+      break;
+    case kFlutterKeyEventTypeDown:
+      key_data.type = flutter::KeyEventType::kDown;
+      break;
+    case kFlutterKeyEventTypeRepeat:
+      key_data.type = flutter::KeyEventType::kRepeat;
+      break;
+  }
+  key_data.physical = event.physical;
+  key_data.logical = event.logical;
+  key_data.synthesized = event.synthesized;
+
+  auto packet = std::make_unique<flutter::KeyDataPacket>(key_data, character);
+
+  auto response = [callback, userData](bool handled) {
+    if (callback != nullptr) {
+      callback(handled, userData);
+    }
+  };
+  self.platformView->DispatchKeyDataPacket(std::move(packet), std::move(response));
 }
 
 - (void)ensureSemanticsEnabled {
@@ -677,6 +718,13 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 #pragma mark - Text input delegate
 
+- (void)handlePressEvent:(FlutterUIPressProxy*)press
+              nextAction:(void (^)())next API_AVAILABLE(ios(13.4)) {
+  if (_viewController.get() != nullptr) {
+    [_viewController.get() handlePressEvent:press nextAction:next];
+  }
+}
+
 - (void)updateEditingClient:(int)client withState:(NSDictionary*)state {
   [_textInputChannel.get() invokeMethod:@"TextInputClient.updateEditingState"
                               arguments:@[ @(client), state ]];
@@ -911,7 +959,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   // [NSLocale currentLocale] provides an iOS resolved locale if the
   // supported locales are exposed to the iOS embedder. Here, we get
   // currentLocale and pass it to dart:ui
-  NSMutableArray<NSString*>* localeData = [[NSMutableArray new] autorelease];
+  NSMutableArray<NSString*>* localeData = [[[NSMutableArray alloc] init] autorelease];
   NSLocale* platformResolvedLocale = [NSLocale currentLocale];
   NSString* languageCode = [platformResolvedLocale objectForKey:NSLocaleLanguageCode];
   NSString* countryCode = [platformResolvedLocale objectForKey:NSLocaleCountryCode];
@@ -928,7 +976,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   }
 
   // Get and pass the user's preferred locale list to dart:ui
-  localeData = [[NSMutableArray new] autorelease];
+  localeData = [[[NSMutableArray alloc] init] autorelease];
   NSArray<NSString*>* preferredLocales = [NSLocale preferredLanguages];
   for (NSString* localeID in preferredLocales) {
     NSLocale* locale = [[[NSLocale alloc] initWithLocaleIdentifier:localeID] autorelease];

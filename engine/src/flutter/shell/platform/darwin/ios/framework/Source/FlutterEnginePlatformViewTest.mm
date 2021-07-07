@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
 #define FML_USED_ON_EMBEDDER
 
 #import <OCMock/OCMock.h>
@@ -17,7 +18,7 @@ FLUTTER_ASSERT_NOT_ARC
 namespace flutter {
 namespace {
 
-class MockDelegate : public PlatformView::Delegate {
+class FakeDelegate : public PlatformView::Delegate {
   void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {}
   void OnPlatformViewDestroyed() override {}
   void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) override {}
@@ -54,28 +55,36 @@ class MockDelegate : public PlatformView::Delegate {
 @end
 
 @implementation FlutterEnginePlatformViewTest
+std::unique_ptr<flutter::PlatformViewIOS> platform_view;
+std::unique_ptr<fml::WeakPtrFactory<flutter::PlatformView>> weak_factory;
+flutter::FakeDelegate fake_delegate;
 
 - (void)setUp {
   fml::MessageLoop::EnsureInitializedForCurrentThread();
-}
-
-- (void)tearDown {
-}
-
-- (void)testCallsNotifyLowMemory {
-  flutter::MockDelegate mock_delegate;
   auto thread_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
                                /*platform=*/thread_task_runner,
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
+  platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/fake_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners);
+  weak_factory = std::make_unique<fml::WeakPtrFactory<flutter::PlatformView>>(platform_view.get());
+}
 
+- (void)tearDown {
+  weak_factory.reset();
+  platform_view.reset();
+}
+
+- (fml::WeakPtr<flutter::PlatformView>)platformViewReplacement {
+  return weak_factory->GetWeakPtr();
+}
+
+- (void)testCallsNotifyLowMemory {
   id project = OCMClassMock([FlutterDartProject class]);
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester" project:project];
   XCTAssertNotNil(engine);
@@ -104,7 +113,6 @@ class MockDelegate : public PlatformView::Delegate {
   [self waitForExpectations:@[ backgroundExpectation ] timeout:5.0];
 
   OCMVerify([mockEngine notifyLowMemory]);
-  [mockEngine stopMocking];
 }
 
 @end

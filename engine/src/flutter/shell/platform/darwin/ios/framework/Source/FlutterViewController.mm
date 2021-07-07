@@ -4,7 +4,6 @@
 
 #define FML_USED_ON_EMBEDDER
 
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 
 #include <memory>
@@ -16,13 +15,19 @@
 #include "flutter/runtime/ptrace_check.h"
 #include "flutter/shell/common/thread_host.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterChannelKeyResponder.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
+#import "flutter/shell/platform/embedder/embedder.h"
 
 static constexpr int kMicrosecondsPerSecond = 1000 * 1000;
 static constexpr CGFloat kScrollViewContentSize = 2.0;
@@ -63,6 +68,12 @@ typedef struct MouseState {
 @property(nonatomic, readwrite, getter=isDisplayingFlutterUI) BOOL displayingFlutterUI;
 @property(nonatomic, assign) BOOL isHomeIndicatorHidden;
 @property(nonatomic, assign) BOOL isPresentingViewControllerAnimating;
+
+/**
+ * Creates and registers plugins used by this view controller.
+ */
+- (void)addInternalPlugins;
+- (void)deregisterNotifications;
 @end
 
 // The following conditional compilation defines an API 13 concept on earlier API targets so that
@@ -607,10 +618,10 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
     [self installFirstFrameCallback];
     [_engine.get() platformViewsController]->SetFlutterView(_flutterView.get());
     [_engine.get() platformViewsController]->SetFlutterViewController(self);
-    [_engine.get() platformView]->NotifyCreated();
+    [_engine.get() iosPlatformView]->NotifyCreated();
   } else {
     self.displayingFlutterUI = NO;
-    [_engine.get() platformView]->NotifyDestroyed();
+    [_engine.get() iosPlatformView]->NotifyDestroyed();
     [_engine.get() platformViewsController]->SetFlutterView(nullptr);
     [_engine.get() platformViewsController]->SetFlutterViewController(nullptr);
   }
@@ -622,6 +633,9 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
   TRACE_EVENT0("flutter", "viewDidLoad");
 
   if (_engine && _engineNeedsLaunch) {
+    // Register internal plugins before starting the engine.
+    [self addInternalPlugins];
+
     [_engine.get() launchEngine:nil libraryURI:nil];
     [_engine.get() setViewController:self];
     _engineNeedsLaunch = NO;
@@ -641,6 +655,25 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
   }
 
   [super viewDidLoad];
+}
+
+- (void)addInternalPlugins {
+  [self.keyboardManager release];
+  self.keyboardManager = [[FlutterKeyboardManager alloc] init];
+  FlutterSendKeyEvent sendEvent =
+      ^(const FlutterKeyEvent& event, FlutterKeyEventCallback callback, void* userData) {
+        [_engine.get() sendKeyEvent:event callback:callback userData:userData];
+      };
+  [self.keyboardManager
+      addPrimaryResponder:[[FlutterEmbedderKeyResponder alloc] initWithSendEvent:sendEvent]];
+  [self.keyboardManager addPrimaryResponder:[[FlutterChannelKeyResponder alloc]
+                                                initWithChannel:self.engine.keyEventChannel]];
+  [self.keyboardManager addSecondaryResponder:self.engine.textInputPlugin];
+}
+
+- (void)removeInternalPlugins {
+  [self.keyboardManager release];
+  self.keyboardManager = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -724,11 +757,16 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
   }
 }
 
-- (void)dealloc {
+- (void)deregisterNotifications {
   [[NSNotificationCenter defaultCenter] postNotificationName:FlutterViewControllerWillDealloc
                                                       object:self
                                                     userInfo:nil];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)dealloc {
+  [self removeInternalPlugins];
+  [self deregisterNotifications];
   [super dealloc];
 }
 
@@ -1081,62 +1119,84 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self updateViewportMetrics];
 }
 
-- (void)dispatchPresses:(NSSet<UIPress*>*)presses API_AVAILABLE(ios(13.4)) {
+- (void)handlePressEvent:(FlutterUIPressProxy*)press
+              nextAction:(void (^)())next API_AVAILABLE(ios(13.4)) {
   if (@available(iOS 13.4, *)) {
-    for (UIPress* press in presses) {
-      if (press.key == nil || press.phase == UIPressPhaseStationary ||
-          press.phase == UIPressPhaseChanged) {
-        continue;
-      }
-      NSMutableDictionary* keyMessage = [[@{
-        @"keymap" : @"ios",
-        @"type" : @"unknown",
-        @"keyCode" : @(press.key.keyCode),
-        @"modifiers" : @(press.key.modifierFlags),
-        @"characters" : press.key.characters,
-        @"charactersIgnoringModifiers" : press.key.charactersIgnoringModifiers
-      } mutableCopy] autorelease];
-
-      if (press.phase == UIPressPhaseBegan) {
-        keyMessage[@"type"] = @"keydown";
-      } else if (press.phase == UIPressPhaseEnded || press.phase == UIPressPhaseCancelled) {
-        keyMessage[@"type"] = @"keyup";
-      }
-
-      [[_engine.get() keyEventChannel] sendMessage:keyMessage];
-    }
+  } else {
+    next();
+    return;
   }
+  [self.keyboardManager handlePress:press nextAction:next];
 }
+
+// The documentation for presses* handlers (implemented below) is entirely
+// unclear about how to handle the case where some, but not all, of the presses
+// are handled here. I've elected to call super separately for each of the
+// presses that aren't handled, but it's not clear if this is correct. It may be
+// that iOS intends for us to either handle all or none of the presses, and pass
+// the original set to super. I have not yet seen multiple presses in the set in
+// the wild, however, so I suspect that the API is built for a tvOS remote or
+// something, and perhaps only one ever appears in the set on iOS from a
+// keyboard.
+
+// If you substantially change these presses overrides, consider also changing
+// the similar ones in FlutterTextInputPlugin. They need to be overridden in
+// both places to capture keys both inside and outside of a text field, but have
+// slightly different implmentations.
 
 - (void)pressesBegan:(NSSet<UIPress*>*)presses
            withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
-  [super pressesBegan:presses withEvent:event];
   if (@available(iOS 13.4, *)) {
-    [self dispatchPresses:presses];
+    for (UIPress* press in presses) {
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+                  nextAction:^() {
+                    [super pressesBegan:[NSSet setWithObject:press] withEvent:event];
+                  }];
+    }
+  } else {
+    [super pressesBegan:presses withEvent:event];
   }
 }
 
 - (void)pressesChanged:(NSSet<UIPress*>*)presses
              withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
-  [super pressesChanged:presses withEvent:event];
   if (@available(iOS 13.4, *)) {
-    [self dispatchPresses:presses];
+    for (UIPress* press in presses) {
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+                  nextAction:^() {
+                    [super pressesChanged:[NSSet setWithObject:press] withEvent:event];
+                  }];
+    }
+  } else {
+    [super pressesChanged:presses withEvent:event];
   }
 }
 
 - (void)pressesEnded:(NSSet<UIPress*>*)presses
            withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
-  [super pressesEnded:presses withEvent:event];
   if (@available(iOS 13.4, *)) {
-    [self dispatchPresses:presses];
+    for (UIPress* press in presses) {
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+                  nextAction:^() {
+                    [super pressesEnded:[NSSet setWithObject:press] withEvent:event];
+                  }];
+    }
+  } else {
+    [super pressesEnded:presses withEvent:event];
   }
 }
 
 - (void)pressesCancelled:(NSSet<UIPress*>*)presses
                withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
-  [super pressesCancelled:presses withEvent:event];
   if (@available(iOS 13.4, *)) {
-    [self dispatchPresses:presses];
+    for (UIPress* press in presses) {
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+                  nextAction:^() {
+                    [super pressesCancelled:[NSSet setWithObject:press] withEvent:event];
+                  }];
+    }
+  } else {
+    [super pressesCancelled:presses withEvent:event];
   }
 }
 

@@ -35,6 +35,11 @@
             isEnabled = "YES">
          </AdditionalOption>
          <AdditionalOption
+            key = "NSZombieEnabled"
+            value = "YES"
+            isEnabled = "YES">
+         </AdditionalOption>
+         <AdditionalOption
             key = "MallocScribble"
             value = ""
             isEnabled = "YES">
@@ -42,8 +47,7 @@
       </AdditionalOptions>
       <Testables>
          <TestableReference
-            skipped = "NO"
-            testExecutionOrdering = "random">
+            skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "0D6AB6C822BB05E200EEE540"

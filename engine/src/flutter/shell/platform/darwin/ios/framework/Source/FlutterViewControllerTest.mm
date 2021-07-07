@@ -8,27 +8,57 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
+#import "flutter/shell/platform/embedder/embedder.h"
 
 FLUTTER_ASSERT_ARC
+
+@interface FlutterEngine ()
+- (FlutterTextInputPlugin*)textInputPlugin;
+- (void)sendKeyEvent:(const FlutterKeyEvent&)event
+            callback:(nullable FlutterKeyEventCallback)callback
+            userData:(nullable void*)userData;
+@end
 
 namespace flutter {
 class PointerDataPacket {};
 }
 
-/// Sometimes we have to use a custom mock to avoid retain cycles in ocmock.
+/// Sometimes we have to use a custom mock to avoid retain cycles in OCMock.
+/// Used for testing low memory notification.
 @interface FlutterEnginePartialMock : FlutterEngine
 @property(nonatomic, strong) FlutterBasicMessageChannel* lifecycleChannel;
+@property(nonatomic, strong) FlutterBasicMessageChannel* keyEventChannel;
 @property(nonatomic, weak) FlutterViewController* viewController;
+@property(nonatomic, strong) FlutterTextInputPlugin* textInputPlugin;
 @property(nonatomic, assign) BOOL didCallNotifyLowMemory;
+- (FlutterTextInputPlugin*)textInputPlugin;
+- (void)sendKeyEvent:(const FlutterKeyEvent&)event
+            callback:(nullable FlutterKeyEventCallback)callback
+            userData:(nullable void*)userData;
 @end
 
 @implementation FlutterEnginePartialMock
 @synthesize viewController;
 @synthesize lifecycleChannel;
+@synthesize keyEventChannel;
+@synthesize textInputPlugin;
 
 - (void)notifyLowMemory {
   _didCallNotifyLowMemory = YES;
+}
+
+- (void)sendKeyEvent:(const FlutterKeyEvent&)event
+            callback:(FlutterKeyEventCallback)callback
+            userData:(void*)userData API_AVAILABLE(ios(9.0)) {
+  NSAssert(callback != nullptr, @"Invalid callback");
+  // Response is async, so we have to post it to the run loop instead of calling
+  // it directly.
+  CFRunLoopPerformBlock(CFRunLoopGetCurrent(), kCFRunLoopDefaultMode, ^() {
+    callback(true, userData);
+  });
 }
 @end
 
@@ -47,10 +77,12 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 /// A simple mock class for FlutterEngine.
 ///
-/// OCMockClass can't be used for FlutterEngine sometimes because OCMock retains arguments to
+/// OCMClassMock can't be used for FlutterEngine sometimes because OCMock retains arguments to
 /// invocations and since the init for FlutterViewController calls a method on the
 /// FlutterEngine it creates a retain cycle that stops us from testing behaviors related to
 /// deleting FlutterViewControllers.
+///
+/// Used for testing deallocation.
 @interface MockEngine : NSObject
 @end
 
@@ -61,10 +93,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)setViewController:(FlutterViewController*)viewController {
   // noop
 }
-@end
-
-@interface FlutterViewControllerTest : XCTestCase
-@property(nonatomic, strong) id mockEngine;
 @end
 
 // The following conditional compilation defines an API 13 concept on earlier API targets so that
@@ -84,14 +112,25 @@ typedef enum UIAccessibilityContrast : NSInteger {
 @interface FlutterViewController (Tests)
 - (void)surfaceUpdated:(BOOL)appeared;
 - (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences;
-- (void)dispatchPresses:(NSSet<UIPress*>*)presses;
+- (void)handlePressEvent:(FlutterUIPressProxy*)press
+              nextAction:(void (^)())next API_AVAILABLE(ios(13.4));
 - (void)scrollEvent:(UIPanGestureRecognizer*)recognizer;
+@end
+
+@interface FlutterViewControllerTest : XCTestCase
+@property(nonatomic, strong) id mockEngine;
+@property(nonatomic, strong) id mockTextInputPlugin;
+@property(nonatomic, strong) id messageSent;
+- (void)sendMessage:(id _Nullable)message reply:(FlutterReply _Nullable)callback;
 @end
 
 @implementation FlutterViewControllerTest
 
 - (void)setUp {
   self.mockEngine = OCMClassMock([FlutterEngine class]);
+  self.mockTextInputPlugin = OCMClassMock([FlutterTextInputPlugin class]);
+  OCMStub([self.mockEngine textInputPlugin]).andReturn(self.mockTextInputPlugin);
+  self.messageSent = nil;
 }
 
 - (void)tearDown {
@@ -99,6 +138,8 @@ typedef enum UIAccessibilityContrast : NSInteger {
   // FlutterViewControllers from deallocing.
   [self.mockEngine stopMocking];
   self.mockEngine = nil;
+  self.mockTextInputPlugin = nil;
+  self.messageSent = nil;
 }
 
 - (void)testViewDidDisappearDoesntPauseEngineWhenNotTheViewController {
@@ -535,6 +576,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
                                                                         nibName:nil
                                                                          bundle:nil];
   XCTAssertFalse([realVC isViewLoaded], @"shouldn't have loaded since it hasn't been shown");
+  engine.viewController = nil;
 }
 
 - (void)testHideOverlay {
@@ -548,6 +590,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
   [[NSNotificationCenter defaultCenter] postNotificationName:FlutterViewControllerHideHomeIndicator
                                                       object:nil];
   XCTAssertTrue(realVC.prefersHomeIndicatorAutoHidden, @"");
+  engine.viewController = nil;
 }
 
 - (void)testNotifyLowMemory {
@@ -560,7 +603,18 @@ typedef enum UIAccessibilityContrast : NSInteger {
   [viewController beginAppearanceTransition:NO animated:NO];
   [viewController endAppearanceTransition];
   XCTAssertTrue(mockEngine.didCallNotifyLowMemory);
-  [viewControllerMock stopMocking];
+}
+
+- (void)sendMessage:(id _Nullable)message reply:(FlutterReply _Nullable)callback {
+  NSMutableDictionary* replyMessage = [@{
+    @"handled" : @YES,
+  } mutableCopy];
+  // Response is async, so we have to post it to the run loop instead of calling
+  // it directly.
+  self.messageSent = message;
+  CFRunLoopPerformBlock(CFRunLoopGetCurrent(), kCFRunLoopDefaultMode, ^() {
+    callback(replyMessage);
+  });
 }
 
 - (void)testValidKeyUpEvent API_AVAILABLE(ios(13.4)) {
@@ -569,36 +623,33 @@ typedef enum UIAccessibilityContrast : NSInteger {
   } else {
     return;
   }
+  FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
+  mockEngine.keyEventChannel = OCMClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([mockEngine.keyEventChannel sendMessage:[OCMArg any] reply:[OCMArg any]])
+      .andCall(self, @selector(sendMessage:reply:));
+  OCMStub([self.mockTextInputPlugin handlePress:[OCMArg any]]).andReturn(YES);
+  mockEngine.textInputPlugin = self.mockTextInputPlugin;
 
-  id keyEventChannel = OCMClassMock([FlutterBasicMessageChannel class]);
-  OCMStub([self.mockEngine keyEventChannel]).andReturn(keyEventChannel);
-
-  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:self.mockEngine
+  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:mockEngine
                                                                     nibName:nil
                                                                      bundle:nil];
 
-  id testSet = [self fakeUiPressSetForPhase:UIPressPhaseBegan
-                                    keyCode:UIKeyboardHIDUsageKeyboardA
-                              modifierFlags:UIKeyModifierShift
-                                 characters:@"a"
-                charactersIgnoringModifiers:@"A"];
+  // Allocate the keyboard manager in the view controller by adding the internal
+  // plugins.
+  [vc addInternalPlugins];
 
-  // Exercise behavior under test.
-  [vc dispatchPresses:testSet];
+  [vc handlePressEvent:keyUpEvent(UIKeyboardHIDUsageKeyboardA, UIKeyModifierShift, 123.0)
+            nextAction:^(){
+            }];
 
-  // Verify behavior.
-  OCMVerify([keyEventChannel
-      sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
-        return [message[@"keymap"] isEqualToString:@"ios"] &&
-               [message[@"type"] isEqualToString:@"keydown"] &&
-               [message[@"keyCode"] isEqualToNumber:[NSNumber numberWithInt:4]] &&
-               [message[@"modifiers"] isEqualToNumber:[NSNumber numberWithInt:131072]] &&
-               [message[@"characters"] isEqualToString:@"a"] &&
-               [message[@"charactersIgnoringModifiers"] isEqualToString:@"A"];
-      }]]);
-
-  // Clean up mocks
-  [keyEventChannel stopMocking];
+  XCTAssert(self.messageSent != nil);
+  XCTAssert([self.messageSent[@"keymap"] isEqualToString:@"ios"]);
+  XCTAssert([self.messageSent[@"type"] isEqualToString:@"keyup"]);
+  XCTAssert([self.messageSent[@"keyCode"] isEqualToNumber:[NSNumber numberWithInt:4]]);
+  XCTAssert([self.messageSent[@"modifiers"] isEqualToNumber:[NSNumber numberWithInt:0]]);
+  XCTAssert([self.messageSent[@"characters"] isEqualToString:@""]);
+  XCTAssert([self.messageSent[@"charactersIgnoringModifiers"] isEqualToString:@""]);
+  [vc deregisterNotifications];
 }
 
 - (void)testValidKeyDownEvent API_AVAILABLE(ios(13.4)) {
@@ -608,35 +659,34 @@ typedef enum UIAccessibilityContrast : NSInteger {
     return;
   }
 
-  id keyEventChannel = OCMClassMock([FlutterBasicMessageChannel class]);
-  OCMStub([self.mockEngine keyEventChannel]).andReturn(keyEventChannel);
+  FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
+  mockEngine.keyEventChannel = OCMClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([mockEngine.keyEventChannel sendMessage:[OCMArg any] reply:[OCMArg any]])
+      .andCall(self, @selector(sendMessage:reply:));
+  OCMStub([self.mockTextInputPlugin handlePress:[OCMArg any]]).andReturn(YES);
+  mockEngine.textInputPlugin = self.mockTextInputPlugin;
 
-  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:self.mockEngine
-                                                                    nibName:nil
-                                                                     bundle:nil];
+  __strong FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                             nibName:nil
+                                                                              bundle:nil];
+  // Allocate the keyboard manager in the view controller by adding the internal
+  // plugins.
+  [vc addInternalPlugins];
 
-  id testSet = [self fakeUiPressSetForPhase:UIPressPhaseEnded
-                                    keyCode:UIKeyboardHIDUsageKeyboardA
-                              modifierFlags:UIKeyModifierShift
-                                 characters:@"a"
-                charactersIgnoringModifiers:@"A"];
+  [vc handlePressEvent:keyDownEvent(UIKeyboardHIDUsageKeyboardA, UIKeyModifierShift, 123.0f, "A",
+                                    "a")
+            nextAction:^(){
+            }];
 
-  // Exercise behavior under test.
-  [vc dispatchPresses:testSet];
-
-  // Verify behavior.
-  OCMVerify([keyEventChannel
-      sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
-        return [message[@"keymap"] isEqualToString:@"ios"] &&
-               [message[@"type"] isEqualToString:@"keyup"] &&
-               [message[@"keyCode"] isEqualToNumber:[NSNumber numberWithInt:4]] &&
-               [message[@"modifiers"] isEqualToNumber:[NSNumber numberWithInt:131072]] &&
-               [message[@"characters"] isEqualToString:@"a"] &&
-               [message[@"charactersIgnoringModifiers"] isEqualToString:@"A"];
-      }]]);
-
-  // Clean up mocks
-  [keyEventChannel stopMocking];
+  XCTAssert(self.messageSent != nil);
+  XCTAssert([self.messageSent[@"keymap"] isEqualToString:@"ios"]);
+  XCTAssert([self.messageSent[@"type"] isEqualToString:@"keydown"]);
+  XCTAssert([self.messageSent[@"keyCode"] isEqualToNumber:[NSNumber numberWithInt:4]]);
+  XCTAssert([self.messageSent[@"modifiers"] isEqualToNumber:[NSNumber numberWithInt:0]]);
+  XCTAssert([self.messageSent[@"characters"] isEqualToString:@"A"]);
+  XCTAssert([self.messageSent[@"charactersIgnoringModifiers"] isEqualToString:@"a"]);
+  [vc deregisterNotifications];
+  vc = nil;
 }
 
 - (void)testIgnoredKeyEvents API_AVAILABLE(ios(13.4)) {
@@ -645,34 +695,36 @@ typedef enum UIAccessibilityContrast : NSInteger {
   } else {
     return;
   }
-
   id keyEventChannel = OCMClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([keyEventChannel sendMessage:[OCMArg any] reply:[OCMArg any]])
+      .andCall(self, @selector(sendMessage:reply:));
+  OCMStub([self.mockTextInputPlugin handlePress:[OCMArg any]]).andReturn(YES);
   OCMStub([self.mockEngine keyEventChannel]).andReturn(keyEventChannel);
 
   FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:self.mockEngine
                                                                     nibName:nil
                                                                      bundle:nil];
 
-  id emptySet = [NSSet set];
-  id ignoredSet = [self fakeUiPressSetForPhase:UIPressPhaseStationary
-                                       keyCode:UIKeyboardHIDUsageKeyboardA
-                                 modifierFlags:UIKeyModifierShift
-                                    characters:@"a"
-                   charactersIgnoringModifiers:@"A"];
+  // Allocate the keyboard manager in the view controller by adding the internal
+  // plugins.
+  [vc addInternalPlugins];
 
-  id mockUiPress = OCMClassMock([UIPress class]);
-  OCMStub([mockUiPress phase]).andReturn(UIPressPhaseBegan);
-  id emptyKeySet = [NSSet setWithArray:@[ mockUiPress ]];
-  // Exercise behavior under test.
-  [vc dispatchPresses:emptySet];
-  [vc dispatchPresses:ignoredSet];
-  [vc dispatchPresses:emptyKeySet];
+  [vc handlePressEvent:keyEventWithPhase(UIPressPhaseStationary, UIKeyboardHIDUsageKeyboardA,
+                                         UIKeyModifierShift, 123.0)
+            nextAction:^(){
+            }];
+  [vc handlePressEvent:keyEventWithPhase(UIPressPhaseCancelled, UIKeyboardHIDUsageKeyboardA,
+                                         UIKeyModifierShift, 123.0)
+            nextAction:^(){
+            }];
+  [vc handlePressEvent:keyEventWithPhase(UIPressPhaseChanged, UIKeyboardHIDUsageKeyboardA,
+                                         UIKeyModifierShift, 123.0)
+            nextAction:^(){
+            }];
 
-  // Verify behavior.
+  XCTAssert(self.messageSent == nil);
   OCMVerify(never(), [keyEventChannel sendMessage:[OCMArg any]]);
-
-  // Clean up mocks
-  [keyEventChannel stopMocking];
+  [vc deregisterNotifications];
 }
 
 - (void)testPanGestureRecognizer API_AVAILABLE(ios(13.4)) {
@@ -720,31 +772,6 @@ typedef enum UIAccessibilityContrast : NSInteger {
 
   [[[self.mockEngine verify] ignoringNonObjectArgs]
       dispatchPointerDataPacket:std::make_unique<flutter::PointerDataPacket>()];
-}
-
-- (NSSet<UIPress*>*)fakeUiPressSetForPhase:(UIPressPhase)phase
-                                   keyCode:(UIKeyboardHIDUsage)keyCode
-                             modifierFlags:(UIKeyModifierFlags)modifierFlags
-                                characters:(NSString*)characters
-               charactersIgnoringModifiers:(NSString*)charactersIgnoringModifiers
-    API_AVAILABLE(ios(13.4)) {
-  if (@available(iOS 13.4, *)) {
-    // noop
-  } else {
-    return [NSSet set];
-  }
-  id mockUiPress = OCMClassMock([UIPress class]);
-  OCMStub([mockUiPress phase]).andReturn(phase);
-
-  id mockUiKey = OCMClassMock([UIKey class]);
-  OCMStub([mockUiKey keyCode]).andReturn(keyCode);
-  OCMStub([mockUiKey modifierFlags]).andReturn(modifierFlags);
-  OCMStub([mockUiKey characters]).andReturn(characters);
-  OCMStub([mockUiKey charactersIgnoringModifiers]).andReturn(charactersIgnoringModifiers);
-
-  OCMStub([mockUiPress key]).andReturn(mockUiKey);
-
-  return [NSSet setWithArray:@[ mockUiPress ]];
 }
 
 @end

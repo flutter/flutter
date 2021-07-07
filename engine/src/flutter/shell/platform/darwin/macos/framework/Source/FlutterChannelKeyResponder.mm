@@ -5,7 +5,7 @@
 #import <objc/message.h>
 
 #import "FlutterChannelKeyResponder.h"
-#import "KeyCodeMap_internal.h"
+#import "KeyCodeMap_Internal.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/embedder/embedder.h"
@@ -74,15 +74,15 @@
     keyMessage[@"characters"] = event.characters;
     keyMessage[@"charactersIgnoringModifiers"] = event.charactersIgnoringModifiers;
   }
-  [_channel sendMessage:keyMessage
-                  reply:^(id reply) {
-                    if (!reply) {
-                      return callback(true);
-                    }
-                    // Only propagate the event to other responders if the framework didn't handle
-                    // it.
-                    callback([[reply valueForKey:@"handled"] boolValue]);
-                  }];
+  [self.channel sendMessage:keyMessage
+                      reply:^(id reply) {
+                        if (!reply) {
+                          return callback(true);
+                        }
+                        // Only propagate the event to other responders if the framework didn't
+                        // handle it.
+                        callback([[reply valueForKey:@"handled"] boolValue]);
+                      }];
 }
 
 #pragma mark - Private

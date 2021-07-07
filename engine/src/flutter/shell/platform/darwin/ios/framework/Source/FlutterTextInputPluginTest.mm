@@ -14,7 +14,6 @@ FLUTTER_ASSERT_ARC
 
 @interface FlutterTextInputView ()
 @property(nonatomic, copy) NSString* autofillId;
-
 - (void)setEditableTransform:(NSArray*)matrix;
 - (void)setTextInputState:(NSDictionary*)state;
 - (void)setMarkedRect:(CGRect)markedRect;
@@ -83,11 +82,11 @@ FLUTTER_ASSERT_ARC
   for (FlutterTextInputView* autofillView in textInputPlugin.autofillContext.allValues) {
     autofillView.textInputDelegate = nil;
   }
+  engine = nil;
   [textInputPlugin.autofillContext removeAllObjects];
   [textInputPlugin cleanUpViewHierarchy:YES clearText:YES delayRemoval:NO];
   [[[[textInputPlugin textInputView] superview] subviews]
       makeObjectsPerformSelector:@selector(removeFromSuperview)];
-  [engine stopMocking];
   [super tearDown];
 }
 
@@ -169,7 +168,7 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(inputView.keyboardType, UIKeyboardTypeDefault);
 
   // We should have only ever created one FlutterTextInputView.
-  XCTAssertEqual(inputFields.count, 1);
+  XCTAssertEqual(inputFields.count, 1ul);
 
   // The one FlutterTextInputView we inserted into the view hierarchy should be the text input
   // plugin's active text input view.
@@ -226,8 +225,8 @@ FLUTTER_ASSERT_ARC
                                                                             toPosition:toPosition];
   NSRange range = flutterRange.range;
 
-  XCTAssertEqual(range.location, 0);
-  XCTAssertEqual(range.length, 2);
+  XCTAssertEqual(range.location, 0ul);
+  XCTAssertEqual(range.length, 2ul);
 }
 
 - (void)testTextInRange {
@@ -241,11 +240,11 @@ FLUTTER_ASSERT_ARC
 
   UITextRange* range = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 20)];
   NSString* substring = [inputView textInRange:range];
-  XCTAssertEqual(substring.length, 4);
+  XCTAssertEqual(substring.length, 4ul);
 
   range = [FlutterTextRange rangeWithNSRange:NSMakeRange(10, 20)];
   substring = [inputView textInRange:range];
-  XCTAssertEqual(substring.length, 0);
+  XCTAssertEqual(substring.length, 0ul);
 }
 
 - (void)testNoZombies {
@@ -262,7 +261,7 @@ FLUTTER_ASSERT_ARC
 - (void)testInputViewCrash {
   FlutterTextInputView* activeView = nil;
   @autoreleasepool {
-    FlutterTextInputPlugin* inputPlugin = [FlutterTextInputPlugin new];
+    FlutterTextInputPlugin* inputPlugin = [[FlutterTextInputPlugin alloc] init];
     activeView = inputPlugin.activeView;
     FlutterEngine* flutterEngine = [[FlutterEngine alloc] init];
     activeView.textInputDelegate = (id<FlutterTextInputDelegate>)flutterEngine;
@@ -550,7 +549,7 @@ FLUTTER_ASSERT_ARC
 - (void)testInputViewsHaveUIInteractions {
   if (@available(iOS 13.0, *)) {
     FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
-    XCTAssertGreaterThan(inputView.interactions.count, 0);
+    XCTAssertGreaterThan(inputView.interactions.count, 0ul);
   }
 }
 
@@ -624,12 +623,12 @@ FLUTTER_ASSERT_ARC
                              }];
 
   XCTAssertEqual(self.viewsVisibleToAutofill.count,
-                 [textInputPlugin.activeView isVisibleToAutofill] ? 1 : 0);
+                 [textInputPlugin.activeView isVisibleToAutofill] ? 1ul : 0ul);
   XCTAssertNotEqual(textInputPlugin.textInputView, nil);
   // The active view should still be installed so it doesn't get
   // deallocated.
-  XCTAssertEqual(self.installedInputViews.count, 1);
-  XCTAssertEqual(textInputPlugin.autofillContext.count, 0);
+  XCTAssertEqual(self.installedInputViews.count, 1ul);
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 0ul);
 }
 
 #pragma mark - Autofill - Tests
@@ -656,12 +655,12 @@ FLUTTER_ASSERT_ARC
   [config setValue:@[ field1, field2 ] forKey:@"fields"];
 
   [self setClientId:123 configuration:config];
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 2);
+  XCTAssertEqual(self.viewsVisibleToAutofill.count, 2ul);
 
-  XCTAssertEqual(textInputPlugin.autofillContext.count, 2);
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 2ul);
 
   [textInputPlugin cleanUpViewHierarchy:NO clearText:YES delayRemoval:NO];
-  XCTAssertEqual(self.installedInputViews.count, 2);
+  XCTAssertEqual(self.installedInputViews.count, 2ul);
   XCTAssertEqual(textInputPlugin.textInputView, textInputPlugin.autofillContext[@"field1"]);
   [self ensureOnlyActiveViewCanBecomeFirstResponder];
 
@@ -680,11 +679,11 @@ FLUTTER_ASSERT_ARC
 
   [self setClientId:123 configuration:config];
 
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 2);
-  XCTAssertEqual(textInputPlugin.autofillContext.count, 3);
+  XCTAssertEqual(self.viewsVisibleToAutofill.count, 2ul);
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 3ul);
 
   [textInputPlugin cleanUpViewHierarchy:NO clearText:YES delayRemoval:NO];
-  XCTAssertEqual(self.installedInputViews.count, 3);
+  XCTAssertEqual(self.installedInputViews.count, 3ul);
   XCTAssertEqual(textInputPlugin.textInputView, textInputPlugin.autofillContext[@"field1"]);
   [self ensureOnlyActiveViewCanBecomeFirstResponder];
 
@@ -700,11 +699,11 @@ FLUTTER_ASSERT_ARC
   [self setClientId:124 configuration:config];
   [self ensureOnlyActiveViewCanBecomeFirstResponder];
 
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1);
-  XCTAssertEqual(textInputPlugin.autofillContext.count, 3);
+  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1ul);
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 3ul);
 
   [textInputPlugin cleanUpViewHierarchy:NO clearText:YES delayRemoval:NO];
-  XCTAssertEqual(self.installedInputViews.count, 4);
+  XCTAssertEqual(self.installedInputViews.count, 4ul);
 
   // Old autofill input fields are still installed and reused.
   for (NSString* key in oldContext.allKeys) {
@@ -719,11 +718,11 @@ FLUTTER_ASSERT_ARC
   [self setClientId:200 configuration:config];
 
   // Reuse the input view instance from the last time.
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1);
-  XCTAssertEqual(textInputPlugin.autofillContext.count, 3);
+  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1ul);
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 3ul);
 
   [textInputPlugin cleanUpViewHierarchy:NO clearText:YES delayRemoval:NO];
-  XCTAssertEqual(self.installedInputViews.count, 4);
+  XCTAssertEqual(self.installedInputViews.count, 4ul);
 
   // Old autofill input fields are still installed and reused.
   for (NSString* key in oldContext.allKeys) {
@@ -762,8 +761,8 @@ FLUTTER_ASSERT_ARC
   [config setValue:@[ field1, field2 ] forKey:@"fields"];
 
   [self setClientId:123 configuration:config];
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 2);
-  XCTAssertEqual(textInputPlugin.autofillContext.count, 2);
+  XCTAssertEqual(self.viewsVisibleToAutofill.count, 2ul);
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 2ul);
   [self ensureOnlyActiveViewCanBecomeFirstResponder];
 
   [self commitAutofillContextAndVerify];
@@ -773,11 +772,11 @@ FLUTTER_ASSERT_ARC
   [self setClientId:123 configuration:config];
   // Switch to a regular autofill group.
   [self setClientId:124 configuration:field3];
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1);
+  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1ul);
 
   [textInputPlugin cleanUpViewHierarchy:NO clearText:YES delayRemoval:NO];
-  XCTAssertEqual(self.installedInputViews.count, 3);
-  XCTAssertEqual(textInputPlugin.autofillContext.count, 2);
+  XCTAssertEqual(self.installedInputViews.count, 3ul);
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 2ul);
   XCTAssertNotEqual(textInputPlugin.textInputView, nil);
   [self ensureOnlyActiveViewCanBecomeFirstResponder];
 
@@ -787,13 +786,13 @@ FLUTTER_ASSERT_ARC
   // Now switch to an input field that does not autofill.
   [self setClientId:125 configuration:self.mutableTemplateCopy];
 
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 0);
+  XCTAssertEqual(self.viewsVisibleToAutofill.count, 0ul);
   // The active view should still be installed so it doesn't get
   // deallocated.
 
   [textInputPlugin cleanUpViewHierarchy:NO clearText:YES delayRemoval:NO];
-  XCTAssertEqual(self.installedInputViews.count, 1);
-  XCTAssertEqual(textInputPlugin.autofillContext.count, 0);
+  XCTAssertEqual(self.installedInputViews.count, 1ul);
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 0ul);
   [self ensureOnlyActiveViewCanBecomeFirstResponder];
 
   [self commitAutofillContextAndVerify];
@@ -827,8 +826,8 @@ FLUTTER_ASSERT_ARC
   NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
 
   // Both fields are installed and visible because it's a password group.
-  XCTAssertEqual(inputFields.count, 2);
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 2);
+  XCTAssertEqual(inputFields.count, 2ul);
+  XCTAssertEqual(self.viewsVisibleToAutofill.count, 2ul);
 
   // Find the inactive autofillable input field.
   FlutterTextInputView* inactiveView = inputFields[1];
@@ -874,7 +873,7 @@ FLUTTER_ASSERT_ARC
   [regularField addEntriesFromDictionary:editingValue];
   [self setClientId:123 configuration:regularField];
   [self ensureOnlyActiveViewCanBecomeFirstResponder];
-  XCTAssertEqual(self.installedInputViews.count, 1);
+  XCTAssertEqual(self.installedInputViews.count, 1ul);
 
   FlutterTextInputView* oldInputView = self.installedInputViews[0];
   XCTAssert([oldInputView.text isEqualToString:@"REGULAR_TEXT_FIELD"]);
@@ -886,10 +885,10 @@ FLUTTER_ASSERT_ARC
   [self setClientId:124 configuration:self.mutablePasswordTemplateCopy];
   [self ensureOnlyActiveViewCanBecomeFirstResponder];
 
-  XCTAssertEqual(self.installedInputViews.count, 2);
+  XCTAssertEqual(self.installedInputViews.count, 2ul);
 
   [textInputPlugin cleanUpViewHierarchy:NO clearText:YES delayRemoval:NO];
-  XCTAssertEqual(self.installedInputViews.count, 1);
+  XCTAssertEqual(self.installedInputViews.count, 1ul);
 
   // Verify the old input view is properly cleaned up.
   XCTAssert([oldInputView.text isEqualToString:@""]);
@@ -902,13 +901,13 @@ FLUTTER_ASSERT_ARC
   [self setClientId:123 configuration:self.mutablePasswordTemplateCopy];
   [self ensureOnlyActiveViewCanBecomeFirstResponder];
 
-  XCTAssertEqual(self.installedInputViews.count, 1);
+  XCTAssertEqual(self.installedInputViews.count, 1ul);
   // Add an input field that doesn't autofill. This should remove the password
   // field, but not immediately.
   [self setClientId:124 configuration:self.mutableTemplateCopy];
   [self ensureOnlyActiveViewCanBecomeFirstResponder];
 
-  XCTAssertEqual(self.installedInputViews.count, 2);
+  XCTAssertEqual(self.installedInputViews.count, 2ul);
 
   [self commitAutofillContextAndVerify];
 }
@@ -1018,8 +1017,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testFlutterTextInputPluginRetainsFlutterTextInputView {
-  FlutterTextInputPlugin* myInputPlugin;
-  myInputPlugin = [[FlutterTextInputPlugin alloc] init];
+  FlutterTextInputPlugin* myInputPlugin = [[FlutterTextInputPlugin alloc] init];
   myInputPlugin.textInputDelegate = engine;
   __weak UIView* activeView;
   @autoreleasepool {

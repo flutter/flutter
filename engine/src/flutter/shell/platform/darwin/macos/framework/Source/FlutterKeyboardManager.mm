@@ -52,9 +52,9 @@
       event.type != NSEventTypeFlagsChanged) {
     return;
   }
-  // Having no primary responders require extra logic, but since Flutter adds
-  // all primary responders in hard-code, this is a situation that Flutter will
-  // never meet.
+  // Having no primary responders require extra logic, but Flutter hard-codes
+  // all primary responders, so this is a situation that Flutter will never
+  // encounter.
   NSAssert([_primaryResponders count] >= 0, @"At least one primary responder must be added.");
 
   __weak __typeof__(self) weakSelf = self;
