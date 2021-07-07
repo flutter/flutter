@@ -1263,6 +1263,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           autofillHints: widget.autofillHints,
           autocorrectionTextRectColor: autocorrectionTextRectColor,
           restorationId: 'editable',
+          parentContext: context,
         ),
       ),
     );

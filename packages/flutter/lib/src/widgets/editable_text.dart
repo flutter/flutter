@@ -495,6 +495,7 @@ class EditableText extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
+    this.parentContext,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1346,6 +1347,10 @@ class EditableText extends StatefulWidget {
   /// than 1.
   final ScrollBehavior? scrollBehavior;
 
+  /// Optionally, the parent build context if this editable text was built as part of
+  /// a larger text field.
+  final BuildContext? parentContext;
+
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
     required Iterable<String>? autofillHints,
@@ -1600,7 +1605,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.initState();
     _clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
-    _focusAttachment = widget.focusNode.attach(context);
+    _focusAttachment = widget.focusNode.attach(context, contextBounds: widget.parentContext);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController = widget.scrollController ?? ScrollController();
     _scrollController!.addListener(() { _selectionOverlay?.updateForScroll(); });
