@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -119,12 +120,12 @@ abstract class TextSelectionControls {
   /// interaction is allowed. As a counterexample, the default selection handle
   /// on iOS [cupertinoTextSelectionControls] does not call [onTap] at all,
   /// since its handles are not meant to be tapped.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? secondaryLineHeight]);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? secondaryLineHeight]);
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -824,13 +825,38 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
-    final Rect? leftHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
-    final Rect? rightHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
+    late final Rect? startHandleRect;
+    late final Rect? endHandleRect;
+
+    if(widget.renderObject.selectionHeightStyle == ui.BoxHeightStyle.tight){
+      startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
+      endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
+    }else{
+      startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
+      endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
+    }
+
+    late double preferredLineHeight;
+
+    if(defaultTargetPlatform == TargetPlatform.iOS){
+      switch(type){
+        case TextSelectionHandleType.left:
+          preferredLineHeight = startHandleRect?.height ?? widget.renderObject.preferredLineHeight;
+          break;
+        case TextSelectionHandleType.right:
+          preferredLineHeight = endHandleRect?.height ?? widget.renderObject.preferredLineHeight;
+          break;
+        case TextSelectionHandleType.collapsed:
+          preferredLineHeight = widget.renderObject.preferredLineHeight;
+          break;
+      }
+    }else{
+      preferredLineHeight = widget.renderObject.preferredLineHeight;
+    }
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
-      type,
-      leftHandleRect?.height ?? widget.renderObject.preferredLineHeight,
-      defaultTargetPlatform == TargetPlatform.iOS? rightHandleRect?.height: null
+        type,
+        preferredLineHeight,
     );
 
     final Size handleSize = widget.selectionControls.getHandleSize(
@@ -850,7 +876,7 @@ class _TextSelectionHandleOverlayState
     );
     final RelativeRect padding = RelativeRect.fromLTRB(
       math.max((interactiveRect.width - handleRect.width) / 2, 0),
-      math.max((interactiveRect.height - handleRect.height) / 2, 0),
+      math.max((interactiveRect.height - handleRect.height) / 2, 0),//
       math.max((interactiveRect.width - handleRect.width) / 2, 0),
       math.max((interactiveRect.height - handleRect.height) / 2, 0),
     );
@@ -880,9 +906,8 @@ class _TextSelectionHandleOverlayState
               child: widget.selectionControls.buildHandle(
                 context,
                 type,
-                leftHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+                preferredLineHeight,
                 widget.onSelectionHandleTapped,
-                defaultTargetPlatform == TargetPlatform.iOS? rightHandleRect?.height: null,
               ),
             ),
           ),
