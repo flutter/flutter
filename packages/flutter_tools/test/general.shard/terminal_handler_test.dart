@@ -1250,7 +1250,9 @@ void main() {
           'isolateId': '1',
         },
         jsonResponse: <String, Object>{
-          'frames': <Object>[],
+          'data': <String, Object>{
+            'frames': <Object>[],
+          },
         }
       ),
     ], logger: logger);
