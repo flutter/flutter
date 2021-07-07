@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -634,77 +633,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     onSelectionChanged?.call(nextSelection, this, cause);
-  }
-
-  static final Set<LogicalKeyboardKey> _movementKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.arrowRight,
-    LogicalKeyboardKey.arrowLeft,
-    LogicalKeyboardKey.arrowUp,
-    LogicalKeyboardKey.arrowDown,
-  };
-
-  static final Set<LogicalKeyboardKey> _shortcutKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.keyC,
-    LogicalKeyboardKey.keyV,
-    LogicalKeyboardKey.keyX,
-    LogicalKeyboardKey.delete,
-    LogicalKeyboardKey.backspace,
-  };
-
-  static final Set<LogicalKeyboardKey> _nonModifierKeys = <LogicalKeyboardKey>{
-    ..._shortcutKeys,
-    ..._movementKeys,
-  };
-
-  static final Set<LogicalKeyboardKey> _modifierKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.alt,
-  };
-
-  static final Set<LogicalKeyboardKey> _macOsModifierKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.meta,
-    LogicalKeyboardKey.alt,
-  };
-
-  static final Set<LogicalKeyboardKey> _interestingKeys = <LogicalKeyboardKey>{
-    ..._modifierKeys,
-    ..._macOsModifierKeys,
-    ..._nonModifierKeys,
-  };
-
-  void _handleKeyEvent(RawKeyEvent keyEvent) {
-    if (kIsWeb) {
-      // On web platform, we should ignore the key because it's processed already.
-      return;
-    }
-
-    if (keyEvent is! RawKeyDownEvent)
-      return;
-    final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);
-    final LogicalKeyboardKey key = keyEvent.logicalKey;
-
-    final bool isMacOS = keyEvent.data is RawKeyEventDataMacOs;
-    if (!_nonModifierKeys.contains(key) ||
-        keysPressed.difference(isMacOS ? _macOsModifierKeys : _modifierKeys).length > 1 ||
-        keysPressed.difference(_interestingKeys).isNotEmpty) {
-      // If the most recently pressed key isn't a non-modifier key, or more than
-      // one non-modifier key is down, or keys other than the ones we're interested in
-      // are pressed, just ignore the keypress.
-      return;
-    }
-
-    // TODO(ianh): It seems to be entirely possible for the selection to be null here, but
-    // all the keyboard handling functions assume it is not.
-    assert(selection != null);
-
-    final bool isShortcutModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isControlPressed;
-    if (isShortcutModifierPressed && _shortcutKeys.contains(key)) {
-      // _handleShortcuts depends on being started in the same stack invocation
-      // as the _handleKeyEvent method
-      _handleShortcuts(key);
-    }
   }
 
   /// Returns the index into the string of the next character boundary after the
@@ -2244,45 +2172,62 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     );
   }
 
-  // Handles shortcut functionality including cut, copy, paste using
-  // using control/command + (X, C, V).
-  Future<void> _handleShortcuts(LogicalKeyboardKey key) async {
+  /// Copy current [selection] to [Clipboard].
+  void copySelection() {
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
     final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
-    assert(_shortcutKeys.contains(key), 'shortcut key $key not recognized.');
-    if (key == LogicalKeyboardKey.keyC) {
-      if (!selection.isCollapsed) {
-        Clipboard.setData(ClipboardData(text: selection.textInside(text)));
-      }
+    if (!selection.isCollapsed) {
+      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    }
+  }
+
+  /// Cut current [selection] to Clipboard.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  void cutSelection(SelectionChangedCause cause) {
+    if (_readOnly) {
       return;
     }
-    TextEditingValue? value;
-    if (key == LogicalKeyboardKey.keyX && !_readOnly) {
-      if (!selection.isCollapsed) {
-        Clipboard.setData(ClipboardData(text: selection.textInside(text)));
-        value = TextEditingValue(
+    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
+    final String text = textSelectionDelegate.textEditingValue.text;
+    assert(selection != null);
+    if (!selection.isCollapsed) {
+      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+      _setTextEditingValue(
+        TextEditingValue(
           text: selection.textBefore(text) + selection.textAfter(text),
           selection: TextSelection.collapsed(offset: math.min(selection.start, selection.end)),
-        );
-      }
-    } else if (key == LogicalKeyboardKey.keyV && !_readOnly) {
-      // Snapshot the input before using `await`.
-      // See https://github.com/flutter/flutter/issues/11427
-      final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-      if (data != null && selection.isValid) {
-        value = TextEditingValue(
-          text: selection.textBefore(text) + data.text! + selection.textAfter(text),
-          selection: TextSelection.collapsed(
-            offset: math.min(selection.start, selection.end) + data.text!.length,
-          ),
-        );
-      }
+        ),
+        cause,
+      );
     }
-    if (value != null) {
+  }
+
+  /// Paste text from [Clipboard].
+  ///
+  /// If there is currently a selection, it will be replaced.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  Future<void> pasteText(SelectionChangedCause cause) async {
+    if (_readOnly) {
+      return;
+    }
+    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
+    final String text = textSelectionDelegate.textEditingValue.text;
+    assert(selection != null);
+    // Snapshot the input before using `await`.
+    // See https://github.com/flutter/flutter/issues/11427
+    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (data != null && selection.isValid) {
       _setTextEditingValue(
-        value,
-        SelectionChangedCause.keyboard,
+          TextEditingValue(
+            text: selection.textBefore(text) + data.text! + selection.textAfter(text),
+            selection: TextSelection.collapsed(
+                offset: math.min(selection.start, selection.end) + data.text!.length,
+            ),
+          ),
+          cause,
       );
     }
   }
@@ -2441,32 +2386,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Whether the editable is currently focused.
   bool get hasFocus => _hasFocus;
   bool _hasFocus = false;
-  bool _listenerAttached = false;
   set hasFocus(bool value) {
     assert(value != null);
     if (_hasFocus == value)
       return;
     _hasFocus = value;
     markNeedsSemanticsUpdate();
-
-    if (!attached) {
-      assert(!_listenerAttached);
-      return;
-    }
-
-    if (_hasFocus) {
-      assert(!_listenerAttached);
-      // TODO(justinmc): This listener should be ported to Actions and removed.
-      // https://github.com/flutter/flutter/issues/75004
-      RawKeyboard.instance.addListener(_handleKeyEvent);
-      _listenerAttached = true;
-    } else {
-      assert(_listenerAttached);
-      // TODO(justinmc): This listener should be ported to Actions and removed.
-      // https://github.com/flutter/flutter/issues/75004
-      RawKeyboard.instance.removeListener(_handleKeyEvent);
-      _listenerAttached = false;
-    }
   }
 
   /// Whether this rendering object will take a full line regardless the text width.
@@ -3073,11 +2998,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _offset.addListener(markNeedsPaint);
     _showHideCursor();
     _showCursor.addListener(_showHideCursor);
-    assert(!_listenerAttached);
-    if (_hasFocus) {
-      RawKeyboard.instance.addListener(_handleKeyEvent);
-      _listenerAttached = true;
-    }
   }
 
   @override
@@ -3086,12 +3006,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _longPress.dispose();
     _offset.removeListener(markNeedsPaint);
     _showCursor.removeListener(_showHideCursor);
-    // TODO(justinmc): This listener should be ported to Actions and removed.
-    // https://github.com/flutter/flutter/issues/75004
-    if (_listenerAttached) {
-      RawKeyboard.instance.removeListener(_handleKeyEvent);
-      _listenerAttached = false;
-    }
     super.detach();
     _foregroundRenderObject?.detach();
     _backgroundRenderObject?.detach();

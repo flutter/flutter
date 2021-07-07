@@ -718,7 +718,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// [ImageStreamListener.onChunk] specified) to notify them of a new
   /// [ImageChunkEvent].
   @protected
-  void reportImageChunkEvent(ImageChunkEvent event){
+  void reportImageChunkEvent(ImageChunkEvent event) {
     _checkDisposed();
     if (hasListeners) {
       // Make a copy to allow for concurrent modification.

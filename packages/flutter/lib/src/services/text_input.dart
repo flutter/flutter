@@ -174,14 +174,17 @@ class TextInputType {
   /// [TYPE_TEXT_VARIATION_POSTAL_ADDRESS](https://developer.android.com/reference/android/text/InputType#TYPE_TEXT_VARIATION_POSTAL_ADDRESS).
   static const TextInputType streetAddress = TextInputType._(9);
 
+  /// Prevent the OS from showing the on-screen virtual keyboard.
+  static const TextInputType none = TextInputType._(10);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress,
+    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress, none,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address',
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address', 'none',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
