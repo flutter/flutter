@@ -137,8 +137,6 @@ class CanvasCompareTester {
 
     RenderWithStrokes(cv_renderer, dl_renderer);
 
-    // Not testing FilterQuality here because there is no SkPaint version
-
     {
       // half opaque cyan
       SkColor blendableColor = SkColorSetARGB(0x7f, 0x00, 0xff, 0xff);

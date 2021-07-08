@@ -162,19 +162,6 @@ struct SetBlendModeOp final : DLOp {
   void dispatch(Dispatcher& dispatcher) const { dispatcher.setBlendMode(mode); }
 };
 
-// 4 byte header + 4 byte payload packs into minimum 8 bytes
-struct SetFilterQualityOp final : DLOp {
-  static const auto kType = DisplayListOpType::kSetFilterQuality;
-
-  SetFilterQualityOp(SkFilterQuality quality) : quality(quality) {}
-
-  const SkFilterQuality quality;
-
-  void dispatch(Dispatcher& dispatcher) const {
-    dispatcher.setFilterQuality(quality);
-  }
-};
-
 // Clear: 4 byte header + unused 4 byte payload uses 8 bytes
 //        (4 bytes unused)
 // Set: 4 byte header + an sk_sp (ptr) uses 16 bytes due to the
@@ -1071,9 +1058,6 @@ void DisplayListBuilder::setColor(SkColor color) {
 }
 void DisplayListBuilder::setBlendMode(SkBlendMode mode) {
   Push<SetBlendModeOp>(0, mode);
-}
-void DisplayListBuilder::setFilterQuality(SkFilterQuality quality) {
-  Push<SetFilterQualityOp>(0, quality);
 }
 void DisplayListBuilder::setShader(sk_sp<SkShader> shader) {
   shader  //
