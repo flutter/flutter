@@ -1,4 +1,4 @@
-Signature: 402e6b2ad96d0a1057e866e0becb5f06
+Signature: b50585545e62f9fdccf965db4a81bd03
 
 UNUSED LICENSES:
 
@@ -594,6 +594,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/elf_stdio.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
@@ -1325,6 +1326,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/elf_stdio.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
@@ -1953,6 +1955,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/elf_stdio.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
