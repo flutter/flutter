@@ -714,6 +714,14 @@ hooks = [
     ]
   },
   {
+    'name': 'Download prebuilt Dart SDK',
+    'pattern': '.',
+    'action': [
+      'python3',
+      'src/flutter/tools/download_dart_sdk.py',
+    ]
+  },
+  {
     'name': 'Setup githooks',
     'pattern': '.',
     'action': [

@@ -5,6 +5,7 @@
 import("//build/compiled_action.gni")
 import("//flutter/common/config.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
+import("//third_party/dart/sdk_args.gni")
 
 is_aot_test =
     flutter_runtime_mode == "profile" || flutter_runtime_mode == "release"
@@ -56,17 +57,22 @@ template("dart_snapshot_kernel") {
   dart_action(target_name) {
     testonly = true
 
-    deps = [
-      # This generates the Frontend server snapshot used in this Dart action as
-      # well as the patched SDK.
-      "//third_party/dart/utils/kernel-service:frontend_server",
-    ]
+    if (flutter_prebuilt_dart_sdk) {
+      deps = [ "//flutter:dart_sdk" ]
+      script =
+          "$root_out_dir/dart-sdk/bin/snapshots/frontend_server.dart.snapshot"
+    } else {
+      deps = [
+        # This generates the Frontend server snapshot used in this Dart action as
+        # well as the patched SDK.
+        "//third_party/dart/utils/kernel-service:frontend_server",
+      ]
+      script = "$root_out_dir/frontend_server.dart.snapshot"
+    }
 
     if (is_aot_test) {
       deps += [ "//flutter/lib/snapshot:strong_platform" ]
     }
-
-    script = "$root_out_dir/frontend_server.dart.snapshot"
 
     inputs = [ invoker.dart_main ]
 
