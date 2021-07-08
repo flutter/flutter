@@ -186,6 +186,7 @@ void main() {
       terminal: Terminal.test(supportsColor: true),
       stdio: FakeStdio(),
       outputPreferences: OutputPreferences.test(),
+      machine: false,
     );
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,

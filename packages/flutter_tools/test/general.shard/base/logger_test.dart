@@ -26,7 +26,7 @@ final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
 final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
 void main() {
-  testWithoutContext('correct logger instance is created', () {
+  testWithoutContext('correct logger instance is created with machine: false', () {
     final LoggerFactory loggerFactory = LoggerFactory(
       terminal: Terminal.test(),
       stdio: FakeStdio(),
@@ -36,52 +36,124 @@ void main() {
     expect(loggerFactory.createLogger(
       verbose: false,
       prefixedErrors: false,
-      machine: false,
+      runMachine: false,
       daemon: false,
       windows: false,
-    ), isA<StdoutLogger>());
+      machine: false
+    ), isA<StdoutLogger>().having((Logger logger) => logger.machine, 'machine', false));
     expect(loggerFactory.createLogger(
       verbose: false,
       prefixedErrors: false,
-      machine: false,
+      runMachine: false,
       daemon: false,
       windows: true,
-    ), isA<WindowsStdoutLogger>());
+      machine: false
+    ), isA<WindowsStdoutLogger>().having((Logger logger) => logger.machine, 'machine', false));
     expect(loggerFactory.createLogger(
       verbose: true,
       prefixedErrors: false,
-      machine: false,
+      runMachine: false,
       daemon: false,
       windows: true,
-    ), isA<VerboseLogger>());
+      machine: false
+    ), isA<VerboseLogger>().having((Logger logger) => logger.machine, 'machine', false));
     expect(loggerFactory.createLogger(
       verbose: true,
       prefixedErrors: false,
-      machine: false,
+      runMachine: false,
       daemon: false,
       windows: false,
-    ), isA<VerboseLogger>());
+      machine: false
+    ), isA<VerboseLogger>().having((Logger logger) => logger.machine, 'machine', false));
     expect(loggerFactory.createLogger(
       verbose: false,
       prefixedErrors: true,
-      machine: false,
+      runMachine: false,
       daemon: false,
       windows: false,
-    ), isA<PrefixedErrorLogger>());
+      machine: false
+    ), isA<PrefixedErrorLogger>().having((Logger logger) => logger.machine, 'machine', false));
     expect(loggerFactory.createLogger(
       verbose: false,
       prefixedErrors: false,
-      machine: false,
+      runMachine: false,
       daemon: true,
       windows: false,
-    ), isA<NotifyingLogger>());
+      machine: false
+    ), isA<NotifyingLogger>().having((Logger logger) => logger.machine, 'machine', false));
     expect(loggerFactory.createLogger(
       verbose: false,
       prefixedErrors: false,
-      machine: true,
+      runMachine: true,
       daemon: false,
       windows: false,
-    ), isA<AppRunLogger>());
+      machine: false
+    ), isA<AppRunLogger>().having((Logger logger) => logger.machine, 'machine', false));
+  });
+
+  testWithoutContext('correct logger instance is created with machine: true', () {
+    final LoggerFactory loggerFactory = LoggerFactory(
+      terminal: Terminal.test(),
+      stdio: FakeStdio(),
+      outputPreferences: OutputPreferences.test(),
+    );
+
+    expect(loggerFactory.createLogger(
+      verbose: false,
+      prefixedErrors: false,
+      runMachine: false,
+      daemon: false,
+      windows: false,
+      machine: true
+    ), isA<StdoutLogger>().having((Logger logger) => logger.machine, 'machine', true));
+    expect(loggerFactory.createLogger(
+      verbose: false,
+      prefixedErrors: false,
+      runMachine: false,
+      daemon: false,
+      windows: true,
+      machine: true
+    ), isA<WindowsStdoutLogger>().having((Logger logger) => logger.machine, 'machine', true));
+    expect(loggerFactory.createLogger(
+      verbose: true,
+      prefixedErrors: false,
+      runMachine: false,
+      daemon: false,
+      windows: true,
+      machine: true
+    ), isA<VerboseLogger>().having((Logger logger) => logger.machine, 'machine', true));
+    expect(loggerFactory.createLogger(
+      verbose: true,
+      prefixedErrors: false,
+      runMachine: false,
+      daemon: false,
+      windows: false,
+      machine: true
+    ), isA<VerboseLogger>().having((Logger logger) => logger.machine, 'machine', true));
+    expect(loggerFactory.createLogger(
+      verbose: false,
+      prefixedErrors: true,
+      runMachine: false,
+      daemon: false,
+      windows: false,
+      machine: true
+    ), isA<PrefixedErrorLogger>().having((Logger logger) => logger.machine, 'machine', true));
+    expect(loggerFactory.createLogger(
+      verbose: false,
+      prefixedErrors: false,
+      runMachine: false,
+      daemon: true,
+      windows: false,
+      machine: true
+    ), isA<NotifyingLogger>().having((Logger logger) => logger.machine, 'machine', true));
+    expect(loggerFactory.createLogger(
+      verbose: false,
+      prefixedErrors: false,
+      runMachine: true,
+      daemon: false,
+      windows: false,
+      machine: true
+    ), isA<AppRunLogger>().having((Logger logger) => logger.machine, 'machine', true));
   });
 
   testWithoutContext('WindowsStdoutLogger rewrites emojis when terminal does not support emoji', () {
@@ -90,6 +162,7 @@ void main() {
       outputPreferences: OutputPreferences.test(),
       stdio: stdio,
       terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
+      machine: false,
     );
 
     logger.printStatus('🔥🖼️✗✓🔨💪✏️');
@@ -103,6 +176,7 @@ void main() {
       outputPreferences: OutputPreferences.test(),
       stdio: stdio,
       terminal: Terminal.test(supportsColor: true, supportsEmoji: true),
+      machine: false,
     );
 
     logger.printStatus('🔥🖼️✗✓🔨💪✏️');
@@ -295,6 +369,7 @@ void main() {
       ),
       stdio: stdio,
       outputPreferences: OutputPreferences.test(),
+      machine: false,
     );
 
     logger.printStatus('message');
@@ -312,6 +387,7 @@ void main() {
       ),
       stdio: stdio,
       outputPreferences: OutputPreferences.test(),
+      machine: false,
     );
     logger.printStatus('message');
     logger.printError('error message');
@@ -331,6 +407,7 @@ void main() {
       ),
       stdio: stdio,
       outputPreferences: OutputPreferences.test(),
+      machine: false,
     );
     logger.printStatus('message');
     logger.printError('error message');
@@ -461,6 +538,7 @@ void main() {
             stdio: mockStdio,
             outputPreferences: OutputPreferences.test(showColor: true),
             stopwatchFactory: stopwatchFactory,
+            machine: false,
           );
           final Status status = logger.startProgress(
             'Hello',
@@ -498,6 +576,7 @@ void main() {
               stdio: mockStdio,
               outputPreferences: OutputPreferences.test(showColor: true),
               stopwatchFactory: stopwatchFactory,
+              machine: false,
             );
             const String message = "Knock Knock, Who's There";
             final Status status = logger.startProgress(
@@ -539,6 +618,7 @@ void main() {
               stdio: mockStdio,
               outputPreferences: OutputPreferences.test(showColor: true),
               stopwatchFactory: stopwatchFactory,
+              machine: false,
             );
             const String message = "Knock Knock, Who's There";
             final Status status = logger.startProgress(
@@ -671,6 +751,7 @@ void main() {
         ),
         stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
+        machine: false,
       );
       logger.printError('0123456789' * 15);
       final List<String> lines = outputStderr();
@@ -699,6 +780,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
+        machine: false,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printError('0123456789' * 15, indent: 5);
@@ -722,6 +804,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
+        machine: false,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printError('0123456789' * 15, hangingIndent: 5);
@@ -745,6 +828,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
+        machine: false,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printError('0123456789' * 15, indent: 4, hangingIndent: 5);
@@ -768,6 +852,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
+        machine: false,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printStatus('0123456789' * 15);
@@ -789,6 +874,7 @@ void main() {
         ),
         stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
+        machine: false,
       );
       logger.printStatus('0123456789' * 15, indent: 5);
       final List<String> lines = outputStdout();
@@ -811,6 +897,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
+        machine: false,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false)
       );
       logger.printStatus('0123456789' * 15, hangingIndent: 5);
@@ -834,6 +921,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
+        machine: false,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printStatus('0123456789' * 15, indent: 4, hangingIndent: 5);
@@ -857,6 +945,7 @@ void main() {
           platform: FakePlatform(stdoutSupportsAnsi: true),
         ),
         stdio: fakeStdio,
+        machine: false,
         outputPreferences: OutputPreferences.test(showColor: true),
       );
       logger.printError('Pants on fire!');
@@ -874,6 +963,7 @@ void main() {
           platform: FakePlatform(),
         ),
         stdio: fakeStdio,
+        machine: false,
         outputPreferences:  OutputPreferences.test(showColor: true),
       );
       logger.printStatus('All good.');
@@ -892,6 +982,7 @@ void main() {
         ),
         stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: true),
+        machine: false,
       );
       logger.printStatus(
         null,
@@ -915,6 +1006,7 @@ void main() {
         ),
         stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: false),
+        machine: false,
       );
       logger.printStatus(
         null,
@@ -939,6 +1031,7 @@ void main() {
         stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: false),
         stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopwatch),
+        machine: false,
       );
       final Status status = logger.startProgress(
         'Hello',
@@ -1008,6 +1101,7 @@ void main() {
         ),
         stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: false),
+        machine: false,
       );
       logger.startProgress('AAA').stop();
       logger.startProgress('BBB').stop();
@@ -1031,6 +1125,7 @@ void main() {
           ),
           stdio: fakeStdio,
           outputPreferences: OutputPreferences.test(),
+          machine: false,
         ),
         stopwatchFactory: FakeStopwatchFactory(),
       );
