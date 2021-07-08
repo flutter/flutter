@@ -2104,7 +2104,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       .copyWith(color: decoration!.enabled ? themeData.hintColor : themeData.disabledColor);
   }
 
-  TextStyle _getFloatingLabelStyle(ThemeData themeData) {
+  TextStyle _getFloatingLabelStyle(ThemeData themeData, TextStyle? labelStyle) {
     final Color color = decoration!.errorText != null
       ? decoration!.errorStyle?.color ?? themeData.errorColor
       : _getActiveColor(themeData);
@@ -2115,10 +2115,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.fixTextFieldOutlineLabel
       ? style
         .copyWith(height: 1, color: decoration!.enabled ? color : themeData.disabledColor)
-        .merge(decoration!.labelStyle)
+        .merge(labelStyle)
       : style
         .copyWith(color: decoration!.enabled ? color : themeData.disabledColor)
-        .merge(decoration!.labelStyle);
+        .merge(labelStyle);
 
   }
 
@@ -2222,7 +2222,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                     duration:_kTransitionDuration,
                     curve: _kTransitionCurve,
                     style: widget._labelShouldWithdraw
-                        ? _getFloatingLabelStyle(themeData)
+                        ? _getFloatingLabelStyle(themeData, decoration!.labelStyle)
                         : inlineLabelStyle,
                     child: Text(
                       decoration!.labelText!,
@@ -2237,9 +2237,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                       duration:_kTransitionDuration,
                       curve: _kTransitionCurve,
                       style: widget._labelShouldWithdraw
-                          ? _getFloatingLabelStyle(themeData)
+                          ? _getFloatingLabelStyle(themeData, decoration!.requiredLabelStyle)
                           : inlineRequiredLabelStyle,
-                      child:Text(
+                      child: Text(
                         '*',
                         overflow: TextOverflow.ellipsis,
                         textAlign: textAlign,
