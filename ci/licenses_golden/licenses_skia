@@ -1,4 +1,4 @@
-Signature: 5f9c8a0cc90e1198332be6b7a060334f
+Signature: 5583ba9100d93ec27123de194e34da58
 
 UNUSED LICENSES:
 
@@ -1078,7 +1078,6 @@ FILE: ../../../third_party/skia/specs/web-img-decode/proposed/index.html
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/ports/SkTLS_pthread.cpp
 FILE: ../../../third_party/skia/src/ports/SkTLS_win.cpp
-FILE: ../../../third_party/skia/src/sksl/generated/sksl_fp.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_geom.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.dehydrated.sksl
@@ -1090,7 +1089,6 @@ FILE: ../../../third_party/skia/src/sksl/generated/sksl_rt_shader.dehydrated.sks
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_runtime.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_vert.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
-FILE: ../../../third_party/skia/src/sksl/sksl_fp_raw.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_frag.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_geom.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_gpu.sksl
@@ -1948,11 +1946,9 @@ FILE: ../../../third_party/skia/src/sksl/SkSLPosition.h
 FILE: ../../../third_party/skia/src/sksl/SkSLProgramSettings.h
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.h
-FILE: ../../../third_party/skia/src/sksl/codegen/SkSLCPPCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLGLSLCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLGLSLCodeGenerator.h
-FILE: ../../../third_party/skia/src/sksl/codegen/SkSLHCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLMetalCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLMetalCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVCodeGenerator.cpp
@@ -1986,7 +1982,6 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLPostfixExpression.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLPrefixExpression.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLProgram.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLReturnStatement.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLSection.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSetting.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwizzle.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSymbolTable.cpp
@@ -3172,8 +3167,6 @@ FILE: ../../../third_party/skia/src/pdf/SkClusterator.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFTag.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFTag.h
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_fuchsia.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLPipelineStageCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
 FILE: ../../../third_party/skia/src/utils/SkAnimCodecPlayer.cpp
@@ -3441,11 +3434,8 @@ FILE: ../../../third_party/skia/src/sksl/SkSLFileOutputStream.h
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOutputStream.h
-FILE: ../../../third_party/skia/src/sksl/SkSLSectionAndParameterHelper.h
 FILE: ../../../third_party/skia/src/sksl/SkSLString.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLStringStream.h
-FILE: ../../../third_party/skia/src/sksl/codegen/SkSLCPPCodeGenerator.h
-FILE: ../../../third_party/skia/src/sksl/codegen/SkSLHCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLPipelineStageCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLEnum.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSetting.cpp
@@ -5121,7 +5111,6 @@ FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.h
-FILE: ../../../third_party/skia/src/sksl/SkSLSectionAndParameterHelper.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC.
 
@@ -5171,6 +5160,7 @@ FILE: ../../../third_party/skia/gm/lazytiling.cpp
 FILE: ../../../third_party/skia/gm/particles.cpp
 FILE: ../../../third_party/skia/gm/runtimeeffectimage.cpp
 FILE: ../../../third_party/skia/include/core/SkBlender.h
+FILE: ../../../third_party/skia/include/effects/SkBlenders.h
 FILE: ../../../third_party/skia/include/gpu/gl/egl/GrGLMakeEGLInterface.h
 FILE: ../../../third_party/skia/include/gpu/gl/glx/GrGLMakeGLXInterface.h
 FILE: ../../../third_party/skia/include/sksl/DSLSymbols.h
@@ -5181,6 +5171,7 @@ FILE: ../../../third_party/skia/src/core/SkBlenderBase.h
 FILE: ../../../third_party/skia/src/core/SkMatrixInvert.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixInvert.h
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
+FILE: ../../../third_party/skia/src/effects/SkBlenders.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkRuntimeImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkRuntimeImageFilter.h
 FILE: ../../../third_party/skia/src/gpu/BaseDevice.cpp
@@ -5210,8 +5201,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLIntrinsicList.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.h
-FILE: ../../../third_party/skia/src/sksl/codegen/SkSLDSLCPPCodeGenerator.cpp
-FILE: ../../../third_party/skia/src/sksl/codegen/SkSLDSLCPPCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBinaryExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorArray.cpp
