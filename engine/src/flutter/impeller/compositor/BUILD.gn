@@ -69,6 +69,7 @@ impeller_component("compositor") {
   public_deps = [
     "../base",
     "../geometry",
+    "../image",
     "../shader_glue",
   ]
 
