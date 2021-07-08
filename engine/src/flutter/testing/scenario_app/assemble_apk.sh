@@ -28,7 +28,7 @@ SRC_DIR="$(cd "$SCRIPT_DIR/../../.."; pwd -P)"
 export ANDROID_HOME="$SRC_DIR/third_party/android_tools/sdk"
 
 "$SRC_DIR/flutter/tools/gn" --unopt
-ninja -C "$SRC_DIR/out/host_debug_unopt" sky_engine sky_services -j 400
+ninja -C "$SRC_DIR/out/host_debug_unopt" sky_engine -j 400
 
 "$SCRIPT_DIR/compile_android_aot.sh" "$1" "$2"
 
