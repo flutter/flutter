@@ -571,11 +571,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   BuildContext? get context => _context;
   BuildContext? _context;
 
-  /// An optional parent context that determines whether or not a primary pointer
-  /// gesture that missed the actual [context] should remove focus from the node.
-  BuildContext? get contextBounds => _contextBounds;
-  BuildContext? _contextBounds;
-
   /// Called if this focus node receives a key event while focused (i.e. when
   /// [hasFocus] returns true).
   ///
@@ -1034,9 +1029,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// node, and then [attach] called on the new node. This typically happens in
   /// the [State.didUpdateWidget] method.
   @mustCallSuper
-  FocusAttachment attach(BuildContext? context, {FocusOnKeyCallback? onKey, BuildContext? contextBounds}) {
+  FocusAttachment attach(BuildContext? context, {FocusOnKeyCallback? onKey}) {
     _context = context;
-    _contextBounds = contextBounds;
     this.onKey = onKey ?? this.onKey;
     _attachment = FocusAttachment._(this);
     return _attachment!;

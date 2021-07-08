@@ -2068,8 +2068,7 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     if (focusNode == null || result == null)
       return;
 
-    final RenderObject? renderObject = focusNode.contextBounds?.findRenderObject()
-      ?? focusNode.context?.findRenderObject();
+    final RenderObject? renderObject = focusNode.context?.findRenderObject();
     if (renderObject == null)
       return;
 

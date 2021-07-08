@@ -468,4 +468,50 @@ void main() {
 
     expect(focusNodeA.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('A Focused EditableText will lose focus removing the parentContext property', (WidgetTester tester) async {
+    final FocusNode focusNodeA = FocusNode();
+    final TextEditingController controller = TextEditingController();
+    late void Function(VoidCallback) setStateCallback;
+    bool attachContext = true;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              StatefulBuilder(builder: (BuildContext context, void Function(VoidCallback) setState) {
+                setStateCallback = setState;
+                return EditableText(
+                  focusNode: focusNodeA,
+                  backgroundCursorColor: Colors.blue,
+                  controller: controller,
+                  cursorColor: Colors.red,
+                  style: const TextStyle(),
+                  parentContext: attachContext ? context : null,
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture down1 = await tester.startGesture(tester.getCenter(find.byType(EditableText).first), kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    await down1.up();
+    await down1.removePointer();
+
+    expect(focusNodeA.hasFocus, true);
+
+    // Remove the parent context to force focus to re-attach to the child context.
+    setStateCallback(() {
+      attachContext = false;
+    });
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(focusNodeA.hasFocus, false);
+  }, variant: TargetPlatformVariant.desktop());
 }

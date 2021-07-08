@@ -1349,6 +1349,10 @@ class EditableText extends StatefulWidget {
 
   /// Optionally, the parent build context if this editable text was built as part of
   /// a larger text field.
+  ///
+  /// If this is provided then focus will be attached to the parent context instead of
+  /// the editable text. If the [parentContext] is later modified while the editable text
+  /// has focus, this focus will be lost.
   final BuildContext? parentContext;
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
@@ -1598,6 +1602,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
+  /// The [BuildContext] to use for focus attachment.
+  BuildContext get _focusContext => widget.parentContext ?? context;
+
   // State lifecycle:
 
   @override
@@ -1605,7 +1612,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.initState();
     _clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
-    _focusAttachment = widget.focusNode.attach(context, contextBounds: widget.parentContext);
+    _focusAttachment = widget.focusNode.attach(_focusContext);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController = widget.scrollController ?? ScrollController();
     _scrollController!.addListener(() { _selectionOverlay?.updateForScroll(); });
@@ -1652,19 +1659,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay?.handlesVisible = widget.showSelectionHandles;
     _isInAutofillContext = _isInAutofillContext || _shouldBeInAutofillContext;
 
-    if (widget.focusNode != oldWidget.focusNode) {
-      oldWidget.focusNode.removeListener(_handleFocusChanged);
+    final bool didChangeParentContext = widget.parentContext != oldWidget.parentContext;
+    final bool didChangeFocusNode = widget.focusNode != oldWidget.focusNode;
+
+    if (didChangeParentContext || didChangeFocusNode) {
       _focusAttachment?.detach();
-      _focusAttachment = widget.focusNode.attach(context);
+      _focusAttachment = widget.focusNode.attach(_focusContext);
+    }
+    if (didChangeFocusNode) {
+      oldWidget.focusNode.removeListener(_handleFocusChanged);
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
+
     if (!_shouldCreateInputConnection) {
       _closeInputConnectionIfNeeded();
-    } else {
-      if (oldWidget.readOnly && _hasFocus) {
-        _openInputConnection();
-      }
+    } else if (oldWidget.readOnly && _hasFocus) {
+      _openInputConnection();
     }
 
     if (kIsWeb && _hasInputConnection) {
