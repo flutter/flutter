@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:conductor/next.dart';
 import 'package:conductor/proto/conductor_state.pb.dart' as pb;
@@ -12,7 +10,6 @@ import 'package:conductor/repository.dart';
 import 'package:conductor/state.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import './common.dart';
@@ -31,8 +28,8 @@ void main() {
     const String revision3 = '789aaa';
     const String releaseVersion = '1.2.0-3.0.pre';
     const String releaseChannel = 'beta';
-    MemoryFileSystem fileSystem;
-    TestStdio stdio;
+    late MemoryFileSystem fileSystem;
+    late TestStdio stdio;
     const String stateFile = '/state-file.json';
 
     setUp(() {
@@ -41,7 +38,7 @@ void main() {
     });
 
     CommandRunner<void> createRunner({
-      @required Checkouts checkouts,
+      required Checkouts checkouts,
     }) {
       final NextCommand command = NextCommand(
         checkouts: checkouts,
@@ -239,9 +236,9 @@ void main() {
     });
 
     group('CODESIGN_ENGINE_BINARIES to APPLY_FRAMEWORK_CHERRYPICKS', () {
-      pb.ConductorState state;
-      FakeProcessManager processManager;
-      FakePlatform platform;
+      late pb.ConductorState state;
+      late FakeProcessManager processManager;
+      late FakePlatform platform;
 
       setUp(() {
         state = pb.ConductorState(
@@ -341,9 +338,9 @@ void main() {
       const String frameworkCheckoutPath = '$checkoutsParentDirectory/framework';
       const String engineCheckoutPath = '$checkoutsParentDirectory/engine';
       const String oldEngineVersion = '000000001';
-      FakeProcessManager processManager;
-      FakePlatform platform;
-      pb.ConductorState state;
+      late FakeProcessManager processManager;
+      late FakePlatform platform;
+      late pb.ConductorState state;
 
       setUp(() {
         processManager = FakeProcessManager.empty();
@@ -640,8 +637,8 @@ void main() {
     group('PUBLISH_VERSION to PUBLISH_CHANNEL', () {
       const String remoteName = 'upstream';
       const String releaseVersion = '1.2.0-3.0.pre';
-      pb.ConductorState state;
-      FakePlatform platform;
+      late pb.ConductorState state;
+      late FakePlatform platform;
 
       setUp(() {
         state = pb.ConductorState(
@@ -766,8 +763,8 @@ void main() {
 
     group('PUBLISH_CHANNEL to VERIFY_RELEASE', () {
       const String remoteName = 'upstream';
-      pb.ConductorState state;
-      FakePlatform platform;
+      late pb.ConductorState state;
+      late FakePlatform platform;
 
       setUp(() {
         state = pb.ConductorState(
