@@ -24,7 +24,7 @@ class UploadMetricsCommand extends Command<void> {
   @override
   Future<void> run() async {
     final String resultsPath = argResults!['results-file'] as String;
-    final String serviceAccountTokenFile = argResults!['service-account-token-file'] as String;
+    final String? serviceAccountTokenFile = argResults!['service-account-token-file'] as String?;
 
     final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
     return cocoon.sendResultsPath(resultsPath);
