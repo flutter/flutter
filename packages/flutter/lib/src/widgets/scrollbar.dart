@@ -1067,9 +1067,9 @@ class RawScrollbar extends StatefulWidget {
 
   /// The [shape] of the scrollbar's thumb.
   ///
-  /// If you need just a simple rectangle with rounded borders, use [radius].
-  /// Using [shape] and [radius] together will not work and will throw an
-  /// error. Use only one (or none) of them to construct the [RawScrollbar].
+  /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
+  /// it's simplest to just specify [radius]. By default the scrollbar thumb's
+  /// shape is a simple rectangle.
   ///
   /// If neither [shape] nor [radius] are specified, the thumb will take the
   /// shape of a regular rectangle whose width is defined by [thickness], which
@@ -1078,12 +1078,26 @@ class RawScrollbar extends StatefulWidget {
   /// is unspecified).
   ///
   /// The [shape] could be any one of the subclasses of [OutlinedBorder].
-  /// If a [CircleBorder] is used, the [thickness] would be the diameter
-  /// of the circle, and the border (if any) will be painted over it.
   ///
-  /// If the [OutlinedBorder] is a class implementing [MaterialStateOutlinedBorder], the
-  /// argument that should be passed to [shape] must be the result of the
-  /// `resolve` function of that class.
+  /// Here is an example of using a [StadiumBorder] for drawing the [shape] of the
+  /// thumb in a [RawScrollbar]:
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     body: RawScrollbar(
+  ///       child: ListView(
+  ///         children: List<Text>.generate(100, (int index) => Text((index * index).toString())),
+  ///         physics: const BouncingScrollPhysics(),
+  ///       ),
+  ///       shape: const StadiumBorder(side: BorderSide(color: Colors.brown, width: 3.0)),
+  ///       thickness: 15.0,
+  ///       thumbColor: Colors.blue,
+  ///       isAlwaysShown: true,
+  ///     ),
+  ///   );
+  /// }
+  /// ```
   final OutlinedBorder? shape;
 
   /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
