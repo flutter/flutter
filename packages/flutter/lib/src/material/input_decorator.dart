@@ -2228,8 +2228,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                       decoration!.labelText!,
                       overflow: TextOverflow.ellipsis,
                       textAlign: textAlign,
+                    ),
                   ),
-                ),
                 ),
                 WidgetSpan(
                   child: AnimatedDefaultTextStyle(
@@ -2239,13 +2239,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                         ? _getFloatingLabelStyle(themeData)
                         : inlineRequiredLabelStyle,
                     child:Text(
-                    decoration!.requiredLabelText!,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: textAlign,
-                  ),
+                      decoration!.requiredLabelText!,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: textAlign,
+                    ),
                   ),
                 ),
-                // TextSpan(decoration!.requiredLabelText!, style: TextStyle(overflow: TextOverflow.ellipsis))
               ]
             ),
           ),
@@ -2647,8 +2646,8 @@ class InputDecoration {
        semanticCounterText = null,
        alignLabelWithHint = false,
        constraints = null,
-        requiredLabelText = null,
-        requiredLabelStyle = null;
+       requiredLabelText = null,
+       requiredLabelStyle = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
