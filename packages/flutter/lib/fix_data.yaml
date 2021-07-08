@@ -15,6 +15,36 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/81303
+  - title: "Migrate to 'setEnabledSystemUIMode'"
+    date: 2021-06-08
+    element:
+      uris: [ 'services.dart' ]
+      method: 'setEnabledSystemUIOverlays'
+      inClass: 'SystemChrome'
+    changes:
+      - kind: 'rename'
+        newName: 'setEnabledSystemUIMode'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addParameter'
+        index: 0
+        name: 'mode'
+        style: required_positional
+        argumentValue:
+          expression: 'SystemUiMode.manual'
+      - kind: 'addParameter'
+        index: 1
+        name: 'overlays'
+        style: optional_named
+        argumentValue:
+          expression: '{% overlays %}'
+          requiredIf: "overlays != ''"
+    variables:
+      overlays:
+        kind: 'fragment'
+        value: 'arguments[0]'
+
   # Changes made in https://github.com/flutter/flutter/pull/64254
   - title: "Migrate to 'removeRenderObjectChild'"
     date: 2020-08-20

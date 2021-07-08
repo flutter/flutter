@@ -28,4 +28,4 @@ void main() {
   });
 }
 
-class FakeAndroidSdk extends Fake implements AndroidSdk {}
+class FakeAndroidSdk extends Fake implements AndroidSdk { }
