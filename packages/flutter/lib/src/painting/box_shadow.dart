@@ -42,7 +42,9 @@ class BoxShadow extends ui.Shadow {
   /// The amount the box should be inflated prior to applying the blur.
   final double spreadRadius;
 
-  /// The style(inner/normal/outer/solid) of the blur.
+  /// The [BlurStyle] to use for this shadow.
+  ///
+  /// Defaults to [BlurStyle.normal].
   final BlurStyle blurStyle;
 
   /// Create the [Paint] object that corresponds to this shadow description.
