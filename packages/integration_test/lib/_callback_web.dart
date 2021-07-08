@@ -50,6 +50,11 @@ class WebCallbackManager implements CallbackManager {
     return const <String, dynamic>{'bytes': <int>[]};
   }
 
+  @override
+  Future<void> convertFlutterSurfaceToImage() async {
+    // Noop on Web.
+  }
+
   Future<void> _sendWebDriverCommand(WebDriverCommand command) async {
     try {
       _webDriverCommandPipe.complete(command);

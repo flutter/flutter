@@ -59,10 +59,24 @@ class IOCallbackManager implements CallbackManager {
     // comes up in the future. For example: `WebCallbackManager.cleanup`.
   }
 
+  // Whether the Flutter surface uses an Image.
+  bool _usesFlutterImage = false;
+
+  @override
+  Future<void> convertFlutterSurfaceToImage() async {
+    await integrationTestChannel.invokeMethod<void>(
+      'convertFlutterSurfaceToImage',
+      null,
+    );
+    _usesFlutterImage = true;
+  }
+
   @override
   Future<Map<String, dynamic>> takeScreenshot(String screenshot) async {
+    if (!_usesFlutterImage) {
+      throw 'Please call convertFlutterSurfaceToImage() before taking a screenshot';
+    }
     integrationTestChannel.setMethodCallHandler(_onMethodChannelCall);
-
     final List<int>? rawBytes = await integrationTestChannel.invokeMethod<List<int>>(
       'captureScreenshot',
       null,

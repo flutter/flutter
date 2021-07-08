@@ -274,6 +274,9 @@ abstract class CallbackManager {
   /// Returns the data that is sent back to the host.
    Future<Map<String, dynamic>> takeScreenshot(String screenshot);
 
+  /// Android only. Convert the Flutter surface to an image view.
+  Future<void> convertFlutterSurfaceToImage();
+
   /// Cleanup and completers or locks used during the communication.
   void cleanup();
 }

@@ -167,9 +167,11 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// side.
   final CallbackManager callbackManager = driver_actions.callbackManager;
 
-  /// Taking a screenshot.
+  /// Take a screenshot.
   ///
-  /// Called by test methods. Implementation differs for each platform.
+  /// On Android, you need to call `convertFlutterSurfaceToImage()`, and set the
+  /// `framePolicy` to `LiveTestWidgetsFlutterBindingFramePolicy.fullyLive`
+  /// prior to taking a screenshot.
   Future<List<int>> takeScreenshot(String screenshotName) async {
     if (Platform.isAndroid) {
       assert(
@@ -184,6 +186,14 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
 
     (reportData!['screenshots']! as List<dynamic>).add(data);
     return data['bytes']! as List<int>;
+  }
+
+  /// Android only. Convert the Flutter surface to an image view.
+  /// Be aware that if you are conducting a perf test, you may not want to call
+  /// this method since the this is an expensive operation that affects the
+  /// rendering of a Flutter app.
+  Future<void> convertFlutterSurfaceToImage() async {
+    await callbackManager.convertFlutterSurfaceToImage();
   }
 
   /// The callback function to response the driver side input.

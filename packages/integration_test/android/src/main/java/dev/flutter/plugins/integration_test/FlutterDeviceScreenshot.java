@@ -6,7 +6,6 @@ package dev.flutter.plugins.integration_test;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.Instrumentation;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -19,7 +18,8 @@ import android.view.PixelCopy;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
-import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.annotation.Nullable;
+import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.android.FlutterSurfaceView;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.plugin.common.MethodChannel;
@@ -28,45 +28,44 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.StringBuilder;
 
-/** FlutterDeviceScreenshot */
+/**
+ * FlutterDeviceScreenshot is a utility class that allows to capture a screenshot
+ * that includes both Android views and the Flutter UI.
+ *
+ * To take screenshots, the rendering surface must be changed to {@code FlutterImageView},
+ * since surfaces like {@code FlutterSurfaceView} or {@code FlutterTextureView} are opaque
+ * when the view hierarchy is rendered to a bitmap.
+ *
+ * It's also necessary to ask the framework to schedule a frame, and then add a listener
+ * that waits for that frame to be presented by the Android framework.
+ */
 @TargetApi(19)
 class FlutterDeviceScreenshot {
+  /**
+   * Finds the {@code FlutterView} added to the {@code activity} view hierarchy.
+   *
+   * <p> This assumes that there's only one {@code FlutterView} per activity, which
+   * is always the case.
+   *
+   * @param activity typically, {code FlutterActivity}.
+   * @return the Flutter view.
+   */
+  @Nullable
+  private static FlutterView getFlutterView(@NonNull Activity activity) {
+   return (FlutterView)activity.findViewById(FlutterActivity.FLUTTER_VIEW_ID);
+  }
+
   /**
    * Whether the app is run with instrumentation.
    *
    * @return true if the app is running with instrumentation.
    */
   static boolean hasInstrumentation() {
-    try {
-      return InstrumentationRegistry.getInstrumentation() != null;
-    } catch (IllegalStateException exception) {
-      return false;
-    }
-  }
-
-  /**
-   * Captures a screenshot by drawing the view to a Canvas.
-   *
-   * <p>It also converts {@link FlutterView} to an image view, since {@link FlutterSurfaceView}
-   * pixels are opaque when rendering the view to a canvas.
-   *
-   * @param activity This is {@link FlutterActivity}.
-   * @param methodChannel The method channel to call into Dart.
-   * @param result The result of the method call that came from Dart.
-   */
-  static void captureView(
-      @NonNull Activity activity, @NonNull MethodChannel methodChannel, @NonNull Result result) {
-    final FlutterView flutterView = getFlutterView(activity);
-    flutterView.convertToImageView();
-    methodChannel.invokeMethod("scheduleFrame", null);
-
-    final HandlerThread screenshotBackgroundThread = new HandlerThread("screenshot");
-    screenshotBackgroundThread.start();
-
-    final Handler backgroundHandler = new Handler(screenshotBackgroundThread.getLooper());
-    final Handler mainHandler = new Handler(Looper.getMainLooper());
-
-    takeScreenshot(backgroundHandler, mainHandler, flutterView, result);
+    // TODO(egarciad): InstrumentationRegistry requires the uiautomator dependency.
+    // However, Flutter adds test dependencies to release builds.
+    // As a result, disable screenshots with instrumentation until the issue is fixed.
+    // https://github.com/flutter/flutter/issues/56591
+    return false;
   }
 
   /**
@@ -75,19 +74,73 @@ class FlutterDeviceScreenshot {
    * @return byte array containing the screenshot.
    */
   static byte[] captureWithUiAutomation() throws IOException {
-    final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-    final Bitmap originalBitmap = instrumentation.getUiAutomation().takeScreenshot();
-    final ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-    originalBitmap.compress(Bitmap.CompressFormat.PNG, /* irrelevant for PNG */ 100, output);
-    return output.toByteArray();
+    return new byte[0];
   }
 
-  private static FlutterView getFlutterView(Activity activity) {
-    final ViewGroup root = (ViewGroup) activity.findViewById(android.R.id.content);
-    return (FlutterView) (((ViewGroup) root.getChildAt(0)).getChildAt(0));
+  // Whether the flutter surface is already converted to an image.
+  private static boolean flutterSurfaceConvertedToImage = false;
+
+  /**
+   * Converts the Flutter surface to an image view.
+   * This allows to render the view hierarchy to a bitmap since
+   * {@code FlutterSurfaceView} or {@code FlutterTextureView} cannot be rendered to a bitmap.
+   *
+   * @param activity typically {@code FlutterActivity}.
+   */
+  static void convertFlutterSurfaceToImage(@NonNull Activity activity) {
+    final FlutterView flutterView = getFlutterView(activity);
+    if (flutterView != null) {
+      flutterSurfaceConvertedToImage = true;
+      flutterView.convertToImageView();
+    }
   }
 
+
+  // Handlers use to capture a view.
+  private static Handler backgroundHandler;
+  private static Handler mainHandler;
+
+  /**
+   * Captures a screenshot by drawing the view to a Canvas.
+   *
+   * <p> {@code convertFlutterSurfaceToImage} must be called prior to capturing the view,
+   * otherwise the result is an error.
+   *
+   * @param activity this is {@link FlutterActivity}.
+   * @param methodChannel the method channel to call into Dart.
+   * @param result the result for the method channel that will contain the byte array.
+   */
+  static void captureView(
+      @NonNull Activity activity, @NonNull MethodChannel methodChannel, @NonNull Result result) {
+    final FlutterView flutterView = getFlutterView(activity);
+    if (flutterView == null) {
+      result.error("Could not copy the pixels", "FlutterView is null", null);
+      return;
+    }
+    if (!flutterSurfaceConvertedToImage) {
+      result.error("Could not copy the pixels", "Flutter surface must be converted to image first", null);
+      return;
+    }
+
+    // Ask the framework to schedule a new frame.
+    methodChannel.invokeMethod("scheduleFrame", null);
+
+    if (backgroundHandler == null) {
+      final HandlerThread screenshotBackgroundThread = new HandlerThread("screenshot");
+      screenshotBackgroundThread.start();
+      backgroundHandler = new Handler(screenshotBackgroundThread.getLooper());
+    }
+    if (mainHandler == null) {
+      mainHandler = new Handler(Looper.getMainLooper());
+    }
+    takeScreenshot(backgroundHandler, mainHandler, flutterView, result);
+  }
+
+  /**
+   * Waits for the next Android frame.
+   *
+   * @param r a callback.
+   */
   private static void waitForAndroidFrame(Runnable r) {
     Choreographer.getInstance()
         .postFrameCallback(
@@ -99,6 +152,14 @@ class FlutterDeviceScreenshot {
             });
   }
 
+  /**
+   * Waits until a Flutter frame is rendered by the Android OS.
+   *
+   * @param backgroundHandler the handler associated to a background thread.
+   * @param mainHandler the handler associated to the platform thread.
+   * @param view the flutter view.
+   * @param result the result that contains the byte array.
+   */
   private static void takeScreenshot(
       @NonNull Handler backgroundHandler,
       @NonNull Handler mainHandler,
@@ -120,8 +181,17 @@ class FlutterDeviceScreenshot {
         });
   }
 
+  /**
+   * Renders {@code FlutterView} to a Bitmap.
+   *
+   * If successful, The byte array is provided in the result.
+   *
+   * @param flutterView the Flutter view.
+   * @param result the result that contains the byte array.
+   * @param backgroundHandler a background handler to avoid blocking the platform thread.
+   */
   private static void convertViewToBitmap(
-      FlutterView flutterView, @NonNull Result result, @NonNull Handler backgroundHandler) {
+    @NonNull FlutterView flutterView, @NonNull Result result, @NonNull Handler backgroundHandler) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
       final Bitmap bitmap =
           Bitmap.createBitmap(

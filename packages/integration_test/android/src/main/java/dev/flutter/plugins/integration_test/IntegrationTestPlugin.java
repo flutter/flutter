@@ -82,6 +82,14 @@ public class IntegrationTestPlugin implements MethodCallHandler, FlutterPlugin, 
         testResultsSettable.set(results);
         result.success(null);
         return;
+      case "convertFlutterSurfaceToImage":
+        if (flutterActivity == null) {
+          result.error("Could not convert to image", "Activity not initialized", null);
+          return;
+        }
+        FlutterDeviceScreenshot.convertFlutterSurfaceToImage(flutterActivity);
+        result.success(null);
+        return;
       case "captureScreenshot":
         if (FlutterDeviceScreenshot.hasInstrumentation()) {
           byte[] image;
