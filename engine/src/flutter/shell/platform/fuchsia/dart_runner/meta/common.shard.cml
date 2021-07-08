@@ -1,0 +1,39 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+{
+    capabilities: [
+        {
+            directory: "diagnostics",
+            rights: [ "connect" ],
+            path: "/diagnostics",
+        },
+    ],
+    use: [
+        {
+            directory: "config-data",
+            rights: [ "r*" ],
+            path: "/config/data",
+        },
+        {
+            protocol: [
+                "fuchsia.component.runner.ComponentRunner",
+                "fuchsia.deprecatedtimezone.Timezone",
+                "fuchsia.feedback.CrashReporter",
+                "fuchsia.intl.PropertyProvider",
+                "fuchsia.logger.LogSink",
+                "fuchsia.net.NameLookup",
+                "fuchsia.posix.socket.Provider",
+                "fuchsia.tracing.provider.Registry",
+            ],
+            from: "parent",
+        },
+    ],
+    expose: [
+        {
+            directory: "diagnostics",
+            from: "self",
+            to: "framework",
+        },
+    ],
+}

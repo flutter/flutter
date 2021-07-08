@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_RUNNER_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_RUNNER_H_
 
+#include <fuchsia/component/runner/cpp/fidl.h>
 #include <fuchsia/sys/cpp/fidl.h>
 #include <lib/fidl/cpp/binding_set.h>
 #include <lib/sys/cpp/component_context.h>
@@ -13,7 +14,8 @@
 
 namespace dart_runner {
 
-class DartRunner : public fuchsia::sys::Runner {
+class DartRunner : public fuchsia::sys::Runner,
+                   public fuchsia::component::runner::ComponentRunner {
  public:
   explicit DartRunner(sys::ComponentContext* context);
   ~DartRunner() override;
@@ -26,9 +28,17 @@ class DartRunner : public fuchsia::sys::Runner {
       ::fidl::InterfaceRequest<fuchsia::sys::ComponentController> controller)
       override;
 
+  // |fuchsia::component::runner::ComponentRunner|
+  void Start(
+      fuchsia::component::runner::ComponentStartInfo start_info,
+      fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
+          controller) override;
+
   // Not owned by DartRunner.
   sys::ComponentContext* context_;
   fidl::BindingSet<fuchsia::sys::Runner> bindings_;
+  fidl::BindingSet<fuchsia::component::runner::ComponentRunner>
+      component_runner_bindings_;
 
 #if !defined(AOT_RUNTIME)
   dart_utils::MappedResource vm_snapshot_data_;
