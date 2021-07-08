@@ -224,15 +224,16 @@ void runNext({
           'This release has no framework cherrypicks. However, a framework PR is still\n'
           'required to roll engine cherrypicks.',
         );
+      } else if (unappliedCherrypicks.isEmpty) {
+        stdio.printStatus('All framework cherrypicks were auto-applied by the conductor.');
       } else {
-        if (unappliedCherrypicks.isEmpty) {
-          stdio.printStatus('All framework cherrypicks were auto-applied by the conductor.');
-        } else {
-          stdio.printStatus(
-            'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
-          stdio.printStatus('These must be applied manually in the directory '
-            '${state.framework.checkoutPath} before proceeding.\n');
-        }
+        stdio.printStatus(
+          'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.',
+        );
+        stdio.printStatus(
+          'These must be applied manually in the directory '
+          '${state.framework.checkoutPath} before proceeding.\n',
+        );
       }
 
       if (autoAccept == false) {
