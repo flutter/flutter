@@ -2128,6 +2128,7 @@ class _RepositoryFlutterDirectory extends _RepositoryDirectory {
         // None of the web_sdk code is linked into Flutter apps. It's only used
         // by engine tests and tools.
         && entry.name != 'web_sdk'
+        && entry.name != 'prebuilts'
         && super.shouldRecurse(entry);
   }
 
