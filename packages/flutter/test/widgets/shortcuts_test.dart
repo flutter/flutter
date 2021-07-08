@@ -1084,7 +1084,7 @@ void main() {
         CallbackShortcuts(
           bindings: <ShortcutActivator, VoidCallback>{
             const SingleActivator(LogicalKeyboardKey.keyA): () {
-              invoked++;
+              invoked += 1;
             },
           },
           child: const Focus(
@@ -1107,13 +1107,13 @@ void main() {
         CallbackShortcuts(
           bindings: <ShortcutActivator, VoidCallback>{
             const SingleActivator(LogicalKeyboardKey.keyA): () {
-              invokedOuter++;
+              invokedOuter += 1;
             },
           },
           child: CallbackShortcuts(
             bindings: <ShortcutActivator, VoidCallback>{
               const SingleActivator(LogicalKeyboardKey.keyA): () {
-                invokedInner++;
+                invokedInner += 1;
               },
             },
             child: const Focus(
@@ -1139,13 +1139,13 @@ void main() {
         CallbackShortcuts(
           bindings: <ShortcutActivator, VoidCallback>{
             const CharacterActivator('b'): () {
-              invokedOuter++;
+              invokedOuter += 1;
             },
           },
           child: CallbackShortcuts(
             bindings: <ShortcutActivator, VoidCallback>{
               const CharacterActivator('a'): () {
-                invokedInner++;
+                invokedInner += 1;
               },
             },
             child: const Focus(
@@ -1186,13 +1186,13 @@ void main() {
           actions: <Type, Action<Intent>>{
             TestIntent: TestAction(
               onInvoke: (Intent intent) {
-                invokedActionA++;
+                invokedActionA += 1;
                 return true;
               },
             ),
             TestIntent2: TestAction(
               onInvoke: (Intent intent) {
-                invokedActionB++;
+                invokedActionB += 1;
                 return true;
               },
             ),
@@ -1200,7 +1200,7 @@ void main() {
           child: CallbackShortcuts(
             bindings: <ShortcutActivator, VoidCallback>{
               const CharacterActivator('b'): () {
-                invokedCallbackB++;
+                invokedCallbackB += 1;
               },
             },
             child: Shortcuts(
@@ -1211,7 +1211,7 @@ void main() {
               child: CallbackShortcuts(
                 bindings: <ShortcutActivator, VoidCallback>{
                   const CharacterActivator('a'): () {
-                    invokedCallbackA++;
+                    invokedCallbackA += 1;
                   },
                 },
                 child: const Focus(
