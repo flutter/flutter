@@ -19,6 +19,9 @@ declare_args() {
 
   # Whether to use the Skia text shaper module for all text rendering
   flutter_always_use_skshaper = false
+
+  # Whether to use a prebuilt Dart SDK instead of building one.
+  flutter_prebuilt_dart_sdk = false
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -61,4 +64,18 @@ if (is_ios || is_mac) {
   flutter_cflags_objcc = flutter_cflags_objc
   flutter_cflags_objc_arc = flutter_cflags_objc + [ "-fobjc-arc" ]
   flutter_cflags_objcc_arc = flutter_cflags_objc_arc
+}
+
+# prebuilt Dart SDK location
+
+if (flutter_prebuilt_dart_sdk) {
+  _os_name = target_os
+  if (_os_name == "mac") {
+    _os_name = "macos"
+  } else if (_os_name == "win" || _os_name == "winuwp") {
+    _os_name = "windows"
+  }
+  target_prebuilt_dart_sdk =
+      "//flutter/prebuilts/$_os_name-$target_cpu/dart-sdk"
+  host_prebuilt_dart_sdk = "//flutter/prebuilts/$_os_name-$host_cpu/dart-sdk"
 }
