@@ -45,12 +45,6 @@ if [[ ! -d "$DEVICE_TOOLS" ]]; then
   exit 1
 fi
 
-PUB="$HOST_TOOLS/dart-sdk/bin/pub"
-PUB_VERSION="$("$PUB" --version)"
-echo "Using Pub ${PUB_VERSION} from $PUB"
-
-(cd "$SCRIPT_DIR"; "$PUB" get --offline)
-
 echo "Using dart from $HOST_TOOLS, gen_snapshot from $DEVICE_TOOLS."
 
 OUTDIR="$SCRIPT_DIR/build/android"

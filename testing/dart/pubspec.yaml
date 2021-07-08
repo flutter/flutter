@@ -19,6 +19,7 @@ environment:
 dependencies:
   litetest: any
   path: any
+  sky_engine: any
   vm_service: any
 
 dependency_overrides:
@@ -35,8 +36,6 @@ dependency_overrides:
   spirv:
     path: ../../lib/spirv
   sky_engine:
-    path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_engine
-  sky_services:
-    path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_services
+    path: ../../sky/packages/sky_engine
   vm_service:
     path: ../../../third_party/dart/pkg/vm_service
