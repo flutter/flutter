@@ -21,7 +21,7 @@ String luciConsoleLink(String channel, String groupName) {
     'channel $channel not recognized',
   );
   assert(
-    <String>['framework', 'engine', 'devicelab'].contains(groupName),
+    <String>['framework', 'engine', 'devicelab', 'packaging'].contains(groupName),
     'group named $groupName not recognized',
   );
   final String consoleName = channel == 'master' ? groupName : '${channel}_$groupName';
@@ -133,8 +133,9 @@ String phaseInstructions(pb.ConductorState state) {
       ].join('\n');
     case ReleasePhase.CODESIGN_ENGINE_BINARIES:
       return <String>[
-        'You must verify Engine CI builds are successful and then codesign the',
-        'binaries at revision ${state.engine.currentGitHead}.',
+        'You must verify pre-submit CI builds on your engine pull request are successful,',
+        'merge your pull request, validate post-submit CI, and then codesign the binaries ',
+        'on the merge commit.',
       ].join('\n');
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       final List<pb.Cherrypick> outstandingCherrypicks = state.framework.cherrypicks.where(
@@ -150,13 +151,14 @@ String phaseInstructions(pb.ConductorState state) {
       ].join('\n');
     case ReleasePhase.PUBLISH_VERSION:
       return <String>[
-        'You must verify Framework CI builds are successful.',
-        'See $kReleaseDocumentationUrl for more information.',
+        'You must verify pre-submit CI builds on your framework pull request are successful,',
+        'merge your pull request, and validate post-submit CI. See $kReleaseDocumentationUrl,',
+        'for more information.',
       ].join('\n');
     case ReleasePhase.PUBLISH_CHANNEL:
       return 'Issue `conductor next` to publish your release to the release branch.';
     case ReleasePhase.VERIFY_RELEASE:
-      return 'Release archive packages must be verified on cloud storage.';
+      return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}';
     case ReleasePhase.RELEASE_COMPLETED:
       return 'This release has been completed.';
   }

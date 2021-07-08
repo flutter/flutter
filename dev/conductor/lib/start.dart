@@ -100,7 +100,7 @@ class StartCommand extends Command<void> {
         'y': 'Indicates the first dev release after a beta release.',
         'z': 'Indicates a hotfix to a stable release.',
         'm': 'Indicates a standard dev release.',
-        'n': 'Indicates a hotfix to a dev release.',
+        'n': 'Indicates a hotfix to a dev or beta release.',
       },
     );
     final Git git = Git(processManager);
@@ -230,7 +230,8 @@ class StartCommand extends Command<void> {
 
     // Create a new branch so that we don't accidentally push to upstream
     // candidateBranch.
-    engine.newBranch('cherrypicks-$candidateBranch');
+    final String workingBranchName = 'cherrypicks-$candidateBranch';
+    engine.newBranch(workingBranchName);
 
     if (dartRevision != null && dartRevision.isNotEmpty) {
       engine.updateDartRevision(dartRevision);
@@ -262,6 +263,7 @@ class StartCommand extends Command<void> {
     final String engineHead = engine.reverseParse('HEAD');
     state.engine = pb.Repository(
       candidateBranch: candidateBranch,
+      workingBranch: workingBranchName,
       startingGitHead: engineHead,
       currentGitHead: engineHead,
       checkoutPath: engine.checkoutDirectory.path,
@@ -282,7 +284,7 @@ class StartCommand extends Command<void> {
         url: frameworkMirror,
       ),
     );
-    framework.newBranch('cherrypicks-$candidateBranch');
+    framework.newBranch(workingBranchName);
     final List<pb.Cherrypick> frameworkCherrypicks = _sortCherrypicks(
       repository: framework,
       cherrypicks: frameworkCherrypickRevisions,
@@ -320,6 +322,7 @@ class StartCommand extends Command<void> {
     final String frameworkHead = framework.reverseParse('HEAD');
     state.framework = pb.Repository(
       candidateBranch: candidateBranch,
+      workingBranch: workingBranchName,
       startingGitHead: frameworkHead,
       currentGitHead: frameworkHead,
       checkoutPath: framework.checkoutDirectory.path,
