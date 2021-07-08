@@ -693,7 +693,6 @@ class FutureBuilder<T> extends StatefulWidget {
     this.future,
     this.initialData,
     required this.builder,
-    this.debugRethrowError = false,
   }) : assert(builder != null),
        super(key: key);
 
@@ -744,7 +743,7 @@ class FutureBuilder<T> extends StatefulWidget {
   /// When set to true, will rethrow the latest error only in debug mode.
   ///
   /// Defaults to `false`, resulting in swallowing of errors.
-  final bool debugRethrowError;
+  static bool debugRethrowError = false;
 
   @override
   State<FutureBuilder<T>> createState() => _FutureBuilderState<T>();
@@ -804,7 +803,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
             _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace);
           });
         }
-        if(kDebugMode && widget.debugRethrowError) {
+        if(kDebugMode && FutureBuilder.debugRethrowError) {
           Future<Object>.error(error, stackTrace);
         }
       });

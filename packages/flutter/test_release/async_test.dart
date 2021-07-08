@@ -9,11 +9,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('debugRethrowError rethrows caught error', (WidgetTester tester) async {
+    FutureBuilder.debugRethrowError = true;
     final Completer<void> caughtError = Completer<void>();
     await runZonedGuarded(() async {
       final Completer<String> completer = Completer<String>();
       await tester.pumpWidget(FutureBuilder<String>(
-        debugRethrowError: true,
         future: completer.future,
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           return Text(snapshot.toString(), textDirection: TextDirection.ltr);
@@ -26,5 +26,6 @@ void main() {
     });
     await tester.pumpAndSettle();
     expectSync(caughtError.isCompleted, isFalse);
+    FutureBuilder.debugRethrowError = true;
   });
 }

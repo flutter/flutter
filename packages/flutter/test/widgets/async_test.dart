@@ -166,11 +166,11 @@ void main() {
       expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, I, null, null)'), findsOneWidget);
     });
     testWidgets('debugRethrowError rethrows caught error', (WidgetTester tester) async {
+      FutureBuilder.debugRethrowError = true;
       final Completer<void> caughtError = Completer<void>();
       await runZonedGuarded(() async {
         final Completer<String> completer = Completer<String>();
         await tester.pumpWidget(FutureBuilder<String>(
-          debugRethrowError: true,
           future: completer.future,
           builder: snapshotText,
         ), const Duration(seconds: 1));
@@ -181,6 +181,7 @@ void main() {
       });
       await tester.pumpAndSettle();
       expectSync(caughtError.isCompleted, isTrue);
+      FutureBuilder.debugRethrowError = false;
     });
   });
   group('StreamBuilder', () {
