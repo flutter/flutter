@@ -40,16 +40,13 @@ class BuildMacosCommand extends BuildSubCommand {
   String get description => 'Build a macOS desktop application.';
 
   @override
-  bool get supported => globals.platform.isMacOS;
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!featureFlags.isMacOSEnabled) {
       throwToolExit('"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".');
     }
-    if (!supported) {
+    if (!globals.platform.isMacOS) {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
     displayNullSafetyMode(buildInfo);

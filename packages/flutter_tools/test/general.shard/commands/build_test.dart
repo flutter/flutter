@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:args/args.dart';
-import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -75,13 +74,6 @@ void main() {
     testLogger.clear();
     FakeBuildSubCommand().test(sound);
     expect(testLogger.statusText, contains('💪 Building with sound null safety 💪'));
-  });
-
-  testUsingContext('Include only supported sub commands', () {
-    final BuildCommand command = BuildCommand();
-    for (final Command<void> x in command.subcommands.values) {
-      expect((x as BuildSubCommand).supported, isTrue);
-    }
   });
 }
 

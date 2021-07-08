@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -112,7 +111,7 @@ void main() {
 
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
-        throwsA(isA<UsageException>()),
+        throwsToolExit(),
       );
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
