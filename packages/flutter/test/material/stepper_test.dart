@@ -956,12 +956,39 @@ void main() {
    });
 
   testWidgets('Stepper horizontal preserves state', (WidgetTester tester) async {
+    const Color untappedColor = Colors.blue;
+    const Color tappedColor = Colors.red;
+    int index = 0;
+
     Widget buildFrame() {
-      return const MaterialApp(
+      return MaterialApp(
         home: Scaffold(
           body: Center(
             // Must break this out into its own widget purely to be able to call `setState()`
-            child: StatefulStepper(),
+            // child: StatefulStepper(),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Stepper(
+                  onStepTapped: (int i) => setState(() => index = i),
+                  currentStep: index,
+                  type: StepperType.horizontal,
+                  steps: const <Step>[
+                    Step(
+                      title: Text('Step 1'),
+                      content: _TappableColorWidget(
+                        key: Key('tappable-color'),
+                        tappedColor: tappedColor,
+                        untappedColor: untappedColor,
+                      ),
+                    ),
+                    Step(
+                      title: Text('Step 2'),
+                      content: Text('Step 2 Content'),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       );
@@ -970,84 +997,72 @@ void main() {
     final Widget widget = buildFrame();
     await tester.pumpWidget(widget);
 
+    // Set up a getter to examine the MacGuffin's color
+    Color getColor() => tester.widget<ColoredBox>(
+      find.descendant(of: find.byKey(const Key('tappable-color')), matching: find.byType(ColoredBox)),
+    ).color;
+
     // We are on step 1
     expect(find.text('Step 2 Content'), findsNothing);
+    expect(getColor(), untappedColor);
 
-    ColoredBox findBox() => tester.widget<ColoredBox>(
-      find.descendant(of: find.byKey(const Key('randomized-color')), matching: find.byType(ColoredBox)),
-    );
-    final Color color = findBox().color;
+    await tester.tap(find.byKey(const Key('tap-me')));
+    await tester.pumpAndSettle();
+    expect(getColor(), tappedColor);
 
+    // Now flip to step 2
     await tester.tap(find.text('Step 2'));
     await tester.pumpAndSettle();
 
-    // Confirm that we flipped over to step 2
+    // Confirm that we did in fact flip to step 2
     expect(find.text('Step 2 Content'), findsOneWidget);
 
+    // Now go back to step 1
     await tester.tap(find.text('Step 1'));
     await tester.pumpAndSettle();
 
     // Confirm that we flipped back to step 1
     expect(find.text('Step 2 Content'), findsNothing);
-    final Color color2 = findBox().color;
-    expect(color, equals(color2));
+
+    // The color should still be `tappedColor`
+    expect(getColor(), tappedColor);
   });
 }
 
-class StatefulStepper extends StatefulWidget {
-  const StatefulStepper({ Key? key }) : super(key: key);
+class _TappableColorWidget extends StatefulWidget {
+  const _TappableColorWidget({required this.tappedColor, required this.untappedColor, Key? key,}) : super(key: key);
+
+  final Color tappedColor;
+  final Color untappedColor;
 
   @override
-  StatefulStepperState createState() => StatefulStepperState();
+  State<StatefulWidget> createState() => _TappableColorWidgetState();
 }
 
-class StatefulStepperState extends State<StatefulStepper> {
-  int index = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stepper(
-      onStepTapped: (int i) => setState(() => index = i),
-      currentStep: index,
-      type: StepperType.horizontal,
-      steps: const <Step>[
-        Step(
-          title: Text('Step 1'),
-          content: RandomColorWidget(
-            key: Key('randomized-color'),
-          ),
-        ),
-        Step(
-          title: Text('Step 2'),
-          content: Text('Step 2 Content'),
-        ),
-      ],
-    );
-  }
-}
-
-class RandomColorWidget extends StatefulWidget {
-  const RandomColorWidget({Key? key}) : super(key: key);
-  @override
-  State<StatefulWidget> createState() => RandomColorWidgetState();
-}
-
-class RandomColorWidgetState extends State<RandomColorWidget> {
+class _TappableColorWidgetState extends State<_TappableColorWidget> {
 
   Color? color;
-
+  
   @override
   void initState() {
-    color = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
     super.initState();
+    color = widget.untappedColor;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 50,
-      width: 50,
-      color: color,
+    return GestureDetector(
+      onTap: () {
+        setState((){
+          color = widget.tappedColor;
+        });
+      },
+      child: Container(
+        key: const Key('tap-me'),
+        height: 50,
+        width: 50,
+        color: color,
+      ),
     );
   }
 }
