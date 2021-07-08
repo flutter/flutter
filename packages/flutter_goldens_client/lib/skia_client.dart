@@ -428,4 +428,4 @@ class SkiaGoldClient {
 }
 
 /// Used to make HttpRequests during testing.
-class SkiaGoldHttpOverrides extends io.HttpOverrides {}
+class SkiaGoldHttpOverrides extends io.HttpOverrides { }
