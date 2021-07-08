@@ -38,6 +38,9 @@ void main() {
 
     await Future<void>.delayed(const Duration(seconds: 3));
 
+    // On Android, this is required prior to taking the screenshot.
+    await binding.convertFlutterSurfaceToImage();
+
     // Takes a screenshot of the native UI.
     await binding.takeScreenshot('platform_name');
 
