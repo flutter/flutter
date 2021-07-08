@@ -4,7 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
-import 'package:meta/meta.dart' show required, visibleForTesting;
+import 'package:meta/meta.dart' show visibleForTesting;
 import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart';
