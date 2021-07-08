@@ -178,7 +178,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'devtools 2.4.0',
         ),
         const FakeCommand(
           command: <String>[
@@ -186,8 +186,9 @@ void main() {
             'global',
             'activate',
             'devtools',
+            '2.4.0',
           ],
-          stdout: 'Activated DevTools 0.9.6',
+          stdout: 'Activated DevTools 2.4.0',
         ),
         FakeCommand(
           command: const <String>[
@@ -231,8 +232,9 @@ void main() {
             'global',
             'activate',
             'devtools',
+            '2.4.0'
           ],
-          stdout: 'Activated DevTools 0.9.5',
+          stdout: 'Activated DevTools 2.4.0',
         ),
         const FakeCommand(
           command: <String>[
@@ -240,7 +242,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.5',
+          stdout: 'devtools 2.4.0',
         ),
         FakeCommand(
           command: const <String>[
@@ -276,7 +278,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.5',
+          stdout: 'devtools 2.4.0',
         ),
         const FakeCommand(
           command: <String>[
@@ -284,8 +286,9 @@ void main() {
             'global',
             'activate',
             'devtools',
+            '2.4.0'
           ],
-          stdout: 'Activated DevTools 0.9.5',
+          stdout: 'Activated DevTools 2.4.0',
         ),
         FakeCommand(
           command: const <String>[
@@ -326,7 +329,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'devtools 2.4.0',
         ),
         const FakeCommand(
           command: <String>[
@@ -353,7 +356,7 @@ void main() {
           'global',
           'list',
         ],
-        stdout: 'devtools 0.9.6',
+        stdout: 'devtools 2.4.0',
       ),
       const FakeCommand(
         command: <String>[
@@ -397,7 +400,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'devtools 2.4.0',
         ),
         const FakeCommand(
           command: <String>[
@@ -405,6 +408,7 @@ void main() {
             'global',
             'activate',
             'devtools',
+            '2.4.0',
           ],
           stderr: 'Error - could not activate devtools',
           exitCode: 1,
@@ -442,7 +446,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.5',
+          stdout: 'devtools 2.4.0',
         ),
         const FakeCommand(
           command: <String>[
@@ -450,8 +454,9 @@ void main() {
             'global',
             'activate',
             'devtools',
+            '2.4.0'
           ],
-          stdout: 'Activated DevTools 0.9.6',
+          stdout: 'Activated DevTools 2.4.0',
         ),
         const FakeCommand(
           command: <String>[
