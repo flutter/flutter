@@ -107,14 +107,12 @@ analyze \
   "$FLUTTER_DIR/testing/smoke_test_failure"
 
 echo "Analyzing testing/dart..."
-(cd "$FLUTTER_DIR/testing/dart" && "$PUB" get --offline)
 analyze \
   --packages="$FLUTTER_DIR/testing/dart/.dart_tool/package_config.json" \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
   "$FLUTTER_DIR/testing/dart"
 
 echo "Analyzing testing/scenario_app..."
-(cd "$FLUTTER_DIR/testing/scenario_app" && "$PUB" get --offline)
 analyze \
   --packages="$FLUTTER_DIR/testing/scenario_app/.dart_tool/package_config.json" \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
