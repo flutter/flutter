@@ -378,7 +378,7 @@ class RenderSliverOffstage extends RenderProxySliver {
 ///
 /// This is a variant of [RenderSliverOpacity] that uses an [Animation<double>]
 /// rather than a [double] to control the opacity.
-class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedOpacityMixin<RenderSliver>{
+class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedOpacityMixin<RenderSliver> {
   /// Creates a partially transparent render object.
   ///
   /// The [opacity] argument must not be null.

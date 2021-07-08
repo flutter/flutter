@@ -651,7 +651,7 @@ mixin _PointerEventDescription on PointerEvent {
   }
 }
 
-abstract class _AbstractPointerEvent implements PointerEvent {}
+abstract class _AbstractPointerEvent implements PointerEvent { }
 
 // The base class for transformed pointer event classes.
 //

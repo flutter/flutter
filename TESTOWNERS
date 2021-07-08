@@ -8,7 +8,7 @@
 # the TL will be assigned and the sub-team will be labeled by default
 # for further triage.
 
-# Linux Android DeviceLab tests
+## Linux Android DeviceLab tests
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_defines_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_obfuscate_test.dart @zanderso @flutter/tool
@@ -51,13 +51,13 @@
 /dev/devicelab/bin/tasks/multi_widget_construction_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery__crane_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/picture_cache_perf__e2e_summary.dart @zanderso @flutter/engine
-/dev/devicelab/bin/tasks/platform_channels_benchmarks @gaaclarke @flutter/engine
+/dev/devicelab/bin/tasks/platform_channels_benchmarks.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/routing_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @ferhatb @flutter/web
 
-# Windows Android DeviceLab tests
+## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/channels_integration_test_win.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_win__compile.dart @zanderso @flutter/tool
@@ -66,7 +66,7 @@
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_win__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/windows_chrome_dev_mode.dart @ferhatb @flutter/web
 
-# Mac Android DeviceLab tests
+## Mac Android DeviceLab tests
 /dev/devicelab/bin/tasks/android_semantics_integration_test.dart @HansMuller @flutter/framework
 /dev/devicelab/bin/tasks/backdrop_filter_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/channels_integration_test.dart @zanderso @flutter/engine
@@ -108,7 +108,7 @@
 /dev/devicelab/bin/tasks/textfield_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/tiles_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
 
-# Mac iOS DeviceLab tests
+## Mac iOS DeviceLab tests
 /dev/devicelab/bin/tasks/backdrop_filter_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/basic_material_app_ios__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/channels_integration_test_ios.dart @zanderso @flutter/engine
@@ -139,7 +139,7 @@
 /dev/devicelab/bin/tasks/new_gallery_ios__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test_swift.dart @zanderso @flutter/engine
-/dev/devicelab/bin/tasks/platform_channels_benchmarks_ios @gaaclarke @flutter/engine
+/dev/devicelab/bin/tasks/platform_channels_benchmarks_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/platform_interaction_test_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_view_ios__start_up.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
@@ -148,11 +148,11 @@
 /dev/devicelab/bin/tasks/smoke_catalina_hot_mode_dev_cycle_ios__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 
-# Mac iOS32 DeviceLab tests
+## Mac iOS32 DeviceLab tests
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e_ios32.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/native_ui_tests_ios32.dart @zanderso @flutter/engine
 
-# Host only DeviceLab tests
+## Host only DeviceLab tests
 /dev/devicelab/bin/tasks/build_aar_module_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/gradle_desugar_classes_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/gradle_non_android_plugin_test.dart @stuartmorgan @flutter/plugin
@@ -174,14 +174,8 @@
 /dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/module_test_ios.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/plugin_lint_mac.dart @stuartmorgan @flutter/plugin
-/dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
-/dev/devicelab/bin/tasks/gradle_non_android_plugin_test.dart @stuartmorgan @flutter/plugin
-/dev/devicelab/bin/tasks/gradle_plugin_bundle_test.dart @stuartmorgan @flutter/plugin
-/dev/devicelab/bin/tasks/gradle_plugin_fat_apk_test.dart @stuartmorgan @flutter/plugin
-/dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @stuartmorgan @flutter/plugin
-/dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
 
-# Host only framework tests
+## Host only framework tests
 # Linux analyze
 /dev/bots/analyze.dart @HansMuller @flutter/framework
 # Linux/Mac/Windows customer_testing
@@ -193,6 +187,7 @@
 # Linux web_smoke_test
 /examples/hello_world/test_driver/smoke_web_engine.dart @ferhatb @flutter/web
 
+## Shards tests
 # TODO(keyonghan): add files/paths for below framework host only testss.
 # https://github.com/flutter/flutter/issues/82068
 #

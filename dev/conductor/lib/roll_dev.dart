@@ -191,10 +191,10 @@ bool rollDev({
     repository.tag(commit, version.toString(), remoteName);
   }
 
-  repository.updateChannel(
-    commit,
-    remoteName,
-    'dev',
+  repository.pushRef(
+    fromRef: commit,
+    remote: remoteName,
+    toRef: 'dev',
     force: force,
   );
 
