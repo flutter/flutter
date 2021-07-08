@@ -8,13 +8,13 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
 import 'package:meta/meta.dart' show required, visibleForTesting;
 import './globals.dart';
-import './proto/conductor_state.pb.dart' as pb;
-import './proto/conductor_state.pbenum.dart';
+import './proto/conductor_county.pb.dart' as pb;
+import './proto/conductor_county.pbenum.dart';
 import './repository.dart';
-import './state.dart';
+import './county.dart';
 import './stdio.dart';
 
-const String kStateOption = 'state-file';
+const String kCountyOption = 'county-file';
 const String kYesFlag = 'yes';
 const String kForceFlag = 'force';
 
@@ -23,11 +23,11 @@ class NextCommand extends Command<void> {
   NextCommand({
     @required this.checkouts,
   }) {
-    final String defaultPath = defaultStateFilePath(checkouts.platform);
+    final String defaultPath = defaultCountyFilePath(checkouts.platform);
     argParser.addOption(
-      kStateOption,
+      kCountyOption,
       defaultsTo: defaultPath,
-      help: 'Path to persistent state file. Defaults to $defaultPath',
+      help: 'Path to persistent county file. Defaults to $defaultPath',
     );
     argParser.addFlag(
       kYesFlag,
@@ -54,7 +54,7 @@ class NextCommand extends Command<void> {
       autoAccept: argResults[kYesFlag] as bool,
       checkouts: checkouts,
       force: argResults[kForceFlag] as bool,
-      stateFile: checkouts.fileSystem.file(argResults[kStateOption]),
+      countyFile: checkouts.fileSystem.file(argResults[kCountyOption]),
     );
   }
 }
@@ -80,31 +80,31 @@ void runNext({
   @required bool autoAccept,
   @required bool force,
   @required Checkouts checkouts,
-  @required File stateFile,
+  @required File countyFile,
 }) {
   final Stdio stdio = checkouts.stdio;
-  const List<CherrypickState> finishedStates = <CherrypickState>[
-    CherrypickState.COMPLETED,
-    CherrypickState.ABANDONED,
+  const List<CherrypickCounty> finishedCountys = <CherrypickCounty>[
+    CherrypickCounty.COMPLETED,
+    CherrypickCounty.ABANDONED,
   ];
-  if (!stateFile.existsSync()) {
+  if (!countyFile.existsSync()) {
     throw ConductorException(
-      'No persistent state file found at ${stateFile.path}.',
+      'No persistent county file found at ${countyFile.path}.',
     );
   }
 
-  final pb.ConductorState state = readStateFromFile(stateFile);
+  final pb.ConductorCounty county = readCountyFromFile(countyFile);
 
-  switch (state.currentPhase) {
+  switch (county.currentPhase) {
     case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
       final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
-      for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
-        if (!finishedStates.contains(cherrypick.state)) {
+      for (final pb.Cherrypick cherrypick in county.engine.cherrypicks) {
+        if (!finishedCountys.contains(cherrypick.county)) {
           unappliedCherrypicks.add(cherrypick);
         }
       }
 
-      if (state.engine.cherrypicks.isEmpty) {
+      if (county.engine.cherrypicks.isEmpty) {
         stdio.printStatus('This release has no engine cherrypicks.');
         break;
       } else if (unappliedCherrypicks.isEmpty) {
@@ -113,12 +113,12 @@ void runNext({
         if (autoAccept == false) {
           final bool response = prompt(
             'Are you ready to push your changes to the repository '
-            '${state.engine.mirror.url}?',
+            '${county.engine.mirror.url}?',
             stdio,
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
+            writeCountyToFile(countyFile, county, stdio.logs);
             return;
           }
         }
@@ -126,16 +126,16 @@ void runNext({
         stdio.printStatus(
           'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
         stdio.printStatus('These must be applied manually in the directory '
-          '${state.engine.checkoutPath} before proceeding.\n');
+          '${county.engine.checkoutPath} before proceeding.\n');
         if (autoAccept == false) {
           final bool response = prompt(
               'Are you ready to push your engine branch to the repository '
-              '${state.engine.mirror.url}?',
+              '${county.engine.mirror.url}?',
             stdio,
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
+            writeCountyToFile(countyFile, county, stdio.logs);
             return;
           }
         }
@@ -150,20 +150,20 @@ void runNext({
         );
         if (!response) {
           stdio.printError('Aborting command.');
-          writeStateToFile(stateFile, state, stdio.logs);
+          writeCountyToFile(countyFile, county, stdio.logs);
           return;
         }
       }
       break;
     case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
-      for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
-        if (!finishedStates.contains(cherrypick.state)) {
+      for (final pb.Cherrypick cherrypick in county.framework.cherrypicks) {
+        if (!finishedCountys.contains(cherrypick.county)) {
           unappliedCherrypicks.add(cherrypick);
         }
       }
 
-      if (state.framework.cherrypicks.isEmpty) {
+      if (county.framework.cherrypicks.isEmpty) {
         stdio.printStatus('This release has no framework cherrypicks.');
         break;
       } else if (unappliedCherrypicks.isEmpty) {
@@ -172,12 +172,12 @@ void runNext({
         if (autoAccept == false) {
           final bool response = prompt(
             'Are you ready to push your changes to the repository '
-            '${state.framework.mirror.url}?',
+            '${county.framework.mirror.url}?',
             stdio,
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
+            writeCountyToFile(countyFile, county, stdio.logs);
             return;
           }
         }
@@ -185,16 +185,16 @@ void runNext({
         stdio.printStatus(
           'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
         stdio.printStatus('These must be applied manually in the directory '
-          '${state.framework.checkoutPath} before proceeding.\n');
+          '${county.framework.checkoutPath} before proceeding.\n');
         if (autoAccept == false) {
           final bool response = prompt(
               'Are you ready to push your framework branch to the repository '
-              '${state.framework.mirror.url}?',
+              '${county.framework.mirror.url}?',
             stdio,
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
+            writeCountyToFile(countyFile, county, stdio.logs);
             return;
           }
         }
@@ -205,13 +205,13 @@ void runNext({
       stdio.printStatus('post-submit CI has finished successfully.\n');
       final Remote upstream = Remote(
         name: RemoteName.upstream,
-        url: state.framework.upstream.url,
+        url: county.framework.upstream.url,
       );
       final FrameworkRepository framework = FrameworkRepository(
         checkouts,
-        initialRef: state.framework.candidateBranch,
+        initialRef: county.framework.candidateBranch,
         upstreamRemote: upstream,
-        previousCheckoutLocation: state.framework.checkoutPath,
+        previousCheckoutLocation: county.framework.checkoutPath,
       );
       final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {
@@ -221,40 +221,40 @@ void runNext({
         );
         if (!response) {
           stdio.printError('Aborting command.');
-          writeStateToFile(stateFile, state, stdio.logs);
+          writeCountyToFile(countyFile, county, stdio.logs);
           return;
         }
       }
-      framework.tag(headRevision, state.releaseVersion, upstream.name);
+      framework.tag(headRevision, county.releaseVersion, upstream.name);
       break;
     case pb.ReleasePhase.PUBLISH_CHANNEL:
       final Remote upstream = Remote(
         name: RemoteName.upstream,
-        url: state.framework.upstream.url,
+        url: county.framework.upstream.url,
       );
       final FrameworkRepository framework = FrameworkRepository(
         checkouts,
-        initialRef: state.framework.candidateBranch,
+        initialRef: county.framework.candidateBranch,
         upstreamRemote: upstream,
-        previousCheckoutLocation: state.framework.checkoutPath,
+        previousCheckoutLocation: county.framework.checkoutPath,
       );
       final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {
         final bool response = prompt(
-            'Are you ready to publish release ${state.releaseVersion} to '
-            'channel ${state.releaseChannel} at ${state.framework.upstream.url}?',
+            'Are you ready to publish release ${county.releaseVersion} to '
+            'channel ${county.releaseChannel} at ${county.framework.upstream.url}?',
           stdio,
         );
         if (!response) {
           stdio.printError('Aborting command.');
-          writeStateToFile(stateFile, state, stdio.logs);
+          writeCountyToFile(countyFile, county, stdio.logs);
           return;
         }
       }
       framework.updateChannel(
         headRevision,
-        state.framework.upstream.url,
-        state.releaseChannel,
+        county.framework.upstream.url,
+        county.releaseChannel,
         force: force,
       );
       break;
@@ -270,7 +270,7 @@ void runNext({
         );
         if (!response) {
           stdio.printError('Aborting command.');
-          writeStateToFile(stateFile, state, stdio.logs);
+          writeCountyToFile(countyFile, county, stdio.logs);
           return;
         }
       }
@@ -279,10 +279,10 @@ void runNext({
       throw ConductorException('This release is finished.');
       break;
   }
-  final ReleasePhase nextPhase = getNextPhase(state.currentPhase);
-  stdio.printStatus('\nUpdating phase from ${state.currentPhase} to $nextPhase...\n');
-  state.currentPhase = nextPhase;
-  stdio.printStatus(phaseInstructions(state));
+  final ReleasePhase nextPhase = getNextPhase(county.currentPhase);
+  stdio.printStatus('\nUpdating phase from ${county.currentPhase} to $nextPhase...\n');
+  county.currentPhase = nextPhase;
+  stdio.printStatus(phaseInstructions(county));
 
-  writeStateToFile(stateFile, state, stdio.logs);
+  writeCountyToFile(countyFile, county, stdio.logs);
 }
