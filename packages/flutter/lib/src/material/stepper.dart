@@ -55,6 +55,50 @@ enum StepperType {
   horizontal,
 }
 
+/// Container for all the information necessary to build a Stepper widget's 
+/// foward and backward controls for any given step.
+@immutable
+class ControlsDetails {
+  /// Default constructor.
+  const ControlsDetails({
+    required this.currentStep,
+    required this.stepIndex,
+    this.onStepCancel,
+    this.onStepContinue,
+  });
+  /// Index that is active for the surrounding Stepper widget. This may be
+  /// different from [stepIndex] if the user has just changed steps and we are
+  /// currently animating toward that step.
+  final int currentStep;
+  
+  /// Index of the step for which these controls are being built. This is
+  /// not necessarily the active index, if the user has just changed steps and
+  /// this step is animating away.
+  final int stepIndex;
+
+  /// The callback called when the 'continue' button is tapped.
+  ///
+  /// If null, the 'continue' button will be disabled.
+  final VoidCallback? onStepContinue;
+
+  /// The callback called when the 'cancel' button is tapped.
+  ///
+  /// If null, the 'cancel' button will be disabled.
+  final VoidCallback? onStepCancel;
+
+  /// True if the indicated step is also the current active step.
+  bool get isActive => currentStep == stepIndex;
+}
+
+/// A builder that creates a widget given a ControlsDetails object.
+///
+/// Used by [Stepper.indexedControlsBuilder].
+///
+/// See also:
+///
+///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
+typedef IndexedControlsBuilder = Widget Function(BuildContext context, { required ControlsDetails details });
+
 const TextStyle _kStepStyle = TextStyle(
   fontSize: 12.0,
   color: Colors.white,
@@ -184,7 +228,12 @@ class Stepper extends StatefulWidget {
     this.onStepTapped,
     this.onStepContinue,
     this.onStepCancel,
+    @Deprecated(
+      'Migrate to indexedControlsBuilder. '
+      'This builder was deprecated after v2.4.0-1.0.pre.126.',
+    )
     this.controlsBuilder,
+    this.indexedControlsBuilder,
     this.elevation,
   }) : assert(steps != null),
        assert(type != null),
@@ -279,7 +328,64 @@ class Stepper extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  @Deprecated(
+    'Migrate to indexedControlsBuilder. '
+    'This builder was deprecated after v2.4.0-1.0.pre.126.',
+  )
   final ControlsWidgetBuilder? controlsBuilder;
+
+  /// The callback for creating custom controls.
+  ///
+  /// If null, the default controls from the current theme will be used.
+  ///
+  /// This callback which takes in a context and a [ControlsDetails] object, which
+  /// contains step information and two functions: [onStepContinue] and [onStepCancel].
+  /// These can be used to control the stepper. For example, reading the
+  /// [ControlsDetails.currentStep] value within the callback can change the text
+  /// of the continue or cancel button depending on which step users are at.
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// Creates a stepper control with custom buttons.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Stepper(
+  ///     indexedControlsBuilder:
+  ///       (BuildContext context, { ControlsDetails details }) {
+  ///          return Row(
+  ///            children: <Widget>[
+  ///              TextButton(
+  ///                onPressed: details.onStepContinue
+  ///                child: const Text('Continue to Step ${details.stepIndex + 1}'),
+  ///              ),
+  ///              TextButton(
+  ///                onPressed: details.onStepCancel,
+  ///                child: const Text('Back to Step {details.stepIndex - 1}'),
+  ///              ),
+  ///            ],
+  ///          );
+  ///       },
+  ///     steps: const <Step>[
+  ///       Step(
+  ///         title: Text('A'),
+  ///         content: SizedBox(
+  ///           width: 100.0,
+  ///           height: 100.0,
+  ///         ),
+  ///       ),
+  ///       Step(
+  ///         title: Text('B'),
+  ///         content: SizedBox(
+  ///           width: 100.0,
+  ///           height: 100.0,
+  ///         ),
+  ///       ),
+  ///     ],
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final IndexedControlsBuilder? indexedControlsBuilder;
 
   /// The elevation of this stepper's [Material] when [type] is [StepperType.horizontal].
   final double? elevation;
@@ -436,8 +542,20 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalControls(int stepIndex) {
+    if (widget.indexedControlsBuilder != null)
+      return widget.indexedControlsBuilder!(
+        context,
+        details: ControlsDetails(
+          currentStep: widget.currentStep,
+          onStepContinue: widget.onStepContinue,
+          onStepCancel: widget.onStepCancel,
+          stepIndex: stepIndex,
+        ),
+      );
+
+    // TODO(craiglabenz): Remove this after the deprecation period.
     if (widget.controlsBuilder != null)
-      return widget.controlsBuilder!(context, stepIndex: stepIndex, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
+      return widget.controlsBuilder!(context, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
 
     final Color cancelColor;
     switch (Theme.of(context).brightness) {
