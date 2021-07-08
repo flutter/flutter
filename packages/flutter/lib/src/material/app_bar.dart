@@ -655,6 +655,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [ThemeData.appBarTheme] is used. If that is also null, the default
   /// value is a copy of the overall theme's [TextTheme.bodyText2]
   /// [TextStyle], with color set to the app bar's [foregroundColor].
+  /// 
+  /// If this property is specified, then [backwardsCompatibility] should be false.
   /// {@endtemplate}
   ///
   /// See also:
@@ -671,6 +673,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [ThemeData.appBarTheme] is used. If that is also null, the default
   /// value is a copy of the overall theme's [TextTheme.headline6]
   /// [TextStyle], with color set to the app bar's [foregroundColor].
+  /// 
+  /// If this property is specified, then [backwardsCompatibility] should be false.
   /// {@endtemplate}
   ///
   /// See also:
