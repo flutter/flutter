@@ -7,6 +7,7 @@ package io.flutter.plugin.platform;
 import android.app.Activity;
 import android.app.ActivityManager.TaskDescription;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Build;
@@ -124,10 +125,7 @@ public class PlatformPlugin {
 
         @Override
         public boolean clipboardHasStrings() {
-          CharSequence data =
-              PlatformPlugin.this.getClipboardData(
-                  PlatformChannel.ClipboardContentFormat.PLAIN_TEXT);
-          return data != null && data.length() > 0;
+          return PlatformPlugin.this.clipboardHasStrings();
         }
       };
 
@@ -489,5 +487,21 @@ public class PlatformPlugin {
         (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
     ClipData clip = ClipData.newPlainText("text label?", text);
     clipboard.setPrimaryClip(clip);
+  }
+
+  private boolean clipboardHasStrings() {
+    ClipboardManager clipboard =
+        (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+    // Android 12 introduces a toast message that appears when an app reads the clipboard. To avoid
+    // unintended access, call the appropriate APIs to receive information about the current content
+    // that's on the clipboard (rather than the actual content itself).
+    if (!clipboard.hasPrimaryClip()) {
+      return false;
+    }
+    ClipDescription description = clipboard.getPrimaryClipDescription();
+    if (description == null) {
+      return false;
+    }
+    return description.hasMimeType("text/*");
   }
 }
