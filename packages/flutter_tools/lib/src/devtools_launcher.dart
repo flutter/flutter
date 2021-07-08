@@ -33,6 +33,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         _persistentToolState = persistentToolState,
         _httpClient = httpClient ?? io.HttpClient();
 
+  static const String kDevToolsVersion = '2.4.0';
+
   final ProcessManager _processManager;
   final String _pubExecutable;
   final Logger _logger;
@@ -178,7 +180,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         'global',
         'activate',
         'devtools',
-        '2.4.0',
+        kDevToolsVersion,
       ]);
       if (_devToolsActivateProcess.exitCode != 0) {
         _logger.printError(

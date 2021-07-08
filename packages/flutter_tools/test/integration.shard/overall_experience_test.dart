@@ -28,6 +28,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:process/process.dart';
@@ -450,7 +451,7 @@ void main() {
     // Ensure that DevTools is activated.
     final ProcessResult pubResult = await processManager.run(<String>[
       fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
-      'pub', 'global', 'activate', 'devtools', '2.4.0',
+      'pub', 'global', 'activate', 'devtools', DevtoolsServerLauncher.kDevToolsVersion,
     ], workingDirectory: testDirectory).timeout(const Duration(seconds: 20));
     if (pubResult.exitCode != 0) {
       print('Unable to activate devtools:\n${pubResult.stderr}');

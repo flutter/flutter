@@ -178,7 +178,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 2.4.0',
+          stdout: 'devtools ${DevtoolsServerLauncher.kDevToolsVersion}',
         ),
         const FakeCommand(
           command: <String>[
@@ -186,9 +186,9 @@ void main() {
             'global',
             'activate',
             'devtools',
-            '2.4.0',
+            DevtoolsServerLauncher.kDevToolsVersion,
           ],
-          stdout: 'Activated DevTools 2.4.0',
+          stdout: 'Activated DevTools ${DevtoolsServerLauncher.kDevToolsVersion}',
         ),
         FakeCommand(
           command: const <String>[
@@ -232,9 +232,9 @@ void main() {
             'global',
             'activate',
             'devtools',
-            '2.4.0'
+            DevtoolsServerLauncher.kDevToolsVersion
           ],
-          stdout: 'Activated DevTools 2.4.0',
+          stdout: 'Activated DevTools ${DevtoolsServerLauncher.kDevToolsVersion}',
         ),
         const FakeCommand(
           command: <String>[
@@ -242,7 +242,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 2.4.0',
+          stdout: 'devtools ${DevtoolsServerLauncher.kDevToolsVersion}',
         ),
         FakeCommand(
           command: const <String>[
@@ -278,7 +278,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 2.4.0',
+          stdout: 'devtools ${DevtoolsServerLauncher.kDevToolsVersion}',
         ),
         const FakeCommand(
           command: <String>[
@@ -286,9 +286,9 @@ void main() {
             'global',
             'activate',
             'devtools',
-            '2.4.0'
+            DevtoolsServerLauncher.kDevToolsVersion
           ],
-          stdout: 'Activated DevTools 2.4.0',
+          stdout: 'Activated DevTools ${DevtoolsServerLauncher.kDevToolsVersion}',
         ),
         FakeCommand(
           command: const <String>[
@@ -329,7 +329,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 2.4.0',
+          stdout: 'devtools ${DevtoolsServerLauncher.kDevToolsVersion}',
         ),
         const FakeCommand(
           command: <String>[
@@ -356,7 +356,7 @@ void main() {
           'global',
           'list',
         ],
-        stdout: 'devtools 2.4.0',
+        stdout: 'devtools ${DevtoolsServerLauncher.kDevToolsVersion}',
       ),
       const FakeCommand(
         command: <String>[
@@ -400,7 +400,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 2.4.0',
+          stdout: 'devtools ${DevtoolsServerLauncher.kDevToolsVersion}',
         ),
         const FakeCommand(
           command: <String>[
@@ -408,7 +408,7 @@ void main() {
             'global',
             'activate',
             'devtools',
-            '2.4.0',
+            DevtoolsServerLauncher.kDevToolsVersion,
           ],
           stderr: 'Error - could not activate devtools',
           exitCode: 1,
@@ -446,7 +446,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 2.4.0',
+          stdout: 'devtools ${DevtoolsServerLauncher.kDevToolsVersion}',
         ),
         const FakeCommand(
           command: <String>[
@@ -454,9 +454,9 @@ void main() {
             'global',
             'activate',
             'devtools',
-            '2.4.0'
+            DevtoolsServerLauncher.kDevToolsVersion
           ],
-          stdout: 'Activated DevTools 2.4.0',
+          stdout: 'Activated DevTools ${DevtoolsServerLauncher.kDevToolsVersion}',
         ),
         const FakeCommand(
           command: <String>[
