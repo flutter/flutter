@@ -2231,20 +2231,21 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                     ),
                   ),
                 ),
-                WidgetSpan(
-                  child: AnimatedDefaultTextStyle(
-                    duration:_kTransitionDuration,
-                    curve: _kTransitionCurve,
-                    style: widget._labelShouldWithdraw
-                        ? _getFloatingLabelStyle(themeData)
-                        : inlineRequiredLabelStyle,
-                    child:Text(
-                      decoration!.requiredLabelText!,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: textAlign,
+                if (decoration!.isRequired!)
+                  WidgetSpan(
+                    child: AnimatedDefaultTextStyle(
+                      duration:_kTransitionDuration,
+                      curve: _kTransitionCurve,
+                      style: widget._labelShouldWithdraw
+                          ? _getFloatingLabelStyle(themeData)
+                          : inlineRequiredLabelStyle,
+                      child:Text(
+                        '*',
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: textAlign,
+                      ),
                     ),
                   ),
-                ),
               ]
             ),
           ),
@@ -2589,7 +2590,7 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
-    this.requiredLabelText,
+    this.isRequired,
     this.requiredLabelStyle,
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
@@ -2646,7 +2647,7 @@ class InputDecoration {
        semanticCounterText = null,
        alignLabelWithHint = false,
        constraints = null,
-       requiredLabelText = null,
+       isRequired = null,
        requiredLabelStyle = null;
 
   /// An icon to show before the input field and outside of the decoration's
@@ -3342,7 +3343,7 @@ class InputDecoration {
   final BoxConstraints? constraints;
 
   ///
-  final String? requiredLabelText;
+  final bool? isRequired;
 
   ///
   final TextStyle? requiredLabelStyle;
@@ -3394,7 +3395,7 @@ class InputDecoration {
     String? semanticCounterText,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
-    String? requiredLabelText,
+    bool? isRequired,
     TextStyle? requiredLabelStyle,
   }) {
     return InputDecoration(
@@ -3442,7 +3443,7 @@ class InputDecoration {
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
-      requiredLabelText: requiredLabelText ?? this.requiredLabelText,
+      isRequired: isRequired ?? this.isRequired,
       requiredLabelStyle: requiredLabelStyle ?? this.requiredLabelStyle,
     );
   }
@@ -3534,7 +3535,7 @@ class InputDecoration {
         && other.semanticCounterText == semanticCounterText
         && other.alignLabelWithHint == alignLabelWithHint
         && other.constraints == constraints
-        && other.requiredLabelText == requiredLabelText
+        && other.isRequired == isRequired
         && other.requiredLabelStyle == requiredLabelStyle;
   }
 
@@ -3587,7 +3588,7 @@ class InputDecoration {
       semanticCounterText,
       alignLabelWithHint,
       constraints,
-      requiredLabelText,
+      isRequired,
       requiredLabelStyle,
     ];
     return hashList(values);
@@ -3636,7 +3637,7 @@ class InputDecoration {
       if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
       if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
       if (constraints != null) 'constraints: $constraints',
-      if (requiredLabelText != null) 'requiredLabelText: $requiredLabelText',
+      if (isRequired != null) 'isRequired: $isRequired',
       if (requiredLabelStyle != null) 'requiredLabelStyle: $requiredLabelStyle',
     ];
     return 'InputDecoration(${description.join(', ')})';
