@@ -16,6 +16,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.view.Choreographer;
 import android.view.PixelCopy;
+import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -25,6 +26,7 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.Result;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.StringBuilder;
 
 /** FlutterDeviceScreenshot */
 @TargetApi(19)

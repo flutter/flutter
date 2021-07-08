@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:ui';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'common.dart';
 
-const MethodChannel integrationTestChannel = MethodChannel('plugins.flutter.io/integration_test');
+import 'channel.dart';
+import 'common.dart';
 
 /// The dart:io implementation of [CallbackManager].
 ///

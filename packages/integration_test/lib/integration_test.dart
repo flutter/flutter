@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:typed_data';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -18,6 +18,7 @@ import 'package:vm_service/vm_service_io.dart' as vm_io;
 
 import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
+import 'channel.dart';
 import 'common.dart';
 
 const String _success = 'success';
@@ -33,9 +34,6 @@ const bool _shouldReportResultsToNative = bool.fromEnvironment(
   'INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE',
   defaultValue: true,
 );
-
-// The channel name used to call platform methods.
-const MethodChannel integrationTestChannel = MethodChannel('plugins.flutter.io/integration_test');
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
@@ -172,11 +170,20 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// Taking a screenshot.
   ///
   /// Called by test methods. Implementation differs for each platform.
-  Future<void> takeScreenshot(String screenshotName) async {
+  Future<List<int>> takeScreenshot(String screenshotName) async {
+    if (Platform.isAndroid) {
+      assert(
+        framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
+        'To take a screenshot on Android, you must set binding.framePolicy to LiveTestWidgetsFlutterBindingFramePolicy.fullyLive.',
+      );
+    }
     reportData ??= <String, dynamic>{};
     reportData!['screenshots'] ??= <dynamic>[];
     final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName);
-    reportData!['screenshots']!.add(data);
+    assert(data.containsKey('bytes'));
+
+    (reportData!['screenshots']! as List<dynamic>).add(data);
+    return data['bytes']! as List<int>;
   }
 
   /// The callback function to response the driver side input.

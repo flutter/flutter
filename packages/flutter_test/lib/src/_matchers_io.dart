@@ -51,7 +51,7 @@ class MatchesGoldenFile extends AsyncMatcher {
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     if (item is Future<Uint8List>) {
-      final Uint8List buffer = await (item as Future<Uint8List>);
+      final Uint8List buffer = await item;
       if (autoUpdateGoldenFiles) {
         await goldenFileComparator.update(testNameUri, buffer);
         return null;
