@@ -1249,6 +1249,17 @@ class CallbackShortcuts extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
+  // A helper function to make the stack trace more useful if the callback
+  // throws, by providing the activator and event as arguments that will appear
+  // in the stack trace.
+  bool _applyKeyBinding(ShortcutActivator activator, RawKeyEvent event) {
+    if (activator.accepts(event, RawKeyboard.instance)) {
+      bindings[activator]!.call();
+      return true;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Focus(
@@ -1258,10 +1269,7 @@ class CallbackShortcuts extends StatelessWidget {
         KeyEventResult result = KeyEventResult.ignored;
         // Activates all key bindings that match, returns "handled" if any handle it.
         for (final ShortcutActivator activator in bindings.keys) {
-          if (activator.accepts(event, RawKeyboard.instance)) {
-            bindings[activator]!.call();
-            result = KeyEventResult.handled;
-          }
+          result = _applyKeyBinding(activator, event) ? KeyEventResult.handled : result;
         }
         return result;
       },
