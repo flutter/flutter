@@ -129,6 +129,8 @@ class CupertinoContextMenu extends StatefulWidget {
     required this.actions,
     required this.child,
     this.previewBuilder,
+    this.previewOffset,
+    this.previewSize,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(child != null),
        super(key: key);
@@ -218,6 +220,16 @@ class CupertinoContextMenu extends StatefulWidget {
   /// {@end-tool}
   final ContextMenuPreviewBuilder? previewBuilder;
 
+  /// The preview child offset in full-screen coordinate space.
+  ///
+  /// If not specified, [child] will be shown at the original position.
+  final Offset? previewOffset;
+
+  /// The preview child size.
+  ///
+  /// If not specified, [child] will be shown with the original size.
+  final Size? previewSize;
+
   @override
   State<CupertinoContextMenu> createState() => _CupertinoContextMenuState();
 }
@@ -283,6 +295,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       ),
       contextMenuLocation: _contextMenuLocation,
       previousChildRect: _decoyChildEndRect!,
+      previewOffset: widget.previewOffset,
+      previewSize: widget.previewSize,
       builder: (BuildContext context, Animation<double> animation) {
         if (widget.previewBuilder == null) {
           return widget.child;
@@ -547,6 +561,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     _ContextMenuPreviewBuilderChildless? builder,
     ui.ImageFilter? filter,
     required Rect previousChildRect,
+    this.previewOffset,
+    this.previewSize,
     RouteSettings? settings,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(contextMenuLocation != null),
@@ -575,6 +591,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   Orientation? _lastOrientation;
   // The Rect of the child at the moment that the CupertinoContextMenu opens.
   final Rect _previousChildRect;
+  final Offset? previewOffset;
+  final Size? previewSize;
   double? _scale = 1.0;
   final GlobalKey _sheetGlobalKey = GlobalKey();
 
@@ -801,8 +819,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
                     child: _ContextMenuSheet(
                       key: _sheetGlobalKey,
                       actions: _actions,
-                      contextMenuLocation: _contextMenuLocation,
-                      orientation: orientation,
                     ),
                   ),
                 ),
@@ -816,11 +832,19 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
           );
         }
 
+        final Rect childRectOriginal = Rect.fromCenter(
+          center: _previousChildRect.center,
+          width: _previousChildRect.width / _kOpenScale,
+          height: _previousChildRect.height / _kOpenScale,
+        );
         // When the animation is done, just render everything in a static layout
         // in the final position.
         return _ContextMenuRouteStatic(
           actions: _actions,
           childGlobalKey: _childGlobalKey,
+          childRectOriginal: childRectOriginal,
+          previewSize: previewSize,
+          previewOffset: previewOffset,
           contextMenuLocation: _contextMenuLocation,
           onDismiss: _onDismiss,
           orientation: orientation,
@@ -840,6 +864,9 @@ class _ContextMenuRouteStatic extends StatefulWidget {
     this.actions,
     required this.child,
     this.childGlobalKey,
+    required this.childRectOriginal,
+    this.previewOffset,
+    this.previewSize,
     required this.contextMenuLocation,
     this.onDismiss,
     required this.orientation,
@@ -851,6 +878,9 @@ class _ContextMenuRouteStatic extends StatefulWidget {
   final List<Widget>? actions;
   final Widget child;
   final GlobalKey? childGlobalKey;
+  final Rect childRectOriginal;
+  final Offset? previewOffset;
+  final Size? previewSize;
   final _ContextMenuLocation contextMenuLocation;
   final _DismissCallback? onDismiss;
   final Orientation orientation;
@@ -877,6 +907,21 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   late Animation<Offset> _moveAnimation;
   late Animation<double> _sheetScaleAnimation;
   late Animation<double> _sheetOpacityAnimation;
+
+  late double _childWidth;
+  late double _childHeight;
+
+  double _childTop = 0.0;
+  double _childLeft = 0.0;
+  double _childRight = 0.0;
+  double _childBottom = 0.0;
+
+  double _menuSheetTop = 0.0;
+  double _menuSheetLeft = 0.0;
+  double _menuSheetRight = 0.0;
+  double _menuSheetBottom = 0.0;
+
+  AlignmentGeometry _alignment = AlignmentDirectional.topStart;
 
   // The scale of the child changes as a function of the distance it is dragged.
   static double _getScale(Orientation orientation, double maxDragDistance, double dy) {
@@ -961,23 +1006,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     widget.onDismiss!(context, _lastScale, _sheetOpacityAnimation.value);
   }
 
-  Alignment _getChildAlignment(Orientation orientation, _ContextMenuLocation contextMenuLocation) {
-    switch (contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topRight;
-      case _ContextMenuLocation.right:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topLeft;
-      case _ContextMenuLocation.left:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topRight;
-    }
-  }
-
   void _setDragOffset(Offset dragOffset) {
     // Allow horizontal and negative vertical movement, but damp it.
     final double endX = _kPadding * dragOffset.dx / _kDamping;
@@ -1012,16 +1040,60 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     });
   }
 
-  // The order and alignment of the _ContextMenuSheet and the child depend on
-  // both the orientation of the screen as well as the position on the screen of
-  // the original child.
-  List<Widget> _getChildren(Orientation orientation, _ContextMenuLocation contextMenuLocation) {
-    final Expanded child = Expanded(
-      child: Align(
-        alignment: _getChildAlignment(
-          widget.orientation,
-          widget.contextMenuLocation,
-        ),
+  Rect _getPreViewRect(Size screenSize) {
+    Rect retRect;
+    if (widget.previewSize == null && widget.previewOffset == null) {
+      retRect = widget.childRectOriginal;
+    } else if (widget.previewOffset != null && widget.previewSize == null) {
+      retRect = widget.previewOffset! & widget.childRectOriginal.size;
+    } else if (widget.previewOffset == null && widget.previewSize != null) {
+      retRect = Offset(widget.childRectOriginal.left, widget.childRectOriginal.top) & widget.previewSize!;
+    } else {
+      retRect =  widget.previewOffset! & widget.previewSize!;
+    }
+    return retRect.intersect(Offset.zero & screenSize);
+  }
+
+  Widget _getChild (RelativeRect position, Size screenSize) {
+    double dx = 0.0;
+    double dy = 0.0;
+    if (position.left < _kPadding){
+      dx = 0.0;
+    } else {
+      dx = position.left - _kPadding;
+    }
+
+    if (position.right < _kPadding)
+      dx = dx - (_kPadding - position.right);
+
+    if (position.top < _kPadding) {
+      dy = 0.0;
+    } else {
+      dy = position.top - _kPadding;
+    }
+
+    if (position.bottom < _kPadding)
+      dy = dy - (_kPadding - position.bottom);
+
+    _childLeft = math.max(0.0, dx);
+    _childTop = math.max(0.0, dy);
+    _childWidth = math.min(screenSize.width - 2.0 * _kPadding,
+      math.max(0.0, screenSize.width - position.left - position.right));
+    _childHeight = math.min(screenSize.height - 2.0 * _kPadding,
+      math.max(0.0, screenSize.height - position.top - position.bottom));
+    _childBottom = math.max(0.0, screenSize.height - 2.0 * _kPadding - _childTop - _childHeight);
+    _childRight = math.max(0.0, screenSize.width - 2.0 * _kPadding - _childLeft - _childWidth);
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: _childLeft,
+        top: _childTop,
+        right: _childRight,
+        bottom: _childBottom,
+      ),
+      child: SizedBox(
+        width: _childWidth,
+        height: _childHeight,
         child: AnimatedBuilder(
           animation: _moveController,
           builder: _buildChildAnimation,
@@ -1029,33 +1101,93 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         ),
       ),
     );
-    const SizedBox spacer = SizedBox(
-      width: _kPadding,
-      height: _kPadding,
+  }
+
+  void _calcMenuSheetOffset(Orientation orientation, Size screenSize, double width,) {
+    if (orientation == Orientation.portrait) {
+      if (_childTop <= _childBottom) {
+        _alignment = AlignmentDirectional.topStart;
+        _menuSheetTop = _childTop + _childHeight + _kPadding;
+        _menuSheetBottom = 0.0;
+      } else {
+        _alignment = AlignmentDirectional.bottomStart;
+        _menuSheetBottom = math.max(0.0, screenSize.height - _childTop - _kPadding);
+        _menuSheetTop = 0.0;
+      }
+
+      if (_childLeft == _childRight) {
+        _menuSheetLeft = _childLeft + _childWidth / 2.0 - width / 2.0;
+      } else if (_childLeft > _childRight) {
+        _menuSheetLeft = _childLeft + _childWidth - width;
+      } else {
+        _menuSheetLeft = _childLeft;
+      }
+    } else {
+      if (_childTop <= _childBottom) {
+        _alignment = AlignmentDirectional.topStart;
+        _menuSheetTop = _childTop;
+        _menuSheetBottom = 0.0;
+      } else {
+        _alignment = AlignmentDirectional.bottomStart;
+        _menuSheetTop = 0.0;
+        _menuSheetBottom = math.max(0.0, screenSize.height - _childTop - 2.0 * _kPadding - _childHeight);
+      }
+
+      if (_childLeft <= _childRight) {
+        _menuSheetLeft = _childLeft + _childWidth + _kPadding;
+        _menuSheetRight = 0.0;
+      } else {
+        _menuSheetLeft = math.max(0.0, _childLeft - width - _kPadding);
+        _menuSheetRight = 0.0;
+      }
+    }
+  }
+
+  double _getMenuSheetWidth(Orientation orientation, Size screenSize,) {
+    if (orientation == Orientation.portrait) {
+      final double width = math.max(_childLeft, _childRight) + _childWidth;
+      return math.min(width, screenSize.width * 2.0 / 3.0);
+    }
+    final double width = math.min(math.max(_childLeft, _childRight), screenSize.width / 2.0) - 2.0 * _kPadding;
+    return math.max(0.0, width);
+  }
+
+  // The order and alignment of the _ContextMenuSheet and the child depend on
+  // both the orientation of the screen as well as the position on the screen of
+  // the original child.
+  List<Widget> _getChildren(
+    Orientation orientation,
+    _ContextMenuLocation contextMenuLocation,
+    Size screenSize,
+  ) {
+    final RelativeRect position = RelativeRect.fromRect(
+      _getPreViewRect(screenSize),
+      Offset.zero & screenSize,
     );
-    final Expanded sheet = Expanded(
-      child: AnimatedBuilder(
-        animation: _sheetController,
-        builder: _buildSheetAnimation,
-        child: _ContextMenuSheet(
-          key: widget.sheetGlobalKey,
-          actions: widget.actions!,
-          contextMenuLocation: widget.contextMenuLocation,
-          orientation: widget.orientation,
+    final Widget child = _getChild(position, screenSize);
+    final double sheetWidth = _getMenuSheetWidth(orientation, screenSize);
+    _calcMenuSheetOffset(orientation, screenSize, sheetWidth);
+
+    final Widget sheet = Padding(
+      padding: EdgeInsets.only(
+        left: _menuSheetLeft,
+        top: _menuSheetTop,
+        right: _menuSheetRight,
+        bottom: _menuSheetBottom,
+      ),
+      child: SizedBox(
+        width: sheetWidth,
+        child: AnimatedBuilder(
+          animation: _sheetController,
+          builder: _buildSheetAnimation,
+          child: _ContextMenuSheet(
+            key: widget.sheetGlobalKey,
+            actions: widget.actions!,
+          ),
         ),
       ),
     );
-
-    switch (contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return <Widget>[child, spacer, sheet];
-      case _ContextMenuLocation.right:
-        return orientation == Orientation.portrait
-          ? <Widget>[child, spacer, sheet]
-          : <Widget>[sheet, spacer, child];
-      case _ContextMenuLocation.left:
-        return <Widget>[child, spacer, sheet];
-    }
+    return <Widget>[child, sheet];
   }
 
   // Build the animation for the _ContextMenuSheet.
@@ -1134,29 +1266,22 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     final List<Widget> children = _getChildren(
       widget.orientation,
       widget.contextMenuLocation,
+      MediaQuery.of(context).size,
     );
 
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(_kPadding),
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: GestureDetector(
-            onPanEnd: _onPanEnd,
-            onPanStart: _onPanStart,
-            onPanUpdate: _onPanUpdate,
-            child: AnimatedBuilder(
-              animation: _moveController,
-              builder: _buildAnimation,
-              child: widget.orientation == Orientation.portrait
-                ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children,
-                )
-                : Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children,
-                ),
+        child: GestureDetector(
+          onPanEnd: _onPanEnd,
+          onPanStart: _onPanStart,
+          onPanUpdate: _onPanUpdate,
+          child: AnimatedBuilder(
+            animation: _moveController,
+            builder: _buildAnimation,
+            child: Stack(
+              alignment: _alignment,
+              children: children,
             ),
           ),
         ),
@@ -1171,76 +1296,21 @@ class _ContextMenuSheet extends StatelessWidget {
   _ContextMenuSheet({
     Key? key,
     required this.actions,
-    required _ContextMenuLocation contextMenuLocation,
-    required Orientation orientation,
   }) : assert(actions != null && actions.isNotEmpty),
-       assert(contextMenuLocation != null),
-       assert(orientation != null),
-       _contextMenuLocation = contextMenuLocation,
-       _orientation = orientation,
        super(key: key);
 
   final List<Widget> actions;
-  final _ContextMenuLocation _contextMenuLocation;
-  final Orientation _orientation;
-
-  // Get the children, whose order depends on orientation and
-  // contextMenuLocation.
-  List<Widget> get children {
-    final Flexible menu = Flexible(
-      fit: FlexFit.tight,
-      flex: 2,
-      child: IntrinsicHeight(
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(13.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: actions,
-          ),
-        ),
-      ),
-    );
-
-    switch (_contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return _orientation == Orientation.portrait
-          ? <Widget>[
-            const Spacer(
-              flex: 1,
-            ),
-            menu,
-            const Spacer(
-              flex: 1,
-            ),
-          ]
-        : <Widget>[
-            menu,
-            const Spacer(
-              flex: 1,
-            ),
-          ];
-      case _ContextMenuLocation.right:
-        return <Widget>[
-          const Spacer(
-            flex: 1,
-          ),
-          menu,
-        ];
-      case _ContextMenuLocation.left:
-        return <Widget>[
-          menu,
-          const Spacer(
-            flex: 1,
-          ),
-        ];
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children,
+    return IntrinsicHeight(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(13.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: actions,
+        ),
+      ),
     );
   }
 }
