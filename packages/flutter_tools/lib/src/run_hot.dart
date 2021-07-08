@@ -546,6 +546,15 @@ class HotRunner extends ResidentRunner {
     String reason,
   }) async {
     final Stopwatch restartTimer = Stopwatch()..start();
+    for (final FlutterDevice device in flutterDevices) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
+        await device.vmService.flutterInvokePreHotRestartCallbacks(
+          isolateId: view.uiIsolate.id,
+        );
+      }
+    }
+
     final UpdateFSReport updatedDevFS = await _updateDevFS(fullRestart: true);
     if (!updatedDevFS.success) {
       for (final FlutterDevice device in flutterDevices) {

@@ -147,6 +147,13 @@ const FakeVmServiceRequest evict = FakeVmServiceRequest(
   }
 );
 
+final List<FakeVmServiceRequest> preHotRestartCallbacks = <FakeVmServiceRequest>[
+  listViews,
+  FakeVmServiceRequest(method: 'ext.flutter.invokePreHotRestartCallbacks', args: <String, Object>{
+    'isolateId': fakeFlutterView.uiIsolate.id,
+  }),
+];
+
 final Uri testUri = Uri.parse('foo://bar');
 
 void main() {
@@ -325,6 +332,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
+      ...preHotRestartCallbacks,
       listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
@@ -847,6 +855,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
+      ...preHotRestartCallbacks,
       listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
@@ -890,7 +899,9 @@ void main() {
       enableDevTools: true,
     ));
 
+    await futureAppStart.future;
     final OperationResult result = await residentRunner.restart(fullRestart: true);
+
     expect(result.fatal, false);
     expect(result.code, 0);
 
@@ -907,6 +918,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
+      ...preHotRestartCallbacks,
       listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
@@ -969,10 +981,11 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
-  testUsingContext('ResidentRunner will alternative the name of the dill file uploaded for a hot restart', () => testbed.run(() async {
+  testUsingContext('ResidentRunner will alternate the name of the dill file uploaded for a hot restart', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
+      ...preHotRestartCallbacks,
       listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
@@ -1007,6 +1020,7 @@ void main() {
           kind: vm_service.EventKind.kIsolateRunnable,
         ),
       ),
+      ...preHotRestartCallbacks,
       listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
@@ -1041,6 +1055,7 @@ void main() {
           kind: vm_service.EventKind.kIsolateRunnable,
         ),
       ),
+      ...preHotRestartCallbacks,
       listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
@@ -1095,6 +1110,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
+      ...preHotRestartCallbacks,
     ]);
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();

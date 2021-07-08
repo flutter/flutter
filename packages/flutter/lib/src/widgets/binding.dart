@@ -493,6 +493,17 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           },
       );
 
+      registerServiceExtension(name: 'invokePreHotRestartCallbacks', callback: (Map<String, Object> params) async {
+        for (final VoidCallback callback in _hotRestartCallbacks) {
+          try {
+            callback();
+          } catch (err) {
+            debugPrint('Failed to invoke preHotRestartCallback: $err');
+          }
+        }
+        return <String, Object>{};
+      });
+
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;
@@ -505,6 +516,21 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       return endOfFrame;
     }
     return Future<void>.value();
+  }
+
+  final List<VoidCallback> _hotRestartCallbacks = <VoidCallback>[];
+
+  /// Register a callback that will be invoked before a hot restart is called.
+  ///
+  /// In non-debug modes this method is a no-op.
+  ///
+  /// This can be used to release native resources acquired through platform
+  /// channels or `dart:ffi`.
+  void registerHotRestartCallback(VoidCallback voidCallback) {
+    if (!kDebugMode) {
+      return;
+    }
+    _hotRestartCallbacks.add(voidCallback);
   }
 
   /// The [BuildOwner] in charge of executing the build pipeline for the
@@ -1001,6 +1027,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return window.computePlatformResolvedLocale(supportedLocales);
   }
+
+
 }
 
 /// Inflate the given widget and attach it to the screen.

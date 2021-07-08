@@ -8,6 +8,10 @@ import '../test_utils.dart';
 import 'project.dart';
 
 class HotReloadProject extends Project {
+  HotReloadProject({this.preHotRestartHook = false});
+
+  final bool preHotRestartHook;
+
   @override
   final String pubspec = '''
   name: test
@@ -20,7 +24,7 @@ class HotReloadProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  String get main => '''
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';
   import 'package:flutter/services.dart';
@@ -30,6 +34,11 @@ class HotReloadProject extends Project {
     WidgetsFlutterBinding.ensureInitialized();
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    if ($preHotRestartHook) {
+      WidgetsBinding.instance!.registerHotRestartCallback(() {
+        print('INVOKE PRE HOT RESTART CALLBACK');
+      });
+    }
     runApp(MyApp());
   }
 
@@ -44,7 +53,7 @@ class HotReloadProject extends Project {
       // hot reloading worked:
       // printHotReloadWorked();
 
-      print('((((TICK $count))))');
+      print('((((TICK \$count))))');
       // tick 1 = startup warmup frame
       // tick 2 = hot reload warmup reassemble frame
       // after that there's a post-hot-reload frame scheduled by the tool that
