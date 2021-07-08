@@ -68,13 +68,13 @@ class TestCommand extends Command<void> {
     print(taskArgs);
     await runTasks(
       <String>[argResults!['task'] as String],
-      deviceId: argResults!['device-id'] as String,
-      gitBranch: argResults!['git-branch'] as String,
-      localEngine: argResults!['local-engine'] as String,
-      localEngineSrcPath: argResults!['local-engine-src-path'] as String,
-      luciBuilder: argResults!['luci-builder'] as String,
-      resultsPath: argResults!['results-file'] as String,
-      silent: argResults!['silent'] as bool,
+      deviceId: argResults!['device-id'] as String?,
+      gitBranch: argResults!['git-branch'] as String?,
+      localEngine: argResults!['local-engine'] as String?,
+      localEngineSrcPath: argResults!['local-engine-src-path'] as String?,
+      luciBuilder: argResults!['luci-builder'] as String?,
+      resultsPath: argResults!['results-file'] as String?,
+      silent: (argResults!['silent'] as bool?) ?? false,
       taskArgs: taskArgs,
     );
   }

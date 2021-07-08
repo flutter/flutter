@@ -425,11 +425,11 @@ class BlinkTraceEvent {
     required this.cat,
     required this.name,
     required this.ph,
-    required this.pid,
-    required this.tid,
-    required this.ts,
-    required this.tts,
-    required this.tdur,
+    this.pid,
+    this.tid,
+    this.ts,
+    this.tts,
+    this.tdur,
   });
 
   /// Parses an event from its JSON representation.
@@ -552,8 +552,13 @@ class BlinkTraceEvent {
 ///
 /// Returns null if the value is null.
 int? _readInt(Map<String, dynamic> json, String key) {
-  final num? jsonValue = json[key] as num?;
-  return jsonValue?.toInt();
+  final num jsonValue = json[key] as num;
+
+  if (jsonValue == null) {
+    return null;
+  }
+
+  return jsonValue.toInt();
 }
 
 /// Used by [Chrome.launch] to detect a glibc bug and retry launching the

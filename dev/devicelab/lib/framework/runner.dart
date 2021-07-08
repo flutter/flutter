@@ -20,7 +20,7 @@ Future<void> runTasks(
   bool exitOnFirstTestFailure = false,
   bool silent = false,
   String? deviceId,
-  required String gitBranch,
+  String? gitBranch,
   String? localEngine,
   String? localEngineSrcPath,
   String? luciBuilder,
@@ -45,8 +45,8 @@ Future<void> runTasks(
     if (resultsPath != null) {
       final Cocoon cocoon = Cocoon();
       await cocoon.writeTaskResultToFile(
-        builderName: luciBuilder,
-        gitBranch: gitBranch,
+        builderName: luciBuilder!,
+        gitBranch: gitBranch!,
         result: result,
         resultsPath: resultsPath,
       );

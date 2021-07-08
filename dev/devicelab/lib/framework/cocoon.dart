@@ -107,7 +107,7 @@ class Cocoon {
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
   Future<void> writeTaskResultToFile({
-    String? builderName,
+    required String builderName,
     required String gitBranch,
     required TaskResult result,
     required String resultsPath,
