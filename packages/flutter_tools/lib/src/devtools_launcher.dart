@@ -9,9 +9,11 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/platform.dart';
+import 'cache.dart';
 import 'convert.dart';
 import 'persistent_tool_state.dart';
 import 'resident_runner.dart';
@@ -22,11 +24,13 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
     @required Platform platform,
     @required ProcessManager processManager,
+    @required FileSystem fileSystem,
     @required String pubExecutable,
     @required Logger logger,
     @required PersistentToolState persistentToolState,
     @visibleForTesting io.HttpClient httpClient,
   })  : _processManager = processManager,
+        _fileSystem = fileSystem,
         _pubExecutable = pubExecutable,
         _logger = logger,
         _platform = platform,
@@ -34,6 +38,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         _httpClient = httpClient ?? io.HttpClient();
 
   final ProcessManager _processManager;
+  final FileSystem _fileSystem;
   final String _pubExecutable;
   final Logger _logger;
   final Platform _platform;
@@ -46,6 +51,13 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   static final RegExp _serveDevToolsPattern =
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+?)\.?$');
   static const String _pubHostedUrlKey = 'PUB_HOSTED_URL';
+
+  static String _devtoolsVersion;
+  static String devtoolsVersion(FileSystem fs) {
+    return _devtoolsVersion ??= fs.file(
+      fs.path.join(Cache.flutterRoot, 'bin', 'internal', 'devtools.version'),
+    ).readAsStringSync();
+  }
 
   @override
   Future<void> get processStart => _processStartCompleter.future;
@@ -171,7 +183,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         'global',
         'activate',
         'devtools',
-        '2.4.0',
+        devtoolsVersion(_fileSystem),
       ]);
       if (_devToolsActivateProcess.exitCode != 0) {
         _logger.printError(

@@ -312,7 +312,12 @@ Future<void> _runIntegrationToolTests() async {
   }
   await runCommand(
     pub,
-    <String>['global', 'activate', 'devtools'],
+    <String>[
+      'global',
+      'activate',
+      'devtools',
+      File(path.join(flutterRoot, 'bin', 'internal', 'devtools.version')).readAsStringSync(),
+    ],
     environment: pubEnvironment,
   );
 
