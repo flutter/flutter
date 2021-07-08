@@ -77,8 +77,6 @@ namespace flutter {
   V(SetColor)                       \
   V(SetBlendMode)                   \
                                     \
-  V(SetFilterQuality)               \
-                                    \
   V(SetShader)                      \
   V(ClearShader)                    \
   V(SetColorFilter)                 \
@@ -232,7 +230,6 @@ class Dispatcher {
   virtual void setMiterLimit(SkScalar limit) = 0;
   virtual void setColor(SkColor color) = 0;
   virtual void setBlendMode(SkBlendMode mode) = 0;
-  virtual void setFilterQuality(SkFilterQuality quality) = 0;
   virtual void setShader(sk_sp<SkShader> shader) = 0;
   virtual void setImageFilter(sk_sp<SkImageFilter> filter) = 0;
   virtual void setColorFilter(sk_sp<SkColorFilter> filter) = 0;
@@ -344,7 +341,6 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
   void setMiterLimit(SkScalar limit) override;
   void setColor(SkColor color) override;
   void setBlendMode(SkBlendMode mode) override;
-  void setFilterQuality(SkFilterQuality quality) override;
   void setShader(sk_sp<SkShader> shader) override;
   void setImageFilter(sk_sp<SkImageFilter> filter) override;
   void setColorFilter(sk_sp<SkColorFilter> filter) override;

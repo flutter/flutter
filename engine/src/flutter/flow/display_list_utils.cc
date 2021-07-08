@@ -57,9 +57,6 @@ void SkPaintDispatchHelper::setColor(SkColor color) {
 void SkPaintDispatchHelper::setBlendMode(SkBlendMode mode) {
   paint_.setBlendMode(mode);
 }
-void SkPaintDispatchHelper::setFilterQuality(SkFilterQuality quality) {
-  paint_.setFilterQuality(quality);
-}
 void SkPaintDispatchHelper::setShader(sk_sp<SkShader> shader) {
   paint_.setShader(shader);
 }
