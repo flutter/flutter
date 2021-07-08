@@ -72,7 +72,6 @@ void validateEnglishLocalizations(File file) {
     if (description == null && !optional)
       errorMessages.writeln('No description specified for $atResourceId');
 
-    atResource.forEach((String key, dynamic value) => print('$key: $value'));
     final String? plural = atResource['plural'] as String?;
     final String resourceId = atResourceId.substring(1);
     if (plural != null) {
