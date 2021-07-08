@@ -42,8 +42,9 @@ void main() {
       final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
 
+      bool hasPlatformViewCreated = false;
       void onPlatformViewCreatedCallBack(int id) {
-        expect(id >= 0, true);
+        hasPlatformViewCreated = true;
       }
 
       await tester.pumpWidget(
@@ -58,6 +59,9 @@ void main() {
           ),
         ),
       );
+
+      // Check the onPlatformViewCreatedCallBack has been called.
+      expect(hasPlatformViewCreated, true);
 
       expect(
         viewsController.views,
