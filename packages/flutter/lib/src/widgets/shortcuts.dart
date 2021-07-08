@@ -1217,7 +1217,16 @@ class _ShortcutsMarker extends InheritedNotifier<ShortcutManager> {
 /// [Shortcuts] and [Actions] mechanism is overkill, and this widget is here for
 /// those apps.
 ///
-/// [Shortcuts] and [CallbackShortcuts] can both be used in the same app.
+/// [Shortcuts] and [CallbackShortcuts] can both be used in the same app. As
+/// with any key handling widget, if this widget handles a key event then
+/// widgets above it in the focus chain will not receive the event. This means
+/// that if this widget handles a key, then an ancestor [Shortcuts] widget (or
+/// any other key handling widget) will not receive that key, and similarly, if
+/// a descendant of this widget handles the key, then the key event will not
+/// reach this widget for handling.
+///
+/// See also:
+///  * [Focus], a widget that defines which widgets can receive keyboard focus.
 class CallbackShortcuts extends StatelessWidget {
   /// Creates a const [CallbackShortcuts] widget.
   const CallbackShortcuts({

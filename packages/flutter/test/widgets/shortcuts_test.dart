@@ -1077,6 +1077,7 @@ void main() {
       invoked = 0;
     });
   });
+
   group('CallbackShortcuts', () {
     testWidgets('trigger on key events', (WidgetTester tester) async {
       int invoked = 0;
@@ -1100,6 +1101,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
       expect(invoked, equals(1));
     });
+
     testWidgets('nested CallbackShortcuts stop propagation', (WidgetTester tester) async {
       int invokedOuter = 0;
       int invokedInner = 0;
@@ -1132,6 +1134,7 @@ void main() {
       expect(invokedOuter, equals(0));
       expect(invokedInner, equals(1));
     });
+
     testWidgets('non-overlapping nested CallbackShortcuts fire appropriately', (WidgetTester tester) async {
       int invokedOuter = 0;
       int invokedInner = 0;
@@ -1168,6 +1171,7 @@ void main() {
       expect(invokedOuter, equals(1));
       expect(invokedInner, equals(1));
     });
+
     testWidgets('Works correctly with Shortcuts too', (WidgetTester tester) async {
       int invokedCallbackA = 0;
       int invokedCallbackB = 0;
