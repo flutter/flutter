@@ -149,7 +149,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--no-pub']
-    ), throwsA(isA<UsageException>()));
+    ), throwsToolExit(message: '"build macos" only supported on macOS hosts.'));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,
@@ -391,7 +391,7 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(() => runner.run(<String>['build', 'macos', '--no-pub']),
-      throwsA(isA<UsageException>()));
+      throwsToolExit());
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
