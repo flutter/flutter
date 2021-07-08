@@ -270,11 +270,11 @@ abstract class CallbackManager {
   Future<Map<String, dynamic>> callback(
       Map<String, String> params, IntegrationTestResults testRunner);
 
-  /// Request to take a screenshot of the application.
+  /// Takes a screenshot of the application.
   /// Returns the data that is sent back to the host.
    Future<Map<String, dynamic>> takeScreenshot(String screenshot);
 
-  /// Android only. Convert the Flutter surface to an image view.
+  /// Android only. Converts the Flutter surface to an image view.
   Future<void> convertFlutterSurfaceToImage();
 
   /// Cleanup and completers or locks used during the communication.

@@ -167,7 +167,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// side.
   final CallbackManager callbackManager = driver_actions.callbackManager;
 
-  /// Take a screenshot.
+  /// Takes a screenshot.
   ///
   /// On Android, you need to call `convertFlutterSurfaceToImage()`, and set the
   /// `framePolicy` to `LiveTestWidgetsFlutterBindingFramePolicy.fullyLive`
@@ -188,7 +188,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     return data['bytes']! as List<int>;
   }
 
-  /// Android only. Convert the Flutter surface to an image view.
+  /// Android only. Converts the Flutter surface to an image view.
   /// Be aware that if you are conducting a perf test, you may not want to call
   /// this method since the this is an expensive operation that affects the
   /// rendering of a Flutter app.
