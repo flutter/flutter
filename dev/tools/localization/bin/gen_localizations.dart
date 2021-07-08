@@ -183,7 +183,7 @@ String generateArbBasedLocalizationSubclasses({
             // When script fallback contains the key, we compare to it instead of language fallback.
             if (scriptResources.containsKey(key) ? scriptResources[key] == localeResources[key] : languageResources[key] == localeResources[key])
               continue;
-            final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key] as Map<String, dynamic>;
+            final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>;
             output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
           }
          output.writeln('}');
@@ -192,12 +192,12 @@ String generateArbBasedLocalizationSubclasses({
     } else {
       // No scriptCode. Here, we do not compare against script default (because it
       // doesn't exist).
-      final List<LocaleInfo> localeCodes = languageToLocales[languageName]..sort();
+      final List<LocaleInfo> localeCodes = languageToLocales[languageName]!..sort();
       for (final LocaleInfo locale in localeCodes) {
         if (locale.originalString == languageName)
           continue;
         countryCodeCount += 1;
-        final Map<String, String> localeResources = localeToResources[locale];
+        final Map<String, String> localeResources = localeToResources[locale]!;
         output.writeln(generateClassDeclaration(
           locale,
           generatedClassPrefix,
@@ -207,7 +207,7 @@ String generateArbBasedLocalizationSubclasses({
         for (final String key in localeResources.keys) {
           if (languageResources[key] == localeResources[key])
             continue;
-          final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key] as Map<String, dynamic>;
+          final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>;
           output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
         }
        output.writeln('}');
@@ -268,16 +268,16 @@ $factoryDeclaration
     if (languageToLocales[language]!.length == 1) {
       output.writeln('''
     case '$language':
-      return $generatedClassPrefix${languageToLocales[language][0].camelCase()}($factoryArguments);''');
+      return $generatedClassPrefix${languageToLocales[language]![0].camelCase()}($factoryArguments);''');
     } else if (!languageToScriptCodes.containsKey(language)) { // Does not distinguish between scripts. Switch on countryCode directly.
       output.writeln('''
     case '$language': {
       switch (locale.countryCode) {''');
-      for (final LocaleInfo locale in languageToLocales[language]) {
+      for (final LocaleInfo locale in languageToLocales[language]!) {
         if (locale.originalString == language)
           continue;
         assert(locale.length > 1);
-        final String countryCode = locale.countryCode;
+        final String countryCode = locale.countryCode!;
         output.writeln('''
         case '$countryCode':
           return $generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
@@ -291,14 +291,14 @@ $factoryDeclaration
       output.writeln('''
     case '$language': {
       switch (locale.scriptCode) {''');
-      for (final String scriptCode in languageToScriptCodes[language]) {
+      for (final String scriptCode in languageToScriptCodes[language]!) {
         final LocaleInfo scriptLocale = LocaleInfo.fromString('${language}_$scriptCode');
         output.writeln('''
         case '$scriptCode': {''');
         if (languageAndScriptToCountryCodes.containsKey(scriptLocale)) {
           output.writeln('''
           switch (locale.countryCode) {''');
-          for (final LocaleInfo locale in languageToLocales[language]) {
+          for (final LocaleInfo locale in languageToLocales[language]!) {
             if (locale.countryCode == null)
               continue;
             else
@@ -307,7 +307,7 @@ $factoryDeclaration
               continue;
             if (locale.scriptCode != scriptCode && locale.scriptCode != null)
               continue;
-            final String countryCode = locale.countryCode;
+            final String countryCode = locale.countryCode!;
             output.writeln('''
             case '$countryCode':
               return $generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
@@ -316,7 +316,7 @@ $factoryDeclaration
         // Return a fallback locale that matches scriptCode, but not countryCode.
         //
         // Explicitly defined scriptCode fallback:
-        if (languageToLocales[language].contains(scriptLocale)) {
+        if (languageToLocales[language]!.contains(scriptLocale)) {
           if (languageAndScriptToCountryCodes.containsKey(scriptLocale)) {
             output.writeln('''
           }''');
@@ -327,7 +327,7 @@ $factoryDeclaration
         } else {
           // Not Explicitly defined, fallback to first locale with the same language and
           // script:
-          for (final LocaleInfo locale in languageToLocales[language]) {
+          for (final LocaleInfo locale in languageToLocales[language]!) {
             if (locale.scriptCode != scriptCode)
               continue;
             if (languageAndScriptToCountryCodes.containsKey(scriptLocale)) {
@@ -346,13 +346,13 @@ $factoryDeclaration
       if (hasCountryCode) {
       output.writeln('''
       switch (locale.countryCode) {''');
-        for (final LocaleInfo locale in languageToLocales[language]) {
+        for (final LocaleInfo locale in languageToLocales[language]!) {
           if (locale.originalString == language)
             continue;
           assert(locale.length > 1);
           if (locale.countryCode == null)
             continue;
-          final String countryCode = locale.countryCode;
+          final String countryCode = locale.countryCode!;
           output.writeln('''
         case '$countryCode':
           return $generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
