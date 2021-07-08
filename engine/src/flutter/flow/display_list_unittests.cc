@@ -295,13 +295,6 @@ std::vector<DisplayListInvocationGroup> allGroups = {
       {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(SkBlendMode::kDstIn);}},
     }
   },
-  { "SetFilterQuality", {
-      {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setFilterQuality(kNone_SkFilterQuality);}},
-      {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setFilterQuality(kLow_SkFilterQuality);}},
-      {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setFilterQuality(kMedium_SkFilterQuality);}},
-      {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setFilterQuality(kHigh_SkFilterQuality);}},
-    }
-  },
   { "SetShader", {
       {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setShader(nullptr);}},
       {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setShader(TestShader1);}},

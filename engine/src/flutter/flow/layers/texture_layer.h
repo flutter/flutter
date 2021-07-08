@@ -6,7 +6,6 @@
 #define FLUTTER_FLOW_LAYERS_TEXTURE_LAYER_H_
 
 #include "flutter/flow/layers/layer.h"
-#include "third_party/skia/include/core/SkFilterQuality.h"
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkSize.h"
 

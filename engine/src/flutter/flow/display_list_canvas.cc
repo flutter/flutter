@@ -453,10 +453,6 @@ void DisplayListCanvasRecorder::RecordPaintAttributes(const SkPaint* paint,
       builder_->setMiterLimit(current_miter_limit_ = paint->getStrokeMiter());
     }
   }
-  if ((dataNeeded & kFilterQualityNeeded_) != 0 &&
-      current_fq_ != paint->getFilterQuality()) {
-    builder_->setFilterQuality(current_fq_ = paint->getFilterQuality());
-  }
   if ((dataNeeded & kShaderNeeded_) != 0 &&
       current_shader_.get() != paint->getShader()) {
     builder_->setShader(current_shader_ = sk_ref_sp(paint->getShader()));
