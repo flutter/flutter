@@ -295,4 +295,3 @@ enum TooltipTriggerMode {
   /// See `GestureDetector.onTap` for more details
   tap,
 }
-
