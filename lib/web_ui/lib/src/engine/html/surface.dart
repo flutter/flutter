@@ -2,19 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html' as html;
+
+import 'package:meta/meta.dart';
+import 'package:ui/ui.dart' as ui;
+
+import '../frame_reference.dart';
+import '../onscreen_logging.dart';
+import '../semantics.dart';
+import '../util.dart';
+import '../vector_math.dart';
+import 'picture.dart';
+import 'scene.dart';
+import 'surface_stats.dart';
+
 /// When `true` prints statistics about what happened to the surface tree when
-
-part of engine;
-
 /// it was composited.
 ///
 /// Also paints an on-screen overlay with the numbers visualized as a timeline.
-const bool _debugExplainSurfaceStats = false;
+const bool debugExplainSurfaceStats = false;
 
 /// When `true` shows an overlay that contains stats about canvas reuse.
 ///
 /// The overlay also includes a button to reset the stats.
-const bool _debugShowCanvasReuseStats = false;
+const bool debugShowCanvasReuseStats = false;
 
 /// When `true` renders the outlines of clip layers on the screen instead of
 /// clipping the contents.
@@ -28,44 +39,44 @@ bool debugShowClipLayers = false;
 /// As we improve canvas utilization we should decrease this number. It is
 /// unlikely that we will hit 1.0, but something around 3.0 should be
 /// reasonable.
-const double _kScreenPixelRatioWarningThreshold = 6.0;
+const double kScreenPixelRatioWarningThreshold = 6.0;
 
 /// Performs any outstanding painting work enqueued by [PersistedPicture]s.
 void commitScene(PersistedScene scene) {
-  if (_paintQueue.isNotEmpty) {
+  if (paintQueue.isNotEmpty) {
     try {
-      if (_paintQueue.length > 1) {
+      if (paintQueue.length > 1) {
         // Sort paint requests in decreasing canvas size order. Paint requests
         // attempt to reuse canvases. For efficiency we want the biggest pictures
         // to find canvases before the smaller ones claim them.
-        _paintQueue.sort((_PaintRequest a, _PaintRequest b) {
+        paintQueue.sort((PaintRequest a, PaintRequest b) {
           final double aSize = a.canvasSize.height * a.canvasSize.width;
           final double bSize = b.canvasSize.height * b.canvasSize.width;
           return bSize.compareTo(aSize);
         });
       }
 
-      for (_PaintRequest request in _paintQueue) {
+      for (PaintRequest request in paintQueue) {
         request.paintCallback();
       }
     } finally {
-      _paintQueue = <_PaintRequest>[];
+      paintQueue = <PaintRequest>[];
     }
   }
 
   // After the update the retained surfaces are back to active.
-  if (_retainedSurfaces.isNotEmpty) {
-    for (int i = 0; i < _retainedSurfaces.length; i++) {
-      final PersistedSurface retainedSurface = _retainedSurfaces[i];
+  if (retainedSurfaces.isNotEmpty) {
+    for (int i = 0; i < retainedSurfaces.length; i++) {
+      final PersistedSurface retainedSurface = retainedSurfaces[i];
       assert(debugAssertSurfaceState(
           retainedSurface, PersistedSurfaceState.pendingRetention));
       retainedSurface.state = PersistedSurfaceState.active;
     }
-    _retainedSurfaces = <PersistedSurface>[];
+    retainedSurfaces = <PersistedSurface>[];
   }
-  if (_debugExplainSurfaceStats) {
-    _debugPrintSurfaceStats(scene, _debugFrameNumber);
-    _debugRepaintSurfaceStatsOverlay(scene);
+  if (debugExplainSurfaceStats) {
+    debugPrintSurfaceStats(scene, debugFrameNumber);
+    debugRepaintSurfaceStatsOverlay(scene);
   }
 
   assert(() {
@@ -83,11 +94,11 @@ void commitScene(PersistedScene scene) {
   }
   frameReferences = <FrameReference<dynamic>>[];
 
-  if (_debugExplainSurfaceStats) {
-    _surfaceStats = <PersistedSurface, _DebugSurfaceStats>{};
+  if (debugExplainSurfaceStats) {
+    surfaceStats = <PersistedSurface, DebugSurfaceStats>{};
   }
   assert(() {
-    _debugFrameNumber++;
+    debugFrameNumber++;
     return true;
   }());
 }
@@ -361,8 +372,8 @@ abstract class PersistedSurface implements ui.EngineLayer {
     rootElement = createElement();
     assert(rootElement != null);
     applyWebkitClipFix(rootElement);
-    if (_debugExplainSurfaceStats) {
-      _surfaceStatsFor(this).allocatedDomNodeCount++;
+    if (debugExplainSurfaceStats) {
+      surfaceStatsFor(this).allocatedDomNodeCount++;
     }
     apply();
     state = PersistedSurfaceState.active;
@@ -388,8 +399,8 @@ abstract class PersistedSurface implements ui.EngineLayer {
       return true;
     }());
     rootElement = oldSurface.rootElement;
-    if (_debugExplainSurfaceStats) {
-      _surfaceStatsFor(this).reuseElementCount++;
+    if (debugExplainSurfaceStats) {
+      surfaceStatsFor(this).reuseElementCount++;
     }
 
     // We took ownership of the old element.
@@ -434,13 +445,13 @@ abstract class PersistedSurface implements ui.EngineLayer {
       // it is set to active state. We do not set the state to active
       // immediately. Otherwise, another surface could match on it and steal
       // this surface's DOM elements.
-      _retainedSurfaces.add(this);
+      retainedSurfaces.add(this);
     }
     if (assertionsEnabled) {
       rootElement!.setAttribute('flt-layer-state', 'retained');
     }
-    if (_debugExplainSurfaceStats) {
-      _surfaceStatsFor(this).retainSurfaceCount++;
+    if (debugExplainSurfaceStats) {
+      surfaceStatsFor(this).retainSurfaceCount++;
     }
   }
 
@@ -514,6 +525,9 @@ abstract class PersistedSurface implements ui.EngineLayer {
   ///
   /// The value is update by [recomputeTransformAndClip].
   Matrix4? get transform => _transform;
+  set transform(Matrix4? value) {
+    _transform = value;
+  }
   Matrix4? _transform;
 
   /// The intersection at this surface level.
@@ -522,20 +536,16 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// the clip added by this layer (if any).
   ///
   /// The value is update by [recomputeTransformAndClip].
-  ui.Rect? _projectedClip;
+  ui.Rect? projectedClip;
 
   /// Bounds of clipping performed by this layer.
-  ui.Rect? _localClipBounds;
-  // Cached inverse of transform on this node. Unlike transform, this
-  // Matrix only contains local transform (not chain multiplied since root).
-  Matrix4? _localTransformInverse;
+  ui.Rect? localClipBounds;
 
   /// The inverse of the local transform that this surface applies to its children.
   ///
   /// The default implementation is identity transform. Concrete
   /// implementations may override this getter to supply a different transform.
-  Matrix4? get localTransformInverse =>
-      _localTransformInverse ??= Matrix4.identity();
+  Matrix4? get localTransformInverse => null;
 
   /// Recomputes [transform] and [globalClip] fields.
   ///
@@ -546,9 +556,8 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// This method is called by the [preroll] method.
   void recomputeTransformAndClip() {
     _transform = parent!._transform;
-    _localClipBounds = null;
-    _localTransformInverse = null;
-    _projectedClip = null;
+    localClipBounds = null;
+    projectedClip = null;
   }
 
   /// Performs computations before [build], [update], or [retain] are called.
@@ -653,9 +662,8 @@ abstract class PersistedContainerSurface extends PersistedSurface {
   @override
   void recomputeTransformAndClip() {
     _transform = parent!._transform;
-    _localClipBounds = null;
-    _localTransformInverse = null;
-    _projectedClip = null;
+    localClipBounds = null;
+    projectedClip = null;
   }
 
   @override

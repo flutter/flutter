@@ -2,7 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+
+import 'package:ui/src/engine.dart' show DomRenderer;
+import 'package:ui/ui.dart' as ui;
+
+import '../browser_detection.dart';
+import '../util.dart';
+import '../vector_math.dart';
+import 'shaders/shader.dart';
+import 'surface.dart';
+import 'surface_stats.dart';
 
 /// A surface that applies an image filter to background.
 class PersistedBackdropFilter extends PersistedContainerSurface
@@ -20,7 +30,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
   html.Element? _childContainer;
   html.Element? _filterElement;
   ui.Rect? _activeClipBounds;
-  // Cached inverted transform for _transform.
+  // Cached inverted transform for [transform].
   late Matrix4 _invertedTransform;
   // Reference to transform last used to cache [_invertedTransform].
   Matrix4? _previousTransform;
@@ -39,9 +49,9 @@ class PersistedBackdropFilter extends PersistedContainerSurface
       ..style.transformOrigin = '0 0 0';
     _childContainer = html.Element.tag('flt-backdrop-interior');
     _childContainer!.style.position = 'absolute';
-    if (_debugExplainSurfaceStats) {
+    if (debugExplainSurfaceStats) {
       // This creates an additional interior element. Count it too.
-      _surfaceStatsFor(this).allocatedDomNodeCount++;
+      surfaceStatsFor(this).allocatedDomNodeCount++;
     }
     _filterElement = defaultCreateElement('flt-backdrop-filter');
     _filterElement!.style.transformOrigin = '0 0 0';
@@ -61,9 +71,9 @@ class PersistedBackdropFilter extends PersistedContainerSurface
 
   @override
   void apply() {
-    if (_previousTransform != _transform) {
-      _invertedTransform = Matrix4.inverted(_transform!);
-      _previousTransform = _transform;
+    if (_previousTransform != transform) {
+      _invertedTransform = Matrix4.inverted(transform!);
+      _previousTransform = transform;
     }
     // https://api.flutter.dev/flutter/widgets/BackdropFilter-class.html
     // Defines the effective area as the parent/ancestor clip or if not
@@ -84,7 +94,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
     PersistedContainerSurface? parentSurface = parent;
     while (parentSurface != null) {
       if (parentSurface.isClipping) {
-        final ui.Rect activeClipBounds = (_activeClipBounds = parentSurface._localClipBounds)!;
+        final ui.Rect activeClipBounds = (_activeClipBounds = parentSurface.localClipBounds)!;
         left = activeClipBounds.left;
         top = activeClipBounds.top;
         width = activeClipBounds.width;
@@ -134,7 +144,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
     PersistedContainerSurface? parentSurface = parent;
     while (parentSurface != null) {
       if (parentSurface.isClipping) {
-        if (parentSurface._localClipBounds != _activeClipBounds) {
+        if (parentSurface.localClipBounds != _activeClipBounds) {
           apply();
         }
         break;

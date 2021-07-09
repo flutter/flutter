@@ -7,9 +7,11 @@ import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/src/engine.dart' show assertionsEnabled, BitmapCanvas, colorToCssString, canonicalizeFontFamily, domRenderer, DomRenderer, SurfacePaint;
+import 'package:ui/src/engine.dart' show domRenderer, DomRenderer;
 
 import '../browser_detection.dart';
+import '../html/bitmap_canvas.dart';
+import '../html/painting.dart';
 import '../profiler.dart';
 import '../util.dart';
 import 'canvas_paragraph.dart';
