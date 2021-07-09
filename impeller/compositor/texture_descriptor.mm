@@ -28,8 +28,7 @@ std::optional<TextureDescriptor> TextureDescriptor::MakeFromImageResult(
     return std::nullopt;
   }
 
-  const auto pixel_format =
-      FormatForImageResultComponents(result.GetComponents());
+  const auto pixel_format = FormatForImageResultComponents(result.GetFormat());
   if (!pixel_format.has_value()) {
     FML_DLOG(ERROR) << "Unknown image format.";
     return std::nullopt;

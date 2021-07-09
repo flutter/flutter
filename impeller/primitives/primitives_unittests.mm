@@ -48,18 +48,18 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
   ASSERT_TRUE(vertex_buffer);
 
   // Contents texture.
-  CompressedImage image(
+  CompressedImage compressed_image(
       flutter::testing::OpenFixtureAsMapping("bay_bridge.jpg"));
-  auto result = image.Decode();
-  ASSERT_TRUE(result.IsValid());
-  auto texture_descriptor = TextureDescriptor::MakeFromImageResult(result);
+  auto image = compressed_image.Decode().ConvertToRGBA();
+  ASSERT_TRUE(image.IsValid());
+  auto texture_descriptor = TextureDescriptor::MakeFromImageResult(image);
   ASSERT_TRUE(texture_descriptor.has_value());
   auto texture = context->GetPermanentsAllocator()->CreateTexture(
       StorageMode::kHostVisible, texture_descriptor.value());
   ASSERT_TRUE(texture);
   texture->SetLabel("Bay Bridge");
-  auto uploaded = texture->SetContents(result.GetAllocation()->GetMapping(),
-                                       result.GetAllocation()->GetSize());
+  auto uploaded = texture->SetContents(image.GetAllocation()->GetMapping(),
+                                       image.GetAllocation()->GetSize());
   ASSERT_TRUE(uploaded);
   auto sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);

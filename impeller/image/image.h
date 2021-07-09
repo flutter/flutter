@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
@@ -25,7 +26,7 @@ class Image {
   Image();
 
   Image(ISize size,
-        Format components,
+        Format format,
         std::shared_ptr<const fml::Mapping> allocation);
 
   ~Image();
@@ -34,17 +35,17 @@ class Image {
 
   bool IsValid() const;
 
-  Format GetComponents() const;
+  Format GetFormat() const;
 
   const std::shared_ptr<const fml::Mapping>& GetAllocation() const;
 
+  Image ConvertToRGBA() const;
+
  private:
   ISize size_;
-  Format components_ = Format::Invalid;
+  Format format_ = Format::Invalid;
   std::shared_ptr<const fml::Mapping> allocation_;
   bool is_valid_ = false;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(Image);
 };
 
 }  // namespace impeller
