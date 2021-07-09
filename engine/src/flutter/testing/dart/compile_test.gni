@@ -1,0 +1,61 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//third_party/dart/build/dart/dart_action.gni")
+
+# Generates a Dart kernel snapshot using flutter_frontend_server.
+#
+# Arguments
+#     dart_main (required): The Main Dart file.
+#
+#     dart_kernel (required): The path to the output kernel snapshot in the out
+#                             directory.
+#
+#     packages (required): The path to the .packages file.
+template("compile_flutter_dart_test") {
+  assert(defined(invoker.dart_file), "The Dart test file must be specified.")
+  assert(defined(invoker.dart_kernel),
+         "The Dart Kernel file location must be specified.")
+  assert(defined(invoker.packages),
+         "The path to the .packages file must be specified.")
+
+  dart_action(target_name) {
+    testonly = true
+    deps = []
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+    deps += [
+      "//flutter/flutter_frontend_server:frontend_server",
+      "//flutter/lib/snapshot:strong_platform",
+    ]
+    script = "$root_gen_dir/frontend_server.dart.snapshot"
+    packages = rebase_path(invoker.packages)  # rebase_path(".packages")
+
+    inputs = [ invoker.dart_file ]
+    outputs = [ invoker.dart_kernel ]
+
+    snapshot_depfile =
+        "$root_gen_dir/flutter/testing/snapshot_$target_name.depfile.d"
+    depfile = snapshot_depfile
+
+    flutter_patched_sdk = rebase_path("$root_out_dir/flutter_patched_sdk")
+
+    vm_args = [ "--disable-dart-dev" ]
+
+    args = [
+      "--sound-null-safety",
+      "--sdk-root",
+      flutter_patched_sdk,
+      "--target=flutter",
+      "--packages",
+      packages,
+      "--depfile",
+      rebase_path(snapshot_depfile),
+      "--output-dill",
+      rebase_path(invoker.dart_kernel, root_out_dir),
+      rebase_path(invoker.dart_file),
+    ]
+  }
+}
