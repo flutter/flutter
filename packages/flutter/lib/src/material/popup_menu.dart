@@ -1165,9 +1165,9 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
 
     if (widget.child != null) {
-      final tooltip =
+      String tooltip =
           widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip;
-      final child = InkWell(
+      Widget child = InkWell(
         onTap: widget.enabled ? showButtonMenu : null,
         canRequestFocus: _canRequestFocus,
         enableFeedback: enableFeedback,
