@@ -390,8 +390,9 @@ void main() {
   testUsingContext('Refuses to build for macOS when feature is disabled', () {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
+    final bool supported = BuildMacosCommand(verboseHelp: false).supported;
     expect(() => runner.run(<String>['build', 'macos', '--no-pub']),
-      throwsA(isA<UsageException>()));
+      supported ? throwsToolExit() : throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
