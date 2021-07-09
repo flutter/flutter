@@ -664,7 +664,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     }
     if (_currentRunningAppId != null) {
       _debugPrint('Stopping application...');
-      await Future.any<int?>(<Future<int?>>[
+      await Future.any<void>(<Future<void>>[
         _process!.exitCode,
         _sendRequest(
           'app.stop',
@@ -684,7 +684,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   int id = 1;
-  Future<int?> _sendRequest(String method, dynamic params) async {
+  Future<bool> _sendRequest(String method, dynamic params) async {
     final int requestId = id++;
     final Map<String, dynamic> request = <String, dynamic>{
       'id': requestId,
@@ -708,7 +708,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       _throwErrorResponse('Unexpected error response');
     }
 
-    return response['result'] as int?;
+    return response['result'] as bool;
   }
 
   void _throwErrorResponse(String message) {
