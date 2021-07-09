@@ -623,7 +623,7 @@ void main() {
       "vehicleType": {}
     }
   },
-  
+
   "pluralInString": "Indeed, {count, plural, =1 {she likes} other {they like} } Flutter!",
   "@pluralInString": {
     "description": "A plural message with a single quote.",
