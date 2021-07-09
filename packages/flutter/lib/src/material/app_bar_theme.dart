@@ -76,6 +76,8 @@ class AppBarTheme with Diagnosticable {
   )
   final Brightness? brightness;
 
+  /// This property is deprecated, please use [backgroundColor] instead.
+  ///
   /// Obsolete property that overrides the default value of
   /// [AppBar.backgroundColor] in all descendant [AppBar] widgets.
   ///
@@ -86,6 +88,10 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.backgroundColor].
   ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
   ///    on this obsolete property.
+  @Deprecated(
+    'This property is no longer used, please use backgroundColor instead. '
+    'This feature was deprecated after v2.4.0-0.0.pre.',
+  )
   Color? get color => backgroundColor;
 
   /// Overrides the default value of [AppBar.backgroundColor] in all
@@ -169,7 +175,8 @@ class AppBarTheme with Diagnosticable {
   /// Overrides the default value for the obsolete [AppBar.toolbarTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
-  /// If this property is specified, then [backwardsCompatibility] should be true.
+  /// If this property is specified, then [backwardsCompatibility]
+  /// should be false (the default).
   ///
   /// See also:
   ///
@@ -180,7 +187,8 @@ class AppBarTheme with Diagnosticable {
   /// Overrides the default value of [AppBar.titleTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
-  /// If this property is specified, then [backwardsCompatibility] should be true.
+  /// If this property is specified, then [backwardsCompatibility]
+  /// should be false (the default).
   ///
   /// See also:
   ///

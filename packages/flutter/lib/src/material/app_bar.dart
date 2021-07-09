@@ -745,7 +745,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.systemOverlayStyle}
   /// Specifies the style to use for the system overlays that overlap the AppBar.
   ///
-  /// This property is only used if [backwardsCompatibility] is set to false.
+  /// This property is only used if [backwardsCompatibility] is false (the default).
   ///
   /// If this property is null, then [AppBarTheme.systemOverlayStyle] of
   /// [ThemeData.appBarTheme] is used. If that is also null, an appropriate
