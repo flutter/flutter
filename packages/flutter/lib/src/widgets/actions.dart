@@ -1030,24 +1030,23 @@ class Actions extends StatefulWidget {
   ) {
     assert(intent != null);
     assert(context != null);
-    Action<T>? action;
-    InheritedElement? actionElement;
+    Object? returnValue;
 
-    _visitActionsAncestors(context, (InheritedElement element) {
+    final bool actionFound = _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
       final Action<T>? result = _castAction(actions, intent);
-      if (result != null) {
-        actionElement = element;
-        if (result.isEnabled(intent)) {
-          action = result;
-          return true;
-        }
+      if (result != null && result.isEnabled(intent)) {
+        // Invoke the action we found using the relevant dispatcher from the Actions
+        // Element we found.
+        returnValue = _findDispatcher(element).invokeAction(result, intent, context);
+        return true;
       }
+
       return false;
     });
 
     assert(() {
-      if (actionElement == null) {
+      if (!actionFound) {
         throw FlutterError(
           'Unable to find an action for an Intent with type '
           '${intent.runtimeType} in an $Actions widget in the given context.\n'
@@ -1063,12 +1062,7 @@ class Actions extends StatefulWidget {
       }
       return true;
     }());
-    if (actionElement == null || action == null) {
-      return null;
-    }
-    // Invoke the action we found using the relevant dispatcher from the Actions
-    // Element we found.
-    return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
+    return returnValue;
   }
 
   /// Invokes the action associated with the given [Intent] using the
@@ -1091,28 +1085,20 @@ class Actions extends StatefulWidget {
   ) {
     assert(intent != null);
     assert(context != null);
-    Action<T>? action;
-    InheritedElement? actionElement;
+    Object? returnValue;
 
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
-      final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
-      if (result != null) {
-        actionElement = element;
-        if (result.isEnabled(intent)) {
-          action = result;
-          return true;
-        }
+      final Action<T>? result = _castAction(actions, intent);
+      if (result != null && result.isEnabled(intent)) {
+        // Invoke the action we found using the relevant dispatcher from the Actions
+        // Element we found.
+        returnValue = _findDispatcher(element).invokeAction(result, intent, context);
+        return true;
       }
       return false;
     });
-
-    if (actionElement == null || action == null) {
-      return null;
-    }
-    // Invoke the action we found using the relevant dispatcher from the Actions
-    // Element we found.
-    return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
+    return returnValue;
   }
 
   @override

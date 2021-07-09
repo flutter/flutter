@@ -651,7 +651,7 @@ void main() {
         ),
       );
 
-      Object? result = Actions.invoke(
+      Object? result = Actions.maybeInvoke(
         containerKey.currentContext!,
         const TestIntent(),
       );
@@ -689,7 +689,7 @@ void main() {
       );
 
       await tester.pump();
-      result = Actions.invoke<TestIntent>(
+      result = Actions.maybeInvoke<TestIntent>(
         containerKey.currentContext!,
         const SecondTestIntent(),
       );
