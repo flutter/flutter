@@ -6,11 +6,13 @@
 
 #include "flutter/fml/paths.h"
 #include "flutter/testing/testing.h"
+#include "impeller/compositor/allocator.h"
 #include "impeller/compositor/context.h"
 #include "impeller/compositor/formats_metal.h"
 #include "impeller/compositor/render_pass.h"
 #include "impeller/compositor/renderer.h"
 #include "impeller/compositor/surface.h"
+#include "impeller/image/compressed_image.h"
 #include "impeller/playground/playground.h"
 
 #define GLFW_INCLUDE_NONE
@@ -142,6 +144,39 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   }
 
   return true;
+}
+
+std::shared_ptr<Texture> Playground::CreateTextureForFixture(
+    const char* fixture_name) const {
+  CompressedImage compressed_image(
+      flutter::testing::OpenFixtureAsMapping(fixture_name));
+  auto image = compressed_image.Decode().ConvertToRGBA();
+  if (!image.IsValid()) {
+    FML_LOG(ERROR) << "Could not find fixture named " << fixture_name;
+    return nullptr;
+  }
+  auto texture_descriptor = TextureDescriptor::MakeFromImageResult(image);
+  if (!texture_descriptor.has_value()) {
+    FML_LOG(ERROR) << "Could not figure out texture descriptor for fixture "
+                   << fixture_name;
+    return nullptr;
+  }
+  auto texture =
+      renderer_.GetContext()->GetPermanentsAllocator()->CreateTexture(
+          StorageMode::kHostVisible, texture_descriptor.value());
+  if (!texture) {
+    FML_LOG(ERROR) << "Could not allocate texture for fixture " << fixture_name;
+    return nullptr;
+  }
+  texture->SetLabel(fixture_name);
+  auto uploaded = texture->SetContents(image.GetAllocation()->GetMapping(),
+                                       image.GetAllocation()->GetSize());
+  if (!uploaded) {
+    FML_LOG(ERROR) << "Could not upload texture to device memory for fixture "
+                   << fixture_name;
+    return nullptr;
+  }
+  return texture;
 }
 
 }  // namespace impeller

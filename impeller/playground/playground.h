@@ -6,6 +6,7 @@
 #include "flutter/fml/macros.h"
 #include "gtest/gtest.h"
 #include "impeller/compositor/renderer.h"
+#include "impeller/compositor/texture.h"
 
 namespace impeller {
 
@@ -18,6 +19,9 @@ class Playground : public ::testing::Test {
   std::shared_ptr<Context> GetContext() const;
 
   bool OpenPlaygroundHere(Renderer::RenderCallback render_callback);
+
+  std::shared_ptr<Texture> CreateTextureForFixture(
+      const char* fixture_name) const;
 
  private:
   Renderer renderer_;

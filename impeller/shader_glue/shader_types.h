@@ -58,6 +58,16 @@ struct ShaderStageIOSlot {
   size_t columns;
 };
 
+struct SampledImageSlot {
+  const char* name;
+  size_t texture_index;
+  size_t sampler_index;
+
+  constexpr bool HasTexture() const { return texture_index < 32u; }
+
+  constexpr bool HasSampler() const { return sampler_index < 32u; }
+};
+
 template <size_t Size>
 struct Padding {
  private:

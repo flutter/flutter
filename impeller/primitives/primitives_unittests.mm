@@ -47,20 +47,9 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
       vertex_builder.CreateVertexBuffer(*context->GetPermanentsAllocator());
   ASSERT_TRUE(vertex_buffer);
 
-  // Contents texture.
-  CompressedImage compressed_image(
-      flutter::testing::OpenFixtureAsMapping("bay_bridge.jpg"));
-  auto image = compressed_image.Decode().ConvertToRGBA();
-  ASSERT_TRUE(image.IsValid());
-  auto texture_descriptor = TextureDescriptor::MakeFromImageResult(image);
-  ASSERT_TRUE(texture_descriptor.has_value());
-  auto texture = context->GetPermanentsAllocator()->CreateTexture(
-      StorageMode::kHostVisible, texture_descriptor.value());
-  ASSERT_TRUE(texture);
-  texture->SetLabel("Bay Bridge");
-  auto uploaded = texture->SetContents(image.GetAllocation()->GetMapping(),
-                                       image.GetAllocation()->GetSize());
-  ASSERT_TRUE(uploaded);
+  auto bridge = CreateTextureForFixture("bay_bridge.jpg");
+  auto boston = CreateTextureForFixture("boston.jpg");
+  ASSERT_TRUE(bridge && boston);
   auto sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
   Renderer::RenderCallback callback = [&](const Surface& surface,
@@ -78,10 +67,23 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
         .buffers[BoxVertexShader::kUniformUniformBuffer.binding] =
         pass.GetTransientsBuffer().EmplaceUniform(uniforms);
 
+    BoxFragmentShader::FrameInfo frame_info;
+    frame_info.current_time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
     cmd.fragment_bindings
-        .textures[BoxFragmentShader::kInputContentsTexture.location] = texture;
+        .buffers[BoxFragmentShader::kUniformFrameInfo.binding] =
+        pass.GetTransientsBuffer().EmplaceUniform(frame_info);
     cmd.fragment_bindings
-        .samplers[BoxFragmentShader::kInputContentsTexture.location] = sampler;
+        .textures[BoxFragmentShader::kSampledImageContents1Texture
+                      .texture_index] = bridge;
+    cmd.fragment_bindings
+        .samplers[BoxFragmentShader::kSampledImageContents1Texture
+                      .sampler_index] = sampler;
+    cmd.fragment_bindings
+        .textures[BoxFragmentShader::kSampledImageContents2Texture
+                      .texture_index] = boston;
+    cmd.fragment_bindings
+        .samplers[BoxFragmentShader::kSampledImageContents2Texture
+                      .sampler_index] = sampler;
 
     cmd.index_buffer = vertex_buffer.index_buffer;
     cmd.index_count = vertex_buffer.index_count;
