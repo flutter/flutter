@@ -53,6 +53,8 @@ class LayerTree {
     for (int i = 0; i < overlayCanvases.length; i++) {
       internalNodesCanvas.addCanvas(overlayCanvases[i]);
     }
+    // Clear the canvases before painting
+    internalNodesCanvas.clear(ui.Color(0x00000000));
     final PaintContext context = PaintContext(
       internalNodesCanvas,
       frame.canvas,

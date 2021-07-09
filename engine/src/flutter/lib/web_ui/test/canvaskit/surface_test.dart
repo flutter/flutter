@@ -18,56 +18,88 @@ void main() {
 void testMain() {
   group('CanvasKit', () {
     setUpCanvasKitTest();
+    setUp(() {
+      window.debugOverrideDevicePixelRatio(1.0);
+    });
 
     test('Surface allocates canvases efficiently', () {
       final Surface surface = SurfaceFactory.instance.getSurface();
-      final CkSurface original =
+      CkSurface originalSurface =
           surface.acquireFrame(ui.Size(9, 19)).skiaSurface;
+      final html.CanvasElement original = surface.htmlCanvas!;
 
       // Expect exact requested dimensions.
-      expect(original.width(), 9);
-      expect(original.height(), 19);
-      expect(surface.htmlCanvas!.style.width, '9px');
-      expect(surface.htmlCanvas!.style.height, '19px');
+      expect(original.width, 9);
+      expect(original.height, 19);
+      expect(original.style.width, '9px');
+      expect(original.style.height, '19px');
+      expect(originalSurface.width(), 9);
+      expect(originalSurface.height(), 19);
 
-      // Shrinking reuses the existing surface straight-up.
-      final CkSurface shrunk = surface.acquireFrame(ui.Size(5, 15)).skiaSurface;
+      // Shrinking reuses the existing canvas straight-up.
+      CkSurface shrunkSurface =
+          surface.acquireFrame(ui.Size(5, 15)).skiaSurface;
+      final html.CanvasElement shrunk = surface.htmlCanvas!;
       expect(shrunk, same(original));
-      expect(surface.htmlCanvas!.style.width, '9px');
-      expect(surface.htmlCanvas!.style.height, '19px');
+      expect(shrunk.style.width, '9px');
+      expect(shrunk.style.height, '19px');
+      expect(shrunkSurface, isNot(same(original)));
+      expect(shrunkSurface.width(), 5);
+      expect(shrunkSurface.height(), 15);
 
-      // The first increase will allocate a new surface, but will overallocate
+      // The first increase will allocate a new canvas, but will overallocate
       // by 40% to accommodate future increases.
-      final CkSurface firstIncrease =
+      CkSurface firstIncreaseSurface =
           surface.acquireFrame(ui.Size(10, 20)).skiaSurface;
+      final html.CanvasElement firstIncrease = surface.htmlCanvas!;
       expect(firstIncrease, isNot(same(original)));
+      expect(firstIncreaseSurface, isNot(same(shrunkSurface)));
 
       // Expect overallocated dimensions
-      expect(firstIncrease.width(), 14);
-      expect(firstIncrease.height(), 28);
-      expect(surface.htmlCanvas!.style.width, '14px');
-      expect(surface.htmlCanvas!.style.height, '28px');
+      expect(firstIncrease.width, 14);
+      expect(firstIncrease.height, 28);
+      expect(firstIncrease.style.width, '14px');
+      expect(firstIncrease.style.height, '28px');
+      expect(firstIncreaseSurface.width(), 10);
+      expect(firstIncreaseSurface.height(), 20);
 
-      // Subsequent increases within 40% reuse the old surface.
-      final CkSurface secondIncrease =
+      // Subsequent increases within 40% reuse the old canvas.
+      CkSurface secondIncreaseSurface =
           surface.acquireFrame(ui.Size(11, 22)).skiaSurface;
+      final html.CanvasElement secondIncrease = surface.htmlCanvas!;
       expect(secondIncrease, same(firstIncrease));
+      expect(secondIncreaseSurface, isNot(same(firstIncreaseSurface)));
+      expect(secondIncreaseSurface.width(), 11);
+      expect(secondIncreaseSurface.height(), 22);
 
       // Increases beyond the 40% limit will cause a new allocation.
-      final CkSurface huge = surface.acquireFrame(ui.Size(20, 40)).skiaSurface;
-      expect(huge, isNot(same(firstIncrease)));
+      CkSurface hugeSurface = surface.acquireFrame(ui.Size(20, 40)).skiaSurface;
+      final html.CanvasElement huge = surface.htmlCanvas!;
+      expect(huge, isNot(same(secondIncrease)));
+      expect(hugeSurface, isNot(same(secondIncreaseSurface)));
 
       // Also over-allocated
-      expect(huge.width(), 28);
-      expect(huge.height(), 56);
-      expect(surface.htmlCanvas!.style.width, '28px');
-      expect(surface.htmlCanvas!.style.height, '56px');
+      expect(huge.width, 28);
+      expect(huge.height, 56);
+      expect(huge.style.width, '28px');
+      expect(huge.style.height, '56px');
+      expect(hugeSurface.width(), 20);
+      expect(hugeSurface.height(), 40);
 
       // Shrink again. Reuse the last allocated surface.
-      final CkSurface shrunk2 =
+      CkSurface shrunkSurface2 =
           surface.acquireFrame(ui.Size(5, 15)).skiaSurface;
+      final html.CanvasElement shrunk2 = surface.htmlCanvas!;
       expect(shrunk2, same(huge));
-    });
+      expect(shrunkSurface2, isNot(same(hugeSurface)));
+      expect(shrunkSurface2.width(), 5);
+      expect(shrunkSurface2.height(), 15);
+      // Skipping on Firefox for now since Firefox headless doesn't support WebGL
+      // This causes issues in the test since we create a Canvas-backed surface,
+      // which cannot be a different size from the canvas.
+      // TODO(hterkelsen): See if we can give a custom size for software
+      //     surfaces.
+    }, skip: isFirefox || isIosSafari);
 
     test(
       'Surface creates new context when WebGL context is restored',
