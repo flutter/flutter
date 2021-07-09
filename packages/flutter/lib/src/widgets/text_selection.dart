@@ -824,28 +824,31 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
+    final double preferredLineHeight;
+
     // On iOS we want to calculate the start and end handles separately so they
     // scale for the selected content.
-    late final Rect? startHandleRect;
-    late final Rect? endHandleRect;
-    startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
-    endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
-
-    late double preferredLineHeight;
-
-    if(defaultTargetPlatform == TargetPlatform.iOS){
-      switch(type){
+    //
+    // For the start handle we compute the rectangles that encompass the beginning
+    // of the selection.
+    //
+    // For the end handle we compute the rectangles that encompass the end of
+    // the selection.
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      switch (type) {
         case TextSelectionHandleType.left:
-          preferredLineHeight = startHandleRect?.height ?? widget.renderObject.preferredLineHeight;
+          final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
+          preferredLineHeight = startHandleRect!.height;
           break;
         case TextSelectionHandleType.right:
-          preferredLineHeight = endHandleRect?.height ?? widget.renderObject.preferredLineHeight;
+          final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
+          preferredLineHeight = endHandleRect!.height;
           break;
         case TextSelectionHandleType.collapsed:
           preferredLineHeight = widget.renderObject.preferredLineHeight;
           break;
       }
-    }else{
+    } else {
       preferredLineHeight = widget.renderObject.preferredLineHeight;
     }
 
