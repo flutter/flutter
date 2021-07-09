@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 
-import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -823,24 +822,5 @@ void main() {
 
     expect(result, isNotNull);
     expect(lastMessage, 'Failed to invoke preHotRestartCallback foo: Exception');
-  });
-
-  test('Service extensions - preHotRestartCallback that takes longer than 5 seconds', () async {
-    FakeAsync().run((FakeAsync fakeAsync) {
-      String? lastMessage;
-      debugPrint = (String? message, {int? wrapWidth}) {
-        lastMessage = message;
-      };
-
-      binding.registerHotRestartCallback(() async {
-        await Completer<void>().future;
-      }, debugLabel: 'foo');
-
-      unawaited(binding.testExtension('invokePreHotRestartCallbacks', <String, String>{}));
-      fakeAsync.elapse(const Duration(seconds: 6));
-      fakeAsync.flushMicrotasks();
-
-      expect(lastMessage, 'preHotRestartCallback foo is taking longer than expected...');
-    });
   });
 }
