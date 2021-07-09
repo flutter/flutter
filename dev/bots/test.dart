@@ -722,7 +722,7 @@ Future<void> _runFrameworkTests() async {
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'));
     // TODO(fujino): Move this to its own test shard
     await _pubRunTest(path.join(flutterRoot, 'dev', 'conductor'), forceSingleCore: true);
@@ -1436,6 +1436,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   bool forceSingleCore = false,
   Duration perTestTimeout,
   bool includeLocalEngineEnv = false,
+  bool ensurePrecompiledTool = true,
 }) async {
   int cpus;
   final String cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -1491,6 +1492,8 @@ Future<void> _pubRunTest(String workingDirectory, {
     // We need to force it to be regenerated with them enabled.
     deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
     deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
+  }
+  if (ensurePrecompiledTool) {
     // We rerun the `flutter` tool here just to make sure that it is compiled
     // before tests run, because the tests might time out if they have to rebuild
     // the tool themselves.
