@@ -258,7 +258,7 @@ String _generateSelectMethod(Message message, String translationForMessage) {
   if (selectMatch != null && selectMatch.groupCount == 2) {
     choice = selectMatch.group(1);
     final String pattern = selectMatch.group(2)!;
-    final RegExp patternRE = RegExp(r'\s*([\w\d]+)\{(.*?)\}');
+    final RegExp patternRE = RegExp(r'\s*([\w\d]+)\s*\{(.*?)\}');
     for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
       if (patternMatch.groupCount == 2) {
         cases.add(
