@@ -116,7 +116,8 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
     # stack traces on Linux.
     executable = unstripped_exe
     # Some tests depend on the EGL/GLES libraries placed in the build directory.
-    env = {'LD_LIBRARY_PATH': os.path.join(build_dir, 'lib.unstripped')}
+    env = os.environ.copy()
+    env['LD_LIBRARY_PATH'] = os.path.join(build_dir, 'lib.unstripped')
   else:
     executable = FindExecutablePath(os.path.join(build_dir, executable_name))
     env = None
@@ -220,7 +221,7 @@ def RunEngineBenchmarks(build_dir, filter):
 def SnapshotTest(build_dir, test_packages, dart_file, kernel_file_output, verbose_dart_snapshot):
   print("Generating snapshot for test %s" % dart_file)
 
-  dart = os.path.join(build_dir, 'dart-sdk', 'bin', 'dart')
+  dart = os.path.join(build_dir, 'dart')
   frontend_server = os.path.join(build_dir, 'gen', 'frontend_server.dart.snapshot')
   flutter_patched_sdk = os.path.join(build_dir, 'flutter_patched_sdk')
 
@@ -451,7 +452,7 @@ def RunFrontEndServerTests(build_dir):
       os.path.join(build_dir, 'flutter_patched_sdk')]
     RunEngineExecutable(
       build_dir,
-      os.path.join('dart-sdk', 'bin', 'dart'),
+      'dart',
       None,
       flags=opts,
       cwd=test_dir)
@@ -464,7 +465,7 @@ def RunConstFinderTests(build_dir):
     os.path.join(test_dir, 'const_finder_test.dart'),
     os.path.join(build_dir, 'gen', 'frontend_server.dart.snapshot'),
     os.path.join(build_dir, 'flutter_patched_sdk')]
-  RunEngineExecutable(build_dir, os.path.join('dart-sdk', 'bin', 'dart'), None, flags=opts, cwd=test_dir)
+  RunEngineExecutable(build_dir, 'dart', None, flags=opts, cwd=test_dir)
 
 
 def RunLitetestTests(build_dir):
@@ -476,7 +477,7 @@ def RunLitetestTests(build_dir):
       dart_test_file]
     RunEngineExecutable(
       build_dir,
-      os.path.join('dart-sdk', 'bin', 'dart'),
+      'dart',
       None,
       flags=opts,
       cwd=test_dir)
@@ -491,7 +492,7 @@ def RunBenchmarkTests(build_dir):
       dart_test_file]
     RunEngineExecutable(
       build_dir,
-      os.path.join('dart-sdk', 'bin', 'dart'),
+      'dart',
       None,
       flags=opts,
       cwd=test_dir)
@@ -506,7 +507,7 @@ def RunGithooksTests(build_dir):
       dart_test_file]
     RunEngineExecutable(
       build_dir,
-      os.path.join('dart-sdk', 'bin', 'dart'),
+      'dart',
       None,
       flags=opts,
       cwd=test_dir)
@@ -523,7 +524,7 @@ def RunClangTidyTests(build_dir):
       os.path.join(buildroot_dir, 'flutter')]
     RunEngineExecutable(
       build_dir,
-      os.path.join('dart-sdk', 'bin', 'dart'),
+      'dart',
       None,
       flags=opts,
       cwd=test_dir)
