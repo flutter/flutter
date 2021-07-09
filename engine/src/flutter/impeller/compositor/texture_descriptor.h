@@ -39,7 +39,7 @@ struct TextureDescriptor {
   }
 
   static std::optional<TextureDescriptor> MakeFromImageResult(
-      const ImageResult& result);
+      const Image& result);
 };
 
 }  // namespace impeller

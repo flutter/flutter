@@ -10,6 +10,7 @@
 #include "impeller/compositor/sampler_descriptor.h"
 #include "impeller/compositor/surface.h"
 #include "impeller/compositor/vertex_buffer_builder.h"
+#include "impeller/image/compressed_image.h"
 #include "impeller/image/image.h"
 #include "impeller/playground/playground.h"
 #include "impeller/primitives/box.frag.h"
@@ -47,7 +48,8 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
   ASSERT_TRUE(vertex_buffer);
 
   // Contents texture.
-  Image image(flutter::testing::OpenFixtureAsMapping("bay_bridge.jpg"));
+  CompressedImage image(
+      flutter::testing::OpenFixtureAsMapping("bay_bridge.jpg"));
   auto result = image.Decode();
   ASSERT_TRUE(result.IsValid());
   auto texture_descriptor = TextureDescriptor::MakeFromImageResult(result);

@@ -6,10 +6,10 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("image") {
   sources = [
+    "compressed_image.cc",
+    "compressed_image.h",
     "image.cc",
     "image.h",
-    "image_result.cc",
-    "image_result.h",
   ]
 
   deps = [ "../third_party/stb" ]

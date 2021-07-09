@@ -7,24 +7,24 @@
 namespace impeller {
 
 std::optional<PixelFormat> FormatForImageResultComponents(
-    ImageResult::Components comp) {
+    Image::Components comp) {
   switch (comp) {
-    case ImageResult::Components::Invalid:
+    case Image::Components::Invalid:
       return std::nullopt;
-    case ImageResult::Components::Grey:
+    case Image::Components::Grey:
       return std::nullopt;
-    case ImageResult::Components::GreyAlpha:
+    case Image::Components::GreyAlpha:
       return std::nullopt;
-    case ImageResult::Components::RGB:
+    case Image::Components::RGB:
       return std::nullopt;
-    case ImageResult::Components::RGBA:
+    case Image::Components::RGBA:
       return PixelFormat::kPixelFormat_R8G8B8A8_UNormInt;
   }
   return std::nullopt;
 }
 
 std::optional<TextureDescriptor> TextureDescriptor::MakeFromImageResult(
-    const ImageResult& result) {
+    const Image& result) {
   if (!result.IsValid()) {
     return std::nullopt;
   }
