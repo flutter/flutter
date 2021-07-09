@@ -14,6 +14,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
+import 'message_codec.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
 
@@ -33,6 +34,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
+    SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     readInitialLifecycleStateFromNativeWindow();
   }
 
@@ -229,6 +231,16 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     return null;
   }
 
+  Future<void> _handlePlatformMessage(MethodCall methodCall) async {
+    final String method = methodCall.method;
+    // There is only one incoming method call currently possible.
+    assert(method == 'SystemChrome.systemUIChange');
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+    if (_systemUiChangeCallback != null) {
+      await _systemUiChangeCallback!(args[0] as bool);
+    }
+  }
+
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
     switch (message) {
       case 'AppLifecycleState.paused':
@@ -263,7 +275,31 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   RestorationManager createRestorationManager() {
     return RestorationManager();
   }
+
+  SystemUiChangeCallback? _systemUiChangeCallback;
+
+  /// Sets the callback for the `SystemChrome.systemUIChange` method call
+  /// received on the [SystemChannels.platform] channel.
+  ///
+  /// This is typically not called directly. System UI changes that this method
+  /// responds to are associated with [SystemUiMode]s, which are configured
+  /// using [SystemChrome]. Use [SystemChrome.setSystemUIChangeCallback] to configure
+  /// along with other SystemChrome settings.
+  ///
+  /// See also:
+  ///
+  ///   * [SystemChrome.setEnabledSystemUIMode], which specifies the
+  ///     [SystemUiMode] to have visible when the application is running.
+  void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
+    _systemUiChangeCallback = callback;
+  }
+
 }
+
+/// Signature for listening to changes in the [SystemUiMode].
+///
+/// Set by [SystemChrome.setSystemUIChangeCallback].
+typedef SystemUiChangeCallback = Future<void> Function(bool systemOverlaysAreVisible);
 
 /// The default implementation of [BinaryMessenger].
 ///
