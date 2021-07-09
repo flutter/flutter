@@ -284,6 +284,14 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectResource(
       resource.id, spv::Decoration::DecorationLocation);
   result["index"] =
       compiler_->get_decoration(resource.id, spv::Decoration::DecorationIndex);
+  result["msl_res_0"] =
+      compiler_->get_automatic_msl_resource_binding(resource.id);
+  result["msl_res_1"] =
+      compiler_->get_automatic_msl_resource_binding_secondary(resource.id);
+  result["msl_res_2"] =
+      compiler_->get_automatic_msl_resource_binding_tertiary(resource.id);
+  result["msl_res_3"] =
+      compiler_->get_automatic_msl_resource_binding_quaternary(resource.id);
   auto type = ReflectType(resource.type_id);
   if (!type.has_value()) {
     return std::nullopt;
