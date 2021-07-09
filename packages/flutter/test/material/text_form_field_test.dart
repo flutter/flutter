@@ -121,7 +121,7 @@ void main() {
         maxLength: TextField.noMaxLength,
       );
       asserted = false;
-    } catch (e){
+    } catch (e) {
       asserted = true;
     }
     expect(asserted, false);

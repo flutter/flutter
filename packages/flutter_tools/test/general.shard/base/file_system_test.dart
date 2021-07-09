@@ -183,4 +183,4 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;
 }
-class FakeFile extends Fake implements File {}
+class FakeFile extends Fake implements File { }

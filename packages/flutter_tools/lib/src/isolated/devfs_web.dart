@@ -660,6 +660,10 @@ class WebDevFS implements DevFS {
 
   Dwds get dwds => webAssetServer.dwds;
 
+  // A flag to indicate whether we have called `setAssetDirectory` on the target device.
+  @override
+  bool hasSetAssetDirectory = false;
+
   Future<DebugConnection> _cachedExtensionFuture;
   StreamSubscription<void> _connectedApps;
 
