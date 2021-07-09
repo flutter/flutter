@@ -1,4 +1,4 @@
-Signature: ef505b96b50b20a421f6519daf8a87d3
+Signature: 6ffa4b0e6e38550915cf352228b4003d
 
 UNUSED LICENSES:
 
@@ -3275,7 +3275,6 @@ FILE: ../../../third_party/skia/include/gpu/GrBackendSurface.h
 FILE: ../../../third_party/skia/include/gpu/mock/GrMockTypes.h
 FILE: ../../../third_party/skia/include/gpu/mtl/GrMtlTypes.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_mac_ct.h
-FILE: ../../../third_party/skia/include/private/GrSharedEnums.h
 FILE: ../../../third_party/skia/include/private/SkImageInfoPriv.h
 FILE: ../../../third_party/skia/include/private/SkMalloc.h
 FILE: ../../../third_party/skia/include/private/SkSLString.h
@@ -3429,7 +3428,6 @@ FILE: ../../../third_party/skia/src/ports/SkFontMgr_mac_ct_factory.cpp
 FILE: ../../../third_party/skia/src/ports/SkOSFile_ios.h
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_fvar.h
 FILE: ../../../third_party/skia/src/shaders/SkShaderBase.h
-FILE: ../../../third_party/skia/src/sksl/SkSLCPP.h
 FILE: ../../../third_party/skia/src/sksl/SkSLFileOutputStream.h
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.h
