@@ -229,15 +229,39 @@ String _generatePluralMethod(Message message, String translationForMessage) {
 
   final String comment = message.description ?? 'No description provided in @${message.resourceId}';
 
-  return pluralMethodTemplate
-    .replaceAll('@(comment)', comment)
-    .replaceAll('@(name)', message.resourceId)
-    .replaceAll('@(parameters)', parameters.join(', '))
-    .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-    .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
-    .replaceAll('@(count)', countPlaceholder.name)
-    .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
-    .replaceAll('@(none)\n', '');
+  if (translationForMessage.startsWith('{') && translationForMessage.endsWith('}')) {
+    return pluralMethodTemplate
+        .replaceAll('@(comment)', comment)
+        .replaceAll('@(name)', message.resourceId)
+        .replaceAll('@(parameters)', parameters.join(', '))
+        .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+        .replaceAll(
+        '@(numberFormatting)', generateNumberFormattingLogic(message))
+        .replaceAll('@(count)', countPlaceholder.name)
+        .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
+        .replaceAll('@(none)\n', '');
+  }
+
+  final String string = _replaceWithVariable(translationForMessage, 'pluralString');
+  return pluralMethodTemplateInString
+      .replaceAll('@(comment)', comment)
+      .replaceAll('@(name)', message.resourceId)
+      .replaceAll('@(parameters)', parameters.join(', '))
+      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+      .replaceAll(
+      '@(numberFormatting)', generateNumberFormattingLogic(message))
+      .replaceAll('@(count)', countPlaceholder.name)
+      .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
+      .replaceAll('@(none)\n', '')
+      .replaceAll('@(string)', string);
+}
+
+String _replaceWithVariable(String translation, String variable) {
+  String prefix = generateString(translation.substring(0, translation.indexOf('{')));
+  prefix = prefix.substring(0, prefix.length - 1);
+  String suffix = generateString(translation.substring(translation.lastIndexOf('}') + 1));
+  suffix = suffix.substring(1);
+  return prefix + r'$' + variable + suffix;
 }
 
 String _generateSelectMethod(Message message, String translationForMessage) {
@@ -275,12 +299,23 @@ String _generateSelectMethod(Message message, String translationForMessage) {
 
   final String description = message.description ?? 'No description provided in @${message.resourceId}';
 
-  return selectMethodTemplate
-    .replaceAll('@(name)', message.resourceId)
-    .replaceAll('@(parameters)', parameters.join(', '))
-    .replaceAll('@(choice)', choice!)
-    .replaceAll('@(cases)', cases.join(',\n').trim())
-    .replaceAll('@(description)', description);
+  if (translationForMessage.startsWith('{') && translationForMessage.endsWith('}')) {
+    return selectMethodTemplate
+        .replaceAll('@(name)', message.resourceId)
+        .replaceAll('@(parameters)', parameters.join(', '))
+        .replaceAll('@(choice)', choice!)
+        .replaceAll('@(cases)', cases.join(',\n').trim())
+        .replaceAll('@(description)', description);
+  }
+
+  final String string = _replaceWithVariable(translationForMessage, 'selectString');
+  return selectMethodTemplateInString
+      .replaceAll('@(name)', message.resourceId)
+      .replaceAll('@(parameters)', parameters.join(', '))
+      .replaceAll('@(choice)', choice!)
+      .replaceAll('@(cases)', cases.join(',\n').trim())
+      .replaceAll('@(description)', description)
+      .replaceAll('@(string)', string);
 }
 
 bool _needsCurlyBracketStringInterpolation(String messageString, String placeholder) {

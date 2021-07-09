@@ -226,6 +226,8 @@ class Home extends StatelessWidget {
               '${localizations.doubleQuote}',
               '${localizations.doubleQuotePlural(2)}',
               "${localizations.vehicleSelect('truck')}",
+              "${localizations.pluralInString(1)}",
+              "${localizations.selectInString('he')}",
             ]);
           },
         ),
@@ -268,6 +270,8 @@ class Home extends StatelessWidget {
               '${localizations.doubleQuote}',
               '${localizations.doubleQuotePlural(2)}',
               "${localizations.vehicleSelect('truck')}",
+              "${localizations.pluralInString(1)}",
+              "${localizations.selectInString('he')}",
             ]);
           },
         ),
@@ -618,6 +622,21 @@ void main() {
     "placeholders": {
       "vehicleType": {}
     }
+  },
+  
+  "pluralInString": "Indeed, {count, plural, =1 {she likes} other {they like} } Flutter!",
+  "@pluralInString": {
+    "description": "A plural message with a single quote.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "selectInString": "Indeed, {gender, select, male {he likes} female {she likes} other {they like} } Flutter!",
+  "@selectInString": {
+    "placeholders": {
+      "gender": {}
+    }
   }
 }
 ''';
@@ -656,14 +675,16 @@ void main() {
   "helloWorldsOn": "{count,plural, =0{ES - Hello on {date}} =1{ES - Hello World, on {date}} =2{ES - Hello two worlds, on {date}} other{ES - Hello other {count} worlds, on {date}}}",
   "helloWorldPopulation": "{ES - count,plural, =1{ES - Hello World of {population} citizens} =2{ES - Hello two worlds with {population} total citizens} many{ES - Hello all {count} worlds, with a total of {population} citizens} other{ES - Hello other {count} worlds, with a total of {population} citizens}}",
   "helloWorldInterpolation": "ES - [{hello}] #{world}#",
-  "helloWorldsInterpolation": "ES - {count,plural, other {ES - [{hello}] -{world}- #{count}#}}",
+  "helloWorldsInterpolation": "{count,plural, other {ES - [{hello}] -{world}- #{count}#}}",
   "dollarSign": "ES - $!",
   "dollarSignPlural": "{count,plural, =1{ES - One $} other{ES - Many $}}",
   "singleQuote": "ES - Flutter's amazing!",
   "singleQuotePlural": "{count,plural, =1{ES - Flutter's amazing, times 1!} other{ES - Flutter's amazing, times {count}!}}",
   "doubleQuote": "ES - Flutter is \"amazing\"!",
   "doubleQuotePlural": "{count,plural, =1{ES - Flutter is \"amazing\", times 1!} other{ES - Flutter is \"amazing\", times {count}!}}",
-  "vehicleSelect": "{vehicleType, select, sedan{ES - Sedan} cabriolet{ES - Solid roof cabriolet} truck{ES - 16 wheel truck} other{ES - Other}}"
+  "vehicleSelect": "{vehicleType, select, sedan{ES - Sedan} cabriolet{ES - Solid roof cabriolet} truck{ES - 16 wheel truck} other{ES - Other}}",
+  "pluralInString": "ES - Indeed, {count, plural, =1 {ES - she likes} other {ES - they like} } ES - Flutter!",
+  "selectInString": "ES - Indeed, {gender, select, male {ES - he likes} female {ES - she likes} other {ES - they like} } ES - Flutter!"
 }
 ''';
 
