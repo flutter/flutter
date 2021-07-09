@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import './globals.dart';
@@ -22,7 +20,7 @@ const String kStateOption = 'state-file';
 /// If the release was not completed, this command will abort the release.
 class CleanCommand extends Command<void> {
   CleanCommand({
-    @required this.checkouts,
+    required this.checkouts,
   })  : platform = checkouts.platform,
         fileSystem = checkouts.fileSystem,
         stdio = checkouts.stdio {
@@ -52,13 +50,14 @@ class CleanCommand extends Command<void> {
 
   @override
   void run() {
-    final File stateFile = checkouts.fileSystem.file(argResults[kStateOption]);
+    final ArgResults argumentResults = argResults!;
+    final File stateFile = checkouts.fileSystem.file(argumentResults[kStateOption]);
     if (!stateFile.existsSync()) {
       throw ConductorException(
           'No persistent state file found at ${stateFile.path}!');
     }
 
-    if (!(argResults[kYesFlag] as bool)) {
+    if (!(argumentResults[kYesFlag] as bool)) {
       stdio.printStatus(
         'Are you sure you want to clean up the persistent state file at\n'
         '${stateFile.path} (y/n)?',

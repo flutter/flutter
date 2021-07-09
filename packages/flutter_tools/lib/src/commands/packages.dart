@@ -162,8 +162,8 @@ class PackagesGetCommand extends FlutterCommand {
     final String target = findProjectRoot(globals.fs, workingDirectory);
     if (target == null) {
       throwToolExit(
-       'Expected to find project root in '
-       '${ workingDirectory ?? "current working directory" }.'
+        'Expected to find project root in '
+        '${ workingDirectory ?? "current working directory" }.'
       );
     }
     final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
