@@ -855,32 +855,30 @@ Future<void> _runWebLongRunningTests() async {
         silenceBrowserOutput: true,
       ),
 
-    // // This test specifically tests how images are loaded in HTML mode, so we don't run it in CanvasKit mode.
+    // This test specifically tests how images are loaded in HTML mode, so we don't run it in CanvasKit mode.
     () => _runWebE2eTest('image_loading_integration', buildMode: 'debug', renderer: 'html'),
     () => _runWebE2eTest('image_loading_integration', buildMode: 'profile', renderer: 'html'),
     () => _runWebE2eTest('image_loading_integration', buildMode: 'release', renderer: 'html'),
 
-    // // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
     () => _runWebE2eTest('platform_messages_integration', buildMode: 'debug', renderer: 'canvaskit'),
     () => _runWebE2eTest('platform_messages_integration', buildMode: 'profile', renderer: 'html'),
     () => _runWebE2eTest('platform_messages_integration', buildMode: 'release', renderer: 'html'),
 
-    // // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
     () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'debug', renderer: 'html'),
     () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'profile', renderer: 'canvaskit'),
     () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'release', renderer: 'html'),
 
-    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    // This test is only known to work in debug mode.
     () => _runWebE2eTest('scroll_wheel_integration', buildMode: 'debug', renderer: 'html'),
-    () => _runWebE2eTest('scroll_wheel_integration', buildMode: 'profile', renderer: 'html'),
-    () => _runWebE2eTest('scroll_wheel_integration', buildMode: 'release', renderer: 'canvaskit'),
 
-    // // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
     () => _runWebE2eTest('text_editing_integration', buildMode: 'debug', renderer: 'canvaskit'),
     () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'html'),
     () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'html'),
 
-    // // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'debug', renderer: 'html'),
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'profile', renderer: 'canvaskit'),
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'release', renderer: 'html'),

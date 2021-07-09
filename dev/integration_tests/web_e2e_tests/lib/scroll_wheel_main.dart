@@ -79,9 +79,8 @@ abstract class DeltaMode {
   static const int kPage = 0x02;
 }
 
-html.WheelEvent dispatchMouseWheelEvent(int mouseX, int mouseY,
-    int deltaMode, double deltaX, double deltaY,
-    {bool shiftKeyPressed = false}) {
+void dispatchMouseWheelEvent(int mouseX, int mouseY,
+    int deltaMode, double deltaX, double deltaY) {
   final html.EventTarget target = html.document.elementFromPoint(mouseX, mouseY)!;
 
   target.dispatchEvent(html.MouseEvent('mouseover',
@@ -98,7 +97,7 @@ html.WheelEvent dispatchMouseWheelEvent(int mouseX, int mouseY,
     clientY: mouseY,
   ));
 
-  final html.WheelEvent event = html.WheelEvent('wheel',
+  target.dispatchEvent(html.WheelEvent('wheel',
     screenX: mouseX,
     screenY: mouseY,
     clientX: mouseX,
@@ -106,8 +105,6 @@ html.WheelEvent dispatchMouseWheelEvent(int mouseX, int mouseY,
     deltaMode: deltaMode,
     deltaX : deltaX,
     deltaY : deltaY,
-    shiftKey: shiftKeyPressed,
-  );
-  target.dispatchEvent(event);
-  return event;
+    shiftKey: false,
+  ));
 }

@@ -16,9 +16,9 @@ void main() {
 
     final Finder finder = find.byKey(const Key('scroll-button'));
     expect(finder, findsOneWidget);
-    await tester.tap(find.byKey(const Key('scroll-button')));
+    await tester.tap(finder);
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('scroll-button')));
+    await tester.tap(finder);
     await tester.pumpAndSettle();
 
     await expectLater(
