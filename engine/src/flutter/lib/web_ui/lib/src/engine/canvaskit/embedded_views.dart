@@ -70,10 +70,6 @@ class HtmlViewEmbedder {
   ui.Size _frameSize = ui.window.physicalSize;
 
   void set frameSize(ui.Size size) {
-    if (_frameSize == size) {
-      return;
-    }
-    _activeCompositionOrder.clear();
     _frameSize = size;
   }
 
