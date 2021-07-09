@@ -90,7 +90,7 @@ class TooltipThemeData with Diagnosticable {
   ///
   /// If this property is null, then [TooltipThemeData.triggerMode] is used.
   /// If [TooltipThemeData.triggerMode] is also null, the default mode is
-  /// [Tooltip.DefaultTooltipTriggerMode] logical pixels on all sides.
+  /// [_kTooltipTriggerMode]
   final TooltipTriggerMode? triggerMode;
 
   /// Whether the tooltip should provide acoustic and/or haptic feedback.

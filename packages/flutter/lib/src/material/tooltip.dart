@@ -14,6 +14,12 @@ import 'feedback.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
 
+/// The default value used when a value is not provided anywhere.
+///
+/// Read the documentation on the following properties to determine all sources:
+/// [Tooltip.triggerMode] and [TooltipTheme.triggerMode]
+const TooltipTriggerMode _kTooltipTriggerMode = TooltipTriggerMode.longPress;
+
 /// A material design tooltip.
 ///
 /// Tooltips provide text labels which help explain the function of a button or
@@ -117,10 +123,6 @@ class Tooltip extends StatefulWidget {
   }) : assert(message != null),
        super(key: key);
 
-  /// The default value used when a value is not provided anywhere.
-  /// Read documentation for specific properties to determine all sources.
-  static const TooltipTriggerMode DefaultTooltipTriggerMode = TooltipTriggerMode.longPress;
-
   /// The text to display in the tooltip.
   final String message;
 
@@ -211,7 +213,7 @@ class Tooltip extends StatefulWidget {
   ///
   /// If this property is null, then [TooltipThemeData.triggerMode] is used.
   /// If [TooltipThemeData.triggerMode] is also null, the default mode is
-  /// [DefaultTooltipTriggerMode] logical pixels on all sides.
+  /// [_kTooltipTriggerMode]
   final TooltipTriggerMode? triggerMode;
 
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
@@ -272,7 +274,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const Duration _defaultHoverShowDuration = Duration(milliseconds: 100);
   static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
-  static const TooltipTriggerMode _defaultTriggerMode = Tooltip.DefaultTooltipTriggerMode;
+  static const TooltipTriggerMode _defaultTriggerMode = _kTooltipTriggerMode;
   static const bool _defaultEnableFeedback = true;
 
   late double height;
