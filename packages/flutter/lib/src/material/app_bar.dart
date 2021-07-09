@@ -1531,7 +1531,7 @@ class SliverAppBar extends StatefulWidget {
     this.foregroundColor,
     @Deprecated(
       'This property is no longer used, please use systemOverlayStyle instead. '
-      'This feature was deprecated after 2.4.0-0.0.pre.',
+      'This feature was deprecated after v2.4.0-0.0.pre.',
     )
     this.brightness,
     this.iconTheme,
@@ -1635,7 +1635,7 @@ class SliverAppBar extends StatefulWidget {
   /// This property is used to configure an [AppBar].
   @Deprecated(
     'This property is no longer used, please use systemOverlayStyle instead. '
-    'This feature was deprecated after 2.4.0-0.0.pre.',
+    'This feature was deprecated after v2.4.0-0.0.pre.',
   )
   final Brightness? brightness;
 
