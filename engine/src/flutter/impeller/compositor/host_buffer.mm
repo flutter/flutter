@@ -45,10 +45,9 @@ BufferView HostBuffer::Emplace(const void* buffer,
 
 BufferView HostBuffer::Emplace(const void* buffer, size_t length) {
   auto old_length = GetLength();
-  if (!Truncate(GetLength() + length)) {
+  if (!Truncate(old_length + length)) {
     return {};
   }
-  FML_DCHECK(GetBuffer());
   generation_++;
   if (buffer) {
     ::memmove(GetBuffer() + old_length, buffer, length);

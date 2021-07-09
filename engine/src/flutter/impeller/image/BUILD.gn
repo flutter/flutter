@@ -14,7 +14,10 @@ impeller_component("image") {
 
   deps = [ "../third_party/stb" ]
 
-  public_deps = [ "../geometry" ]
+  public_deps = [
+    "../base",
+    "../geometry",
+  ]
 }
 
 impeller_component("image_unittests") {

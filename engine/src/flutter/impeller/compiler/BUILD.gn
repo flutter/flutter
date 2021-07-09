@@ -20,6 +20,7 @@ impeller_component("compiler_lib") {
   ]
 
   public_deps = [
+    "../base",
     "../geometry",
     "//flutter/fml",
     "//flutter/runtime:libdart",

@@ -15,6 +15,7 @@
 #include "flutter/impeller/compiler/utilities.h"
 #include "flutter/impeller/geometry/matrix.h"
 #include "flutter/impeller/geometry/scalar.h"
+#include "impeller/base/strings.h"
 
 namespace impeller {
 namespace compiler {
@@ -374,9 +375,26 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
 
   std::vector<StructMember> result;
 
-  size_t total_byte_length = 0;
+  size_t current_byte_offset = 0;
+
   for (size_t i = 0; i < struct_type.member_types.size(); i++) {
     const auto& member = compiler_->get_type(struct_type.member_types[i]);
+    const auto struct_member_offset =
+        compiler_->type_struct_member_offset(struct_type, i);
+
+    if (struct_member_offset > current_byte_offset) {
+      const auto alignment_pad = struct_member_offset - current_byte_offset;
+      result.emplace_back(StructMember{
+          .type = TypeNameWithPaddingOfSize(alignment_pad),
+          .name = SPrintF("_align_%s",
+                          GetMemberNameAtIndex(struct_type, i).c_str()),
+          .offset = current_byte_offset,
+          .byte_length = alignment_pad,
+      });
+      current_byte_offset += alignment_pad;
+    }
+
+    FML_CHECK(current_byte_offset == struct_member_offset);
 
     // Tightly packed 4x4 Matrix is special cased as we know how to work with
     // those.
@@ -388,14 +406,14 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
       result.emplace_back(StructMember{
           .type = "Matrix",
           .name = GetMemberNameAtIndex(struct_type, i),
-          .offset = total_byte_length,
+          .offset = struct_member_offset,
           .byte_length = sizeof(Matrix),
       });
-      total_byte_length += sizeof(Matrix);
+      current_byte_offset += sizeof(Matrix);
       continue;
     }
 
-    // Tightly packed Point
+    // Tightly packed Point (vec2).
     if (member.basetype == SPIRType::BaseType::Float &&  //
         member.width == sizeof(float) * 8 &&             //
         member.columns == 1 &&                           //
@@ -404,14 +422,14 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
       result.emplace_back(StructMember{
           .type = "Point",
           .name = GetMemberNameAtIndex(struct_type, i),
-          .offset = total_byte_length,
+          .offset = struct_member_offset,
           .byte_length = sizeof(Point),
       });
-      total_byte_length += sizeof(Point);
+      current_byte_offset += sizeof(Point);
       continue;
     }
 
-    // Tightly packed Vector3
+    // Tightly packed Vector3.
     if (member.basetype == SPIRType::BaseType::Float &&  //
         member.width == sizeof(float) * 8 &&             //
         member.columns == 1 &&                           //
@@ -420,14 +438,14 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
       result.emplace_back(StructMember{
           .type = "Vector3",
           .name = GetMemberNameAtIndex(struct_type, i),
-          .offset = total_byte_length,
+          .offset = struct_member_offset,
           .byte_length = sizeof(Vector3),
       });
-      total_byte_length += sizeof(Vector3);
+      current_byte_offset += sizeof(Vector3);
       continue;
     }
 
-    // Tightly packed Vector4
+    // Tightly packed Vector4.
     if (member.basetype == SPIRType::BaseType::Float &&  //
         member.width == sizeof(float) * 8 &&             //
         member.columns == 1 &&                           //
@@ -436,14 +454,14 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
       result.emplace_back(StructMember{
           .type = "Vector4",
           .name = GetMemberNameAtIndex(struct_type, i),
-          .offset = total_byte_length,
+          .offset = struct_member_offset,
           .byte_length = sizeof(Vector4),
       });
-      total_byte_length += sizeof(Vector4);
+      current_byte_offset += sizeof(Vector4);
       continue;
     }
 
-    // Other single isolated scalars.
+    // Other isolated scalars (like bool, int, float/Scalar, etc..).
     {
       auto maybe_known_type = ReadKnownScalarType(member.basetype);
       if (maybe_known_type.has_value() &&  //
@@ -454,23 +472,10 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
         result.emplace_back(StructMember{
             .type = maybe_known_type.value().name,
             .name = GetMemberNameAtIndex(struct_type, i),
-            .offset = total_byte_length,
+            .offset = struct_member_offset,
             .byte_length = maybe_known_type.value().byte_size,
         });
-        total_byte_length += maybe_known_type.value().byte_size;
-
-        // Consider any excess padding.
-        const auto padding =
-            (member.width / 8u) - maybe_known_type.value().byte_size;
-        if (padding != 0) {
-          result.emplace_back(StructMember{
-              .type = TypeNameWithPaddingOfSize(padding),
-              .name = GetMemberNameAtIndex(struct_type, i, "_pad"),
-              .offset = total_byte_length,
-              .byte_length = padding,
-          });
-          total_byte_length += padding;
-        }
+        current_byte_offset += maybe_known_type.value().byte_size;
         continue;
       }
     }
@@ -483,10 +488,11 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
       result.emplace_back(StructMember{
           .type = TypeNameWithPaddingOfSize(byte_length),
           .name = GetMemberNameAtIndex(struct_type, i),
-          .offset = total_byte_length,
+          .offset = struct_member_offset,
           .byte_length = byte_length,
       });
-      total_byte_length += byte_length;
+      current_byte_offset += byte_length;
+      continue;
     }
   }
   return result;
@@ -504,16 +510,9 @@ std::optional<Reflector::StructDefinition> Reflector::ReflectStructDefinition(
     return std::nullopt;
   }
 
-  size_t total_size = 0u;
-  for (const auto& member_type_id : type.member_types) {
-    const auto& member_type = compiler_->get_type(member_type_id);
-    total_size +=
-        (member_type.width * member_type.vecsize * member_type.columns) / 8u;
-  }
-
   StructDefinition struc;
   struc.name = struct_name;
-  struc.byte_length = total_size;
+  struc.byte_length = compiler_->get_declared_struct_size(type);
   struc.members = ReadStructMembers(type_id);
   return struc;
 }
