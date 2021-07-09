@@ -4,27 +4,47 @@
 
 #pragma once
 
+#include <memory>
+
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "image_result.h"
 #include "impeller/geometry/size.h"
 
 namespace impeller {
 
-class ImageSource;
-
 class Image {
  public:
-  Image(std::shared_ptr<const fml::Mapping> sourceAllocation);
+  enum class Components {
+    Invalid,
+    Grey,
+    GreyAlpha,
+    RGB,
+    RGBA,
+  };
+
+  Image();
+
+  Image(ISize size,
+        Components components,
+        std::shared_ptr<const fml::Mapping> allocation);
 
   ~Image();
 
-  [[nodiscard]] ImageResult Decode() const;
+  const ISize& GetSize() const;
 
   bool IsValid() const;
 
+  Components GetComponents() const;
+
+  const std::shared_ptr<const fml::Mapping>& GetAllocation() const;
+
  private:
-  std::shared_ptr<const fml::Mapping> source_;
+  ISize size_;
+  Components components_ = Components::Invalid;
+  std::shared_ptr<const fml::Mapping> allocation_;
+  bool is_valid_ = false;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(Image);
 };
 
 }  // namespace impeller
