@@ -179,6 +179,24 @@ class PlatformViewsService {
     return controller;
   }
 
+  /// Whether the render surface of the Android `FlutterView` should be converted to a `FlutterImageView`.
+  ///
+  /// When adding platform views using
+  /// [Hybrid Composition](https://flutter.dev/docs/development/platform-integration/platform-views),
+  /// the engine converts the render surface to a `FlutterImageView` to improve
+  /// animation synchronization between Flutter widgets and the Android platform
+  /// views. On Android versions < 10, this can have some performance issues.
+  /// This flag allows disabling this conversion.
+  ///
+  /// Defaults to true.
+  static Future<void> synchronizeToNativeViewHierarchy(bool yes) {
+    assert(defaultTargetPlatform == TargetPlatform.android);
+    return SystemChannels.platform_views.invokeMethod<void>(
+      'synchronizeToNativeViewHierarchy',
+      yes,
+    );
+  }
+
   // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
   /// This is work in progress, not yet ready to be used, and requires a custom engine build. Creates a controller for a new iOS UIView.
   ///

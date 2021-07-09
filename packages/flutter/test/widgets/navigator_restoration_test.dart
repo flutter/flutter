@@ -1332,4 +1332,4 @@ class _RouteFinder extends MatchFinder {
   }
 }
 
-class FakeRoute extends Fake implements Route<void> {}
+class FakeRoute extends Fake implements Route<void> { }

@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -181,7 +180,6 @@ FlutterTesterDevices setUpFlutterTesterDevices() {
     artifacts: Artifacts.test(),
     processManager: FakeProcessManager.any(),
     fileSystem: MemoryFileSystem.test(),
-    config: Config.test(),
     flutterVersion: FakeFlutterVersion(),
     operatingSystemUtils: FakeOperatingSystemUtils(),
   );
