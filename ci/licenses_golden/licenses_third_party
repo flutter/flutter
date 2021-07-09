@@ -1,4 +1,4 @@
-Signature: c30f38b5114561bde3e5952f00c908bd
+Signature: 45d63b18746b06040f0d7f13a3844d72
 
 UNUSED LICENSES:
 
@@ -255,6 +255,7 @@ LIBRARY: abseil-cpp
 LIBRARY: angle
 LIBRARY: boringssl
 LIBRARY: khronos
+LIBRARY: libwebp
 LIBRARY: vulkan
 LIBRARY: vulkan-deps
 LIBRARY: wuffs
@@ -1198,6 +1199,7 @@ FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/x448
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/xchacha20_poly1305_test.json
 FILE: ../../../third_party/khronos/GLES2/gl2platform.h
 FILE: ../../../third_party/khronos/GLES3/gl3platform.h
+FILE: ../../../third_party/libwebp/gradlew
 FILE: ../../../third_party/vulkan/include/vulkan/vk_platform.h
 FILE: ../../../third_party/vulkan/include/vulkan/vulkan.h
 FILE: ../../../third_party/vulkan/include/vulkan/vulkan_android.h
@@ -22263,6 +22265,7 @@ ORIGIN: ../../../third_party/libwebp/COPYING
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/libwebp/.mailmap
 FILE: ../../../third_party/libwebp/Makefile.vc
+FILE: ../../../third_party/libwebp/cmake/WebPConfig.cmake.in
 FILE: ../../../third_party/libwebp/cmake/config.h.in
 FILE: ../../../third_party/libwebp/doc/TODO
 FILE: ../../../third_party/libwebp/doc/template.html
@@ -22277,6 +22280,10 @@ FILE: ../../../third_party/libwebp/src/libwebpdecoder.pc.in
 FILE: ../../../third_party/libwebp/src/libwebpdecoder.rc
 FILE: ../../../third_party/libwebp/src/mux/libwebpmux.pc.in
 FILE: ../../../third_party/libwebp/src/mux/libwebpmux.rc
+FILE: ../../../third_party/libwebp/webp_js/index.html
+FILE: ../../../third_party/libwebp/webp_js/index_wasm.html
+FILE: ../../../third_party/libwebp/webp_js/test_webp_js.webp
+FILE: ../../../third_party/libwebp/webp_js/test_webp_wasm.webp
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2010, Google Inc. All rights reserved.
 
@@ -22330,8 +22337,6 @@ FILE: ../../../third_party/libwebp/src/dsp/lossless_enc_sse2.c
 FILE: ../../../third_party/libwebp/src/dsp/lossless_enc_sse41.c
 FILE: ../../../third_party/libwebp/src/dsp/rescaler_neon.c
 FILE: ../../../third_party/libwebp/src/dsp/rescaler_sse2.c
-FILE: ../../../third_party/libwebp/src/enc/delta_palettization_enc.c
-FILE: ../../../third_party/libwebp/src/enc/delta_palettization_enc.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2015 Google Inc. All Rights Reserved.
 
@@ -22377,6 +22382,7 @@ FILE: ../../../third_party/libwebp/imageio/image_enc.h
 FILE: ../../../third_party/libwebp/imageio/imageio_util.c
 FILE: ../../../third_party/libwebp/imageio/imageio_util.h
 FILE: ../../../third_party/libwebp/src/dsp/common_sse2.h
+FILE: ../../../third_party/libwebp/src/dsp/common_sse41.h
 FILE: ../../../third_party/libwebp/src/dsp/dec_msa.c
 FILE: ../../../third_party/libwebp/src/dsp/enc_msa.c
 FILE: ../../../third_party/libwebp/src/dsp/filters_msa.c
@@ -22389,6 +22395,53 @@ FILE: ../../../third_party/libwebp/src/enc/predictor_enc.c
 FILE: ../../../third_party/libwebp/src/mux/animi.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2016 Google Inc. All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of Google nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: libwebp
+ORIGIN: ../../../third_party/libwebp/extras/vwebp_sdl.c + ../../../third_party/libwebp/COPYING
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/libwebp/extras/vwebp_sdl.c
+FILE: ../../../third_party/libwebp/extras/webp_to_sdl.c
+FILE: ../../../third_party/libwebp/extras/webp_to_sdl.h
+FILE: ../../../third_party/libwebp/imageio/pnmdec.c
+FILE: ../../../third_party/libwebp/imageio/pnmdec.h
+FILE: ../../../third_party/libwebp/src/dsp/alpha_processing_neon.c
+FILE: ../../../third_party/libwebp/src/dsp/filters_neon.c
+FILE: ../../../third_party/libwebp/src/dsp/ssim.c
+FILE: ../../../third_party/libwebp/src/dsp/ssim_sse2.c
+FILE: ../../../third_party/libwebp/src/dsp/yuv_neon.c
+FILE: ../../../third_party/libwebp/src/enc/backward_references_cost_enc.c
+----------------------------------------------------------------------------------------------------
+Copyright 2017 Google Inc. All Rights Reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -22496,16 +22549,12 @@ FILE: ../../../third_party/libwebp/imageio/webpdec.c
 FILE: ../../../third_party/libwebp/imageio/webpdec.h
 FILE: ../../../third_party/libwebp/src/dsp/alpha_processing_mips_dsp_r2.c
 FILE: ../../../third_party/libwebp/src/dsp/alpha_processing_sse2.c
-FILE: ../../../third_party/libwebp/src/dsp/argb.c
-FILE: ../../../third_party/libwebp/src/dsp/argb_mips_dsp_r2.c
-FILE: ../../../third_party/libwebp/src/dsp/argb_sse2.c
 FILE: ../../../third_party/libwebp/src/dsp/cost.c
 FILE: ../../../third_party/libwebp/src/dsp/cost_mips32.c
 FILE: ../../../third_party/libwebp/src/dsp/cost_mips_dsp_r2.c
 FILE: ../../../third_party/libwebp/src/dsp/dec_clip_tables.c
 FILE: ../../../third_party/libwebp/src/dsp/dec_mips32.c
 FILE: ../../../third_party/libwebp/src/dsp/dec_mips_dsp_r2.c
-FILE: ../../../third_party/libwebp/src/dsp/enc_avx2.c
 FILE: ../../../third_party/libwebp/src/dsp/enc_mips32.c
 FILE: ../../../third_party/libwebp/src/dsp/enc_mips_dsp_r2.c
 FILE: ../../../third_party/libwebp/src/dsp/filters_mips_dsp_r2.c
@@ -22521,6 +22570,7 @@ FILE: ../../../third_party/libwebp/src/dsp/upsampling_mips_dsp_r2.c
 FILE: ../../../third_party/libwebp/src/dsp/yuv_mips32.c
 FILE: ../../../third_party/libwebp/src/dsp/yuv_mips_dsp_r2.c
 FILE: ../../../third_party/libwebp/src/dsp/yuv_sse2.c
+FILE: ../../../third_party/libwebp/src/dsp/yuv_sse41.c
 FILE: ../../../third_party/libwebp/src/enc/near_lossless_enc.c
 FILE: ../../../third_party/libwebp/src/enc/picture_csp_enc.c
 FILE: ../../../third_party/libwebp/src/enc/picture_psnr_enc.c
@@ -22623,6 +22673,7 @@ FILE: ../../../third_party/libwebp/src/dsp/filters.c
 FILE: ../../../third_party/libwebp/src/dsp/upsampling.c
 FILE: ../../../third_party/libwebp/src/dsp/upsampling_neon.c
 FILE: ../../../third_party/libwebp/src/dsp/upsampling_sse2.c
+FILE: ../../../third_party/libwebp/src/dsp/upsampling_sse41.c
 FILE: ../../../third_party/libwebp/src/enc/alpha_enc.c
 FILE: ../../../third_party/libwebp/src/enc/analysis_enc.c
 FILE: ../../../third_party/libwebp/src/enc/config_enc.c
@@ -22738,12 +22789,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: libwebp
-ORIGIN: ../../../third_party/libwebp/src/dsp/alpha_processing_neon.c + ../../../third_party/libwebp/COPYING
+ORIGIN: ../../../third_party/libwebp/src/dsp/cost_neon.c + ../../../third_party/libwebp/COPYING
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/libwebp/src/dsp/alpha_processing_neon.c
-FILE: ../../../third_party/libwebp/src/dsp/filters_neon.c
+FILE: ../../../third_party/libwebp/src/dsp/cost_neon.c
+FILE: ../../../third_party/libwebp/src/dsp/quant.h
 ----------------------------------------------------------------------------------------------------
-Copyright 2017 Google Inc. All Rights Reserved.
+Copyright 2018 Google Inc. All Rights Reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -24800,4 +24851,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 375
+Total license count: 376
