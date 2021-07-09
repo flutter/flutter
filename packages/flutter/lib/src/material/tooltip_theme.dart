@@ -88,9 +88,8 @@ class TooltipThemeData with Diagnosticable {
 
   /// The [TooltipTriggerMode] that will show the tooltip.
   ///
-  /// If this property is null, then [TooltipThemeData.triggerMode] is used.
-  /// If [TooltipThemeData.triggerMode] is also null, the default mode is
-  /// [_kTooltipTriggerMode]
+  /// This value is used if [Tooltip.triggerMode] is null.
+  /// Read [Tooltip.triggerMode] documentation for other sources.
   final TooltipTriggerMode? triggerMode;
 
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
