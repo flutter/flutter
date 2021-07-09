@@ -312,7 +312,7 @@ void testMain() {
       //   Expect: success. Just checking the system is not left in a corrupted state.
       await _createPlatformView(0, 'test-platform-view');
       renderTestScene(viewCount: 0);
-    // TODO(yjbanov): skipped due to https://github.com/flutter/flutter/issues/73867
+      // TODO(yjbanov): skipped due to https://github.com/flutter/flutter/issues/73867
     }, skip: isSafari);
 
     test('embeds and disposes of a platform view', () async {
@@ -378,6 +378,20 @@ void testMain() {
         domRenderer.glassPaneElement!.querySelector('flt-platform-view'),
         isNotNull,
       );
+
+      // Render a frame with a different platform view.
+      await _createPlatformView(1, 'test-platform-view');
+      sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.addPlatformView(1, width: 10, height: 10);
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      expect(
+          domRenderer.sceneElement!.querySelectorAll('flt-platform-view-slot'),
+          hasLength(1));
+      expect(
+          domRenderer.glassPaneElement!.querySelectorAll('flt-platform-view'),
+          hasLength(2));
 
       // Render a frame without a platform view, but also without disposing of
       // the platform view.
