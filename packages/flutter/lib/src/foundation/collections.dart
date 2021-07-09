@@ -4,7 +4,7 @@
 
 // TODO(ianh): These should be on the Set and List classes themselves.
 
-/// Compares two sets for shallow equality (element-by-element).
+/// Compares two sets for shallow, element by element, equality.
 ///
 /// Returns true if the sets are both null, or if they are both non-null, have
 /// the same length, and contain the same members. Returns false otherwise.
@@ -12,7 +12,7 @@
 ///
 /// The term shallow above refers to the first level of equality: if the elements
 /// are maps, lists, sets, or other collections/composite objects, then the
-/// contents of those elements are not compared element-by-element unless their
+/// contents of those elements are not compared element by element unless their
 /// equality operators ([Object.==]) do so.
 /// For checking deep equality, consider using [DeepCollectionEquality] class.
 ///
@@ -34,7 +34,7 @@ bool setEquals<T>(Set<T>? a, Set<T>? b) {
   return true;
 }
 
-/// Compares two lists for shallow equality (element-by-element).
+/// Compares two lists for shallow, element by element, equality.
 ///
 /// Returns true if the lists are both null, or if they are both non-null, have
 /// the same length, and contain the same members in the same order. Returns
@@ -42,7 +42,7 @@ bool setEquals<T>(Set<T>? a, Set<T>? b) {
 ///
 /// The term shallow above refers to the first level of equality: if the elements
 /// are maps, lists, sets, or other collections/composite objects, then the
-/// contents of those elements are not compared element-by-element unless their
+/// contents of those elements are not compared element by element unless their
 /// equality operators ([Object.==]) do so.
 /// For checking deep equality, consider using [DeepCollectionEquality] class.
 ///
@@ -64,7 +64,7 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
   return true;
 }
 
-/// Compares two maps for shallow equality (element-by-element).
+/// Compares two maps for shallow, element by element, equality.
 ///
 /// Returns true if the maps are both null, or if they are both non-null, have
 /// the same length, and contain the same keys associated with the same values.
@@ -72,7 +72,7 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
 ///
 /// The term shallow above refers to the first level of equality: if the elements
 /// are maps, lists, sets, or other collections/composite objects, then the
-/// contents of those elements are not compared element-by-element unless their
+/// contents of those elements are not compared element by element unless their
 /// equality operators ([Object.==]) do so.
 /// For checking deep equality, consider using [DeepCollectionEquality] class.
 ///
