@@ -21,6 +21,9 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
+/// A callback that can be registered with [WidgetsBinding.registerHotRestartCallback].
+typedef PreHotRestartCallback = FutureOr<void> Function();
+
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// When used as a mixin, provides no-op method implementations.
@@ -494,13 +497,20 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       );
 
       registerServiceExtension(name: 'invokePreHotRestartCallbacks', callback: (Map<String, Object> params) async {
-        for (final VoidCallback callback in _hotRestartCallbacks) {
+        Future<void> invokeAndWait(PreHotRestartCallback callback, String? label) async {
           try {
-            callback();
-          } catch (err) {
-            debugPrint('Failed to invoke preHotRestartCallback: $err');
+            await callback();
+          } catch (error) {
+            debugPrint('Failed to invoke preHotRestartCallback ${label ?? 'unlabeled'}: $error');
           }
         }
+
+        await Future.wait(<Future<void>>[
+          for (MapEntry<PreHotRestartCallback, String?> entry in _hotRestartCallbacks.entries)
+            invokeAndWait(entry.key, entry.value).timeout(const Duration(seconds: 5), onTimeout: () {
+              debugPrint('preHotRestartCallback ${entry.value ?? 'unlabeled'} is taking longer than expected...');
+            })
+        ]);
         return <String, Object>{};
       });
 
@@ -518,7 +528,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     return Future<void>.value();
   }
 
-  final List<VoidCallback> _hotRestartCallbacks = <VoidCallback>[];
+  final Map<PreHotRestartCallback, String?> _hotRestartCallbacks = <PreHotRestartCallback, String?>{};
 
   /// Register a callback that will be invoked before a hot restart is called.
   ///
@@ -526,11 +536,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// This can be used to release native resources acquired through platform
   /// channels or `dart:ffi`.
-  void registerHotRestartCallback(VoidCallback voidCallback) {
+  void registerHotRestartCallback(PreHotRestartCallback callback, {String? debugLabel}) {
     if (!kDebugMode) {
       return;
     }
-    _hotRestartCallbacks.add(voidCallback);
+    _hotRestartCallbacks[callback] = debugLabel;
   }
 
   /// The [BuildOwner] in charge of executing the build pipeline for the
@@ -1027,8 +1037,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return window.computePlatformResolvedLocale(supportedLocales);
   }
-
-
 }
 
 /// Inflate the given widget and attach it to the screen.
