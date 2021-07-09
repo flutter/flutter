@@ -2,7 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:ui/src/engine.dart' show toMatrix32;
+import 'package:ui/ui.dart' as ui;
+
+import '../../util.dart';
+import '../../validators.dart';
+import 'conic.dart';
+import 'cubic.dart';
+import 'path_iterator.dart';
+import 'path_metrics.dart';
+import 'path_ref.dart';
+import 'path_utils.dart';
+import 'path_windings.dart';
+import 'tangent.dart';
 
 /// A complex, one-dimensional subset of a plane.
 ///
@@ -63,7 +78,7 @@ class SurfacePath implements ui.Path {
     _copyFields(source);
   }
 
-  SurfacePath._shallowCopy(SurfacePath source)
+  SurfacePath.shallowCopy(SurfacePath source)
       : pathRef = PathRef.shallowCopy(source.pathRef) {
     _copyFields(source);
   }
@@ -101,7 +116,7 @@ class SurfacePath implements ui.Path {
       return true;
     }
     out.reset();
-    out._addPath(this, 0, 0, null, SPathAddPathMode.kAppend);
+    out.addPathWithMode(this, 0, 0, null, SPathAddPathMode.kAppend);
     PathRef.interpolate(ending.pathRef, weight, out.pathRef);
     return true;
   }
@@ -1056,11 +1071,16 @@ class SurfacePath implements ui.Path {
   /// matrix stored in column major order.
   @override
   void addPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
-    _addPath(path, offset.dx, offset.dy,
+    addPathWithMode(path, offset.dx, offset.dy,
         matrix4 == null ? null : toMatrix32(matrix4), SPathAddPathMode.kAppend);
   }
 
-  void _addPath(ui.Path path, double offsetX, double offsetY,
+  /// Adds a new subpath that consists of the given `path` offset by the given
+  /// `offset`, and using the given [mode].
+  ///
+  /// If `matrix4` is not null, the path will be transformed by this matrix
+  /// after the matrix is translated by the given offset.
+  void addPathWithMode(ui.Path path, double offsetX, double offsetY,
       Float32List? matrix4, int mode) {
     SurfacePath source = path as SurfacePath;
     if (source.pathRef.isEmpty) {
@@ -1173,7 +1193,7 @@ class SurfacePath implements ui.Path {
   @override
   void extendWithPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
     assert(offsetIsValid(offset));
-    _addPath(path, offset.dx, offset.dy,
+    addPathWithMode(path, offset.dx, offset.dy,
         matrix4 == null ? null : toMatrix32(matrix4), SPathAddPathMode.kExtend);
   }
 

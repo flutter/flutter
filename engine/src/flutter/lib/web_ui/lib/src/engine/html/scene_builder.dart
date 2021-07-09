@@ -2,7 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:typed_data';
+
+import 'package:ui/src/engine.dart' show kProfileApplyFrame, kProfilePrerollFrame, toMatrix32, window;
+import 'package:ui/ui.dart' as ui;
+
+import '../picture.dart';
+import '../profiler.dart';
+import '../util.dart';
+import '../vector_math.dart';
+import 'backdrop_filter.dart';
+import 'clip.dart';
+import 'color_filter.dart';
+import 'image_filter.dart';
+import 'offset.dart';
+import 'opacity.dart';
+import 'path/path.dart';
+import 'path_to_svg_clip.dart';
+import 'picture.dart';
+import 'platform_view.dart';
+import 'scene.dart';
+import 'shader_mask.dart';
+import 'shaders/shader.dart';
+import 'surface.dart';
+import 'transform.dart';
 
 class SurfaceSceneBuilder implements ui.SceneBuilder {
   SurfaceSceneBuilder() {
@@ -502,7 +525,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     _lastFrameScene?.rootElement?.remove();
     _lastFrameScene = null;
     resetSvgClipIds();
-    _recycledCanvases.clear();
+    recycledCanvases.clear();
   }
 
   /// Finishes building the scene.

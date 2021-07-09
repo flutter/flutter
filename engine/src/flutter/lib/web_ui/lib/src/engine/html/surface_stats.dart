@@ -2,29 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:async';
+import 'dart:html' as html;
+
+import 'package:ui/src/engine.dart' show EnginePlatformDispatcher;
+
+import 'bitmap_canvas.dart';
+import 'dom_canvas.dart';
+import 'picture.dart';
+import 'scene.dart';
+import 'surface.dart';
 
 /// Surfaces that were retained this frame.
 ///
 /// Surfaces should be added to this list directly. Instead, if a surface needs
 /// to be retained call [_retainSurface].
-List<PersistedSurface> get debugRetainedSurfaces => _retainedSurfaces;
-List<PersistedSurface> _retainedSurfaces = <PersistedSurface>[];
+List<PersistedSurface> retainedSurfaces = <PersistedSurface>[];
 
 /// Maps every surface currently active on the screen to debug statistics.
-Map<PersistedSurface, _DebugSurfaceStats> _surfaceStats =
-    <PersistedSurface, _DebugSurfaceStats>{};
+Map<PersistedSurface, DebugSurfaceStats> surfaceStats =
+    <PersistedSurface, DebugSurfaceStats>{};
 
-List<Map<PersistedSurface, _DebugSurfaceStats>> _surfaceStatsTimeline =
-    <Map<PersistedSurface, _DebugSurfaceStats>>[];
+List<Map<PersistedSurface, DebugSurfaceStats>> _surfaceStatsTimeline =
+    <Map<PersistedSurface, DebugSurfaceStats>>[];
 
 /// Returns debug statistics for the given [surface].
-_DebugSurfaceStats _surfaceStatsFor(PersistedSurface surface) {
-  if (!_debugExplainSurfaceStats) {
+DebugSurfaceStats surfaceStatsFor(PersistedSurface surface) {
+  if (!debugExplainSurfaceStats) {
     throw Exception(
-        '_surfaceStatsFor is only available when _debugExplainSurfaceStats is set to true.');
+        'surfaceStatsFor is only available when debugExplainSurfaceStats is set to true.');
   }
-  return _surfaceStats.putIfAbsent(surface, () => _DebugSurfaceStats(surface));
+  return surfaceStats.putIfAbsent(surface, () => DebugSurfaceStats(surface));
 }
 
 /// Compositor information collected for one frame useful for assessing the
@@ -34,8 +42,8 @@ _DebugSurfaceStats _surfaceStatsFor(PersistedSurface surface) {
 ///
 /// For stats pertaining to a single surface the numeric counter fields are
 /// typically either 0 or 1. For aggregated stats, the numbers can be >1.
-class _DebugSurfaceStats {
-  _DebugSurfaceStats(this.surface);
+class DebugSurfaceStats {
+  DebugSurfaceStats(this.surface);
 
   /// The surface these stats are for, or `null` if these are aggregated stats.
   final PersistedSurface? surface;
@@ -75,7 +83,7 @@ class _DebugSurfaceStats {
   int allocatedDomNodeCount = 0;
 
   /// Adds all counters of [oneSurfaceStats] into this object.
-  void aggregate(_DebugSurfaceStats oneSurfaceStats) {
+  void aggregate(DebugSurfaceStats oneSurfaceStats) {
     retainSurfaceCount += oneSurfaceStats.retainSurfaceCount;
     reuseElementCount += oneSurfaceStats.reuseElementCount;
     paintCount += oneSurfaceStats.paintCount;
@@ -89,14 +97,14 @@ class _DebugSurfaceStats {
 
 html.CanvasRenderingContext2D? _debugSurfaceStatsOverlayCtx;
 
-void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
+void debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
   final int overlayWidth = html.window.innerWidth!;
   const int rowHeight = 30;
   const int rowCount = 4;
   const int overlayHeight = rowHeight * rowCount;
   const int strokeWidth = 2;
 
-  _surfaceStatsTimeline.add(_surfaceStats);
+  _surfaceStatsTimeline.add(surfaceStats);
 
   while (_surfaceStatsTimeline.length > (overlayWidth / strokeWidth)) {
     _surfaceStatsTimeline.removeAt(0);
@@ -133,11 +141,11 @@ void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
   final int totalDomNodeCount = scene.rootElement!.querySelectorAll('*').length;
 
   for (int i = 0; i < _surfaceStatsTimeline.length; i++) {
-    final Map<PersistedSurface, _DebugSurfaceStats> statsMap =
+    final Map<PersistedSurface, DebugSurfaceStats> statsMap =
         _surfaceStatsTimeline[i];
-    final _DebugSurfaceStats totals = _DebugSurfaceStats(null);
+    final DebugSurfaceStats totals = DebugSurfaceStats(null);
     int pixelCount = 0;
-    for (_DebugSurfaceStats oneSurfaceStats in statsMap.values) {
+    for (DebugSurfaceStats oneSurfaceStats in statsMap.values) {
       totals.aggregate(oneSurfaceStats);
       if (oneSurfaceStats.surface is PersistedPicture) {
         final PersistedPicture picture = oneSurfaceStats.surface as PersistedPicture;
@@ -210,7 +218,7 @@ void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
 }
 
 /// Prints debug statistics for the current frame to the console.
-void _debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
+void debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
   int pictureCount = 0;
   int paintCount = 0;
 
@@ -229,7 +237,7 @@ void _debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
   int totalAllocatedDomNodeCount = 0;
 
   void countReusesRecursively(PersistedSurface surface) {
-    final _DebugSurfaceStats stats = _surfaceStatsFor(surface);
+    final DebugSurfaceStats stats = surfaceStatsFor(surface);
     assert(stats != null); // ignore: unnecessary_null_comparison
 
     surfaceRetainCount += stats.retainSurfaceCount;
@@ -240,12 +248,12 @@ void _debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
       pictureCount += 1;
       paintCount += stats.paintCount;
 
-      if (surface._canvas is DomCanvas) {
+      if (surface.canvas is DomCanvas) {
         domCanvasCount++;
         domPaintCount += stats.paintCount;
       }
 
-      if (surface._canvas is BitmapCanvas) {
+      if (surface.canvas is BitmapCanvas) {
         bitmapCanvasCount++;
         bitmapPaintCount += stats.paintCount;
       }
@@ -279,7 +287,7 @@ void _debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
     ..writeln('  Reused: $bitmapReuseCount')
     ..writeln('  Allocated: $bitmapAllocationCount')
     ..writeln('  Allocated pixels: $bitmapPixelsAllocated')
-    ..writeln('  Available for reuse: ${_recycledCanvases.length}');
+    ..writeln('  Available for reuse: ${recycledCanvases.length}');
 
   // A microtask will fire after the DOM is flushed, letting us probe into
   // actual <canvas> tags.
@@ -311,7 +319,7 @@ void _debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
       ..writeln('  Pixels: $canvasPixelDescription; $screenDescription)')
       ..writeln('-----------------------------------------------------------');
     final bool screenPixelRatioTooHigh =
-        screenPixelRatio > _kScreenPixelRatioWarningThreshold;
+        screenPixelRatio > kScreenPixelRatioWarningThreshold;
     if (screenPixelRatioTooHigh) {
       print(
           'WARNING: pixel/screen ratio too high (${screenPixelRatio.toStringAsFixed(2)}x)');

@@ -2,7 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+
+import 'package:ui/src/engine.dart' show NullTreeSanitizer;
+import 'package:ui/ui.dart' as ui;
+
+import '../browser_detection.dart';
+import 'bitmap_canvas.dart';
+import 'path_to_svg_clip.dart';
+import 'shaders/shader.dart';
+import 'surface.dart';
 
 /// A surface that applies a shader to its children.
 ///
@@ -230,7 +239,7 @@ String? svgMaskFilterFromImageAndBlendMode(
     case ui.BlendMode.difference:
     case ui.BlendMode.exclusion:
       svgFilter = _blendImageToSvg(
-          imageUrl, _stringForBlendMode(blendMode), width, height);
+          imageUrl, stringForBlendMode(blendMode), width, height);
       break;
     case ui.BlendMode.src:
     case ui.BlendMode.dst:

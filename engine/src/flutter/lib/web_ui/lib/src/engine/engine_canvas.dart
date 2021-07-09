@@ -2,7 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:typed_data';
+import 'dart:html' as html;
+
+import 'package:ui/ui.dart' as ui;
+
+import 'html/painting.dart';
+import 'html/render_vertices.dart';
+import 'text/paragraph.dart';
+import 'util.dart';
+import 'vector_math.dart';
 
 /// Defines canvas interface common across canvases that the [SceneBuilder]
 /// renders to.
@@ -92,29 +101,29 @@ Matrix4 transformWithOffset(Matrix4 transform, ui.Offset offset) {
   return effectiveTransform;
 }
 
-class _SaveStackEntry {
-  _SaveStackEntry({
+class SaveStackEntry {
+  SaveStackEntry({
     required this.transform,
     required this.clipStack,
   });
 
   final Matrix4 transform;
-  final List<_SaveClipEntry>? clipStack;
+  final List<SaveClipEntry>? clipStack;
 }
 
 /// Tagged union of clipping parameters used for canvas.
-class _SaveClipEntry {
+class SaveClipEntry {
   final ui.Rect? rect;
   final ui.RRect? rrect;
   final ui.Path? path;
   final Matrix4 currentTransform;
-  _SaveClipEntry.rect(this.rect, this.currentTransform)
+  SaveClipEntry.rect(this.rect, this.currentTransform)
       : rrect = null,
         path = null;
-  _SaveClipEntry.rrect(this.rrect, this.currentTransform)
+  SaveClipEntry.rrect(this.rrect, this.currentTransform)
       : rect = null,
         path = null;
-  _SaveClipEntry.path(this.path, this.currentTransform)
+  SaveClipEntry.path(this.path, this.currentTransform)
       : rect = null,
         rrect = null;
 }
@@ -124,11 +133,11 @@ class _SaveClipEntry {
 mixin SaveStackTracking on EngineCanvas {
   static final Vector3 _unitZ = Vector3(0.0, 0.0, 1.0);
 
-  final List<_SaveStackEntry> _saveStack = <_SaveStackEntry>[];
+  final List<SaveStackEntry> _saveStack = <SaveStackEntry>[];
 
   /// The stack that maintains clipping operations used when text is painted
   /// onto bitmap canvas but is composited as separate element.
-  List<_SaveClipEntry>? _clipStack;
+  List<SaveClipEntry>? _clipStack;
 
   /// Returns whether there are active clipping regions on the canvas.
   bool get isClipped => _clipStack != null;
@@ -153,10 +162,10 @@ mixin SaveStackTracking on EngineCanvas {
   /// Classes that override this method must call `super.save()`.
   @override
   void save() {
-    _saveStack.add(_SaveStackEntry(
+    _saveStack.add(SaveStackEntry(
       transform: _currentTransform.clone(),
       clipStack:
-          _clipStack == null ? null : List<_SaveClipEntry>.from(_clipStack!),
+          _clipStack == null ? null : List<SaveClipEntry>.from(_clipStack!),
     ));
   }
 
@@ -168,7 +177,7 @@ mixin SaveStackTracking on EngineCanvas {
     if (_saveStack.isEmpty) {
       return;
     }
-    final _SaveStackEntry entry = _saveStack.removeLast();
+    final SaveStackEntry entry = _saveStack.removeLast();
     _currentTransform = entry.transform;
     _clipStack = entry.clipStack;
   }
@@ -222,8 +231,8 @@ mixin SaveStackTracking on EngineCanvas {
   /// Classes that override this method must call `super.clipRect()`.
   @override
   void clipRect(ui.Rect rect, ui.ClipOp op) {
-    _clipStack ??= <_SaveClipEntry>[];
-    _clipStack!.add(_SaveClipEntry.rect(rect, _currentTransform.clone()));
+    _clipStack ??= <SaveClipEntry>[];
+    _clipStack!.add(SaveClipEntry.rect(rect, _currentTransform.clone()));
   }
 
   /// Adds a round rectangle to clipping stack.
@@ -231,8 +240,8 @@ mixin SaveStackTracking on EngineCanvas {
   /// Classes that override this method must call `super.clipRRect()`.
   @override
   void clipRRect(ui.RRect rrect) {
-    _clipStack ??= <_SaveClipEntry>[];
-    _clipStack!.add(_SaveClipEntry.rrect(rrect, _currentTransform.clone()));
+    _clipStack ??= <SaveClipEntry>[];
+    _clipStack!.add(SaveClipEntry.rrect(rrect, _currentTransform.clone()));
   }
 
   /// Adds a path to clipping stack.
@@ -240,12 +249,12 @@ mixin SaveStackTracking on EngineCanvas {
   /// Classes that override this method must call `super.clipPath()`.
   @override
   void clipPath(ui.Path path) {
-    _clipStack ??= <_SaveClipEntry>[];
-    _clipStack!.add(_SaveClipEntry.path(path, _currentTransform.clone()));
+    _clipStack ??= <SaveClipEntry>[];
+    _clipStack!.add(SaveClipEntry.path(path, _currentTransform.clone()));
   }
 }
 
-html.Element _drawParagraphElement(
+html.Element drawParagraphElement(
   EngineParagraph paragraph,
   ui.Offset offset, {
   Matrix4? transform,

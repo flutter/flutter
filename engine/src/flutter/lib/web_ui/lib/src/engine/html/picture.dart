@@ -2,7 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:ui/src/engine.dart' show domRenderer;
+import 'package:ui/ui.dart' as ui;
+
+import '../engine_canvas.dart';
+import '../frame_reference.dart';
+import '../picture.dart';
+import '../util.dart';
+import '../vector_math.dart';
+import 'bitmap_canvas.dart';
+import 'debug_canvas_reuse_overlay.dart';
+import 'dom_canvas.dart';
+import 'path/path_metrics.dart';
+import 'shader_mask.dart';
+import 'surface.dart';
+import 'surface_stats.dart';
 
 // TODO(yjbanov): this is currently very naive. We probably want to cache
 //                fewer large canvases than small canvases. We could also
@@ -16,10 +34,11 @@ part of engine;
 const int _kCanvasCacheSize = 30;
 
 /// Canvases available for reuse, capped at [_kCanvasCacheSize].
+List<BitmapCanvas> get recycledCanvases => _recycledCanvases;
 final List<BitmapCanvas> _recycledCanvases = <BitmapCanvas>[];
 
 /// Reduces recycled canvas list by 50% to reduce bitmap canvas memory use.
-void _reduceCanvasMemoryUsage() {
+void reduceCanvasMemoryUsage() {
   final int canvasCount = _recycledCanvases.length;
   for (int i = 0; i < canvasCount; i++) {
     _recycledCanvases[i].dispose();
@@ -33,8 +52,8 @@ void _reduceCanvasMemoryUsage() {
 /// makes canvas allocation more efficient by letting large pictures claim
 /// larger recycled canvases. Otherwise, small pictures would claim the large
 /// canvases forcing us to allocate new large canvases.
-class _PaintRequest {
-  _PaintRequest({
+class PaintRequest {
+  PaintRequest({
     required this.canvasSize,
     required this.paintCallback,
   })  : assert(canvasSize != null), // ignore: unnecessary_null_comparison
@@ -47,7 +66,7 @@ class _PaintRequest {
 /// Repaint requests produced by [PersistedPicture]s that actually paint on the
 /// canvas. Painting is delayed until the layer tree is updated to maximize
 /// the number of reusable canvases.
-List<_PaintRequest> _paintQueue = <_PaintRequest>[];
+List<PaintRequest> paintQueue = <PaintRequest>[];
 
 void _recycleCanvas(EngineCanvas? canvas) {
   // If a canvas is in the paint queue it maybe be recycled. To
@@ -62,11 +81,11 @@ void _recycleCanvas(EngineCanvas? canvas) {
       if (_recycledCanvases.length > _kCanvasCacheSize) {
         final BitmapCanvas removedCanvas = _recycledCanvases.removeAt(0);
         removedCanvas.dispose();
-        if (_debugShowCanvasReuseStats) {
+        if (debugShowCanvasReuseStats) {
           DebugCanvasReuseOverlay.instance.disposedCount++;
         }
       }
-      if (_debugShowCanvasReuseStats) {
+      if (debugShowCanvasReuseStats) {
         DebugCanvasReuseOverlay.instance.inRecycleCount =
             _recycledCanvases.length;
       }
@@ -85,9 +104,7 @@ class PersistedPicture extends PersistedLeafSurface {
   EngineCanvas? _canvas;
 
   /// Returns the canvas used by this picture layer.
-  ///
-  /// Useful for tests.
-  EngineCanvas? get debugCanvas => _canvas;
+  EngineCanvas? get canvas => _canvas;
 
   final double dx;
   final double dy;
@@ -120,17 +137,17 @@ class PersistedPicture extends PersistedLeafSurface {
 
   @override
   void recomputeTransformAndClip() {
-    _transform = parent!._transform;
+    transform = parent!.transform;
     if (dx != 0.0 || dy != 0.0) {
-      _transform = _transform!.clone();
-      _transform!.translate(dx, dy);
+      transform = transform!.clone();
+      transform!.translate(dx, dy);
     }
     final double paintWidth = localPaintBounds!.width;
     final double paintHeight = localPaintBounds!.height;
     final double newDensity =
         localPaintBounds == null || paintWidth == 0 || paintHeight == 0
             ? 1.0
-            : _computePixelDensity(_transform, paintWidth, paintHeight);
+            : _computePixelDensity(transform, paintWidth, paintHeight);
     if (newDensity != _density) {
       _density = newDensity;
       _requiresRepaint = true;
@@ -166,7 +183,7 @@ class PersistedPicture extends PersistedLeafSurface {
     assert(transform != null);
     assert(localPaintBounds != null);
 
-    if (parent!._projectedClip == null) {
+    if (parent!.projectedClip == null) {
       // Compute and cache chain of clipping bounds on parent of picture since
       // parent may include multiple pictures so it can be reused by all
       // child pictures.
@@ -174,7 +191,7 @@ class PersistedPicture extends PersistedLeafSurface {
       PersistedSurface? parentSurface = parent;
       final Matrix4 clipTransform = Matrix4.identity();
       while (parentSurface != null) {
-        final ui.Rect? localClipBounds = parentSurface._localClipBounds;
+        final ui.Rect? localClipBounds = parentSurface.localClipBounds;
         if (localClipBounds != null) {
           if (bounds == null) {
             bounds = transformRect(clipTransform, localClipBounds);
@@ -193,15 +210,15 @@ class PersistedPicture extends PersistedLeafSurface {
         bounds = ui.Rect.zero;
       }
       // Cache projected clip on parent.
-      parent!._projectedClip = bounds;
+      parent!.projectedClip = bounds;
     }
     // Intersect localPaintBounds with parent projected clip to calculate
     // and cache [_exactLocalCullRect].
-    if (parent!._projectedClip == null) {
+    if (parent!.projectedClip == null) {
       _exactLocalCullRect = localPaintBounds;
     } else {
       _exactLocalCullRect =
-          localPaintBounds!.intersect(parent!._projectedClip!);
+          localPaintBounds!.intersect(parent!.projectedClip!);
     }
     if (_exactLocalCullRect!.width <= 0 || _exactLocalCullRect!.height <= 0) {
       _exactLocalCullRect = ui.Rect.zero;
@@ -342,8 +359,8 @@ class PersistedPicture extends PersistedLeafSurface {
       return;
     }
 
-    if (_debugExplainSurfaceStats) {
-      _surfaceStatsFor(this).paintCount++;
+    if (debugExplainSurfaceStats) {
+      surfaceStatsFor(this).paintCount++;
     }
 
     assert(_optimalLocalCullRect != null);
@@ -386,10 +403,10 @@ class PersistedPicture extends PersistedLeafSurface {
         return 1.0;
       } else {
         final int newPixelCount =
-            BitmapCanvas._widthToPhysical(_exactLocalCullRect!.width) *
-                BitmapCanvas._heightToPhysical(_exactLocalCullRect!.height);
+            BitmapCanvas.widthToPhysical(_exactLocalCullRect!.width) *
+                BitmapCanvas.heightToPhysical(_exactLocalCullRect!.height);
         final int oldPixelCount =
-            oldCanvas._widthInBitmapPixels * oldCanvas._heightInBitmapPixels;
+            oldCanvas.widthInBitmapPixels * oldCanvas.heightInBitmapPixels;
 
         if (oldPixelCount == 0) {
           return 1.0;
@@ -402,9 +419,6 @@ class PersistedPicture extends PersistedLeafSurface {
       }
     }
   }
-
-  @override
-  Matrix4? get localTransformInverse => null;
 
   void applyPaint(EngineCanvas? oldCanvas) {
     if (picture.recordingCanvas!.renderStrategy.hasArbitraryPaint) {
@@ -427,7 +441,7 @@ class PersistedPicture extends PersistedLeafSurface {
         oldCanvas.doesFitBounds(_optimalLocalCullRect!, _density) &&
         oldCanvas.isReusable()) {
       final BitmapCanvas reusedCanvas = oldCanvas;
-      if (_debugShowCanvasReuseStats) {
+      if (debugShowCanvasReuseStats) {
         DebugCanvasReuseOverlay.instance.keptCount++;
       }
       // Re-use old bitmap canvas.
@@ -448,15 +462,15 @@ class PersistedPicture extends PersistedLeafSurface {
       // able to reuse have been released yet. So instead we enqueue this
       // picture to be painted after the update cycle is done syncing the layer
       // tree then reuse canvases that were freed up.
-      _paintQueue.add(_PaintRequest(
+      paintQueue.add(PaintRequest(
         canvasSize: _optimalLocalCullRect!.size,
         paintCallback: () {
           final BitmapCanvas bitmapCanvas =
               _findOrCreateCanvas(_optimalLocalCullRect!);
           _canvas = bitmapCanvas;
           bitmapCanvas.setElementCache(_elementCache);
-          if (_debugExplainSurfaceStats) {
-            _surfaceStatsFor(this).paintPixelCount +=
+          if (debugExplainSurfaceStats) {
+            surfaceStatsFor(this).paintPixelCount +=
                 bitmapCanvas.bitmapPixelCount;
           }
           domRenderer.clearDom(rootElement!);
@@ -516,15 +530,15 @@ class PersistedPicture extends PersistedLeafSurface {
     }
 
     if (bestRecycledCanvas != null) {
-      if (_debugExplainSurfaceStats) {
-        _surfaceStatsFor(this).reuseCanvasCount++;
+      if (debugExplainSurfaceStats) {
+        surfaceStatsFor(this).reuseCanvasCount++;
       }
       _recycledCanvases.remove(bestRecycledCanvas);
-      if (_debugShowCanvasReuseStats) {
+      if (debugShowCanvasReuseStats) {
         DebugCanvasReuseOverlay.instance.inRecycleCount =
             _recycledCanvases.length;
       }
-      if (_debugShowCanvasReuseStats) {
+      if (debugShowCanvasReuseStats) {
         DebugCanvasReuseOverlay.instance.reusedCount++;
       }
       bestRecycledCanvas.bounds = bounds;
@@ -532,18 +546,18 @@ class PersistedPicture extends PersistedLeafSurface {
       return bestRecycledCanvas;
     }
 
-    if (_debugShowCanvasReuseStats) {
+    if (debugShowCanvasReuseStats) {
       DebugCanvasReuseOverlay.instance.createdCount++;
     }
     final BitmapCanvas canvas = BitmapCanvas(
         bounds, picture.recordingCanvas!.renderStrategy,
         density: _density);
     canvas.setElementCache(_elementCache);
-    if (_debugExplainSurfaceStats) {
-      _surfaceStatsFor(this)
+    if (debugExplainSurfaceStats) {
+      surfaceStatsFor(this)
         ..allocateBitmapCanvasCount += 1
         ..allocatedBitmapSizeInPixels =
-            canvas._widthInBitmapPixels * canvas._heightInBitmapPixels;
+            canvas.widthInBitmapPixels * canvas.heightInBitmapPixels;
     }
     return canvas;
   }
@@ -581,7 +595,7 @@ class PersistedPicture extends PersistedLeafSurface {
     _computeOptimalCullRect(oldSurface);
     if (identical(picture, oldSurface.picture)) {
       bool densityChanged = (_canvas is BitmapCanvas &&
-          _density != (_canvas as BitmapCanvas)._density);
+          _density != (_canvas as BitmapCanvas).density);
 
       // The picture is the same. Attempt to avoid repaint.
       if (_requiresRepaint || densityChanged) {
@@ -635,7 +649,7 @@ class PersistedPicture extends PersistedLeafSurface {
     super.debugValidate(validationErrors);
 
     if (picture.recordingCanvas!.didDraw) {
-      if (!_optimalLocalCullRect!.isEmpty && debugCanvas == null) {
+      if (!_optimalLocalCullRect!.isEmpty && canvas == null) {
         validationErrors
             .add('$runtimeType has non-trivial picture but it has null canvas');
       }

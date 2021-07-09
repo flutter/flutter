@@ -2,7 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+import 'dart:js_util' as js_util;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart' show DomRenderer, EnginePlatformDispatcher, window;
+import 'package:ui/ui.dart' as ui;
+
+import 'browser_detection.dart';
+import 'engine_canvas.dart';
+import 'html/bitmap_canvas.dart';
+import 'html/painting.dart';
+import 'html/picture.dart';
+import 'html/path/conic.dart';
+import 'html/path/path.dart';
+import 'html/path/path_ref.dart';
+import 'html/path/path_utils.dart';
+import 'html/shaders/image_shader.dart';
+import 'html/shaders/shader.dart';
+import 'rrect_renderer.dart';
+import 'shadow.dart';
+import 'util.dart';
+import 'vector_math.dart';
 
 /// Renders picture to a CanvasElement by allocating and caching 0 or more
 /// canvas(s) for [BitmapCanvas].
@@ -13,14 +36,14 @@ part of engine;
 /// and adds the canvas(s) to [_activeCanvasList].
 ///
 /// To make sure transformations and clips are preserved correctly when a new
-/// canvas is allocated, [_CanvasPool] replays the current stack on the newly
+/// canvas is allocated, [CanvasPool] replays the current stack on the newly
 /// allocated canvas. It also maintains a [_saveContextCount] so that
 /// the context stack can be reinitialized to default when reused in the future.
 ///
 /// On a subsequent repaint, when a Picture determines that a [BitmapCanvas]
-/// can be reused, [_CanvasPool] will move canvas(s) from pool to reusablePool
+/// can be reused, [CanvasPool] will move canvas(s) from pool to reusablePool
 /// to prevent reallocation.
-class _CanvasPool extends _SaveStackTracking {
+class CanvasPool extends _SaveStackTracking {
   html.CanvasRenderingContext2D? _context;
   ContextStateHandle? _contextHandle;
   final int _widthInBitmapPixels, _heightInBitmapPixels;
@@ -29,13 +52,14 @@ class _CanvasPool extends _SaveStackTracking {
   // List of canvases available to reuse from prior paint cycle.
   List<html.CanvasElement>? _reusablePool;
   // Current canvas element or null if marked for lazy allocation.
+  html.CanvasElement? get canvas => _canvas;
   html.CanvasElement? _canvas;
 
   html.HtmlElement? _rootElement;
   int _saveContextCount = 0;
   final double _density;
 
-  _CanvasPool(this._widthInBitmapPixels, this._heightInBitmapPixels,
+  CanvasPool(this._widthInBitmapPixels, this._heightInBitmapPixels,
       this._density);
 
   html.CanvasRenderingContext2D get context {
@@ -116,7 +140,7 @@ class _CanvasPool extends _SaveStackTracking {
       // browser more memory to allocate a new canvas.
       if (_canvas == null) {
         // Evict BitmapCanvas(s) and retry.
-        _reduceCanvasMemoryUsage();
+        reduceCanvasMemoryUsage();
         canvas = _allocCanvas(_widthInBitmapPixels, _heightInBitmapPixels);
       }
       canvas!.style
@@ -144,7 +168,7 @@ class _CanvasPool extends _SaveStackTracking {
       // Handle OOM.
     }
     if (_context == null) {
-      _reduceCanvasMemoryUsage();
+      reduceCanvasMemoryUsage();
       _context = canvas.context2D;
     }
     if (_context == null) {
@@ -209,13 +233,13 @@ class _CanvasPool extends _SaveStackTracking {
   }
 
   int _replaySingleSaveEntry(int clipDepth, Matrix4 prevTransform,
-      Matrix4 transform, List<_SaveClipEntry>? clipStack) {
+      Matrix4 transform, List<SaveClipEntry>? clipStack) {
     final html.CanvasRenderingContext2D ctx = context;
     if (clipStack != null) {
       for (int clipCount = clipStack.length;
           clipDepth < clipCount;
           clipDepth++) {
-        _SaveClipEntry clipEntry = clipStack[clipDepth];
+        SaveClipEntry clipEntry = clipStack[clipDepth];
         Matrix4 clipTimeTransform = clipEntry.currentTransform;
         // If transform for entry recording change since last element, update.
         // Comparing only matrix3 elements since Canvas API restricted.
@@ -275,7 +299,7 @@ class _CanvasPool extends _SaveStackTracking {
     for (int saveStackIndex = 0, len = _saveStack.length;
         saveStackIndex < len;
         saveStackIndex++) {
-      _SaveStackEntry saveEntry = _saveStack[saveStackIndex];
+      SaveStackEntry saveEntry = _saveStack[saveStackIndex];
       clipDepth = _replaySingleSaveEntry(
           clipDepth, prevTransform, saveEntry.transform, saveEntry.clipStack);
       prevTransform = saveEntry.transform;
@@ -283,7 +307,7 @@ class _CanvasPool extends _SaveStackTracking {
       ++_saveContextCount;
     }
     _replaySingleSaveEntry(
-        clipDepth, prevTransform, _currentTransform, _clipStack);
+        clipDepth, prevTransform, _currentTransform, clipStack);
   }
 
   // Marks this pool for reuse.
@@ -668,14 +692,14 @@ class _CanvasPool extends _SaveStackTracking {
 
   void drawRRect(ui.RRect roundRect, ui.PaintingStyle? style) {
     final ui.Rect? shaderBounds = contextHandle._shaderBounds;
-    _RRectToCanvasRenderer(context).render(
+    RRectToCanvasRenderer(context).render(
         shaderBounds == null ? roundRect
             : roundRect.shift(ui.Offset(-shaderBounds.left, -shaderBounds.top)));
     contextHandle.paint(style);
   }
 
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.PaintingStyle? style) {
-    _RRectRenderer renderer = _RRectToCanvasRenderer(context);
+    RRectRenderer renderer = RRectToCanvasRenderer(context);
     final ui.Rect? shaderBounds = contextHandle._shaderBounds;
     if (shaderBounds == null) {
       renderer.render(outer);
@@ -748,7 +772,7 @@ class _CanvasPool extends _SaveStackTracking {
         // alpha for the paint the path is painted in addition to the shadow,
         // which is undesirable.
         context.translate(shadow.offset.dx, shadow.offset.dy);
-        context.filter = _maskFilterToCanvasFilter(
+        context.filter = maskFilterToCanvasFilter(
             ui.MaskFilter.blur(ui.BlurStyle.normal, shadow.blurWidth));
         context.strokeStyle = '';
         context.fillStyle = solidColor;
@@ -815,7 +839,7 @@ class _CanvasPool extends _SaveStackTracking {
 //
 class ContextStateHandle {
   final html.CanvasRenderingContext2D context;
-  final _CanvasPool _canvasPool;
+  final CanvasPool _canvasPool;
   final double density;
 
   ContextStateHandle(this._canvasPool, this.context, this.density);
@@ -832,7 +856,7 @@ class ContextStateHandle {
     if (blendMode != _currentBlendMode) {
       _currentBlendMode = blendMode;
       context.globalCompositeOperation =
-          _stringForBlendMode(blendMode) ?? 'source-over';
+          stringForBlendMode(blendMode) ?? 'source-over';
     }
   }
 
@@ -840,7 +864,7 @@ class ContextStateHandle {
     strokeCap ??= ui.StrokeCap.butt;
     if (strokeCap != _currentStrokeCap) {
       _currentStrokeCap = strokeCap;
-      context.lineCap = _stringForStrokeCap(strokeCap)!;
+      context.lineCap = stringForStrokeCap(strokeCap)!;
     }
   }
 
@@ -855,7 +879,7 @@ class ContextStateHandle {
     strokeJoin ??= ui.StrokeJoin.miter;
     if (strokeJoin != _currentStrokeJoin) {
       _currentStrokeJoin = strokeJoin;
-      context.lineJoin = _stringForStrokeJoin(strokeJoin);
+      context.lineJoin = stringForStrokeJoin(strokeJoin);
     }
   }
 
@@ -949,7 +973,7 @@ class ContextStateHandle {
     if (!_renderMaskFilterForWebkit) {
       if (_currentFilter != maskFilter) {
         _currentFilter = maskFilter;
-        context.filter = _maskFilterToCanvasFilter(maskFilter);
+        context.filter = maskFilterToCanvasFilter(maskFilter);
       }
     } else {
       // WebKit does not support the `filter` property. Instead we apply a
@@ -1074,21 +1098,21 @@ class _SaveStackTracking {
   // !Warning: this vector should not be mutated.
   static final Vector3 _unitZ = Vector3(0.0, 0.0, 1.0);
 
-  final List<_SaveStackEntry> _saveStack = <_SaveStackEntry>[];
+  final List<SaveStackEntry> _saveStack = <SaveStackEntry>[];
 
   /// The stack that maintains clipping operations used when text is painted
   /// onto bitmap canvas but is composited as separate element.
-  List<_SaveClipEntry>? _clipStack;
+  List<SaveClipEntry>? clipStack;
 
   /// Returns whether there are active clipping regions on the canvas.
-  bool get isClipped => _clipStack != null;
+  bool get isClipped => clipStack != null;
 
   /// Empties the save stack and the element stack, and resets the transform
   /// and clip parameters.
   @mustCallSuper
   void clear() {
     _saveStack.clear();
-    _clipStack = null;
+    clipStack = null;
     _currentTransform = Matrix4.identity();
   }
 
@@ -1099,10 +1123,10 @@ class _SaveStackTracking {
   /// Saves current clip and transform on the save stack.
   @mustCallSuper
   void save() {
-    _saveStack.add(_SaveStackEntry(
+    _saveStack.add(SaveStackEntry(
       transform: _currentTransform.clone(),
       clipStack:
-          _clipStack == null ? null : List<_SaveClipEntry>.from(_clipStack!),
+          clipStack == null ? null : List<SaveClipEntry>.from(clipStack!),
     ));
   }
 
@@ -1112,9 +1136,9 @@ class _SaveStackTracking {
     if (_saveStack.isEmpty) {
       return;
     }
-    final _SaveStackEntry entry = _saveStack.removeLast();
+    final SaveStackEntry entry = _saveStack.removeLast();
     _currentTransform = entry.transform;
-    _clipStack = entry.clipStack;
+    clipStack = entry.clipStack;
   }
 
   /// Multiplies the [currentTransform] matrix by a translation.
@@ -1154,21 +1178,21 @@ class _SaveStackTracking {
   /// Adds a rectangle to clipping stack.
   @mustCallSuper
   void clipRect(ui.Rect rect) {
-    _clipStack ??= <_SaveClipEntry>[];
-    _clipStack!.add(_SaveClipEntry.rect(rect, _currentTransform.clone()));
+    clipStack ??= <SaveClipEntry>[];
+    clipStack!.add(SaveClipEntry.rect(rect, _currentTransform.clone()));
   }
 
   /// Adds a round rectangle to clipping stack.
   @mustCallSuper
   void clipRRect(ui.RRect rrect) {
-    _clipStack ??= <_SaveClipEntry>[];
-    _clipStack!.add(_SaveClipEntry.rrect(rrect, _currentTransform.clone()));
+    clipStack ??= <SaveClipEntry>[];
+    clipStack!.add(SaveClipEntry.rrect(rrect, _currentTransform.clone()));
   }
 
   /// Adds a path to clipping stack.
   @mustCallSuper
   void clipPath(ui.Path path) {
-    _clipStack ??= <_SaveClipEntry>[];
-    _clipStack!.add(_SaveClipEntry.path(path, _currentTransform.clone()));
+    clipStack ??= <SaveClipEntry>[];
+    clipStack!.add(SaveClipEntry.path(path, _currentTransform.clone()));
   }
 }

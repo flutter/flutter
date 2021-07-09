@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
-
 /// A monotonically increasing frame number being rendered.
 ///
 /// Used for debugging only.
-int _debugFrameNumber = 1;
+int debugFrameNumber = 1;
 
 List<FrameReference<dynamic>> frameReferences = <FrameReference<dynamic>>[];
 
