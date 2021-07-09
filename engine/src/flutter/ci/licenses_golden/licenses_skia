@@ -1,4 +1,4 @@
-Signature: de85a8c26a84ab1ab1151170a7bb28c4
+Signature: ef505b96b50b20a421f6519daf8a87d3
 
 UNUSED LICENSES:
 
@@ -3437,7 +3437,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLOutputStream.h
 FILE: ../../../third_party/skia/src/sksl/SkSLString.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLStringStream.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLPipelineStageCodeGenerator.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLEnum.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSetting.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwitchCase.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwitchStatement.h
