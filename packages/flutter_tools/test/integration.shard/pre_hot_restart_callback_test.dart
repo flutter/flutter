@@ -33,6 +33,6 @@ void main() {
     await flutter.run();
     await flutter.hotRestart();
 
-    expect(stdout.toString(), contains(containsIgnoringWhitespace('INVOKE PRE HOT RESTART CALLBACK')));
+    expect(stdout.toString(), contains('INVOKE PRE HOT RESTART CALLBACK'));
   });
 }
