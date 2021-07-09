@@ -70,6 +70,13 @@ class CkNWayCanvas {
     }
   }
 
+  /// Calls [clear] on all canvases.
+  void clear(ui.Color color) {
+    for (int i = 0; i < _canvases.length; i++) {
+      _canvases[i].clear(color);
+    }
+  }
+
   /// Calls [clipPath] on all canvases.
   void clipPath(CkPath path, bool doAntiAlias) {
     for (int i = 0; i < _canvases.length; i++) {

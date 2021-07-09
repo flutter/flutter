@@ -448,6 +448,7 @@ class HtmlViewEmbedder {
     // If there's an active overlay for the view ID, continue using it.
     Surface? overlay = _overlays[viewId];
     if (overlay != null && !_viewsUsingBackupSurface.contains(viewId)) {
+      overlay.createOrUpdateSurfaces(_frameSize);
       return;
     }
 
@@ -462,6 +463,7 @@ class HtmlViewEmbedder {
     if (overlay == SurfaceFactory.instance.backupSurface) {
       _viewsUsingBackupSurface.add(viewId);
     }
+    overlay.createOrUpdateSurfaces(_frameSize);
     _overlays[viewId] = overlay;
   }
 
