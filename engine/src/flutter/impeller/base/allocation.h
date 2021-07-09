@@ -21,7 +21,7 @@ class Allocation {
 
   size_t GetReservedLength() const;
 
-  [[nodiscard]] bool Truncate(size_t length);
+  [[nodiscard]] bool Truncate(size_t length, bool npot = true);
 
  private:
   uint8_t* buffer_ = nullptr;

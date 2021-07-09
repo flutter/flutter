@@ -28,8 +28,9 @@ size_t Allocation::GetReservedLength() const {
   return reserved_;
 }
 
-bool Allocation::Truncate(size_t length) {
-  if (!ReserveNPOT(length)) {
+bool Allocation::Truncate(size_t length, bool npot) {
+  const auto reserved = npot ? ReserveNPOT(length) : Reserve(length);
+  if (!reserved) {
     return false;
   }
   length_ = length;
@@ -53,13 +54,12 @@ static uint32_t NextPowerOfTwoSize(uint32_t x) {
 }
 
 bool Allocation::ReserveNPOT(size_t reserved) {
+  // Reserve at least one page of data.
+  reserved = std::max<size_t>(4096u, reserved);
   return Reserve(NextPowerOfTwoSize(reserved));
 }
 
 bool Allocation::Reserve(size_t reserved) {
-  // Reserve at least one page of data.
-  reserved = std::max<size_t>(4096u, reserved);
-
   if (reserved == reserved_) {
     return true;
   }
