@@ -33,13 +33,13 @@ class HotReloadProject extends Project {
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     // See https://github.com/flutter/flutter/issues/86202
     if (kIsWeb) {
-     while (true) {
-       runApp(MyApp());
-         await Future.delayed(const Duration(seconds: 1));
-       }
-     } else {
-      runApp(MyApp());
-     }
+      while (true) {
+        runApp(MyApp());
+        await Future.delayed(const Duration(seconds: 1));
+      }
+    } else {
+     runApp(MyApp());
+    }
   }
 
   int count = 1;
