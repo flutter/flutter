@@ -218,54 +218,13 @@ def RunEngineBenchmarks(build_dir, filter):
     RunEngineExecutable(build_dir, 'txt_benchmarks', filter, icu_flags)
 
 
-def SnapshotTest(build_dir, test_packages, dart_file, kernel_file_output, verbose_dart_snapshot):
-  print("Generating snapshot for test %s" % dart_file)
-
-  dart = os.path.join(build_dir, 'dart')
-  frontend_server = os.path.join(build_dir, 'gen', 'frontend_server.dart.snapshot')
-  flutter_patched_sdk = os.path.join(build_dir, 'flutter_patched_sdk')
-
-  assert os.path.exists(dart)
-  assert os.path.exists(frontend_server)
-  assert os.path.exists(flutter_patched_sdk)
-  assert os.path.exists(test_packages)
-
-  snapshot_command = [
-    dart,
-    '--disable-dart-dev',
-    frontend_server,
-    '--sound-null-safety',
-    '--sdk-root',
-    flutter_patched_sdk,
-    '--incremental',
-    '--target=flutter',
-    '--packages',
-    test_packages,
-    '--output-dill',
-    kernel_file_output,
-    dart_file
-  ]
-
-  if verbose_dart_snapshot:
-    RunCmd(snapshot_command, cwd=buildroot_dir)
-  else:
-    try:
-      subprocess.check_output(snapshot_command, cwd=buildroot_dir)
-    except subprocess.CalledProcessError as error:
-      # CalledProcessError's string doesn't print the output. Print it before
-      # the crash for easier inspection.
-      print('Error occurred from the subprocess, with the output:')
-      print(error.output)
-      raise
-  assert os.path.exists(kernel_file_output)
-
-
 def RunDartTest(build_dir, test_packages, dart_file, verbose_dart_snapshot, multithreaded,
                 enable_observatory=False, expect_failure=False):
-  kernel_file_name = os.path.basename(dart_file) + '.kernel.dill'
-  kernel_file_output = os.path.join(out_dir, kernel_file_name)
-
-  SnapshotTest(build_dir, test_packages, dart_file, kernel_file_output, verbose_dart_snapshot)
+  kernel_file_name = os.path.basename(dart_file) + '.dill'
+  kernel_file_output = os.path.join(build_dir, 'gen', kernel_file_name)
+  error_message = "%s doesn't exist. Please run the build that populates %s" % (
+      kernel_file_output, build_dir)
+  assert os.path.isfile(kernel_file_output), error_message
 
   command_args = []
   if not enable_observatory:
