@@ -9,6 +9,10 @@ test_fixtures("fixtures") {
   fixtures = [
     "sample.vert",
     "types.h",
-    "image.png",
+    "airplane.jpg",
+    "bay_bridge.jpg",
+    "boston.jpg",
+    "embarcadero.jpg",
+    "kalimba.jpg",
   ]
 }
