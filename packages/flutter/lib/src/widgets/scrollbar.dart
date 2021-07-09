@@ -872,7 +872,7 @@ class RawScrollbar extends StatefulWidget {
        assert(minThumbLength >= 0),
        assert(minOverscrollLength == null || minOverscrollLength <= minThumbLength),
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
-       _minOverscrollLength = minOverscrollLength ?? minThumbLength,
+       minOverscrollLength = minOverscrollLength ?? minThumbLength,
        assert(fadeDuration != null),
        assert(timeToFade != null),
        assert(pressDuration != null),
@@ -1066,8 +1066,7 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// The value is less than or equal to [minThumbLength] and greater than or equal to 0.
   /// If unspecified or set to null, it will default to the value of [minThumbLength].
-  double get minOverscrollLength => _minOverscrollLength;
-  final double _minOverscrollLength;
+  final double minOverscrollLength;
 
   /// The [Duration] of the fade animation.
   ///
