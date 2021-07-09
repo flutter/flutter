@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+
+import 'package:ui/ui.dart' as ui;
+
+import '../vector_math.dart';
+import 'surface.dart';
 
 class SurfaceScene implements ui.Scene {
   /// This class is created by the engine, and should not be instantiated
@@ -28,7 +33,7 @@ class SurfaceScene implements ui.Scene {
 /// A surface that creates a DOM element for whole app.
 class PersistedScene extends PersistedContainerSurface {
   PersistedScene(PersistedScene? oldLayer) : super(oldLayer) {
-    _transform = Matrix4.identity();
+    transform = Matrix4.identity();
   }
 
   @override
@@ -39,13 +44,17 @@ class PersistedScene extends PersistedContainerSurface {
     //                update this code when we add add2app support.
     final double screenWidth = html.window.innerWidth!.toDouble();
     final double screenHeight = html.window.innerHeight!.toDouble();
-    _localClipBounds = ui.Rect.fromLTRB(0, 0, screenWidth, screenHeight);
-    _localTransformInverse = Matrix4.identity();
-    _projectedClip = null;
+    localClipBounds = ui.Rect.fromLTRB(0, 0, screenWidth, screenHeight);
+    projectedClip = null;
   }
 
+  /// Cached inverse of transform on this node. Unlike transform, this
+  /// Matrix only contains local transform (not chain multiplied since root).
+  Matrix4? _localTransformInverse;
+
   @override
-  Matrix4? get localTransformInverse => _localTransformInverse;
+  Matrix4? get localTransformInverse =>
+      _localTransformInverse ??= Matrix4.identity();
 
   @override
   html.Element createElement() {

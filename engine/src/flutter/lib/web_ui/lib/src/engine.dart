@@ -24,6 +24,7 @@ import 'dart:developer' as developer;
 import 'dart:html' as html;
 import 'dart:js' as js;
 import 'dart:js_util' as js_util;
+// ignore: unused_import
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -39,56 +40,82 @@ export 'engine/assets.dart';
 import 'engine/browser_detection.dart';
 export 'engine/browser_detection.dart';
 
+export 'engine/canvas_pool.dart';
+
+export 'engine/engine_canvas.dart';
+
+export 'engine/frame_reference.dart';
+
 import 'engine/host_node.dart';
 export 'engine/host_node.dart';
 
-import 'engine/html_image_codec.dart';
 export 'engine/html_image_codec.dart';
+
+export 'engine/html/backdrop_filter.dart';
+
+export 'engine/html/bitmap_canvas.dart';
+
+export 'engine/html/canvas.dart';
+
+export 'engine/html/clip.dart';
+
+export 'engine/html/color_filter.dart';
+
+export 'engine/html/debug_canvas_reuse_overlay.dart';
+
+export 'engine/html/dom_canvas.dart';
+
+export 'engine/html/image_filter.dart';
 
 export 'engine/html/offscreen_canvas.dart';
 
-import 'engine/html/painting.dart';
+export 'engine/html/offset.dart';
+
+export 'engine/html/opacity.dart';
+
 export 'engine/html/painting.dart';
 
-import 'engine/html/path_to_svg_clip.dart';
+export 'engine/html/path/path.dart';
+
 export 'engine/html/path_to_svg_clip.dart';
 
-import 'engine/html/path/conic.dart';
 export 'engine/html/path/conic.dart';
 
-import 'engine/html/path/cubic.dart';
 export 'engine/html/path/cubic.dart';
 
-import 'engine/html/path/path_iterator.dart';
 export 'engine/html/path/path_iterator.dart';
 
-import 'engine/html/path/path_metrics.dart';
 export 'engine/html/path/path_metrics.dart';
 
-import 'engine/html/path/path_ref.dart';
 export 'engine/html/path/path_ref.dart';
 
-import 'engine/html/path/path_to_svg.dart';
 export 'engine/html/path/path_to_svg.dart';
 
-import 'engine/html/path/path_utils.dart';
 export 'engine/html/path/path_utils.dart';
 
-import 'engine/html/path/path_windings.dart';
 export 'engine/html/path/path_windings.dart';
 
-import 'engine/html/path/tangent.dart';
 export 'engine/html/path/tangent.dart';
 
-import 'engine/html/render_vertices.dart';
+export 'engine/html/picture.dart';
+
+export 'engine/html/platform_view.dart';
+
+export 'engine/html/recording_canvas.dart';
+
 export 'engine/html/render_vertices.dart';
 
-import 'engine/html/shaders/image_shader.dart';
+import 'engine/html/scene.dart';
+export 'engine/html/scene.dart';
+
+export 'engine/html/scene_builder.dart';
+
+export 'engine/html/shader_mask.dart';
+
 export 'engine/html/shaders/image_shader.dart';
 
 export 'engine/html/shaders/normalized_gradient.dart';
 
-import 'engine/html/shaders/shader.dart';
 export 'engine/html/shaders/shader.dart';
 
 export 'engine/html/shaders/shader_builder.dart';
@@ -96,6 +123,12 @@ export 'engine/html/shaders/shader_builder.dart';
 export 'engine/html/shaders/vertex_shaders.dart';
 
 export 'engine/html/shaders/webgl_context.dart';
+
+export 'engine/html/surface.dart';
+
+export 'engine/html/surface_stats.dart';
+
+export 'engine/html/transform.dart';
 
 import 'engine/keyboard_binding.dart';
 export 'engine/keyboard_binding.dart';
@@ -117,6 +150,10 @@ export 'engine/navigation/js_url_strategy.dart';
 import 'engine/navigation/url_strategy.dart';
 export 'engine/navigation/url_strategy.dart';
 
+export 'engine/onscreen_logging.dart';
+
+export 'engine/picture.dart';
+
 import 'engine/plugins.dart';
 export 'engine/plugins.dart';
 
@@ -129,6 +166,8 @@ export 'engine/pointer_converter.dart';
 
 import 'engine/profiler.dart';
 export 'engine/profiler.dart';
+
+export 'engine/rrect_renderer.dart';
 
 import 'engine/semantics/accessibility.dart';
 export 'engine/semantics/accessibility.dart';
@@ -166,7 +205,6 @@ export 'engine/services/message_codecs.dart';
 // import 'engine/services/serialization.dart';
 export 'engine/services/serialization.dart';
 
-import 'engine/shadow.dart';
 export 'engine/shadow.dart';
 
 import 'engine/test_embedding.dart';
@@ -185,7 +223,6 @@ export 'engine/text/measurement.dart';
 
 export 'engine/text/paint_service.dart';
 
-import 'engine/text/paragraph.dart';
 export 'engine/text/paragraph.dart';
 
 export 'engine/text/canvas_paragraph.dart';
@@ -212,10 +249,8 @@ export 'engine/text_editing/text_editing.dart';
 import 'engine/util.dart';
 export 'engine/util.dart';
 
-import 'engine/validators.dart';
 export 'engine/validators.dart';
 
-import 'engine/vector_math.dart';
 export 'engine/vector_math.dart';
 
 import 'engine/web_experiments.dart';
@@ -247,7 +282,6 @@ export 'engine/canvaskit/initialization.dart';
 
 export 'engine/canvaskit/interval_tree.dart';
 
-import 'engine/canvaskit/layer.dart';
 export 'engine/canvaskit/layer.dart';
 
 import 'engine/canvaskit/layer_scene_builder.dart';
@@ -288,41 +322,15 @@ export 'engine/canvaskit/util.dart';
 
 export 'engine/canvaskit/vertices.dart';
 
-part 'engine/html/bitmap_canvas.dart';
-part 'engine/canvas_pool.dart';
 part 'engine/clipboard.dart';
 part 'engine/color_filter.dart';
-part 'engine/html/dom_canvas.dart';
 part 'engine/dom_renderer.dart';
-part 'engine/engine_canvas.dart';
 part 'engine/font_change_util.dart';
-part 'engine/frame_reference.dart';
-part 'engine/html/backdrop_filter.dart';
-part 'engine/html/canvas.dart';
-part 'engine/html/clip.dart';
-part 'engine/html/color_filter.dart';
-part 'engine/html/debug_canvas_reuse_overlay.dart';
-part 'engine/html/image_filter.dart';
-part 'engine/html/offset.dart';
-part 'engine/html/opacity.dart';
-part 'engine/html/path/path.dart';
-part 'engine/html/picture.dart';
-part 'engine/html/platform_view.dart';
-part 'engine/html/recording_canvas.dart';
-part 'engine/html/scene.dart';
-part 'engine/html/scene_builder.dart';
-part 'engine/html/shader_mask.dart';
-part 'engine/html/surface.dart';
-part 'engine/html/surface_stats.dart';
-part 'engine/html/transform.dart';
-part 'engine/onscreen_logging.dart';
-part 'engine/picture.dart';
 part 'engine/platform_dispatcher.dart';
 part 'engine/platform_views.dart';
 part 'engine/platform_views/content_manager.dart';
 part 'engine/platform_views/message_handler.dart';
 part 'engine/platform_views/slots.dart';
-part 'engine/rrect_renderer.dart';
 part 'engine/window.dart';
 
 // The mode the app is running in.

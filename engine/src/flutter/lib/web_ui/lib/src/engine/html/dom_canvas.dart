@@ -2,7 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:ui/src/engine.dart' show domRenderer, NullTreeSanitizer;
+import 'package:ui/ui.dart' as ui;
+
+import '../browser_detection.dart';
+import '../engine_canvas.dart';
+import '../html_image_codec.dart';
+import '../text/paragraph.dart';
+import '../util.dart';
+import '../vector_math.dart';
+import 'painting.dart';
+import 'path/path.dart';
+import 'path/path_to_svg.dart';
+import 'shaders/image_shader.dart';
 
 /// A canvas that renders to DOM elements and CSS properties.
 class DomCanvas extends EngineCanvas with SaveElementStackTracking {
@@ -61,14 +77,14 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
   @override
   void drawRect(ui.Rect rect, SurfacePaintData paint) {
     currentElement.append(
-        _buildDrawRectElement(rect, paint, 'draw-rect', currentTransform));
+        buildDrawRectElement(rect, paint, 'draw-rect', currentTransform));
   }
 
   @override
   void drawRRect(ui.RRect rrect, SurfacePaintData paint) {
-    html.Element element = _buildDrawRectElement(
+    html.Element element = buildDrawRectElement(
         rrect.outerRect, paint, 'draw-rrect', currentTransform);
-    _applyRRectBorderRadius(element.style, rrect);
+    applyRRectBorderRadius(element.style, rrect);
     currentElement.append(element);
   }
 
@@ -111,7 +127,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
 
   @override
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
-    final html.Element paragraphElement = _drawParagraphElement(
+    final html.Element paragraphElement = drawParagraphElement(
         paragraph as EngineParagraph, offset,
         transform: currentTransform);
     currentElement.append(paragraphElement);
@@ -145,7 +161,7 @@ ui.Color blurColor(ui.Color color, double sigma) {
   return ui.Color((reducedAlpha & 0xff) << 24 | (color.value & 0x00ffffff));
 }
 
-html.HtmlElement _buildDrawRectElement(
+html.HtmlElement buildDrawRectElement(
     ui.Rect rect, SurfacePaintData paint, String tagName, Matrix4 transform) {
   assert(paint.shader == null);
   final html.HtmlElement rectangle =
@@ -226,7 +242,7 @@ void _applyImageShaderToElement(html.HtmlElement targetElement,
   targetElement.style.backgroundImage = image.imgElement.src;
 }
 
-void _applyRRectBorderRadius(html.CssStyleDeclaration style, ui.RRect rrect) {
+void applyRRectBorderRadius(html.CssStyleDeclaration style, ui.RRect rrect) {
   if (rrect.tlRadiusX == rrect.trRadiusX &&
       rrect.tlRadiusX == rrect.blRadiusX &&
       rrect.tlRadiusX == rrect.brRadiusX &&
@@ -256,7 +272,7 @@ String _borderStrokeToCssUnit(double value) {
   return '${value.toStringAsFixed(3)}px';
 }
 
-html.Element _pathToSvgElement(
+html.Element pathToSvgElement(
     SurfacePath path, SurfacePaintData paint, String width, String height) {
   final StringBuffer sb = StringBuffer();
   sb.write(

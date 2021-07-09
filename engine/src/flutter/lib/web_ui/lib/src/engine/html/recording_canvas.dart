@@ -2,7 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:ui/ui.dart' as ui;
+
+import '../engine_canvas.dart';
+import '../picture.dart';
+import '../rrect_renderer.dart';
+import '../shadow.dart';
+import '../text/paragraph.dart';
+import '../util.dart';
+import '../vector_math.dart';
+import 'bitmap_canvas.dart';
+import 'painting.dart';
+import 'path/path.dart';
+import 'path/path_utils.dart';
+import 'render_vertices.dart';
+import 'shaders/image_shader.dart';
 
 /// Enable this to print every command applied by a canvas.
 const bool _debugDumpPaintCommands = false;
@@ -503,7 +520,7 @@ class RecordingCanvas {
         pathBounds = pathBounds.inflate(paintSpread);
       }
       // Clone path so it can be reused for subsequent draw calls.
-      final ui.Path clone = SurfacePath._shallowCopy(path);
+      final ui.Path clone = SurfacePath.shallowCopy(path);
       final PaintDrawPath command =
           PaintDrawPath(clone as SurfacePath, paint.paintData);
       _paintBounds.grow(pathBounds, command);
@@ -1373,7 +1390,7 @@ class Ellipse extends PathCommand {
         anticlockwise ? startAngle - endAngle : endAngle - startAngle,
         matrix4,
         bezierPath);
-    targetPath._addPath(bezierPath, 0, 0, matrix4, SPathAddPathMode.kAppend);
+    targetPath.addPathWithMode(bezierPath, 0, 0, matrix4, SPathAddPathMode.kAppend);
   }
 
   void _drawArcWithBezier(
@@ -1627,8 +1644,8 @@ class RRectCommand extends PathCommand {
   @override
   void transform(Float32List matrix4, SurfacePath targetPath) {
     final ui.Path roundRectPath = ui.Path();
-    _RRectToPathRenderer(roundRectPath).render(rrect);
-    targetPath._addPath(roundRectPath, 0, 0, matrix4, SPathAddPathMode.kAppend);
+    RRectToPathRenderer(roundRectPath).render(rrect);
+    targetPath.addPathWithMode(roundRectPath, 0, 0, matrix4, SPathAddPathMode.kAppend);
   }
 
   @override

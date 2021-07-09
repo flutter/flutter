@@ -321,7 +321,7 @@ void testMain() {
       builder.pop();
       html.Element content = builder.build().webOnlyRootElement!;
       expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
-      expect(findPictureSurfaceChild(clip)!.debugCanvas, isNull);
+      expect(findPictureSurfaceChild(clip)!.canvas, isNull);
     }
   });
 
@@ -394,7 +394,7 @@ void testMain() {
     builder1.pop();
     html.Element content1 = builder1.build().webOnlyRootElement!;
     expect(content1.querySelectorAll('flt-picture').single.children, isNotEmpty);
-    expect(findPictureSurfaceChild(offset1)!.debugCanvas, isNotNull);
+    expect(findPictureSurfaceChild(offset1)!.canvas, isNotNull);
 
     // Frame 2: picture is clipped out after an update
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
@@ -403,7 +403,7 @@ void testMain() {
     builder2.pop();
     html.Element content = builder2.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
-    expect(findPictureSurfaceChild(offset2)!.debugCanvas, isNull);
+    expect(findPictureSurfaceChild(offset2)!.canvas, isNull);
   });
 
   test('releases old canvas when picture is fully clipped out after addRetained', () async {
@@ -418,7 +418,7 @@ void testMain() {
     builder1.pop();
     html.Element content1 = builder1.build().webOnlyRootElement!;
     expect(content1.querySelectorAll('flt-picture').single.children, isNotEmpty);
-    expect(findPictureSurfaceChild(subOffset1)!.debugCanvas, isNotNull);
+    expect(findPictureSurfaceChild(subOffset1)!.canvas, isNotNull);
 
     // Frame 2: picture is clipped out after addRetained
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
@@ -431,7 +431,7 @@ void testMain() {
     builder2.pop();
     html.Element content = builder2.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
-    expect(findPictureSurfaceChild(subOffset1)!.debugCanvas, isNull);
+    expect(findPictureSurfaceChild(subOffset1)!.canvas, isNull);
   });
 
   test('auto-pops pushed layers', () async {
@@ -752,7 +752,7 @@ void testLayerLifeCycle(
   expect(surface3.rootElement, isNotNull); // offset3 should be rehydrated.
 
   // Make sure we clear retained surface list.
-  expect(debugRetainedSurfaces, isEmpty);
+  expect(retainedSurfaces, isEmpty);
 }
 
 class MockPersistedPicture extends PersistedPicture {
@@ -774,7 +774,7 @@ class MockPersistedPicture extends PersistedPicture {
   final BitmapCanvas _fakeCanvas = BitmapCanvas(const ui.Rect.fromLTRB(0, 0, 10, 10), RenderStrategy());
 
   @override
-  EngineCanvas get debugCanvas {
+  EngineCanvas get canvas {
     return _fakeCanvas;
   }
 

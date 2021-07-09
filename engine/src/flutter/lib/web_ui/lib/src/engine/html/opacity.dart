@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+
+import 'package:ui/src/engine.dart' show domRenderer, DomRenderer;
+import 'package:ui/ui.dart' as ui;
+
+import '../vector_math.dart';
+import 'surface.dart';
 
 /// A surface that makes its children transparent.
 class PersistedOpacity extends PersistedContainerSurface
@@ -15,18 +21,21 @@ class PersistedOpacity extends PersistedContainerSurface
 
   @override
   void recomputeTransformAndClip() {
-    _transform = parent!._transform;
+    transform = parent!.transform;
 
     final double dx = offset.dx;
     final double dy = offset.dy;
 
     if (dx != 0.0 || dy != 0.0) {
-      _transform = _transform!.clone();
-      _transform!.translate(dx, dy);
+      transform = transform!.clone();
+      transform!.translate(dx, dy);
     }
-    _localTransformInverse = null;
-    _projectedClip = null;
+    projectedClip = null;
   }
+
+  /// Cached inverse of transform on this node. Unlike transform, this
+  /// Matrix only contains local transform (not chain multiplied since root).
+  Matrix4? _localTransformInverse;
 
   @override
   Matrix4 get localTransformInverse => _localTransformInverse ??=

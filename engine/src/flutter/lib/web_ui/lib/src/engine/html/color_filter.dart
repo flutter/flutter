@@ -2,7 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+
+import 'package:ui/src/engine.dart' show EngineColorFilter, NullTreeSanitizer;
+import 'package:ui/ui.dart' as ui;
+
+import '../canvaskit/color_filter.dart';
+import '../util.dart';
+import 'bitmap_canvas.dart';
+import 'path_to_svg_clip.dart';
+import 'surface.dart';
 
 /// A surface that applies an [ColorFilter] to its children.
 class PersistedColorFilter extends PersistedContainerSurface
@@ -121,7 +130,7 @@ class PersistedColorFilter extends PersistedContainerSurface
       _filterElement =
           html.Element.html(svgFilter, treeSanitizer: NullTreeSanitizer());
       rootElement!.append(_filterElement!);
-      rootElement!.style.filter = 'url(#_fcf${_filterIdCounter})';
+      rootElement!.style.filter = 'url(#_fcf${filterIdCounter})';
       if (colorFilterBlendMode == ui.BlendMode.saturation ||
           colorFilterBlendMode == ui.BlendMode.multiply ||
           colorFilterBlendMode == ui.BlendMode.modulate) {
@@ -136,7 +145,7 @@ class PersistedColorFilter extends PersistedContainerSurface
       _filterElement =
           html.Element.html(svgFilter, treeSanitizer: NullTreeSanitizer());
       rootElement!.append(_filterElement!);
-      rootElement!.style.filter = 'url(#_fcf${_filterIdCounter})';
+      rootElement!.style.filter = 'url(#_fcf${filterIdCounter})';
     }
   }
 
@@ -210,7 +219,7 @@ String? svgFilterFromBlendMode(
     case ui.BlendMode.difference:
     case ui.BlendMode.exclusion:
       svgFilter = _blendColorFilterToSvg(
-          filterColor, _stringForBlendMode(colorFilterBlendMode));
+          filterColor, stringForBlendMode(colorFilterBlendMode));
       break;
     case ui.BlendMode.src:
     case ui.BlendMode.dst:
@@ -229,7 +238,7 @@ String? svgFilterFromBlendMode(
 }
 
 String? svgFilterFromColorMatrix(List<double> matrix) {
-  _filterIdCounter += 1;
+  filterIdCounter += 1;
   final StringBuffer sbMatrix = StringBuffer();
   assert(matrix.length == 20);
   for (int i = 0; i < 20; i++) {
@@ -239,13 +248,13 @@ String? svgFilterFromColorMatrix(List<double> matrix) {
     sbMatrix.write(matrix[i]);
   }
   return '$kSvgResourceHeader'
-      '<filter id="_fcf$_filterIdCounter" '
+      '<filter id="_fcf$filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feColorMatrix values="$sbMatrix" result="comp"/>'
       '</filter></svg>';
 }
 
-int _filterIdCounter = 0;
+int filterIdCounter = 0;
 
 // The color matrix for feColorMatrix element changes colors based on
 // the following:
@@ -261,9 +270,9 @@ int _filterIdCounter = 0;
 // B' = b1*R + b2*G + b3*B + b4*A + b5
 // A' = a1*R + a2*G + a3*B + a4*A + a5
 String _srcInColorFilterToSvg(ui.Color? color) {
-  _filterIdCounter += 1;
+  filterIdCounter += 1;
   return '$kSvgResourceHeader'
-      '<filter id="_fcf$_filterIdCounter" '
+      '<filter id="_fcf$filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feColorMatrix values="0 0 0 0 1 ' // Ignore input, set it to absolute.
       '0 0 0 0 1 '
@@ -280,9 +289,9 @@ String _srcInColorFilterToSvg(ui.Color? color) {
 /// The destination that overlaps the source is composited with the source and
 /// replaces the destination. dst-atop	CR = CB*αB*αA+CA*αA*(1-αB)	αR=αA
 String _dstATopColorFilterToSvg(ui.Color? color) {
-  _filterIdCounter += 1;
+  filterIdCounter += 1;
   return '$kSvgResourceHeader'
-      '<filter id="_fcf$_filterIdCounter" '
+      '<filter id="_fcf$filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
       '</feFlood>'
@@ -292,9 +301,9 @@ String _dstATopColorFilterToSvg(ui.Color? color) {
 }
 
 String _srcOutColorFilterToSvg(ui.Color? color) {
-  _filterIdCounter += 1;
+  filterIdCounter += 1;
   return '$kSvgResourceHeader'
-      '<filter id="_fcf$_filterIdCounter" '
+      '<filter id="_fcf$filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
       '</feFlood>'
@@ -304,9 +313,9 @@ String _srcOutColorFilterToSvg(ui.Color? color) {
 }
 
 String _xorColorFilterToSvg(ui.Color? color) {
-  _filterIdCounter += 1;
+  filterIdCounter += 1;
   return '$kSvgResourceHeader'
-      '<filter id="_fcf$_filterIdCounter" '
+      '<filter id="_fcf$filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
       '</feFlood>'
@@ -319,9 +328,9 @@ String _xorColorFilterToSvg(ui.Color? color) {
 // result = k1 *in*in2 + k2*in + k3*in2 + k4.
 String _compositeColorFilterToSvg(
     ui.Color? color, double k1, double k2, double k3, double k4) {
-  _filterIdCounter += 1;
+  filterIdCounter += 1;
   return '$kSvgResourceHeader'
-      '<filter id="_fcf$_filterIdCounter" '
+      '<filter id="_fcf$filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
       '</feFlood>'
@@ -335,12 +344,12 @@ String _compositeColorFilterToSvg(
 // First apply color filter to source to change it to [color], then
 // composite using multiplication.
 String _modulateColorFilterToSvg(ui.Color color) {
-  _filterIdCounter += 1;
+  filterIdCounter += 1;
   final double r = color.red / 255.0;
   final double b = color.blue / 255.0;
   final double g = color.green / 255.0;
   return '$kSvgResourceHeader'
-      '<filter id="_fcf$_filterIdCounter" '
+      '<filter id="_fcf$filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feColorMatrix values="0 0 0 0 $r ' // Ignore input, set it to absolute.
       '0 0 0 0 $g '
@@ -355,9 +364,9 @@ String _modulateColorFilterToSvg(ui.Color color) {
 // Uses feBlend element to blend source image with a color.
 String _blendColorFilterToSvg(ui.Color? color, String? feBlend,
     {bool swapLayers = false}) {
-  _filterIdCounter += 1;
+  filterIdCounter += 1;
   return '$kSvgResourceHeader'
-          '<filter id="_fcf$_filterIdCounter" filterUnits="objectBoundingBox" '
+          '<filter id="_fcf$filterIdCounter" filterUnits="objectBoundingBox" '
           'x="0%" y="0%" width="100%" height="100%">'
           '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
           '</feFlood>' +
