@@ -235,7 +235,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.foregroundColor,
     @Deprecated(
       'This property is no longer used, please use systemOverlayStyle instead. '
-      'This feature was deprecated after 2.4.0-0.0.pre.',
+      'This feature was deprecated after v2.4.0-0.0.pre.',
     )
     this.brightness,
     this.iconTheme,
@@ -251,7 +251,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.leadingWidth,
     @Deprecated(
       'This property is obsolete and is false by default. '
-      'This feature was deprecated after 2.4.0-0.0.pre.',
+      'This feature was deprecated after v2.4.0-0.0.pre.',
     )
     this.backwardsCompatibility,
     this.toolbarTextStyle,
@@ -558,7 +558,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///    obsolete property.
   @Deprecated(
     'This property is no longer used, please use systemOverlayStyle instead. '
-    'This feature was deprecated after 2.4.0-0.0.pre.',
+    'This feature was deprecated after v2.4.0-0.0.pre.',
   )
   final Brightness? brightness;
 
@@ -698,12 +698,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// This is a temporary property and it has been deprecated. App
   /// developers are encouraged to opt into the new features by
-  /// setting it to false and using the [foregroundColor] and
+  /// leaving it default (false) and using the [foregroundColor] and
   /// [systemOverlayStyle] properties as needed.
   /// {@endtemplate}
   @Deprecated(
     'This property is obsolete and is false by default. '
-    'This feature was deprecated after 2.4.0-0.0.pre.',
+    'This feature was deprecated after v2.4.0-0.0.pre.',
   )
   final bool? backwardsCompatibility;
 

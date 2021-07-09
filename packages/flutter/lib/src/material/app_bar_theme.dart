@@ -30,7 +30,7 @@ class AppBarTheme with Diagnosticable {
   const AppBarTheme({
     @Deprecated(
       'This property is no longer used, please use systemOverlayStyle instead. '
-      'This feature was deprecated after 2.4.0-0.0.pre.',
+      'This feature was deprecated after v2.4.0-0.0.pre.',
     )
     this.brightness,
     Color? color,
@@ -49,7 +49,7 @@ class AppBarTheme with Diagnosticable {
     this.systemOverlayStyle,
     @Deprecated(
       'This property is obsolete and is false by default. '
-      'This feature was deprecated after 2.4.0-0.0.pre.',
+      'This feature was deprecated after v2.4.0-0.0.pre.',
     )
     this.backwardsCompatibility,
   }) : assert(
@@ -72,7 +72,7 @@ class AppBarTheme with Diagnosticable {
   ///    on this obsolete property.
   @Deprecated(
     'This property is no longer used, please use systemOverlayStyle instead. '
-    'This feature was deprecated after 2.4.0-0.0.pre.',
+    'This feature was deprecated after v2.4.0-0.0.pre.',
   )
   final Brightness? brightness;
 
@@ -196,7 +196,7 @@ class AppBarTheme with Diagnosticable {
   /// property in all descendant [AppBar] widgets.
   @Deprecated(
     'This property is obsolete and is false by default. '
-    'This feature was deprecated after 2.4.0-0.0.pre.',
+    'This feature was deprecated after v2.4.0-0.0.pre.',
   )
   final bool? backwardsCompatibility;
 
