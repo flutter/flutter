@@ -45,13 +45,6 @@ Future<void> writeResponseData(
 
 /// Adaptor to run an integration test using `flutter drive`.
 ///
-/// `timeout` controls the longest time waited before the test ends.
-/// It is not necessarily the execution time for the test app: the test may
-/// finish sooner than the `timeout`.
-///
-/// `responseDataCallback` is the handler for processing [Response.data].
-/// The default value is `writeResponseData`.
-///
 /// To an integration test `<test_name>.dart` using `flutter drive`, put a file named
 /// `<test_name>_test.dart` in the app's `test_driver` directory:
 ///
@@ -63,13 +56,52 @@ Future<void> writeResponseData(
 /// Future<void> main() async => integrationDriver();
 ///
 /// ```
+///
+/// ## Parameters:
+///
+/// `timeout` controls the longest time waited before the test ends.
+/// It is not necessarily the execution time for the test app: the test may
+/// finish sooner than the `timeout`.
+///
+/// `responseDataCallback` is the handler for processing [Response.data].
+/// The default value is `writeResponseData`.
+///
+/// `onScreenshot` can be used to process the screenshots taken during the test.
+/// An example could be that this callback compares the byte array against a baseline image,
+/// and it return `true` if both images are equal.
+///
+/// As a result, returning `false` from `onScreenshot` will make the test fail.
 Future<void> integrationDriver({
   Duration timeout = const Duration(minutes: 20),
   ResponseDataCallback? responseDataCallback = writeResponseData,
+  ScreenshotCallback? onScreenshot,
 }) async {
   final FlutterDriver driver = await FlutterDriver.connect();
   final String jsonResult = await driver.requestData(null, timeout: timeout);
   final Response response = Response.fromJson(jsonResult);
+
+  if (onScreenshot != null) {
+    final List<dynamic> screenshots = response.data!['screenshots'] as List<dynamic>;
+    for (final dynamic screenshot in screenshots) {
+      final Map<String, dynamic> data = screenshot as Map<String, dynamic>;
+      final List<dynamic> screenshotBytes = data['bytes'] as List<dynamic>;
+      final String screenshotName = data['screenshotName'] as String;
+
+      bool ok = false;
+      try {
+        ok = await onScreenshot(screenshotName, screenshotBytes.cast<int>());
+      } catch (exception) {
+        throw 'Screenshot failure:\n'
+            'onScreenshot("$screenshotName", <bytes>) threw an exception: $exception';
+      }
+      if (!ok) {
+        print('Screenshot failure:\n'
+            'Expected onScreenshot("$screenshotName", <bytes>) to return true, but it returned false');
+        exit(1);
+      }
+    }
+  }
+
   await driver.close();
 
   if (response.allTestsPassed) {

@@ -5,6 +5,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+/// A callback to use with [integrationDriver].
+typedef ScreenshotCallback = Future<bool> Function(String name, List<int> image);
+
 /// Classes shared between `integration_test.dart` and `flutter drive` based
 /// adoptor (ex: `integration_test_driver.dart`).
 
