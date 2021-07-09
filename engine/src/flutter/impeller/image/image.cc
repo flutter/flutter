@@ -9,7 +9,7 @@ namespace impeller {
 Image::Image() = default;
 
 Image::Image(ISize size,
-             Components components,
+             Format components,
              std::shared_ptr<const fml::Mapping> allocation)
     : size_(size), components_(components), allocation_(std::move(allocation)) {
   if (!allocation_ || !size.IsPositive()) {
@@ -28,7 +28,7 @@ const ISize& Image::GetSize() const {
   return size_;
 }
 
-Image::Components Image::GetComponents() const {
+Image::Format Image::GetComponents() const {
   return components_;
 }
 

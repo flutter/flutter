@@ -14,7 +14,7 @@ namespace impeller {
 
 class Image {
  public:
-  enum class Components {
+  enum class Format {
     Invalid,
     Grey,
     GreyAlpha,
@@ -25,7 +25,7 @@ class Image {
   Image();
 
   Image(ISize size,
-        Components components,
+        Format components,
         std::shared_ptr<const fml::Mapping> allocation);
 
   ~Image();
@@ -34,13 +34,13 @@ class Image {
 
   bool IsValid() const;
 
-  Components GetComponents() const;
+  Format GetComponents() const;
 
   const std::shared_ptr<const fml::Mapping>& GetAllocation() const;
 
  private:
   ISize size_;
-  Components components_ = Components::Invalid;
+  Format components_ = Format::Invalid;
   std::shared_ptr<const fml::Mapping> allocation_;
   bool is_valid_ = false;
 

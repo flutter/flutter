@@ -47,27 +47,27 @@ Image CompressedImage::Decode() const {
   /*
    *  Make sure we got a valid component set.
    */
-  auto components = Image::Components::Invalid;
+  auto components = Image::Format::Invalid;
 
   switch (comps) {
     case STBI_grey:
-      components = Image::Components::Grey;
+      components = Image::Format::Grey;
       break;
     case STBI_grey_alpha:
-      components = Image::Components::GreyAlpha;
+      components = Image::Format::GreyAlpha;
       break;
     case STBI_rgb:
-      components = Image::Components::RGB;
+      components = Image::Format::RGB;
       break;
     case STBI_rgb_alpha:
-      components = Image::Components::RGBA;
+      components = Image::Format::RGBA;
       break;
     default:
-      components = Image::Components::Invalid;
+      components = Image::Format::Invalid;
       break;
   }
 
-  if (components == Image::Components::Invalid) {
+  if (components == Image::Format::Invalid) {
     FML_LOG(ERROR) << "Could not detect image components when decoding.";
     return {};
   }

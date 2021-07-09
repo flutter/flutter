@@ -6,18 +6,17 @@
 
 namespace impeller {
 
-std::optional<PixelFormat> FormatForImageResultComponents(
-    Image::Components comp) {
+std::optional<PixelFormat> FormatForImageResultComponents(Image::Format comp) {
   switch (comp) {
-    case Image::Components::Invalid:
+    case Image::Format::Invalid:
       return std::nullopt;
-    case Image::Components::Grey:
+    case Image::Format::Grey:
       return std::nullopt;
-    case Image::Components::GreyAlpha:
+    case Image::Format::GreyAlpha:
       return std::nullopt;
-    case Image::Components::RGB:
+    case Image::Format::RGB:
       return std::nullopt;
-    case Image::Components::RGBA:
+    case Image::Format::RGBA:
       return PixelFormat::kPixelFormat_R8G8B8A8_UNormInt;
   }
   return std::nullopt;
