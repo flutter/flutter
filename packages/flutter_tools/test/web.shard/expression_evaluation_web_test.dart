@@ -36,7 +36,10 @@ void main() {
       await flutter.run(
         withDebugger: true, chrome: true,
         expressionEvaluation: expressionEvaluation,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        additionalCommandArgs: <String>[
+          '--verbose', 
+          '--web-renderer=html',
+          '--extra-front-end-options=--verbose']);
     }
 
     Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
@@ -140,7 +143,10 @@ void main() {
         withDebugger: true, chrome: true,
         expressionEvaluation: expressionEvaluation,
         startPaused: true, script: project.testFilePath,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        additionalCommandArgs: <String>[
+          '--verbose', 
+          '--web-renderer=html',
+          '--extra-front-end-options=--verbose']);
     }
 
     testWithoutContext('cannot evaluate expressions if feature is disabled', () async {
