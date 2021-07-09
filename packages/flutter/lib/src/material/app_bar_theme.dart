@@ -28,6 +28,10 @@ import 'theme.dart';
 class AppBarTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.appBarTheme].
   const AppBarTheme({
+    @Deprecated(
+      'This property is no longer used, please use systemOverlayStyle instead. '
+      'This feature was deprecated after 2.4.0-0.0.pre.',
+    )
     this.brightness,
     Color? color,
     Color? backgroundColor,
@@ -43,6 +47,10 @@ class AppBarTheme with Diagnosticable {
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
+    @Deprecated(
+      'This property is obsolete and is false by default. '
+      'This feature was deprecated after 2.4.0-0.0.pre.',
+    )
     this.backwardsCompatibility,
   }) : assert(
          color == null || backgroundColor == null,
@@ -50,7 +58,7 @@ class AppBarTheme with Diagnosticable {
        ),
        backgroundColor = backgroundColor ?? color;
 
-  /// This property is obsolete, please use [systemOverlayStyle] instead.
+  /// This property is deprecated, please use [systemOverlayStyle] instead.
   ///
   /// Overrides the default value of the obsolete [AppBar.brightness]
   /// property which implicitly defines [AppBar.systemOverlayStyle] in
@@ -62,6 +70,10 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.systemOverlayStyle] in all descendant [AppBar] widgets.
   ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
   ///    on this obsolete property.
+  @Deprecated(
+    'This property is no longer used, please use systemOverlayStyle instead. '
+    'This feature was deprecated after 2.4.0-0.0.pre.',
+  )
   final Brightness? brightness;
 
   /// Obsolete property that overrides the default value of
@@ -182,6 +194,10 @@ class AppBarTheme with Diagnosticable {
 
   /// Overrides the default value of [AppBar.backwardsCompatibility]
   /// property in all descendant [AppBar] widgets.
+  @Deprecated(
+    'This property is obsolete and is false by default. '
+    'This feature was deprecated after 2.4.0-0.0.pre.',
+  )
   final bool? backwardsCompatibility;
 
   /// Creates a copy of this object with the given fields replaced with the
