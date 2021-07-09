@@ -120,9 +120,17 @@ template("_dartdevc") {
       inputs = invoker.inputs
       outputs = invoker.outputs
 
-      dartdevc =
-          rebase_path("$host_prebuilt_dart_sdk/bin/dartdevc", root_out_dir)
-      args = [ dartdevc ] + invoker.args
+      ext = ""
+      if (is_win) {
+        ext = ".exe"
+      }
+      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
+      dartdevc = rebase_path(
+              "$host_prebuilt_dart_sdk/bin/snapshots/dartdevc.dart.snapshot")
+      args = [
+               dart,
+               dartdevc,
+             ] + invoker.args
     }
   } else {
     prebuilt_dart_action(target_name) {
@@ -158,7 +166,11 @@ template("_kernel_worker") {
       inputs = invoker.inputs
       outputs = invoker.outputs
 
-      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart", root_out_dir)
+      ext = ""
+      if (is_win) {
+        ext = ".exe"
+      }
+      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
       kernel_worker = rebase_path(
               "$host_prebuilt_dart_sdk/bin/snapshots/kernel_worker.dart.snapshot")
 
