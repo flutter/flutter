@@ -155,7 +155,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   }
 
   @override
-  String get templatePath => path.join(dataRoot, 'ios_key_code_map_cc.tmpl');
+  String get templatePath => path.join(dataRoot, 'ios_key_code_map_mm.tmpl');
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,

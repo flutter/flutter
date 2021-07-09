@@ -34,7 +34,7 @@
 | File name | Explanation |
 | ---- | ---- |
 | [`ios_logical_to_physical.json`](ios_logical_to_physical.json) | Maps a logical key name to the names of its corresponding physical keys. This is used to derive logical keys (from `keyCode`) that can't or shouldn't be derived from `characterIgnoringModifiers`. |
-| [`ios_key_code_map_cc.tmpl`](ios_key_code_map_cc.tmpl) | The template for `KeyCodeMap.mm`.|
+| [`ios_key_code_map_mm.tmpl`](ios_key_code_map_mm.tmpl) | The template for `KeyCodeMap.mm`.|
 
 ### Web
 
