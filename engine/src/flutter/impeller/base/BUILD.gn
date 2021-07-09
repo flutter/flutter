@@ -6,6 +6,8 @@ import("../tools/impeller.gni")
 
 impeller_component("base") {
   sources = [
+    "allocation.cc",
+    "allocation.h",
     "base.h",
     "config.h",
     "strings.cc",

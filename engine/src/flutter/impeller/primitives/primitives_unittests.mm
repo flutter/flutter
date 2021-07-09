@@ -47,7 +47,7 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
   ASSERT_TRUE(vertex_buffer);
 
   // Contents texture.
-  Image image(flutter::testing::OpenFixtureAsMapping("image.png"));
+  Image image(flutter::testing::OpenFixtureAsMapping("bay_bridge.jpg"));
   auto result = image.Decode();
   ASSERT_TRUE(result.IsValid());
   auto texture_descriptor = TextureDescriptor::MakeFromImageResult(result);

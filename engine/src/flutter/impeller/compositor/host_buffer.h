@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include "flutter/fml/macros.h"
+#include "impeller/base/allocation.h"
 #include "impeller/compositor/buffer.h"
 #include "impeller/compositor/buffer_view.h"
 #include "impeller/compositor/platform.h"
@@ -17,18 +18,15 @@
 namespace impeller {
 
 class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
+                         public Allocation,
                          public Buffer {
  public:
+  static std::shared_ptr<HostBuffer> Create();
+
   // |Buffer|
   virtual ~HostBuffer();
 
-  static std::shared_ptr<HostBuffer> Create();
-
   void SetLabel(std::string label);
-
-  size_t GetLength() const;
-
-  size_t GetReservedLength() const;
 
   template <class T, class = std::enable_if_t<std::is_standard_layout_v<T>>>
   [[nodiscard]] BufferView EmplaceUniform(const T& t) {
@@ -45,14 +43,9 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
                                    size_t length,
                                    size_t align);
 
-  [[nodiscard]] bool Truncate(size_t length);
-
  private:
   mutable std::shared_ptr<DeviceBuffer> device_buffer_;
   mutable size_t device_buffer_generation_ = 0u;
-  uint8_t* buffer_ = nullptr;
-  size_t length_ = 0;
-  size_t reserved_ = 0;
   size_t generation_ = 1u;
   std::string label_;
 
@@ -61,10 +54,6 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
       Allocator& allocator) const override;
 
   [[nodiscard]] BufferView Emplace(const void* buffer, size_t length);
-
-  [[nodiscard]] bool Reserve(size_t reserved);
-
-  [[nodiscard]] bool ReserveNPOT(size_t reserved);
 
   HostBuffer();
 
