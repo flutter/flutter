@@ -1,4 +1,4 @@
-Signature: 9535bc5f5b7ab2e4dd0db6b18cc03b85
+Signature: 49bc62b785d542f0ed4bc9f8f81c8a41
 
 UNUSED LICENSES:
 
@@ -5439,6 +5439,7 @@ FILE: ../../../third_party/skia/gm/gpu_blur_utils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.h
 FILE: ../../../third_party/skia/src/gpu/GrVx.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasInstancedHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeHardwareTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeHardwareTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateOp.cpp
@@ -5706,6 +5707,7 @@ FILE: ../../../third_party/skia/include/sksl/DSLWrapper.h
 FILE: ../../../third_party/skia/src/core/SkStringView.cpp
 FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.cpp
 FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasInstancedHelper.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathCurveTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathCurveTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilCoverOp.cpp
