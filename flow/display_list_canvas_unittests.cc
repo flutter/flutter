@@ -1350,7 +1350,7 @@ TEST(DisplayListCanvas, DrawShadow) {
                                        1.0);
       },
       [=](DisplayListBuilder& builder) {  //
-        builder.drawShadow(path, color, elevation, false);
+        builder.drawShadow(path, color, elevation, false, 1.0);
       });
   CanvasCompareTester::UsingShadows = false;
 }
@@ -1373,7 +1373,30 @@ TEST(DisplayListCanvas, DrawOccludingShadow) {
                                        1.0);
       },
       [=](DisplayListBuilder& builder) {  //
-        builder.drawShadow(path, color, elevation, true);
+        builder.drawShadow(path, color, elevation, true, 1.0);
+      });
+  CanvasCompareTester::UsingShadows = false;
+}
+
+TEST(DisplayListCanvas, DrawShadowDpr) {
+  CanvasCompareTester::UsingShadows = true;
+  SkPath path;
+  path.moveTo(RenderCenterX, RenderTop);
+  path.lineTo(RenderRight, RenderBottom);
+  path.lineTo(RenderLeft, RenderCenterY);
+  path.lineTo(RenderRight, RenderCenterY);
+  path.lineTo(RenderLeft, RenderBottom);
+  path.close();
+  const SkColor color = SK_ColorDKGRAY;
+  const SkScalar elevation = 10;
+
+  CanvasCompareTester::RenderNoAttributes(
+      [=](SkCanvas* canvas, SkPaint& paint) {  //
+        PhysicalShapeLayer::DrawShadow(canvas, path, color, elevation, false,
+                                       2.5);
+      },
+      [=](DisplayListBuilder& builder) {  //
+        builder.drawShadow(path, color, elevation, false, 2.5);
       });
   CanvasCompareTester::UsingShadows = false;
 }
