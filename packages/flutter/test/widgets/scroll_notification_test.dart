@@ -21,18 +21,12 @@ void main() {
       );
     }
     await tester.pumpWidget(buildFrame(1200.0));
-    // Initial metrics notification.
-    expect(events.length, 1);
-    ScrollMetricsNotification event = events[0] as ScrollMetricsNotification;
-    expect(event.metrics.extentBefore, 0.0);
-    expect(event.metrics.extentInside, 600.0);
-    expect(event.metrics.extentAfter, 600.0);
+    expect(events.length, 0);
 
-    events.clear();
     await tester.pumpWidget(buildFrame(1000.0));
     // Change the content dimensions will trigger a new event.
     expect(events.length, 1);
-    event = events[0] as ScrollMetricsNotification;
+    ScrollMetricsNotification event = events[0] as ScrollMetricsNotification;
     expect(event.metrics.extentBefore, 0.0);
     expect(event.metrics.extentInside, 600.0);
     expect(event.metrics.extentAfter, 400.0);
