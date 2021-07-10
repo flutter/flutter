@@ -356,7 +356,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
 
   @override
   Widget build(BuildContext context) {
-    final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(widget.textStyle?.color, materialStates);
+    final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(widget.textStyle!.color, materialStates);
     final ShapeBorder? effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder?>(widget.shape, materialStates);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
@@ -378,7 +378,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
       constraints: effectiveConstraints,
       child: Material(
         elevation: _effectiveElevation,
-        textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
+        textStyle: widget.textStyle!.copyWith(color: effectiveTextColor),
         shape: effectiveShape,
         color: widget.fillColor,
         type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
