@@ -796,24 +796,28 @@ struct DrawTextBlobOp final : DLOp {
 };
 
 // 4 byte header + 28 byte payload packs evenly into 32 bytes
-struct DrawShadowOp final : DLOp {
-  static const auto kType = DisplayListOpType::kDrawShadow;
-
-  DrawShadowOp(const SkPath& path,
-               SkColor color,
-               SkScalar elevation,
-               bool occludes)
-      : color(color), elevation(elevation), occludes(occludes), path(path) {}
-
-  const SkColor color;
-  const SkScalar elevation;
-  const bool occludes;
-  const SkPath path;
-
-  void dispatch(Dispatcher& dispatcher) const {
-    dispatcher.drawShadow(path, color, elevation, occludes);
-  }
-};
+#define DEFINE_DRAW_SHADOW_OP(name, occludes)                         \
+  struct Draw##name##Op final : DLOp {                                \
+    static const auto kType = DisplayListOpType::kDraw##name;         \
+                                                                      \
+    Draw##name##Op(const SkPath& path,                                \
+                   SkColor color,                                     \
+                   SkScalar elevation,                                \
+                   SkScalar dpr)                                      \
+        : color(color), elevation(elevation), dpr(dpr), path(path) {} \
+                                                                      \
+    const SkColor color;                                              \
+    const SkScalar elevation;                                         \
+    const SkScalar dpr;                                               \
+    const SkPath path;                                                \
+                                                                      \
+    void dispatch(Dispatcher& dispatcher) const {                     \
+      dispatcher.drawShadow(path, color, elevation, occludes, dpr);   \
+    }                                                                 \
+  };
+DEFINE_DRAW_SHADOW_OP(Shadow, false)
+DEFINE_DRAW_SHADOW_OP(ShadowOccludes, true)
+#undef DEFINE_DRAW_SHADOW_OP
 
 #pragma pack(pop, DLOp_Alignment)
 
@@ -1351,8 +1355,11 @@ void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
 void DisplayListBuilder::drawShadow(const SkPath& path,
                                     const SkColor color,
                                     const SkScalar elevation,
-                                    bool occludes) {
-  Push<DrawShadowOp>(0, path, color, elevation, occludes);
+                                    bool occludes,
+                                    SkScalar dpr) {
+  occludes  //
+      ? Push<DrawShadowOccludesOp>(0, path, color, elevation, dpr)
+      : Push<DrawShadowOp>(0, path, color, elevation, dpr);
 }
 
 }  // namespace flutter

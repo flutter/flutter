@@ -176,9 +176,10 @@ void DisplayListCanvasDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
 void DisplayListCanvasDispatcher::drawShadow(const SkPath& path,
                                              const SkColor color,
                                              const SkScalar elevation,
-                                             bool occludes) {
+                                             bool occludes,
+                                             SkScalar dpr) {
   flutter::PhysicalShapeLayer::DrawShadow(canvas_, path, color, elevation,
-                                          occludes, 1.0);
+                                          occludes, dpr);
 }
 
 DisplayListCanvasRecorder::DisplayListCanvasRecorder(const SkRect& bounds)
