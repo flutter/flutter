@@ -473,4 +473,4 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   TargetPlatform targetPlatform = TargetPlatform.android_arm;
 }
 
-class FakeDevice extends Fake implements Device {}
+class FakeDevice extends Fake implements Device { }

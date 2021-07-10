@@ -6212,6 +6212,41 @@ void main() {
       final TextSpan textSpan = renderEditable.text! as TextSpan;
       expect(textSpan.style!.color, color);
     });
+
+    testWidgets('controller listener changes value', (WidgetTester tester) async {
+      const double maxValue = 5.5555;
+      final TextEditingController controller = TextEditingController();
+
+      controller.addListener(() {
+        final double value = double.tryParse(controller.text.trim()) ?? .0;
+        if (value > maxValue) {
+          controller.text = maxValue.toString();
+          controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: maxValue.toString().length));
+        }
+      });
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ));
+
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+      state.updateEditingValue(const TextEditingValue(text: '1', selection: TextSelection.collapsed(offset: 1)));
+      await tester.pump();
+      state.updateEditingValue(const TextEditingValue(text: '12', selection: TextSelection.collapsed(offset: 2)));
+      await tester.pump();
+
+      expect(controller.text, '5.5555');
+      expect(controller.selection.baseOffset, 6);
+      expect(controller.selection.extentOffset, 6);
+    });
   });
 
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
