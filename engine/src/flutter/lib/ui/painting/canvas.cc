@@ -499,6 +499,11 @@ void Canvas::drawShadow(const CanvasPath* path,
         ToDart("Canvas.drawShader called with non-genuine Path."));
     return;
   }
+  SkScalar dpr = UIDartState::Current()
+                     ->platform_configuration()
+                     ->get_window(0)
+                     ->viewport_metrics()
+                     .device_pixel_ratio;
   if (display_list_recorder_) {
     // The DrawShadow mechanism results in non-public operations to be
     // performed on the canvas involving an SkDrawShadowRec. Since we
@@ -507,13 +512,9 @@ void Canvas::drawShadow(const CanvasPath* path,
     // that situation we bypass the canvas interface and inject the
     // shadow parameters directly into the underlying DisplayList.
     // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
-    builder()->drawShadow(path->path(), color, elevation, transparentOccluder);
+    builder()->drawShadow(path->path(), color, elevation, transparentOccluder,
+                          dpr);
   } else {
-    SkScalar dpr = UIDartState::Current()
-                       ->platform_configuration()
-                       ->get_window(0)
-                       ->viewport_metrics()
-                       .device_pixel_ratio;
     flutter::PhysicalShapeLayer::DrawShadow(
         canvas_, path->path(), color, elevation, transparentOccluder, dpr);
   }

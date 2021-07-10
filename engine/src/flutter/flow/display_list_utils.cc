@@ -335,7 +335,8 @@ void DisplayListBoundsCalculator::drawTextBlob(const sk_sp<SkTextBlob> blob,
 void DisplayListBoundsCalculator::drawShadow(const SkPath& path,
                                              const SkColor color,
                                              const SkScalar elevation,
-                                             bool occludes) {
+                                             bool occludes,
+                                             SkScalar dpr) {
   // Constants from physical_shape_layer.cc
   const SkScalar kLightHeight = 600;
   const SkScalar kLightRadius = 800;
@@ -348,9 +349,9 @@ void DisplayListBoundsCalculator::drawShadow(const SkPath& path,
   SkScalar shadow_y = bounds.top() - 600.0f;
   SkRect shadow_bounds;
   SkShadowUtils::GetLocalBounds(
-      matrix(), path, SkPoint3::Make(0, 0, elevation),
-      SkPoint3::Make(shadow_x, shadow_y, kLightHeight), kLightRadius, flags,
-      &shadow_bounds);
+      matrix(), path, SkPoint3::Make(0, 0, dpr * elevation),
+      SkPoint3::Make(shadow_x, shadow_y, dpr * kLightHeight),
+      dpr * kLightRadius, flags, &shadow_bounds);
   accumulateRect(shadow_bounds);
 }
 
