@@ -984,7 +984,7 @@ void main() {
 
      final Stepper material = tester.firstWidget<Stepper>(
        find.descendant(
-         of: find.byType(Material), 
+         of: find.byType(Material),
          matching: find.byType(Stepper),
        ),
      );
