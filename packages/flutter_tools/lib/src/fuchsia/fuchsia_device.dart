@@ -500,7 +500,7 @@ class FuchsiaDevice extends Device {
 
     // In a debug or profile build, try to find the observatory uri.
     final FuchsiaIsolateDiscoveryProtocol discovery =
-      getIsolateDiscoveryProtocol(fuchsiaUrl);
+      getIsolateDiscoveryProtocol(appName);
     try {
       final Uri observatoryUri = await discovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
@@ -768,8 +768,8 @@ class FuchsiaDevice extends Device {
     throwToolExit('No ports found running $isolateName');
   }
 
-  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String fuchsiaUrl) {
-    return FuchsiaIsolateDiscoveryProtocol(this, fuchsiaUrl);
+  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String isolateName) {
+    return FuchsiaIsolateDiscoveryProtocol(this, isolateName);
   }
 
   @override
