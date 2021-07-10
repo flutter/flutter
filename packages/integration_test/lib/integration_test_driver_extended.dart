@@ -60,7 +60,7 @@ Future<void> integrationDriver(
   if (response.data != null &&
       response.data!['web_driver_command'] != null &&
       response.data!['web_driver_command'] == '${WebDriverCommandType.noop}') {
-    jsonResponse = await driver.requestData('');
+    jsonResponse = await driver.requestData(null);
 
     response = Response.fromJson(jsonResponse);
     print('result $jsonResponse');
