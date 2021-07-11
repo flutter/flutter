@@ -19,8 +19,6 @@ final CommandRunner<void> runner =
 
 Future<void> main(List<String> rawArgs) async {
   unawaited(runner.run(rawArgs).catchError((dynamic error) {
-    stderr.writeln('Error type = ${error.runtimeType}');
-    stderr.writeln('Stack trace: ${(error as Error).stackTrace}');
     stderr.writeln('$error\n');
     stderr.writeln('Usage:\n');
     stderr.writeln(runner.usage);
