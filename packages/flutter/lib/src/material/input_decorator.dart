@@ -2104,7 +2104,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       .copyWith(color: decoration!.enabled ? themeData.hintColor : themeData.disabledColor);
   }
 
-  TextStyle _getFloatingLabelStyle(ThemeData themeData, TextStyle? labelStyle) {
+  TextStyle _getFloatingLabelStyle(ThemeData themeData) {
     final Color color = decoration!.errorText != null
       ? decoration!.errorStyle?.color ?? themeData.errorColor
       : _getActiveColor(themeData);
@@ -2115,10 +2115,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.fixTextFieldOutlineLabel
       ? style
         .copyWith(height: 1, color: decoration!.enabled ? color : themeData.disabledColor)
-        .merge(labelStyle)
+        .merge(decoration!.labelStyle)
       : style
         .copyWith(color: decoration!.enabled ? color : themeData.disabledColor)
-        .merge(labelStyle);
+        .merge(decoration!.labelStyle);
 
   }
 
@@ -2215,8 +2215,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           duration:_kTransitionDuration,
           curve: _kTransitionCurve,
           style: widget._labelShouldWithdraw
-              ? _getFloatingLabelStyle(themeData, decoration!.labelStyle)
-              : inlineLabelStyle,
+            ? _getFloatingLabelStyle(themeData)
+            : inlineLabelStyle,
           child: decoration!.label ?? Text(
             decoration!.labelText!,
             overflow: TextOverflow.ellipsis,
