@@ -2642,8 +2642,42 @@ class InputDecoration {
 
   /// Optional widget that describes the input field.
   ///
-  /// This can be used, for example, to add some styling to a label that would
-  /// otherwise be specified using [labelText], which only takes one style.
+  /// This can be used, for example, to add multiple [TextStyle]'s to a label that would
+  /// otherwise be specified using [labelText], which only takes one [TextStyle].
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold}
+  ///
+  /// This example shows a `TextField` with a [Text.rich] widget as the [label].
+  /// The widget contains multiple [Text] widgets with different [TextStyle]'s.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return const Center(
+  ///     child: TextField(
+  ///       decoration: InputDecoration(
+  ///         label: Text.rich(
+  ///           TextSpan(
+  ///             children: [
+  ///               WidgetSpan(
+  ///                 child: Text(
+  ///                   'Username',
+  ///                 ),
+  ///               ),
+  ///               WidgetSpan(
+  ///                 child: Text(
+  ///                   '*',
+  ///                   style: TextStyle(color: Colors.red),
+  ///                 ),
+  ///               ),
+  ///             ],
+  ///           ),
+  ///         ),
+  ///       ),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// Only one of [label] and [labelText] can be specified.
   final Widget? label;
