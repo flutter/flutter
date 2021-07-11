@@ -73,9 +73,9 @@ constexpr MTLBlendFactor ToMTLBlendFactor(BlendFactor type) {
 
 constexpr MTLPrimitiveType ToMTLPrimitiveType(PrimitiveType type) {
   switch (type) {
-    case PrimitiveType::kTriange:
+    case PrimitiveType::kTriangle:
       return MTLPrimitiveTypeTriangle;
-    case PrimitiveType::kTriangeStrip:
+    case PrimitiveType::kTriangleStrip:
       return MTLPrimitiveTypeTriangleStrip;
     case PrimitiveType::kLine:
       return MTLPrimitiveTypeLine;

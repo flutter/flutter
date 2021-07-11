@@ -60,8 +60,8 @@ enum class StoreAction {
 };
 
 enum class PrimitiveType {
-  kTriange,
-  kTriangeStrip,
+  kTriangle,
+  kTriangleStrip,
   kLine,
   kLineStrip,
   kPoint,
