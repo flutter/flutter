@@ -2090,7 +2090,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // hint would.
   bool get _hasInlineLabel {
     return !widget._labelShouldWithdraw
-        && decoration!.labelText != null
+        && (decoration!.labelText != null || decoration!.label != null)
         && decoration!.floatingLabelBehavior != FloatingLabelBehavior.always;
   }
 
@@ -2205,50 +2205,24 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle inlineLabelStyle = themeData.fixTextFieldOutlineLabel
       ? inlineStyle.merge(decoration!.labelStyle).copyWith(height: 1)
       : inlineStyle.merge(decoration!.labelStyle);
-    final TextStyle inlineRequiredLabelStyle = themeData.fixTextFieldOutlineLabel
-        ? inlineStyle.merge(decoration!.requiredLabelStyle).copyWith(height: 1)
-        : inlineStyle.merge(decoration!.requiredLabelStyle);
-    final Widget? label = decoration!.labelText == null ? null : _Shaker(
+    final Widget? label = decoration!.labelText == null && decoration!.label == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         opacity: _shouldShowLabel ? 1.0 : 0.0,
-        child: Text.rich(
-            TextSpan(
-              children: [
-                WidgetSpan(
-                  child: AnimatedDefaultTextStyle(
-                    duration:_kTransitionDuration,
-                    curve: _kTransitionCurve,
-                    style: widget._labelShouldWithdraw
-                        ? _getFloatingLabelStyle(themeData, decoration!.labelStyle)
-                        : inlineLabelStyle,
-                    child: Text(
-                      decoration!.labelText!,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: textAlign,
-                    ),
-                  ),
-                ),
-                if (decoration!.isRequired!)
-                  WidgetSpan(
-                    child: AnimatedDefaultTextStyle(
-                      duration:_kTransitionDuration,
-                      curve: _kTransitionCurve,
-                      style: widget._labelShouldWithdraw
-                          ? _getFloatingLabelStyle(themeData, decoration!.requiredLabelStyle)
-                          : inlineRequiredLabelStyle,
-                      child: Text(
-                        '*',
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: textAlign,
-                      ),
-                    ),
-                  ),
-              ]
-            ),
+        child: AnimatedDefaultTextStyle(
+          duration:_kTransitionDuration,
+          curve: _kTransitionCurve,
+          style: widget._labelShouldWithdraw
+              ? _getFloatingLabelStyle(themeData, decoration!.labelStyle)
+              : inlineLabelStyle,
+          child: decoration!.label ?? Text(
+            decoration!.labelText!,
+            overflow: TextOverflow.ellipsis,
+            textAlign: textAlign,
           ),
+        ),
       ),
     );
 
@@ -2547,6 +2521,7 @@ class InputDecoration {
   /// Similarly, only one of [suffix] and [suffixText] can be specified.
   const InputDecoration({
     this.icon,
+    this.label,
     this.labelText,
     this.labelStyle,
     this.helperText,
@@ -2590,9 +2565,8 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
-    this.isRequired,
-    this.requiredLabelStyle,
   }) : assert(enabled != null),
+       assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
@@ -2614,6 +2588,7 @@ class InputDecoration {
     this.enabled = true,
   }) : assert(enabled != null),
        icon = null,
+       label = null,
        labelText = null,
        labelStyle = null,
        helperText = null,
@@ -2646,9 +2621,7 @@ class InputDecoration {
        enabledBorder = null,
        semanticCounterText = null,
        alignLabelWithHint = false,
-       constraints = null,
-       isRequired = null,
-       requiredLabelStyle = null;
+       constraints = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -2667,13 +2640,25 @@ class InputDecoration {
   /// See [Icon], [ImageIcon].
   final Widget? icon;
 
-  /// Text that describes the input field.
+
+  /// Optional widget that describes the input field.
+  ///
+  /// This can be used, for example, to add some styling to a label that would
+  /// otherwise be specified using [labelText], which only takes one style.
+  ///
+  /// Only one of [label] and [labelText] can be specified.
+  final Widget? label;
+
+  /// Optional text that describes the input field.
   ///
   /// When the input field is empty and unfocused, the label is displayed on
   /// top of the input field (i.e., at the same location on the screen where
   /// text may be entered in the input field). When the input field receives
   /// focus (or if the field is non-empty), the label moves above (i.e.,
   /// vertically adjacent to) the input field.
+  ///
+  /// If a more elaborate label is required, consider using [label] instead.
+  /// Only one of [label] and [labelText] can be specified.
   final String? labelText;
 
   /// The style to use for the [labelText] when the label is above (i.e.,
@@ -3342,16 +3327,11 @@ class InputDecoration {
   /// a default height based on text size.
   final BoxConstraints? constraints;
 
-  ///
-  final bool? isRequired;
-
-  ///
-  final TextStyle? requiredLabelStyle;
-
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
   InputDecoration copyWith({
     Widget? icon,
+    Widget? label,
     String? labelText,
     TextStyle? labelStyle,
     String? helperText,
@@ -3395,11 +3375,10 @@ class InputDecoration {
     String? semanticCounterText,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
-    bool? isRequired,
-    TextStyle? requiredLabelStyle,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
+      label: label ?? this.label,
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
       helperText: helperText ?? this.helperText,
@@ -3443,8 +3422,6 @@ class InputDecoration {
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
-      isRequired: isRequired ?? this.isRequired,
-      requiredLabelStyle: requiredLabelStyle ?? this.requiredLabelStyle,
     );
   }
 
@@ -3480,7 +3457,6 @@ class InputDecoration {
       border: border ?? theme.border,
       alignLabelWithHint: alignLabelWithHint ?? theme.alignLabelWithHint,
       constraints: constraints ?? theme.constraints,
-      requiredLabelStyle: requiredLabelStyle ?? theme.requiredLabelStyle,
     );
   }
 
@@ -3492,6 +3468,7 @@ class InputDecoration {
       return false;
     return other is InputDecoration
         && other.icon == icon
+        && other.label == label
         && other.labelText == labelText
         && other.labelStyle == labelStyle
         && other.helperText == helperText
@@ -3534,15 +3511,14 @@ class InputDecoration {
         && other.enabled == enabled
         && other.semanticCounterText == semanticCounterText
         && other.alignLabelWithHint == alignLabelWithHint
-        && other.constraints == constraints
-        && other.isRequired == isRequired
-        && other.requiredLabelStyle == requiredLabelStyle;
+        && other.constraints == constraints;
   }
 
   @override
   int get hashCode {
     final List<Object?> values = <Object?>[
       icon,
+      label,
       labelText,
       labelStyle,
       helperText,
@@ -3588,8 +3564,6 @@ class InputDecoration {
       semanticCounterText,
       alignLabelWithHint,
       constraints,
-      isRequired,
-      requiredLabelStyle,
     ];
     return hashList(values);
   }
@@ -3598,6 +3572,7 @@ class InputDecoration {
   String toString() {
     final List<String> description = <String>[
       if (icon != null) 'icon: $icon',
+      if (label != null) 'label: $label',
       if (labelText != null) 'labelText: "$labelText"',
       if (helperText != null) 'helperText: "$helperText"',
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
@@ -3637,8 +3612,6 @@ class InputDecoration {
       if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
       if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
       if (constraints != null) 'constraints: $constraints',
-      if (isRequired != null) 'isRequired: $isRequired',
-      if (requiredLabelStyle != null) 'requiredLabelStyle: $requiredLabelStyle',
     ];
     return 'InputDecoration(${description.join(', ')})';
   }
@@ -3686,7 +3659,6 @@ class InputDecorationTheme with Diagnosticable {
     this.border,
     this.alignLabelWithHint = false,
     this.constraints,
-    this.requiredLabelStyle,
   }) : assert(isDense != null),
        assert(isCollapsed != null),
        assert(filled != null),
@@ -4007,8 +3979,6 @@ class InputDecorationTheme with Diagnosticable {
   ///    given decorator.
   final BoxConstraints? constraints;
 
-  final TextStyle? requiredLabelStyle;
-
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   InputDecorationTheme copyWith({
@@ -4037,7 +4007,6 @@ class InputDecorationTheme with Diagnosticable {
     InputBorder? border,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
-    TextStyle? requiredLabelStyle,
   }) {
     return InputDecorationTheme(
       labelStyle: labelStyle ?? this.labelStyle,
@@ -4065,7 +4034,6 @@ class InputDecorationTheme with Diagnosticable {
       border: border ?? this.border,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
-      requiredLabelStyle: requiredLabelStyle ?? this.requiredLabelStyle,
     );
   }
 
@@ -4097,7 +4065,6 @@ class InputDecorationTheme with Diagnosticable {
       border,
       alignLabelWithHint,
       constraints,
-      requiredLabelStyle,
     ]);
   }
 
@@ -4133,8 +4100,7 @@ class InputDecorationTheme with Diagnosticable {
         && other.border == border
         && other.alignLabelWithHint == alignLabelWithHint
         && other.constraints == constraints
-        && other.disabledBorder == disabledBorder
-        && other.requiredLabelStyle == requiredLabelStyle;
+        && other.disabledBorder == disabledBorder;
   }
 
   @override
@@ -4166,6 +4132,5 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
     properties.add(DiagnosticsProperty<bool>('alignLabelWithHint', alignLabelWithHint, defaultValue: defaultTheme.alignLabelWithHint));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: defaultTheme.constraints));
-    properties.add(DiagnosticsProperty<TextStyle>('requiredLabelStyle', requiredLabelStyle, defaultValue: defaultTheme.requiredLabelStyle));
   }
 }
