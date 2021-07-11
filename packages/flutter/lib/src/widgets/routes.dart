@@ -2060,11 +2060,19 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
       || event.buttons != kPrimaryButton
       || event.kind != PointerDeviceKind.mouse
       || _shouldIgnoreEvents
+<<<<<<< HEAD
       || focusScopeNode.focusedChild == null) {
       return;
     }
     final BoxHitTestResult? result = cachedResults[entry];
     final FocusNode? focusNode = focusScopeNode.focusedChild;
+=======
+      || _focusScopeNode.focusedChild == null) {
+      return;
+    }
+    final BoxHitTestResult? result = cachedResults[entry];
+    final FocusNode? focusNode = _focusScopeNode.focusedChild;
+>>>>>>> a268b011f35fda292623d93362b07b3b31fdad97
     if (focusNode == null || result == null)
       return;
 

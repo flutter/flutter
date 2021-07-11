@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
-import 'package:meta/meta.dart' show required, visibleForTesting;
+import 'package:meta/meta.dart' show visibleForTesting;
 import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart';
@@ -21,7 +19,7 @@ const String kForceFlag = 'force';
 /// Command to proceed from one [pb.ReleasePhase] to the next.
 class NextCommand extends Command<void> {
   NextCommand({
-    @required this.checkouts,
+    required this.checkouts,
   }) {
     final String defaultPath = defaultStateFilePath(checkouts.platform);
     argParser.addOption(
@@ -51,10 +49,10 @@ class NextCommand extends Command<void> {
   @override
   void run() {
     runNext(
-      autoAccept: argResults[kYesFlag] as bool,
+      autoAccept: argResults![kYesFlag] as bool,
       checkouts: checkouts,
-      force: argResults[kForceFlag] as bool,
-      stateFile: checkouts.fileSystem.file(argResults[kStateOption]),
+      force: argResults![kForceFlag] as bool,
+      stateFile: checkouts.fileSystem.file(argResults![kStateOption]),
     );
   }
 }
@@ -77,10 +75,10 @@ bool prompt(String message, Stdio stdio) {
 
 @visibleForTesting
 void runNext({
-  @required bool autoAccept,
-  @required bool force,
-  @required Checkouts checkouts,
-  @required File stateFile,
+  required bool autoAccept,
+  required bool force,
+  required Checkouts checkouts,
+  required File stateFile,
 }) {
   final Stdio stdio = checkouts.stdio;
   const List<CherrypickState> finishedStates = <CherrypickState>[
@@ -341,7 +339,6 @@ void runNext({
       break;
     case pb.ReleasePhase.RELEASE_COMPLETED:
       throw ConductorException('This release is finished.');
-      break;
   }
   final ReleasePhase nextPhase = getNextPhase(state.currentPhase);
   stdio.printStatus('\nUpdating phase from ${state.currentPhase} to $nextPhase...\n');

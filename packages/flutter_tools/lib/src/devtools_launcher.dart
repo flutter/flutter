@@ -178,6 +178,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         'global',
         'activate',
         'devtools',
+        '2.4.0',
       ]);
       if (_devToolsActivateProcess.exitCode != 0) {
         _logger.printError(
