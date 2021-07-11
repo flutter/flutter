@@ -91,7 +91,7 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
 
     cmd.index_buffer = vertex_buffer.index_buffer;
     cmd.index_count = vertex_buffer.index_count;
-    cmd.primitive_type = PrimitiveType::kTriange;
+    cmd.primitive_type = PrimitiveType::kTriangle;
     if (!pass.RecordCommand(std::move(cmd))) {
       return false;
     }
