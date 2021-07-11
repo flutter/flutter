@@ -16,6 +16,10 @@ class Playground : public ::testing::Test {
 
   ~Playground();
 
+  Point GetCursorPosition() const;
+
+  ISize GetWindowSize() const;
+
   std::shared_ptr<Context> GetContext() const;
 
   bool OpenPlaygroundHere(Renderer::RenderCallback render_callback);
@@ -25,6 +29,9 @@ class Playground : public ::testing::Test {
 
  private:
   Renderer renderer_;
+  Point cursor_position_;
+
+  void SetCursorPosition(Point pos);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Playground);
 };

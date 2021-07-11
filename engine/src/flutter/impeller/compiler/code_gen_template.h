@@ -82,8 +82,8 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
 
   static constexpr auto kSampledImage{{camel_case(sampled_image.name)}} = SampledImageSlot { // {{sampled_image.name}}
     "{{sampled_image.name}}",      // name
-    {{sampled_image.msl_res_0}}u,  // auto primary
-    {{sampled_image.msl_res_1}}u,  // auto secondary
+    {{sampled_image.msl_res_0}}u,  // texture
+    {{sampled_image.msl_res_1}}u,  // sampler
   };
 {% endfor %}
 {% endif %}

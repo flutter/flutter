@@ -58,6 +58,18 @@ static std::string GetWindowTitle(const std::string& test_name) {
   return stream.str();
 }
 
+Point Playground::GetCursorPosition() const {
+  return cursor_position_;
+}
+
+ISize Playground::GetWindowSize() const {
+  return {1024, 768};
+}
+
+void Playground::SetCursorPosition(Point pos) {
+  cursor_position_ = pos;
+}
+
 bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   if (!render_callback) {
     return true;
@@ -79,13 +91,20 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   ::glfwWindowHint(GLFW_RESIZABLE, false);
 
   auto window_title = GetWindowTitle(flutter::testing::GetCurrentTestName());
-  auto window = ::glfwCreateWindow(1024, 768, window_title.c_str(), NULL, NULL);
+  auto window =
+      ::glfwCreateWindow(GetWindowSize().width, GetWindowSize().height,
+                         window_title.c_str(), NULL, NULL);
   if (!window) {
     return false;
   }
 
   ::glfwSetWindowUserPointer(window, this);
   ::glfwSetKeyCallback(window, &PlaygroundKeyCallback);
+  ::glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x,
+                                        double y) {
+    reinterpret_cast<Playground*>(::glfwGetWindowUserPointer(window))
+        ->SetCursorPosition({static_cast<Scalar>(x), static_cast<Scalar>(y)});
+  });
 
   fml::ScopedCleanupClosure close_window(
       [window]() { ::glfwDestroyWindow(window); });
