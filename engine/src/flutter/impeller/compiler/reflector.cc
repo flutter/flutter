@@ -239,6 +239,8 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     });
   }
 
+  root["bind_prototype"] = EmitBindPrototypes(shader_resources);
+
   return root;
 }
 
@@ -654,6 +656,55 @@ std::string Reflector::GetMemberNameAtIndex(
   std::stringstream stream;
   stream << "unnamed_" << sUnnamedMembersID++ << suffix;
   return stream.str();
+}
+
+std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
+    const spirv_cross::ShaderResources& resources) const {
+  std::vector<BindPrototype> prototypes;
+  for (const auto& sampled_image : resources.sampled_images) {
+    auto& proto = prototypes.emplace_back(BindPrototype{});
+    proto.return_type = "void";
+    proto.name =
+        SPrintF("Bind%s", ConvertToCamelCase(sampled_image.name).c_str());
+    {
+      std::stringstream stream;
+      stream << "Bind combined image sampler for resource named "
+             << sampled_image.name << ".";
+      proto.docstring = stream.str();
+    }
+    proto.args.push_back(BindPrototypeArgument{
+        .type_name = "Command&",
+        .argument_name = "command",
+    });
+    proto.args.push_back(BindPrototypeArgument{
+        .type_name = "Texture&",
+        .argument_name = "texture",
+    });
+    proto.args.push_back(BindPrototypeArgument{
+        .type_name = "Sampler&",
+        .argument_name = "sampler",
+    });
+  }
+  return prototypes;
+}
+
+nlohmann::json::array_t Reflector::EmitBindPrototypes(
+    const spirv_cross::ShaderResources& resources) const {
+  const auto prototypes = ReflectBindPrototypes(resources);
+  nlohmann::json::array_t result;
+  for (const auto& res : prototypes) {
+    auto& item = result.emplace_back(nlohmann::json::object_t{});
+    item["return_type"] = res.return_type;
+    item["name"] = res.name;
+    item["docstring"] = res.docstring;
+    auto& args = item["args"] = nlohmann::json::array_t{};
+    for (const auto& arg : res.args) {
+      auto& json_arg = args.emplace_back(nlohmann::json::object_t{});
+      json_arg["type_name"] = arg.type_name;
+      json_arg["argument_name"] = arg.argument_name;
+    }
+  }
+  return result;
 }
 
 }  // namespace compiler

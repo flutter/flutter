@@ -51,9 +51,21 @@ class Reflector {
     std::vector<StructMember> members;
   };
 
+  struct BindPrototypeArgument {
+    std::string type_name;
+    std::string argument_name;
+  };
+
+  struct BindPrototype {
+    std::string name;
+    std::string return_type;
+    std::string docstring;
+    std::vector<BindPrototypeArgument> args;
+  };
+
   const Options options_;
   const std::shared_ptr<const spirv_cross::ParsedIR> ir_;
-  // TODO: There is no reason this needs to the MSL subtype.
+  // TODO(csg): There is no reason this needs to the MSL subtype.
   const std::shared_ptr<const spirv_cross::CompilerMSL> compiler_;
   std::unique_ptr<const nlohmann::json> template_arguments_;
   std::shared_ptr<fml::Mapping> reflection_header_;
@@ -84,6 +96,12 @@ class Reflector {
   std::optional<StructDefinition> ReflectStructDefinition(
       const spirv_cross::TypeID& type_id) const;
 
+  std::vector<BindPrototype> ReflectBindPrototypes(
+      const spirv_cross::ShaderResources& resources) const;
+
+  nlohmann::json::array_t EmitBindPrototypes(
+      const spirv_cross::ShaderResources& resources) const;
+
   std::optional<StructDefinition> ReflectPerVertexStructDefinition(
       const spirv_cross::SmallVector<spirv_cross::Resource>& stage_inputs)
       const;
@@ -98,6 +116,8 @@ class Reflector {
 
   std::vector<StructMember> ReadStructMembers(
       const spirv_cross::TypeID& type_id) const;
+
+  bool IsVertexShader() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Reflector);
 };
