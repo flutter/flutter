@@ -495,7 +495,6 @@ class EditableText extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
-    this.parentContext,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1347,14 +1346,6 @@ class EditableText extends StatefulWidget {
   /// than 1.
   final ScrollBehavior? scrollBehavior;
 
-  /// Optionally, the parent build context if this editable text was built as part of
-  /// a larger text field.
-  ///
-  /// If this is provided then focus will be attached to the parent context instead of
-  /// the editable text. If the [parentContext] is later modified while the editable text
-  /// has focus, this focus will be lost.
-  final BuildContext? parentContext;
-
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
     required Iterable<String>? autofillHints,
@@ -1602,9 +1593,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
-  /// The [BuildContext] to use for focus attachment.
-  BuildContext get _focusContext => widget.parentContext ?? context;
-
   // State lifecycle:
 
   @override
@@ -1612,7 +1600,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.initState();
     _clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
-    _focusAttachment = widget.focusNode.attach(_focusContext);
+    _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController = widget.scrollController ?? ScrollController();
     _scrollController!.addListener(() { _selectionOverlay?.updateForScroll(); });
@@ -1659,16 +1647,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay?.handlesVisible = widget.showSelectionHandles;
     _isInAutofillContext = _isInAutofillContext || _shouldBeInAutofillContext;
 
-    final bool didChangeParentContext = widget.parentContext != oldWidget.parentContext;
-    final bool didChangeFocusNode = widget.focusNode != oldWidget.focusNode;
-
-    if (didChangeParentContext || didChangeFocusNode) {
+    if (widget.focusNode != oldWidget.focusNode) {
       _focusAttachment?.detach();
-      _focusAttachment = widget.focusNode.attach(_focusContext);
-    }
-    if (didChangeFocusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
       widget.focusNode.addListener(_handleFocusChanged);
+      _focusAttachment = widget.focusNode.attach(context);
       updateKeepAlive();
     }
 
@@ -1742,6 +1725,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void updateEditingValue(TextEditingValue value) {
+    print('UPDATE EDITING VALUE: $value');
     // This method handles text editing state updates from the platform text
     // input plugin. The [EditableText] may not have the focus or an open input
     // connection, as autofill can update a disconnected [EditableText].
@@ -2297,6 +2281,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @pragma('vm:notify-debugger-on-exception')
   void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
+    print('what what');
     // Only apply input formatters if the text has changed (including uncommitted
     // text in the composing region), or when the user committed the composing
     // text.
@@ -2533,6 +2518,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
+    print('$value from $cause');
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
     final bool shouldShowCaret = widget.readOnly

@@ -2010,6 +2010,40 @@ class _FocusTrap extends SingleChildRenderObjectWidget {
   }
 }
 
+/// Declares a widget subtree which is part of the provided [focusNode]'s focus area
+/// without attaching focus to that region.
+///
+/// This is used by text field widgets which decorate a smaller editable text area.
+/// This area is conceptually part of the editable text, but not attached to the
+/// focus context. The [FocusTrapArea] is used to inform the framework of this
+/// relationship, so that primary pointer contact inside of this region but above
+/// the editable text focus will not trigger loss of focus.
+class FocusTrapArea extends SingleChildRenderObjectWidget {
+
+  /// Create a new [FocusTrapArea] that expands the area of the provided [focusNode].
+  const FocusTrapArea({required this.focusNode, Key? key, Widget? child}) : super(key: key, child: child);
+
+  /// The [FocusNode] that the focus trap area will expand to.
+  final FocusNode focusNode;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderFocusTrapArea(focusNode);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    if (renderObject is _RenderFocusTrapArea)
+      renderObject.focusNode = focusNode;
+  }
+}
+
+class _RenderFocusTrapArea extends RenderProxyBox {
+  _RenderFocusTrapArea(this.focusNode);
+
+  FocusNode focusNode;
+}
+
 class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
   _RenderFocusTrap(this._focusScopeNode);
 
@@ -2060,19 +2094,11 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
       || event.buttons != kPrimaryButton
       || event.kind != PointerDeviceKind.mouse
       || _shouldIgnoreEvents
-<<<<<<< HEAD
-      || focusScopeNode.focusedChild == null) {
-      return;
-    }
-    final BoxHitTestResult? result = cachedResults[entry];
-    final FocusNode? focusNode = focusScopeNode.focusedChild;
-=======
       || _focusScopeNode.focusedChild == null) {
       return;
     }
     final BoxHitTestResult? result = cachedResults[entry];
     final FocusNode? focusNode = _focusScopeNode.focusedChild;
->>>>>>> a268b011f35fda292623d93362b07b3b31fdad97
     if (focusNode == null || result == null)
       return;
 
@@ -2084,6 +2110,10 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     for (final HitTestEntry entry in result.path) {
       final HitTestTarget target = entry.target;
       if (target == renderObject) {
+        hitCurrentFocus = true;
+        break;
+      }
+      if (target is _RenderFocusTrapArea && target.focusNode == focusNode) {
         hitCurrentFocus = true;
         break;
       }
