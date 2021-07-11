@@ -1409,7 +1409,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         if (uri != null) {
           globals.printStatus(
             'The Flutter DevTools debugger and profiler '
-            'on ${device.device.name} is available at: $uri',
+            'on ${device.device.name} is available at: ${urlToDisplayString(uri)}',
           );
         }
       }

@@ -137,7 +137,7 @@ class MaterialBanner extends StatefulWidget {
   /// Creates a [MaterialBanner].
   ///
   /// The [actions], [content], and [forceActionsBelow] must be non-null.
-  /// The [actions.length] must be greater than 0.
+  /// The [actions].length must be greater than 0.
   const MaterialBanner({
     Key? key,
     required this.content,

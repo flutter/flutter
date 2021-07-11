@@ -610,6 +610,12 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         content,
       ]);
     }
+
+    // If the DismissDirection is none, we do not add drag gestures because the content
+    // cannot be dragged.
+    if (widget.direction == DismissDirection.none)
+      return content;
+
     // We are not resizing but we may be being dragging in widget.direction.
     return GestureDetector(
       onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,

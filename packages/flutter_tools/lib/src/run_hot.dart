@@ -279,14 +279,6 @@ class HotRunner extends ResidentRunner {
         device.generator.accept();
       }
       final List<FlutterView> views = await device.vmService.getFlutterViews();
-      final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(globals.fs.path.toUri(getAssetBuildDirectory()));
-      await Future.wait<void>(views.map<Future<void>>(
-        (FlutterView view) => device.vmService.setAssetDirectory(
-          assetsDirectory: deviceAssetsDirectoryUri,
-          uiIsolateId: view.uiIsolate.id,
-          viewId: view.id,
-        )
-      ));
       for (final FlutterView view in views) {
         globals.printTrace('Connected to $view.');
       }
@@ -896,7 +888,7 @@ class HotRunner extends ResidentRunner {
     }
     reloadVMTimer.stop();
 
-    await _evictDirtyAssets();
+    await evictDirtyAssets();
 
     final Stopwatch reassembleTimer = _stopwatchFactory.createStopwatch('reloadSources:reassemble')..start();
 
@@ -997,13 +989,31 @@ class HotRunner extends ResidentRunner {
     printDebuggerList();
   }
 
-  Future<void> _evictDirtyAssets() async {
+  @visibleForTesting
+  Future<void> evictDirtyAssets() async {
     final List<Future<Map<String, dynamic>>> futures = <Future<Map<String, dynamic>>>[];
     for (final FlutterDevice device in flutterDevices) {
       if (device.devFS.assetPathsToEvict.isEmpty) {
         continue;
       }
       final List<FlutterView> views = await device.vmService.getFlutterViews();
+
+      // If this is the first time we update the assets, make sure to call the setAssetDirectory
+      if (!device.devFS.hasSetAssetDirectory) {
+        final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(globals.fs.path.toUri(getAssetBuildDirectory()));
+        await Future.wait<void>(views.map<Future<void>>(
+          (FlutterView view) => device.vmService.setAssetDirectory(
+            assetsDirectory: deviceAssetsDirectoryUri,
+            uiIsolateId: view.uiIsolate.id,
+            viewId: view.id,
+          )
+        ));
+        for (final FlutterView view in views) {
+          globals.printTrace('Set asset directory in $view.');
+        }
+        device.devFS.hasSetAssetDirectory = true;
+      }
+
       if (views.first.uiIsolate == null) {
         globals.printError('Application isolate not found for $device');
         continue;

@@ -1221,6 +1221,35 @@ void main() {
       );
     });
 
+    testWidgets('DatePicker displays the date in correct order', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                dateOrder: DatePickerDateOrder.ydm,
+                mode: CupertinoDatePickerMode.date,
+                onDateTimeChanged: (DateTime newDate) {},
+                initialDateTime: DateTime(2018, 1, 14, 10, 30),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getTopLeft(find.text('2018')).dx,
+        lessThan(tester.getTopLeft(find.text('14')).dx),
+      );
+
+      expect(
+        tester.getTopLeft(find.text('14')).dx,
+        lessThan(tester.getTopLeft(find.text('January')).dx),
+      );
+    });
+
     testWidgets('DatePicker displays hours and minutes correctly in RTL', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(

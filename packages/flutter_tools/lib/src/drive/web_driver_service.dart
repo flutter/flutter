@@ -279,7 +279,7 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
 }
 
 /// Converts [browserName] string to [Browser]
-Browser _browserNameToEnum(String browserName){
+Browser _browserNameToEnum(String browserName) {
   switch (browserName) {
     case 'android-chrome': return Browser.androidChrome;
     case 'chrome': return Browser.chrome;

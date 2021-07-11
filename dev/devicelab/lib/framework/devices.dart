@@ -615,10 +615,11 @@ class AndroidDevice extends Device {
 
   @override
   Future<void> stopLoggingToSink() async {
-    assert(_loggingProcess != null);
-    _abortedLogging = true;
-    _loggingProcess.kill();
-    await _loggingProcess.exitCode;
+    if (_loggingProcess != null) {
+      _abortedLogging = true;
+      _loggingProcess.kill();
+      await _loggingProcess.exitCode;
+    }
   }
 
   @override
@@ -877,10 +878,11 @@ class IosDevice extends Device {
 
   @override
   Future<void> stopLoggingToSink() async {
-    assert(_loggingProcess != null);
-    _abortedLogging = true;
-    _loggingProcess.kill();
-    await _loggingProcess.exitCode;
+    if (_loggingProcess != null) {
+      _abortedLogging = true;
+      _loggingProcess.kill();
+      await _loggingProcess.exitCode;
+    }
   }
 
   // The methods below are stubs for now. They will need to be expanded.
