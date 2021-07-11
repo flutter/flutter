@@ -5,6 +5,7 @@
 uniform FrameInfo {
   float current_time;
   vec2 cursor_position;
+  vec2 window_size;
 } frame;
 
 in vec4 color;
@@ -18,5 +19,5 @@ uniform sampler2D contents2_texture;
 void main() {
   vec4 tex1 = texture(contents1_texture, interporlated_texture_coordinates);
   vec4 tex2 = texture(contents2_texture, interporlated_texture_coordinates);
-  frag_color = mix(tex1, tex2, frame.cursor_position.x);
+  frag_color = mix(tex1, tex2, clamp(frame.cursor_position.x / frame.window_size.x, 0.0, 1.0));
 }

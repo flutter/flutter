@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstdlib>
+
 #include "impeller/geometry/scalar.h"
 
 namespace impeller {
@@ -626,6 +628,15 @@ struct Color {
 
   static constexpr Color YellowGreen() {
     return {154.0 / 255.0, 205.0 / 255.0, 50.0 / 255.0, 1.0};
+  }
+
+  static Color Random() {
+    return {
+        static_cast<Scalar>((std::rand() % 255) / 255.0),  //
+        static_cast<Scalar>((std::rand() % 255) / 255.0),  //
+        static_cast<Scalar>((std::rand() % 255) / 255.0),  //
+        1.0                                                //
+    };
   }
 };
 

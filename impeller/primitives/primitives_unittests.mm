@@ -69,6 +69,10 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
 
     BoxFragmentShader::FrameInfo frame_info;
     frame_info.current_time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
+    frame_info.cursor_position = GetCursorPosition();
+    frame_info.window_size.x = GetWindowSize().width;
+    frame_info.window_size.y = GetWindowSize().height;
+
     cmd.fragment_bindings
         .buffers[BoxFragmentShader::kUniformFrameInfo.binding] =
         pass.GetTransientsBuffer().EmplaceUniform(frame_info);
