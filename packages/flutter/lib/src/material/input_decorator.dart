@@ -2640,7 +2640,6 @@ class InputDecoration {
   /// See [Icon], [ImageIcon].
   final Widget? icon;
 
-
   /// Optional widget that describes the input field.
   ///
   /// This can be used, for example, to add some styling to a label that would
