@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+
+import 'package:ui/ui.dart' as ui;
+
+import 'browser_detection.dart';
+import 'services.dart';
+import 'util.dart';
 
 /// Handles clipboard related platform messages.
 class ClipboardMessageHandler {
@@ -78,17 +84,13 @@ class ClipboardMessageHandler {
   }
 }
 
-bool _unsafeIsNull(dynamic object) {
-  return object == null;
-}
-
 /// Provides functionality for writing text to clipboard.
 ///
 /// A concrete implementation is picked at runtime based on the available
 /// APIs and the browser.
 abstract class CopyToClipboardStrategy {
   factory CopyToClipboardStrategy() {
-    return !_unsafeIsNull(html.window.navigator.clipboard)
+    return !unsafeIsNull(html.window.navigator.clipboard)
         ? ClipboardAPICopyStrategy()
         : ExecCommandCopyStrategy();
   }
@@ -108,7 +110,7 @@ abstract class CopyToClipboardStrategy {
 abstract class PasteFromClipboardStrategy {
   factory PasteFromClipboardStrategy() {
     return (browserEngine == BrowserEngine.firefox ||
-            _unsafeIsNull(html.window.navigator.clipboard))
+            unsafeIsNull(html.window.navigator.clipboard))
         ? ExecCommandPasteStrategy()
         : ClipboardAPIPasteStrategy();
   }
