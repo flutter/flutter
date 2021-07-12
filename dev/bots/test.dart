@@ -84,6 +84,7 @@ const List<String> kWebTestFileKnownFailures = <String>[
 ];
 
 const String kSmokeTestShardName = 'smoke_tests';
+const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
@@ -843,15 +844,52 @@ Future<void> _runWebUnitTests() async {
 /// Coarse-grained integration tests running on the Web.
 Future<void> _runWebLongRunningTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
-    () => _runFlutterDriverWebTest(
-      testAppDirectory: path.join(flutterRoot, 'dev', 'integration_tests', 'web_e2e_tests'),
-      target: 'test_driver/text_editing_integration.dart',
-      buildMode: 'profile',
-    ),
+    for (String buildMode in _kAllBuildModes)
+      () => _runFlutterDriverWebTest(
+        testAppDirectory: path.join('packages', 'integration_test', 'example'),
+        target: path.join('test_driver', 'failure.dart'),
+        buildMode: buildMode,
+        renderer: 'canvaskit',
+        // This test intentionally fails and prints stack traces in the browser
+        // logs. To avoid confusion, silence browser output.
+        silenceBrowserOutput: true,
+      ),
+
+    // This test specifically tests how images are loaded in HTML mode, so we don't run it in CanvasKit mode.
+    () => _runWebE2eTest('image_loading_integration', buildMode: 'debug', renderer: 'html'),
+    () => _runWebE2eTest('image_loading_integration', buildMode: 'profile', renderer: 'html'),
+    () => _runWebE2eTest('image_loading_integration', buildMode: 'release', renderer: 'html'),
+
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    () => _runWebE2eTest('platform_messages_integration', buildMode: 'debug', renderer: 'canvaskit'),
+    () => _runWebE2eTest('platform_messages_integration', buildMode: 'profile', renderer: 'html'),
+    () => _runWebE2eTest('platform_messages_integration', buildMode: 'release', renderer: 'html'),
+
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'debug', renderer: 'html'),
+    () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'profile', renderer: 'canvaskit'),
+    () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'release', renderer: 'html'),
+
+    // This test is only known to work in debug mode.
+    () => _runWebE2eTest('scroll_wheel_integration', buildMode: 'debug', renderer: 'html'),
+
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    () => _runWebE2eTest('text_editing_integration', buildMode: 'debug', renderer: 'canvaskit'),
+    () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'html'),
+    () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'html'),
+
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    () => _runWebE2eTest('url_strategy_integration', buildMode: 'debug', renderer: 'html'),
+    () => _runWebE2eTest('url_strategy_integration', buildMode: 'profile', renderer: 'canvaskit'),
+    () => _runWebE2eTest('url_strategy_integration', buildMode: 'release', renderer: 'html'),
+
+    () => _runWebTreeshakeTest(),
+
     () => _runFlutterDriverWebTest(
       testAppDirectory: path.join(flutterRoot, 'examples', 'hello_world'),
       target: 'test_driver/smoke_web_engine.dart',
       buildMode: 'profile',
+      renderer: 'auto',
     ),
     () => _runGalleryE2eWebTest('debug'),
     () => _runGalleryE2eWebTest('debug', canvasKit: true),
@@ -899,12 +937,29 @@ Future<void> _runWebLongRunningTests() async {
   await _stopChromeDriver();
 }
 
+/// Runs one of the `dev/integration_tests/web_e2e_tests` tests.
+Future<void> _runWebE2eTest(
+  String name, {
+  @required String buildMode,
+  @required String renderer,
+}) async {
+  await _runFlutterDriverWebTest(
+    target: path.join('test_driver', '$name.dart'),
+    buildMode: buildMode,
+    renderer: renderer,
+    testAppDirectory: path.join(flutterRoot, 'dev', 'integration_tests', 'web_e2e_tests'),
+  );
+}
+
 Future<void> _runFlutterDriverWebTest({
   @required String target,
   @required String buildMode,
+  @required String renderer,
   @required String testAppDirectory,
+  bool expectFailure = false,
+  bool silenceBrowserOutput = false,
 }) async {
-  print('${green}Running web_e2e_test $target in $buildMode mode.$reset');
+  print('${green}Running integration tests $target in $buildMode mode.$reset');
   await runCommand(
     flutter,
     <String>[ 'clean' ],
@@ -921,13 +976,80 @@ Future<void> _runFlutterDriverWebTest({
       '-d',
       'web-server',
       '--$buildMode',
+      '--web-renderer=$renderer',
+    ],
+    expectNonZeroExit: expectFailure,
+    workingDirectory: testAppDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    },
+    removeLine: (String line) {
+      if (!silenceBrowserOutput) {
+        return false;
+      }
+      if (line.trim().startsWith('[INFO]')) {
+        return true;
+      }
+      return false;
+    },
+  );
+  print('${green}Integration test passed.$reset');
+}
+
+// Compiles a sample web app and checks that its JS doesn't contain certain
+// debug code that we expect to be tree shaken out.
+//
+// The app is compiled in `--profile` mode to prevent the compiler from
+// minifying the symbols.
+Future<void> _runWebTreeshakeTest() async {
+  final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web_e2e_tests');
+  final String target = path.join('lib', 'treeshaking_main.dart');
+  await runCommand(
+    flutter,
+    <String>[ 'clean' ],
+    workingDirectory: testAppDirectory,
+  );
+  await runCommand(
+    flutter,
+    <String>[
+      'build',
+      'web',
+      '--target=$target',
+      '--no-sound-null-safety',
+      '--profile',
     ],
     workingDirectory: testAppDirectory,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
     },
   );
-  print('${green}Integration test passed.$reset');
+
+  final File mainDartJs = File(path.join(testAppDirectory, 'build', 'web', 'main.dart.js'));
+  final String javaScript = mainDartJs.readAsStringSync();
+
+  // Check that we're not looking at minified JS. Otherwise this test would result in false positive.
+  expect(javaScript.contains('RenderObjectToWidgetElement'), true);
+
+  const String word = 'debugFillProperties';
+  int count = 0;
+  int pos = javaScript.indexOf(word);
+  final int contentLength = javaScript.length;
+  while (pos != -1) {
+    count += 1;
+    pos += word.length;
+    if (pos >= contentLength || count > 100) {
+      break;
+    }
+    pos = javaScript.indexOf(word, pos);
+  }
+
+  const int kMaxExpectedDebugFillProperties = 11;
+  if (count > kMaxExpectedDebugFillProperties) {
+    throw Exception(
+      'Too many occurrences of "$word" in compiled JavaScript.\n'
+      'Expected no more than $kMaxExpectedDebugFillProperties, but found $count.'
+    );
+  }
 }
 
 /// Returns the commit hash of the flutter/plugins repository that's rolled in.

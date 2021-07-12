@@ -111,7 +111,7 @@ bool rollDev({
   required FrameworkRepository repository,
 }) {
   final String remoteName = argResults[kRemoteName] as String;
-  final String level = argResults[kIncrement] as String;
+  final String? level = argResults[kIncrement] as String?;
   final String candidateBranch = argResults[kCandidateBranch] as String;
   final bool justPrint = argResults[kJustPrint] as bool;
   final bool autoApprove = argResults[kYes] as bool;

@@ -6,7 +6,7 @@
 //  Generated code. Do not modify.
 //  source: conductor_state.proto
 //
-// @dart = 2.7
+// @dart = 2.12
 // ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
 
 import 'dart:core' as $core;
@@ -30,8 +30,8 @@ class Remote extends $pb.GeneratedMessage {
 
   Remote._() : super();
   factory Remote({
-    $core.String name,
-    $core.String url,
+    $core.String? name,
+    $core.String? url,
   }) {
     final _result = create();
     if (name != null) {
@@ -62,7 +62,7 @@ class Remote extends $pb.GeneratedMessage {
   static $pb.PbList<Remote> createRepeated() => $pb.PbList<Remote>();
   @$core.pragma('dart2js:noInline')
   static Remote getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Remote>(create);
-  static Remote _defaultInstance;
+  static Remote? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get name => $_getSZ(0);
@@ -106,9 +106,9 @@ class Cherrypick extends $pb.GeneratedMessage {
 
   Cherrypick._() : super();
   factory Cherrypick({
-    $core.String trunkRevision,
-    $core.String appliedRevision,
-    CherrypickState state,
+    $core.String? trunkRevision,
+    $core.String? appliedRevision,
+    CherrypickState? state,
   }) {
     final _result = create();
     if (trunkRevision != null) {
@@ -142,7 +142,7 @@ class Cherrypick extends $pb.GeneratedMessage {
   static $pb.PbList<Cherrypick> createRepeated() => $pb.PbList<Cherrypick>();
   @$core.pragma('dart2js:noInline')
   static Cherrypick getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Cherrypick>(create);
-  static Cherrypick _defaultInstance;
+  static Cherrypick? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get trunkRevision => $_getSZ(0);
@@ -210,15 +210,15 @@ class Repository extends $pb.GeneratedMessage {
 
   Repository._() : super();
   factory Repository({
-    $core.String candidateBranch,
-    $core.String startingGitHead,
-    $core.String currentGitHead,
-    $core.String checkoutPath,
-    Remote upstream,
-    Remote mirror,
-    $core.Iterable<Cherrypick> cherrypicks,
-    $core.String dartRevision,
-    $core.String workingBranch,
+    $core.String? candidateBranch,
+    $core.String? startingGitHead,
+    $core.String? currentGitHead,
+    $core.String? checkoutPath,
+    Remote? upstream,
+    Remote? mirror,
+    $core.Iterable<Cherrypick>? cherrypicks,
+    $core.String? dartRevision,
+    $core.String? workingBranch,
   }) {
     final _result = create();
     if (candidateBranch != null) {
@@ -270,7 +270,7 @@ class Repository extends $pb.GeneratedMessage {
   static $pb.PbList<Repository> createRepeated() => $pb.PbList<Repository>();
   @$core.pragma('dart2js:noInline')
   static Repository getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Repository>(create);
-  static Repository _defaultInstance;
+  static Repository? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get candidateBranch => $_getSZ(0);
@@ -407,15 +407,15 @@ class ConductorState extends $pb.GeneratedMessage {
 
   ConductorState._() : super();
   factory ConductorState({
-    $core.String releaseChannel,
-    $core.String releaseVersion,
-    Repository engine,
-    Repository framework,
-    $fixnum.Int64 createdDate,
-    $fixnum.Int64 lastUpdatedDate,
-    $core.Iterable<$core.String> logs,
-    ReleasePhase currentPhase,
-    $core.String conductorVersion,
+    $core.String? releaseChannel,
+    $core.String? releaseVersion,
+    Repository? engine,
+    Repository? framework,
+    $fixnum.Int64? createdDate,
+    $fixnum.Int64? lastUpdatedDate,
+    $core.Iterable<$core.String>? logs,
+    ReleasePhase? currentPhase,
+    $core.String? conductorVersion,
   }) {
     final _result = create();
     if (releaseChannel != null) {
@@ -468,7 +468,7 @@ class ConductorState extends $pb.GeneratedMessage {
   static $pb.PbList<ConductorState> createRepeated() => $pb.PbList<ConductorState>();
   @$core.pragma('dart2js:noInline')
   static ConductorState getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConductorState>(create);
-  static ConductorState _defaultInstance;
+  static ConductorState? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get releaseChannel => $_getSZ(0);

@@ -675,7 +675,7 @@ class TextSelectionOverlay {
         break;
     }
     selectionDelegate!.userUpdateTextEditingValue(
-      _value.copyWith(selection: newSelection, composing: TextRange.empty),
+      _value.copyWith(selection: newSelection),
       SelectionChangedCause.drag,
     );
     selectionDelegate!.bringIntoView(textPosition);

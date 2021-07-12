@@ -450,7 +450,7 @@ void main() {
     // Ensure that DevTools is activated.
     final ProcessResult pubResult = await processManager.run(<String>[
       fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
-      'pub', 'global', 'activate', 'devtools',
+      'pub', 'global', 'activate', 'devtools', '2.4.0',
     ], workingDirectory: testDirectory).timeout(const Duration(seconds: 20));
     if (pubResult.exitCode != 0) {
       print('Unable to activate devtools:\n${pubResult.stderr}');
