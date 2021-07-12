@@ -58,10 +58,10 @@ class HandleDisposition : public fml::RefCountedThreadSafe<HandleDisposition>,
 
   void ReleaseDartWrappableReference() const override { Release(); }
 
-  zx_handle_op_t operation_;
-  fml::RefPtr<dart::Handle> handle_;
-  zx_obj_type_t type_;
-  zx_rights_t rights_;
+  const zx_handle_op_t operation_;
+  const fml::RefPtr<dart::Handle> handle_;
+  const zx_obj_type_t type_;
+  const zx_rights_t rights_;
   zx_status_t result_;
 };
 

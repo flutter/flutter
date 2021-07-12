@@ -74,10 +74,6 @@ class Handle : public fml::RefCountedThreadSafe<Handle>,
 
   Dart_Handle Replace(uint32_t rights);
 
-  void ScheduleCallback(tonic::DartPersistentValue callback,
-                        zx_status_t status,
-                        const zx_packet_signal_t* signal);
-
  private:
   explicit Handle(zx_handle_t handle);
 
@@ -88,13 +84,6 @@ class Handle : public fml::RefCountedThreadSafe<Handle>,
   zx_handle_t handle_;
 
   std::vector<HandleWaiter*> waiters_;
-
-  // Some cached persistent handles to make running handle wait completers
-  // faster.
-  tonic::DartPersistentValue async_lib_;
-  tonic::DartPersistentValue closure_string_;
-  tonic::DartPersistentValue on_wait_completer_type_;
-  tonic::DartPersistentValue schedule_microtask_string_;
 
   // Cache koid. To guarantee proper cache invalidation, only one `Handle`
   // should own the `zx_handle_t` at a time and use of syscalls that invalidate
