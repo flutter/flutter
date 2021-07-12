@@ -71,7 +71,7 @@ transforms:
     changes:
     - kind: 'rename'
       newName: 'clipBehavior'
-  
+
   # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
