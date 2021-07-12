@@ -14,6 +14,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 #include "third_party/skia/include/core/SkVertices.h"
+#include "third_party/skia/include/effects/SkBlenders.h"
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkDiscretePathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
@@ -45,7 +46,7 @@ constexpr SkRect RenderBounds =
     SkRect::MakeLTRB(RenderLeft, RenderTop, RenderRight, RenderBottom);
 
 class CanvasCompareTester {
- public:
+ private:
   // If a test is using any shadow operations then we cannot currently
   // record those in an SkCanvas and play it back into a DisplayList
   // because internally the operation gets encapsulated in a Skia
@@ -53,17 +54,61 @@ class CanvasCompareTester {
   // that use shadows, we can perform a lot of tests, but not the tests
   // that require SkCanvas->DisplayList transfers.
   // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
-  static bool UsingShadows;
+  static bool TestingDrawShadows;
+  // The CPU renders nothing for drawVertices with a Blender.
+  // See: https://bugs.chromium.org/p/skia/issues/detail?id=12200
+  static bool TestingDrawVertices;
+  // The CPU renders nothing for drawAtlas with a Blender.
+  // See: https://bugs.chromium.org/p/skia/issues/detail?id=12199
+  static bool TestingDrawAtlas;
 
+ public:
   typedef const std::function<void(SkCanvas*, SkPaint&)> CvRenderer;
   typedef const std::function<void(DisplayListBuilder&)> DlRenderer;
 
+  // All of the tests should eventually use this method except for the
+  // tests that call |RenderNoAttributes| because they do not use the
+  // SkPaint object.
+  // But there are a couple of conditions beyond our control which require
+  // the use of one of the variant methods below (|RenderShadows|,
+  // |RenderVertices|, |RenderAtlas|).
   static void RenderAll(CvRenderer& cv_renderer, DlRenderer& dl_renderer) {
     RenderWithAttributes(cv_renderer, dl_renderer);
     RenderWithTransforms(cv_renderer, dl_renderer);
     RenderWithClips(cv_renderer, dl_renderer);
   }
 
+  // Used by the tests that render shadows to deal with a condition where
+  // we cannot recapture the shadow information from an SkCanvas stream
+  // due to the DrawShadowRec used by Skia is not properly exported.
+  // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
+  static void RenderShadows(CvRenderer& cv_renderer, DlRenderer& dl_renderer) {
+    TestingDrawShadows = true;
+    RenderNoAttributes(cv_renderer, dl_renderer);
+    TestingDrawShadows = false;
+  }
+
+  // Used by the tests that call drawVertices to avoid using an SkBlender
+  // during testing because the CPU renderer appears not to render anything.
+  // See: https://bugs.chromium.org/p/skia/issues/detail?id=12200
+  static void RenderVertices(CvRenderer& cv_renderer, DlRenderer& dl_renderer) {
+    TestingDrawVertices = true;
+    RenderAll(cv_renderer, dl_renderer);
+    TestingDrawVertices = false;
+  }
+
+  // Used by the tests that call drawAtlas to avoid using an SkBlender
+  // during testing because the CPU renderer appears not to render anything.
+  // See: https://bugs.chromium.org/p/skia/issues/detail?id=12199
+  static void RenderAtlas(CvRenderer& cv_renderer, DlRenderer& dl_renderer) {
+    TestingDrawAtlas = true;
+    RenderAll(cv_renderer, dl_renderer);
+    TestingDrawAtlas = false;
+  }
+
+  // Used by the tests that call a draw method that does not take a paint
+  // call. Those tests could use |RenderAll| but there would be a lot of
+  // wasted test runs that prepare an SkPaint that is never used.
   static void RenderNoAttributes(CvRenderer& cv_renderer,
                                  DlRenderer& dl_renderer) {
     RenderWith([=](SkCanvas*, SkPaint& p) {},  //
@@ -162,6 +207,26 @@ class CanvasCompareTester {
             b.setColor(blendableColor);
           },
           cv_renderer, dl_renderer, "Blend == DstIn", &bg);
+    }
+
+    if (!(TestingDrawAtlas || TestingDrawVertices)) {
+      sk_sp<SkBlender> blender =
+          SkBlenders::Arithmetic(0.25, 0.25, 0.25, 0.25, false);
+      {
+        RenderWith([=](SkCanvas*, SkPaint& p) { p.setBlender(blender); },
+                   [=](DisplayListBuilder& b) { b.setBlender(blender); },
+                   cv_renderer, dl_renderer,
+                   "ImageFilter == Blender Arithmetic 0.25-false");
+      }
+      ASSERT_TRUE(blender->unique()) << "Blender Cleanup";
+      blender = SkBlenders::Arithmetic(0.25, 0.25, 0.25, 0.25, true);
+      {
+        RenderWith([=](SkCanvas*, SkPaint& p) { p.setBlender(blender); },
+                   [=](DisplayListBuilder& b) { b.setBlender(blender); },
+                   cv_renderer, dl_renderer,
+                   "ImageFilter == Blender Arithmetic 0.25-true");
+      }
+      ASSERT_TRUE(blender->unique()) << "Blender Cleanup";
     }
 
     {
@@ -654,7 +719,7 @@ class CanvasCompareTester {
 
     // This test cannot work if the rendering is using shadows until
     // we can access the Skia ShadowRec via public headers.
-    if (!UsingShadows) {
+    if (!TestingDrawShadows) {
       // This sequence renders SkCanvas calls to a DisplayList and then
       // plays them back on SkCanvas to SkSurface
       // SkCanvas calls => DisplayList => rendering
@@ -783,7 +848,10 @@ class CanvasCompareTester {
   }
 };
 
-bool CanvasCompareTester::UsingShadows = false;
+bool CanvasCompareTester::TestingDrawShadows = false;
+bool CanvasCompareTester::TestingDrawVertices = false;
+bool CanvasCompareTester::TestingDrawAtlas = false;
+
 const sk_sp<SkImage> CanvasCompareTester::testImage =
     CanvasCompareTester::makeTestImage();
 
@@ -1020,7 +1088,7 @@ TEST(DisplayListCanvas, DrawVerticesWithColors) {
   const SkColor colors[3] = {SK_ColorRED, SK_ColorBLUE, SK_ColorGREEN};
   const sk_sp<SkVertices> vertices = SkVertices::MakeCopy(
       SkVertices::kTriangles_VertexMode, 3, pts, nullptr, colors);
-  CanvasCompareTester::RenderAll(
+  CanvasCompareTester::RenderVertices(
       [=](SkCanvas* canvas, SkPaint& paint) {  //
         canvas->drawVertices(vertices.get(), SkBlendMode::kSrcOver, paint);
       },
@@ -1045,7 +1113,7 @@ TEST(DisplayListCanvas, DrawVerticesWithImage) {
       SkVertices::kTriangles_VertexMode, 3, pts, tex, nullptr);
   const sk_sp<SkShader> shader = CanvasCompareTester::testImage->makeShader(
       SkTileMode::kRepeat, SkTileMode::kRepeat, SkSamplingOptions());
-  CanvasCompareTester::RenderAll(
+  CanvasCompareTester::RenderVertices(
       [=](SkCanvas* canvas, SkPaint& paint) {  //
         paint.setShader(shader);
         canvas->drawVertices(vertices.get(), SkBlendMode::kSrcOver, paint);
@@ -1208,7 +1276,7 @@ TEST(DisplayListCanvas, DrawAtlasNearest) {
       SK_ColorGREEN,
   };
   const sk_sp<SkImage> image = CanvasCompareTester::testImage;
-  CanvasCompareTester::RenderAll(
+  CanvasCompareTester::RenderAtlas(
       [=](SkCanvas* canvas, SkPaint& paint) {
         canvas->drawAtlas(image.get(), xform, tex, colors, 2,
                           SkBlendMode::kSrcOver, DisplayList::NearestSampling,
@@ -1235,7 +1303,7 @@ TEST(DisplayListCanvas, DrawAtlasLinear) {
       SK_ColorGREEN,
   };
   const sk_sp<SkImage> image = CanvasCompareTester::testImage;
-  CanvasCompareTester::RenderAll(
+  CanvasCompareTester::RenderAtlas(
       [=](SkCanvas* canvas, SkPaint& paint) {
         canvas->drawAtlas(image.get(), xform, tex, colors, 2,  //
                           SkBlendMode::kSrcOver, DisplayList::LinearSampling,
@@ -1333,7 +1401,6 @@ TEST(DisplayListCanvas, DrawTextBlob) {
 }
 
 TEST(DisplayListCanvas, DrawShadow) {
-  CanvasCompareTester::UsingShadows = true;
   SkPath path;
   path.moveTo(RenderCenterX, RenderTop);
   path.lineTo(RenderRight, RenderBottom);
@@ -1344,7 +1411,7 @@ TEST(DisplayListCanvas, DrawShadow) {
   const SkColor color = SK_ColorDKGRAY;
   const SkScalar elevation = 10;
 
-  CanvasCompareTester::RenderNoAttributes(
+  CanvasCompareTester::RenderShadows(
       [=](SkCanvas* canvas, SkPaint& paint) {  //
         PhysicalShapeLayer::DrawShadow(canvas, path, color, elevation, false,
                                        1.0);
@@ -1352,11 +1419,9 @@ TEST(DisplayListCanvas, DrawShadow) {
       [=](DisplayListBuilder& builder) {  //
         builder.drawShadow(path, color, elevation, false, 1.0);
       });
-  CanvasCompareTester::UsingShadows = false;
 }
 
 TEST(DisplayListCanvas, DrawOccludingShadow) {
-  CanvasCompareTester::UsingShadows = true;
   SkPath path;
   path.moveTo(RenderCenterX, RenderTop);
   path.lineTo(RenderRight, RenderBottom);
@@ -1367,7 +1432,7 @@ TEST(DisplayListCanvas, DrawOccludingShadow) {
   const SkColor color = SK_ColorDKGRAY;
   const SkScalar elevation = 10;
 
-  CanvasCompareTester::RenderNoAttributes(
+  CanvasCompareTester::RenderShadows(
       [=](SkCanvas* canvas, SkPaint& paint) {  //
         PhysicalShapeLayer::DrawShadow(canvas, path, color, elevation, true,
                                        1.0);
@@ -1375,11 +1440,9 @@ TEST(DisplayListCanvas, DrawOccludingShadow) {
       [=](DisplayListBuilder& builder) {  //
         builder.drawShadow(path, color, elevation, true, 1.0);
       });
-  CanvasCompareTester::UsingShadows = false;
 }
 
 TEST(DisplayListCanvas, DrawShadowDpr) {
-  CanvasCompareTester::UsingShadows = true;
   SkPath path;
   path.moveTo(RenderCenterX, RenderTop);
   path.lineTo(RenderRight, RenderBottom);
@@ -1390,7 +1453,7 @@ TEST(DisplayListCanvas, DrawShadowDpr) {
   const SkColor color = SK_ColorDKGRAY;
   const SkScalar elevation = 10;
 
-  CanvasCompareTester::RenderNoAttributes(
+  CanvasCompareTester::RenderShadows(
       [=](SkCanvas* canvas, SkPaint& paint) {  //
         PhysicalShapeLayer::DrawShadow(canvas, path, color, elevation, false,
                                        2.5);
@@ -1398,7 +1461,6 @@ TEST(DisplayListCanvas, DrawShadowDpr) {
       [=](DisplayListBuilder& builder) {  //
         builder.drawShadow(path, color, elevation, false, 2.5);
       });
-  CanvasCompareTester::UsingShadows = false;
 }
 
 }  // namespace testing

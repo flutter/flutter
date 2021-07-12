@@ -188,6 +188,7 @@ struct SetBlendModeOp final : DLOp {
       dispatcher.set##name(field);                                    \
     }                                                                 \
   };
+DEFINE_SET_CLEAR_SKREF_OP(Blender, blender)
 DEFINE_SET_CLEAR_SKREF_OP(Shader, shader)
 DEFINE_SET_CLEAR_SKREF_OP(ImageFilter, filter)
 DEFINE_SET_CLEAR_SKREF_OP(ColorFilter, filter)
@@ -1062,6 +1063,11 @@ void DisplayListBuilder::setColor(SkColor color) {
 }
 void DisplayListBuilder::setBlendMode(SkBlendMode mode) {
   Push<SetBlendModeOp>(0, mode);
+}
+void DisplayListBuilder::setBlender(sk_sp<SkBlender> blender) {
+  blender  //
+      ? Push<SetBlenderOp>(0, std::move(blender))
+      : Push<ClearBlenderOp>(0);
 }
 void DisplayListBuilder::setShader(sk_sp<SkShader> shader) {
   shader  //
