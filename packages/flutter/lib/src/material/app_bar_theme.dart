@@ -154,10 +154,10 @@ class AppBarTheme with Diagnosticable {
   ///    height of an AppBar widget, taking this value into account.
   final double? toolbarHeight;
 
-  /// Overrides the default value for the obsolete [AppBar.toolbarTextStyle]
+  /// Overrides the default value of [AppBar.toolbarTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
-  /// If this property is specified, then [backwardsCompatibility] should be true.
+  /// If this property is specified, then [backwardsCompatibility] should be false.
   ///
   /// See also:
   ///
@@ -168,7 +168,7 @@ class AppBarTheme with Diagnosticable {
   /// Overrides the default value of [AppBar.titleTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
-  /// If this property is specified, then [backwardsCompatibility] should be true.
+  /// If this property is specified, then [backwardsCompatibility] should be false.
   ///
   /// See also:
   ///
