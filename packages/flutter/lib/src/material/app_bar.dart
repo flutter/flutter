@@ -240,6 +240,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.brightness,
     this.iconTheme,
     this.actionsIconTheme,
+    @Deprecated(
+      'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     this.textTheme,
     this.primary = true,
     this.centerTitle,
@@ -595,6 +599,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final IconThemeData? actionsIconTheme;
 
   /// {@template flutter.material.appbar.textTheme}
+  /// This property is deprecated, please use [toolbarTextStyle] and
+  /// [titleTextStyle] instead.
+  ///
   /// The typographic styles to use for text in the app bar. Typically this is
   /// set along with [backgroundColor], [iconTheme].
   ///
@@ -602,6 +609,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [ThemeData.appBarTheme] is used. If that is also null, then
   /// [ThemeData.primaryTextTheme] is used.
   /// {@endtemplate}
+  @Deprecated(
+    'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
+    'This feature was deprecated after v2.4.0-0.0.pre.',
+  )
   final TextTheme? textTheme;
 
   /// {@template flutter.material.appbar.primary}
@@ -1536,6 +1547,10 @@ class SliverAppBar extends StatefulWidget {
     this.brightness,
     this.iconTheme,
     this.actionsIconTheme,
+    @Deprecated(
+      'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     this.textTheme,
     this.primary = true,
     this.centerTitle,
@@ -1652,6 +1667,10 @@ class SliverAppBar extends StatefulWidget {
   /// {@macro flutter.material.appbar.textTheme}
   ///
   /// This property is used to configure an [AppBar].
+  @Deprecated(
+    'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
+    'This feature was deprecated after v2.4.0-0.0.pre.',
+  )
   final TextTheme? textTheme;
 
   /// {@macro flutter.material.appbar.primary}

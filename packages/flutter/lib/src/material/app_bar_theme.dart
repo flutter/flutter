@@ -40,6 +40,10 @@ class AppBarTheme with Diagnosticable {
     this.shadowColor,
     this.iconTheme,
     this.actionsIconTheme,
+    @Deprecated(
+      'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     this.textTheme,
     this.centerTitle,
     this.titleSpacing,
@@ -142,6 +146,9 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.foregroundColor] in all descendant widgets.
   final IconThemeData? actionsIconTheme;
 
+  /// This property is deprecated, please use [toolbarTextStyle] and
+  /// [titleTextStyle] instead.
+  ///
   /// Overrides the default value of the obsolete [AppBar.textTheme]
   /// property in all descendant [AppBar] widgets.
   ///
@@ -151,6 +158,10 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.toolbarTextStyle in all descendant [AppBar] widgets.
   ///  * [titleTextStyle], which overrides the default value for
   ///    [AppBar.titleTextStyle in all descendant [AppBar] widgets.
+  @Deprecated(
+    'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
+    'This feature was deprecated after v2.4.0-0.0.pre.',
+  )
   final TextTheme? textTheme;
 
   /// Overrides the default value for [AppBar.centerTitle].

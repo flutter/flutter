@@ -623,7 +623,6 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
-
             title: const Text('X'),
             actions: const <Widget> [
               IconButton(
