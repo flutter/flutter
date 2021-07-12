@@ -6,7 +6,6 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -41,7 +40,11 @@ void _handleDriverMessage(Map<String, dynamic> call) {
 
 Future<void> _handlePlatformMessage(
     String name, ByteData data, PlatformMessageResponseCallback callback) async {
-  print('$name = ${utf8.decode(data.buffer.asUint8List())}');
+  if (data != null) {
+    print('$name = ${utf8.decode(data.buffer.asUint8List())}');
+  } else {
+    print(name);
+  }
 
   switch (name) {
     case 'driver':
@@ -57,21 +60,12 @@ Future<void> _handlePlatformMessage(
 }
 
 Future<String> _getTimelineData() async {
-  final String isolateId = developer.Service.getIsolateID(Isolate.current);
   final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
-  final Uri cpuProfileTimelineUri = info.serverUri.resolve(
-    '_getCpuProfileTimeline?tags=None&isolateId=$isolateId',
-  );
   final Uri vmServiceTimelineUri = info.serverUri.resolve('getVMTimeline');
-  final Map<String, dynamic> cpuTimelineJson = await _getJson(cpuProfileTimelineUri);
   final Map<String, dynamic> vmServiceTimelineJson = await _getJson(vmServiceTimelineUri);
-  final Map<String, dynamic> cpuResult = cpuTimelineJson['result'] as Map<String, dynamic>;
   final Map<String, dynamic> vmServiceResult = vmServiceTimelineJson['result'] as Map<String, dynamic>;
-
   return json.encode(<String, dynamic>{
-    'stackFrames': cpuResult['stackFrames'],
     'traceEvents': <dynamic>[
-      ...cpuResult['traceEvents'] as List<dynamic>,
       ...vmServiceResult['traceEvents'] as List<dynamic>,
     ],
   });
@@ -82,7 +76,7 @@ Future<Map<String, dynamic>> _getJson(Uri uri) async {
   final HttpClientRequest request = await client.getUrl(uri);
   final HttpClientResponse response = await request.close();
   if (response.statusCode > 299) {
-    return null;
+    return <String, dynamic>{};
   }
   final String data = await utf8.decodeStream(response);
   return json.decode(data) as Map<String, dynamic>;
