@@ -100,7 +100,8 @@ linter:
     # - curly_braces_in_flow_control_structures # not required by flutter style
     - deprecated_consistency
     # - diagnostic_describe_all_properties # not yet tested
-    - directives_ordering
+    # TODO: Re-enable directives_ordering once roll https://github.com/flutter/engine/pull/27324 has completed.
+    # - directives_ordering
     # - do_not_use_environment # we do this commonly
     - empty_catches
     - empty_constructor_bodies
