@@ -11,7 +11,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +27,7 @@ import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
+import io.flutter.util.ViewUtils;
 import java.util.Arrays;
 
 /**
@@ -266,7 +266,10 @@ import java.util.Arrays;
    */
   @NonNull
   View onCreateView(
-      LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+      LayoutInflater inflater,
+      @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState,
+      int flutterViewId) {
     Log.v(TAG, "Creating FlutterView.");
     ensureAlive();
 
@@ -296,18 +299,12 @@ import java.util.Arrays;
     flutterView.addOnFirstFrameRenderedListener(flutterUiDisplayListener);
 
     flutterSplashView = new FlutterSplashView(host.getContext());
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-      flutterSplashView.setId(View.generateViewId());
-    } else {
-      // TODO(mattcarroll): Find a better solution to this ID. This is a random, static ID.
-      // It might conflict with other Views, and it means that only a single FlutterSplashView
-      // can exist in a View hierarchy at one time.
-      flutterSplashView.setId(486947586);
-    }
+    flutterSplashView.setId(ViewUtils.generateViewId(486947586));
     flutterSplashView.displayFlutterViewWithSplash(flutterView, host.provideSplashScreen());
 
     Log.v(TAG, "Attaching FlutterEngine to FlutterView.");
     flutterView.attachToFlutterEngine(flutterEngine);
+    flutterView.setId(flutterViewId);
 
     return flutterSplashView;
   }
