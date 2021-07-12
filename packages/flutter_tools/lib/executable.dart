@@ -109,6 +109,7 @@ Future<void> main(List<String> args) async {
       // devtools source code.
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
+        fileSystem: globals.fs,
         pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
         logger: globals.logger,
         platform: globals.platform,
