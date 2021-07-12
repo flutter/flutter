@@ -14,6 +14,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 #include "third_party/skia/include/core/SkVertices.h"
+#include "third_party/skia/include/effects/SkBlenders.h"
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
@@ -66,6 +67,12 @@ constexpr SkPoint TestPoints[] = {
 };
 #define TestPointCount sizeof(TestPoints) / (sizeof(TestPoints[0]))
 
+static const sk_sp<SkBlender> TestBlender1 =
+    SkBlenders::Arithmetic(0.2, 0.2, 0.2, 0.2, false);
+static const sk_sp<SkBlender> TestBlender2 =
+    SkBlenders::Arithmetic(0.2, 0.2, 0.2, 0.2, true);
+static const sk_sp<SkBlender> TestBlender3 =
+    SkBlenders::Arithmetic(0.3, 0.3, 0.3, 0.3, true);
 static const sk_sp<SkShader> TestShader1 =
     SkGradientShader::MakeLinear(end_points,
                                  colors,
@@ -293,6 +300,13 @@ std::vector<DisplayListInvocationGroup> allGroups = {
   { "SetBlendMode", {
       {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(SkBlendMode::kSrcIn);}},
       {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(SkBlendMode::kDstIn);}},
+    }
+  },
+  { "SetBlender", {
+      {1, 8, 0, 0, [](DisplayListBuilder& b) {b.setBlender(nullptr);}},
+      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setBlender(TestBlender1);}},
+      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setBlender(TestBlender2);}},
+      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.setBlender(TestBlender3);}},
     }
   },
   { "SetShader", {

@@ -301,6 +301,7 @@ class DisplayListCanvasRecorder
   SkScalar current_miter_limit_ = 4.0;
   SkPaint::Cap current_cap_ = SkPaint::Cap::kButt_Cap;
   SkPaint::Join current_join_ = SkPaint::Join::kMiter_Join;
+  sk_sp<SkBlender> current_blender_;
   sk_sp<SkShader> current_shader_;
   sk_sp<SkColorFilter> current_color_filter_;
   sk_sp<SkImageFilter> current_image_filter_;
