@@ -2,13 +2,232 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "impeller/geometry/geometry_unittests.h"
 #include "flutter/testing/testing.h"
+#include "impeller/geometry/path.h"
+#include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/size.h"
 
 namespace impeller {
 namespace testing {
+
+TEST(GeometryTest, RotationMatrix) {
+  auto rotation = Matrix::MakeRotationZ(M_PI_4);
+  auto expect = Matrix{0.707,  0.707, 0, 0,  //
+                       -0.707, 0.707, 0, 0,  //
+                       0,      0,     1, 0,  //
+                       0,      0,     0, 1};
+  ASSERT_MATRIX_NEAR(rotation, expect);
+}
+
+TEST(GeometryTest, InvertMultMatrix) {
+  auto rotation = Matrix::MakeRotationZ(M_PI_4);
+  auto invert = rotation.Invert();
+  auto expect = Matrix{0.707, -0.707, 0, 0,  //
+                       0.707, 0.707,  0, 0,  //
+                       0,     0,      1, 0,  //
+                       0,     0,      0, 1};
+  ASSERT_MATRIX_NEAR(invert, expect);
+}
+
+TEST(GeometryTest, MutliplicationMatrix) {
+  auto rotation = Matrix::MakeRotationZ(M_PI_4);
+  auto invert = rotation.Invert();
+  ASSERT_MATRIX_NEAR(rotation * invert, Matrix{});
+}
+
+TEST(GeometryTest, DeterminantTest) {
+  auto matrix = Matrix{3, 4, 14, 155, 2, 1, 3, 4, 2, 3, 2, 1, 1, 2, 4, 2};
+  ASSERT_EQ(matrix.GetDeterminant(), -1889);
+}
+
+TEST(GeometryTest, InvertMatrix) {
+  auto inverted = Matrix{10,  -9,  -12, 8,   //
+                         7,   -12, 11,  22,  //
+                         -10, 10,  3,   6,   //
+                         -2,  22,  2,   1}
+                      .Invert();
+
+  auto result = Matrix{
+      438.0 / 85123.0,   1751.0 / 85123.0, -7783.0 / 85123.0, 4672.0 / 85123.0,
+      393.0 / 85123.0,   -178.0 / 85123.0, -570.0 / 85123.0,  4192 / 85123.0,
+      -5230.0 / 85123.0, 2802.0 / 85123.0, -3461.0 / 85123.0, 962.0 / 85123.0,
+      2690.0 / 85123.0,  1814.0 / 85123.0, 3896.0 / 85123.0,  319.0 / 85123.0};
+
+  ASSERT_MATRIX_NEAR(inverted, result);
+}
+
+TEST(GeometryTest, TestDecomposition) {
+  auto rotated = Matrix::MakeRotationZ(M_PI_4);
+
+  auto result = rotated.Decompose();
+
+  ASSERT_TRUE(result.first);
+
+  Matrix::Decomposition res = result.second;
+
+  auto quaternion = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
+  ASSERT_QUATERNION_NEAR(res.rotation, quaternion);
+}
+
+TEST(GeometryTest, TestDecomposition2) {
+  auto rotated = Matrix::MakeRotationZ(M_PI_4);
+  auto scaled = Matrix::MakeScale({2.0, 3.0, 1.0});
+  auto translated = Matrix::MakeTranslation({-200, 750, 20});
+
+  auto result = (translated * rotated * scaled).Decompose();
+
+  ASSERT_TRUE(result.first);
+
+  Matrix::Decomposition res = result.second;
+
+  auto quaternion = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
+
+  ASSERT_QUATERNION_NEAR(res.rotation, quaternion);
+
+  ASSERT_FLOAT_EQ(res.translation.x, -200);
+  ASSERT_FLOAT_EQ(res.translation.y, 750);
+  ASSERT_FLOAT_EQ(res.translation.z, 20);
+
+  ASSERT_FLOAT_EQ(res.scale.x, 2);
+  ASSERT_FLOAT_EQ(res.scale.y, 3);
+  ASSERT_FLOAT_EQ(res.scale.z, 1);
+}
+
+TEST(GeometryTest, TestRecomposition) {
+  /*
+   *  Decomposition.
+   */
+  auto rotated = Matrix::MakeRotationZ(M_PI_4);
+
+  auto result = rotated.Decompose();
+
+  ASSERT_TRUE(result.first);
+
+  Matrix::Decomposition res = result.second;
+
+  auto quaternion = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
+
+  ASSERT_QUATERNION_NEAR(res.rotation, quaternion);
+
+  /*
+   *  Recomposition.
+   */
+  ASSERT_MATRIX_NEAR(rotated, Matrix{res});
+}
+
+TEST(GeometryTest, TestRecomposition2) {
+  auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
+                Matrix::MakeRotationZ(M_PI_4) *
+                Matrix::MakeScale({2.0, 2.0, 2.0});
+
+  auto result = matrix.Decompose();
+
+  ASSERT_TRUE(result.first);
+
+  ASSERT_MATRIX_NEAR(matrix, Matrix{result.second});
+}
+
+TEST(GeometryTest, QuaternionLerp) {
+  auto q1 = Quaternion{{0.0, 0.0, 1.0}, 0.0};
+  auto q2 = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
+
+  auto q3 = q1.Slerp(q2, 0.5);
+
+  auto expected = Quaternion{{0.0, 0.0, 1.0}, M_PI_4 / 2.0};
+
+  ASSERT_QUATERNION_NEAR(q3, expected);
+}
+
+TEST(GeometryTest, RectWithPoint) {
+  auto rect = Rect{};
+
+  auto expected = Rect{};
+
+  ASSERT_RECT_NEAR(rect, expected);
+
+  rect = rect.WithPoint({100, 100});
+  expected = Rect{0, 0, 100, 100};
+  ASSERT_RECT_NEAR(rect, expected);
+
+  rect = rect.WithPoint({-11, -12});
+  expected = Rect{-11, -12, 111, 112};
+  ASSERT_RECT_NEAR(rect, expected);
+
+  rect = rect.WithPoint({55, 65});
+  expected = Rect{-11, -12, 111, 112};
+  ASSERT_RECT_NEAR(rect, expected);
+
+  rect = rect.WithPoint({-25, 0});
+  expected = Rect{-25, -12, 125, 112};
+  ASSERT_RECT_NEAR(rect, expected);
+
+  rect = rect.WithPoint({0, -25});
+  expected = Rect{-25, -25, 125, 125};
+  ASSERT_RECT_NEAR(rect, expected);
+
+  rect = rect.WithPoint({125, 135});
+  expected = Rect{-25, -25, 150, 160};
+  ASSERT_RECT_NEAR(rect, expected);
+}
+
+TEST(GeometryTest, SimplePath) {
+  Path path;
+
+  path.AddLinearComponent({0, 0}, {100, 100})
+      .AddQuadraticComponent({100, 100}, {200, 200}, {300, 300})
+      .AddCubicComponent({300, 300}, {400, 400}, {500, 500}, {600, 600});
+
+  ASSERT_EQ(path.GetComponentCount(), 3u);
+
+  path.EnumerateComponents(
+      [](size_t index, const LinearPathComponent& linear) {
+        Point p1(0, 0);
+        Point p2(100, 100);
+        ASSERT_EQ(index, 0u);
+        ASSERT_EQ(linear.p1, p1);
+        ASSERT_EQ(linear.p2, p2);
+      },
+      [](size_t index, const QuadraticPathComponent& quad) {
+        Point p1(100, 100);
+        Point cp(200, 200);
+        Point p2(300, 300);
+        ASSERT_EQ(index, 1u);
+        ASSERT_EQ(quad.p1, p1);
+        ASSERT_EQ(quad.cp, cp);
+        ASSERT_EQ(quad.p2, p2);
+      },
+      [](size_t index, const CubicPathComponent& cubic) {
+        Point p1(300, 300);
+        Point cp1(400, 400);
+        Point cp2(500, 500);
+        Point p2(600, 600);
+        ASSERT_EQ(index, 2u);
+        ASSERT_EQ(cubic.p1, p1);
+        ASSERT_EQ(cubic.cp1, cp1);
+        ASSERT_EQ(cubic.cp2, cp2);
+        ASSERT_EQ(cubic.p2, p2);
+      });
+}
+
+TEST(GeometryTest, BoundingBoxCubic) {
+  Path path;
+  path.AddCubicComponent({120, 160}, {25, 200}, {220, 260}, {220, 40});
+  auto box = path.GetBoundingBox();
+  Rect expected(0, 0, 220, 198.862);
+  ASSERT_RECT_NEAR(box, expected);
+}
+
+TEST(GeometryTest, BoundingBoxOfCompositePathIsCorrect) {
+  PathBuilder builder;
+  builder.AddRoundedRect({{10, 10}, {300, 300}}, {50, 50, 50, 50});
+  auto path = builder.CreatePath();
+  auto actual = path.GetBoundingBox();
+  Rect expected(0, 0, 310, 310);
+  ASSERT_RECT_NEAR(actual, expected);
+}
 
 TEST(GeometryTest, CanGenerateMipCounts) {
   ASSERT_EQ((Size{128, 128}.MipCount()), 7u);

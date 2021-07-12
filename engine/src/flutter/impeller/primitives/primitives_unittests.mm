@@ -35,13 +35,12 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
   VertexBufferBuilder<BoxVertexShader::PerVertexData> vertex_builder;
   vertex_builder.SetLabel("Box");
   vertex_builder.AddVertices({
-      {{100, 100, 0.0}, {Color::Red()}, {0.0, 0.0}},    // 1
-      {{800, 100, 0.0}, {Color::Green()}, {1.0, 0.0}},  // 2
-      {{800, 800, 0.0}, {Color::Blue()}, {1.0, 1.0}},   // 3
-
-      {{100, 100, 0.0}, {Color::Cyan()}, {0.0, 0.0}},    // 1
-      {{800, 800, 0.0}, {Color::White()}, {1.0, 1.0}},   // 3
-      {{100, 800, 0.0}, {Color::Purple()}, {0.0, 1.0}},  // 4
+      {{100, 100, 0.0}, {0.0, 0.0}},  // 1
+      {{800, 100, 0.0}, {1.0, 0.0}},  // 2
+      {{800, 800, 0.0}, {1.0, 1.0}},  // 3
+      {{100, 100, 0.0}, {0.0, 0.0}},  // 1
+      {{800, 800, 0.0}, {1.0, 1.0}},  // 3
+      {{100, 800, 0.0}, {0.0, 1.0}},  // 4
   });
   auto vertex_buffer =
       vertex_builder.CreateVertexBuffer(*context->GetPermanentsAllocator());
@@ -74,8 +73,8 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
 
     BoxFragmentShader::BindFrameInfo(
         cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
-    BoxFragmentShader::BindContents1Texture(cmd, boston, sampler);
-    BoxFragmentShader::BindContents2Texture(cmd, bridge, sampler);
+    BoxFragmentShader::BindContents1(cmd, boston, sampler);
+    BoxFragmentShader::BindContents2(cmd, bridge, sampler);
 
     cmd.primitive_type = PrimitiveType::kTriangle;
     if (!pass.RecordCommand(std::move(cmd))) {
