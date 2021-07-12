@@ -37,9 +37,6 @@ struct TextureDescriptor {
            mip_count >= 1u                     //
         ;
   }
-
-  static std::optional<TextureDescriptor> MakeFromImageResult(
-      const Image& result);
 };
 
 }  // namespace impeller

@@ -98,7 +98,7 @@ template("impeller_shaders") {
     spirv_intermediate = "$target_gen_dir/{{source_file_part}}.spirv"
     reflection_json_intermediate = "$target_gen_dir/{{source_file_part}}.json"
     reflection_header_intermediate = "$target_gen_dir/{{source_file_part}}.h"
-    reflection_cc_intermediate = "$target_gen_dir/{{source_file_part}}.cc"
+    reflection_cc_intermediate = "$target_gen_dir/{{source_file_part}}.mm"
 
     outputs = [
       metal_intermediate,
@@ -164,6 +164,7 @@ template("impeller_shaders") {
                              [
                                "*.h",
                                "*.cc",
+                               "*.mm",
                              ])
 
     deps = [

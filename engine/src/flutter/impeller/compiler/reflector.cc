@@ -239,7 +239,7 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     });
   }
 
-  root["bind_prototype"] = EmitBindPrototypes(shader_resources);
+  root["bind_prototypes"] = EmitBindPrototypes(shader_resources);
 
   return root;
 }
@@ -661,11 +661,29 @@ std::string Reflector::GetMemberNameAtIndex(
 std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
     const spirv_cross::ShaderResources& resources) const {
   std::vector<BindPrototype> prototypes;
+  for (const auto& uniform_buffer : resources.uniform_buffers) {
+    auto& proto = prototypes.emplace_back(BindPrototype{});
+    proto.return_type = "bool";
+    proto.name = ConvertToCamelCase(uniform_buffer.name);
+    {
+      std::stringstream stream;
+      stream << "Bind uniform buffer for resource named " << uniform_buffer.name
+             << ".";
+      proto.docstring = stream.str();
+    }
+    proto.args.push_back(BindPrototypeArgument{
+        .type_name = "Command&",
+        .argument_name = "command",
+    });
+    proto.args.push_back(BindPrototypeArgument{
+        .type_name = "BufferView",
+        .argument_name = "view",
+    });
+  }
   for (const auto& sampled_image : resources.sampled_images) {
     auto& proto = prototypes.emplace_back(BindPrototype{});
-    proto.return_type = "void";
-    proto.name =
-        SPrintF("Bind%s", ConvertToCamelCase(sampled_image.name).c_str());
+    proto.return_type = "bool";
+    proto.name = ConvertToCamelCase(sampled_image.name);
     {
       std::stringstream stream;
       stream << "Bind combined image sampler for resource named "
@@ -677,11 +695,49 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "Texture&",
+        .type_name = "std::shared_ptr<const Texture>",
         .argument_name = "texture",
     });
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "Sampler&",
+        .type_name = "std::shared_ptr<const Sampler>",
+        .argument_name = "sampler",
+    });
+  }
+  for (const auto& separate_image : resources.separate_images) {
+    auto& proto = prototypes.emplace_back(BindPrototype{});
+    proto.return_type = "bool";
+    proto.name = ConvertToCamelCase(separate_image.name);
+    {
+      std::stringstream stream;
+      stream << "Bind separate image for resource named " << separate_image.name
+             << ".";
+      proto.docstring = stream.str();
+    }
+    proto.args.push_back(BindPrototypeArgument{
+        .type_name = "Command&",
+        .argument_name = "command",
+    });
+    proto.args.push_back(BindPrototypeArgument{
+        .type_name = "std::shared_ptr<const Texture>",
+        .argument_name = "texture",
+    });
+  }
+  for (const auto& separate_sampler : resources.separate_samplers) {
+    auto& proto = prototypes.emplace_back(BindPrototype{});
+    proto.return_type = "bool";
+    proto.name = ConvertToCamelCase(separate_sampler.name);
+    {
+      std::stringstream stream;
+      stream << "Bind separate sampler for resource named "
+             << separate_sampler.name << ".";
+      proto.docstring = stream.str();
+    }
+    proto.args.push_back(BindPrototypeArgument{
+        .type_name = "Command&",
+        .argument_name = "command",
+    });
+    proto.args.push_back(BindPrototypeArgument{
+        .type_name = "std::shared_ptr<const Sampler>",
         .argument_name = "sampler",
     });
   }

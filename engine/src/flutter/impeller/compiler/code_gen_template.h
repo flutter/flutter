@@ -13,7 +13,13 @@ constexpr std::string_view kReflectionHeaderTemplate =
 
 #pragma once
 
-#include "shader_types.h"
+// Note: The nogncheck decorations are only to make GN not mad at the template.
+// There are no GN rule violations in the generated file itself.
+#include "impeller/compositor/buffer_view.h"   // nogncheck
+#include "impeller/compositor/command.h"       // nogncheck
+#include "impeller/compositor/sampler.h"       // nogncheck
+#include "impeller/compositor/texture.h"       // nogncheck
+#include "impeller/shader_glue/shader_types.h" // nogncheck
 
 namespace impeller {
 
@@ -43,7 +49,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
   // ===========================================================================
 {% for uniform in uniform_buffers %}
 
-  static constexpr auto kUniform{{camel_case(uniform.name)}} = ShaderUniformSlot<{{uniform.name}}> { // {{uniform.name}}
+  static constexpr auto kResource{{camel_case(uniform.name)}} = ShaderUniformSlot<{{uniform.name}}> { // {{uniform.name}}
     "{{uniform.name}}",     // name
     {{uniform.binding}}u,   // binding
   };
@@ -80,7 +86,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
   // ===========================================================================
 {% for sampled_image in sampled_images %}
 
-  static constexpr auto kSampledImage{{camel_case(sampled_image.name)}} = SampledImageSlot { // {{sampled_image.name}}
+  static constexpr auto kResource{{camel_case(sampled_image.name)}} = SampledImageSlot { // {{sampled_image.name}}
     "{{sampled_image.name}}",      // name
     {{sampled_image.msl_res_0}}u,  // texture
     {{sampled_image.msl_res_1}}u,  // sampler
@@ -109,6 +115,21 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
 {% endfor %}
   };
 {% endif %}
+
+{% for proto in bind_prototypes %}
+  /// {{proto.docstring}}
+  static {{proto.return_type}} Bind{{proto.name}}({% for arg in proto.args %}
+{{arg.type_name}} {{arg.argument_name}}{% if not loop.is_last %}, {% endif %}
+{% endfor %}) {
+    return {{ proto.args.0.argument_name }}.BindResource({% for arg in proto.args %}
+  {% if loop.is_first %}
+{{to_shader_stage(shader_stage)}}, kResource{{ proto.name }}, {% else %}
+std::move({{ arg.argument_name }}){% if not loop.is_last %}, {% endif %}
+  {% endif %}
+  {% endfor %});
+  }
+
+{% endfor %}
 
 };  // struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader
 

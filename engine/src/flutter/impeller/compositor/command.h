@@ -8,15 +8,17 @@
 #include <memory>
 #include <string>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/buffer_view.h"
 #include "impeller/compositor/formats.h"
 #include "impeller/compositor/pipeline.h"
+#include "impeller/compositor/sampler.h"
+#include "impeller/compositor/texture.h"
+#include "impeller/compositor/vertex_buffer.h"
+#include "impeller/shader_glue/shader_types.h"
 
 namespace impeller {
-
-class Texture;
-class Sampler;
 
 struct Bindings {
   std::map<size_t, BufferView> buffers;
@@ -32,6 +34,30 @@ struct Command {
   size_t index_count = 0u;
   std::string label;
   PrimitiveType primitive_type;
+
+  bool BindVertices(const VertexBuffer& buffer);
+
+  template <class T>
+  bool BindResource(ShaderStage stage,
+                    const ShaderUniformSlot<T> slot,
+                    BufferView view) {
+    return BindResource(stage, slot.binding, std::move(view));
+  }
+
+  bool BindResource(ShaderStage stage, size_t binding, BufferView view);
+
+  bool BindResource(ShaderStage stage,
+                    const SampledImageSlot& slot,
+                    std::shared_ptr<const Texture> texture);
+
+  bool BindResource(ShaderStage stage,
+                    const SampledImageSlot& slot,
+                    std::shared_ptr<const Sampler> sampler);
+
+  bool BindResource(ShaderStage stage,
+                    const SampledImageSlot& slot,
+                    std::shared_ptr<const Texture> texture,
+                    std::shared_ptr<const Sampler> sampler);
 
   constexpr operator bool() const { return pipeline && pipeline->IsValid(); }
 };

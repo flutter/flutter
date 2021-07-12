@@ -169,20 +169,25 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
     const char* fixture_name) const {
   CompressedImage compressed_image(
       flutter::testing::OpenFixtureAsMapping(fixture_name));
+  // The decoded image is immediately converted into RGBA as that format is
+  // known to be supported everywhere. For image sources that don't need 32 bit
+  // pixel strides, this is overkill. Since this is a test fixture we aren't
+  // necessarily trying to eke out memory savings here and instead favor
+  // simplicity.
   auto image = compressed_image.Decode().ConvertToRGBA();
   if (!image.IsValid()) {
     FML_LOG(ERROR) << "Could not find fixture named " << fixture_name;
     return nullptr;
   }
-  auto texture_descriptor = TextureDescriptor::MakeFromImageResult(image);
-  if (!texture_descriptor.has_value()) {
-    FML_LOG(ERROR) << "Could not figure out texture descriptor for fixture "
-                   << fixture_name;
-    return nullptr;
-  }
+
+  auto texture_descriptor = TextureDescriptor{};
+  texture_descriptor.format = PixelFormat::kPixelFormat_R8G8B8A8_UNormInt;
+  texture_descriptor.size = image.GetSize();
+  texture_descriptor.mip_count = 1u;
+
   auto texture =
       renderer_.GetContext()->GetPermanentsAllocator()->CreateTexture(
-          StorageMode::kHostVisible, texture_descriptor.value());
+          StorageMode::kHostVisible, texture_descriptor);
   if (!texture) {
     FML_LOG(ERROR) << "Could not allocate texture for fixture " << fixture_name;
     return nullptr;

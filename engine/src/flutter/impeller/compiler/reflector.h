@@ -117,8 +117,6 @@ class Reflector {
   std::vector<StructMember> ReadStructMembers(
       const spirv_cross::TypeID& type_id) const;
 
-  bool IsVertexShader() const;
-
   FML_DISALLOW_COPY_AND_ASSIGN(Reflector);
 };
 
