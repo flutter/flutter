@@ -26,7 +26,7 @@ public class MemoryLeakTests {
   @FailTestOnLeak
   public void platformViewHybridComposition_launchActivityFinishAndLaunchAgain() throws Exception {
     Intent intent = new Intent(Intent.ACTION_MAIN);
-    intent.putExtra("scenario", "platform_view");
+    intent.putExtra("scenario_name", "platform_view");
     intent.putExtra("use_android_view", true);
 
     activityRule.launchActivity(intent);
