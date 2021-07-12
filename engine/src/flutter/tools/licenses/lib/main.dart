@@ -2122,9 +2122,6 @@ class _RepositoryFlutterDirectory extends _RepositoryDirectory {
         && entry.name != 'build'
         && entry.name != 'ci'
         && entry.name != 'flutter_frontend_server'
-        // The directory that contains end to end tests.
-        // Should be excluded from the licence checks.
-        && entry.name != 'e2etests'
         // None of the web_sdk code is linked into Flutter apps. It's only used
         // by engine tests and tools.
         && entry.name != 'web_sdk'

@@ -38,7 +38,6 @@ import 'environment.dart';
 import 'exceptions.dart';
 import 'firefox.dart';
 import 'firefox_installer.dart';
-import 'integration_tests_manager.dart';
 import 'macos_info.dart';
 import 'safari_installation.dart';
 import 'safari_ios.dart';
@@ -57,18 +56,6 @@ List<String> failedShards = <String>[];
 
 /// Whether all test shards succeeded.
 bool get allShardsPassed => failedShards.isEmpty;
-
-/// The type of tests requested by the tool user.
-enum TestTypesRequested {
-  /// For running the unit tests only.
-  unit,
-
-  /// For running the integration tests only.
-  integration,
-
-  /// For running both unit and integration tests.
-  all,
-}
 
 /// Command-line argument parsers that parse browser-specific options.
 final List<BrowserArgParser> _browserArgParsers  = <BrowserArgParser>[
@@ -115,13 +102,6 @@ class TestCommand extends Command<bool> with ArgUtils {
         defaultsTo: false,
         help: 'felt test command runs the unit tests and the integration tests '
             'at the same time. If this flag is set, only run the unit tests.',
-      )
-      ..addFlag(
-        'integration-tests-only',
-        defaultsTo: false,
-        help: 'felt test command runs the unit tests and the integration tests '
-            'at the same time. If this flag is set, only run the integration '
-            'tests.',
       )
       ..addFlag('use-system-flutter',
           defaultsTo: false,
@@ -170,7 +150,6 @@ class TestCommand extends Command<bool> with ArgUtils {
       browserArgParser.populateOptions(argParser);
     }
     GeneralTestsArgumentParser.instance.populateOptions(argParser);
-    IntegrationTestsArgumentParser.instance.populateOptions(argParser);
   }
 
   @override
@@ -192,25 +171,6 @@ class TestCommand extends Command<bool> with ArgUtils {
   /// If unit tests already did these steps, integration tests do not have to
   /// repeat them.
   bool _testPreparationReady = false;
-
-  /// Check the flags to see what type of tests are requested.
-  TestTypesRequested get testType {
-    if (boolArg('unit-tests-only')! && boolArg('integration-tests-only')!) {
-      throw ArgumentError('Conflicting arguments: unit-tests-only and '
-          'integration-tests-only are both set');
-    } else if (boolArg('unit-tests-only')!) {
-      print('Running the unit tests only');
-      return TestTypesRequested.unit;
-    } else if (boolArg('integration-tests-only')!) {
-      if (!isChrome && !isSafariOnMacOS && !isFirefox) {
-        throw UnimplementedError(
-            'Integration tests are only available on Chrome Desktop for now');
-      }
-      return TestTypesRequested.integration;
-    } else {
-      return TestTypesRequested.all;
-    }
-  }
 
   @override
   Future<bool> run() async {
@@ -277,46 +237,7 @@ class TestCommand extends Command<bool> with ArgUtils {
     return message.toString();
   }
 
-  Future<bool> runTests() async {
-    try {
-      switch (testType) {
-        case TestTypesRequested.unit:
-          return runUnitTests();
-        case TestTypesRequested.integration:
-          return runIntegrationTests();
-        case TestTypesRequested.all:
-          if (runAllTests && isIntegrationTestsAvailable) {
-            bool unitTestResult = await runUnitTests();
-            bool integrationTestResult = await runIntegrationTests();
-            if (integrationTestResult != unitTestResult) {
-              print(
-                  'Tests run. Integration tests passed: $integrationTestResult '
-                  'unit tests passed: $unitTestResult');
-            }
-            return integrationTestResult && unitTestResult;
-          } else {
-            return await runUnitTests();
-          }
-      }
-    } on TestFailureException {
-      return true;
-    }
-  }
-
-  Future<bool> runIntegrationTests() async {
-    // Parse additional arguments specific for integration testing.
-    IntegrationTestsArgumentParser.instance.parseOptions(argResults!);
-    await _prepare();
-    final bool result = await IntegrationTestsManager(
-            browser, useSystemFlutter, doUpdateScreenshotGoldens)
-        .runTests();
-    if (!result) {
-      failedShards.add('Integration tests');
-    }
-    return result;
-  }
-
-  Future<bool> runUnitTests() async {
+  Future<void> runUnitTests() async {
     _copyTestFontsIntoWebUi();
     await _buildHostPage();
     await _prepare();
@@ -327,7 +248,6 @@ class TestCommand extends Command<bool> with ArgUtils {
     } else {
       await _runSpecificTests(targetFiles);
     }
-    return true;
   }
 
   /// Preparations before running the tests such as booting simulators or
@@ -887,6 +807,6 @@ class TestRunnerStep implements PipelineStep {
 
   @override
   Future<void> run() async {
-    await testCommand.runTests();
+    await testCommand.runUnitTests();
   }
 }

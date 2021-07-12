@@ -1,32 +1,16 @@
-## Driver version in use.
-## For an integration test to run, the browser's major version and the driver's
-## major version should be equal. Please make sure the major version of
-## the binary for `chrome` is the same with `required_driver_version`.
-## (Major version meaning: For a browser that has version 13.0.5, the major
-## version is 13.)
-## Please refer to README's `Upgrade Browser Version` section for more details
-## on how to update the version number.
+# Please refer to the "Upgrade Browser Version" section in the README.md for
+# more details on how to update browser version numbers.
 chrome:
   # It seems Chrome can't always release from the same build for all operating
   # systems, so we specify per-OS build number.
   Linux: 768968 # Major version 84
   Mac: 768985 # Major version 84
   Win: 768975 # Major version 84
-required_driver_version:
-  ## Make sure the major version of the binary in `browser_lock.yaml` is the
-  ## same for Chrome.
-  chrome: '84'
 
 ## Firefox does not use CIPD. To update the version, simply update it in this
-## file. However geckodriver does use CIPD. When upgrading geckodriver, update
-## it here, then follow the process in go/cipd-flutter-web (googlers only) to
-## create a new CIPD package.
+## file.
 firefox:
   version: '83.0'
-## geckodriver is used for testing Firefox Browser. It works with multiple
-## Firefox Browser versions.
-## See: https://github.com/mozilla/geckodriver/releases
-geckodriver: 'v0.28.0'
 
 edge:
   launcher_version: '1.2.0.0'
