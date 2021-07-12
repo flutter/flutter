@@ -29,8 +29,6 @@ class Environment {
         io.Directory(pathlib.join(hostDebugUnoptDir.path, 'dart-sdk'));
     final io.Directory webUiRootDir = io.Directory(
         pathlib.join(engineSrcDir.path, 'flutter', 'lib', 'web_ui'));
-    final io.Directory integrationTestsDir = io.Directory(
-        pathlib.join(engineSrcDir.path, 'flutter', 'e2etests', 'web'));
 
     for (io.Directory expectedDirectory in <io.Directory>[
       engineSrcDir,
@@ -49,7 +47,6 @@ class Environment {
       webUiRootDir: webUiRootDir,
       engineSrcDir: engineSrcDir,
       engineToolsDir: engineToolsDir,
-      integrationTestsDir: integrationTestsDir,
       outDir: outDir,
       hostDebugUnoptDir: hostDebugUnoptDir,
       dartSdkDir: dartSdkDir,
@@ -61,7 +58,6 @@ class Environment {
     required this.webUiRootDir,
     required this.engineSrcDir,
     required this.engineToolsDir,
-    required this.integrationTestsDir,
     required this.outDir,
     required this.hostDebugUnoptDir,
     required this.dartSdkDir,
@@ -78,9 +74,6 @@ class Environment {
 
   /// Path to the engine's "tools" directory.
   final io.Directory engineToolsDir;
-
-  /// Path to the web integration tests.
-  final io.Directory integrationTestsDir;
 
   /// Path to the engine's "out" directory.
   ///
