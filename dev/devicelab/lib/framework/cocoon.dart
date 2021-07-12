@@ -107,16 +107,11 @@ class Cocoon {
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
   Future<void> writeTaskResultToFile({
-    required String builderName,
-    required String gitBranch,
+    String? builderName,
+    String? gitBranch,
     required TaskResult result,
     required String resultsPath,
   }) async {
-    assert(builderName != null);
-    assert(gitBranch != null);
-    assert(result != null);
-    assert(resultsPath != null);
-
     final Map<String, dynamic> updateRequest = _constructUpdateRequest(
       gitBranch: gitBranch,
       builderName: builderName,
@@ -134,7 +129,7 @@ class Cocoon {
   Map<String, dynamic> _constructUpdateRequest({
     String? builderName,
     required TaskResult result,
-    required String gitBranch,
+    String? gitBranch,
   }) {
     final Map<String, dynamic> updateRequest = <String, dynamic>{
       'CommitBranch': gitBranch,
