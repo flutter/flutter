@@ -33,7 +33,7 @@ struct Command {
   BufferView index_buffer;
   size_t index_count = 0u;
   std::string label;
-  PrimitiveType primitive_type;
+  PrimitiveType primitive_type = PrimitiveType::kTriangle;
 
   bool BindVertices(const VertexBuffer& buffer);
 
