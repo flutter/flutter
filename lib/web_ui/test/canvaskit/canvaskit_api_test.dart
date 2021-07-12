@@ -387,7 +387,6 @@ void _paintTests() {
       2.0,
       true,
     ));
-    paint.setFilterQuality(canvasKit.FilterQuality.High);
     paint.setColorFilter(canvasKit.ColorFilter.MakeLinearToSRGBGamma());
     paint.setStrokeMiter(1.4);
     paint.setImageFilter(canvasKit.ImageFilter.MakeBlur(
