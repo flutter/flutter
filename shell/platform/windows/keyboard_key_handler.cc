@@ -18,13 +18,85 @@ namespace {
 // emitting a warning on the console about unhandled events.
 static constexpr int kMaxPendingEvents = 1000;
 
+// Returns true if this key is a key down event of ShiftRight.
+//
+// This is a temporary solution to
+// https://github.com/flutter/flutter/issues/81674, and forces ShiftRight
+// KeyDown events to not be redispatched regardless of the framework's response.
+//
+// If a ShiftRight KeyDown event is not handled by the framework and is
+// redispatched, Win32 will not send its following KeyUp event and keeps
+// recording ShiftRight as being pressed.
+static bool IsKeyDownShiftRight(int virtual_key, bool was_down) {
+#ifdef WINUWP
+  return false;
+#else
+  return virtual_key == VK_RSHIFT && !was_down;
+#endif
+}
+
+// Returns true if this key is an AltRight key down event.
+//
+// This is used to resolve an issue where an AltGr press causes CtrlLeft to hang
+// when pressed, as reported in https://github.com/flutter/flutter/issues/78005.
+//
+// When AltGr is pressed (in a supporting layout such as Spanish), Win32 first
+// fires a fake CtrlLeft down event, then an AltRight down event.
+// This is significant because this fake CtrlLeft down event will not be paired
+// with a up event, which is fine until Flutter redispatches the CtrlDown
+// event, which Win32 then interprets as a real event, leaving both Win32 and
+// the Flutter framework thinking that CtrlLeft is still pressed.
+//
+// To resolve this, Flutter recognizes this fake CtrlLeft down event using the
+// following AltRight down event. Flutter then synthesizes a CtrlLeft key up
+// event immediately after the corresponding AltRight key up event.
+//
+// One catch is that it is impossible to distinguish the fake CtrlLeft down
+// from a normal CtrlLeft down (followed by a AltRight down), since they
+// contain the exactly same information, including the GetKeyState result.
+// Fortunately, this will require the two events to occur *really* close, which
+// would be rare, and a misrecognition would only cause a minor consequence
+// where the CtrlLeft is released early; the later, real, CtrlLeft up event will
+// be ignored.
+static bool IsKeyDownAltRight(int action, int virtual_key, bool extended) {
+#ifdef WINUWP
+  return false;
+#else
+  return virtual_key == VK_LMENU && extended && action == WM_KEYDOWN;
+#endif
+}
+
+// Returns true if this key is a key up event of AltRight.
+//
+// This is used to assist a corner case described in |IsKeyDownAltRight|.
+static bool IsKeyUpAltRight(int action, int virtual_key, bool extended) {
+#ifdef WINUWP
+  return false;
+#else
+  return virtual_key == VK_LMENU && extended && action == WM_KEYUP;
+#endif
+}
+
+// Returns true if this key is a key down event of CtrlLeft.
+//
+// This is used to assist a corner case described in |IsKeyDownAltRight|.
+static bool IsKeyDownCtrlLeft(int action, int virtual_key) {
+#ifdef WINUWP
+  return false;
+#else
+  return virtual_key == VK_LCONTROL && action == WM_KEYDOWN;
+#endif
+}
+
 }  // namespace
 
 KeyboardKeyHandler::KeyboardKeyHandlerDelegate::~KeyboardKeyHandlerDelegate() =
     default;
 
-KeyboardKeyHandler::KeyboardKeyHandler(EventRedispatcher redispatch_event)
-    : redispatch_event_(redispatch_event), last_sequence_id_(1) {}
+KeyboardKeyHandler::KeyboardKeyHandler(EventDispatcher dispatch_event)
+    : dispatch_event_(dispatch_event),
+      last_sequence_id_(1),
+      last_key_is_ctrl_left_down(false) {}
 
 KeyboardKeyHandler::~KeyboardKeyHandler() = default;
 
@@ -40,37 +112,47 @@ size_t KeyboardKeyHandler::RedispatchedCount() {
   return pending_redispatches_.size();
 }
 
-void KeyboardKeyHandler::RedispatchEvent(std::unique_ptr<PendingEvent> event) {
-  // TODO(dkwingsmt) consider adding support for redispatching events for UWP
+void KeyboardKeyHandler::DispatchEvent(const PendingEvent& event) {
+  // TODO(dkwingsmt) consider adding support for dispatching events for UWP
   // in order to support add-to-app.
   // https://github.com/flutter/flutter/issues/70202
 #ifdef WINUWP
   return;
 #else
-  uint8_t scancode = event->scancode;
-  char32_t character = event->character;
+  char32_t character = event.character;
 
   INPUT input_event{
       .type = INPUT_KEYBOARD,
       .ki =
           KEYBDINPUT{
-              .wVk = 0,
-              .wScan = static_cast<WORD>(event->scancode),
+              .wVk = static_cast<WORD>(event.key),
+              .wScan = static_cast<WORD>(event.scancode),
               .dwFlags = static_cast<WORD>(
                   KEYEVENTF_SCANCODE |
-                  (event->extended ? KEYEVENTF_EXTENDEDKEY : 0x0) |
-                  (event->action == WM_KEYUP ? KEYEVENTF_KEYUP : 0x0)),
+                  (event.extended ? KEYEVENTF_EXTENDEDKEY : 0x0) |
+                  (event.action == WM_KEYUP ? KEYEVENTF_KEYUP : 0x0)),
           },
   };
 
-  pending_redispatches_.push_back(std::move(event));
-
-  UINT accepted = redispatch_event_(1, &input_event, sizeof(input_event));
+  UINT accepted = dispatch_event_(1, &input_event, sizeof(input_event));
   if (accepted != 1) {
-    std::cerr << "Unable to synthesize event for unhandled keyboard event "
-                 "with scancode "
-              << scancode << " (character " << character << ")" << std::endl;
+    std::cerr << "Unable to synthesize event for keyboard event with scancode "
+              << event.scancode;
+    if (character != 0) {
+      std::cerr << " (character " << character << ")";
+    }
+    std::cerr << std::endl;
+    ;
   }
+#endif
+}
+
+void KeyboardKeyHandler::RedispatchEvent(std::unique_ptr<PendingEvent> event) {
+#ifdef WINUWP
+  return;
+#else
+  DispatchEvent(*event);
+  pending_redispatches_.push_back(std::move(event));
 #endif
 }
 
@@ -96,10 +178,39 @@ bool KeyboardKeyHandler::KeyboardHook(FlutterWindowsView* view,
     return false;
   }
 
+  if (IsKeyDownAltRight(action, key, extended)) {
+    if (last_key_is_ctrl_left_down) {
+      should_synthesize_ctrl_left_up = true;
+    }
+  }
+  if (IsKeyDownCtrlLeft(action, key)) {
+    last_key_is_ctrl_left_down = true;
+    ctrl_left_scancode = scancode;
+    should_synthesize_ctrl_left_up = false;
+  } else {
+    last_key_is_ctrl_left_down = false;
+  }
+  if (IsKeyUpAltRight(action, key, extended)) {
+    if (should_synthesize_ctrl_left_up) {
+      should_synthesize_ctrl_left_up = false;
+      PendingEvent ctrl_left_up{
+          .key = VK_LCONTROL,
+          .scancode = ctrl_left_scancode,
+          .action = WM_KEYUP,
+          .was_down = true,
+      };
+      DispatchEvent(ctrl_left_up);
+    }
+  }
+
   uint64_t sequence_id = ++last_sequence_id_;
   incoming->sequence_id = sequence_id;
   incoming->unreplied = delegates_.size();
-  incoming->any_handled = false;
+  // There are a few situations where events must not be redispatched.
+  // Initializing `any_handled` with true in such cases suffices, since it can
+  // only be set to true and is used to disable redispatching.
+  const bool must_not_redispatch = IsKeyDownShiftRight(key, was_down);
+  incoming->any_handled = must_not_redispatch;
 
   if (pending_responds_.size() > kMaxPendingEvents) {
     std::cerr
@@ -148,7 +259,7 @@ void KeyboardKeyHandler::ResolvePendingEvent(uint64_t sequence_id,
       assert(event.unreplied >= 0);
       // If all delegates have replied, redispatch if no one handled.
       if (event.unreplied == 0) {
-        auto event_ptr = std::move(*iter);
+        std::unique_ptr<PendingEvent> event_ptr = std::move(*iter);
         pending_responds_.erase(iter);
         if (!event_ptr->any_handled) {
           RedispatchEvent(std::move(event_ptr));
