@@ -16,8 +16,8 @@ import 'package:args/args.dart';
 import 'package:isolate/isolate.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:process_runner/process_runner.dart';
 import 'package:process/process.dart';
+import 'package:process_runner/process_runner.dart';
 
 class FormattingException implements Exception {
   FormattingException(this.message, [this.result]);
