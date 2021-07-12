@@ -193,6 +193,7 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
     return nullptr;
   }
   texture->SetLabel(fixture_name);
+
   auto uploaded = texture->SetContents(image.GetAllocation()->GetMapping(),
                                        image.GetAllocation()->GetSize());
   if (!uploaded) {
