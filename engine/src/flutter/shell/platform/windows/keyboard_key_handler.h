@@ -53,14 +53,14 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
     virtual ~KeyboardKeyHandlerDelegate();
   };
 
-  using EventRedispatcher =
+  using EventDispatcher =
       std::function<UINT(UINT cInputs, LPINPUT pInputs, int cbSize)>;
 
   // Create a KeyboardKeyHandler and specify where to redispatch events.
   //
   // The |redispatch_event| is typically |SendInput|, but can also be nullptr
   // (for UWP).
-  explicit KeyboardKeyHandler(EventRedispatcher redispatch_event);
+  explicit KeyboardKeyHandler(EventDispatcher dispatch_event);
 
   ~KeyboardKeyHandler();
 
@@ -140,6 +140,8 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
     uint64_t hash;
   };
 
+  void DispatchEvent(const PendingEvent& event);
+
   // Find an event in the redispatch list that matches the given one.
   //
   // If an matching event is found, removes the matching event from the
@@ -161,8 +163,23 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
   // The sequence_id attached to the last event sent to the framework.
   uint64_t last_sequence_id_;
 
-  // The callback used to redispatch synthesized events.
-  EventRedispatcher redispatch_event_;
+  // The callback used to dispatch synthesized events.
+  EventDispatcher dispatch_event_;
+
+  // Whether the last event is a CtrlLeft key down.
+  //
+  // This is used to resolve a corner case described in |IsKeyDownAltRight|.
+  bool last_key_is_ctrl_left_down;
+
+  // The scancode of the last met CtrlLeft down.
+  //
+  // This is used to resolve a corner case described in |IsKeyDownAltRight|.
+  uint8_t ctrl_left_scancode;
+
+  // Whether a CtrlLeft up should be synthesized upon the next AltRight up.
+  //
+  // This is used to resolve a corner case described in |IsKeyDownAltRight|.
+  bool should_synthesize_ctrl_left_up;
 
   // Calculate a hash based on event data for fast comparison for a redispatched
   // event.
