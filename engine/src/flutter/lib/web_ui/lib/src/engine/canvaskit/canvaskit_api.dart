@@ -890,7 +890,6 @@ class SkPaint {
   external void setColorInt(int color);
   external void setShader(SkShader? shader);
   external void setMaskFilter(SkMaskFilter? maskFilter);
-  external void setFilterQuality(SkFilterQuality filterQuality);
   external void setColorFilter(SkColorFilter? colorFilter);
   external void setStrokeMiter(double miterLimit);
   external void setImageFilter(SkImageFilter? imageFilter);
