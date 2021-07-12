@@ -5,8 +5,8 @@
 Map<Key, dynamic> _cache = <Key, dynamic>{};
 const int _maxSize = 10;
 
-T cache<T>(Key key, T getter()) {
-  T result = _cache[key];
+T cache<T>(Key key, T Function() getter) {
+  T result = _cache[key] as T;
   if (result != null) {
     _cache.remove(key);
   } else {
