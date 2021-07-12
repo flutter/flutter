@@ -25,6 +25,17 @@ abstract class KeyboardKey with Diagnosticable {
   const KeyboardKey();
 }
 
+abstract class KeyboardVirtualKey {
+  Iterable<LogicalKeyboardKey> get concreteLogicalKeys;
+}
+
+class ListKeyboardVirtualKey implements KeyboardVirtualKey {
+  const ListKeyboardVirtualKey(this.concreteLogicalKeys);
+
+  @override
+  final List<LogicalKeyboardKey> concreteLogicalKeys;
+}
+
 /// A class with static values that describe the keys that are returned from
 /// [RawKeyEvent.logicalKey].
 ///
@@ -123,7 +134,7 @@ abstract class KeyboardKey with Diagnosticable {
 ///  * [RawKeyboardListener], a widget used to listen to and supply handlers for
 ///    keyboard events.
 @immutable
-class LogicalKeyboardKey extends KeyboardKey {
+class LogicalKeyboardKey extends KeyboardKey implements KeyboardVirtualKey {
   /// Creates a new LogicalKeyboardKey object for a key ID.
   const LogicalKeyboardKey(this.keyId);
 
@@ -298,6 +309,11 @@ class LogicalKeyboardKey extends KeyboardKey {
   Set<LogicalKeyboardKey> get synonyms {
     final LogicalKeyboardKey? result = _synonyms[this];
     return result == null ? <LogicalKeyboardKey>{} : <LogicalKeyboardKey>{result};
+  }
+
+  @override
+  Iterable<LogicalKeyboardKey> get concreteLogicalKeys sync* {
+    yield this;
   }
 
   /// Takes a set of keys, and returns the same set, but with any keys that have
