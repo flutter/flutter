@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+
+import '../browser_detection.dart';
+import '../dom_renderer.dart';
+import '../util.dart';
+import 'slots.dart';
 
 /// A function which takes a unique `id` and some `params` and creates an HTML element.
 ///
@@ -149,7 +154,7 @@ class PlatformViewManager {
     final html.Element slot = html.document.createElement('slot')
       ..style.display = 'none'
       ..setAttribute('name', tombstoneName);
-    domRenderer._glassPaneShadow!.append(slot);
+    domRenderer.glassPaneShadow!.append(slot);
     // Link the element to the new slot
     element.setAttribute('slot', tombstoneName);
     // Delete both the element, and the new slot

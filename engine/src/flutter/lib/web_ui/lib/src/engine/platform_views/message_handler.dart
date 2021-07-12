@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+import 'dart:typed_data';
+
+import '../services.dart';
+import 'content_manager.dart';
 
 /// The signature for a callback for a Platform Message. From the `ui` package.
 /// Copied here so there's no circular dependencies.

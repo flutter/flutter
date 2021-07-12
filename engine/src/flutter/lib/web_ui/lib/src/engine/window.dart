@@ -2,12 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+@JS()
+library window;
+
+import 'dart:async';
+import 'dart:html' as html;
+import 'dart:typed_data';
+
+import 'package:js/js.dart';
+import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart' show registerHotRestartListener;
+import 'package:ui/ui.dart' as ui;
+
+import 'browser_detection.dart';
+import 'navigation/history.dart';
+import 'navigation/js_url_strategy.dart';
+import 'navigation/url_strategy.dart';
+import 'platform_dispatcher.dart';
+import 'services.dart';
+import 'test_embedding.dart';
 
 typedef _HandleMessageCallBack = Future<bool> Function();
 
 /// When set to true, all platform messages will be printed to the console.
-const bool /*!*/ _debugPrintPlatformMessages = false;
+const bool debugPrintPlatformMessages = false;
 
 /// Whether [_customUrlStrategy] has been set or not.
 ///
@@ -28,8 +46,8 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   EngineFlutterWindow(this._windowId, this.platformDispatcher) {
     final EnginePlatformDispatcher engineDispatcher =
         platformDispatcher as EnginePlatformDispatcher;
-    engineDispatcher._windows[_windowId] = this;
-    engineDispatcher._windowConfigurations[_windowId] = ui.ViewConfiguration();
+    engineDispatcher.windows[_windowId] = this;
+    engineDispatcher.windowConfigurations[_windowId] = ui.ViewConfiguration();
     if (_isUrlStrategySet) {
       _browserHistory =
           MultiEntriesBrowserHistory(urlStrategy: _customUrlStrategy);
@@ -44,7 +62,6 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
 
   /// Handles the browser history integration to allow users to use the back
   /// button, etc.
-  @visibleForTesting
   BrowserHistory get browserHistory {
     return _browserHistory ??=
         MultiEntriesBrowserHistory(urlStrategy: _urlStrategyForInitialization);
@@ -164,15 +181,15 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   ui.ViewConfiguration get viewConfiguration {
     final EnginePlatformDispatcher engineDispatcher =
         platformDispatcher as EnginePlatformDispatcher;
-    assert(engineDispatcher._windowConfigurations.containsKey(_windowId));
-    return engineDispatcher._windowConfigurations[_windowId] ??
+    assert(engineDispatcher.windowConfigurations.containsKey(_windowId));
+    return engineDispatcher.windowConfigurations[_windowId] ??
         ui.ViewConfiguration();
   }
 
   @override
   ui.Size get physicalSize {
     if (_physicalSize == null) {
-      _computePhysicalSize();
+      computePhysicalSize();
     }
     assert(_physicalSize != null);
     return _physicalSize!;
@@ -182,7 +199,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   ///
   /// This function is expensive. It triggers browser layout if there are
   /// pending DOM writes.
-  void _computePhysicalSize() {
+  void computePhysicalSize() {
     bool override = false;
 
     assert(() {
@@ -231,7 +248,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
 
   /// Forces the window to recompute its physical size. Useful for tests.
   void debugForceResize() {
-    _computePhysicalSize();
+    computePhysicalSize();
   }
 
   void computeOnScreenKeyboardInsets(bool isEditingOnMobile) {
@@ -315,7 +332,7 @@ typedef _JsSetUrlStrategy = void Function(JsUrlStrategy?);
 //
 // TODO: Add integration test https://github.com/flutter/flutter/issues/66852
 @JS('_flutter_web_set_location_strategy')
-external set _jsSetUrlStrategy(_JsSetUrlStrategy? newJsSetUrlStrategy);
+external set jsSetUrlStrategy(_JsSetUrlStrategy? newJsSetUrlStrategy);
 
 UrlStrategy? _createDefaultUrlStrategy() {
   return ui.debugEmulateFlutterTesterEnvironment
@@ -356,8 +373,8 @@ class EngineFlutterWindowView extends ui.FlutterWindow {
   ui.ViewConfiguration get viewConfiguration {
     final EnginePlatformDispatcher engineDispatcher =
         platformDispatcher as EnginePlatformDispatcher;
-    assert(engineDispatcher._windowConfigurations.containsKey(_viewId));
-    return engineDispatcher._windowConfigurations[_viewId] ??
+    assert(engineDispatcher.windowConfigurations.containsKey(_viewId));
+    return engineDispatcher.windowConfigurations[_viewId] ??
         ui.ViewConfiguration();
   }
 }

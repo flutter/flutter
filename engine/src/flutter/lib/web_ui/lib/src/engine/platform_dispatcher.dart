@@ -2,7 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:async';
+import 'dart:html' as html;
+import 'dart:typed_data';
+import 'dart:convert';
+
+import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart' show platformViewManager, registerHotRestartListener;
+import 'package:ui/ui.dart' as ui;
+
+import 'canvaskit/initialization.dart';
+import 'canvaskit/layer_scene_builder.dart';
+import 'canvaskit/rasterizer.dart';
+import 'clipboard.dart';
+import 'dom_renderer.dart';
+import 'html/scene.dart';
+import 'profiler.dart';
+import 'mouse_cursor.dart';
+import 'platform_views/message_handler.dart';
+import 'plugins.dart';
+import 'semantics.dart';
+import 'services.dart';
+import 'text_editing/text_editing.dart';
+import 'util.dart';
+import 'window.dart';
 
 /// Requests that the browser schedule a frame.
 ///
@@ -54,12 +77,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// The current list of windows,
   Iterable<ui.FlutterView> get views => _windows.values;
+  Map<Object, ui.FlutterWindow> get windows => _windows;
   Map<Object, ui.FlutterWindow> _windows = <Object, ui.FlutterWindow>{};
 
   /// A map of opaque platform window identifiers to window configurations.
   ///
   /// This should be considered a protected member, only to be used by
   /// [PlatformDispatcher] subclasses.
+  Map<Object, ui.ViewConfiguration> get windowConfigurations => _windowConfigurations;
   Map<Object, ui.ViewConfiguration> _windowConfigurations =
       <Object, ui.ViewConfiguration>{};
 
@@ -326,7 +351,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       return;
     }
 
-    if (_debugPrintPlatformMessages) {
+    if (debugPrintPlatformMessages) {
       print('Sent platform message on channel: "$name"');
     }
 
@@ -684,7 +709,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   // Called by DomRenderer when browser languages change.
-  void _updateLocales() {
+  void updateLocales() {
     _configuration = _configuration.copyWith(locales: parseBrowserLanguages());
   }
 

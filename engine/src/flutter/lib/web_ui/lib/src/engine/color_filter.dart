@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'package:ui/ui.dart' as ui;
+
+import 'canvaskit/color_filter.dart';
 
 /// A description of a color filter to apply when drawing a shape or compositing
 /// a layer with a particular [Paint]. A color filter is a function that takes
