@@ -2,7 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:async';
+import 'dart:html' as html;
+import 'dart:js' as js;
+import 'dart:js_util' as js_util;
+
+import 'package:ui/src/engine.dart' show buildMode, registerHotRestartListener;
+import 'package:ui/ui.dart' as ui;
+
+import 'browser_detection.dart';
+import 'canvaskit/initialization.dart';
+import 'canvaskit/canvaskit_api.dart';
+import 'host_node.dart';
+import 'keyboard_binding.dart';
+import 'platform_dispatcher.dart';
+import 'pointer_binding.dart';
+import 'semantics.dart';
+import 'text/measurement.dart';
+import 'text_editing/text_editing.dart';
+import 'util.dart';
+import 'window.dart';
 
 class DomRenderer {
   DomRenderer() {
@@ -514,7 +533,7 @@ class DomRenderer {
     }
     _localeSubscription =
         languageChangeEvent.forTarget(html.window).listen(_languageDidChange);
-    EnginePlatformDispatcher.instance._updateLocales();
+    EnginePlatformDispatcher.instance.updateLocales();
   }
 
   // Creates a [HostNode] into a `root` [html.Element].
@@ -550,7 +569,7 @@ class DomRenderer {
       window.computeOnScreenKeyboardInsets(true);
       EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
     } else {
-      window._computePhysicalSize();
+      window.computePhysicalSize();
       // When physical size changes this value has to be recalculated.
       window.computeOnScreenKeyboardInsets(false);
       EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
@@ -559,7 +578,7 @@ class DomRenderer {
 
   /// Called immediately after browser window language change.
   void _languageDidChange(html.Event event) {
-    EnginePlatformDispatcher.instance._updateLocales();
+    EnginePlatformDispatcher.instance.updateLocales();
     if (ui.window.onLocaleChanged != null) {
       ui.window.onLocaleChanged!();
     }
@@ -626,9 +645,9 @@ class DomRenderer {
   /// See w3c screen api: https://www.w3.org/TR/screen-orientation/
   Future<bool> setPreferredOrientation(List<dynamic> orientations) {
     final html.Screen screen = html.window.screen!;
-    if (!_unsafeIsNull(screen)) {
+    if (!unsafeIsNull(screen)) {
       final html.ScreenOrientation? screenOrientation = screen.orientation;
-      if (!_unsafeIsNull(screenOrientation)) {
+      if (!unsafeIsNull(screenOrientation)) {
         if (orientations.isEmpty) {
           screenOrientation!.unlock();
           return Future.value(true);

@@ -555,3 +555,8 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
 String blurSigmasToCssString(double sigmaX, double sigmaY) {
   return 'blur(${(sigmaX + sigmaY) * 0.5}px)';
 }
+
+/// Checks if the dynamic [object] is equal to null.
+bool unsafeIsNull(dynamic object) {
+  return object == null;
+}
