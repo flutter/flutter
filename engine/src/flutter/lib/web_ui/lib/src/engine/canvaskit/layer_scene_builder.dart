@@ -4,9 +4,10 @@
 
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart' show toMatrix32, Matrix4;
+import 'package:ui/src/engine.dart' show toMatrix32;
 import 'package:ui/ui.dart' as ui;
 
+import '../vector_math.dart';
 import 'layer.dart';
 import 'layer_tree.dart';
 import 'picture.dart';

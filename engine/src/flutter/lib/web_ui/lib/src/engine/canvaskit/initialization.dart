@@ -9,8 +9,9 @@ import 'dart:html' as html;
 import 'dart:js' as js;
 
 import 'package:js/js.dart';
-import 'package:ui/src/engine.dart' show isDesktop, kProfileMode, domRenderer;
+import 'package:ui/src/engine.dart' show kProfileMode, domRenderer;
 
+import '../browser_detection.dart';
 import 'canvaskit_api.dart';
 import 'fonts.dart';
 
