@@ -154,6 +154,50 @@ class _PreferredAppBarSize extends Size {
 /// ```
 /// {@end-tool}
 ///
+/// ## Troubleshooting
+///
+/// ### Why don't my TextButton actions appear?
+///
+/// If the app bar's [actions] contains [TextButton]s, they will not
+/// be visible if their foreground (text) color is the same as the
+/// the app bar's background color.
+///
+/// The default app bar [backgroundColor] is the overall theme's
+/// [ColorScheme.primary] if the overall theme's brightness is
+/// [Brightness.light]. Unfortunately this is the same as the default
+/// [ButtonStyle.foregroundColor] for [TextButton] for light themes.
+/// In this case a preferable text button foreground color is
+/// [ColorScheme.onPrimary], a color that contrasts nicely with
+/// [ColorScheme.primary].  to remedy the problem, override
+/// [TextButton.style]:
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   final ButtonStyle style = TextButton.styleFrom(
+///     primary: Theme.of(context).colorScheme.onPrimary
+///   );
+///   return Scaffold(
+///     appBar: AppBar(
+///       actions: <Widget>[
+///         TextButton(
+///           style: style,
+///           onPressed: () {},
+///           child: const Text('Action 1'),
+///         ),
+///         TextButton(
+///           style: style,
+///           onPressed: () {},
+///           child: const Text('Action 2'),
+///         )
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], which displays the [AppBar] in its [Scaffold.appBar] slot.
