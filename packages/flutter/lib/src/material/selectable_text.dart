@@ -692,6 +692,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         enableInteractiveSelection: widget.enableInteractiveSelection,
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
+        autofillHints: null,
       ),
     );
 
