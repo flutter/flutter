@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/keyboard.dart';
 import 'package:ui/src/engine/services.dart';
-import 'package:ui/src/engine.dart' show HybridTextEditing;
+import 'package:ui/src/engine/text_editing/text_editing.dart';
 import 'package:ui/ui.dart' as ui;
 
 void main() {

@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart' show assertionsEnabled;
+import 'util.dart';
 
 class Matrix4 {
   final Float32List _m4storage;
