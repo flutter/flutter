@@ -19,7 +19,7 @@ REM Test if Git is available on the Host
 where /q git || ECHO Error: Unable to find git in your PATH. && EXIT /B 1
 
 SET repo_dir=%SRC_DIR%\flutter
-SET ci_dir=%repo_dir%\flutter\ci
+SET ci_dir=%repo_dir%\ci
 SET dart_sdk_path=%SRC_DIR%\third_party\dart\tools\sdks\dart-sdk
 SET dart=%dart_sdk_path%\bin\dart.exe
 
