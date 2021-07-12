@@ -2203,8 +2203,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     // Setting TextStyle.height to 1 ensures that the label's height will equal
     // its font size.
     final TextStyle inlineLabelStyle = themeData.fixTextFieldOutlineLabel
-      ? inlineStyle.merge(decoration!.labelStyle).copyWith(height: 1)
-      : inlineStyle.merge(decoration!.labelStyle);
+      ? inlineStyle.merge(decoration!.hintStyle).copyWith(height: 1)
+      : inlineStyle.merge(decoration!.hintStyle);
     final Widget? label = decoration!.labelText == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(

@@ -3086,6 +3086,62 @@ void main() {
         ),
       ).style;
     }
+    // label has the hintStyle because labelText is on top of input field
+    // (i.e., at the same location on the screen where
+    // text may be entered in the child)
+    expect(getLabelStyle().color, hintStyle.color);
+  });
+
+  testWidgets('InputDecorationTheme style overrides focused', (WidgetTester tester) async {
+    const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
+    final TextStyle labelStyle = style16.merge(const TextStyle(color: Colors.red));
+    final TextStyle hintStyle = style16.merge(const TextStyle(color: Colors.green));
+    final TextStyle prefixStyle = style16.merge(const TextStyle(color: Colors.blue));
+    final TextStyle suffixStyle = style16.merge(const TextStyle(color: Colors.purple));
+
+    const TextStyle style12 = TextStyle(fontFamily: 'Ahem', fontSize: 12.0);
+    final TextStyle helperStyle = style12.merge(const TextStyle(color: Colors.orange));
+    final TextStyle counterStyle = style12.merge(const TextStyle(color: Colors.orange));
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true, // label appears, vertically centered
+        isFocused: true, // hintText is visible
+        inputDecorationTheme: InputDecorationTheme(
+          labelStyle: labelStyle,
+          hintStyle: hintStyle,
+          prefixStyle: prefixStyle,
+          suffixStyle: suffixStyle,
+          helperStyle: helperStyle,
+          counterStyle: counterStyle,
+          // filled: false (default) - don't pad by left/right 12dps
+        ),
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+          prefixText: 'prefix',
+          suffixText: 'suffix',
+          helperText: 'helper',
+          counterText: 'counter',
+        ),
+      ),
+    );
+
+    // Verify that the styles were passed along
+    expect(tester.widget<Text>(find.text('hint')).style!.color, hintStyle.color);
+    expect(tester.widget<Text>(find.text('prefix')).style!.color, prefixStyle.color);
+    expect(tester.widget<Text>(find.text('suffix')).style!.color, suffixStyle.color);
+    expect(tester.widget<Text>(find.text('helper')).style!.color, helperStyle.color);
+    expect(tester.widget<Text>(find.text('counter')).style!.color, counterStyle.color);
+
+    TextStyle getLabelStyle() {
+      return tester.firstWidget<AnimatedDefaultTextStyle>(
+        find.ancestor(
+          of: find.text('label'),
+          matching: find.byType(AnimatedDefaultTextStyle),
+        ),
+      ).style;
+    }
     expect(getLabelStyle().color, labelStyle.color);
   });
 
