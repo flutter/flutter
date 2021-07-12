@@ -54,18 +54,17 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
   ASSERT_TRUE(sampler);
   Renderer::RenderCallback callback = [&](const Surface& surface,
                                           RenderPass& pass) {
-    BoxVertexShader::UniformBuffer uniforms;
-    uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize().width,
-                                            surface.GetSize().height);
     Command cmd;
     cmd.label = "Box";
     cmd.pipeline = box_pipeline;
 
-    cmd.vertex_bindings.buffers[VertexDescriptor::kReservedVertexBufferIndex] =
-        vertex_buffer.vertex_buffer;
-    cmd.vertex_bindings
-        .buffers[BoxVertexShader::kUniformUniformBuffer.binding] =
-        pass.GetTransientsBuffer().EmplaceUniform(uniforms);
+    cmd.BindVertices(vertex_buffer);
+
+    BoxVertexShader::UniformBuffer uniforms;
+    uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize().width,
+                                            surface.GetSize().height);
+    BoxVertexShader::BindUniformBuffer(
+        cmd, pass.GetTransientsBuffer().EmplaceUniform(uniforms));
 
     BoxFragmentShader::FrameInfo frame_info;
     frame_info.current_time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
@@ -73,24 +72,11 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
     frame_info.window_size.x = GetWindowSize().width;
     frame_info.window_size.y = GetWindowSize().height;
 
-    cmd.fragment_bindings
-        .buffers[BoxFragmentShader::kUniformFrameInfo.binding] =
-        pass.GetTransientsBuffer().EmplaceUniform(frame_info);
-    cmd.fragment_bindings
-        .textures[BoxFragmentShader::kSampledImageContents1Texture
-                      .texture_index] = bridge;
-    cmd.fragment_bindings
-        .samplers[BoxFragmentShader::kSampledImageContents1Texture
-                      .sampler_index] = sampler;
-    cmd.fragment_bindings
-        .textures[BoxFragmentShader::kSampledImageContents2Texture
-                      .texture_index] = boston;
-    cmd.fragment_bindings
-        .samplers[BoxFragmentShader::kSampledImageContents2Texture
-                      .sampler_index] = sampler;
+    BoxFragmentShader::BindFrameInfo(
+        cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+    BoxFragmentShader::BindContents1Texture(cmd, boston, sampler);
+    BoxFragmentShader::BindContents2Texture(cmd, bridge, sampler);
 
-    cmd.index_buffer = vertex_buffer.index_buffer;
-    cmd.index_count = vertex_buffer.index_count;
     cmd.primitive_type = PrimitiveType::kTriangle;
     if (!pass.RecordCommand(std::move(cmd))) {
       return false;
