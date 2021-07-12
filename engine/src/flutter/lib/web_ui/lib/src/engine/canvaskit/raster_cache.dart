@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/src/engine.dart' show Matrix4;
 import 'package:ui/ui.dart' as ui;
 
+import '../vector_math.dart';
 import 'canvas.dart';
 
 /// A cache of [Picture]s that have already been rasterized.

@@ -5,9 +5,10 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart' show transformRect, Matrix4;
 import 'package:ui/ui.dart' as ui;
 
+import '../util.dart';
+import '../vector_math.dart';
 import 'canvaskit_api.dart';
 import 'path.dart';
 

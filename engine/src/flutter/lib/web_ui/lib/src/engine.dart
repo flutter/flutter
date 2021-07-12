@@ -160,8 +160,6 @@ export 'engine/plugins.dart';
 import 'engine/pointer_binding.dart';
 export 'engine/pointer_binding.dart';
 
-// This import is intentionally commented out because the analyzer says it's unused.
-// import 'engine/pointer_converter.dart';
 export 'engine/pointer_converter.dart';
 
 import 'engine/profiler.dart';
@@ -201,8 +199,6 @@ export 'engine/services/message_codec.dart';
 import 'engine/services/message_codecs.dart';
 export 'engine/services/message_codecs.dart';
 
-// This import is intentionally commented out because the analyzer says it's unused.
-// import 'engine/services/serialization.dart';
 export 'engine/services/serialization.dart';
 
 export 'engine/shadow.dart';

@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart' show WebOnlyImageCodecChunkCallback;
 import 'package:ui/ui.dart' as ui;
 
+import '../html_image_codec.dart';
 import '../util.dart';
 import 'canvaskit_api.dart';
 import 'skia_object_cache.dart';

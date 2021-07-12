@@ -6,9 +6,10 @@ import 'dart:html' as html;
 
 import 'package:ui/ui.dart' as ui;
 
-import 'package:ui/src/engine.dart' show BitmapCanvas, canonicalizeFontFamily, domRenderer, DomRenderer;
+import 'package:ui/src/engine.dart' show BitmapCanvas, domRenderer, DomRenderer;
 
 import '../profiler.dart';
+import '../util.dart';
 import 'layout_service.dart';
 import 'paint_service.dart';
 import 'paragraph.dart';

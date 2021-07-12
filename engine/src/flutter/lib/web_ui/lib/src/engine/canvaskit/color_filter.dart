@@ -4,9 +4,10 @@
 
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart' show listEquals, EngineColorFilter;
+import 'package:ui/src/engine.dart' show EngineColorFilter;
 import 'package:ui/ui.dart' as ui;
 
+import '../util.dart';
 import 'canvaskit_api.dart';
 import 'image_filter.dart';
 import 'skia_object_cache.dart';

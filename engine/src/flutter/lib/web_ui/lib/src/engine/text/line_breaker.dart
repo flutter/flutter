@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/src/engine.dart' show assertionsEnabled;
 
+import '../util.dart';
 import 'line_break_properties.dart';
 import 'unicode_range.dart';
 
