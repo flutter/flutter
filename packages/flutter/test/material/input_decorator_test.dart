@@ -3016,6 +3016,15 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
   });
 
+  TextStyle _getLabelStyle(WidgetTester tester) {
+    return tester.firstWidget<AnimatedDefaultTextStyle>(
+      find.ancestor(
+        of: find.text('label'),
+        matching: find.byType(AnimatedDefaultTextStyle),
+      ),
+    ).style;
+  }
+
   testWidgets('InputDecorationTheme style overrides', (WidgetTester tester) async {
     const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
     final TextStyle labelStyle = style16.merge(const TextStyle(color: Colors.red));
@@ -3078,18 +3087,10 @@ void main() {
     expect(tester.widget<Text>(find.text('helper')).style!.color, helperStyle.color);
     expect(tester.widget<Text>(find.text('counter')).style!.color, counterStyle.color);
 
-    TextStyle getLabelStyle() {
-      return tester.firstWidget<AnimatedDefaultTextStyle>(
-        find.ancestor(
-          of: find.text('label'),
-          matching: find.byType(AnimatedDefaultTextStyle),
-        ),
-      ).style;
-    }
     // label has the hintStyle because labelText is on top of input field
     // (i.e., at the same location on the screen where
     // text may be entered in the child)
-    expect(getLabelStyle().color, hintStyle.color);
+    expect(_getLabelStyle(tester).color, hintStyle.color);
   });
 
   testWidgets('InputDecorationTheme style overrides focused', (WidgetTester tester) async {
@@ -3134,15 +3135,7 @@ void main() {
     expect(tester.widget<Text>(find.text('helper')).style!.color, helperStyle.color);
     expect(tester.widget<Text>(find.text('counter')).style!.color, counterStyle.color);
 
-    TextStyle getLabelStyle() {
-      return tester.firstWidget<AnimatedDefaultTextStyle>(
-        find.ancestor(
-          of: find.text('label'),
-          matching: find.byType(AnimatedDefaultTextStyle),
-        ),
-      ).style;
-    }
-    expect(getLabelStyle().color, labelStyle.color);
+    expect(_getLabelStyle(tester).color, labelStyle.color);
   });
 
   testWidgets('InputDecorator.toString()', (WidgetTester tester) async {
