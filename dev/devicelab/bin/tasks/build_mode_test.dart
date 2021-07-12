@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -23,7 +25,7 @@ Future<String> runFlutterAndQuit(List<String> args, Device device) async {
   );
   final List<String> stdout = <String>[];
   final List<String> stderr = <String>[];
-  int? runExitCode;
+  int runExitCode;
   run.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(
     (String line) {
       print('run:stdout: $line');
