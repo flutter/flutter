@@ -559,6 +559,9 @@ class StreamLogger extends Logger {
   bool get isVerbose => true;
 
   @override
+  bool get machine => true;
+
+  @override
   void printError(
     String message, {
     StackTrace stackTrace,
