@@ -42,11 +42,11 @@ Future<void> runTasks(
     print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
 
-    if (resultsPath != null) {
+    if (resultsPath != null && gitBranch != null) {
       final Cocoon cocoon = Cocoon();
       await cocoon.writeTaskResultToFile(
         builderName: luciBuilder!,
-        gitBranch: gitBranch!,
+        gitBranch: gitBranch,
         result: result,
         resultsPath: resultsPath,
       );
