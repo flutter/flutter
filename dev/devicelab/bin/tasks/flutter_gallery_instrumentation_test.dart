@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/devices.dart';
@@ -25,11 +27,9 @@ Future<void> main() async {
       await flutter('packages', options: <String>['get']);
       await flutter('clean');
       await flutter('build', options: <String>['apk', '--target', 'test/live_smoketest.dart']);
-      final String? javaHome = await findJavaHome();
-      final Map<String, String>? environment = javaHome != null
-        ? <String, String>{ 'JAVA_HOME': javaHome }
-        : null;
-      await exec('./tool/run_instrumentation_test.sh', <String>[], environment: environment);
+      await exec('./tool/run_instrumentation_test.sh', <String>[], environment: <String, String>{
+        'JAVA_HOME': await findJavaHome(),
+      });
     });
 
     return TaskResult.success(null);
