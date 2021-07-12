@@ -273,11 +273,13 @@ Future<T> runInContext<T>(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
+            machine: false,
           )
         : StdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
+            machine: false,
           ),
       MacOSWorkflow: () => MacOSWorkflow(
         featureFlags: featureFlags,

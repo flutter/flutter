@@ -44,7 +44,7 @@ void main() {
     platform = const LocalPlatform();
     processManager = const LocalProcessManager();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
-    logger = BufferLogger(outputPreferences: OutputPreferences.test(), terminal: terminal);
+    logger = BufferLogger(outputPreferences: OutputPreferences.test(), terminal: terminal, machine: false);
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analysis_test.');
   });
 
