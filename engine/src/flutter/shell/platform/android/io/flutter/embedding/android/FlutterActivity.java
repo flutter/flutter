@@ -47,6 +47,7 @@ import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
+import io.flutter.util.ViewUtils;
 
 /**
  * {@code Activity} which displays a fullscreen Flutter UI.
@@ -215,7 +216,7 @@ public class FlutterActivity extends Activity
    * <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For more,
    * see {@link android.view.View#findViewById}.
    */
-  public static final int FLUTTER_VIEW_ID = 0xF1F2;
+  public static final int FLUTTER_VIEW_ID = ViewUtils.generateViewId(0xF1F2);
 
   /**
    * Creates an {@link Intent} that launches a {@code FlutterActivity}, which creates a {@link
@@ -433,9 +434,7 @@ public class FlutterActivity extends Activity
 
     configureWindowForTransparency();
 
-    View flutterView = createFlutterView();
-    flutterView.setId(FLUTTER_VIEW_ID);
-    setContentView(flutterView);
+    setContentView(createFlutterView());
 
     configureStatusBarForFullscreenFlutterExperience();
   }
@@ -540,7 +539,10 @@ public class FlutterActivity extends Activity
   @NonNull
   private View createFlutterView() {
     return delegate.onCreateView(
-        null /* inflater */, null /* container */, null /* savedInstanceState */);
+        /* inflater=*/ null,
+        /* container=*/ null,
+        /* savedInstanceState=*/ null,
+        /*flutterViewId=*/ FLUTTER_VIEW_ID);
   }
 
   private void configureStatusBarForFullscreenFlutterExperience() {
