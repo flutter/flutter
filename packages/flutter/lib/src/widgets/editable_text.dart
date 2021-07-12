@@ -1725,7 +1725,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void updateEditingValue(TextEditingValue value) {
-    print('UPDATE EDITING VALUE: $value');
     // This method handles text editing state updates from the platform text
     // input plugin. The [EditableText] may not have the focus or an open input
     // connection, as autofill can update a disconnected [EditableText].
@@ -2281,7 +2280,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @pragma('vm:notify-debugger-on-exception')
   void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
-    print('what what');
     // Only apply input formatters if the text has changed (including uncommitted
     // text in the composing region), or when the user committed the composing
     // text.
@@ -2518,7 +2516,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
-    print('$value from $cause');
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
     final bool shouldShowCaret = widget.readOnly
