@@ -33,3 +33,16 @@ gcloud --project flutter-infra firebase test android run \
   --results-bucket=gs://flutter_firebase_testlab \
   --results-dir="engine_scenario_test/$GIT_REVISION/$BUILD_ID" \
   --device model=flame,version=29
+
+errors=$(gsutil cat gs://flutter_firebase_testlab/engine_scenario_test/$GIT_REVISION/$BUILD_ID/\*/logcat | grep "[FE]/flutter" | true)
+if [[ ! -z $errors ]]; then
+  echo "Errors detected in logcat:"
+  echo "$errors"
+  exit 1
+fi
+
+result_size=$(gsutil du gs://flutter_firebase_testlab/engine_scenario_test/$GIT_REVISION/$BUILD_ID/\*/game_loop_results/results_scenario_0.json | cut -d " " -f1)
+if [[ $result_size == "0" ]]; then
+  echo "Failed to produce a timeline."
+  exit 1
+fi
