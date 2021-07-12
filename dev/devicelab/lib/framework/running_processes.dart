@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -34,7 +36,7 @@ class RunningProcessInfo {
   }
 }
 
-Future<bool> killProcess(String pid, {ProcessManager? processManager}) async {
+Future<bool> killProcess(String pid, {ProcessManager processManager}) async {
   assert(pid != null, 'Must specify a pid to kill');
   processManager ??= const LocalProcessManager();
   ProcessResult result;
@@ -56,8 +58,8 @@ Future<bool> killProcess(String pid, {ProcessManager? processManager}) async {
 }
 
 Stream<RunningProcessInfo> getRunningProcesses({
-  String? processName,
-  ProcessManager? processManager,
+  String processName,
+  ProcessManager processManager,
 }) {
   processManager ??= const LocalProcessManager();
   if (Platform.isWindows) {
@@ -67,7 +69,7 @@ Stream<RunningProcessInfo> getRunningProcesses({
 }
 
 @visibleForTesting
-Stream<RunningProcessInfo> windowsRunningProcesses(String? processName) async* {
+Stream<RunningProcessInfo> windowsRunningProcesses(String processName) async* {
   // PowerShell script to get the command line arguments and create time of
   // a process.
   // See: https://docs.microsoft.com/en-us/windows/desktop/cimwin32prov/win32-process
@@ -105,8 +107,8 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
 
   const int processIdHeaderSize = 'ProcessId'.length;
   const int creationDateHeaderStart = processIdHeaderSize + 1;
-  late int creationDateHeaderEnd;
-  late int commandLineHeaderStart;
+  int creationDateHeaderEnd;
+  int commandLineHeaderStart;
   bool inTableBody = false;
   for (final String line in output.split('\n')) {
     if (line.startsWith('ProcessId')) {
@@ -158,7 +160,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
 
 @visibleForTesting
 Stream<RunningProcessInfo> posixRunningProcesses(
-  String? processName,
+  String processName,
   ProcessManager processManager,
 ) async* {
   // Cirrus is missing this in Linux for some reason.
@@ -192,7 +194,7 @@ Stream<RunningProcessInfo> posixRunningProcesses(
 @visibleForTesting
 Iterable<RunningProcessInfo> processPsOutput(
   String output,
-  String? processName,
+  String processName,
 ) sync* {
   if (output == null) {
     return;
@@ -233,7 +235,7 @@ Iterable<RunningProcessInfo> processPsOutput(
     final String rawTime = line.substring(0, 24);
 
     final String year = rawTime.substring(20, 24);
-    final String month = months[rawTime.substring(4, 7)]!;
+    final String month = months[rawTime.substring(4, 7)];
     final String day = rawTime.substring(8, 10).replaceFirst(' ', '0');
     final String time = rawTime.substring(11, 19);
 

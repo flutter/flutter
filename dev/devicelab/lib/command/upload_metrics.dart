@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/command_runner.dart';
 
 import '../framework/cocoon.dart';
@@ -23,8 +25,8 @@ class UploadMetricsCommand extends Command<void> {
 
   @override
   Future<void> run() async {
-    final String resultsPath = argResults!['results-file'] as String;
-    final String? serviceAccountTokenFile = argResults!['service-account-token-file'] as String?;
+    final String resultsPath = argResults['results-file'] as String;
+    final String serviceAccountTokenFile = argResults['service-account-token-file'] as String;
 
     final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
     return cocoon.sendResultsPath(resultsPath);

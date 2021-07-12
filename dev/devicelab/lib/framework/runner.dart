@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -19,13 +21,13 @@ Future<void> runTasks(
   List<String> taskNames, {
   bool exitOnFirstTestFailure = false,
   bool silent = false,
-  String? deviceId,
-  String? gitBranch,
-  String? localEngine,
-  String? localEngineSrcPath,
-  String? luciBuilder,
-  String? resultsPath,
-  List<String>? taskArgs,
+  String deviceId,
+  String gitBranch,
+  String localEngine,
+  String localEngineSrcPath,
+  String luciBuilder,
+  String resultsPath,
+  List<String> taskArgs,
 }) async {
   for (final String taskName in taskNames) {
     section('Running task "$taskName"');
@@ -42,10 +44,10 @@ Future<void> runTasks(
     print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
 
-    if (resultsPath != null && gitBranch != null) {
+    if (resultsPath != null) {
       final Cocoon cocoon = Cocoon();
       await cocoon.writeTaskResultToFile(
-        builderName: luciBuilder!,
+        builderName: luciBuilder,
         gitBranch: gitBranch,
         result: result,
         resultsPath: resultsPath,
@@ -74,11 +76,11 @@ Future<void> runTasks(
 Future<TaskResult> runTask(
   String taskName, {
   bool silent = false,
-  String? localEngine,
-  String? localEngineSrcPath,
-  String? deviceId,
-  List<String> ?taskArgs,
-  @visibleForTesting Map<String, String>? isolateParams,
+  String localEngine,
+  String localEngineSrcPath,
+  String deviceId,
+  List<String> taskArgs,
+  @visibleForTesting Map<String, String> isolateParams,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
@@ -115,7 +117,7 @@ Future<TaskResult> runTask(
       .transform<String>(const LineSplitter())
       .listen((String line) {
     if (!uri.isCompleted) {
-      final Uri? serviceUri = parseServiceUri(line, prefix: 'Observatory listening on ');
+      final Uri serviceUri = parseServiceUri(line, prefix: 'Observatory listening on ');
       if (serviceUri != null)
         uri.complete(serviceUri);
     }
@@ -137,7 +139,7 @@ Future<TaskResult> runTask(
       'ext.cocoonRunTask',
       args: isolateParams,
       isolateId: result.isolate.id,
-    )).json!;
+    )).json;
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     await runner.exitCode;
     return taskResult;
@@ -166,13 +168,13 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
       // Look up the isolate.
       final VmService client = await vmServiceConnectUri(url);
       VM vm = await client.getVM();
-      while (vm.isolates!.isEmpty) {
+      while (vm.isolates.isEmpty) {
         await Future<void>.delayed(const Duration(seconds: 1));
         vm = await client.getVM();
       }
-      final IsolateRef isolate = vm.isolates!.first;
+      final IsolateRef isolate = vm.isolates.first;
       final Response response = await client.callServiceExtension('ext.cocoonRunnerReady', isolateId: isolate.id);
-      if (response.json!['response'] != 'ready')
+      if (response.json['response'] != 'ready')
         throw 'not ready yet';
       return ConnectionResult(client, isolate);
     } catch (error) {
@@ -191,7 +193,7 @@ class ConnectionResult {
 }
 
 /// The cocoon client sends an invalid VM service response, we need to intercept it.
-Future<VmService> vmServiceConnectUri(String wsUri, {Log? log}) async {
+Future<VmService> vmServiceConnectUri(String wsUri, {Log log}) async {
   final WebSocket socket = await WebSocket.connect(wsUri);
   final StreamController<dynamic> controller = StreamController<dynamic>();
   final Completer<dynamic> streamClosedCompleter = Completer<dynamic>();
@@ -205,7 +207,7 @@ Future<VmService> vmServiceConnectUri(String wsUri, {Log? log}) async {
         controller.add(data);
       }
     },
-    onError: (Object err, StackTrace stackTrace) => controller.addError(err, stackTrace),
+    onError: (dynamic err, StackTrace stackTrace) => controller.addError(err, stackTrace),
     onDone: () => streamClosedCompleter.complete(),
   );
 

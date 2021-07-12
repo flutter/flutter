@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
@@ -514,7 +516,7 @@ class StartupTest {
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
 
       section('Building application');
-      String? applicationBinaryPath;
+      String applicationBinaryPath;
       switch (deviceOperatingSystem) {
         case DeviceOperatingSystem.android:
           await flutter('build', options: <String>[
@@ -584,7 +586,7 @@ class StartupTest {
                 '-d',
                 device.deviceId,
                 '--out',
-                hostAgent.dumpDirectory!
+                hostAgent.dumpDirectory
                     .childFile('screenshot_startup_failure_$currentFailures.png')
                     .path,
               ],
@@ -628,7 +630,7 @@ class DevtoolsStartupTest {
       final Device device = await devices.workingDevice;
 
       section('Building application');
-      String? applicationBinaryPath;
+      String applicationBinaryPath;
       switch (deviceOperatingSystem) {
         case DeviceOperatingSystem.android:
           await flutter('build', options: <String>[
@@ -731,7 +733,7 @@ class PerfTest {
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
     this.dartDefine = '',
-    String? resultFilename,
+    String resultFilename,
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -751,12 +753,12 @@ class PerfTest {
   /// The main entry-point file of the application, as run on the device.
   final String testTarget;
   // The prefix name of the filename such as `<timelineFileName>.timeline_summary.json`.
-  final String? timelineFileName;
+  final String timelineFileName;
   String get traceFilename => '$timelineFileName.timeline';
   String get resultFilename => _resultFilename ?? '$timelineFileName.timeline_summary';
-  final String? _resultFilename;
+  final String _resultFilename;
   /// The test file to run on the host.
-  final String? testDriver;
+  final String testDriver;
   /// Whether to collect CPU and GPU metrics.
   final bool measureCpuGpu;
   /// Whether to collect memory metrics.
@@ -786,7 +788,7 @@ class PerfTest {
   ///   if (measureCpuGpu) 'average_gpu_usage',
   /// ]
   /// ```
-  final List<String>? benchmarkScoreKeys;
+  final List<String> benchmarkScoreKeys;
 
   /// Additional flags for `--dart-define` to control the test
   final String dartDefine;
@@ -798,8 +800,8 @@ class PerfTest {
   @protected
   Future<TaskResult> internalRun({
       bool cacheSkSL = false,
-      String? existingApp,
-      String? writeSkslFileName,
+      String existingApp,
+      String writeSkslFileName,
   }) {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
@@ -816,7 +818,7 @@ class PerfTest {
           '--trace-startup', // Enables "endless" timeline event buffering.
         '-t', testTarget,
         if (testDriver != null)
-          ...<String>['--driver', testDriver!],
+          ...<String>['--driver', testDriver],
         if (existingApp != null)
           ...<String>['--use-existing-app', existingApp],
         if (writeSkslFileName != null)
@@ -888,9 +890,9 @@ class PerfTestWithSkSL extends PerfTest {
     String testTarget,
     String timelineFileName, {
     bool measureCpuGpu = false,
-    String? testDriver,
+    String testDriver,
     bool needsFullTimeline = true,
-    List<String>? benchmarkScoreKeys,
+    List<String> benchmarkScoreKeys,
   }) : super(
     testDirectory,
     testTarget,
@@ -962,7 +964,7 @@ class PerfTestWithSkSL extends PerfTest {
     );
   }
 
-  Future<String> _runApp({String? appBinary, bool cacheSkSL = false, String? skslPath}) async {
+  Future<String> _runApp({String appBinary, bool cacheSkSL = false, String skslPath}) async {
     if (File(_vmserviceFileName).existsSync()) {
       File(_vmserviceFileName).deleteSync();
     }
@@ -1025,9 +1027,9 @@ class PerfTestWithSkSL extends PerfTest {
     });
   }
 
-  late String _flutterPath;
-  late Device _device;
-  late Process _runProcess;
+  String _flutterPath;
+  Device _device;
+  Process _runProcess;
 
   static const String _kVmserviceOutFileName = 'vmservice.out';
 }
@@ -1071,16 +1073,12 @@ class WebCompileTest {
   ///
   /// Run a single web compile test for the app under [directory], and store
   /// its metrics with prefix [metric].
-  static Future<Map<String, int>> runSingleBuildTest({
-    required String directory,
-    required String metric,
-    bool measureBuildTime = false,
-  }) {
+  static Future<Map<String, int>> runSingleBuildTest({String directory, String metric, bool measureBuildTime = false}) {
     return inDirectory<Map<String, int>>(directory, () async {
       final Map<String, int> metrics = <String, int>{};
 
       await flutter('packages', options: <String>['get']);
-      final Stopwatch? watch = measureBuildTime ? Stopwatch() : null;
+      final Stopwatch watch = measureBuildTime ? Stopwatch() : null;
       watch?.start();
       await evalFlutter('build', options: <String>[
         'web',
@@ -1093,7 +1091,7 @@ class WebCompileTest {
       metrics.addAll(await getSize(outputFileName, metric: metric));
 
       if (measureBuildTime) {
-        metrics['${metric}_dart2js_millis'] = watch!.elapsedMilliseconds;
+        metrics['${metric}_dart2js_millis'] = watch.elapsedMilliseconds;
       }
 
       return metrics;
@@ -1101,7 +1099,7 @@ class WebCompileTest {
   }
 
   /// Obtains the size and gzipped size of a file given by [fileName].
-  static Future<Map<String, int>> getSize(String fileName, {required String metric}) async {
+  static Future<Map<String, int>> getSize(String fileName, {String metric}) async {
     final Map<String, int> sizeMetrics = <String, int>{};
 
     final ProcessResult result = await Process.run('du', <String>['-k', fileName]);
@@ -1170,12 +1168,10 @@ class CompileTest {
         await flutter('build', options: options);
         watch.stop();
         final Directory appBuildDirectory = dir(path.join(cwd, 'build/ios/Release-iphoneos'));
-        final Directory? appBundle = appBuildDirectory
+        final Directory appBundle = appBuildDirectory
             .listSync()
-            .whereType<Directory?>()
-            .singleWhere((Directory? directory) =>
-              directory != null && path.extension(directory.path) == '.app',
-              orElse: () => null);
+            .whereType<Directory>()
+            .singleWhere((Directory directory) => path.extension(directory.path) == '.app', orElse: () => null);
         if (appBundle == null) {
           throw 'Failed to find app bundle in ${appBuildDirectory.path}';
         }
@@ -1230,8 +1226,8 @@ class CompileTest {
   }
 
   static Future<Map<String, dynamic>> _compileDebug({
-    required bool clean,
-    required String metricKey,
+    @required bool clean,
+    @required String metricKey,
   }) async {
     if (clean) {
       await flutter('clean');
@@ -1294,9 +1290,9 @@ class CompileTest {
       fileToMetadata[entry.path] = entry;
     }
 
-    final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so']!;
-    final _UnzipListEntry libapp = fileToMetadata['lib/armeabi-v7a/libapp.so']!;
-    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/NOTICES.Z']!;
+    final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
+    final _UnzipListEntry libapp = fileToMetadata['lib/armeabi-v7a/libapp.so'];
+    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/NOTICES.Z'];
 
     return <String, dynamic>{
       'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
@@ -1319,9 +1315,9 @@ class MemoryTest {
 
   /// Completes when the log line specified in the last call to
   /// [prepareForNextMessage] is seen by `adb logcat`.
-  Future<void>? get receivedNextMessage => _receivedNextMessage?.future;
-  Completer<void>? _receivedNextMessage;
-  String? _nextMessage;
+  Future<void> get receivedNextMessage => _receivedNextMessage?.future;
+  Completer<void> _receivedNextMessage;
+  String _nextMessage;
 
   /// Prepares the [receivedNextMessage] future such that it will complete
   /// when `adb logcat` sees a log line with the given `message`.
@@ -1332,8 +1328,8 @@ class MemoryTest {
 
   int get iterationCount => 10;
 
-  Device? get device => _device;
-  Device? _device;
+  Device get device => _device;
+  Device _device;
 
   Future<TaskResult> run() {
     return inDirectory<TaskResult>(project, () async {
@@ -1341,13 +1337,13 @@ class MemoryTest {
       // device.getMemoryStats, etc, aren't implemented for iOS.
 
       _device = await devices.workingDevice;
-      await device!.unlock();
+      await device.unlock();
       await flutter('packages', options: <String>['get']);
 
-      final StreamSubscription<String> adb = device!.logcat.listen(
+      final StreamSubscription<String> adb = device.logcat.listen(
         (String data) {
           if (data.contains('==== MEMORY BENCHMARK ==== $_nextMessage ===='))
-            _receivedNextMessage?.complete();
+            _receivedNextMessage.complete();
         },
       );
 
@@ -1360,12 +1356,12 @@ class MemoryTest {
         assert(_endMemory.length == iteration + 1);
         assert(_diffMemory.length == iteration + 1);
         print('terminating...');
-        await device!.stop(package);
+        await device.stop(package);
         await Future<void>.delayed(const Duration(milliseconds: 10));
       }
 
       await adb.cancel();
-      await flutter('install', options: <String>['--uninstall-only', '-d', device!.deviceId]);
+      await flutter('install', options: <String>['--uninstall-only', '-d', device.deviceId]);
 
       final ListStatistics startMemoryStatistics = ListStatistics(_startMemory);
       final ListStatistics endMemoryStatistics = ListStatistics(_endMemory);
@@ -1396,7 +1392,7 @@ class MemoryTest {
       '--verbose',
       '--release',
       '--no-resident',
-      '-d', device!.deviceId,
+      '-d', device.deviceId,
       test,
     ]);
     print('awaiting "ready" message...');
@@ -1415,7 +1411,7 @@ class MemoryTest {
 
     prepareForNextMessage('DONE');
     print('tapping device...');
-    await device!.tap(100, 100);
+    await device.tap(100, 100);
     print('awaiting "done" message...');
     await receivedNextMessage;
 
@@ -1426,23 +1422,23 @@ class MemoryTest {
   final List<int> _endMemory = <int>[];
   final List<int> _diffMemory = <int>[];
 
-  Map<String, dynamic>? _startMemoryUsage;
+  Map<String, dynamic> _startMemoryUsage;
 
   @protected
   Future<void> recordStart() async {
     assert(_startMemoryUsage == null);
     print('snapshotting memory usage...');
-    _startMemoryUsage = await device!.getMemoryStats(package);
+    _startMemoryUsage = await device.getMemoryStats(package);
   }
 
   @protected
   Future<void> recordEnd() async {
     assert(_startMemoryUsage != null);
     print('snapshotting memory usage...');
-    final Map<String, dynamic> endMemoryUsage = await device!.getMemoryStats(package);
-    _startMemory.add(_startMemoryUsage!['total_kb'] as int);
+    final Map<String, dynamic> endMemoryUsage = await device.getMemoryStats(package);
+    _startMemory.add(_startMemoryUsage['total_kb'] as int);
     _endMemory.add(endMemoryUsage['total_kb'] as int);
-    _diffMemory.add((endMemoryUsage['total_kb'] as int) - (_startMemoryUsage!['total_kb'] as int));
+    _diffMemory.add((endMemoryUsage['total_kb'] as int) - (_startMemoryUsage['total_kb'] as int));
   }
 }
 
@@ -1491,7 +1487,7 @@ class DevToolsMemoryTest {
     });
   }
 
-  late Device _device;
+  Device _device;
 
   static const String _kJsonFileName = 'devtools_memory.json';
 }
@@ -1509,6 +1505,7 @@ String _reportedDurationTestToString(ReportedDurationTestFlavor flavor) {
     case ReportedDurationTestFlavor.release:
       return 'release';
   }
+  throw ArgumentError('Unexpected value for enum $flavor');
 }
 
 class ReportedDurationTest {
@@ -1524,8 +1521,8 @@ class ReportedDurationTest {
 
   int get iterationCount => 10;
 
-  Device? get device => _device;
-  Device? _device;
+  Device get device => _device;
+  Device _device;
 
   Future<TaskResult> run() {
     return inDirectory<TaskResult>(project, () async {
@@ -1533,13 +1530,13 @@ class ReportedDurationTest {
       // device.getMemoryStats, etc, aren't implemented for iOS.
 
       _device = await devices.workingDevice;
-      await device!.unlock();
+      await device.unlock();
       await flutter('packages', options: <String>['get']);
 
-      final StreamSubscription<String> adb = device!.logcat.listen(
+      final StreamSubscription<String> adb = device.logcat.listen(
         (String data) {
           if (durationPattern.hasMatch(data))
-            durationCompleter.complete(int.parse(durationPattern.firstMatch(data)!.group(1)!));
+            durationCompleter.complete(int.parse(durationPattern.firstMatch(data).group(1)));
         },
       );
       print('launching $project$test on device...');
@@ -1549,13 +1546,13 @@ class ReportedDurationTest {
         '--no-fast-start',
         '--${_reportedDurationTestToString(flavor)}',
         '--no-resident',
-        '-d', device!.deviceId,
+        '-d', device.deviceId,
         test,
       ]);
 
       final int duration = await durationCompleter.future;
       print('terminating...');
-      await device!.stop(package);
+      await device.stop(package);
       await adb.cancel();
 
       _device = null;
@@ -1610,9 +1607,9 @@ class _UnzipListEntry {
   }
 
   _UnzipListEntry._({
-    required this.uncompressedSize,
-    required this.compressedSize,
-    required this.path,
+    @required this.uncompressedSize,
+    @required this.compressedSize,
+    @required this.path,
   }) : assert(uncompressedSize != null),
        assert(compressedSize != null),
        assert(compressedSize <= uncompressedSize),
@@ -1636,7 +1633,7 @@ Future<File> waitForFile(String path) async {
   throw StateError('Did not find vmservice out file after 400 seconds');
 }
 
-String? _findIosAppInBuildDirectory(String searchDirectory) {
+String _findIosAppInBuildDirectory(String searchDirectory) {
   for (final FileSystemEntity entity in Directory(searchDirectory).listSync()) {
     if (entity.path.endsWith('.app')) {
       return entity.path;
