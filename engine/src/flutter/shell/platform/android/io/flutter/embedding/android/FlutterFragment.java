@@ -24,6 +24,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
+import io.flutter.util.ViewUtils;
 
 /**
  * {@code Fragment} which displays a Flutter UI that takes up all available {@code Fragment} space.
@@ -88,11 +89,20 @@ import io.flutter.plugin.platform.PlatformPlugin;
  * }</pre>
  *
  * <p>If Flutter is needed in a location that can only use a {@code View}, consider using a {@link
- * FlutterView}. Using a {@link FlutterView} requires forwarding some calls from an {@code
+ * io.flutter.embedding.android.FlutterView}. Using a {@link
+ * io.flutter.embedding.android.FlutterView} requires forwarding some calls from an {@code
  * Activity}, as well as forwarding lifecycle calls from an {@code Activity} or a {@code Fragment}.
  */
 public class FlutterFragment extends Fragment
     implements FlutterActivityAndFragmentDelegate.Host, ComponentCallbacks2 {
+  /**
+   * The ID of the {@code FlutterView} created by this activity.
+   *
+   * <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For more,
+   * see {@link android.view.View#findViewById}.
+   */
+  public static final int FLUTTER_VIEW_ID = ViewUtils.generateViewId(0xF1F2);
+
   private static final String TAG = "FlutterFragment";
 
   /** The Dart entrypoint method name that is executed upon initialization. */
@@ -105,10 +115,14 @@ public class FlutterFragment extends Fragment
   protected static final String ARG_APP_BUNDLE_PATH = "app_bundle_path";
   /** Flutter shell arguments. */
   protected static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
-  /** {@link RenderMode} to be used for the {@link FlutterView} in this {@code FlutterFragment} */
+  /**
+   * {@link RenderMode} to be used for the {@link io.flutter.embedding.android.FlutterView} in this
+   * {@code FlutterFragment}
+   */
   protected static final String ARG_FLUTTERVIEW_RENDER_MODE = "flutterview_render_mode";
   /**
-   * {@link TransparencyMode} to be used for the {@link FlutterView} in this {@code FlutterFragment}
+   * {@link TransparencyMode} to be used for the {@link io.flutter.embedding.android.FlutterView} in
+   * this {@code FlutterFragment}
    */
   protected static final String ARG_FLUTTERVIEW_TRANSPARENCY_MODE = "flutterview_transparency_mode";
   /** See {@link #shouldAttachEngineToActivity()}. */
@@ -290,8 +304,9 @@ public class FlutterFragment extends Fragment
     }
 
     /**
-     * Support a {@link TransparencyMode#transparent} background within {@link FlutterView}, or
-     * force an {@link TransparencyMode#opaque} background.
+     * Support a {@link TransparencyMode#transparent} background within {@link
+     * io.flutter.embedding.android.FlutterView}, or force an {@link TransparencyMode#opaque}
+     * background.
      *
      * <p>See {@link TransparencyMode} for implications of this selection.
      */
@@ -517,8 +532,9 @@ public class FlutterFragment extends Fragment
     }
 
     /**
-     * Support a {@link TransparencyMode#transparent} background within {@link FlutterView}, or
-     * force an {@link TransparencyMode#opaque} background.
+     * Support a {@link TransparencyMode#transparent} background within {@link
+     * io.flutter.embedding.android.FlutterView}, or force an {@link TransparencyMode#opaque}
+     * background.
      *
      * <p>See {@link TransparencyMode} for implications of this selection.
      */
@@ -710,7 +726,8 @@ public class FlutterFragment extends Fragment
   @Override
   public View onCreateView(
       LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-    return delegate.onCreateView(inflater, container, savedInstanceState);
+    return delegate.onCreateView(
+        inflater, container, savedInstanceState, /*flutterViewId=*/ FLUTTER_VIEW_ID);
   }
 
   @Override
@@ -1002,8 +1019,8 @@ public class FlutterFragment extends Fragment
   }
 
   /**
-   * Returns the desired {@link RenderMode} for the {@link FlutterView} displayed in this {@code
-   * FlutterFragment}.
+   * Returns the desired {@link RenderMode} for the {@link io.flutter.embedding.android.FlutterView}
+   * displayed in this {@code FlutterFragment}.
    *
    * <p>Defaults to {@link RenderMode#surface}.
    *
@@ -1018,8 +1035,8 @@ public class FlutterFragment extends Fragment
   }
 
   /**
-   * Returns the desired {@link TransparencyMode} for the {@link FlutterView} displayed in this
-   * {@code FlutterFragment}.
+   * Returns the desired {@link TransparencyMode} for the {@link
+   * io.flutter.embedding.android.FlutterView} displayed in this {@code FlutterFragment}.
    *
    * <p>Defaults to {@link TransparencyMode#transparent}.
    *
@@ -1176,8 +1193,8 @@ public class FlutterFragment extends Fragment
   }
 
   /**
-   * Invoked after the {@link FlutterView} within this {@code FlutterFragment} starts rendering
-   * pixels to the screen.
+   * Invoked after the {@link io.flutter.embedding.android.FlutterView} within this {@code
+   * FlutterFragment} starts rendering pixels to the screen.
    *
    * <p>This method forwards {@code onFlutterUiDisplayed()} to its attached {@code Activity}, if the
    * attached {@code Activity} implements {@link FlutterUiDisplayListener}.
@@ -1195,8 +1212,8 @@ public class FlutterFragment extends Fragment
   }
 
   /**
-   * Invoked after the {@link FlutterView} within this {@code FlutterFragment} stops rendering
-   * pixels to the screen.
+   * Invoked after the {@link io.flutter.embedding.android.FlutterView} within this {@code
+   * FlutterFragment} stops rendering pixels to the screen.
    *
    * <p>This method forwards {@code onFlutterUiNoLongerDisplayed()} to its attached {@code
    * Activity}, if the attached {@code Activity} implements {@link FlutterUiDisplayListener}.
