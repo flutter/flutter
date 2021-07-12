@@ -791,12 +791,11 @@ void main() {
   });
 
   test('Service extensions - preHotRestartCallback that throws sync expection', () async {
-    String? lastMessage;
-    debugPrint = (String? message, {int? wrapWidth}) {
-      lastMessage = message;
+    FlutterErrorDetails? lastError;
+    FlutterError.onError = (FlutterErrorDetails error) {
+      lastError = error;
     };
     Map<String, dynamic> result;
-    // ignore: void_checks
     binding.registerHotRestartCallback(() {
       throw Exception();
     }, debugLabel: 'foo');
@@ -804,14 +803,18 @@ void main() {
     result = await binding.testExtension('invokePreHotRestartCallbacks', <String, String>{});
 
     expect(result, isNotNull);
-    expect(lastMessage, 'Failed to invoke preHotRestartCallback foo: Exception');
+    expect(lastError.toString(), contains(
+      'The following _Exception was thrown Failed to invoke\n'
+      'preHotRestartCallback "foo":\n'
+    ));
   });
 
   test('Service extensions - preHotRestartCallback that throws async expection', () async {
-    String? lastMessage;
-    debugPrint = (String? message, {int? wrapWidth}) {
-      lastMessage = message;
+    FlutterErrorDetails? lastError;
+    FlutterError.onError = (FlutterErrorDetails error) {
+      lastError = error;
     };
+
     Map<String, dynamic> result;
     binding.registerHotRestartCallback(() async {
       await null;
@@ -821,6 +824,9 @@ void main() {
     result = await binding.testExtension('invokePreHotRestartCallbacks', <String, String>{});
 
     expect(result, isNotNull);
-    expect(lastMessage, 'Failed to invoke preHotRestartCallback foo: Exception');
+    expect(lastError.toString(), contains(
+      'The following _Exception was thrown Failed to invoke\n'
+      'preHotRestartCallback "foo":\n'
+    ));
   });
 }

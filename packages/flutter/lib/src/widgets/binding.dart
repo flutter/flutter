@@ -506,9 +506,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
               FlutterErrorDetails(
                 exception: error,
                 stack: stack,
-                informationCollector: () sync* {
-                  yield ErrorSummary('Failed to invoke preHotRestartCallback $label');
-                },
+                context: ErrorSummary('Failed to invoke preHotRestartCallback "$label"'),
               )
             );
           } finally {
