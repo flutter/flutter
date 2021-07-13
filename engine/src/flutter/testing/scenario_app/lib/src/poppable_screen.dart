@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:ui';
 
 import 'package:scenario_app/src/channel_util.dart';
@@ -20,7 +19,7 @@ class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
         super(dispatcher);
 
   // Rect for the pop button. Only defined once onMetricsChanged is called.
-  Rect _buttonRect;
+  Rect? _buttonRect;
 
   @override
   void onBeginFrame(Duration duration) {
@@ -32,7 +31,7 @@ class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
 
     if (_buttonRect != null) {
       canvas.drawRect(
-        _buttonRect,
+        _buttonRect!,
         Paint()..color = const Color.fromARGB(255, 255, 0, 0),
       );
     }

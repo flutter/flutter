@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -89,7 +88,7 @@ class _NumberSwinger<T extends num> {
 
   /// The current value of the swinger.
   T get current => _current;
-  T _current;
+  late T _current;
 
   bool _up;
 

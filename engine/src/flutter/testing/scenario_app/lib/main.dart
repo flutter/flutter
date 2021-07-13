@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
@@ -27,7 +27,7 @@ void main() {
 }
 
 void _handleDriverMessage(Map<String, dynamic> call) {
-  final String methodName = call['method'] as String;
+  final String? methodName = call['method'] as String?;
   switch (methodName) {
     case 'set_scenario':
       assert(call['args'] != null);
@@ -39,7 +39,7 @@ void _handleDriverMessage(Map<String, dynamic> call) {
 }
 
 Future<void> _handlePlatformMessage(
-    String name, ByteData data, PlatformMessageResponseCallback callback) async {
+    String name, ByteData? data, PlatformMessageResponseCallback? callback) async {
   if (data != null) {
     print('$name = ${utf8.decode(data.buffer.asUint8List())}');
   } else {
@@ -48,11 +48,11 @@ Future<void> _handlePlatformMessage(
 
   switch (name) {
     case 'driver':
-      _handleDriverMessage(json.decode(utf8.decode(data.buffer.asUint8List())) as Map<String, dynamic>);
+      _handleDriverMessage(json.decode(utf8.decode(data!.buffer.asUint8List())) as Map<String, dynamic>);
     break;
     case 'write_timeline':
       final String timelineData = await _getTimelineData();
-      callback(Uint8List.fromList(utf8.encode(timelineData)).buffer.asByteData());
+      callback!(Uint8List.fromList(utf8.encode(timelineData)).buffer.asByteData());
     break;
     default:
       currentScenario?.onPlatformMessage(name, data, callback);
@@ -61,7 +61,7 @@ Future<void> _handlePlatformMessage(
 
 Future<String> _getTimelineData() async {
   final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
-  final Uri vmServiceTimelineUri = info.serverUri.resolve('getVMTimeline');
+  final Uri vmServiceTimelineUri = info.serverUri!.resolve('getVMTimeline');
   final Map<String, dynamic> vmServiceTimelineJson = await _getJson(vmServiceTimelineUri);
   final Map<String, dynamic> vmServiceResult = vmServiceTimelineJson['result'] as Map<String, dynamic>;
   return json.encode(<String, dynamic>{
