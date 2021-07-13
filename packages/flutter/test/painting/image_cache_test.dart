@@ -17,7 +17,8 @@ void main() {
   TestRenderingFlutterBinding();
 
   tearDown(() {
-    imageCache..clear()
+    imageCache
+      ..clear()
       ..clearLiveImages()
       ..maximumSize = 1000
       ..maximumSizeBytes = 10485760;

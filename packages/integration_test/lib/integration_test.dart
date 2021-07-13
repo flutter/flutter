@@ -151,7 +151,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// See also:
   ///
-  ///  - [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
+  ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
   static IntegrationTestWidgetsFlutterBinding ensureInitialized() {
     if (_instance == null)
       IntegrationTestWidgetsFlutterBinding();
