@@ -1129,7 +1129,7 @@ class _AppBarState extends State<AppBar> {
           shadowColor: widget.shadowColor
             ?? appBarTheme.shadowColor
             ?? _defaultShadowColor,
-          shape: widget.shape,
+          shape: widget.shape ?? appBarTheme.shape,
           child: Semantics(
             explicitChildNodes: true,
             child: appBar,
