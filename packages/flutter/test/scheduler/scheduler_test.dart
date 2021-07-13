@@ -164,7 +164,7 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       errorCaught = details;
     };
-    SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
+    SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
       throw Exception('Test');
     });
     window.onReportTimings!(<FrameTiming>[]);
