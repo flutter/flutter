@@ -17,6 +17,9 @@ import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
+// The official docs to install Flutter.
+String get _flutterInstallDocs => 'https://flutter.dev/docs/get-started/install';
+
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({
     @required bool verboseHelp,
@@ -224,7 +227,7 @@ class UpgradeCommandRunner {
 
   /// Returns the remote HEAD flutter version.
   ///
-  /// Exits tool if there is no upstream.
+  /// Exits tool if HEAD isn't pointing to a branch, or there is no upstream.
   Future<FlutterVersion> fetchLatestVersion() async {
     String revision;
     try {
@@ -245,16 +248,17 @@ class UpgradeCommandRunner {
       final String errorString = e.toString();
       if (errorString.contains('fatal: HEAD does not point to a branch')) {
         throwToolExit(
-          'You are not currently on a release branch. Use git to '
-          "check out an official branch ('stable', 'beta', 'dev', or 'master') "
-          'and retry, for example:\n'
-          '  git checkout stable'
+          'Unable to upgrade Flutter: HEAD does not point to a branch (Are you '
+          'in a detached HEAD state?).\n'
+          'Use "flutter channel" to switch to an official channel, and retry. '
+          'Alternatively, re-install Flutter by going to $_flutterInstallDocs.'
         );
       } else if (errorString.contains('fatal: no upstream configured for branch')) {
         throwToolExit(
-          'Unable to upgrade Flutter: no origin repository configured. '
-          "Run 'git remote add origin "
-          "https://github.com/flutter/flutter' in $workingDirectory");
+          'Unable to upgrade Flutter: No upstream repository configured (The current '
+          'branch may not be tracking a remote repository).\n'
+          'Re-install Flutter by going to $_flutterInstallDocs.'
+        );
       } else {
         throwToolExit(errorString);
       }
