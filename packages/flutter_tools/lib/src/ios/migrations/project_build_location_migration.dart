@@ -5,7 +5,7 @@
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
-import '../../project.dart';
+import '../../xcode_project.dart';
 
 // Update the xcodeproj build location. Legacy build location does not work with Swift Packages.
 class ProjectBuildLocationMigration extends ProjectMigrator {

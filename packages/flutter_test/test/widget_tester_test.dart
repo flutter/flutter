@@ -706,11 +706,11 @@ void main() {
     int numberOfVariationsRun = 0;
     TargetPlatform? origTargetPlatform;
 
-    setUpAll((){
+    setUpAll(() {
       origTargetPlatform = debugDefaultTargetPlatformOverride;
     });
 
-    tearDownAll((){
+    tearDownAll(() {
       expect(debugDefaultTargetPlatformOverride, equals(origTargetPlatform));
     });
 

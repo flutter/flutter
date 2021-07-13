@@ -26,6 +26,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'custom_devices/custom_devices_config.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart';
@@ -35,6 +36,7 @@ import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
+import 'runner/local_engine.dart';
 import 'version.dart';
 
 /// The flutter GitHub repository.
@@ -56,6 +58,7 @@ Usage get flutterUsage => context.get<Usage>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
+LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
 
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
@@ -216,3 +219,5 @@ FlutterProjectFactory get projectFactory {
     fileSystem: fs,
   );
 }
+
+CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;

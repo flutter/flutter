@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:test_api/src/backend/declarer.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/group.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/group_entry.dart'; // ignore: implementation_imports
-import 'package:test_api/src/backend/invoker.dart';  // ignore: implementation_imports
+import 'package:test_api/src/backend/invoker.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/live_test.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/message.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
@@ -144,7 +144,7 @@ Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, 
 ///       // This test is especially slow on Windows.
 ///       'windows': Timeout.factor(2),
 ///       'browser': [
-///         Skip('TODO: add browser support'),
+///         Skip('add browser support'),
 ///         // This will be slow on browsers once it works on them.
 ///         Timeout.factor(2)
 ///       ]

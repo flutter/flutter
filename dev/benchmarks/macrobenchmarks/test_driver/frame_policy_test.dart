@@ -7,12 +7,11 @@ import 'dart:io';
 import 'package:integration_test/integration_test_driver.dart' as driver;
 
 Future<void> main() => driver.integrationDriver(
-  timeout: const Duration(minutes: 1),
-  responseDataCallback: (Map<String, dynamic> data) async {
+  responseDataCallback: (Map<String, dynamic>? data) async {
     final Map<String, dynamic> benchmarkLiveResult =
-        data['benchmarkLive'] as Map<String,dynamic>;
+        data?['benchmarkLive'] as Map<String,dynamic>;
     final Map<String, dynamic> fullyLiveResult =
-        data['fullyLive'] as Map<String,dynamic>;
+        data?['fullyLive'] as Map<String,dynamic>;
 
     if(benchmarkLiveResult['frame_count'] as int < 10
        || fullyLiveResult['frame_count'] as int < 10) {

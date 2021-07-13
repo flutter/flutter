@@ -28,6 +28,10 @@ import 'theme.dart';
 class AppBarTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.appBarTheme].
   const AppBarTheme({
+    @Deprecated(
+      'This property is no longer used, please use systemOverlayStyle instead. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     this.brightness,
     Color? color,
     Color? backgroundColor,
@@ -36,6 +40,10 @@ class AppBarTheme with Diagnosticable {
     this.shadowColor,
     this.iconTheme,
     this.actionsIconTheme,
+    @Deprecated(
+      'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     this.textTheme,
     this.centerTitle,
     this.titleSpacing,
@@ -43,6 +51,10 @@ class AppBarTheme with Diagnosticable {
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
+    @Deprecated(
+      'This property is obsolete and is false by default. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     this.backwardsCompatibility,
   }) : assert(
          color == null || backgroundColor == null,
@@ -50,7 +62,7 @@ class AppBarTheme with Diagnosticable {
        ),
        backgroundColor = backgroundColor ?? color;
 
-  /// This property is obsolete, please use [systemOverlayStyle] instead.
+  /// This property is deprecated, please use [systemOverlayStyle] instead.
   ///
   /// Overrides the default value of the obsolete [AppBar.brightness]
   /// property which implicitly defines [AppBar.systemOverlayStyle] in
@@ -62,8 +74,14 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.systemOverlayStyle] in all descendant [AppBar] widgets.
   ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
   ///    on this obsolete property.
+  @Deprecated(
+    'This property is no longer used, please use systemOverlayStyle instead. '
+    'This feature was deprecated after v2.4.0-0.0.pre.',
+  )
   final Brightness? brightness;
 
+  /// This property is deprecated, please use [backgroundColor] instead.
+  ///
   /// Obsolete property that overrides the default value of
   /// [AppBar.backgroundColor] in all descendant [AppBar] widgets.
   ///
@@ -74,6 +92,10 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.backgroundColor].
   ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
   ///    on this obsolete property.
+  @Deprecated(
+    'This property is no longer used, please use backgroundColor instead. '
+    'This feature was deprecated after v2.4.0-0.0.pre.',
+  )
   Color? get color => backgroundColor;
 
   /// Overrides the default value of [AppBar.backgroundColor] in all
@@ -124,6 +146,9 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.foregroundColor] in all descendant widgets.
   final IconThemeData? actionsIconTheme;
 
+  /// This property is deprecated, please use [toolbarTextStyle] and
+  /// [titleTextStyle] instead.
+  ///
   /// Overrides the default value of the obsolete [AppBar.textTheme]
   /// property in all descendant [AppBar] widgets.
   ///
@@ -133,6 +158,10 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.toolbarTextStyle in all descendant [AppBar] widgets.
   ///  * [titleTextStyle], which overrides the default value for
   ///    [AppBar.titleTextStyle in all descendant [AppBar] widgets.
+  @Deprecated(
+    'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
+    'This feature was deprecated after v2.4.0-0.0.pre.',
+  )
   final TextTheme? textTheme;
 
   /// Overrides the default value for [AppBar.centerTitle].
@@ -157,7 +186,8 @@ class AppBarTheme with Diagnosticable {
   /// Overrides the default value for the obsolete [AppBar.toolbarTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
-  /// If this property is specified, then [backwardsCompatibility] should be true.
+  /// If this property is specified, then [backwardsCompatibility]
+  /// should be false (the default).
   ///
   /// See also:
   ///
@@ -168,7 +198,8 @@ class AppBarTheme with Diagnosticable {
   /// Overrides the default value of [AppBar.titleTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
-  /// If this property is specified, then [backwardsCompatibility] should be true.
+  /// If this property is specified, then [backwardsCompatibility]
+  /// should be false (the default).
   ///
   /// See also:
   ///
@@ -182,6 +213,10 @@ class AppBarTheme with Diagnosticable {
 
   /// Overrides the default value of [AppBar.backwardsCompatibility]
   /// property in all descendant [AppBar] widgets.
+  @Deprecated(
+    'This property is obsolete and is false by default. '
+    'This feature was deprecated after v2.4.0-0.0.pre.',
+  )
   final bool? backwardsCompatibility;
 
   /// Creates a copy of this object with the given fields replaced with the

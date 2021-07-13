@@ -24,6 +24,7 @@ import 'src/commands/channel.dart';
 import 'src/commands/clean.dart';
 import 'src/commands/config.dart';
 import 'src/commands/create.dart';
+import 'src/commands/custom_devices.dart';
 import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
@@ -76,8 +77,9 @@ Future<void> main(List<String> args) async {
   final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
   final bool daemon = args.contains('daemon');
-  final bool runMachine = (args.contains('--machine') && args.contains('run')) ||
-                          (args.contains('--machine') && args.contains('attach'));
+  final bool machine = args.contains('--machine');
+  final bool runMachine = (machine && args.contains('run')) ||
+                          (machine && args.contains('attach'));
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
   // enginePath's initializer uses it). This can only work with the real
@@ -107,24 +109,26 @@ Future<void> main(List<String> args) async {
       // devtools source code.
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
+        fileSystem: globals.fs,
         pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
         logger: globals.logger,
         platform: globals.platform,
         persistentToolState: globals.persistentToolState,
       ),
       Logger: () {
-       final LoggerFactory loggerFactory = LoggerFactory(
-         outputPreferences: globals.outputPreferences,
-         terminal: globals.terminal,
-         stdio: globals.stdio,
-       );
-       return loggerFactory.createLogger(
-         daemon: daemon,
-         machine: runMachine,
-         verbose: verbose && !muteCommandLogging,
-         prefixedErrors: prefixedErrors,
-         windows: globals.platform.isWindows,
-       );
+        final LoggerFactory loggerFactory = LoggerFactory(
+          outputPreferences: globals.outputPreferences,
+          terminal: globals.terminal,
+          stdio: globals.stdio,
+        );
+        return loggerFactory.createLogger(
+          daemon: daemon,
+          runMachine: runMachine,
+          verbose: verbose && !muteCommandLogging,
+          prefixedErrors: prefixedErrors,
+          windows: globals.platform.isWindows,
+          machine: machine,
+        );
       },
     },
   );
@@ -149,6 +153,16 @@ List<FlutterCommand> generateCommands({
   ChannelCommand(verboseHelp: verboseHelp),
   CleanCommand(verbose: verbose),
   ConfigCommand(verboseHelp: verboseHelp),
+  CustomDevicesCommand(
+    customDevicesConfig: globals.customDevicesConfig,
+    operatingSystemUtils: globals.os,
+    terminal: globals.terminal,
+    platform: globals.platform,
+    featureFlags: featureFlags,
+    processManager: globals.processManager,
+    fileSystem: globals.fs,
+    logger: globals.logger
+  ),
   CreateCommand(verboseHelp: verboseHelp),
   DaemonCommand(hidden: !verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
@@ -214,9 +228,10 @@ class LoggerFactory {
   Logger createLogger({
     @required bool verbose,
     @required bool prefixedErrors,
-    @required bool machine,
+    @required bool runMachine,
     @required bool daemon,
     @required bool windows,
+    @required bool machine,
   }) {
     Logger logger;
     if (windows) {
@@ -225,13 +240,15 @@ class LoggerFactory {
         stdio: _stdio,
         outputPreferences: _outputPreferences,
         stopwatchFactory: _stopwatchFactory,
+        machine: machine,
       );
     } else {
       logger = StdoutLogger(
         terminal: _terminal,
         stdio: _stdio,
         outputPreferences: _outputPreferences,
-        stopwatchFactory: _stopwatchFactory
+        stopwatchFactory: _stopwatchFactory,
+        machine: machine,
       );
     }
     if (verbose) {
@@ -243,7 +260,7 @@ class LoggerFactory {
     if (daemon) {
       return NotifyingLogger(verbose: verbose, parent: logger);
     }
-    if (machine) {
+    if (runMachine) {
       return AppRunLogger(parent: logger);
     }
     return logger;

@@ -226,6 +226,7 @@ Future<String> _doctorText() async {
     final BufferLogger logger = BufferLogger(
       terminal: globals.terminal,
       outputPreferences: globals.outputPreferences,
+      machine: false,
     );
 
     final Doctor doctor = Doctor(logger: logger);

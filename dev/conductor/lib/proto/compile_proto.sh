@@ -22,8 +22,8 @@ if ! type dart >/dev/null 2>&1; then
   exit 1
 fi
 
-# Pin protoc-gen-dart to pre-nullsafe version.
-dart pub global activate protoc_plugin 19.3.1
+# Use null-safe protoc_plugin
+dart pub global activate protoc_plugin 20.0.0
 
 protoc --dart_out="$DIR" --proto_path="$DIR" "$DIR/conductor_state.proto"
 
@@ -32,7 +32,7 @@ for SOURCE_FILE in $(ls "$DIR"/*.pb*.dart); do
   "$DARTFMT" --overwrite --line-length 120 "$SOURCE_FILE"
 
   # Create temp copy with the license header prepended
-  cp license_header.txt "${SOURCE_FILE}.tmp"
+  cp "$DIR/license_header.txt" "${SOURCE_FILE}.tmp"
 
   # Add an extra newline required by analysis (analysis also prevents
   # license_header.txt from having the trailing newline)
