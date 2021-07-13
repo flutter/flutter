@@ -1106,7 +1106,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final TerminalHandler terminalHandler = setUpTerminalHandler(
       <FakeVmServiceRequest>[
-       listViews,
+        listViews,
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
           args: <String, Object>{
@@ -1132,7 +1132,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final TerminalHandler terminalHandler = setUpTerminalHandler(
       <FakeVmServiceRequest>[
-       listViews,
+        listViews,
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
           args: <String, Object>{
@@ -1168,7 +1168,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final TerminalHandler terminalHandler = setUpTerminalHandler(
       <FakeVmServiceRequest>[
-       listViews,
+        listViews,
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
           args: <String, Object>{
@@ -1205,7 +1205,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final TerminalHandler terminalHandler = setUpTerminalHandler(
       <FakeVmServiceRequest>[
-       listViews,
+        listViews,
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
           args: <String, Object>{
@@ -1455,7 +1455,7 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
   );
 }
 
-class FakeResidentCompiler extends Fake implements ResidentCompiler {}
+class FakeResidentCompiler extends Fake implements ResidentCompiler { }
 
 class TestRunner extends Fake implements ResidentRunner {
   bool hasHelpBeenPrinted = false;
