@@ -365,4 +365,17 @@ void main() {
   themeData = ThemeData.raw(buttonColor: Colors.red);
   themeData = themeData.copyWith(buttonColor: Colors.red);
   themeData.buttonColor; // Removing field reference not supported.
+
+  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  ListWheelScrollView listWheelScrollView = ListWheelScrollView();
+  listWheelScrollView = ListWheelScrollView(clipToSize: true);
+  listWheelScrollView = ListWheelScrollView(clipToSize: false);
+  listWheelScrollView = ListWheelScrollView.useDelegate();
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: true);
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: false);
+  listWheelScrollView.clipToSize;
+  ListWheelViewport listWheelViewport = ListWheelViewport();
+  listWheelViewport = ListWheelViewport(clipToSize: true);
+  listWheelViewport = ListWheelViewport(clipToSize: false);
+  listWheelViewport.clipToSize;
 }

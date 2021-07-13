@@ -16,7 +16,6 @@ void main() {
       final BufferLogger bufferLogger = BufferLogger(
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
         terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
-        machine: false,
       );
       bufferLogger.printStatus('0123456789' * 8);
 
@@ -27,7 +26,6 @@ void main() {
       final BufferLogger bufferLogger = BufferLogger(
         outputPreferences: OutputPreferences.test(wrapText: false),
         terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
-        machine: false,
       );
       final String testString = '0123456789' * 20;
       bufferLogger.printStatus(testString);
@@ -126,7 +124,6 @@ void main() {
       final BufferLogger bufferLogger = BufferLogger(
         terminal: terminalUnderTest,
         outputPreferences: OutputPreferences.test(),
-        machine: false,
       );
       terminalUnderTest.usesTerminalUi = true;
       mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
@@ -151,7 +148,6 @@ void main() {
       final BufferLogger bufferLogger = BufferLogger(
         terminal: terminalUnderTest,
         outputPreferences: OutputPreferences.test(),
-        machine: false,
       );
       terminalUnderTest.usesTerminalUi = true;
       mockStdInStream = Stream<String>.fromFutures(<Future<String>>[

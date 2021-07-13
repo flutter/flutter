@@ -38,7 +38,6 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   Logger: () => BufferLogger(
     terminal: AnsiTerminal(stdio: globals.stdio, platform: globals.platform), // Danger, using real stdio.
     outputPreferences: OutputPreferences.test(),
-    machine: false,
   ), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.

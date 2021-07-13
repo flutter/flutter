@@ -24,7 +24,6 @@ final ProcessUtils processUtils = ProcessUtils(processManager: processManager, l
   ),
   stdio: stdio,
   outputPreferences: OutputPreferences.test(wrapText: true),
-  machine: false,
 ));
 final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
 
