@@ -132,6 +132,15 @@ double getOpacity(WidgetTester tester, String textValue) {
   return opacityWidget.opacity.value;
 }
 
+TextStyle getLabelStyle(WidgetTester tester) {
+  return tester.firstWidget<AnimatedDefaultTextStyle>(
+    find.ancestor(
+      of: find.text('label'),
+      matching: find.byType(AnimatedDefaultTextStyle),
+    ),
+  ).style;
+}
+
 void main() {
   testWidgets('InputDecorator input/label layout', (WidgetTester tester) async {
     // The label appears above the input text
@@ -3016,15 +3025,6 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
   });
 
-  TextStyle _getLabelStyle(WidgetTester tester) {
-    return tester.firstWidget<AnimatedDefaultTextStyle>(
-      find.ancestor(
-        of: find.text('label'),
-        matching: find.byType(AnimatedDefaultTextStyle),
-      ),
-    ).style;
-  }
-
   testWidgets('InputDecorationTheme style overrides', (WidgetTester tester) async {
     const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
     final TextStyle labelStyle = style16.merge(const TextStyle(color: Colors.red));
@@ -3081,16 +3081,15 @@ void main() {
     expect(tester.getTopLeft(find.text('helper')), const Offset(0.0, 64.0));
     expect(tester.getTopRight(find.text('counter')), const Offset(800.0, 64.0));
 
-    // Verify that the styles were passed along
+    // Verify that the styles were passed along.
     expect(tester.widget<Text>(find.text('prefix')).style!.color, prefixStyle.color);
     expect(tester.widget<Text>(find.text('suffix')).style!.color, suffixStyle.color);
     expect(tester.widget<Text>(find.text('helper')).style!.color, helperStyle.color);
     expect(tester.widget<Text>(find.text('counter')).style!.color, counterStyle.color);
 
-    // label has the hintStyle because labelText is on top of input field
-    // (i.e., at the same location on the screen where
-    // text may be entered in the child)
-    expect(_getLabelStyle(tester).color, hintStyle.color);
+    // Label has the hintStyle because labelText is on top of the input field
+    // (i.e., at the same location on the screen where text may be entered in the child).
+    expect(getLabelStyle(tester).color, hintStyle.color);
   });
 
   testWidgets('InputDecorationTheme style overrides focused', (WidgetTester tester) async {
@@ -3128,14 +3127,14 @@ void main() {
       ),
     );
 
-    // Verify that the styles were passed along
+    // Verify that the styles were passed along.
     expect(tester.widget<Text>(find.text('hint')).style!.color, hintStyle.color);
     expect(tester.widget<Text>(find.text('prefix')).style!.color, prefixStyle.color);
     expect(tester.widget<Text>(find.text('suffix')).style!.color, suffixStyle.color);
     expect(tester.widget<Text>(find.text('helper')).style!.color, helperStyle.color);
     expect(tester.widget<Text>(find.text('counter')).style!.color, counterStyle.color);
 
-    expect(_getLabelStyle(tester).color, labelStyle.color);
+    expect(getLabelStyle(tester).color, labelStyle.color);
   });
 
   testWidgets('InputDecorator.toString()', (WidgetTester tester) async {
