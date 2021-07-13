@@ -1834,15 +1834,16 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
     defaultAction._callingAction = newAction;
   }
 
-  Object? _invokeOverride(Action<T> overrideAction, T intent) {
+  Object? _invokeOverride(Action<T> overrideAction, T intent, BuildContext? context) {
     assert(!debugAssertMutuallyRecursive);
     assert(() {
       debugAssertMutuallyRecursive = true;
       return true;
     }());
     overrideAction._callingAction = defaultAction;
-    // Context Action?
-    final Object? returnValue = overrideAction.invoke(intent);
+    final Object? returnValue = overrideAction is ContextAction<T>
+      ? overrideAction.invoke(intent, context)
+      : overrideAction.invoke(intent);
     overrideAction._callingAction = null;
     assert(() {
       debugAssertMutuallyRecursive = false;
@@ -1856,7 +1857,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
     final Action<T>? overrideAction = this.overrideAction;
     final Object? returnValue = overrideAction == null
       ? invokeDefaultAction(intent, callingAction, context)
-      : _invokeOverride(overrideAction, intent);
+      : _invokeOverride(overrideAction, intent, context);
     return returnValue;
   }
 
@@ -1930,7 +1931,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   }
 }
 
-class _OverridableAction<T extends Intent> extends Action<T> with _OverridableActionMixin<T> {
+class _OverridableAction<T extends Intent> extends ContextAction<T> with _OverridableActionMixin<T> {
   _OverridableAction({ required this.defaultAction, required this.lookupContext }) ;
 
   @override
@@ -1950,7 +1951,7 @@ class _OverridableAction<T extends Intent> extends Action<T> with _OverridableAc
   }
 
   @override
-  Action<T> _makeOverridableAction(BuildContext context) {
+  ContextAction<T> _makeOverridableAction(BuildContext context) {
     return _OverridableAction<T>(defaultAction: defaultAction, lookupContext: context);
   }
 }

@@ -1589,6 +1589,57 @@ void main() {
         'action2.invokeAsOverride-post-super',
       ]);
     });
+    testWidgets('Override regular Action with a ContextAction', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context1) {
+            return Actions(
+              actions: <Type, Action<Intent>> {
+                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationContextAction(actionName: 'action1'), context: context1),
+              },
+              child: Builder(
+                builder: (BuildContext context2) {
+                  return Actions(
+                    actions: <Type, Action<Intent>> {
+                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
+                    },
+                    child: Builder(
+                      builder: (BuildContext context3) {
+                        return Actions(
+                          actions: <Type, Action<Intent>> {
+                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          },
+                          child: Builder(
+                            builder: (BuildContext context4) {
+                              invokingContext = context4;
+                              return const SizedBox();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      expect(invocations, <String>[
+        'action1.invokeAsOverride-pre-super',
+        'action2.invokeAsOverride-pre-super',
+        'action3.invoke',
+        'action2.invokeAsOverride-post-super',
+        'action1.invokeAsOverride-post-super',
+      ]);
+
+      // Action1 is a ContextAction and action2 & action3 are not.
+      // They should not lose information.
+      expect(LogInvocationContextAction.invokeContext, isNotNull);
+      expect(LogInvocationContextAction.invokeContext, invokingContext);
+    });
   });
 }
 
@@ -1620,6 +1671,38 @@ class LogInvocationAction extends Action<LogIntent> {
 
   @override
   Object? invoke(LogIntent intent) {
+    final Action<LogIntent>? callingAction = this.callingAction;
+    if (callingAction == null) {
+      intent.log.add('$actionName.invoke');
+    } else {
+      intent.log.add('$actionName.invokeAsOverride-pre-super');
+      callingAction.invoke(intent);
+      intent.log.add('$actionName.invokeAsOverride-post-super');
+    }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('actionName', actionName));
+  }
+}
+
+class LogInvocationContextAction extends ContextAction<LogIntent> {
+  LogInvocationContextAction({ required this.actionName, this.enabled = true });
+
+  static BuildContext? invokeContext;
+
+  final String actionName;
+
+  final bool enabled;
+
+  @override
+  bool get isActionEnabled => enabled;
+
+  @override
+  Object? invoke(LogIntent intent, [BuildContext? context]) {
+    invokeContext = context;
     final Action<LogIntent>? callingAction = this.callingAction;
     if (callingAction == null) {
       intent.log.add('$actionName.invoke');
