@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -142,5 +144,35 @@ void main() {
   test('BoxShadow toString test', () {
     expect(const BoxShadow(blurRadius: 4.0).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0), BlurStyle.normal'));
     expect(const BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.solid).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0), BlurStyle.solid'));
+  });
+
+  testWidgets('BoxShadow BoxStyle.solid', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: Colors.white,
+            width: 50,
+            height: 50,
+            child: Center(
+              child: Container(
+                decoration: const BoxDecoration(
+                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 3.0, blurStyle: BlurStyle.solid)],
+                ),
+                width: 10,
+                height: 10,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('boxShadow.boxStyle.solid.0.0.png'),
+    );
   });
 }
