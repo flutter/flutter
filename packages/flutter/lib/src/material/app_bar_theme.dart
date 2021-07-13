@@ -245,6 +245,10 @@ class AppBarTheme with Diagnosticable {
     TextStyle? toolbarTextStyle,
     TextStyle? titleTextStyle,
     SystemUiOverlayStyle? systemOverlayStyle,
+    @Deprecated(
+      'This property is obsolete and is false by default. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     bool? backwardsCompatibility,
   }) {
     assert(

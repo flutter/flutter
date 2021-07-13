@@ -376,4 +376,21 @@ void main() {
   appBarTheme = AppBarTheme(textTheme: myTextTheme);
   appBarTheme = appBarTheme.copyWith(textTheme: myTextTheme);
   appBarTheme = appBarTheme.copyWith(textTheme: myTextTheme);
+
+  AppBar appBar = AppBar();
+  appBar = AppBar(backwardsCompatibility: true);
+  appBar = AppBar(backwardsCompatibility: false));
+  appBar.backwardsCompatibility; // Removing field reference not supported.
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(backwardsCompatibility: true);
+  sliverAppBar = SliverAppBar(backwardsCompatibility: false);
+  sliverAppBar.backwardsCompatibility; // Removing field reference not supported.
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(backwardsCompatibility: true);
+  appBarTheme = AppBarTheme(backwardsCompatibility: false);
+  appBarTheme = appBarTheme.copyWith(backwardsCompatibility: true);
+  appBarTheme = appBarTheme.copyWith(backwardsCompatibility: false);
+  appBarTheme.backwardsCompatibility; // Removing field reference not supported.
 }

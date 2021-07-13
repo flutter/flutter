@@ -16,6 +16,50 @@ version: 1
 transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'AppBarTheme'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBarTheme'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'SliverAppBar'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
   - title: "Migrate to 'systemOverlayStyle'"
     date: 2021-07-12
     element:
