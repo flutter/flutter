@@ -39,11 +39,8 @@ fi
 
 if [[ ! -d "$SRC_DIR/out/$FLUTTER_ENGINE" ]]; then
   "$GN" --android --unoptimized --android-cpu x64 --runtime-mode debug
-  "$GN" --unoptimized --runtime-mode debug
 fi
 
 autoninja -C "$SRC_DIR/out/$FLUTTER_ENGINE"
-autoninja -C "$SRC_DIR/out/host_debug_unopt"
 
-"$SCRIPT_DIR/compile_android_jit.sh" "$SRC_DIR/out/host_debug_unopt" "$SRC_DIR/out/$FLUTTER_ENGINE/clang_x64"
 "$SCRIPT_DIR/run_android_tests.sh" "$FLUTTER_ENGINE"

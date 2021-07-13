@@ -27,16 +27,9 @@ SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
 SRC_DIR="$(cd "$SCRIPT_DIR/../../.."; pwd -P)"
 export ANDROID_HOME="$SRC_DIR/third_party/android_tools/sdk"
 
-"$SRC_DIR/flutter/tools/gn" --unopt
-ninja -C "$SRC_DIR/out/host_debug_unopt" sky_engine -j 400
-
-"$SCRIPT_DIR/compile_android_aot.sh" "$1" "$2"
-
-(
-  cd "$SCRIPT_DIR/android"
-  ./gradlew assembleDebug --no-daemon
-)
+# TODO(dnfield): Delete this whole file.
+DEVICE_OUT_DIR=${2%"clang_x64"}
 
 # LUCI expects to find the APK here
 mkdir -p "$SCRIPT_DIR/android/app/build/outputs/apk/debug"
-cp "$SCRIPT_DIR/build/app/outputs/apk/debug/app-debug.apk" "$SCRIPT_DIR/android/app/build/outputs/apk/debug"
+cp "$DEVICE_OUT_DIR/scenario_app/app/outputs/apk/debug/app-debug.apk" "$SCRIPT_DIR/android/app/build/outputs/apk/debug"

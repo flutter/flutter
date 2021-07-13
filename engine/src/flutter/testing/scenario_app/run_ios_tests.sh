@@ -37,7 +37,7 @@ fi
 # Can also be set via Simulator app Device > Rotate Device Automatically
 defaults write com.apple.iphonesimulator RotateWindowWhenSignaledByGuest -int 1
 
-cd ios/Scenarios
+cd $SRC_DIR/out/$FLUTTER_ENGINE/scenario_app/Scenarios
 set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
   -destination 'platform=iOS Simulator,OS=13.0,name=iPhone 8' \
