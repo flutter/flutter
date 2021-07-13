@@ -315,4 +315,22 @@ void main() {
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.hardEdge);
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.none);
   listWheelViewport.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/86198
+  AppBar appBar = AppBar();
+  appBar = AppBar(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBar = AppBar(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBar.systemOverlayStyle;
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  sliverAppBar = SliverAppBar(systemOverlayStyle: SystemUiOverlayStyle.light);
+  sliverAppBar.systemOverlayStyle;
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBarTheme = AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBarTheme.systemOverlayStyle;
 }

@@ -223,6 +223,10 @@ class AppBarTheme with Diagnosticable {
   /// new values.
   AppBarTheme copyWith({
     IconThemeData? actionsIconTheme,
+    @Deprecated(
+      'This property is no longer used, please use systemOverlayStyle instead. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     Brightness? brightness,
     Color? color,
     Color? backgroundColor,
@@ -230,6 +234,10 @@ class AppBarTheme with Diagnosticable {
     double? elevation,
     Color? shadowColor,
     IconThemeData? iconTheme,
+    @Deprecated(
+      'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     TextTheme? textTheme,
     bool? centerTitle,
     double? titleSpacing,

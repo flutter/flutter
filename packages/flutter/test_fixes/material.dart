@@ -343,4 +343,22 @@ void main() {
   listWheelViewport = ListWheelViewport(clipToSize: true);
   listWheelViewport = ListWheelViewport(clipToSize: false);
   listWheelViewport.clipToSize;
+
+  // Changes made in https://github.com/flutter/flutter/pull/86198
+  AppBar appBar = AppBar();
+  appBar = AppBar(brightness: Brightness.light);
+  appBar = AppBar(brightness: Brightness.dark);
+  appBar.brightness;
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(brightness: Brightness.light);
+  sliverAppBar = SliverAppBar(brightness: Brightness.dark);
+  sliverAppBar.brightness;
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(brightness: Brightness.light);
+  appBarTheme = AppBarTheme(brightness: Brightness.dark);
+  appBarTheme = appBarTheme.copyWith(brightness: Brightness.light);
+  appBarTheme = appBarTheme.copyWith(brightness: Brightness.dark);
+  appBarTheme.brightness;
 }

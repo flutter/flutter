@@ -15,6 +15,179 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'AppBarTheme'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: 'SystemUiOverlayStyle.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: 'SystemUiOverlayStyle.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBarTheme'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: 'SystemUiOverlayStyle.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: 'SystemUiOverlayStyle.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      field: 'brightness'
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'systemOverlayStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'SliverAppBar'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 34
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: 'SystemUiOverlayStyle.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 34
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: 'SystemUiOverlayStyle.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      field: 'brightness'
+      inClass: 'SliverAppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'systemOverlayStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 27
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: 'SystemUiOverlayStyle.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 27
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: 'SystemUiOverlayStyle.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      field: 'brightness'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'systemOverlayStyle'
+
   # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
