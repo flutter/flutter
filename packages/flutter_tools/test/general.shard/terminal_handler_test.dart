@@ -1455,7 +1455,7 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
   );
 }
 
-class FakeResidentCompiler extends Fake implements ResidentCompiler {}
+class FakeResidentCompiler extends Fake implements ResidentCompiler { }
 
 class TestRunner extends Fake implements ResidentRunner {
   bool hasHelpBeenPrinted = false;

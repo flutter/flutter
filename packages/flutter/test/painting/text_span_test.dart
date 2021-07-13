@@ -309,13 +309,13 @@ void main() {
     addTearDown(gesture.removePointer);
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)) - const Offset(40, 0));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)) + const Offset(40, 0));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('handles onEnter and onExit', (WidgetTester tester) async {

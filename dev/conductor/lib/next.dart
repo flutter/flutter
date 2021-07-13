@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
-import 'package:meta/meta.dart' show required, visibleForTesting;
+import 'package:meta/meta.dart' show visibleForTesting;
 import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart';
@@ -21,7 +19,7 @@ const String kForceFlag = 'force';
 /// Command to proceed from one [pb.ReleasePhase] to the next.
 class NextCommand extends Command<void> {
   NextCommand({
-    @required this.checkouts,
+    required this.checkouts,
   }) {
     final String defaultPath = defaultStateFilePath(checkouts.platform);
     argParser.addOption(
@@ -51,10 +49,10 @@ class NextCommand extends Command<void> {
   @override
   void run() {
     runNext(
-      autoAccept: argResults[kYesFlag] as bool,
+      autoAccept: argResults![kYesFlag] as bool,
       checkouts: checkouts,
-      force: argResults[kForceFlag] as bool,
-      stateFile: checkouts.fileSystem.file(argResults[kStateOption]),
+      force: argResults![kForceFlag] as bool,
+      stateFile: checkouts.fileSystem.file(argResults![kStateOption]),
     );
   }
 }
@@ -77,10 +75,10 @@ bool prompt(String message, Stdio stdio) {
 
 @visibleForTesting
 void runNext({
-  @required bool autoAccept,
-  @required bool force,
-  @required Checkouts checkouts,
-  @required File stateFile,
+  required bool autoAccept,
+  required bool force,
+  required Checkouts checkouts,
+  required File stateFile,
 }) {
   final Stdio stdio = checkouts.stdio;
   const List<CherrypickState> finishedStates = <CherrypickState>[
@@ -104,44 +102,58 @@ void runNext({
         }
       }
 
-      if (state.engine.cherrypicks.isEmpty) {
-        stdio.printStatus('This release has no engine cherrypicks.');
+      if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
+        stdio.printStatus(
+          'This release has no engine cherrypicks. No Engine PR is necessary.\n',
+        );
         break;
-      } else if (unappliedCherrypicks.isEmpty) {
+      }
+
+      if (unappliedCherrypicks.isEmpty) {
         stdio.printStatus('All engine cherrypicks have been auto-applied by '
             'the conductor.\n');
-        if (autoAccept == false) {
-          final bool response = prompt(
-            'Are you ready to push your changes to the repository '
-            '${state.engine.mirror.url}?',
-            stdio,
-          );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
-            return;
-          }
-        }
       } else {
         stdio.printStatus(
           'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
         stdio.printStatus('These must be applied manually in the directory '
           '${state.engine.checkoutPath} before proceeding.\n');
-        if (autoAccept == false) {
-          final bool response = prompt(
-              'Are you ready to push your engine branch to the repository '
-              '${state.engine.mirror.url}?',
-            stdio,
-          );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
-            return;
-          }
+      }
+      if (autoAccept == false) {
+        final bool response = prompt(
+            'Are you ready to push your engine branch to the repository '
+            '${state.engine.mirror.url}?',
+          stdio,
+        );
+        if (!response) {
+          stdio.printError('Aborting command.');
+          writeStateToFile(stateFile, state, stdio.logs);
+          return;
         }
       }
+      final Remote upstream = Remote(
+        name: RemoteName.upstream,
+        url: state.engine.upstream.url,
+      );
+      final EngineRepository engine = EngineRepository(
+        checkouts,
+        initialRef: state.engine.workingBranch,
+        upstreamRemote: upstream,
+        previousCheckoutLocation: state.engine.checkoutPath,
+      );
+      final String headRevision = engine.reverseParse('HEAD');
+
+      engine.pushRef(
+        fromRef: headRevision,
+        toRef: state.engine.workingBranch,
+        remote: state.engine.mirror.name,
+      );
+
       break;
     case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
+      stdio.printStatus(<String>[
+        'You must validate pre-submit CI for your engine PR, merge it, and codesign',
+        'binaries before proceeding.\n',
+      ].join('\n'));
       if (autoAccept == false) {
         // TODO(fujino): actually test if binaries have been codesigned on macOS
         final bool response = prompt(
@@ -163,42 +175,83 @@ void runNext({
         }
       }
 
-      if (state.framework.cherrypicks.isEmpty) {
-        stdio.printStatus('This release has no framework cherrypicks.');
-        break;
-      } else if (unappliedCherrypicks.isEmpty) {
-        stdio.printStatus('All framework cherrypicks have been auto-applied by '
-            'the conductor.\n');
-        if (autoAccept == false) {
-          final bool response = prompt(
-            'Are you ready to push your changes to the repository '
-            '${state.framework.mirror.url}?',
-            stdio,
-          );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
-            return;
-          }
-        }
-      } else {
+      if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
         stdio.printStatus(
-          'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
-        stdio.printStatus('These must be applied manually in the directory '
-          '${state.framework.checkoutPath} before proceeding.\n');
-        if (autoAccept == false) {
-          final bool response = prompt(
-              'Are you ready to push your framework branch to the repository '
-              '${state.framework.mirror.url}?',
-            stdio,
+          'This release has no engine cherrypicks, and thus the engine.version file\n'
+          'in the framework does not need to be updated.',
+        );
+
+        if (state.framework.cherrypicks.isEmpty) {
+          stdio.printStatus(
+            'This release also has no framework cherrypicks. Therefore, a framework\n'
+            'pull request is not required.',
           );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
-            return;
-          }
+          break;
         }
       }
+      final EngineRepository engine = EngineRepository(
+        checkouts,
+        initialRef: state.engine.candidateBranch,
+        upstreamRemote: Remote(
+          name: RemoteName.upstream,
+          url: state.engine.upstream.url,
+        ),
+        previousCheckoutLocation: state.engine.checkoutPath,
+      );
+
+      final String engineRevision = engine.reverseParse('HEAD');
+
+      final Remote upstream = Remote(
+        name: RemoteName.upstream,
+        url: state.framework.upstream.url,
+      );
+      final FrameworkRepository framework = FrameworkRepository(
+        checkouts,
+        initialRef: state.framework.workingBranch,
+        upstreamRemote: upstream,
+        previousCheckoutLocation: state.framework.checkoutPath,
+      );
+      final String headRevision = framework.reverseParse('HEAD');
+
+      stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
+      framework.updateEngineRevision(engineRevision);
+      framework.commit('Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}', addFirst: true);
+
+      if (state.framework.cherrypicks.isEmpty) {
+        stdio.printStatus(
+          'This release has no framework cherrypicks. However, a framework PR is still\n'
+          'required to roll engine cherrypicks.',
+        );
+      } else if (unappliedCherrypicks.isEmpty) {
+        stdio.printStatus('All framework cherrypicks were auto-applied by the conductor.');
+      } else {
+        stdio.printStatus(
+          'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.',
+        );
+        stdio.printStatus(
+          'These must be applied manually in the directory '
+          '${state.framework.checkoutPath} before proceeding.\n',
+        );
+      }
+
+      if (autoAccept == false) {
+        final bool response = prompt(
+          'Are you ready to push your framework branch to the repository '
+          '${state.framework.mirror.url}?',
+          stdio,
+        );
+        if (!response) {
+          stdio.printError('Aborting command.');
+          writeStateToFile(stateFile, state, stdio.logs);
+          return;
+        }
+      }
+
+      framework.pushRef(
+        fromRef: headRevision,
+        toRef: state.framework.workingBranch,
+        remote: state.framework.mirror.name,
+      );
       break;
     case pb.ReleasePhase.PUBLISH_VERSION:
       stdio.printStatus('Please ensure that you have merged your framework PR and that');
@@ -216,7 +269,8 @@ void runNext({
       final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {
         final bool response = prompt(
-          'Has CI passed for the framework PR?',
+          'Are you ready to tag commit $headRevision as ${state.releaseVersion}\n'
+          'and push to remote ${state.framework.upstream.url}?',
           stdio,
         );
         if (!response) {
@@ -240,9 +294,17 @@ void runNext({
       );
       final String headRevision = framework.reverseParse('HEAD');
       if (autoAccept == false) {
+        // dryRun: true means print out git command
+        framework.pushRef(
+          fromRef: headRevision,
+          toRef: state.releaseChannel,
+          remote: state.framework.upstream.url,
+          force: force,
+          dryRun: true,
+        );
+
         final bool response = prompt(
-            'Are you ready to publish release ${state.releaseVersion} to '
-            'channel ${state.releaseChannel} at ${state.framework.upstream.url}?',
+          'Are you ready to publish this release?',
           stdio,
         );
         if (!response) {
@@ -251,10 +313,10 @@ void runNext({
           return;
         }
       }
-      framework.updateChannel(
-        headRevision,
-        state.framework.upstream.url,
-        state.releaseChannel,
+      framework.pushRef(
+        fromRef: headRevision,
+        toRef: state.releaseChannel,
+        remote: state.framework.upstream.url,
         force: force,
       );
       break;
@@ -277,7 +339,6 @@ void runNext({
       break;
     case pb.ReleasePhase.RELEASE_COMPLETED:
       throw ConductorException('This release is finished.');
-      break;
   }
   final ReleasePhase nextPhase = getNextPhase(state.currentPhase);
   stdio.printStatus('\nUpdating phase from ${state.currentPhase} to $nextPhase...\n');

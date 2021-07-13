@@ -220,7 +220,7 @@ bool _isFlingGesture(Velocity velocity) {
 ///
 /// [_LineBetweenPointers] is an abstraction of a line between two pointers in
 /// contact with the screen. Used to track the rotation of a scale gesture.
-class _LineBetweenPointers{
+class _LineBetweenPointers {
 
   /// Creates a [_LineBetweenPointers]. None of the [pointerStartLocation], [pointerStartId]
   /// [pointerEndLocation] and [pointerEndId] must be null. [pointerStartId] and [pointerEndId]

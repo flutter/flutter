@@ -616,11 +616,11 @@ mixin LocalHistoryRoute<T> on Route<T> {
     entry._owner = null;
     entry._notifyRemoved();
     if (_localHistory!.isEmpty) {
-      if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
         // The local history might be removed as a result of disposing inactive
         // elements during finalizeTree. The state is locked at this moment, and
         // we can only notify state has changed in the next frame.
-        SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
           changedInternalState();
         });
       } else {
@@ -2011,11 +2011,8 @@ class _FocusTrap extends SingleChildRenderObjectWidget {
 }
 
 class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
-  _RenderFocusTrap(this._focusScopeNode) {
-    focusScopeNode.addListener(_currentFocusListener);
-  }
+  _RenderFocusTrap(this._focusScopeNode);
 
-  FocusNode? currentFocus;
   Rect? currentFocusRect;
   Expando<BoxHitTestResult> cachedResults = Expando<BoxHitTestResult>();
 
@@ -2024,13 +2021,7 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
   set focusScopeNode(FocusScopeNode value) {
     if (focusScopeNode == value)
       return;
-    focusScopeNode.removeListener(_currentFocusListener);
     _focusScopeNode = value;
-    focusScopeNode.addListener(_currentFocusListener);
-  }
-
-  void _currentFocusListener() {
-    currentFocus = focusScopeNode.focusedChild;
   }
 
   @override
@@ -2069,11 +2060,11 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
       || event.buttons != kPrimaryButton
       || event.kind != PointerDeviceKind.mouse
       || _shouldIgnoreEvents
-      || currentFocus == null) {
+      || _focusScopeNode.focusedChild == null) {
       return;
     }
     final BoxHitTestResult? result = cachedResults[entry];
-    final FocusNode? focusNode = currentFocus;
+    final FocusNode? focusNode = _focusScopeNode.focusedChild;
     if (focusNode == null || result == null)
       return;
 

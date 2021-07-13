@@ -1017,4 +1017,4 @@ class FakeGradleUtils extends GradleUtils {
   }
 }
 
-class FakeAndroidSdk extends Fake implements AndroidSdk {}
+class FakeAndroidSdk extends Fake implements AndroidSdk { }

@@ -1809,7 +1809,7 @@ Widget buildNavigator({
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -1901,7 +1901,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
   }
 }
 
-class _RestorableModalTestWidget extends StatelessWidget{
+class _RestorableModalTestWidget extends StatelessWidget {
   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
     return CupertinoModalPopupRoute<void>(
       builder: (BuildContext context) {
