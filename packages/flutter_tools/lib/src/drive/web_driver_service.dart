@@ -36,6 +36,7 @@ class WebDriverService extends DriverService {
 
   ResidentRunner _residentRunner;
   Uri _webUri;
+  int _runResult;
 
   @override
   Future<void> start(
@@ -69,7 +70,7 @@ class WebDriverService extends DriverService {
           port: debuggingOptions.port,
           disablePortPublication: debuggingOptions.disablePortPublication,
         ),
-      stayResident: false,
+      stayResident: true,
       urlTunneller: null,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
@@ -78,14 +79,34 @@ class WebDriverService extends DriverService {
       systemClock: globals.systemClock,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
-    final int result = await _residentRunner.run(
+    final Future<int> runFuture = _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
       enableDevTools: false,
       route: route,
     );
+
+    // This method must return before the run future resolves. This is because
+    // the app should continue running while the test is executing. So instead
+    // of awaiting on the future, the result of the run future is recorded in
+    // the run result, and then checked when `stop` is called after the test is
+    // done.
+    unawaited(runFuture.then((int result) {
+      _runResult = result;
+    }));
+
+    await appStartedCompleter.future;
+
+    if (_runResult != null) {
+      throw ToolExit(
+        'Application exited before the test started. Check web driver logs '
+        'for possible application-side errors.'
+      );
+    }
+
     _webUri = _residentRunner.uri;
-    if (result != 0) {
-      throwToolExit(null);
+
+    if (_webUri == null) {
+      throw ToolExit('Unable to connect to the app. URL not available.');
     }
   }
 
@@ -150,7 +171,16 @@ class WebDriverService extends DriverService {
 
   @override
   Future<void> stop({File writeSkslOnExit, String userIdentifier}) async {
+    final bool appDidFinishPrematurely = _runResult != null;
+    await _residentRunner.exitApp();
     await _residentRunner.cleanupAtFinish();
+
+    if (appDidFinishPrematurely) {
+      throw ToolExit(
+        'Application exited before the test finished. Check web driver logs '
+        'for possible application-side errors.'
+      );
+    }
   }
 
   Map<String, String> _additionalDriverEnvironment(async_io.WebDriver webDriver, String browserName, bool androidEmulator) {
