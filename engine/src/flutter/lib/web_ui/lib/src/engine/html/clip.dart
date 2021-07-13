@@ -4,9 +4,10 @@
 
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart' show domRenderer, DomRenderer, NullTreeSanitizer;
 import 'package:ui/ui.dart' as ui;
 
+import '../../engine.dart'  show NullTreeSanitizer;
+import '../dom_renderer.dart';
 import '../shadow.dart';
 import '../util.dart';
 import 'dom_canvas.dart';

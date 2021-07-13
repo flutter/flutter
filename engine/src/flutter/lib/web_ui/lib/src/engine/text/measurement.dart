@@ -8,10 +8,12 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/src/engine.dart' show domRenderer, registerHotRestartListener, window;
 
+import '../../engine.dart' show registerHotRestartListener;
+import '../dom_renderer.dart';
 import '../util.dart';
 import '../web_experiments.dart';
+import '../window.dart';
 import 'line_break_properties.dart';
 import 'line_breaker.dart';
 import 'paragraph.dart';

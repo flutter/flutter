@@ -4,10 +4,11 @@
 
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart' show EngineColorFilter, NullTreeSanitizer;
 import 'package:ui/ui.dart' as ui;
 
+import '../../engine.dart' show NullTreeSanitizer;
 import '../canvaskit/color_filter.dart';
+import '../color_filter.dart';
 import '../util.dart';
 import 'bitmap_canvas.dart';
 import 'path_to_svg_clip.dart';

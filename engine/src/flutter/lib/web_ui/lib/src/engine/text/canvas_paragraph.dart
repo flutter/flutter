@@ -6,8 +6,8 @@ import 'dart:html' as html;
 
 import 'package:ui/ui.dart' as ui;
 
-import 'package:ui/src/engine.dart' show BitmapCanvas, domRenderer, DomRenderer;
-
+import '../dom_renderer.dart';
+import '../html/bitmap_canvas.dart';
 import '../profiler.dart';
 import '../util.dart';
 import 'layout_service.dart';
