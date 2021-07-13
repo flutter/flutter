@@ -119,7 +119,7 @@ void main() {
     startValue = null;
     endValue = null;
     await tester.pump(); // No animation should start.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
 
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     final Offset bottomRight = tester.getBottomRight(find.byKey(sliderKey));
@@ -130,7 +130,7 @@ void main() {
     expect(startValue, equals(0.5));
     expect(endValue, moreOrLessEquals(0.25, epsilon: 0.05));
     await tester.pump(); // No animation should start.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
   testWidgets('Slider can move when tapped (RTL)', (WidgetTester tester) async {
@@ -169,7 +169,7 @@ void main() {
     await tester.tap(find.byKey(sliderKey));
     expect(value, equals(0.5));
     await tester.pump(); // No animation should start.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
 
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     final Offset bottomRight = tester.getBottomRight(find.byKey(sliderKey));
@@ -178,7 +178,7 @@ void main() {
     await tester.tapAt(target);
     expect(value, moreOrLessEquals(0.75, epsilon: 0.05));
     await tester.pump(); // No animation should start.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
   testWidgets("Slider doesn't send duplicate change events if tapped on the same value", (WidgetTester tester) async {
@@ -280,19 +280,19 @@ void main() {
     expect(value, equals(0.5));
     await tester.pump(const Duration(milliseconds: 100));
     // Starts with the position animation and value indicator
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
     await tester.pump(const Duration(milliseconds: 100));
     // Value indicator is longer than position.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
     await tester.pump(const Duration(milliseconds: 100));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
     await tester.pump(const Duration(milliseconds: 100));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
     await tester.pump(const Duration(milliseconds: 100));
     // Shown for long enough, value indicator is animated closed.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
     await tester.pump(const Duration(milliseconds: 101));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
   testWidgets('Discrete Slider repaints and animates when dragged', (WidgetTester tester) async {
@@ -528,13 +528,13 @@ void main() {
     expect(value, equals(80.0));
 
     await tester.pump(); // Starts animation.
-    expect(SchedulerBinding.instance!.transientCallbackCount, greaterThan(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     // Animation complete.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
   testWidgets('Slider can be given zero values', (WidgetTester tester) async {
@@ -1265,7 +1265,7 @@ void main() {
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
       expect(
         material,
         paints
@@ -1281,7 +1281,7 @@ void main() {
       await tester.pump();
       // Wait for animations to start.
       await tester.pump(const Duration(milliseconds: 25));
-      expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
       expect(
         material,
         paints
@@ -1301,7 +1301,7 @@ void main() {
 
       // Move a little further in the animations.
       await tester.pump(const Duration(milliseconds: 10));
-      expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
       expect(
         material,
         paints
@@ -1315,7 +1315,7 @@ void main() {
       );
       // Wait for animations to finish.
       await tester.pumpAndSettle();
-      expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
       expect(
         material,
         paints
@@ -1329,7 +1329,7 @@ void main() {
       );
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
       expect(
         material,
         paints
@@ -2319,7 +2319,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test Slider.adaptive() constructor
     await tester.pumpWidget(
@@ -2342,7 +2342,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -2364,7 +2364,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
   testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
