@@ -361,4 +361,19 @@ void main() {
   appBarTheme = appBarTheme.copyWith(brightness: Brightness.light);
   appBarTheme = appBarTheme.copyWith(brightness: Brightness.dark);
   appBarTheme.brightness;
+
+  TextTheme myTextTheme = TextTheme();
+  AppBar appBar = AppBar();
+  appBar = AppBar(textTheme: myTextTheme);
+  appBar = AppBar(textTheme: myTextTheme);
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(textTheme: myTextTheme);
+  sliverAppBar = SliverAppBar(textTheme: myTextTheme);
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(textTheme: myTextTheme);
+  appBarTheme = AppBarTheme(textTheme: myTextTheme);
+  appBarTheme = appBarTheme.copyWith(textTheme: myTextTheme);
+  appBarTheme = appBarTheme.copyWith(textTheme: myTextTheme);
 }

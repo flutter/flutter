@@ -333,4 +333,19 @@ void main() {
   appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.dark);
   appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.light);
   appBarTheme.systemOverlayStyle;
+
+  TextTheme myTextTheme = TextTheme();
+  AppBar appBar = AppBar();
+  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
 }

@@ -22,6 +22,200 @@ transforms:
       uris: [ 'material.dart' ]
       method: 'copyWith'
       inClass: 'AppBarTheme'
+    changes:
+    - kind: 'addParameter'
+      index: 12
+      name: 'toolbarTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.bodyText2'
+        requiredIf: "textTheme != ''"
+    - kind: 'addParameter'
+      index: 13
+      name: 'titleTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.headline6'
+        requiredIf: "textTheme != ''"
+    - kind: 'removeParameter'
+      name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBarTheme'
+    changes:
+    - kind: 'addParameter'
+      index: 13
+      name: 'toolbarTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.bodyText2'
+        requiredIf: "textTheme != ''"
+    - kind: 'addParameter'
+      index: 14
+      name: 'titleTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.headline6'
+        requiredIf: "textTheme != ''"
+    - kind: 'removeParameter'
+      name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextSyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'toolbarTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'titleTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'titleTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'SliverAppBar'
+    changes:
+    - kind: 'addParameter'
+      index: 32
+      name: 'toolbarTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.bodyText2'
+        requiredIf: "textTheme != ''"
+    - kind: 'addParameter'
+      index: 33
+      name: 'titleTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.headline6'
+        requiredIf: "textTheme != ''"
+    - kind: 'removeParameter'
+      name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextSyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'SliverAppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'toolbarTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'titleTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'SliverAppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'titleTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle' and 'titleTextStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    changes:
+      - kind: 'addParameter'
+        index: 24
+        name: 'toolbarTextStyle'
+        style: optional_named
+        argumentValue:
+          expression: '{% textTheme %}.bodyText2'
+          requiredIf: "textTheme != ''"
+      - kind: 'addParameter'
+        index: 25
+        name: 'titleTextStyle'
+        style: optional_named
+        argumentValue:
+          expression: '{% textTheme %}.headline6'
+          requiredIf: "textTheme != ''"
+      - kind: 'removeParameter'
+        name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextSyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'toolbarTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'titleTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'titleTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'AppBarTheme'
     oneOf:
     - if: "brightness == 'Brightness.dark'"
       changes:
