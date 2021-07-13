@@ -115,7 +115,7 @@ class Tooltip extends StatefulWidget {
     this.child,
   })  : assert(
           tooltip != null || message != null,
-          'A non-null message or tooltip must be provided to a Tooltip Widget',
+          'A non-null message or tooltip must be provided to a Tooltip Widget.',
         ),
         super(key: key);
 
@@ -643,7 +643,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.onEnter,
     this.onExit,
   })  : assert(tooltip != null || message != null,
-            'Either tooltip or message must not be null'),
+            'Either tooltip or message must not be null.'),
         super(key: key);
 
   final Widget? tooltip;
