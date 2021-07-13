@@ -279,8 +279,13 @@ transforms:
           name: 'systemOverlayStyle'
           style: optional_named
           argumentValue:
-            expression: 'SystemUiOverlayStyle.light'
+            expression: '{% SystemUiOverlayStyle %}.light'
             requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
         - kind: 'removeParameter'
           name: 'brightness'
     - if: "brightness == 'Brightness.light'"
@@ -290,8 +295,13 @@ transforms:
           name: 'systemOverlayStyle'
           style: optional_named
           argumentValue:
-            expression: 'SystemUiOverlayStyle.dark'
+            expression: '{% SystemUiOverlayStyle %}.dark'
             requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
         - kind: 'removeParameter'
           name: 'brightness'
     variables:
@@ -314,8 +324,13 @@ transforms:
           name: 'systemOverlayStyle'
           style: optional_named
           argumentValue:
-            expression: 'SystemUiOverlayStyle.light'
+            expression: '{% SystemUiOverlayStyle %}.light'
             requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
         - kind: 'removeParameter'
           name: 'brightness'
     - if: "brightness == 'Brightness.light'"
@@ -325,8 +340,13 @@ transforms:
           name: 'systemOverlayStyle'
           style: optional_named
           argumentValue:
-            expression: 'SystemUiOverlayStyle.dark'
+            expression: '{% SystemUiOverlayStyle %}.dark'
             requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
         - kind: 'removeParameter'
           name: 'brightness'
     variables:
@@ -360,8 +380,13 @@ transforms:
           name: 'systemOverlayStyle'
           style: optional_named
           argumentValue:
-            expression: 'SystemUiOverlayStyle.light'
+            expression: '{% SystemUiOverlayStyle %}.light'
             requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
         - kind: 'removeParameter'
           name: 'brightness'
     - if: "brightness == 'Brightness.light'"
@@ -371,8 +396,13 @@ transforms:
           name: 'systemOverlayStyle'
           style: optional_named
           argumentValue:
-            expression: 'SystemUiOverlayStyle.dark'
+            expression: '{% SystemUiOverlayStyle %}.dark'
             requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
         - kind: 'removeParameter'
           name: 'brightness'
     variables:
@@ -406,8 +436,13 @@ transforms:
           name: 'systemOverlayStyle'
           style: optional_named
           argumentValue:
-            expression: 'SystemUiOverlayStyle.light'
+            expression: '{% SystemUiOverlayStyle %}.light'
             requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
         - kind: 'removeParameter'
           name: 'brightness'
     - if: "brightness == 'Brightness.light'"
@@ -417,8 +452,13 @@ transforms:
           name: 'systemOverlayStyle'
           style: optional_named
           argumentValue:
-            expression: 'SystemUiOverlayStyle.dark'
+            expression: '{% SystemUiOverlayStyle %}.dark'
             requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
         - kind: 'removeParameter'
           name: 'brightness'
     variables:
