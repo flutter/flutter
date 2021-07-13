@@ -547,8 +547,8 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
     EnvironmentType environmentType) {
   if (environmentType == EnvironmentType.simulator) {
     return <DarwinArch>[
-      // Apple Silicon ARM simulators not yet supported.
       DarwinArch.x86_64,
+      DarwinArch.arm64,
     ];
   }
   return <DarwinArch>[
@@ -876,7 +876,7 @@ const String kIosArchs = 'IosArchs';
 /// The define to control what macOS architectures are built for.
 ///
 /// This is expected to be a space-delimited list of architectures. If not
-/// provided, defautls to x86_64.
+/// provided, defaults to x86_64.
 ///
 /// Supported values are x86_64 and arm64.
 const String kDarwinArchs = 'DarwinArchs';

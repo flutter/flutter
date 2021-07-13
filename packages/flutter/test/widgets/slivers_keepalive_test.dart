@@ -557,7 +557,7 @@ class WidgetTest0 extends StatefulWidget {
   State<WidgetTest0> createState() => _WidgetTest0State();
 }
 
-class _WidgetTest0State extends State<WidgetTest0> with AutomaticKeepAliveClientMixin{
+class _WidgetTest0State extends State<WidgetTest0> with AutomaticKeepAliveClientMixin {
   bool hasBeenDisposed = false;
 
   @override
@@ -590,7 +590,7 @@ class WidgetTest1 extends StatefulWidget {
   State<WidgetTest1> createState() => _WidgetTest1State();
 }
 
-class _WidgetTest1State extends State<WidgetTest1> with AutomaticKeepAliveClientMixin{
+class _WidgetTest1State extends State<WidgetTest1> with AutomaticKeepAliveClientMixin {
   bool hasBeenDisposed = false;
 
   @override
@@ -623,7 +623,7 @@ class WidgetTest2 extends StatefulWidget {
   State<WidgetTest2> createState() => _WidgetTest2State();
 }
 
-class _WidgetTest2State extends State<WidgetTest2> with AutomaticKeepAliveClientMixin{
+class _WidgetTest2State extends State<WidgetTest2> with AutomaticKeepAliveClientMixin {
   bool hasBeenDisposed = false;
 
   @override

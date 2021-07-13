@@ -93,7 +93,7 @@ void main() {
 
       expect(response['id'], 0);
       expect(response['result'], isNotEmpty);
-      expect(response['result']['platforms'], <String>{'macos'});
+      expect((response['result'] as Map<String, dynamic>)['platforms'], <String>{'macos'});
       await responses.close();
       await commands.close();
     }, overrides: <Type, Generator>{
@@ -111,7 +111,7 @@ void main() {
       );
       globals.printError('daemon.logMessage test');
       final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
-        return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'error';
+        return map['event'] == 'daemon.logMessage' && (map['params'] as Map<String, dynamic>)['level'] == 'error';
       });
       expect(response['id'], isNull);
       expect(response['event'], 'daemon.logMessage');
@@ -347,7 +347,7 @@ void main() {
       unawaited(output.stream
         .firstWhere((Map<String, dynamic> request) => request['method'] == 'app.exposeUrl')
         .then((Map<String, dynamic> request) {
-          expect(request['params']['url'], equals(originalUrl));
+          expect((request['params'] as Map<String, dynamic>)['url'], equals(originalUrl));
           input.add(<String, dynamic>{'id': request['id'], 'result': <String, dynamic>{'url': mappedUrl}});
         })
       );
@@ -370,9 +370,10 @@ void main() {
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
       final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
-      expect(response['result'], isNotEmpty);
-      expect(response['result']['host'], '127.0.0.1');
-      expect(response['result']['port'], 1234);
+      final Map<String, dynamic> result = response['result'] as Map<String, dynamic>;
+      expect(result, isNotEmpty);
+      expect(result['host'], '127.0.0.1');
+      expect(result['port'], 1234);
       await responses.close();
       await commands.close();
     }, overrides: <Type, Generator>{
@@ -390,9 +391,10 @@ void main() {
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
       final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
-      expect(response['result'], isNotEmpty);
-      expect(response['result']['host'], null);
-      expect(response['result']['port'], null);
+      final Map<String, dynamic> result = response['result'] as Map<String, dynamic>;
+      expect(result, isNotEmpty);
+      expect(result['host'], null);
+      expect(result['port'], null);
       await responses.close();
       await commands.close();
     }, overrides: <Type, Generator>{

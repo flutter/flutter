@@ -20,6 +20,8 @@ const List<String> kReleaseChannels = <String>[
 
 const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
 
+const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/flutter/g/packaging/console';
+
 final RegExp releaseCandidateBranchRegex = RegExp(
   r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
 );
@@ -48,23 +50,7 @@ Directory get localFlutterRoot {
   const FileSystem fileSystem = LocalFileSystem();
   const Platform platform = LocalPlatform();
 
-  // If a test
-  if (platform.script.scheme == 'data') {
-    final RegExp pattern = RegExp(
-      r'(file:\/\/[^"]*[/\\]dev\/conductor[/\\][^"]+\.dart)',
-      multiLine: true,
-    );
-    final Match? match =
-        pattern.firstMatch(Uri.decodeFull(platform.script.path));
-    if (match == null) {
-      throw Exception(
-        'Cannot determine path of script!\n${platform.script.path}',
-      );
-    }
-    filePath = Uri.parse(match.group(1)!).path.replaceAll(r'%20', ' ');
-  } else {
-    filePath = platform.script.toFilePath();
-  }
+  filePath = platform.script.toFilePath();
   final String checkoutsDirname = fileSystem.path.normalize(
     fileSystem.path.join(
       fileSystem.path.dirname(filePath),

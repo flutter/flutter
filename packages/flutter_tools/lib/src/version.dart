@@ -14,9 +14,6 @@ import 'cache.dart';
 import 'convert.dart';
 import 'globals_null_migrated.dart' as globals;
 
-/// The flutter GitHub repository.
-String get _flutterGit => globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
-
 const String _unknownFrameworkVersion = '0.0.0-unknown';
 
 /// The names of each channel/branch in order of increasing stability.
@@ -274,7 +271,7 @@ class FlutterVersion {
         'remote',
         'add',
         _versionCheckRemote,
-        _flutterGit,
+        globals.flutterGit,
       ]);
       await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
       return _latestGitCommitDate(
@@ -284,7 +281,7 @@ class FlutterVersion {
     } on VersionCheckError catch (error) {
       if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
         globals.logger.printError('Warning: the Flutter git upstream was overridden '
-        'by the environment variable FLUTTER_GIT_URL = $_flutterGit');
+        'by the environment variable FLUTTER_GIT_URL = ${globals.flutterGit}');
       }
       globals.logger.printError(error.toString());
       rethrow;
@@ -632,7 +629,7 @@ class GitTagVersion {
       if (channel == 'dev' || channel == 'beta' || channel == 'stable') {
         globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
       } else {
-        _runGit('git fetch $_flutterGit --tags -f', processUtils, workingDirectory);
+        _runGit('git fetch ${globals.flutterGit} --tags -f', processUtils, workingDirectory);
       }
     }
     final List<String> tags = _runGit(
