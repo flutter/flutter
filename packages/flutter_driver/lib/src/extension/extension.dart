@@ -219,7 +219,6 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// ```
 ///
 void enableFlutterDriverExtension({ DataHandler? handler, bool silenceErrors = false, bool enableTextEntryEmulation = true, List<FinderExtension>? finders, List<CommandExtension>? commands}) {
-  assert(WidgetsBinding.instance == null);
   _DriverBinding(handler, silenceErrors, enableTextEntryEmulation, finders ?? <FinderExtension>[], commands ?? <CommandExtension>[]);
   assert(WidgetsBinding.instance is _DriverBinding);
 }
