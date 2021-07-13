@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:characters/characters.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
@@ -13,6 +14,79 @@ import 'package:flutter/services.dart';
 /// Contains only generic text editing logic and purposely excludes specific
 /// business logic related to platforms and widgets.
 class TextEditingModel {
+  // TODO(justinmc): Fields should probably be private.
+  /// Create an instance of TextEditingModel.
+  TextEditingModel({
+    required this.textPainter,
+    required TextSelectionDelegate textSelectionDelegate,
+  }) : assert(textPainter != null),
+       assert(textSelectionDelegate != null),
+       _textSelectionDelegate = textSelectionDelegate;
+
+  /// The [TextPainter] for the text represented by this [TextEditingModel].
+  final TextPainter textPainter;
+
+  // The object that controls the text selection, used by this render object
+  // for implementing cut, copy, and paste keyboard shortcuts.
+  //
+  // It must not be null. It will make cut, copy and paste functionality work
+  // with the most recently set [TextSelectionDelegate].
+  final TextSelectionDelegate _textSelectionDelegate;
+
+  String? _cachedPlainText;
+  // Returns a plain text version of the text in the painter.
+  //
+  // Returns the obscured text when [obscureText] is true. See
+  // [obscureText] and [obscuringCharacter].
+  String get _plainText {
+    _cachedPlainText ??= textPainter.text!.toPlainText(includeSemanticsLabels: false);
+    return _cachedPlainText!;
+  }
+
+  TextEditingValue get _textEditingValue {
+    return _textSelectionDelegate.textEditingValue;
+  }
+
+  void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
+    _textSelectionDelegate.textEditingValue = newValue;
+    _textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
+  }
+
+  TextSelection get _selection {
+    return _textEditingValue.selection;
+  }
+
+  void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
+    if (nextSelection.isValid) {
+      // The nextSelection is calculated based on _plainText, which can be out
+      // of sync with the textSelectionDelegate.textEditingValue by one frame.
+      // This is due to the render editable and editable text handle pointer
+      // event separately. If the editable text changes the text during the
+      // event handler, the render editable will use the outdated text stored in
+      // the _plainText when handling the pointer event.
+      //
+      // If this happens, we need to make sure the new selection is still valid.
+      final int textLength = _textEditingValue.text.length;
+      nextSelection = nextSelection.copyWith(
+        baseOffset: math.min(nextSelection.baseOffset, textLength),
+        extentOffset: math.min(nextSelection.extentOffset, textLength),
+      );
+    }
+    // Changes made by the keyboard can sometimes be "out of band" for listening
+    // components, so always send those events, even if we didn't think it
+    // changed. Also, focusing an empty field is sent as a selection change even
+    // if the selection offset didn't change.
+    final bool focusingEmpty = nextSelection.baseOffset == 0 && nextSelection.extentOffset == 0 && !hasFocus;
+    if (nextSelection == _selection && cause != SelectionChangedCause.keyboard && !focusingEmpty) {
+      return;
+    }
+    onSelectionChanged?.call(nextSelection, this, cause);
+    _setTextEditingValue(
+      _textEditingValue.copyWith(selection: nextSelection),
+      cause,
+    );
+  }
+
   /// Return the given [TextSelection] with its [TextSelection.extentOffset]
   /// moved left by one character.
   ///
@@ -325,5 +399,24 @@ class TextEditingModel {
       baseOffset: rightOffset,
       extentOffset: rightOffset,
     );
+  }
+
+  /// Extend the current selection to the end of the field.
+  ///
+  /// If selectionEnabled is false, keeps the selection collapsed and moves it to
+  /// the end.
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionToStart]
+  void extendSelectionToEnd(SelectionChangedCause cause) {
+    if (_selection.extentOffset == _plainText.length) {
+      return;
+    }
+
+    final TextSelection nextSelection = _selection.copyWith(
+      extentOffset: _plainText.length,
+    );
+    _setSelection(nextSelection, cause);
   }
 }

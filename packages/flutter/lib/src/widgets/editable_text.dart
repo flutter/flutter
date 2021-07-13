@@ -1531,6 +1531,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   late AnimationController _cursorBlinkOpacityController;
 
+  /// The state and logic for text editing itself.
+  late final TextEditingModel textEditingModel;
+
   final LayerLink _toolbarLayerLink = LayerLink();
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
@@ -1609,6 +1612,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _floatingCursorResetController = AnimationController(vsync: this);
     _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
     _cursorVisibilityNotifier.value = widget.showCursor;
+    textEditingModel = TextEditingModel(
+      textSelectionDelegate: this,
+      textPainter: TextPainter(
+        text: buildTextSpan(),
+        textAlign: widget.textAlign,
+        textDirection: widget.textDirection,
+        textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+        locale: widget.locale,
+        strutStyle: widget.strutStyle,
+        textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+        textWidthBasis: widget.textWidthBasis,
+      ),
+    );
   }
 
   @override
@@ -2684,6 +2700,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 expands: widget.expands,
                 strutStyle: widget.strutStyle,
                 selectionColor: widget.selectionColor,
+                textEditingModel: textEditingModel,
                 textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
                 textAlign: widget.textAlign,
                 textDirection: _textDirection,
@@ -2789,6 +2806,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
     this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.enableInteractiveSelection = true,
+    required this.textEditingModel,
     required this.textSelectionDelegate,
     required this.devicePixelRatio,
     this.promptRectRange,
@@ -2849,6 +2867,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final ui.BoxHeightStyle selectionHeightStyle;
   final ui.BoxWidthStyle selectionWidthStyle;
   final bool enableInteractiveSelection;
+  final TextEditingModel textEditingModel;
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
   final TextRange? promptRectRange;
@@ -2859,6 +2878,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   RenderEditable createRenderObject(BuildContext context) {
     return RenderEditable(
       text: inlineSpan,
+      textEditingModel: textEditingModel,
       cursorColor: cursorColor,
       startHandleLayerLink: startHandleLayerLink,
       endHandleLayerLink: endHandleLayerLink,
@@ -2870,19 +2890,16 @@ class _Editable extends MultiChildRenderObjectWidget {
       maxLines: maxLines,
       minLines: minLines,
       expands: expands,
-      strutStyle: strutStyle,
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
       textAlign: textAlign,
       textDirection: textDirection,
-      locale: locale ?? Localizations.maybeLocaleOf(context),
       selection: value.selection,
       offset: offset,
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
-      textHeightBehavior: textHeightBehavior,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
       cursorHeight: cursorHeight,

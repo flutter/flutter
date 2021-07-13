@@ -67,6 +67,7 @@ export 'src/rendering/stack.dart';
 export 'src/rendering/table.dart';
 export 'src/rendering/table_border.dart';
 export 'src/rendering/texture.dart';
+export 'src/rendering/text_editing_model.dart';
 export 'src/rendering/tweens.dart';
 export 'src/rendering/view.dart';
 export 'src/rendering/viewport.dart';
