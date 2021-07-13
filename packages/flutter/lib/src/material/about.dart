@@ -798,7 +798,7 @@ class _DetailArguments {
   }
 
   @override
-  int get hashCode => packageName.hashCode; // Good enough.
+  int get hashCode => hashValues(packageName, hashList(licenseEntries));
 }
 
 class _PackageLicensePage extends StatefulWidget {
@@ -844,7 +844,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         return true;
       }());
       final List<LicenseParagraph> paragraphs =
-        await SchedulerBinding.instance!.scheduleTask<List<LicenseParagraph>>(
+        await SchedulerBinding.instance.scheduleTask<List<LicenseParagraph>>(
           license.paragraphs.toList,
           Priority.animation,
           debugLabel: 'License',
@@ -1507,15 +1507,13 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
 
   @override
   void openDetailPage(Object arguments) {
-    SchedulerBinding.instance!
-        .addPostFrameCallback((_) => _detailArguments.value = arguments);
+    SchedulerBinding.instance.addPostFrameCallback((_) => _detailArguments.value = arguments);
     _MasterDetailFlow.of(context)!.openDetailPage(arguments);
   }
 
   @override
   void setInitialDetailPage(Object arguments) {
-    SchedulerBinding.instance!
-        .addPostFrameCallback((_) => _detailArguments.value = arguments);
+    SchedulerBinding.instance.addPostFrameCallback((_) => _detailArguments.value = arguments);
     _MasterDetailFlow.of(context)!.setInitialDetailPage(arguments);
   }
 

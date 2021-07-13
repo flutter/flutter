@@ -602,13 +602,11 @@ void main() {
     parent.buildScene(SceneBuilder());
   }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/42767
 
-  // TODO(dnfield): remove this when https://github.com/flutter/flutter/issues/85066 is resolved.
-  const bool bug85066 = true;
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);
     expect(layer.debugHandleCount, 0);
     layer.dispose();
-    expect(layer.debugDisposed, true, skip: bug85066);
+    expect(layer.debugDisposed, true);
 
     layer = PictureLayer(Rect.zero);
     final LayerHandle<PictureLayer> handle = LayerHandle<PictureLayer>(layer);
@@ -616,8 +614,8 @@ void main() {
     expect(() => layer.dispose(), throwsAssertionError);
     handle.layer = null;
     expect(layer.debugHandleCount, 0);
-    expect(layer.debugDisposed, true, skip: bug85066);
-    expect(() => layer.dispose(), throwsAssertionError, skip: bug85066); // already disposed.
+    expect(layer.debugDisposed, true);
+    expect(() => layer.dispose(), throwsAssertionError); // already disposed.
   });
 
   test('Layer append/remove increases/decreases handle count', () {
@@ -632,7 +630,7 @@ void main() {
 
     layer.remove();
     expect(layer.debugHandleCount, 0);
-    expect(layer.debugDisposed, true, skip: bug85066);
+    expect(layer.debugDisposed, true);
   });
 
   test('Layer.dispose disposes the engineLayer', () {
@@ -693,17 +691,17 @@ void main() {
 
     holder.layer = layer2;
     expect(layer.debugHandleCount, 0);
-    expect(layer.debugDisposed, true, skip: bug85066);
+    expect(layer.debugDisposed, true);
     expect(layer2.debugHandleCount, 1);
     expect(layer2.debugDisposed, false);
 
     holder.layer = null;
     expect(layer.debugHandleCount, 0);
-    expect(layer.debugDisposed, true, skip: bug85066);
+    expect(layer.debugDisposed, true);
     expect(layer2.debugHandleCount, 0);
-    expect(layer2.debugDisposed, true, skip: bug85066);
+    expect(layer2.debugDisposed, true);
 
-    expect(() => holder.layer = layer, throwsAssertionError, skip: bug85066);
+    expect(() => holder.layer = layer, throwsAssertionError);
   });
 }
 

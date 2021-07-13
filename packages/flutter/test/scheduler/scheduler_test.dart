@@ -143,6 +143,7 @@ void main() {
       buildFinish: 15000,
       rasterStart: 16000,
       rasterFinish: 20000,
+      rasterFinishWallTime: 20010,
       frameNumber: 1991
     )]);
 
@@ -163,7 +164,7 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       errorCaught = details;
     };
-    SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
+    SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
       throw Exception('Test');
     });
     window.onReportTimings!(<FrameTiming>[]);

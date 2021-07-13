@@ -1106,7 +1106,7 @@ class ArtifactUpdater {
 }
 
 @visibleForTesting
-String flattenNameSubdirs(Uri url, FileSystem fileSystem){
+String flattenNameSubdirs(Uri url, FileSystem fileSystem) {
   final List<String> pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return fileSystem.path.joinAll(convertedPieces);

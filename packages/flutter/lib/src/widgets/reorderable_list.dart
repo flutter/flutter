@@ -244,7 +244,7 @@ class ReorderableList extends StatefulWidget {
   static ReorderableListState of(BuildContext context) {
     assert(context != null);
     final ReorderableListState? result = context.findAncestorStateOfType<ReorderableListState>();
-    assert((){
+    assert(() {
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('ReorderableList.of() called with a context that does not contain a ReorderableList.'),
@@ -450,7 +450,7 @@ class SliverReorderableList extends StatefulWidget {
   static SliverReorderableListState of(BuildContext context) {
     assert(context != null);
     final SliverReorderableListState? result = context.findAncestorStateOfType<SliverReorderableListState>();
-    assert((){
+    assert(() {
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
@@ -627,7 +627,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     item.dragging = true;
     item.rebuild();
     _dragStartTransitionComplete = false;
-    SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       _dragStartTransitionComplete = true;
     });
 

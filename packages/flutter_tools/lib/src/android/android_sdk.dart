@@ -540,7 +540,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   }
 
   String getBuildToolsPath(String binaryName) {
-   return sdk.directory.childDirectory('build-tools').childDirectory(buildToolsVersionName).childFile(binaryName).path;
+    return sdk.directory.childDirectory('build-tools').childDirectory(buildToolsVersionName).childFile(binaryName).path;
   }
 
   @override
