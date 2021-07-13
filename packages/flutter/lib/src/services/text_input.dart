@@ -793,7 +793,7 @@ enum SelectionChangedCause {
   /// of text.
   drag,
 
-  /// The user used iPadOS 14 Scribble to change the selection.
+  /// The user used iPadOS 14+ Scribble to change the selection.
   scribble,
 }
 
@@ -961,7 +961,7 @@ class SelectionRect {
   /// [bounds].
   const SelectionRect({required this.position, required this.bounds});
 
-  /// The position of this selection rect within the text.
+  /// The position of this selection rect within the text String.
   final int position;
 
   /// The rectangle representing the bounds of this selection rect.
@@ -1409,7 +1409,7 @@ class TextInput {
   @visibleForTesting
   static Map<String, ScribbleClient> get scribbleClients => TextInput._instance._scribbleClients;
 
-  /// true if a scribble interaction is currently happening.
+  /// Returns true if a scribble interaction is currently happening.
   bool get scribbleInProgress => _scribbleInProgress;
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
@@ -1424,8 +1424,8 @@ class TextInput {
       final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
       return _scribbleClients.keys.where((String elementIdentifier) {
         final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
-        return _scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false;
-      }).where((String elementIdentifier) {
+        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false))
+          return false;
         final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
         return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
       }).map((String elementIdentifier) {

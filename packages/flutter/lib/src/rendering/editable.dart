@@ -2797,7 +2797,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Returns a list of rects that bound the given selection.
   ///
   /// See [TextPainter.getBoxesForSelection] for more details.
-  List<Rect> getBoxesForSelection(TextSelection selection) => _textPainter.getBoxesForSelection(selection).map((TextBox textBox) => textBox.toRect().shift(_paintOffset)).toList();
+  List<Rect> getBoxesForSelection(TextSelection selection) =>
+    _textPainter.getBoxesForSelection(selection)
+                .map((TextBox textBox) => textBox.toRect().shift(_paintOffset))
+                .toList();
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
