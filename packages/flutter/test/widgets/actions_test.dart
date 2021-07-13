@@ -1530,14 +1530,14 @@ class LogInvocationAction extends Action<LogIntent> {
 
   @override
   Object? invoke(LogIntent intent) {
-    intent.log.add('$actionName.invoke');
-  }
-
-  @override
-  Object? invokeAsOverride(LogIntent intent, Action<LogIntent> fromAction) {
-    intent.log.add('$actionName.invokeAsOverride-pre-super');
-    fromAction.invoke(intent);
-    intent.log.add('$actionName.invokeAsOverride-post-super');
+    final Action<LogIntent>? callingAction = this.callingAction;
+    if (callingAction == null) {
+      intent.log.add('$actionName.invoke');
+    } else {
+      intent.log.add('$actionName.invokeAsOverride-pre-super');
+      callingAction.invoke(intent);
+      intent.log.add('$actionName.invokeAsOverride-post-super');
+    }
   }
 
   @override
@@ -1558,9 +1558,4 @@ class RedirectOutputAction extends LogInvocationAction {
 
   @override
   Object? invoke(LogIntent intent) => super.invoke(LogIntent(log: newLog));
-
-  @override
-  Object? invokeAsOverride(LogIntent intent, Action<LogIntent> fromAction) {
-    return super.invokeAsOverride(LogIntent(log: newLog), fromAction);
-  }
 }
