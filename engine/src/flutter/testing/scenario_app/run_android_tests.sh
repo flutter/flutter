@@ -29,12 +29,7 @@ function follow_links() (
 )
 
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
-SRC_DIR="$(cd "$SCRIPT_DIR/../../.."; pwd -P)"
-OUT_DIR="$SRC_DIR/out/$1"
 
 cd "$SCRIPT_DIR/android"
 GRADLE_USER_HOME="$PWD/android/gradle-home/.cache"
-set -o pipefail && ./gradlew app:verifyDebugAndroidTestScreenshotTest \
-  --gradle-user-home "$GRADLE_USER_HOME" \
-  -Pflutter_jar=$OUT_DIR/flutter.jar
-  -Pout_dir=$OUT_DIR/scenario_app_screenshot_test
+set -o pipefail && ./gradlew app:verifyDebugAndroidTestScreenshotTest --gradle-user-home "$GRADLE_USER_HOME"
