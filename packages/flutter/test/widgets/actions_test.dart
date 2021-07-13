@@ -1210,7 +1210,7 @@ void main() {
       ]);
     });
 
-    testWidgets('Does not override if not enabled', (WidgetTester tester) async {
+    testWidgets('The final override controls isEnabled', (WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context1) {
@@ -1295,6 +1295,96 @@ void main() {
 
       Actions.invoke(invokingContext!, LogIntent(log: invocations));
       expect(invocations, <String>[]);
+    });
+
+    testWidgets('The override can choose to defer isActionEnabled to the overridable', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context1) {
+            return Actions(
+              actions: <Type, Action<Intent>> {
+                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationButDeferIsEnabledAction(actionName: 'action1'), context: context1),
+              },
+              child: Builder(
+                builder: (BuildContext context2) {
+                  return Actions(
+                    actions: <Type, Action<Intent>> {
+                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
+                    },
+                    child: Builder(
+                      builder: (BuildContext context3) {
+                        return Actions(
+                          actions: <Type, Action<Intent>> {
+                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          },
+                          child: Builder(
+                            builder: (BuildContext context4) {
+                              invokingContext = context4;
+                              return const SizedBox();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      // Nothing since the final override defers its isActionEnabled state to action2,
+      // which is disabled.
+      expect(invocations, <String>[]);
+
+      invocations.clear();
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context1) {
+            return Actions(
+              actions: <Type, Action<Intent>> {
+                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1', enabled: true), context: context1),
+              },
+              child: Builder(
+                builder: (BuildContext context2) {
+                  return Actions(
+                    actions: <Type, Action<Intent>> {
+                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationButDeferIsEnabledAction(actionName: 'action2'), context: context2),
+                    },
+                    child: Builder(
+                      builder: (BuildContext context3) {
+                        return Actions(
+                          actions: <Type, Action<Intent>> {
+                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3', enabled: false), context: context3),
+                          },
+                          child: Builder(
+                            builder: (BuildContext context4) {
+                              invokingContext = context4;
+                              return const SizedBox();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      // Override 3 is enabled so all 3 actions are enabled.
+      expect(invocations, <String>[
+        'action1.invokeAsOverride-pre-super',
+        'action2.invokeAsOverride-pre-super',
+        'action3.invoke',
+        'action2.invokeAsOverride-post-super',
+        'action1.invokeAsOverride-post-super',
+      ]);
     });
 
     testWidgets('Throws on infinite recursions', (WidgetTester tester) async {
@@ -1526,7 +1616,7 @@ class LogInvocationAction extends Action<LogIntent> {
   final bool enabled;
 
   @override
-  bool isEnabled(LogIntent intent) => enabled;
+  bool get isActionEnabled => enabled;
 
   @override
   Object? invoke(LogIntent intent) {
@@ -1545,6 +1635,14 @@ class LogInvocationAction extends Action<LogIntent> {
     super.debugFillProperties(properties);
     properties.add(StringProperty('actionName', actionName));
   }
+}
+
+class LogInvocationButDeferIsEnabledAction extends LogInvocationAction {
+  LogInvocationButDeferIsEnabledAction({ required String actionName }) : super(actionName: actionName);
+
+  // Defer `isActionEnabled` to the overridable action.
+  @override
+  bool get isActionEnabled => callingAction?.isActionEnabled ?? false;
 }
 
 class RedirectOutputAction extends LogInvocationAction {
