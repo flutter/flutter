@@ -104,10 +104,15 @@ class Pipeline {
   PipelineStatus get status => _status;
   PipelineStatus _status = PipelineStatus.idle;
 
-  /// Starts executing tasks of the pipeline.
+  /// Runs the steps of the pipeline.
   ///
   /// Returns a future that resolves after all steps have been performed.
-  Future<void> start() async {
+  ///
+  /// The future resolves to an error as soon as any of the steps fails.
+  ///
+  /// The pipeline may be interrupted by calling [stop] before the future
+  /// resolves.
+  Future<void> run() async {
     _status = PipelineStatus.started;
     try {
       for (PipelineStep step in steps) {
@@ -119,10 +124,9 @@ class Pipeline {
         await _currentStepFuture;
       }
       _status = PipelineStatus.done;
-    } catch (error, stackTrace) {
+    } catch (_) {
       _status = PipelineStatus.error;
-      print('Error in the pipeline: $error');
-      print(stackTrace);
+      rethrow;
     } finally {
       _currentStep = null;
     }
@@ -221,31 +225,38 @@ class PipelineWatcher {
     });
   }
 
-  void _runPipeline() {
-    int runCount;
-    switch (pipeline.status) {
-      case PipelineStatus.started:
-        pipeline.stop().then((_) {
-          runCount = _pipelineRunCount;
-          pipeline.start().then((_) => _pipelineDone(runCount));
-        });
-        break;
+  void _runPipeline() async {
+    if (pipeline.status == PipelineStatus.stopping) {
+      // We are already trying to stop the pipeline. No need to do anything.
+      return;
+    }
 
-      case PipelineStatus.stopping:
-        // We are already trying to stop the pipeline. No need to do anything.
-        break;
+    if (pipeline.status == PipelineStatus.started) {
+      // If the pipeline already running, stop it before starting it again.
+      await pipeline.stop();
+    }
 
-      default:
-        runCount = _pipelineRunCount;
-        pipeline.start().then((_) => _pipelineDone(runCount));
-        break;
+    final int runCount = _pipelineRunCount;
+    try {
+      await pipeline.run();
+      _pipelineSucceeded(runCount);
+    } catch(error, stackTrace) {
+      // The error is printed but not rethrown. This is because in watch mode
+      // failures are expected. The idea is that the developer corrects the
+      // error, saves the file, and the pipeline reruns.
+      _pipelineFailed(error, stackTrace);
     }
   }
 
-  void _pipelineDone(int pipelineRunCount) {
+  void _pipelineSucceeded(int pipelineRunCount) {
     if (pipelineRunCount == _pipelineRunCount) {
       print('*** Done! ***');
       print('Press \'q\' to exit felt');
     }
+  }
+
+  void _pipelineFailed(Object error, StackTrace stackTrace) {
+    print('felt command failed: $error');
+    print(stackTrace);
   }
 }

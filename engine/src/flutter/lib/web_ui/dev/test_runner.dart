@@ -189,7 +189,7 @@ class TestCommand extends Command<bool> with ArgUtils {
       ClearTerminalScreenStep(),
       TestRunnerStep(this),
     ]);
-    await testPipeline.start();
+    await testPipeline.run();
 
     if (isWatchMode) {
       final FilePath dir = FilePath.fromWebUi('');

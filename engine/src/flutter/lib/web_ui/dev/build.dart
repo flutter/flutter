@@ -39,7 +39,7 @@ class BuildCommand extends Command<bool> with ArgUtils {
       GnPipelineStep(),
       NinjaPipelineStep(),
     ]);
-    await buildPipeline.start();
+    await buildPipeline.run();
 
     if (isWatchMode) {
       print('Initial build done!');
