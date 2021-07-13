@@ -50,7 +50,6 @@ template("dart_snapshot") {
       "--depfile=$abs_depfile",
       "--depfile_output_filename=$rebased_output",
       "--disable-dart-dev",
-      "--sound-null-safety",
     ]
 
     args = [
