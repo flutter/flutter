@@ -13,7 +13,6 @@ import 'keyboard_key.dart';
 
 /// Maps Android-specific key codes to the matching [LogicalKeyboardKey].
 const Map<int, LogicalKeyboardKey> kAndroidToLogicalKey = <int, LogicalKeyboardKey>{
-  0: LogicalKeyboardKey.none,
   3: LogicalKeyboardKey.goHome,
   4: LogicalKeyboardKey.goBack,
   5: LogicalKeyboardKey.call,
@@ -539,7 +538,6 @@ const Map<int, LogicalKeyboardKey> kAndroidNumPadMap = <int, LogicalKeyboardKey>
 
 /// Maps Fuchsia-specific IDs to the matching [LogicalKeyboardKey].
 const Map<int, LogicalKeyboardKey> kFuchsiaToLogicalKey = <int, LogicalKeyboardKey>{
-  0x00000000: LogicalKeyboardKey.none,
   0x1200000010: LogicalKeyboardKey.hyper,
   0x1200000011: LogicalKeyboardKey.superKey,
   0x1200000012: LogicalKeyboardKey.fn,
@@ -778,7 +776,6 @@ const Map<int, LogicalKeyboardKey> kFuchsiaToLogicalKey = <int, LogicalKeyboardK
 /// Maps Fuchsia-specific USB HID Usage IDs to the matching
 /// [PhysicalKeyboardKey].
 const Map<int, PhysicalKeyboardKey> kFuchsiaToPhysicalKey = <int, PhysicalKeyboardKey>{
-  0x00000000: PhysicalKeyboardKey.none,
   0x00000010: PhysicalKeyboardKey.hyper,
   0x00000011: PhysicalKeyboardKey.superKey,
   0x00000012: PhysicalKeyboardKey.fn,
@@ -2447,7 +2444,6 @@ const Map<String, LogicalKeyboardKey> kWebToLogicalKey = <String, LogicalKeyboar
   'NextFavoriteChannel': LogicalKeyboardKey.nextFavoriteChannel,
   'NextUserProfile': LogicalKeyboardKey.nextUserProfile,
   'NonConvert': LogicalKeyboardKey.nonConvert,
-  'None': LogicalKeyboardKey.none,
   'Notification': LogicalKeyboardKey.notification,
   'NumLock': LogicalKeyboardKey.numLock,
   'NumberSign': LogicalKeyboardKey.numberSign,
@@ -2788,7 +2784,6 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'Minus': PhysicalKeyboardKey.minus,
   'New': PhysicalKeyboardKey.newKey,
   'NonConvert': PhysicalKeyboardKey.nonConvert,
-  'None': PhysicalKeyboardKey.none,
   'NumLock': PhysicalKeyboardKey.numLock,
   'Numpad0': PhysicalKeyboardKey.numpad0,
   'Numpad1': PhysicalKeyboardKey.numpad1,

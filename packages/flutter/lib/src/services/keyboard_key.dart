@@ -395,11 +395,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// This is used by platform-specific code to generate Flutter key codes.
   static const int glfwPlane = 0x01800000000;
 
-  /// Represents the logical "None" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey none = LogicalKeyboardKey(0x00000000000);
-
   /// Represents the logical "Space" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -2632,7 +2627,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
-    0x00000000000: none,
     0x00000000020: space,
     0x00000000021: exclamation,
     0x00000000022: quote,
@@ -3092,7 +3086,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   };
 
   static const Map<int, String> _keyLabels = <int, String>{
-    0x00000000000: 'None',
     0x00000000020: 'Space',
     0x00000000021: 'Exclamation',
     0x00000000022: 'Quote',
@@ -3684,11 +3677,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
 
   // Key constants for all keyboard keys in the USB HID specification at the
   // time Flutter was built.
-
-  /// Represents the location of the "None" key on a generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey none = PhysicalKeyboardKey(0x00000000);
 
   /// Represents the location of the "Hyper" key on a generalized keyboard.
   ///
@@ -5151,7 +5139,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
   // A list of all the predefined constant PhysicalKeyboardKeys so that they
   // can be searched.
   static const Map<int, PhysicalKeyboardKey> _knownPhysicalKeys = <int, PhysicalKeyboardKey>{
-    0x00000000: none,
     0x00000010: hyper,
     0x00000011: superKey,
     0x00000012: fn,
@@ -5425,7 +5412,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
   static const Map<int, String> _debugNames = kReleaseMode ?
     <int, String>{} :
     <int, String>{
-      0x00000000: 'None',
       0x00000010: 'Hyper',
       0x00000011: 'Super Key',
       0x00000012: 'Fn',

@@ -1,9 +1,6 @@
   // This file contains supplemental key data to be added to those that
   // Chromium defines.
 
-  //          Key                       Enum                Unicode code point
-  DOM_KEY_MAP("None",                   NONE,                   0x0),
-
   // ============================================================
   // Printable keys (Unicode plane)
   // ============================================================

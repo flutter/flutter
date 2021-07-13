@@ -1,24 +1,4 @@
 {
-  "None": {
-    "name": "None",
-    "value": 0,
-    "names": {
-      "web": [
-        "None"
-      ],
-      "android": [
-        "UNKNOWN"
-      ]
-    },
-    "values": {
-      "android": [
-        0
-      ],
-      "fuchsia": [
-        0
-      ]
-    }
-  },
   "Space": {
     "name": "Space",
     "value": 32,
