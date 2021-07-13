@@ -13,6 +13,7 @@ import 'package:package_config/package_config.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -28,14 +29,23 @@ class WebDriverService extends DriverService {
   WebDriverService({
     @required ProcessUtils processUtils,
     @required String dartSdkPath,
+    @required Logger logger,
   }) : _processUtils = processUtils,
-       _dartSdkPath = dartSdkPath;
+       _dartSdkPath = dartSdkPath,
+       _logger = logger;
 
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
+  final Logger _logger;
 
   ResidentRunner _residentRunner;
   Uri _webUri;
+
+  /// The result of [ResidentRunner.run].
+  ///
+  /// This is expected to stay `null` throughout the test, as the application
+  /// must be running until [stop] is called. If it becomes non-null, it likely
+  /// indicates a bug.
   int _runResult;
 
   @override
@@ -75,7 +85,7 @@ class WebDriverService extends DriverService {
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
       usage: globals.flutterUsage,
-      logger: globals.logger,
+      logger: _logger,
       systemClock: globals.systemClock,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
@@ -85,22 +95,27 @@ class WebDriverService extends DriverService {
       route: route,
     );
 
-    // This method must return before the run future resolves. This is because
-    // the app should continue running while the test is executing. So instead
-    // of awaiting on the future, the result of the run future is recorded in
-    // the run result, and then checked when `stop` is called after the test is
-    // done.
-    unawaited(runFuture.then((int result) {
-      _runResult = result;
-    }));
-
-    await appStartedCompleter.future;
+    bool isAppStarted = false;
+    await Future.any<Object>(<Future<Object>>[
+      runFuture.then((int result) {
+        _runResult = result;
+        return null;
+      }),
+      appStartedCompleter.future.then((_) {
+        isAppStarted = true;
+        return null;
+      }),
+    ]);
 
     if (_runResult != null) {
       throw ToolExit(
         'Application exited before the test started. Check web driver logs '
         'for possible application-side errors.'
       );
+    }
+
+    if (!isAppStarted) {
+      throw ToolExit('Failed to start application');
     }
 
     _webUri = _residentRunner.uri;
