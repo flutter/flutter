@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
@@ -662,9 +662,9 @@ void main() {
     );
     expect(endpoints.length, 2);
 
-    Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-    Offset newHandlePos = textOffsetToPosition(tester, 11);
-    TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+    final Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+    final Offset newHandlePos = textOffsetToPosition(tester, 11);
+    final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
     await tester.pump();
@@ -744,9 +744,9 @@ void main() {
     );
     expect(endpoints.length, 2);
 
-    Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-    Offset newHandlePos = textOffsetToPosition(tester, 11);
-    TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+    final Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+    final Offset newHandlePos = textOffsetToPosition(tester, 11);
+    final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
     await tester.pump();
