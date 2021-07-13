@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:ui';
 
 import 'animated_color_square.dart';
@@ -53,7 +52,7 @@ Map<String, ScenarioFactory> _scenarios = <String, ScenarioFactory>{
 
 Map<String, dynamic> _currentScenarioParams = <String, dynamic>{};
 
-Scenario _currentScenarioInstance;
+Scenario? _currentScenarioInstance;
 
 /// Loads an scenario.
 /// The map must contain a `name` entry, which equals to the name of the scenario.
@@ -63,16 +62,16 @@ void loadScenario(Map<String, dynamic> scenario) {
   _currentScenarioParams = scenario;
 
   if (_currentScenarioInstance != null) {
-    _currentScenarioInstance.unmount();
+    _currentScenarioInstance!.unmount();
   }
 
-  _currentScenarioInstance = _scenarios[scenario['name']]();
+  _currentScenarioInstance = _scenarios[scenario['name']]!();
   window.scheduleFrame();
   print('Loading scenario $scenarioName');
 }
 
 /// Gets the loaded [Scenario].
-Scenario get currentScenario {
+Scenario? get currentScenario {
   return _currentScenarioInstance;
 }
 
