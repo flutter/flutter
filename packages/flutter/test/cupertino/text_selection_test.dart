@@ -687,7 +687,7 @@ void main() {
     ));
 
     // The handle height is determined by the formula:
-    // textLineHeight + _kSelectionHandleRadius * 2 - _kSelectionHandleOverlap
+    // textLineHeight + _kSelectionHandleRadius * 2 - _kSelectionHandleOverlap .
     // The text line height will be the value of the fontSize.
     // The constant _kSelectionHandleRadius has the value of 6.
     // The constant _kSelectionHandleOverlap has the value of 1.5.
@@ -769,12 +769,12 @@ void main() {
     ));
 
     // The handle height is determined by the formula:
-    // textLineHeight + _kSelectionHandleRadius * 2 - _kSelectionHandleOverlap
-    // The text line height will be the value of the fontSize.
+    // textLineHeight + _kSelectionHandleRadius * 2 - _kSelectionHandleOverlap .
+    // The text line height will be the value of the fontSize, of the largest word on the line.
     // The constant _kSelectionHandleRadius has the value of 6.
     // The constant _kSelectionHandleOverlap has the value of 1.5.
     // In the case of the start handle, which is located on the word 'def',
-    // 50.0 + 6 * 2 - 1.5 = 60.5 .
+    // 100 + 6 * 2 - 1.5 = 110.5 .
     expect(handles.first.size.height, 110.5);
     expect(handles.last.size.height, 110.5);
   },
