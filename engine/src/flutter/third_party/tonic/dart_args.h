@@ -234,7 +234,6 @@ void DartCallConstructor(Sig func, Dart_NativeArguments args) {
   TONIC_CHECK(!LogIfError(Dart_GetNativeFieldsOfArgument(
       args, 0, DartWrappable::kNumberOfNativeFields, native_fields)));
   TONIC_CHECK(!native_fields[DartWrappable::kPeerIndex]);
-  TONIC_CHECK(!native_fields[DartWrappable::kWrapperInfoIndex]);
 
   wrappable->AssociateWithDartWrapper(wrapper);
 }
