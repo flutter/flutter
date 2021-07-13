@@ -508,8 +508,11 @@ class TextInputConfiguration {
   )
   /// Whether or not the last character entered is shown before
   /// being obscured.
+  /// When this is set to [ObscureTextBehavior.all] or 
+  /// [ObscureTextBehavior.delayed], the last characters in the text 
+  /// field is replaced by [obscuringCharacter].
   ///
-  /// Defaults to [ObscureTextBehavior.none].
+  /// Defaults to [ObscureTextBehavior.none]. Cannot be null.
   final ObscureTextBehavior obscureTextBehavior;
 
   /// Whether to enable autocorrection.
