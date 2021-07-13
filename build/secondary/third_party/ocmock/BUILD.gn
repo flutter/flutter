@@ -101,7 +101,7 @@ source_set("ocmock_src") {
     "$ocmock_path/OCMock/OCProtocolMockObject.m",
   ]
 
-  libs = [ "Foundation.framework" ]
+  frameworks = [ "Foundation.framework" ]
 }
 
 shared_library("ocmock_shared") {
