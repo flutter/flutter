@@ -1,3 +1,10 @@
+# Describes the targets run in continuous integration environment.
+#
+# Flutter infra uses this file to generate a checklist of tasks to be performed
+# for every commit.
+#
+# More information at:
+#  * https://github.com/flutter/cocoon/blob/master/CI_YAML.md
 enabled_branches:
   - master
 
@@ -6,7 +13,7 @@ targets:
     builder: Linux analyze
     properties:
       tags: >
-        ["hostonly","framework"]
+        ["framework","hostonly"]
     scheduler: luci
 
   - name: Linux build_aar_module_test
@@ -24,21 +31,21 @@ targets:
     builder: Linux customer_testing
     properties:
       tags: >
-        ["hostonly","framework"]
+        ["framework","hostonly"]
     scheduler: luci
 
   - name: Linux build_tests_1_2
     builder: Linux build_tests_1_2
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Linux build_tests_2_2
     builder: Linux build_tests_2_2
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Linux docs
@@ -46,7 +53,7 @@ targets:
     postsubmit: false
     properties:
       tags: >
-        ["hostonly","framework"]
+        ["framework","hostonly"]
     scheduler: luci
     runIf:
       - dev/
@@ -60,7 +67,7 @@ targets:
     builder: Linux framework_tests_libraries
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -78,7 +85,7 @@ targets:
     builder: Linux framework_tests_misc
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -96,7 +103,7 @@ targets:
     builder: Linux framework_tests_widgets
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -135,7 +142,7 @@ targets:
     builder: Linux fuchsia_precache
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Linux gradle_desugar_classes_test
@@ -227,7 +234,7 @@ targets:
     builder: Linux skp_generator
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -239,7 +246,7 @@ targets:
     builder: Linux tool_tests_general
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -250,7 +257,7 @@ targets:
     builder: Linux tool_tests_commands
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -261,7 +268,7 @@ targets:
     builder: Linux tool_integration_tests_1_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -272,7 +279,7 @@ targets:
     builder: Linux tool_integration_tests_2_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -283,7 +290,7 @@ targets:
     builder: Linux tool_integration_tests_3_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -294,7 +301,7 @@ targets:
     builder: Linux tool_integration_tests_4_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -305,7 +312,7 @@ targets:
     builder: Linux web_tool_tests
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -326,7 +333,7 @@ targets:
     builder: Linux web_tests_0
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -337,7 +344,7 @@ targets:
     builder: Linux web_tests_1
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -348,7 +355,7 @@ targets:
     builder: Linux web_tests_2
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -359,7 +366,7 @@ targets:
     builder: Linux web_tests_3
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -370,7 +377,7 @@ targets:
     builder: Linux web_tests_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -381,7 +388,7 @@ targets:
     builder: Linux web_tests_5
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -392,7 +399,7 @@ targets:
     builder: Linux web_tests_6
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -403,7 +410,7 @@ targets:
     builder: Linux web_tests_7_last
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -414,7 +421,7 @@ targets:
     builder: Linux web_long_running_tests_1_5
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -425,7 +432,7 @@ targets:
     builder: Linux web_long_running_tests_2_5
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -436,7 +443,7 @@ targets:
     builder: Linux web_long_running_tests_3_5
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -447,7 +454,7 @@ targets:
     builder: Linux web_long_running_tests_4_5
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -458,7 +465,7 @@ targets:
     builder: Linux web_long_running_tests_5_5
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -469,7 +476,7 @@ targets:
     builder: Linux flutter_plugins
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Mac build_aar_module_test
@@ -498,42 +505,42 @@ targets:
     builder: Mac build_tests_1_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Mac build_tests_2_4
     builder: Mac build_tests_2_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Mac build_tests_3_4
     builder: Mac build_tests_3_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Mac build_tests_4_4
     builder: Mac build_tests_4_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Mac customer_testing
     builder: Mac customer_testing
     properties:
       tags: >
-        ["hostonly","framework"]
+        ["framework","hostonly"]
     scheduler: luci
 
   - name: Mac framework_tests_libraries
     builder: Mac framework_tests_libraries
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -551,7 +558,7 @@ targets:
     builder: Mac framework_tests_misc
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -569,7 +576,7 @@ targets:
     builder: Mac framework_tests_widgets
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -694,7 +701,7 @@ targets:
     builder: Mac tool_tests_general
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -705,7 +712,7 @@ targets:
     builder: Windows tool_tests_commands
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -716,7 +723,7 @@ targets:
     builder: Mac tool_integration_tests_1_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -727,7 +734,7 @@ targets:
     builder: Mac tool_integration_tests_2_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -738,7 +745,7 @@ targets:
     builder: Mac tool_integration_tests_3_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -749,7 +756,7 @@ targets:
     builder: Mac tool_integration_tests_4_4
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -761,7 +768,7 @@ targets:
     postsubmit: false
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -783,35 +790,35 @@ targets:
     builder: Windows build_tests_1_3
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Windows build_tests_2_3
     builder: Windows build_tests_2_3
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Windows build_tests_3_3
     builder: Windows build_tests_3_3
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Windows customer_testing
     builder: Windows customer_testing
     properties:
       tags: >
-        ["hostonly","framework"]
+        ["framework","hostonly"]
     scheduler: luci
 
   - name: Windows framework_tests_libraries
     builder: Windows framework_tests_libraries
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -829,7 +836,7 @@ targets:
     builder: Windows framework_tests_misc
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -847,7 +854,7 @@ targets:
     builder: Windows framework_tests_widgets
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/
@@ -929,7 +936,7 @@ targets:
     builder: Windows tool_tests_general
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -940,7 +947,7 @@ targets:
     builder: Windows tool_integration_tests_1_5
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -951,7 +958,7 @@ targets:
     builder: Windows tool_integration_tests_2_5
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -962,7 +969,7 @@ targets:
     builder: Windows tool_integration_tests_3_5
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -973,7 +980,7 @@ targets:
     builder: Windows tool_integration_tests_4_5
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -984,7 +991,7 @@ targets:
     builder: Windows tool_integration_tests_5_5
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -995,7 +1002,7 @@ targets:
     builder: Windows web_tool_tests
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -1136,7 +1143,7 @@ targets:
     presubmit: false
     properties:
       tags: >
-        ["hostonly","framework"]
+        ["framework","hostonly"]
     scheduler: luci
 
   - name: Linux docs_publish
@@ -1144,7 +1151,7 @@ targets:
     presubmit: false
     properties:
       tags: >
-        ["hostonly","framework"]
+        ["framework","hostonly"]
     scheduler: luci
 
   - name: Linux fast_scroll_heavy_gridview__memory
@@ -1739,7 +1746,7 @@ targets:
     presubmit: false
     properties:
       tags: >
-        ["shard","hostonly","framework"]
+        ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
