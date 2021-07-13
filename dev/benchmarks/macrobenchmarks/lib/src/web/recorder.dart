@@ -935,7 +935,7 @@ double _computeAverage(String label, Iterable<double> values) {
 ///
 /// See also:
 ///
-/// * https://en.wikipedia.org/wiki/Standard_deviation
+///  * <https://en.wikipedia.org/wiki/Standard_deviation>
 double _computeStandardDeviationForPopulation(String label, Iterable<double> population) {
   if (population.isEmpty) {
     throw StateError('$label: attempted to compute the standard deviation of empty population.');
@@ -1007,7 +1007,7 @@ class _RecordingWidgetsBinding extends BindingBase
   ///
   /// See also:
   ///
-  ///  - [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
+  ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
   static _RecordingWidgetsBinding ensureInitialized() {
     if (_instance == null) {
       _RecordingWidgetsBinding();

@@ -9,7 +9,7 @@ are all intended to be moved out of `dart:ui` and into `dart:core`.
 
 There is currently also an unfortunate dependency on the platform
 dispatcher logic (SingletonFlutterWindow, Brightness,
-PlatformDispatcher, window), though that should probably more to the
+PlatformDispatcher, window), though that should probably move to the
 'services' library.
 
 See also:
