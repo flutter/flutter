@@ -16,9 +16,9 @@ Future<void> main() async {
         await driver.requestData(null, timeout: const Duration(minutes: 1));
     final common.Response response = common.Response.fromJson(jsonResult);
     await driver.close();
-    expect(
-      response.allTestsPassed,
-      false,
-    );
-  });
+    expect(response.allTestsPassed, isFalse);
+    expect(response.failureDetails, hasLength(2));
+    expect(response.failureDetails![0].methodName, 'failure 1');
+    expect(response.failureDetails![1].methodName, 'failure 2');
+  }, timeout: Timeout.none);
 }

@@ -3868,7 +3868,7 @@ class TabBarDemo extends StatelessWidget {
   }
 }
 
-class MockScrollMetrics extends Fake implements ScrollMetrics {}
+class MockScrollMetrics extends Fake implements ScrollMetrics { }
 
 class TabBody extends StatefulWidget {
   const TabBody({ Key? key, required this.index, required this.log }) : super(key: key);

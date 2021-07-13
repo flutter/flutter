@@ -7,7 +7,6 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:flutter_devicelab/common.dart';
 
 import '../framework/devices.dart';
 import '../framework/task_result.dart';
@@ -109,7 +108,7 @@ abstract class BuildTestTask {
     }
 
     if (!testOnly) {
-      unawaited(build());
+      await build();
     }
 
     if (buildOnly) {

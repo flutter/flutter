@@ -471,7 +471,7 @@ void main() {
   "generator": "pub",
   "generatorVersion": "2.12.0-76.0.dev"
 }
- ''');
+''');
       final FakeReportingNullSafetyCommand command = FakeReportingNullSafetyCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
