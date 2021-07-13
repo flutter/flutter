@@ -2901,6 +2901,61 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('password fields delayed hide the last char when obscure is ObscureTextBehavior.delayed', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    controller.text = 'super-secret-password!!1';
+
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        obscureTextBehavior: ObscureTextBehavior.delayed,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    final String expectedValue = '•' *controller.text.length;
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isObscured,
+                          ],
+                          value: expectedValue,
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    )
+                  ],
+                )
+              ],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
   testWidgets('password fields become obscured with the right semantics when set', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
