@@ -36,12 +36,6 @@ abstract class Logger {
 
   bool get hasTerminal;
 
-  /// Whether the current flutter command invocation also contains a `--machine` flag.
-  ///
-  /// This should be used to elide output to stdout that is not formatted in newline
-  /// delimited JSON.
-  bool get machine;
-
   Terminal get terminal;
 
   OutputPreferences get _outputPreferences;
@@ -166,9 +160,6 @@ class DelegatingLogger implements Logger {
   bool get quiet => _delegate.quiet;
 
   @override
-  bool get machine => _delegate.machine;
-
-  @override
   set quiet(bool value) => _delegate.quiet = value;
 
   @override
@@ -278,7 +269,6 @@ class StdoutLogger extends Logger {
     required this.terminal,
     required Stdio stdio,
     required OutputPreferences outputPreferences,
-    required this.machine,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   })
     : _stdio = stdio,
@@ -289,8 +279,6 @@ class StdoutLogger extends Logger {
   final Terminal terminal;
   @override
   final OutputPreferences _outputPreferences;
-  @override
-  final bool machine;
   final Stdio _stdio;
   final StopwatchFactory _stopwatchFactory;
 
@@ -455,14 +443,12 @@ class WindowsStdoutLogger extends StdoutLogger {
     required Terminal terminal,
     required Stdio stdio,
     required OutputPreferences outputPreferences,
-    required bool machine,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : super(
       terminal: terminal,
       stdio: stdio,
       outputPreferences: outputPreferences,
       stopwatchFactory: stopwatchFactory,
-      machine: machine,
     );
 
   @override
@@ -484,7 +470,6 @@ class BufferLogger extends Logger {
   BufferLogger({
     required this.terminal,
     required OutputPreferences outputPreferences,
-    this.machine = false,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _outputPreferences = outputPreferences,
        _stopwatchFactory = stopwatchFactory;
@@ -493,7 +478,6 @@ class BufferLogger extends Logger {
   BufferLogger.test({
     Terminal? terminal,
     OutputPreferences? outputPreferences,
-    this.machine = false,
   }) : terminal = terminal ?? Terminal.test(),
        _outputPreferences = outputPreferences ?? OutputPreferences.test(),
        _stopwatchFactory = const StopwatchFactory();
@@ -504,9 +488,6 @@ class BufferLogger extends Logger {
 
   @override
   final Terminal terminal;
-
-  @override
-  final bool machine;
 
   final StopwatchFactory _stopwatchFactory;
 

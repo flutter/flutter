@@ -77,9 +77,8 @@ Future<void> main(List<String> args) async {
   final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
   final bool daemon = args.contains('daemon');
-  final bool machine = args.contains('--machine');
-  final bool runMachine = (machine && args.contains('run')) ||
-                          (machine && args.contains('attach'));
+  final bool runMachine = (args.contains('--machine') && args.contains('run')) ||
+                          (args.contains('--machine') && args.contains('attach'));
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
   // enginePath's initializer uses it). This can only work with the real
@@ -123,11 +122,10 @@ Future<void> main(List<String> args) async {
         );
         return loggerFactory.createLogger(
           daemon: daemon,
-          runMachine: runMachine,
+          machine: runMachine,
           verbose: verbose && !muteCommandLogging,
           prefixedErrors: prefixedErrors,
           windows: globals.platform.isWindows,
-          machine: machine,
         );
       },
     },
@@ -228,10 +226,9 @@ class LoggerFactory {
   Logger createLogger({
     @required bool verbose,
     @required bool prefixedErrors,
-    @required bool runMachine,
+    @required bool machine,
     @required bool daemon,
     @required bool windows,
-    @required bool machine,
   }) {
     Logger logger;
     if (windows) {
@@ -240,15 +237,13 @@ class LoggerFactory {
         stdio: _stdio,
         outputPreferences: _outputPreferences,
         stopwatchFactory: _stopwatchFactory,
-        machine: machine,
       );
     } else {
       logger = StdoutLogger(
         terminal: _terminal,
         stdio: _stdio,
         outputPreferences: _outputPreferences,
-        stopwatchFactory: _stopwatchFactory,
-        machine: machine,
+        stopwatchFactory: _stopwatchFactory
       );
     }
     if (verbose) {
@@ -260,7 +255,7 @@ class LoggerFactory {
     if (daemon) {
       return NotifyingLogger(verbose: verbose, parent: logger);
     }
-    if (runMachine) {
+    if (machine) {
       return AppRunLogger(parent: logger);
     }
     return logger;
