@@ -302,4 +302,39 @@ void main() {
   renderObjectToWidgetElement.insertRenderObjectChild(renderObject, object);
   renderObjectToWidgetElement.moveRenderObjectChild(renderObject, object);
   renderObjectToWidgetElement.removeRenderObjectChild(renderObject);
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(colorScheme: ColorScheme(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme(secondary: Colors.blue));
+  themeData = themeData.copyWith(colorScheme: ColorScheme(secondary: Colors.yellow));
+  themeData.colorScheme.secondary;
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentColorBrightness; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentTextTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentIconTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.buttonColor; // Removing field reference not supported.
 }
