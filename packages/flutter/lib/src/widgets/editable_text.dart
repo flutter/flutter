@@ -501,8 +501,7 @@ class EditableText extends StatefulWidget {
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null),
-       assert(obscureTextBehavior != null),
+       assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -578,16 +577,16 @@ class EditableText extends StatefulWidget {
   final bool obscureText;
   
   /// {@template flutter.widgets.editableText.obscureTextBehavior}
-  /// Whether or not the last character entered is shown before
-  /// being obscured.
-  /// When this is set to [ObscureTextBehavior.all] or [ObscureTextBehavior.delayed], the last characters in the text field is
-  /// replaced by [obscuringCharacter].
+  /// How characters in the field are obscured, if at all.
+  /// For example, a password field may want to obscure the entered 
+  /// text so it's not readable.
+  /// When this is set to [ObscureTextBehavior.all] or 
+  /// [ObscureTextBehavior.delayed], the characters in the field 
+  /// are replaced by [obscuringCharacter].
   ///
   /// Defaults to [ObscureTextBehavior.none]. Cannot be null.
-  ///
   /// {@endtemplate}
   final ObscureTextBehavior obscureTextBehavior;
-
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final TextHeightBehavior? textHeightBehavior;
