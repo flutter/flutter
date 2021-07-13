@@ -432,12 +432,12 @@ enum TextCapitalization {
 }
 
 enum ObscureTextBehavior {
-  /// show all text
+  /// Indicates all text should be shown.
   none,
-  /// obscure all text
+  /// Indicates all text should be obscured.
   all,
-  /// obscure all text but the last char just at a short delay
-  delayed
+  /// Indicates all text should be obscured, but the last character is visible for a short delay.
+  delayed,
 }
 
 /// Controls the visual appearance of the text input control.
@@ -496,7 +496,7 @@ class TextInputConfiguration {
   final bool readOnly;
 
   @Deprecated(
-    'use obscure instead.'
+    'Use obscureTextBehavior instead.'
   )
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
@@ -504,9 +504,8 @@ class TextInputConfiguration {
   final bool obscureText;
 
   @Deprecated(
-    'use obscure instead.'
+    'Use obscureTextBehavior instead.'
   )
-
   /// Whether or not the last character entered is shown before
   /// being obscured.
   ///
