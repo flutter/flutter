@@ -1654,12 +1654,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
+
     if (!_shouldCreateInputConnection) {
       _closeInputConnectionIfNeeded();
-    } else {
-      if (oldWidget.readOnly && _hasFocus) {
-        _openInputConnection();
-      }
+    } else if (oldWidget.readOnly && _hasFocus) {
+      _openInputConnection();
     }
 
     if (kIsWeb && _hasInputConnection) {
