@@ -982,16 +982,13 @@ class Actions extends StatefulWidget {
     }
   }
 
-  static Action<T>? _maybeFindEnabled<T extends Intent>(BuildContext context, T intent) {
+  static Action<T>? _maybeFind<T extends Intent>(BuildContext context, T intent) {
     Action<T>? action;
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
       final Action<T>? result = _castAction(actions, intent);
-      if (result != null && result.isEnabled(intent)) {
-        action = result;
-        return true;
-      }
-      return false;
+      action = result;
+      return result != null;
     });
 
     return action;
@@ -1016,14 +1013,12 @@ class Actions extends StatefulWidget {
   ///
   /// The `context` and `intent` arguments must not be null.
   ///
-  /// If the given `intent` doesn't map to an action, or doesn't map to one that
-  /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
-  /// then it will look to the next ancestor [Actions] widget in the hierarchy
-  /// until it reaches the root.
+  /// If the given `intent` doesn't map to an action, then it will look to the
+  /// next ancestor [Actions] widget in the hierarchy until it reaches the root.
   ///
   /// This method will throw an exception if no ambient [Actions] widget is
-  /// found, or if the given `intent` doesn't map to an enabled action in any of
-  /// the [Actions.actions] maps that are found.
+  /// found, or when a suitable [Action] is found but it returns false for
+  /// [Action.isEnabled].
   static Object? invoke<T extends Intent>(
     BuildContext context,
     T intent,
@@ -1039,10 +1034,8 @@ class Actions extends StatefulWidget {
         // Invoke the action we found using the relevant dispatcher from the Actions
         // Element we found.
         returnValue = _findDispatcher(element).invokeAction(result, intent, context);
-        return true;
       }
-
-      return false;
+      return result != null;
     });
 
     assert(() {
@@ -1070,15 +1063,15 @@ class Actions extends StatefulWidget {
   ///
   /// This method returns the result of invoking the action's [Action.invoke]
   /// method. If no action mapping was found for the specified intent, or if the
-  /// actions that were found were disabled, or the action itself returns null
+  /// first action found was disabled, or the action itself returns null
   /// from [Action.invoke], then this method returns null.
   ///
   /// The `context` and `intent` arguments must not be null.
   ///
-  /// If the given `intent` doesn't map to an action, or doesn't map to one that
-  /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
-  /// then it will look to the next ancestor [Actions] widget in the hierarchy
-  /// until it reaches the root.
+  /// If the given `intent` doesn't map to an action, then it will look to the
+  /// next ancestor [Actions] widget in the hierarchy until it reaches the root.
+  /// If a suitable [Action] is found but its [Action.isEnabled] returns false,
+  /// the search will stop and this method will return null.
   static Object? maybeInvoke<T extends Intent>(
     BuildContext context,
     T intent,
@@ -1094,9 +1087,8 @@ class Actions extends StatefulWidget {
         // Invoke the action we found using the relevant dispatcher from the Actions
         // Element we found.
         returnValue = _findDispatcher(element).invokeAction(result, intent, context);
-        return true;
       }
-      return false;
+      return result != null;
     });
     return returnValue;
   }
@@ -1791,6 +1783,7 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
 
 mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   bool debugAssertMutuallyRecursive = false;
+  bool debugAssertIsEnabledMutuallyRecursive = false;
 
   /// The default action to invoke if an enabled override Action can't be found
   /// using [lookupContext];
@@ -1803,7 +1796,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context);
 
   Action<T>? overrideAction(T intent) {
-    final Action<T>? override = Actions._maybeFindEnabled(lookupContext, intent);
+    final Action<T>? override = Actions._maybeFind(lookupContext, intent);
     assert(!identical(override, this));
     return override;
   }
@@ -1832,6 +1825,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
 
   @override
   Object? invokeAsOverride(T intent, Action<T> fromAction, [BuildContext? context]) {
+    assert(isEnabled(intent));
     assert(!debugAssertMutuallyRecursive);
     assert(() {
       debugAssertMutuallyRecursive = true;
@@ -1853,7 +1847,20 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   }
 
   @override
-  bool isEnabled(T intent) => defaultAction.isEnabled(intent);
+  bool isEnabled(T intent) {
+    assert(!debugAssertIsEnabledMutuallyRecursive);
+    assert(() {
+      debugAssertIsEnabledMutuallyRecursive = true;
+      return true;
+    }());
+
+    final bool isEnabled = (overrideAction(intent) ?? defaultAction).isEnabled(intent);
+    assert(() {
+      debugAssertIsEnabledMutuallyRecursive = false;
+      return true;
+    }());
+    return isEnabled;
+  }
 
   @override
   bool consumesKey(T intent) => defaultAction.isEnabled(intent);

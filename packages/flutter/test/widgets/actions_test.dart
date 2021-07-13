@@ -549,7 +549,7 @@ void main() {
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
       expect(testAction.capturedContexts.single, containerKey.currentContext);
     });
-    testWidgets('Disabled actions allow propagation to an ancestor', (WidgetTester tester) async {
+    testWidgets('Disabled actions stop propagation to an ancestor', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const TestIntent intent = TestIntent();
@@ -589,11 +589,11 @@ void main() {
         containerKey.currentContext!,
         intent,
       );
-      expect(result, isTrue);
-      expect(invoked, isTrue);
-      expect(invokedIntent, equals(intent));
-      expect(invokedAction, equals(enabledTestAction));
-      expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
+      expect(result, isNull);
+      expect(invoked, isFalse);
+      expect(invokedIntent, isNull);
+      expect(invokedAction, isNull);
+      expect(invokedDispatcher, isNull);
     });
   });
 
@@ -1250,10 +1250,51 @@ void main() {
       Actions.invoke(invokingContext!, LogIntent(log: invocations));
       expect(invocations, <String>[
         'action1.invokeAsOverride-pre-super',
-        // No action2 here.
+        'action2.invokeAsOverride-pre-super',
         'action3.invoke',
+        'action2.invokeAsOverride-post-super',
         'action1.invokeAsOverride-post-super',
       ]);
+
+      invocations.clear();
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context1) {
+            return Actions(
+              actions: <Type, Action<Intent>> {
+                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1', enabled: false), context: context1),
+              },
+              child: Builder(
+                builder: (BuildContext context2) {
+                  return Actions(
+                    actions: <Type, Action<Intent>> {
+                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
+                    },
+                    child: Builder(
+                      builder: (BuildContext context3) {
+                        return Actions(
+                          actions: <Type, Action<Intent>> {
+                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          },
+                          child: Builder(
+                            builder: (BuildContext context4) {
+                              invokingContext = context4;
+                              return const SizedBox();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      expect(invocations, <String>[]);
     });
 
     testWidgets('Throws on infinite recursions', (WidgetTester tester) async {
@@ -1312,7 +1353,7 @@ void main() {
       } catch (e) {
         exception = e;
       }
-      expect(exception?.toString(), contains('debugAssertMutuallyRecursive'));
+      expect(exception?.toString(), contains('debugAssertIsEnabledMutuallyRecursive'));
     });
 
     testWidgets('Throws on invoking invalid override', (WidgetTester tester) async {
