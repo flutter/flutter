@@ -60,7 +60,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
   @override
   PhysicalKeyboardKey get physicalKey {
-    return kWebToPhysicalKey[code] ?? PhysicalKeyboardKey.none;
+    return kWebToPhysicalKey[code] ?? PhysicalKeyboardKey(LogicalKeyboardKey.webPlane + code.hashCode);
   }
 
   @override

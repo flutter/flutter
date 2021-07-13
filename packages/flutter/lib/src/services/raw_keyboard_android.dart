@@ -152,7 +152,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   @override
   PhysicalKeyboardKey get physicalKey {
     if (kAndroidToPhysicalKey.containsKey(scanCode)) {
-      return kAndroidToPhysicalKey[scanCode] ?? PhysicalKeyboardKey.none;
+      return kAndroidToPhysicalKey[scanCode]!;
     }
 
     // Android sends DPAD_UP, etc. as the keyCode for joystick DPAD events, but
@@ -174,7 +174,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
         return PhysicalKeyboardKey.arrowRight;
       }
     }
-    return PhysicalKeyboardKey.none;
+    return PhysicalKeyboardKey(LogicalKeyboardKey.androidPlane + scanCode);
   }
 
   @override

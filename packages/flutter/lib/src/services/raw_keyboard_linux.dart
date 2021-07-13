@@ -73,7 +73,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   String get keyLabel => unicodeScalarValues == 0 ? '' : String.fromCharCode(unicodeScalarValues);
 
   @override
-  PhysicalKeyboardKey get physicalKey => kLinuxToPhysicalKey[scanCode] ?? PhysicalKeyboardKey.none;
+  PhysicalKeyboardKey get physicalKey => kLinuxToPhysicalKey[scanCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.webPlane + scanCode);
 
   @override
   LogicalKeyboardKey get logicalKey {
