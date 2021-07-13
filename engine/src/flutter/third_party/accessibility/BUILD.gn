@@ -27,7 +27,7 @@ source_set("accessibility") {
   public_configs = [ ":accessibility_config" ]
 
   if (is_mac) {
-    libs = [
+    frameworks = [
       "AppKit.framework",
       "CoreFoundation.framework",
       "CoreGraphics.framework",

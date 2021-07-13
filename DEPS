@@ -66,7 +66,7 @@ vars = {
   'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
 
   # Checkout Android dependencies only on platforms where we build for Android targets.
-  'download_android_deps': 'host_os == "mac" or host_os == "linux"',
+  'download_android_deps': 'host_cpu == "x64" and (host_os == "mac" or host_os == "linux")',
 
   # Checkout Windows dependencies only if we are building on Windows.
   'download_windows_deps' : 'host_os == "win"',
@@ -98,7 +98,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '41cc1d37ca8b59a1bb1a678d11d75871aa2a5c1b',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '5c61df1b8e5ae701c1bd76f089b888b51326a72a',
 
    # Fuchsia compatibility
    #
@@ -546,7 +546,7 @@ deps = {
     'packages': [
       {
         'package': 'gn/gn/${{platform}}',
-        'version': 'git_revision:1e3fd10c5df6b704fc764ee388149e4f32862823'
+        'version': 'git_revision:24e2f7df92641de0351a96096fb2c490b2436bb8'
       },
     ],
     'dep_type': 'cipd',
