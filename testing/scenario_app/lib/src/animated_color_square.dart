@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -77,11 +76,11 @@ class AnimatedColorSquareScenario extends Scenario {
 }
 
 class _NumberSwinger<T extends num> {
-  _NumberSwinger(this._begin, this._end, [this._current])
+  _NumberSwinger(this._begin, this._end, [T? current])
       : assert(_begin != null),
         assert(_end != null),
         _up = _begin < _end {
-    _current ??= _begin;
+    _current = current ?? _begin;
   }
 
   final T _begin;
@@ -89,7 +88,7 @@ class _NumberSwinger<T extends num> {
 
   /// The current value of the swinger.
   T get current => _current;
-  T _current;
+  late T _current;
 
   bool _up;
 
