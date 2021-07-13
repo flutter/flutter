@@ -22,12 +22,12 @@ constexpr void HashCombineSeed(std::size_t& seed,
   HashCombineSeed(seed, other_args...);
 }
 
-constexpr std::size_t HashCombine() {
+[[nodiscard]] constexpr std::size_t HashCombine() {
   return 0xdabbad00;
 }
 
 template <class... Type>
-constexpr std::size_t HashCombine(Type... args) {
+[[nodiscard]] constexpr std::size_t HashCombine(Type... args) {
   std::size_t seed = HashCombine();
   HashCombineSeed(seed, args...);
   return seed;
