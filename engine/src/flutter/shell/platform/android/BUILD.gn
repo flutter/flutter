@@ -543,7 +543,7 @@ action("robolectric_tests") {
   args += rebase_path(sources, root_build_dir)
 
   deps = [
-    ":android",
+    ":android_jar",
     ":flutter_shell_java",
   ]
 }
@@ -583,6 +583,12 @@ zip_bundle("android") {
       },
     ]
     deps += [ ":flutter_shell_native" ]
+  }
+
+  # We only run the robolectric tests for android_debug_unopt (arm CPU), and
+  # the target is relatively expensive to build.
+  if (flutter_runtime_mode == "debug" && current_cpu == "arm") {
+    deps += [ ":robolectric_tests" ]
   }
 }
 
