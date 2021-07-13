@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/common/context_options.h"
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
@@ -138,8 +137,9 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
                      backend_context.fPhysicalDevice, 0, nullptr,
                      countof(device_extensions), device_extensions);
   backend_context.fVkExtensions = &vk_extensions;
-  const auto options = flutter::MakeDefaultContextOptions(
-      flutter::ContextType::kRender, GrBackendApi::kVulkan);
+  GrContextOptions options;
+  options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
+
   context_ = GrDirectContext::MakeVulkan(backend_context, options);
 
   if (context_ == nullptr) {
