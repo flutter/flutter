@@ -71,7 +71,7 @@ transforms:
       name: 'backwardsCompatibility'
 
   # Changes made in https://github.com/flutter/flutter/pull/86198
-  - title: "Migrate to 'systemOverlayStyle'"
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
     date: 2021-07-12
     element:
       uris: [ 'material.dart' ]
@@ -100,7 +100,7 @@ transforms:
         value: 'arguments[textTheme]'
 
   # Changes made in https://github.com/flutter/flutter/pull/86198
-  - title: "Migrate to 'systemOverlayStyle'"
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
     date: 2020-07-12
     element:
       uris: [ 'material.dart' ]
@@ -129,7 +129,7 @@ transforms:
         value: 'arguments[textTheme]'
 
   # Changes made in https://github.com/flutter/flutter/pull/86198
-  - title: "Migrate to 'toolbarTextSyle'"
+  - title: "Migrate to 'toolbarTextStyle'"
     date: 2021-07-12
     # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
     bulkApply: false
@@ -155,7 +155,7 @@ transforms:
         newName: 'titleTextStyle'
 
   # Changes made in https://github.com/flutter/flutter/pull/86198
-  - title: "Migrate to 'systemOverlayStyle'"
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
     date: 2020-07-12
     element:
       uris: [ 'material.dart' ]
@@ -184,7 +184,7 @@ transforms:
         value: 'arguments[textTheme]'
 
   # Changes made in https://github.com/flutter/flutter/pull/86198
-  - title: "Migrate to 'toolbarTextSyle'"
+  - title: "Migrate to 'toolbarTextStyle'"
     date: 2021-07-12
     # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
     bulkApply: false
@@ -210,7 +210,7 @@ transforms:
         newName: 'titleTextStyle'
 
   # Changes made in https://github.com/flutter/flutter/pull/86198
-  - title: "Migrate to 'toolbarTextStyle' and 'titleTextStyle'"
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
     date: 2020-07-12
     element:
       uris: [ 'material.dart' ]
@@ -239,7 +239,7 @@ transforms:
         value: 'arguments[textTheme]'
 
   # Changes made in https://github.com/flutter/flutter/pull/86198
-  - title: "Migrate to 'toolbarTextSyle'"
+  - title: "Migrate to 'toolbarTextStyle'"
     date: 2021-07-12
     # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
     bulkApply: false
