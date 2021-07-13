@@ -1987,7 +1987,7 @@ typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<doubl
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
 typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
 
-/// The [Focustrap] widget removes focus when a mouse primary pointer makes contact with another
+/// The [FocusTrap] widget removes focus when a mouse primary pointer makes contact with another
 /// region of the screen.
 ///
 /// When a primary pointer makes contact with the screen, this widget determines if that pointer
