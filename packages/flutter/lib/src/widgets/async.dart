@@ -803,9 +803,13 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
             _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace);
           });
         }
-        if(kDebugMode && FutureBuilder.debugRethrowError) {
-          Future<Object>.error(error, stackTrace);
-        }
+        assert(() {
+          if(FutureBuilder.debugRethrowError) {
+            Future<Object>.error(error, stackTrace);
+          }
+          return true;
+        }());
+
       });
       _snapshot = _snapshot.inState(ConnectionState.waiting);
     }
