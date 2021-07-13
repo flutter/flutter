@@ -8,9 +8,9 @@ import 'dart:typed_data';
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart' show platformViewManager, registerHotRestartListener;
 import 'package:ui/ui.dart' as ui;
 
+import '../engine.dart'  show platformViewManager, registerHotRestartListener;
 import 'canvaskit/initialization.dart';
 import 'canvaskit/layer_scene_builder.dart';
 import 'canvaskit/rasterizer.dart';

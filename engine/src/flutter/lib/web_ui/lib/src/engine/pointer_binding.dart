@@ -8,8 +8,13 @@ import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+
+import '../engine.dart' show registerHotRestartListener;
+import 'browser_detection.dart';
+import 'platform_dispatcher.dart';
+import 'pointer_converter.dart';
+import 'semantics.dart';
 
 /// Set this flag to true to see all the fired events in the console.
 const bool _debugLogPointerEvents = false;

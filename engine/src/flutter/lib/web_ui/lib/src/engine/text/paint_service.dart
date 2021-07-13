@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/src/engine.dart' show BitmapCanvas;
 
+import '../html/bitmap_canvas.dart';
 import '../html/painting.dart';
 import 'canvas_paragraph.dart';
 import 'layout_service.dart';

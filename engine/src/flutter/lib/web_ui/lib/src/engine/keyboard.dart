@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart' show EnginePlatformDispatcher, registerHotRestartListener;
-
+import '../engine.dart'  show registerHotRestartListener;
+import 'platform_dispatcher.dart';
 import 'services.dart';
 
 /// After a keydown is received, this is the duration we wait for a repeat event

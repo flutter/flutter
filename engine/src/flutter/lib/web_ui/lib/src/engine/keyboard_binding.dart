@@ -4,11 +4,12 @@
 
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart' show EnginePlatformDispatcher, registerHotRestartListener;
 import 'package:ui/ui.dart' as ui;
 
+import '../engine.dart'  show registerHotRestartListener;
 import 'browser_detection.dart';
 import 'key_map.dart';
+import 'platform_dispatcher.dart';
 import 'semantics.dart';
 
 typedef _VoidCallback = void Function();

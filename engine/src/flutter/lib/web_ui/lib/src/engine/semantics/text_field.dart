@@ -4,11 +4,11 @@
 
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart' show EnginePlatformDispatcher;
 import 'package:ui/ui.dart' as ui;
 
-import '../text_editing/text_editing.dart';
 import '../browser_detection.dart';
+import '../platform_dispatcher.dart';
+import '../text_editing/text_editing.dart';
 import 'semantics.dart';
 
 /// Text editing used by accesibility mode.

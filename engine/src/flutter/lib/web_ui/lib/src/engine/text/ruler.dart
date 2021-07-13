@@ -6,9 +6,9 @@ import 'dart:html' as html;
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/src/engine.dart' show domRenderer, DomRenderer;
 
 import '../browser_detection.dart';
+import '../dom_renderer.dart';
 import '../util.dart';
 import 'measurement.dart';
 import 'paragraph.dart';

@@ -4,7 +4,7 @@
 
 import 'dart:js' as js;
 
-import 'package:ui/src/engine.dart' show registerHotRestartListener;
+import '../engine.dart' show registerHotRestartListener;
 
 /// A bag of all experiment flags in the web engine.
 ///

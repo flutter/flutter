@@ -5,8 +5,7 @@
 import 'dart:async';
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart' show EnginePlatformDispatcher;
-
+import '../platform_dispatcher.dart';
 import 'bitmap_canvas.dart';
 import 'dom_canvas.dart';
 import 'picture.dart';

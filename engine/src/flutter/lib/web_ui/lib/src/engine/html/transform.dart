@@ -5,9 +5,9 @@
 import 'dart:html' as html;
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart' show domRenderer, DomRenderer;
 import 'package:ui/ui.dart' as ui;
 
+import '../dom_renderer.dart';
 import '../util.dart';
 import '../vector_math.dart';
 import 'surface.dart';

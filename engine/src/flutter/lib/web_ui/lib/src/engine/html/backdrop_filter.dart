@@ -4,10 +4,10 @@
 
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart' show DomRenderer;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
+import '../dom_renderer.dart';
 import '../util.dart';
 import '../vector_math.dart';
 import 'shaders/shader.dart';

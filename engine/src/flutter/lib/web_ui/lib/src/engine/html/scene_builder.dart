@@ -4,13 +4,14 @@
 
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart' show kProfileApplyFrame, kProfilePrerollFrame, toMatrix32, window;
 import 'package:ui/ui.dart' as ui;
 
+import '../../engine.dart' show kProfileApplyFrame, kProfilePrerollFrame, toMatrix32;
 import '../picture.dart';
 import '../profiler.dart';
 import '../util.dart';
 import '../vector_math.dart';
+import '../window.dart';
 import 'backdrop_filter.dart';
 import 'clip.dart';
 import 'color_filter.dart';

@@ -8,10 +8,10 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart' show DomRenderer, EnginePlatformDispatcher, window;
 import 'package:ui/ui.dart' as ui;
 
 import 'browser_detection.dart';
+import 'dom_renderer.dart';
 import 'engine_canvas.dart';
 import 'html/bitmap_canvas.dart';
 import 'html/painting.dart';
@@ -22,10 +22,12 @@ import 'html/path/path_ref.dart';
 import 'html/path/path_utils.dart';
 import 'html/shaders/image_shader.dart';
 import 'html/shaders/shader.dart';
+import 'platform_dispatcher.dart';
 import 'rrect_renderer.dart';
 import 'shadow.dart';
 import 'util.dart';
 import 'vector_math.dart';
+import 'window.dart';
 
 /// Renders picture to a CanvasElement by allocating and caching 0 or more
 /// canvas(s) for [BitmapCanvas].

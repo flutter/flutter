@@ -7,9 +7,9 @@ import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/src/engine.dart' show domRenderer, DomRenderer;
 
 import '../browser_detection.dart';
+import '../dom_renderer.dart';
 import '../html/bitmap_canvas.dart';
 import '../html/painting.dart';
 import '../profiler.dart';

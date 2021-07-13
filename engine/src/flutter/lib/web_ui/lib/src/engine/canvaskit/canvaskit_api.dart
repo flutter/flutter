@@ -15,8 +15,9 @@ import 'dart:js' as js;
 import 'dart:typed_data';
 
 import 'package:js/js.dart';
-import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+
+import '../profiler.dart';
 
 /// Entrypoint into the CanvasKit API.
 late CanvasKit canvasKit;

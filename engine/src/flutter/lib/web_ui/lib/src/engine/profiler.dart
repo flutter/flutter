@@ -7,7 +7,8 @@ import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/src/engine.dart' show EnginePlatformDispatcher;
+
+import 'platform_dispatcher.dart';
 
 /// A function that receives a benchmark [value] labeleb by [name].
 typedef OnBenchmark = void Function(String name, double value);

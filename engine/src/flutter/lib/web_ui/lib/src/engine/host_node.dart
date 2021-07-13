@@ -4,9 +4,8 @@
 
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart' show applyGlobalCssRulesToSheet;
-
 import 'browser_detection.dart';
+import 'dom_renderer.dart';
 import 'text_editing/text_editing.dart';
 
 /// The interface required to host a flutter app in the DOM, and its tests.

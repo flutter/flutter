@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+
+import '../browser_detection.dart';
+import 'path/path.dart';
+import 'path/path_to_svg.dart';
 
 /// Counter used for generating clip path id inside an svg <defs> tag.
 int _clipIdCounter = 0;

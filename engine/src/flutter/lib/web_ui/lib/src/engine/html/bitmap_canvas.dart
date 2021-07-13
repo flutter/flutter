@@ -6,18 +6,22 @@ import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart' show domRenderer, EngineColorFilter, EnginePlatformDispatcher, NullTreeSanitizer, window;
 import 'package:ui/ui.dart' as ui;
 
+import '../../engine.dart' show NullTreeSanitizer;
 import '../browser_detection.dart';
 import '../canvas_pool.dart';
 import '../canvaskit/color_filter.dart';
+import '../color_filter.dart';
+import '../dom_renderer.dart';
 import '../engine_canvas.dart';
 import '../frame_reference.dart';
 import '../html_image_codec.dart';
+import '../platform_dispatcher.dart';
 import '../text/paragraph.dart';
 import '../util.dart';
 import '../vector_math.dart';
+import '../window.dart';
 import 'clip.dart';
 import 'color_filter.dart';
 import 'dom_canvas.dart';
