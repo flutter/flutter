@@ -266,8 +266,9 @@ class WebAssetServer implements AssetReader {
       };
     }
 
+    logging.Logger.root.level = logging.Level.ALL;
     logging.Logger.root.onRecord.listen((logging.LogRecord event) {
-      globals.printTrace('${event.loggerName}: ${event.message}');
+      globals.printStatus('${event.loggerName}: ${event.message}');
     });
 
     // In debug builds, spin up DWDS and the full asset server.
