@@ -8,13 +8,10 @@ import("//flutter/common/config.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//third_party/dart/utils/compile_platform.gni")
 
-bindings_output_dir = "$root_gen_dir/sky/bindings"
-
-copy("generate_dart_ui") {
+# TODO(dnfield): Remove this when recipes are updated to not use it.
+# https://flutter-review.googlesource.com/c/recipes/+/15420
+group("generate_dart_ui") {
   visibility = [ ":*" ]
-  sources = dart_ui_files
-
-  outputs = [ "$bindings_output_dir/dart_ui/{{source_file_part}}" ]
 }
 
 compiled_action("generate_snapshot_bin") {

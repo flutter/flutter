@@ -62,7 +62,7 @@ function analyze() (
 echo "Analyzing dart:ui library..."
 analyze \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$SRC_DIR/out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart"
+  "$SRC_DIR/out/host_debug_unopt/gen/dart-pkg/sky_engine/lib/ui/ui.dart"
 
 echo "Analyzing spirv library..."
 analyze \
