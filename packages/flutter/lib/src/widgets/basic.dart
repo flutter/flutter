@@ -197,7 +197,7 @@ class Directionality extends InheritedWidget {
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
-/// an [AnimatedOpacity] instead.
+/// an [AnimatedOpacity] or a [FadeTransition] instead.
 ///
 /// ## Transparent image
 ///
