@@ -24,7 +24,7 @@ source_set("graphics") {
     "//flutter/shell/platform/darwin/common:framework_shared",
   ]
 
-  libs = [ "CoreVideo.framework" ]
+  frameworks = [ "CoreVideo.framework" ]
 
   public_deps = [ "//third_party/skia" ]
 

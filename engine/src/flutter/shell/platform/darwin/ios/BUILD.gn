@@ -168,7 +168,7 @@ source_set("flutter_framework_source") {
     "//flutter:config",
   ]
 
-  libs = [
+  frameworks = [
     "AudioToolbox.framework",
     "CoreMedia.framework",
     "CoreVideo.framework",
@@ -179,7 +179,7 @@ source_set("flutter_framework_source") {
   if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "debug") {
     # This is required by the profiler_metrics_ios.mm to get GPU statistics.
     # Usage in release builds will cause rejection from the App Store.
-    libs += [ "IOKit.framework" ]
+    frameworks += [ "IOKit.framework" ]
   }
 }
 
@@ -227,7 +227,7 @@ shared_library("ios_test_flutter") {
     "-F$platform_frameworks_path",
     "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib",
   ]
-  libs = [ "XCTest.framework" ]
+  frameworks = [ "XCTest.framework" ]
   configs -= [
     "//build/config/gcc:symbol_visibility_hidden",
     "//build/config:symbol_visibility_hidden",
