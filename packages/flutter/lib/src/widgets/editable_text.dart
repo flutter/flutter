@@ -1650,8 +1650,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
       _focusAttachment?.detach();
-      widget.focusNode.addListener(_handleFocusChanged);
       _focusAttachment = widget.focusNode.attach(context);
+      widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
 
