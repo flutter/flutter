@@ -16,6 +16,17 @@ version: 1
 transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'backgroundColor'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      getter: color
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'backgroundColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
   - title: "Remove 'backwardsCompatibility'"
     date: 2021-07-12
     element:

@@ -365,4 +365,7 @@ void main() {
   appBarTheme = appBarTheme.copyWith();
   appBarTheme = appBarTheme.copyWith();
   appBarTheme.backwardsCompatibility; // Removing field reference not supported.
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme.backgroundColor;
 }
