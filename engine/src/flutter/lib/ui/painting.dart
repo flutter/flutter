@@ -1831,7 +1831,7 @@ class Image {
 }
 
 @pragma('vm:entry-point')
-class _Image extends NativeFieldWrapperClass2 {
+class _Image extends NativeFieldWrapperClass1 {
   // This class is created by the engine, and should not be instantiated
   // or extended directly.
   //
@@ -1953,7 +1953,7 @@ class FrameInfo {
 /// To obtain an instance of the [Codec] interface, see
 /// [instantiateImageCodec].
 @pragma('vm:entry-point')
-class Codec extends NativeFieldWrapperClass2 {
+class Codec extends NativeFieldWrapperClass1 {
   //
   // This class is created by the engine, and should not be instantiated
   // or extended directly.
@@ -2238,7 +2238,7 @@ enum PathOperation {
 
 /// A handle for the framework to hold and retain an engine layer across frames.
 @pragma('vm:entry-point')
-class EngineLayer extends NativeFieldWrapperClass2 {
+class EngineLayer extends NativeFieldWrapperClass1 {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   @pragma('vm:entry-point')
@@ -2277,7 +2277,7 @@ class EngineLayer extends NativeFieldWrapperClass2 {
 /// Paths can be drawn on canvases using [Canvas.drawPath], and can
 /// used to create clip regions using [Canvas.clipPath].
 @pragma('vm:entry-point')
-class Path extends NativeFieldWrapperClass2 {
+class Path extends NativeFieldWrapperClass1 {
   /// Create a new empty [Path] object.
   @pragma('vm:entry-point')
   Path() { _constructor(); }
@@ -2828,7 +2828,7 @@ class PathMetric {
   String toString() => '$runtimeType{length: $length, isClosed: $isClosed, contourIndex:$contourIndex}';
 }
 
-class _PathMeasure extends NativeFieldWrapperClass2 {
+class _PathMeasure extends NativeFieldWrapperClass1 {
   _PathMeasure(Path path, bool forceClosed) {
     _constructor(path, forceClosed);
   }
@@ -3158,7 +3158,7 @@ class ColorFilter implements ImageFilter {
 /// ColorFilter, because we want ColorFilter to be const constructible and
 /// efficiently comparable, so that widgets can check for ColorFilter equality to
 /// avoid repainting.
-class _ColorFilter extends NativeFieldWrapperClass2 {
+class _ColorFilter extends NativeFieldWrapperClass1 {
   _ColorFilter.mode(this.creator)
     : assert(creator != null),
       assert(creator._type == ColorFilter._kTypeMode) {
@@ -3354,7 +3354,7 @@ class _ComposeImageFilter implements ImageFilter {
 /// This is a private class, rather than being the implementation of the public
 /// ImageFilter, because we want ImageFilter to be efficiently comparable, so that
 /// widgets can check for ImageFilter equality to avoid repainting.
-class _ImageFilter extends NativeFieldWrapperClass2 {
+class _ImageFilter extends NativeFieldWrapperClass1 {
   void _constructor() native 'ImageFilter_constructor';
 
   /// Creates an image filter that applies a Gaussian blur.
@@ -3407,7 +3407,7 @@ class _ImageFilter extends NativeFieldWrapperClass2 {
 
 /// Base class for objects such as [Gradient] and [ImageShader] which
 /// correspond to shaders as used by [Paint.shader].
-class Shader extends NativeFieldWrapperClass2 {
+class Shader extends NativeFieldWrapperClass1 {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   @pragma('vm:entry-point')
@@ -3762,7 +3762,7 @@ enum VertexMode {
 }
 
 /// A set of vertex data used by [Canvas.drawVertices].
-class Vertices extends NativeFieldWrapperClass2 {
+class Vertices extends NativeFieldWrapperClass1 {
   /// Creates a set of vertex data for use with [Canvas.drawVertices].
   ///
   /// The [mode] and [positions] parameters must not be null.
@@ -3907,7 +3907,7 @@ enum ClipOp {
 ///
 /// The current transform and clip can be saved and restored using the stack
 /// managed by the [save], [saveLayer], and [restore] methods.
-class Canvas extends NativeFieldWrapperClass2 {
+class Canvas extends NativeFieldWrapperClass1 {
   /// Creates a canvas for recording graphical operations into the
   /// given picture recorder.
   ///
@@ -4907,7 +4907,7 @@ class Canvas extends NativeFieldWrapperClass2 {
 /// the [SceneBuilder.addPicture] method. A [Picture] can also be
 /// drawn into a [Canvas], using the [Canvas.drawPicture] method.
 @pragma('vm:entry-point')
-class Picture extends NativeFieldWrapperClass2 {
+class Picture extends NativeFieldWrapperClass1 {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   ///
@@ -4954,7 +4954,7 @@ class Picture extends NativeFieldWrapperClass2 {
 ///
 /// To begin recording, construct a [Canvas] to record the commands.
 /// To end recording, use the [PictureRecorder.endRecording] method.
-class PictureRecorder extends NativeFieldWrapperClass2 {
+class PictureRecorder extends NativeFieldWrapperClass1 {
   /// Creates a new idle PictureRecorder. To associate it with a
   /// [Canvas] and begin recording, pass this [PictureRecorder] to the
   /// [Canvas] constructor.
@@ -5198,7 +5198,7 @@ class Shadow {
 ///
 /// The creator of this object is responsible for calling [dispose] when it is
 /// no longer needed.
-class ImmutableBuffer extends NativeFieldWrapperClass2 {
+class ImmutableBuffer extends NativeFieldWrapperClass1 {
   ImmutableBuffer._(this.length);
 
   /// Creates a copy of the data from a [Uint8List] suitable for internal use
@@ -5253,7 +5253,7 @@ class ImmutableBuffer extends NativeFieldWrapperClass2 {
 ///
 /// Use this class to determine the height, width, and byte size of image data
 /// before decoding it.
-class ImageDescriptor extends NativeFieldWrapperClass2 {
+class ImageDescriptor extends NativeFieldWrapperClass1 {
   ImageDescriptor._();
 
   /// Creates an image descriptor from encoded data in a supported format.

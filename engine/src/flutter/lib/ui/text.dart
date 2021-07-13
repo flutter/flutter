@@ -3116,7 +3116,7 @@ class LineMetrics {
 /// Paragraphs can be displayed on a [Canvas] using the [Canvas.drawParagraph]
 /// method.
 @pragma('vm:entry-point')
-class Paragraph extends NativeFieldWrapperClass2 {
+class Paragraph extends NativeFieldWrapperClass1 {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   ///
@@ -3306,7 +3306,7 @@ class Paragraph extends NativeFieldWrapperClass2 {
 ///
 /// After constructing a [Paragraph], call [Paragraph.layout] on it and then
 /// paint it with [Canvas.drawParagraph].
-class ParagraphBuilder extends NativeFieldWrapperClass2 {
+class ParagraphBuilder extends NativeFieldWrapperClass1 {
 
   /// Creates a new [ParagraphBuilder] object, which is used to create a
   /// [Paragraph].
