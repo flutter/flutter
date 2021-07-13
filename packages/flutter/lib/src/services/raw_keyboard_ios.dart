@@ -90,7 +90,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
   String get keyLabel => charactersIgnoringModifiers;
 
   @override
-  PhysicalKeyboardKey get physicalKey => kIosToPhysicalKey[keyCode] ?? PhysicalKeyboardKey.none;
+  PhysicalKeyboardKey get physicalKey => kIosToPhysicalKey[keyCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.iosPlane + keyCode);
 
   @override
   LogicalKeyboardKey get logicalKey {

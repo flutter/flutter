@@ -110,10 +110,24 @@ The planes are planned as follows:
   | 0x18 | GLFW     |
 
   Platform planes store keys that are private to the Flutter embedding of this
-  platform.  This most likely means that these keys are unrecognizable and are
-  only assigned different values to be differentiable.  The value scheme is
-  decided by the platform, typically using the field from the platform's native
-  key event that represents the key's logical effect.
+  platform. This most likely means that these keys have not been officially
+  recognized by Flutter.
+
+  The value scheme within a platform plane is decided by the platform,
+  typically using the field from the platform's native key event that
+  represents the key's logical effect (such as `keycode`, `virtual key`, etc).
+
+  In time, keys that originally belong to a platform plane might be added to
+  Flutter, especially if a key is found shared by multiple platforms. The values
+  of that key will be changed to a new value within the Flutter plane, and all
+  platforms managed by Flutter will start to send the new value, making it a
+  breaking change. Therefore, when handling an unrecognized key on a platform
+  managed by Flutter, it is recommended to file a new issue to add this value
+  to `keyboard_key.dart` instead of using the platform-plane value. However,
+  for a custom platform (see below), since the platfrom author has full control
+  over key mapping, such change will not cause breakage and it is recommended
+  to use the platform-plane value to avoid adding platform-exclusive values
+  to the framework.
 
 - **Plane 0x20-0x2F**: Custom platform planes.  Similar to Flutter's platform
   planes, but for private use by custom platforms.

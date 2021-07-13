@@ -159,8 +159,7 @@ class LogicalKeyData {
       }
 
       final bool isPrintable = (keyLabel != null && !_isControlCharacter(keyLabel))
-        || printable.containsKey(name)
-        || value == 0; // "None" key
+        || printable.containsKey(name);
       data.putIfAbsent(name, () {
         return LogicalKeyEntry.fromName(
           value: toPlane(value, _sourceToPlane(source, isPrintable)),

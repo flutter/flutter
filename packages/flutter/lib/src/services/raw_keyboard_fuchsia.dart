@@ -84,7 +84,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   }
 
   @override
-  PhysicalKeyboardKey get physicalKey => kFuchsiaToPhysicalKey[hidUsage] ?? PhysicalKeyboardKey.none;
+  PhysicalKeyboardKey get physicalKey => kFuchsiaToPhysicalKey[hidUsage] ?? PhysicalKeyboardKey(LogicalKeyboardKey.fuchsiaPlane + hidUsage);
 
   bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
     if (modifiers & anyMask == 0) {

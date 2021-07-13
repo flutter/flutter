@@ -65,7 +65,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   String get keyLabel => charactersIgnoringModifiers;
 
   @override
-  PhysicalKeyboardKey get physicalKey => kMacOsToPhysicalKey[keyCode] ?? PhysicalKeyboardKey.none;
+  PhysicalKeyboardKey get physicalKey => kMacOsToPhysicalKey[keyCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.windowsPlane + keyCode);
 
   @override
   LogicalKeyboardKey get logicalKey {

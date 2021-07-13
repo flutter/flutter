@@ -22,6 +22,7 @@ final List<MaskConstant> _maskConstants = <MaskConstant>[
   kUnicodePlane,
   kUnprintablePlane,
   kFlutterPlane,
+  kStartOfPlatformPlanes,
   kAndroidPlane,
   kFuchsiaPlane,
   kIosPlane,
@@ -148,7 +149,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _maskConstantVariables {
-    final OutputLines<int> lines = OutputLines<int>('Mask constants');
+    final OutputLines<int> lines = OutputLines<int>('Mask constants', checkDuplicate: false);
     for (final MaskConstant constant in _maskConstants) {
       lines.add(constant.value, '''
 ${_wrapString(constant.description)}  ///

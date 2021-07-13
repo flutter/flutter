@@ -60,7 +60,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   String get keyLabel => characterCodePoint == 0 ? '' : String.fromCharCode(characterCodePoint);
 
   @override
-  PhysicalKeyboardKey get physicalKey => kWindowsToPhysicalKey[scanCode] ?? PhysicalKeyboardKey.none;
+  PhysicalKeyboardKey get physicalKey => kWindowsToPhysicalKey[scanCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.windowsPlane + scanCode);
 
   @override
   LogicalKeyboardKey get logicalKey {
