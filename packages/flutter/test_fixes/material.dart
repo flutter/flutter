@@ -334,8 +334,17 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/81336
   ThemeData themeData = ThemeData();
   themeData = ThemeData(accentColor: Colors.red);
-  themeData = ThemeData.raw(accentColor: Colors.blue);
-  themeData = themeData.copyWith(accentColor: Colors.yellow);
+  themeData = ThemeData(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(accentColor: Colors.red);
+  themeData = ThemeData.raw(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(accentColor: Colors.red);
+  themeData = themeData.copyWith(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = themeData.copyWith(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
   themeData.accentColor;
 
   // Changes made in https://github.com/flutter/flutter/pull/81336

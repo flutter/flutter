@@ -305,9 +305,18 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/81336
   ThemeData themeData = ThemeData();
-  themeData = ThemeData(colorScheme: ColorScheme(secondary: Colors.red));
-  themeData = ThemeData.raw(colorScheme: ColorScheme(secondary: Colors.blue));
-  themeData = themeData.copyWith(colorScheme: ColorScheme(secondary: Colors.yellow));
+  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
   themeData.colorScheme.secondary;
 
   // Changes made in https://github.com/flutter/flutter/pull/81336
