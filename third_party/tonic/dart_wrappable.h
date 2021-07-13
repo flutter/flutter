@@ -23,7 +23,6 @@ class DartWrappable {
  public:
   enum DartNativeFields {
     kPeerIndex,  // Must be first to work with Dart_GetNativeReceiver.
-    kWrapperInfoIndex,
     kNumberOfNativeFields,
   };
 

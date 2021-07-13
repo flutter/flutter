@@ -13,7 +13,7 @@ part of dart.ui;
 /// Scene objects can be displayed on the screen using the [FlutterView.render]
 /// method.
 @pragma('vm:entry-point')
-class Scene extends NativeFieldWrapperClass2 {
+class Scene extends NativeFieldWrapperClass1 {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   ///
@@ -205,7 +205,7 @@ class PhysicalShapeEngineLayer extends _EngineLayerWrapper {
 /// To draw graphical operations onto a [Scene], first create a
 /// [Picture] using a [PictureRecorder] and a [Canvas], and then add
 /// it to the scene using [addPicture].
-class SceneBuilder extends NativeFieldWrapperClass2 {
+class SceneBuilder extends NativeFieldWrapperClass1 {
   /// Creates an empty [SceneBuilder] object.
   @pragma('vm:entry-point')
   SceneBuilder() {

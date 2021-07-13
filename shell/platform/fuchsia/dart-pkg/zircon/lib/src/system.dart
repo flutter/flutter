@@ -191,7 +191,7 @@ class MapResult extends _Result {
 }
 
 @pragma('vm:entry-point')
-class System extends NativeFieldWrapperClass2 {
+class System extends NativeFieldWrapperClass1 {
   // No public constructor - this only has static methods.
   System._();
 
