@@ -29,7 +29,7 @@ void main() {
   group(LogicalKeyboardKey, () {
     test('Various classes of keys can be looked up by code', () async {
       // Check a letter key
-      expect(LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.keyA.keyId), equals(LogicalKeyboardKey.keyA));
+      expect(LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.upperA.keyId), equals(LogicalKeyboardKey.upperA));
       // Check a control key
       expect(LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.escape.keyId), equals(LogicalKeyboardKey.escape));
       // Check a modifier key
@@ -118,12 +118,12 @@ void main() {
       );
     });
     test('Values are equal', () async {
-      expect(LogicalKeyboardKey.keyA == LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId), true);
+      expect(LogicalKeyboardKey.lowerA == LogicalKeyboardKey(LogicalKeyboardKey.lowerA.keyId), true);
       // ignore: prefer_const_constructors, intentionally test if a const key is equal to a non-const key
       expect(const PhysicalKeyboardKey(0x12345) == PhysicalKeyboardKey(0x12345), true);
     });
     test('keyLabel', () async {
-      expect(LogicalKeyboardKey.keyA.keyLabel, 'A');
+      expect(LogicalKeyboardKey.upperA.keyLabel, 'A');
       expect(LogicalKeyboardKey.backslash.keyLabel, r'\');
       expect(const LogicalKeyboardKey(0xD9).keyLabel, 'Ù');
       expect(const LogicalKeyboardKey(0xF9).keyLabel, 'Ù');

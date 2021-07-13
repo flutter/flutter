@@ -25,6 +25,30 @@ abstract class KeyboardKey with Diagnosticable {
   const KeyboardKey();
 }
 
+abstract class VirtualKeyboardKey  with Diagnosticable {
+  Iterable<LogicalKeyboardKey> get concreteKeys;
+
+  String? get debugName;
+}
+
+class LetterVirtualKeyboardKey extends LogicalKeyboardKey {
+  const LetterVirtualKeyboardKey(int keyId, this.concreteKeys, {String? debugName})
+    : _debugName = debugName, super(keyId);
+
+  @override
+  final List<LogicalKeyboardKey> concreteKeys;
+
+  String? get debugName {
+    String? result;
+    assert(() {
+      result = _debugName;
+      return true;
+    }());
+    return result;
+  }
+  final String? _debugName;
+}
+
 /// A class with static values that describe the keys that are returned from
 /// [RawKeyEvent.logicalKey].
 ///
@@ -123,7 +147,7 @@ abstract class KeyboardKey with Diagnosticable {
 ///  * [RawKeyboardListener], a widget used to listen to and supply handlers for
 ///    keyboard events.
 @immutable
-class LogicalKeyboardKey extends KeyboardKey {
+class LogicalKeyboardKey extends KeyboardKey implements VirtualKeyboardKey {
   /// Creates a new LogicalKeyboardKey object for a key ID.
   const LogicalKeyboardKey(this.keyId);
 
@@ -300,6 +324,11 @@ class LogicalKeyboardKey extends KeyboardKey {
     return result == null ? <LogicalKeyboardKey>{} : <LogicalKeyboardKey>{result};
   }
 
+  @override
+  Iterable<LogicalKeyboardKey> get concreteKeys sync* {
+    yield this;
+  }
+
   /// Takes a set of keys, and returns the same set, but with any keys that have
   /// synonyms replaced.
   ///
@@ -327,6 +356,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 
 @@@LOGICAL_KEY_DEFINITIONS@@@
 
+@@@VIRTUAL_KEY_DEFINITIONS@@@
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{

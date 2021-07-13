@@ -19,8 +19,13 @@ import 'test_async_utils.dart';
 String _keyLabel(LogicalKeyboardKey key) {
   final String keyLabel = key.keyLabel;
   if (keyLabel.length == 1)
-    return keyLabel.toLowerCase();
+    return keyLabel;
   return '';
+}
+
+int? _offsetIfWithinRange(int target, int start, int end) {
+  if (target >= start && target <= end)
+    return target - start;
 }
 
 /// A class that serves as a namespace for a bunch of keyboard-key generation
@@ -110,10 +115,10 @@ class KeyEventSimulator {
           map = kFuchsiaToLogicalKey;
           break;
         case 'macos':
-        // macOS doesn't do key codes, just scan codes.
+          // macOS doesn't do key codes, just scan codes.
           return -1;
         case 'ios':
-        // iOS doesn't do key codes, just scan codes.
+          // iOS doesn't do key codes, just scan codes.
           return -1;
         case 'web':
           // web doesn't have int type code.
@@ -151,6 +156,12 @@ class KeyEventSimulator {
 
   static PhysicalKeyboardKey _findPhysicalKey(LogicalKeyboardKey key, String platform) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
+    final int? possibleLetterOffset =
+        _offsetIfWithinRange(key.keyId, LogicalKeyboardKey.lowerA.keyId, LogicalKeyboardKey.lowerZ.keyId) ??
+        _offsetIfWithinRange(key.keyId, LogicalKeyboardKey.upperA.keyId, LogicalKeyboardKey.upperZ.keyId);
+    if (possibleLetterOffset != null) {
+      return PhysicalKeyboardKey.findKeyByCode(PhysicalKeyboardKey.keyA.usbHidUsage + possibleLetterOffset)!;
+    }
     late Map<dynamic, PhysicalKeyboardKey> map;
     if (kIsWeb) {
       // This check is used to treeshake keymap code.
@@ -638,13 +649,13 @@ class KeyEventSimulator {
   /// See also:
   ///
   ///  - [simulateKeyUpEvent] to simulate the corresponding key up event.
-  static Future<bool> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey, String? character}) async {
+  static Future<bool> simulateKeyDownEvent(VirtualKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey, String? character}) async {
     return TestAsyncUtils.guard<bool>(() async {
       platform ??= Platform.operatingSystem;
       assert(_osIsSupported(platform!), 'Platform $platform not supported for key simulation');
 
 
-      final Map<String, dynamic> data = getKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
+      final Map<String, dynamic> data = getKeyData(key.concreteKeys.first, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
       final Completer<bool> result = Completer<bool>();
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
@@ -677,12 +688,12 @@ class KeyEventSimulator {
   /// See also:
   ///
   ///  - [simulateKeyDownEvent] to simulate the corresponding key down event.
-  static Future<bool> simulateKeyUpEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) async {
+  static Future<bool> simulateKeyUpEvent(VirtualKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) async {
     return TestAsyncUtils.guard<bool>(() async {
       platform ??= Platform.operatingSystem;
       assert(_osIsSupported(platform!), 'Platform $platform not supported for key simulation');
 
-      final Map<String, dynamic> data = getKeyData(key, platform: platform!, isDown: false, physicalKey: physicalKey);
+      final Map<String, dynamic> data = getKeyData(key.concreteKeys.first, platform: platform!, isDown: false, physicalKey: physicalKey);
       bool result = false;
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
@@ -722,7 +733,7 @@ class KeyEventSimulator {
 /// See also:
 ///
 ///  - [simulateKeyUpEvent] to simulate the corresponding key up event.
-Future<bool> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey, String? character}) {
+Future<bool> simulateKeyDownEvent(VirtualKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey, String? character}) {
   return KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey, character: character);
 }
 
@@ -744,6 +755,6 @@ Future<bool> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, Phy
 /// See also:
 ///
 ///  - [simulateKeyDownEvent] to simulate the corresponding key down event.
-Future<bool> simulateKeyUpEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
+Future<bool> simulateKeyUpEvent(VirtualKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
   return KeyEventSimulator.simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
 }

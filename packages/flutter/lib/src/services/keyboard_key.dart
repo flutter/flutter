@@ -25,15 +25,28 @@ abstract class KeyboardKey with Diagnosticable {
   const KeyboardKey();
 }
 
-abstract class KeyboardVirtualKey {
-  Iterable<LogicalKeyboardKey> get concreteLogicalKeys;
+abstract class VirtualKeyboardKey  with Diagnosticable {
+  Iterable<LogicalKeyboardKey> get concreteKeys;
+
+  String? get debugName;
 }
 
-class ListKeyboardVirtualKey implements KeyboardVirtualKey {
-  const ListKeyboardVirtualKey(this.concreteLogicalKeys);
+class LetterVirtualKeyboardKey extends LogicalKeyboardKey {
+  const LetterVirtualKeyboardKey(int keyId, this.concreteKeys, {String? debugName})
+    : _debugName = debugName, super(keyId);
 
   @override
-  final List<LogicalKeyboardKey> concreteLogicalKeys;
+  final List<LogicalKeyboardKey> concreteKeys;
+
+  String? get debugName {
+    String? result;
+    assert(() {
+      result = _debugName;
+      return true;
+    }());
+    return result;
+  }
+  final String? _debugName;
 }
 
 /// A class with static values that describe the keys that are returned from
@@ -134,7 +147,7 @@ class ListKeyboardVirtualKey implements KeyboardVirtualKey {
 ///  * [RawKeyboardListener], a widget used to listen to and supply handlers for
 ///    keyboard events.
 @immutable
-class LogicalKeyboardKey extends KeyboardKey implements KeyboardVirtualKey {
+class LogicalKeyboardKey extends KeyboardKey implements VirtualKeyboardKey {
   /// Creates a new LogicalKeyboardKey object for a key ID.
   const LogicalKeyboardKey(this.keyId);
 
@@ -312,7 +325,7 @@ class LogicalKeyboardKey extends KeyboardKey implements KeyboardVirtualKey {
   }
 
   @override
-  Iterable<LogicalKeyboardKey> get concreteLogicalKeys sync* {
+  Iterable<LogicalKeyboardKey> get concreteKeys sync* {
     yield this;
   }
 
@@ -576,6 +589,136 @@ class LogicalKeyboardKey extends KeyboardKey implements KeyboardVirtualKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey at = LogicalKeyboardKey(0x00000000040);
 
+  /// Represents the logical "Upper A" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperA = LogicalKeyboardKey(0x00000000041);
+
+  /// Represents the logical "Upper B" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperB = LogicalKeyboardKey(0x00000000042);
+
+  /// Represents the logical "Upper C" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperC = LogicalKeyboardKey(0x00000000043);
+
+  /// Represents the logical "Upper D" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperD = LogicalKeyboardKey(0x00000000044);
+
+  /// Represents the logical "Upper E" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperE = LogicalKeyboardKey(0x00000000045);
+
+  /// Represents the logical "Upper F" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperF = LogicalKeyboardKey(0x00000000046);
+
+  /// Represents the logical "Upper G" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperG = LogicalKeyboardKey(0x00000000047);
+
+  /// Represents the logical "Upper H" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperH = LogicalKeyboardKey(0x00000000048);
+
+  /// Represents the logical "Upper I" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperI = LogicalKeyboardKey(0x00000000049);
+
+  /// Represents the logical "Upper J" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperJ = LogicalKeyboardKey(0x0000000004a);
+
+  /// Represents the logical "Upper K" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperK = LogicalKeyboardKey(0x0000000004b);
+
+  /// Represents the logical "Upper L" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperL = LogicalKeyboardKey(0x0000000004c);
+
+  /// Represents the logical "Upper M" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperM = LogicalKeyboardKey(0x0000000004d);
+
+  /// Represents the logical "Upper N" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperN = LogicalKeyboardKey(0x0000000004e);
+
+  /// Represents the logical "Upper O" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperO = LogicalKeyboardKey(0x0000000004f);
+
+  /// Represents the logical "Upper P" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperP = LogicalKeyboardKey(0x00000000050);
+
+  /// Represents the logical "Upper Q" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperQ = LogicalKeyboardKey(0x00000000051);
+
+  /// Represents the logical "Upper R" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperR = LogicalKeyboardKey(0x00000000052);
+
+  /// Represents the logical "Upper S" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperS = LogicalKeyboardKey(0x00000000053);
+
+  /// Represents the logical "Upper T" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperT = LogicalKeyboardKey(0x00000000054);
+
+  /// Represents the logical "Upper U" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperU = LogicalKeyboardKey(0x00000000055);
+
+  /// Represents the logical "Upper V" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperV = LogicalKeyboardKey(0x00000000056);
+
+  /// Represents the logical "Upper W" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperW = LogicalKeyboardKey(0x00000000057);
+
+  /// Represents the logical "Upper X" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperX = LogicalKeyboardKey(0x00000000058);
+
+  /// Represents the logical "Upper Y" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperY = LogicalKeyboardKey(0x00000000059);
+
+  /// Represents the logical "Upper Z" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperZ = LogicalKeyboardKey(0x0000000005a);
+
   /// Represents the logical "Bracket Left" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -606,135 +749,135 @@ class LogicalKeyboardKey extends KeyboardKey implements KeyboardVirtualKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey backquote = LogicalKeyboardKey(0x00000000060);
 
-  /// Represents the logical "Key A" key on the keyboard.
+  /// Represents the logical "Lower A" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyA = LogicalKeyboardKey(0x00000000061);
+  static const LogicalKeyboardKey lowerA = LogicalKeyboardKey(0x00000000061);
 
-  /// Represents the logical "Key B" key on the keyboard.
+  /// Represents the logical "Lower B" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyB = LogicalKeyboardKey(0x00000000062);
+  static const LogicalKeyboardKey lowerB = LogicalKeyboardKey(0x00000000062);
 
-  /// Represents the logical "Key C" key on the keyboard.
+  /// Represents the logical "Lower C" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyC = LogicalKeyboardKey(0x00000000063);
+  static const LogicalKeyboardKey lowerC = LogicalKeyboardKey(0x00000000063);
 
-  /// Represents the logical "Key D" key on the keyboard.
+  /// Represents the logical "Lower D" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyD = LogicalKeyboardKey(0x00000000064);
+  static const LogicalKeyboardKey lowerD = LogicalKeyboardKey(0x00000000064);
 
-  /// Represents the logical "Key E" key on the keyboard.
+  /// Represents the logical "Lower E" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyE = LogicalKeyboardKey(0x00000000065);
+  static const LogicalKeyboardKey lowerE = LogicalKeyboardKey(0x00000000065);
 
-  /// Represents the logical "Key F" key on the keyboard.
+  /// Represents the logical "Lower F" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyF = LogicalKeyboardKey(0x00000000066);
+  static const LogicalKeyboardKey lowerF = LogicalKeyboardKey(0x00000000066);
 
-  /// Represents the logical "Key G" key on the keyboard.
+  /// Represents the logical "Lower G" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyG = LogicalKeyboardKey(0x00000000067);
+  static const LogicalKeyboardKey lowerG = LogicalKeyboardKey(0x00000000067);
 
-  /// Represents the logical "Key H" key on the keyboard.
+  /// Represents the logical "Lower H" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyH = LogicalKeyboardKey(0x00000000068);
+  static const LogicalKeyboardKey lowerH = LogicalKeyboardKey(0x00000000068);
 
-  /// Represents the logical "Key I" key on the keyboard.
+  /// Represents the logical "Lower I" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyI = LogicalKeyboardKey(0x00000000069);
+  static const LogicalKeyboardKey lowerI = LogicalKeyboardKey(0x00000000069);
 
-  /// Represents the logical "Key J" key on the keyboard.
+  /// Represents the logical "Lower J" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyJ = LogicalKeyboardKey(0x0000000006a);
+  static const LogicalKeyboardKey lowerJ = LogicalKeyboardKey(0x0000000006a);
 
-  /// Represents the logical "Key K" key on the keyboard.
+  /// Represents the logical "Lower K" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyK = LogicalKeyboardKey(0x0000000006b);
+  static const LogicalKeyboardKey lowerK = LogicalKeyboardKey(0x0000000006b);
 
-  /// Represents the logical "Key L" key on the keyboard.
+  /// Represents the logical "Lower L" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyL = LogicalKeyboardKey(0x0000000006c);
+  static const LogicalKeyboardKey lowerL = LogicalKeyboardKey(0x0000000006c);
 
-  /// Represents the logical "Key M" key on the keyboard.
+  /// Represents the logical "Lower M" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyM = LogicalKeyboardKey(0x0000000006d);
+  static const LogicalKeyboardKey lowerM = LogicalKeyboardKey(0x0000000006d);
 
-  /// Represents the logical "Key N" key on the keyboard.
+  /// Represents the logical "Lower N" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyN = LogicalKeyboardKey(0x0000000006e);
+  static const LogicalKeyboardKey lowerN = LogicalKeyboardKey(0x0000000006e);
 
-  /// Represents the logical "Key O" key on the keyboard.
+  /// Represents the logical "Lower O" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyO = LogicalKeyboardKey(0x0000000006f);
+  static const LogicalKeyboardKey lowerO = LogicalKeyboardKey(0x0000000006f);
 
-  /// Represents the logical "Key P" key on the keyboard.
+  /// Represents the logical "Lower P" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyP = LogicalKeyboardKey(0x00000000070);
+  static const LogicalKeyboardKey lowerP = LogicalKeyboardKey(0x00000000070);
 
-  /// Represents the logical "Key Q" key on the keyboard.
+  /// Represents the logical "Lower Q" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyQ = LogicalKeyboardKey(0x00000000071);
+  static const LogicalKeyboardKey lowerQ = LogicalKeyboardKey(0x00000000071);
 
-  /// Represents the logical "Key R" key on the keyboard.
+  /// Represents the logical "Lower R" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyR = LogicalKeyboardKey(0x00000000072);
+  static const LogicalKeyboardKey lowerR = LogicalKeyboardKey(0x00000000072);
 
-  /// Represents the logical "Key S" key on the keyboard.
+  /// Represents the logical "Lower S" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyS = LogicalKeyboardKey(0x00000000073);
+  static const LogicalKeyboardKey lowerS = LogicalKeyboardKey(0x00000000073);
 
-  /// Represents the logical "Key T" key on the keyboard.
+  /// Represents the logical "Lower T" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyT = LogicalKeyboardKey(0x00000000074);
+  static const LogicalKeyboardKey lowerT = LogicalKeyboardKey(0x00000000074);
 
-  /// Represents the logical "Key U" key on the keyboard.
+  /// Represents the logical "Lower U" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyU = LogicalKeyboardKey(0x00000000075);
+  static const LogicalKeyboardKey lowerU = LogicalKeyboardKey(0x00000000075);
 
-  /// Represents the logical "Key V" key on the keyboard.
+  /// Represents the logical "Lower V" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyV = LogicalKeyboardKey(0x00000000076);
+  static const LogicalKeyboardKey lowerV = LogicalKeyboardKey(0x00000000076);
 
-  /// Represents the logical "Key W" key on the keyboard.
+  /// Represents the logical "Lower W" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyW = LogicalKeyboardKey(0x00000000077);
+  static const LogicalKeyboardKey lowerW = LogicalKeyboardKey(0x00000000077);
 
-  /// Represents the logical "Key X" key on the keyboard.
+  /// Represents the logical "Lower X" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyX = LogicalKeyboardKey(0x00000000078);
+  static const LogicalKeyboardKey lowerX = LogicalKeyboardKey(0x00000000078);
 
-  /// Represents the logical "Key Y" key on the keyboard.
+  /// Represents the logical "Lower Y" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyY = LogicalKeyboardKey(0x00000000079);
+  static const LogicalKeyboardKey lowerY = LogicalKeyboardKey(0x00000000079);
 
-  /// Represents the logical "Key Z" key on the keyboard.
+  /// Represents the logical "Lower Z" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyZ = LogicalKeyboardKey(0x0000000007a);
+  static const LogicalKeyboardKey lowerZ = LogicalKeyboardKey(0x0000000007a);
 
   /// Represents the logical "Brace Left" key on the keyboard.
   ///
@@ -2640,6 +2783,136 @@ class LogicalKeyboardKey extends KeyboardKey implements KeyboardVirtualKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey gameButtonZ = LogicalKeyboardKey(0x0020000031f);
 
+  /// A virtual key that contains the upper case and lower case of key A.
+  static const LetterVirtualKeyboardKey keyA = LetterVirtualKeyboardKey(65,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerA, LogicalKeyboardKey.upperA],
+      debugName: kDebugMode ? 'Key A' : null);
+
+  /// A virtual key that contains the upper case and lower case of key B.
+  static const LetterVirtualKeyboardKey keyB = LetterVirtualKeyboardKey(66,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerB, LogicalKeyboardKey.upperB],
+      debugName: kDebugMode ? 'Key B' : null);
+
+  /// A virtual key that contains the upper case and lower case of key C.
+  static const LetterVirtualKeyboardKey keyC = LetterVirtualKeyboardKey(67,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerC, LogicalKeyboardKey.upperC],
+      debugName: kDebugMode ? 'Key C' : null);
+
+  /// A virtual key that contains the upper case and lower case of key D.
+  static const LetterVirtualKeyboardKey keyD = LetterVirtualKeyboardKey(68,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerD, LogicalKeyboardKey.upperD],
+      debugName: kDebugMode ? 'Key D' : null);
+
+  /// A virtual key that contains the upper case and lower case of key E.
+  static const LetterVirtualKeyboardKey keyE = LetterVirtualKeyboardKey(69,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerE, LogicalKeyboardKey.upperE],
+      debugName: kDebugMode ? 'Key E' : null);
+
+  /// A virtual key that contains the upper case and lower case of key F.
+  static const LetterVirtualKeyboardKey keyF = LetterVirtualKeyboardKey(70,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerF, LogicalKeyboardKey.upperF],
+      debugName: kDebugMode ? 'Key F' : null);
+
+  /// A virtual key that contains the upper case and lower case of key G.
+  static const LetterVirtualKeyboardKey keyG = LetterVirtualKeyboardKey(71,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerG, LogicalKeyboardKey.upperG],
+      debugName: kDebugMode ? 'Key G' : null);
+
+  /// A virtual key that contains the upper case and lower case of key H.
+  static const LetterVirtualKeyboardKey keyH = LetterVirtualKeyboardKey(72,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerH, LogicalKeyboardKey.upperH],
+      debugName: kDebugMode ? 'Key H' : null);
+
+  /// A virtual key that contains the upper case and lower case of key I.
+  static const LetterVirtualKeyboardKey keyI = LetterVirtualKeyboardKey(73,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerI, LogicalKeyboardKey.upperI],
+      debugName: kDebugMode ? 'Key I' : null);
+
+  /// A virtual key that contains the upper case and lower case of key J.
+  static const LetterVirtualKeyboardKey keyJ = LetterVirtualKeyboardKey(74,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerJ, LogicalKeyboardKey.upperJ],
+      debugName: kDebugMode ? 'Key J' : null);
+
+  /// A virtual key that contains the upper case and lower case of key K.
+  static const LetterVirtualKeyboardKey keyK = LetterVirtualKeyboardKey(75,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerK, LogicalKeyboardKey.upperK],
+      debugName: kDebugMode ? 'Key K' : null);
+
+  /// A virtual key that contains the upper case and lower case of key L.
+  static const LetterVirtualKeyboardKey keyL = LetterVirtualKeyboardKey(76,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerL, LogicalKeyboardKey.upperL],
+      debugName: kDebugMode ? 'Key L' : null);
+
+  /// A virtual key that contains the upper case and lower case of key M.
+  static const LetterVirtualKeyboardKey keyM = LetterVirtualKeyboardKey(77,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerM, LogicalKeyboardKey.upperM],
+      debugName: kDebugMode ? 'Key M' : null);
+
+  /// A virtual key that contains the upper case and lower case of key N.
+  static const LetterVirtualKeyboardKey keyN = LetterVirtualKeyboardKey(78,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerN, LogicalKeyboardKey.upperN],
+      debugName: kDebugMode ? 'Key N' : null);
+
+  /// A virtual key that contains the upper case and lower case of key O.
+  static const LetterVirtualKeyboardKey keyO = LetterVirtualKeyboardKey(79,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerO, LogicalKeyboardKey.upperO],
+      debugName: kDebugMode ? 'Key O' : null);
+
+  /// A virtual key that contains the upper case and lower case of key P.
+  static const LetterVirtualKeyboardKey keyP = LetterVirtualKeyboardKey(80,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerP, LogicalKeyboardKey.upperP],
+      debugName: kDebugMode ? 'Key P' : null);
+
+  /// A virtual key that contains the upper case and lower case of key Q.
+  static const LetterVirtualKeyboardKey keyQ = LetterVirtualKeyboardKey(81,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerQ, LogicalKeyboardKey.upperQ],
+      debugName: kDebugMode ? 'Key Q' : null);
+
+  /// A virtual key that contains the upper case and lower case of key R.
+  static const LetterVirtualKeyboardKey keyR = LetterVirtualKeyboardKey(82,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerR, LogicalKeyboardKey.upperR],
+      debugName: kDebugMode ? 'Key R' : null);
+
+  /// A virtual key that contains the upper case and lower case of key S.
+  static const LetterVirtualKeyboardKey keyS = LetterVirtualKeyboardKey(83,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerS, LogicalKeyboardKey.upperS],
+      debugName: kDebugMode ? 'Key S' : null);
+
+  /// A virtual key that contains the upper case and lower case of key T.
+  static const LetterVirtualKeyboardKey keyT = LetterVirtualKeyboardKey(84,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerT, LogicalKeyboardKey.upperT],
+      debugName: kDebugMode ? 'Key T' : null);
+
+  /// A virtual key that contains the upper case and lower case of key U.
+  static const LetterVirtualKeyboardKey keyU = LetterVirtualKeyboardKey(85,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerU, LogicalKeyboardKey.upperU],
+      debugName: kDebugMode ? 'Key U' : null);
+
+  /// A virtual key that contains the upper case and lower case of key V.
+  static const LetterVirtualKeyboardKey keyV = LetterVirtualKeyboardKey(86,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerV, LogicalKeyboardKey.upperV],
+      debugName: kDebugMode ? 'Key V' : null);
+
+  /// A virtual key that contains the upper case and lower case of key W.
+  static const LetterVirtualKeyboardKey keyW = LetterVirtualKeyboardKey(87,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerW, LogicalKeyboardKey.upperW],
+      debugName: kDebugMode ? 'Key W' : null);
+
+  /// A virtual key that contains the upper case and lower case of key X.
+  static const LetterVirtualKeyboardKey keyX = LetterVirtualKeyboardKey(88,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerX, LogicalKeyboardKey.upperX],
+      debugName: kDebugMode ? 'Key X' : null);
+
+  /// A virtual key that contains the upper case and lower case of key Y.
+  static const LetterVirtualKeyboardKey keyY = LetterVirtualKeyboardKey(89,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerY, LogicalKeyboardKey.upperY],
+      debugName: kDebugMode ? 'Key Y' : null);
+
+  /// A virtual key that contains the upper case and lower case of key Z.
+  static const LetterVirtualKeyboardKey keyZ = LetterVirtualKeyboardKey(90,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.lowerZ, LogicalKeyboardKey.upperZ],
+      debugName: kDebugMode ? 'Key Z' : null);
+
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
@@ -2676,38 +2949,64 @@ class LogicalKeyboardKey extends KeyboardKey implements KeyboardVirtualKey {
     0x0000000003e: greater,
     0x0000000003f: question,
     0x00000000040: at,
+    0x00000000041: upperA,
+    0x00000000042: upperB,
+    0x00000000043: upperC,
+    0x00000000044: upperD,
+    0x00000000045: upperE,
+    0x00000000046: upperF,
+    0x00000000047: upperG,
+    0x00000000048: upperH,
+    0x00000000049: upperI,
+    0x0000000004a: upperJ,
+    0x0000000004b: upperK,
+    0x0000000004c: upperL,
+    0x0000000004d: upperM,
+    0x0000000004e: upperN,
+    0x0000000004f: upperO,
+    0x00000000050: upperP,
+    0x00000000051: upperQ,
+    0x00000000052: upperR,
+    0x00000000053: upperS,
+    0x00000000054: upperT,
+    0x00000000055: upperU,
+    0x00000000056: upperV,
+    0x00000000057: upperW,
+    0x00000000058: upperX,
+    0x00000000059: upperY,
+    0x0000000005a: upperZ,
     0x0000000005b: bracketLeft,
     0x0000000005c: backslash,
     0x0000000005d: bracketRight,
     0x0000000005e: caret,
     0x0000000005f: underscore,
     0x00000000060: backquote,
-    0x00000000061: keyA,
-    0x00000000062: keyB,
-    0x00000000063: keyC,
-    0x00000000064: keyD,
-    0x00000000065: keyE,
-    0x00000000066: keyF,
-    0x00000000067: keyG,
-    0x00000000068: keyH,
-    0x00000000069: keyI,
-    0x0000000006a: keyJ,
-    0x0000000006b: keyK,
-    0x0000000006c: keyL,
-    0x0000000006d: keyM,
-    0x0000000006e: keyN,
-    0x0000000006f: keyO,
-    0x00000000070: keyP,
-    0x00000000071: keyQ,
-    0x00000000072: keyR,
-    0x00000000073: keyS,
-    0x00000000074: keyT,
-    0x00000000075: keyU,
-    0x00000000076: keyV,
-    0x00000000077: keyW,
-    0x00000000078: keyX,
-    0x00000000079: keyY,
-    0x0000000007a: keyZ,
+    0x00000000061: lowerA,
+    0x00000000062: lowerB,
+    0x00000000063: lowerC,
+    0x00000000064: lowerD,
+    0x00000000065: lowerE,
+    0x00000000066: lowerF,
+    0x00000000067: lowerG,
+    0x00000000068: lowerH,
+    0x00000000069: lowerI,
+    0x0000000006a: lowerJ,
+    0x0000000006b: lowerK,
+    0x0000000006c: lowerL,
+    0x0000000006d: lowerM,
+    0x0000000006e: lowerN,
+    0x0000000006f: lowerO,
+    0x00000000070: lowerP,
+    0x00000000071: lowerQ,
+    0x00000000072: lowerR,
+    0x00000000073: lowerS,
+    0x00000000074: lowerT,
+    0x00000000075: lowerU,
+    0x00000000076: lowerV,
+    0x00000000077: lowerW,
+    0x00000000078: lowerX,
+    0x00000000079: lowerY,
+    0x0000000007a: lowerZ,
     0x0000000007b: braceLeft,
     0x0000000007c: bar,
     0x0000000007d: braceRight,
@@ -3135,38 +3434,64 @@ class LogicalKeyboardKey extends KeyboardKey implements KeyboardVirtualKey {
     0x0000000003e: 'Greater',
     0x0000000003f: 'Question',
     0x00000000040: 'At',
+    0x00000000041: 'Upper A',
+    0x00000000042: 'Upper B',
+    0x00000000043: 'Upper C',
+    0x00000000044: 'Upper D',
+    0x00000000045: 'Upper E',
+    0x00000000046: 'Upper F',
+    0x00000000047: 'Upper G',
+    0x00000000048: 'Upper H',
+    0x00000000049: 'Upper I',
+    0x0000000004a: 'Upper J',
+    0x0000000004b: 'Upper K',
+    0x0000000004c: 'Upper L',
+    0x0000000004d: 'Upper M',
+    0x0000000004e: 'Upper N',
+    0x0000000004f: 'Upper O',
+    0x00000000050: 'Upper P',
+    0x00000000051: 'Upper Q',
+    0x00000000052: 'Upper R',
+    0x00000000053: 'Upper S',
+    0x00000000054: 'Upper T',
+    0x00000000055: 'Upper U',
+    0x00000000056: 'Upper V',
+    0x00000000057: 'Upper W',
+    0x00000000058: 'Upper X',
+    0x00000000059: 'Upper Y',
+    0x0000000005a: 'Upper Z',
     0x0000000005b: 'Bracket Left',
     0x0000000005c: 'Backslash',
     0x0000000005d: 'Bracket Right',
     0x0000000005e: 'Caret',
     0x0000000005f: 'Underscore',
     0x00000000060: 'Backquote',
-    0x00000000061: 'Key A',
-    0x00000000062: 'Key B',
-    0x00000000063: 'Key C',
-    0x00000000064: 'Key D',
-    0x00000000065: 'Key E',
-    0x00000000066: 'Key F',
-    0x00000000067: 'Key G',
-    0x00000000068: 'Key H',
-    0x00000000069: 'Key I',
-    0x0000000006a: 'Key J',
-    0x0000000006b: 'Key K',
-    0x0000000006c: 'Key L',
-    0x0000000006d: 'Key M',
-    0x0000000006e: 'Key N',
-    0x0000000006f: 'Key O',
-    0x00000000070: 'Key P',
-    0x00000000071: 'Key Q',
-    0x00000000072: 'Key R',
-    0x00000000073: 'Key S',
-    0x00000000074: 'Key T',
-    0x00000000075: 'Key U',
-    0x00000000076: 'Key V',
-    0x00000000077: 'Key W',
-    0x00000000078: 'Key X',
-    0x00000000079: 'Key Y',
-    0x0000000007a: 'Key Z',
+    0x00000000061: 'Lower A',
+    0x00000000062: 'Lower B',
+    0x00000000063: 'Lower C',
+    0x00000000064: 'Lower D',
+    0x00000000065: 'Lower E',
+    0x00000000066: 'Lower F',
+    0x00000000067: 'Lower G',
+    0x00000000068: 'Lower H',
+    0x00000000069: 'Lower I',
+    0x0000000006a: 'Lower J',
+    0x0000000006b: 'Lower K',
+    0x0000000006c: 'Lower L',
+    0x0000000006d: 'Lower M',
+    0x0000000006e: 'Lower N',
+    0x0000000006f: 'Lower O',
+    0x00000000070: 'Lower P',
+    0x00000000071: 'Lower Q',
+    0x00000000072: 'Lower R',
+    0x00000000073: 'Lower S',
+    0x00000000074: 'Lower T',
+    0x00000000075: 'Lower U',
+    0x00000000076: 'Lower V',
+    0x00000000077: 'Lower W',
+    0x00000000078: 'Lower X',
+    0x00000000079: 'Lower Y',
+    0x0000000007a: 'Lower Z',
     0x0000000007b: 'Brace Left',
     0x0000000007c: 'Bar',
     0x0000000007d: 'Brace Right',

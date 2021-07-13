@@ -996,7 +996,7 @@ abstract class WidgetController {
   ///
   ///  - [sendKeyDownEvent] to simulate only a key down event.
   ///  - [sendKeyUpEvent] to simulate only a key up event.
-  Future<bool> sendKeyEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyEvent(VirtualKeyboardKey key, { String platform = _defaultPlatform }) async {
     assert(platform != null);
     final bool handled = await simulateKeyDownEvent(key, platform: platform);
     // Internally wrapped in async guard.
@@ -1023,7 +1023,7 @@ abstract class WidgetController {
   ///
   ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyDownEvent(VirtualKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, character: character, platform: platform);
@@ -1045,7 +1045,7 @@ abstract class WidgetController {
   ///
   ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyUpEvent(VirtualKeyboardKey key, { String platform = _defaultPlatform }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform);
