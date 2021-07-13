@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/devices.dart';
@@ -43,8 +41,8 @@ Future<void> main() async {
     final Map<String, String> environment = Platform.environment;
     // If not running on CI, inject the Flutter team code signing properties.
     final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-    final String codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-    final String provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+    final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+    final String? provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
 
     final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_native_ui_tests_ios32_xcresult.').path;
     final String resultBundlePath = path.join(resultBundleTemp, 'result');
@@ -74,7 +72,7 @@ Future<void> main() async {
     );
 
     if (testResultExit != 0) {
-      final Directory dumpDirectory = hostAgent.dumpDirectory;
+      final Directory? dumpDirectory = hostAgent.dumpDirectory;
       if (dumpDirectory != null) {
         // Zip the test results to the artifacts directory for upload.
         final String zipPath = path.join(dumpDirectory.path,

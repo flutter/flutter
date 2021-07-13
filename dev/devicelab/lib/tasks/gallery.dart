@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -55,9 +53,9 @@ class GalleryTransitionTest {
   final bool needFullTimeline;
   final String testFile;
   final String timelineSummaryFile;
-  final String timelineTraceFile;
-  final String transitionDurationFile;
-  final String driverFile;
+  final String? timelineTraceFile;
+  final String? transitionDurationFile;
+  final String? driverFile;
 
   Future<TaskResult> call() async {
     final Device device = await devices.workingDevice;
@@ -65,7 +63,7 @@ class GalleryTransitionTest {
     final String deviceId = device.deviceId;
     final Directory galleryDirectory = dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
     await inDirectory<void>(galleryDirectory, () async {
-      String applicationBinaryPath;
+      String? applicationBinaryPath;
       if (deviceOperatingSystem == DeviceOperatingSystem.android) {
         section('BUILDING APPLICATION');
         await flutter(

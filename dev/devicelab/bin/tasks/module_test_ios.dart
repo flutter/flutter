@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -20,7 +18,7 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
-    String simulatorDeviceId;
+    late String simulatorDeviceId;
     section('Create Flutter module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
@@ -360,7 +358,7 @@ Future<void> main() async {
         );
 
         if (testResultExit != 0) {
-          final Directory dumpDirectory = hostAgent.dumpDirectory;
+          final Directory? dumpDirectory = hostAgent.dumpDirectory;
           if (dumpDirectory != null) {
             // Zip the test results to the artifacts directory for upload.
             await inDirectory(resultBundleTemp, () {
