@@ -68,7 +68,7 @@ source_set("flutter_glfw") {
 
     configs += [ "//flutter/shell/platform/linux/config:x11" ]
   } else if (is_mac) {
-    libs = [
+    frameworks = [
       "CoreVideo.framework",
       "IOKit.framework",
     ]
