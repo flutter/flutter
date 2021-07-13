@@ -30,14 +30,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    sourceSets {
-        main.assets.srcDirs += "${project.buildDir}/assets"
+    sourceSets.main {
+        assets.srcDirs += "${project.buildDir}/assets"
+        if (project.hasProperty('libapp')) {
+            jni.srcDirs = []
+            jniLibs.srcDirs = [project.property('libapp')]
+        }
     }
 }
 
 dependencies {
+    implementation files(project.property('flutter_jar'))
     compile 'com.facebook.testing.screenshot:layout-hierarchy-common:0.12.0'
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.material:material:1.0.0'

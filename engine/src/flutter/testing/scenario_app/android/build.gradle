@@ -21,7 +21,10 @@ allprojects {
     }
 }
 
-rootProject.buildDir = '../build'
+rootProject.buildDir = project.hasProperty('out_dir')
+    ? project.property('out_dir')
+    : '../build'
+
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
