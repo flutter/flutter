@@ -1700,6 +1700,7 @@ void main() {
       final WidgetWithLocalHistoryState state = tester.state(find.byType(WidgetWithLocalHistory));
       state.addLocalHistory();
       // Waits for modal route to update its internal state;
+
       await tester.pump();
       // Pumps a new widget to dispose WidgetWithLocalHistory. This should cause
       // it to remove the local history entry from modal route during
@@ -1719,6 +1720,7 @@ void main() {
       final WidgetWithNoLocalHistoryState state = tester.state(find.byType(WidgetWithNoLocalHistory));
       state.addLocalHistory();
       // Waits for modal route to update its internal state;
+      
       await tester.pump();
       // Pumps a new widget to dispose WidgetWithNoLocalHistory. This should cause
       // it to remove the local history entry from modal route during
