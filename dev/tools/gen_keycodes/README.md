@@ -119,9 +119,9 @@ The planes are planned as follows:
 
   In time, keys that originally belong to a platform plane might be added to
   Flutter, especially if a key is found shared by multiple platforms. The values
-  of these keys will be changed to a new value within the Flutter plane, and
-  all platforms managed by Flutter will start to send the new value, making it
-  a breaking change. Therefore, when handling an unrecognized key on a platform
+  of that key will be changed to a new value within the Flutter plane, and all
+  platforms managed by Flutter will start to send the new value, making it a
+  breaking change. Therefore, when handling an unrecognized key on a platform
   managed by Flutter, it is recommended to file a new issue to add this value
   to `keyboard_key.dart` instead of using the platform-plane value. However,
   for a custom platform (see below), since the platfrom author has full control
