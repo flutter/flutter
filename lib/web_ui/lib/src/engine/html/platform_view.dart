@@ -4,8 +4,7 @@
 
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart' show createPlatformViewSlot;
-
+import '../platform_views/slots.dart';
 import 'surface.dart';
 
 /// A surface containing a platform view, which is an HTML element.

@@ -6,8 +6,7 @@ import 'dart:async';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart' show registerHotRestartListener;
-
+import '../../engine.dart'  show registerHotRestartListener;
 import '../services.dart';
 
 /// Singleton for accessing accessibility announcements from the platform.

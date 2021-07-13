@@ -5,9 +5,9 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart' show toMatrix32;
 import 'package:ui/ui.dart' as ui;
 
+import '../../engine.dart' show toMatrix32;
 import '../picture.dart';
 import '../util.dart';
 import '../validators.dart';

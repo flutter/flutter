@@ -4,11 +4,12 @@
 
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart' show window, EnginePlatformDispatcher;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
+import '../platform_dispatcher.dart';
 import '../util.dart';
+import '../window.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
 import 'initialization.dart';

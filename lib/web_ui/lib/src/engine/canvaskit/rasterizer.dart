@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart' show frameReferences;
 import 'package:ui/ui.dart' as ui;
 
+import '../frame_reference.dart';
 import 'canvas.dart';
 import 'embedded_views.dart';
 import 'layer_tree.dart';

@@ -7,9 +7,10 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../font_change_util.dart';
+import '../platform_dispatcher.dart';
 import '../util.dart';
 import 'canvaskit_api.dart';
 import 'fonts.dart';

@@ -4,9 +4,9 @@
 
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart' show EnginePlatformDispatcher;
 import 'package:ui/ui.dart' as ui;
 
+import '../platform_dispatcher.dart';
 import 'semantics.dart';
 
 /// Adds increment/decrement event handling to a semantics object.

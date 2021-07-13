@@ -4,9 +4,9 @@
 
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart' show NullTreeSanitizer;
 import 'package:ui/ui.dart' as ui;
 
+import '../../engine.dart' show NullTreeSanitizer;
 import '../browser_detection.dart';
 import 'bitmap_canvas.dart';
 import 'path_to_svg_clip.dart';

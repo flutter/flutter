@@ -5,7 +5,8 @@
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
-import 'package:ui/src/engine.dart';
+
+import '../platform_dispatcher.dart';
 
 /// Polyfill for html.OffscreenCanvas that is not supported on some browsers.
 class OffScreenCanvas {

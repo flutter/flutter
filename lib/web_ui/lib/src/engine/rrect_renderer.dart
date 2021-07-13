@@ -5,8 +5,9 @@
 import 'dart:html' as html;
 import 'dart:math' as math;
 
-import 'package:ui/src/engine.dart' show DomRenderer;
 import 'package:ui/ui.dart' as ui;
+
+import 'dom_renderer.dart';
 
 /// Renders an RRect using path primitives.
 abstract class RRectRenderer {

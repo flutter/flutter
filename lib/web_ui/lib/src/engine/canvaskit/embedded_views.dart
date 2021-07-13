@@ -4,8 +4,20 @@
 
 import 'dart:html' as html;
 
-import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+
+import '../../engine.dart' show NullTreeSanitizer, platformViewManager;
+import '../html/path_to_svg_clip.dart';
+import '../platform_views/slots.dart';
+import '../util.dart';
+import '../vector_math.dart';
+import '../window.dart';
+import 'canvas.dart';
+import 'initialization.dart';
+import 'path.dart';
+import 'picture_recorder.dart';
+import 'surface.dart';
+import 'surface_factory.dart';
 
 /// This composites HTML views into the [ui.Scene].
 class HtmlViewEmbedder {
