@@ -32,7 +32,7 @@ void main() {
 
   testWithoutContext('hot restart works without error', () async {
     await flutter.run(
-      chrome: true, 
+      chrome: true,
       additionalCommandArgs: <String>[
         '--verbose',
         '--web-renderer=html',
@@ -50,7 +50,7 @@ void main() {
       }
     });
     await flutter.run(chrome: true, additionalCommandArgs: <String>[
-      '--verbose', 
+      '--verbose',
       '--web-renderer=html',
       '--extra-front-end-options=--verbose',
     ]);
