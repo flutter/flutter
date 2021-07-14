@@ -133,6 +133,9 @@ String phaseInstructions(pb.ConductorState state) {
         'See $kReleaseDocumentationUrl for more information.',
       ].join('\n');
     case ReleasePhase.CODESIGN_ENGINE_BINARIES:
+      if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
+        return 'You must now codesign the engine binaries.';
+      }
       return <String>[
         'You must verify pre-submit CI builds on your engine pull request are successful,',
         'merge your pull request, validate post-submit CI, and then codesign the binaries ',
@@ -144,17 +147,22 @@ String phaseInstructions(pb.ConductorState state) {
           return cp.state == pb.CherrypickState.PENDING || cp.state == pb.CherrypickState.PENDING_WITH_CONFLICT;
         },
       ).toList();
+      if (outstandingCherrypicks.isNotEmpty) {
+        return <String>[
+          'You must now manually apply the following framework cherrypicks to the checkout',
+          'at ${state.framework.checkoutPath} in order:',
+          for (final pb.Cherrypick cherrypick in outstandingCherrypicks)
+            '\t${cherrypick.trunkRevision}',
+        ].join('\n');
+      }
       return <String>[
-        'You must now manually apply the following framework cherrypicks to the checkout',
-        'at ${state.framework.checkoutPath} in order:',
-        for (final pb.Cherrypick cherrypick in outstandingCherrypicks)
-          '\t${cherrypick.trunkRevision}',
+        'Either all cherrypicks have been auto-applied or there were none.'
       ].join('\n');
     case ReleasePhase.PUBLISH_VERSION:
       return <String>[
         'You must verify pre-submit CI builds on your framework pull request are successful,',
-        'merge your pull request, and validate post-submit CI. See $kReleaseDocumentationUrl,',
-        'for more information.',
+        'merge your pull request, and validate post-submit CI. See',
+        '$kReleaseDocumentationUrl for more information.',
       ].join('\n');
     case ReleasePhase.PUBLISH_CHANNEL:
       return 'Issue `conductor next` to publish your release to the release branch.';
@@ -163,8 +171,8 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.RELEASE_COMPLETED:
       return 'This release has been completed.';
   }
-  assert(false);
-  return ''; // For analyzer
+  // For analyzer
+  throw ConductorException('Unimplemented phase ${state.currentPhase}');
 }
 
 /// Returns the next phase in the ReleasePhase enum.
