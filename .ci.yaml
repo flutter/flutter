@@ -59,7 +59,6 @@ targets:
 
   - name: Linux Android Scenarios
     builder: Linux Android Scenarios
-    postsubmit: false
     recipe: engine/scenarios
     properties:
       upload_packages: "true"
