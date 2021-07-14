@@ -13,8 +13,6 @@ analyzer:
 
 linter:
   rules:
-    always_declare_return_types: true
-    always_put_control_body_on_new_line: true
     always_specify_types: false
     annotate_overrides: false
     avoid_classes_with_only_static_members: false
@@ -88,14 +86,8 @@ linter:
     prefer_final_in_for_each: false
     avoid_single_cascade_in_expression_statements: false
     unnecessary_string_interpolations: false
-    unnecessary_string_escapes: false
     cast_nullable_to_non_nullable: false
     flutter_style_todos: false
-    avoid_unused_constructor_parameters: false
     avoid_void_async: false
-    prefer_if_elements_to_conditional_expressions: false
-    unnecessary_await_in_return: false
-    avoid_bool_literals_in_conditional_expressions: false
-    unnecessary_statements: false
     # We have some legitimate use-cases for this (preserve tear-off identity)
     prefer_function_declarations_over_variables: false

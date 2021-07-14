@@ -150,9 +150,7 @@ class SurfacePath implements ui.Path {
   /// and last point.
   bool get isLastContourClosed {
     int verbCount = pathRef.countVerbs();
-    return verbCount == 0
-        ? false
-        : (pathRef.atVerb(verbCount - 1) == SPathVerb.kClose);
+    return verbCount > 0 && (pathRef.atVerb(verbCount - 1) == SPathVerb.kClose);
   }
 
   /// Returns true for finite SkPoint array values between negative SK_ScalarMax
