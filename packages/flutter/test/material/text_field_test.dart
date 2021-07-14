@@ -2127,6 +2127,77 @@ void main() {
   );
 
   testWidgets(
+    'the toolbar adjusts its position above/below when bottom inset changes',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      double bottomInset = 0.0;
+      late StateSetter setState;
+
+      final Widget child = Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 48.0,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                IntrinsicHeight(
+                  child: TextField(
+                    controller: controller,
+                    expands: true,
+                    minLines: null,
+                    maxLines: null,
+                  ),
+                ),
+                const SizedBox(height: 325.0),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter currentSetState) {
+            setState = currentSetState;
+            return MediaQuery(
+              data: MediaQueryData(
+                viewInsets: EdgeInsets.only(bottom: bottomInset),
+              ),
+              child: child,
+            );
+          },
+        ),
+      ));
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
+
+      // Verify the selection toolbar position is above the text.
+      expect(find.text('Select all'), findsOneWidget);
+      Offset toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
+      Offset textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
+      expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
+
+      setState(() {
+        bottomInset = 200.0;
+      });
+      await tester.pumpAndSettle();
+
+      // Verify the selection toolbar position is below the text.
+      expect(find.text('Select all'), findsOneWidget);
+      toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
+      textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
+      expect(toolbarTopLeft.dy, greaterThan(textFieldTopLeft.dy));
+    },
+    skip: isContextMenuProvidedByPlatform,
+  );
+
+  testWidgets(
     'Toolbar appears in the right places in multiline inputs',
     (WidgetTester tester) async {
       // This is a regression test for
