@@ -14,13 +14,9 @@
 #  - "public_member_api_docs" enabled.
 
 analyzer:
-  exclude: [
-    # this test pretends to be part of dart:ui and results in lots of false
-    # positives.
-    testing/dart/window_hooks_integration_test.dart,
+  exclude:
     # Fixture depends on dart:ui and raises false positives.
-    flutter_frontend_server/test/fixtures/lib/main.dart
-  ]
+    - flutter_frontend_server/test/fixtures/lib/main.dart
   strong-mode:
     implicit-casts: false
     implicit-dynamic: false

@@ -33,110 +33,40 @@ FLUTTER_DIR="$SRC_DIR/flutter"
 DART_BIN="$SRC_DIR/third_party/dart/tools/sdks/dart-sdk/bin"
 PUB="$DART_BIN/pub"
 DART="$DART_BIN/dart"
-DART_ANALYZER="$DART_BIN/dartanalyzer"
 
-echo "Using analyzer from $DART_ANALYZER"
+echo "Using dart from $DART_BIN"
+"$DART" --version
+echo ""
 
-"$DART_ANALYZER" --version
+"$DART" analyze "$FLUTTER_DIR/lib/ui"
 
-function analyze() (
-  local last_arg="${!#}"
-  local results
-  # Grep sets its return status to non-zero if it doesn't find what it's
-  # looking for.
-  set +e
-  results="$("$DART_ANALYZER" "$@" 2>&1 |
-    grep -Ev "No issues found!" |
-    grep -Ev "Analyzing.+$last_arg")"
-  set -e
-  echo "$results"
-  if [ -n "$results" ]; then
-    echo "Failed analysis of $last_arg"
-    return 1
-  else
-    echo "Success: no issues found in $last_arg"
-  fi
-  return 0
-)
+"$DART" analyze "$FLUTTER_DIR/lib/spirv"
 
-echo "Analyzing dart:ui library..."
-analyze \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$SRC_DIR/out/host_debug_unopt/gen/dart-pkg/sky_engine/lib/ui/ui.dart"
+"$DART" analyze "$FLUTTER_DIR/ci"
 
-echo "Analyzing spirv library..."
-analyze \
-  --packages="$FLUTTER_DIR/lib/spirv/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$FLUTTER_DIR/lib/spirv"
+"$DART" analyze "$FLUTTER_DIR/flutter_frontend_server"
 
-echo "Analyzing ci/"
-analyze \
-  --packages="$FLUTTER_DIR/ci/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$FLUTTER_DIR/ci"
+"$DART" analyze "$FLUTTER_DIR/tools/licenses"
 
-echo "Analyzing flutter_frontend_server..."
-analyze \
-  --packages="$FLUTTER_DIR/flutter_frontend_server/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$FLUTTER_DIR/flutter_frontend_server"
+"$DART" analyze "$FLUTTER_DIR/testing/litetest"
 
-echo "Analyzing tools/licenses..."
-analyze \
-  --packages="$FLUTTER_DIR/tools/licenses/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/tools/licenses/analysis_options.yaml" \
-  "$FLUTTER_DIR/tools/licenses"
+"$DART" analyze "$FLUTTER_DIR/testing/benchmark"
 
-echo "Analyzing testing/litetest"
-analyze \
-  --packages="$FLUTTER_DIR/testing/litetest/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$FLUTTER_DIR/testing/litetest"
+"$DART" analyze "$FLUTTER_DIR/testing/smoke_test_failure"
 
-echo "Analyzing testing/benchmark"
-analyze \
-  --packages="$FLUTTER_DIR/testing/benchmark/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$FLUTTER_DIR/testing/benchmark"
+"$DART" analyze "$FLUTTER_DIR/testing/dart"
 
-echo "Analyzing testing/smoke_test_failure"
-analyze \
-  --packages="$FLUTTER_DIR/testing/smoke_test_failure/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$FLUTTER_DIR/testing/smoke_test_failure"
+"$DART" analyze "$FLUTTER_DIR/testing/scenario_app"
 
-echo "Analyzing testing/dart..."
-analyze \
-  --packages="$FLUTTER_DIR/testing/dart/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$FLUTTER_DIR/testing/dart"
+"$DART" analyze "$FLUTTER_DIR/testing/symbols"
 
-echo "Analyzing testing/scenario_app..."
-analyze \
-  --packages="$FLUTTER_DIR/testing/scenario_app/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$FLUTTER_DIR/testing/scenario_app"
+"$DART" analyze "$FLUTTER_DIR/tools/githooks"
 
-echo "Analyzing testing/symbols..."
-analyze \
-  --packages="$FLUTTER_DIR/testing/symbols/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$FLUTTER_DIR/testing/symbols"
+"$DART" analyze "$FLUTTER_DIR/tools/clang_tidy"
 
-echo "Analyzing githooks..."
-analyze \
-  --packages="$FLUTTER_DIR/tools/githooks/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$FLUTTER_DIR/tools/githooks"
-
-echo "Analyzing tools/clang_tidy"
-analyze \
-  --packages="$FLUTTER_DIR/tools/clang_tidy/.dart_tool/package_config.json" \
-  --options "$FLUTTER_DIR/analysis_options.yaml" \
-  "$FLUTTER_DIR/tools/clang_tidy"
+echo ""
 
 # Check that dart libraries conform.
 echo "Checking web_ui api conformance..."
-(cd "$FLUTTER_DIR/web_sdk"; "$PUB" get)
+(cd "$FLUTTER_DIR/web_sdk"; "$DART" pub get)
 (cd "$FLUTTER_DIR"; "$DART" "web_sdk/test/api_conform_test.dart")
