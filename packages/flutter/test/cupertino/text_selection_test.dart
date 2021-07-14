@@ -774,6 +774,9 @@ void main() {
     // The constant _kSelectionHandleOverlap has the value of 1.5.
     // In the case of the start handle, which is located on the word 'def',
     // 100 + 6 * 2 - 1.5 = 110.5 .
+    // In this case both selection handles are the same size because the selection
+    // height style is set to BoxHeightStyle.max which means that the height of
+    // the selection highlight will be the height of the largest word on the line.
     expect(handles.first.size.height, 110.5);
     expect(handles.last.size.height, 110.5);
   },
