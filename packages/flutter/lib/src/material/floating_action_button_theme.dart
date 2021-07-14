@@ -43,6 +43,11 @@ class FloatingActionButtonThemeData with Diagnosticable {
     this.highlightElevation,
     this.shape,
     this.enableFeedback,
+    this.sizeConstraints,
+    this.smallSizeConstraints,
+    this.largeSizeConstraints,
+    this.extendedSizeConstraints,
+    this.extendedIconLabelSpacing,
   });
 
   /// Color to be used for the unselected, enabled [FloatingActionButton]'s
@@ -96,6 +101,25 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// ignored.
   final bool? enableFeedback;
 
+  /// The size constraints for the [FloatingActionButton].
+  final BoxConstraints? sizeConstraints;
+
+  /// The size constraints for the [FloatingActionButton] when using the small
+  /// constructor.
+  final BoxConstraints? smallSizeConstraints;
+
+  /// The size constraints for the [FloatingActionButton] when using the large
+  /// constructor.
+  final BoxConstraints? largeSizeConstraints;
+
+  /// The size constraints for the [FloatingActionButton] when using the
+  /// extended constructor.
+  final BoxConstraints? extendedSizeConstraints;
+
+  /// The spacing between the icon and the label for an extended
+  /// [FloatingActionButton].
+  final double? extendedIconLabelSpacing;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   FloatingActionButtonThemeData copyWith({
@@ -111,6 +135,11 @@ class FloatingActionButtonThemeData with Diagnosticable {
     double? highlightElevation,
     ShapeBorder? shape,
     bool? enableFeedback,
+    BoxConstraints? sizeConstraints,
+    BoxConstraints? smallSizeConstraints,
+    BoxConstraints? largeSizeConstraints,
+    BoxConstraints? extendedSizeConstraints,
+    double? extendedIconLabelSpacing,
   }) {
     return FloatingActionButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
@@ -125,6 +154,11 @@ class FloatingActionButtonThemeData with Diagnosticable {
       highlightElevation: highlightElevation ?? this.highlightElevation,
       shape: shape ?? this.shape,
       enableFeedback: enableFeedback ?? this.enableFeedback,
+      sizeConstraints: sizeConstraints ?? this.sizeConstraints,
+      smallSizeConstraints: smallSizeConstraints ?? this.smallSizeConstraints,
+      largeSizeConstraints: largeSizeConstraints ?? this.largeSizeConstraints,
+      extendedSizeConstraints: extendedSizeConstraints ?? this.extendedSizeConstraints,
+      extendedIconLabelSpacing: extendedIconLabelSpacing ?? this.extendedIconLabelSpacing,
     );
   }
 
@@ -150,6 +184,11 @@ class FloatingActionButtonThemeData with Diagnosticable {
       highlightElevation: lerpDouble(a?.highlightElevation, b?.highlightElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
+      sizeConstraints: BoxConstraints.lerp(a?.sizeConstraints, b?.sizeConstraints, t),
+      smallSizeConstraints: BoxConstraints.lerp(a?.smallSizeConstraints, b?.smallSizeConstraints, t),
+      largeSizeConstraints: BoxConstraints.lerp(a?.largeSizeConstraints, b?.largeSizeConstraints, t),
+      extendedSizeConstraints: BoxConstraints.lerp(a?.extendedSizeConstraints, b?.extendedSizeConstraints, t),
+      extendedIconLabelSpacing: lerpDouble(a?.extendedIconLabelSpacing, b?.extendedIconLabelSpacing, t),
     );
   }
 
@@ -168,6 +207,11 @@ class FloatingActionButtonThemeData with Diagnosticable {
       highlightElevation,
       shape,
       enableFeedback,
+      sizeConstraints,
+      smallSizeConstraints,
+      largeSizeConstraints,
+      extendedSizeConstraints,
+      extendedIconLabelSpacing,
     );
   }
 
@@ -189,7 +233,12 @@ class FloatingActionButtonThemeData with Diagnosticable {
         && other.disabledElevation == disabledElevation
         && other.highlightElevation == highlightElevation
         && other.shape == shape
-        && other.enableFeedback == enableFeedback;
+        && other.enableFeedback == enableFeedback
+        && other.sizeConstraints == sizeConstraints
+        && other.smallSizeConstraints == smallSizeConstraints
+        && other.largeSizeConstraints == largeSizeConstraints
+        && other.extendedSizeConstraints == extendedSizeConstraints
+        && other.extendedIconLabelSpacing == extendedIconLabelSpacing;
   }
 
   @override
@@ -209,5 +258,10 @@ class FloatingActionButtonThemeData with Diagnosticable {
     properties.add(DoubleProperty('highlightElevation', highlightElevation, defaultValue: defaultData.highlightElevation));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: defaultData.enableFeedback));
+    properties.add(DiagnosticsProperty<BoxConstraints>('sizeConstraints', sizeConstraints, defaultValue: defaultData.sizeConstraints));
+    properties.add(DiagnosticsProperty<BoxConstraints>('smallSizeConstraints', smallSizeConstraints, defaultValue: defaultData.smallSizeConstraints));
+    properties.add(DiagnosticsProperty<BoxConstraints>('largeSizeConstraints', largeSizeConstraints, defaultValue: defaultData.largeSizeConstraints));
+    properties.add(DiagnosticsProperty<BoxConstraints>('extendedSizeConstraints', extendedSizeConstraints, defaultValue: defaultData.extendedSizeConstraints));
+    properties.add(DoubleProperty('extendedIconLabelSpacing', extendedIconLabelSpacing, defaultValue: defaultData.extendedIconLabelSpacing));
   }
 }
